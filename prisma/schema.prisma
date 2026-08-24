@@ -1,0 +1,53 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+enum ClubRank {
+    B
+    B_PLUS
+    A
+    A_PLUS
+    S
+    S_PLUS
+}
+
+enum ClubMemberRole {
+    TRAINER
+    ASSISTANT
+}
+
+enum FanCountPeriod {
+    DAY
+    WEEK
+    BIWEEKLY
+    MONTH
+}
+
+model Club {
+    id             String           @id @default(cuid())
+    name           String           @unique
+    rank           ClubRank
+    headcount      Int              @default(0)
+    fanCountAmount Float?
+    fanCountPeriod FanCountPeriod?
+    createdAt      DateTime         @default(now())
+    updatedAt      DateTime         @updatedAt
+
+    members        ClubMember[]
+}
+
+model ClubMember {
+    id            String         @id @default(cuid())
+    club          Club           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+    clubId        String
+    discordUserId String
+    role          ClubMemberRole
+    createdAt     DateTime       @default(now())
+
+    @@unique([clubId, discordUserId])
+}
