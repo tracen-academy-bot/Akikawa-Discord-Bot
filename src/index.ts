@@ -1,8 +1,10 @@
-import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events } from 'discord.js';
+import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events, MessageFlags } from 'discord.js';
 import 'dotenv/config';
 import { commands } from './commands';
 import { assertDatabaseReady } from './db/prisma';
 import { classifyError, buildErrorEmbed } from './lib/errors';
+import { startScheduler } from './lib/timer/scheduler';
+import { handleTimerButton, isTimerButton } from './commands/timer';
 
 const client = new Client({intents: [GatewayIntentBits.Guilds]});
 
@@ -22,6 +24,12 @@ client.once(Events.ClientReady, async () => {
     try {
         await assertDatabaseReady();
         console.log('Database is reachable and migrated.');
+
+        // Started only after the preflight passes, so the first tick cannot
+        // fail against an unmigrated schema. The first tick also delivers any
+        // timer that expired while the bot was offline.
+        startScheduler(client);
+        console.log('Training timer scheduler started.');
     } catch (e) {
         console.error('FATAL: database preflight failed.');
         console.error(e instanceof Error ? e.message : e);
@@ -91,6 +99,30 @@ client.on(Events.InteractionCreate, async (interaction) => {
             }
             return;
         }
+
+    // Panel buttons are routed by custom ID rather than a component collector,
+    // so panels posted before a restart keep working afterwards.
+    if (interaction.isButton()) {
+        if (!isTimerButton(interaction.customId)) return;
+        try {
+            await handleTimerButton(interaction);
+        } catch (e) {
+            const classified = classifyError(e);
+            const label = classified.incidentId ? `[incident ${classified.incidentId}] ` : '';
+            console.error(`${label}Error handling button ${interaction.customId}:`, e);
+            try {
+                const reply = { embeds: [buildErrorEmbed(classified)] };
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.followUp({ ...reply, flags: MessageFlags.Ephemeral });
+                } else {
+                    await interaction.reply({ ...reply, flags: MessageFlags.Ephemeral });
+                }
+            } catch (replyError) {
+                console.error(`${label}Could not deliver the button error reply:`, replyError);
+            }
+        }
+        return;
+    }
 
     if (!interaction.isChatInputCommand()) return;
     

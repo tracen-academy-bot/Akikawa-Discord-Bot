@@ -33,6 +33,32 @@ npm run dev
 > migrated. The bot now detects this at startup and logs it explicitly; run
 > `npx prisma migrate deploy`. See `DEVELOPMENT_LOG.md` for the full write-up.
 
+## Independent Training timer
+
+`/timer panel` posts the control panel (Club Managers only). Pin it.
+
+| Action | Effect |
+| --- | --- |
+| **Start** | Begins a 50-minute run, or resets the one you have |
+| **Stop** | Cancels your run; it does not count |
+| **My Stats** | Your statistics card |
+| **Leaderboard** | Top trainers this week |
+
+Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`.
+
+Timers are stored in Postgres, so a run that ends while the bot is offline
+still pings you when it comes back, and still counts toward your streak.
+Streak days are bucketed in `TIMER_STREAK_TIMEZONE` (default `Asia/Tokyo`).
+
+## Tests
+
+```bash
+DATABASE_URL=postgresql://... npm test
+```
+
+Both suites run against a real Postgres and clean up after themselves. Point
+them at a scratch database, not production.
+
 ## Scripts
 
 | Script | Purpose |
@@ -42,6 +68,7 @@ npm run dev
 | `npm start` | Run the compiled build |
 | `npm run deploy-commands` | Register slash commands |
 | `npm run prisma:migrate` | Create and apply a migration (development) |
+| `npm test` | Run the timer and scheduler test suites |
 
 Set `DEV_GUILD_ID` to register commands to a single guild instantly; leave it
 empty to register globally, which can take up to an hour to propagate.

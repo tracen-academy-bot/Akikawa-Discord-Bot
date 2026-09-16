@@ -4,6 +4,78 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-09-16 — Independent Training timer
+
+A 50-minute Independent Training timer with a button panel, persistence across
+restarts, and statistics.
+
+### Fixed duration, on purpose
+
+The timer models one specific game mechanic, so there are no custom or preset
+durations. `TRAINING_MINUTES` is a constant, not configuration.
+
+### Timers survive downtime
+
+The reference bot discards any timer that reaches zero while it is offline.
+Ours does not. Timers are rows in Postgres, never in-process `setTimeout`
+handles, and the scheduler is a 10-second poll over an indexed `expiresAt`
+column. On boot the first tick runs immediately, so everything that came due
+during downtime is delivered at once. The ping says so explicitly:
+
+> This run ended about 40 minutes ago while the bot was offline. It still counted.
+
+Runs are credited to their scheduled `expiresAt`, not to delivery time, so a
+late ping cannot distort daily counts or streaks. `deliveryLagS` records the
+gap for diagnostics.
+
+Expiry claiming uses a single `DELETE ... RETURNING` statement. Two overlapping
+ticks therefore cannot both claim the same timer and double-ping a trainer.
+
+### Engagement
+
+Statistics exist to make accumulated effort visible:
+
+- `/timer stats` renders a card: total runs, current streak, runs this week,
+  total time trained, guild placement, and a 14-day bar chart.
+- `/timer leaderboard` renders a ranked table with bars scaled to the leader,
+  over 7 / 30 / all-time windows.
+- Expiry pings call out run milestones (1, 10, 25, 50, 100, 250, 500, 1000,
+  2500) and new personal-best streaks.
+- The panel shows a live roster, runs completed guild-wide today, and who is
+  leading today.
+
+Streaks are bucketed by calendar day in `TIMER_STREAK_TIMEZONE` (default
+`Asia/Tokyo`, matching the game reset), not UTC. A streak stays alive if the
+trainer trained yesterday but not yet today, so it is not reported as broken
+partway through a day.
+
+### Panel
+
+Countdowns use Discord relative timestamps (`<t:unix:R>`), which tick client
+side, so the roster stays live without the bot editing the message on a timer.
+Buttons route by custom ID rather than through a component collector, so panels
+posted before a restart keep working afterwards.
+
+### Notification cleanup
+
+Expiry pings are deleted after 10 minutes. Pending deletions live in their own
+table rather than on the timer row, so a trainer can start their next run the
+instant they are pinged instead of waiting out the notification's lifetime.
+
+### Tests
+
+`npm test` runs both suites against a real Postgres.
+
+- `scripts/test-timer.ts` — 33 assertions covering streaks (gaps, multiple runs
+  per day, month boundaries, yesterday-anchored streaks), leaderboard windows,
+  ranking, and the start/reset/stop lifecycle. All passing.
+- `scripts/test-scheduler.ts` — 15 assertions driving the real scheduler with a
+  stub Discord client, covering offline expiry recovery, in-progress timers
+  being left alone, exactly-once delivery across ticks, lag recording, and
+  notification auto-deletion. All passing.
+
+---
+
 ## 2026-09-16 — Fix: every Prisma-backed command failed
 
 ### Symptom

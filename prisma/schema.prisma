@@ -51,3 +51,60 @@ model ClubMember {
 
     @@unique([clubId, discordUserId])
 }
+
+// ─── Independent Training timer ───────────────────────────────────────────────
+
+/// An in-flight 50-minute Independent Training run.
+///
+/// Timers live in the database rather than in memory so that a restart, a
+/// deploy, or the bot being offline cannot silently drop them. On boot the
+/// scheduler reloads every row; anything already past `expiresAt` fires
+/// immediately instead of being discarded.
+model TrainingTimer {
+    id             String   @id @default(cuid())
+    guildId        String
+    /// Channel holding the control panel, where the expiry ping is posted.
+    channelId      String
+    /// Panel message to refresh when this timer starts or ends.
+    panelMessageId String?
+    discordUserId  String
+    startedAt      DateTime @default(now())
+    expiresAt      DateTime
+
+    /// One active timer per trainer per guild. Pressing Start again resets the
+    /// existing row rather than stacking a second countdown.
+    @@unique([guildId, discordUserId])
+    @@index([expiresAt])
+}
+
+/// A completed run, kept for statistics and leaderboards.
+///
+/// Written when the timer reaches zero, keyed on the scheduled `completedAt`
+/// rather than the moment the ping was delivered, so downtime does not distort
+/// streaks or daily counts.
+model TrainingRun {
+    id            String   @id @default(cuid())
+    guildId       String
+    discordUserId String
+    startedAt     DateTime
+    completedAt   DateTime
+    /// Seconds between expiry and ping delivery. Non-zero only when the bot was
+    /// down or lagging at expiry; useful for spotting delivery problems.
+    deliveryLagS  Int      @default(0)
+
+    @@index([guildId, discordUserId])
+    @@index([guildId, completedAt])
+}
+
+/// An expiry ping awaiting automatic deletion.
+///
+/// Held separately from TrainingTimer so a trainer can start their next run the
+/// instant they are pinged, rather than waiting out the notification's lifetime.
+model TimerNotification {
+    id        String   @id @default(cuid())
+    channelId String
+    messageId String
+    deleteAt  DateTime
+
+    @@index([deleteAt])
+}

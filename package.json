@@ -10,7 +10,10 @@
     "deploy-commands": "ts-node src/deploy-commands.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test:timer": "ts-node --compilerOptions {\"module\":\"commonjs\",\"types\":[\"node\"]} scripts/test-timer.ts",
+    "test:scheduler": "ts-node --compilerOptions {\"module\":\"commonjs\",\"types\":[\"node\"]} scripts/test-scheduler.ts",
+    "test": "npm run test:timer && npm run test:scheduler"
   },
   "keywords": [],
   "author": "",
