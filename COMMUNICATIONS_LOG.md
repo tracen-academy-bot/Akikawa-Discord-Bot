@@ -4,6 +4,23 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-09-16 — Open question logged for the next session
+
+`docs/quota-math.md` records one unresolved detail in the quota maths. For
+members who joined a circle mid-month, the reference report computes `Expected`
+over one day fewer than the member's span of fan data. The most likely rule is
+days-since-joining-the-circle, which `daily_fans` alone cannot reveal.
+
+`QuotaOptions.quotaDaysOffset` exposes the adjustment and defaults to `0`. The
+effect is bounded and errs toward over-stating expectation, never toward
+under-reporting who is behind.
+
+**To close it:** capture one real `/api/v4/circles` payload for a circle with a
+known mid-month transfer, and compare `previous_circle_id` against that
+member's first non-zero day.
+
+---
+
 ## 2026-09-16 — Scope set for three workstreams
 
 **Context.** Three requests: build an autorun training timer, diagnose the

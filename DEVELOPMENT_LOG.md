@@ -4,6 +4,85 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-09-16 — Dashboard, and two more startup bugs
+
+### Dashboard
+
+Self-hosted, Discord OAuth, running **inside the bot process**. One container,
+one connection pool, and no way for the dashboard's view of the data to drift
+from the bot's. Disabled unless configured, so the bot still starts without it.
+
+Sessions are a signed, stateless cookie: nothing to lose on restart, no session
+store, and the Discord access token is used once during callback and then
+discarded rather than being kept in the cookie.
+
+Charts on the dashboard are the bot's own PNG renderers served as `<img>`, so
+every figure has exactly one implementation.
+
+Reading is open to any guild member. Every mutation requires a Club Manager
+role **and** a CSRF token. `scripts/test-dashboard.ts` drives the real app over
+HTTP and covers the parts that are expensive to get wrong:
+
+| Concern | Covered |
+| --- | --- |
+| Anonymous access | pages redirect, images refuse, no data leaks |
+| Forged cookie | tampered signature rejected |
+| Role separation | members cannot see or perform mutations |
+| CSRF | missing and wrong tokens both refused, state unchanged |
+| XSS | a circle named `<script>alert(1)</script>` renders escaped |
+| Open redirect | `https://evil` and `//evil` both refused |
+| Tenancy | another guild's circle is a 404 |
+| Bad input | non-numeric IDs 404 rather than crash |
+
+42 assertions, all passing.
+
+### Second startup bug: /settag crashed the whole bot
+
+Found while smoke-testing the compiled build. With `TAG_TRANSFER_ID` or
+`TAG_CLUB_APP_ACCEPTED_ID` unset, `setTag.ts` passed `{ value: undefined }` to
+`addChoices`, which throws inside discord.js option validation **at module
+load** — the process died before it ever signed in, with a
+`@sapphire/shapeshift` stack trace that named neither `/settag` nor the missing
+variable.
+
+Same class as the P2021 outage: a one-line configuration problem presenting as
+an opaque failure somewhere else entirely.
+
+Fixed three ways:
+
+1. **`src/lib/env.ts`** validates the environment at startup and reports every
+   missing variable at once, in plain language, separating what stops the bot
+   from what merely disables a feature. Imported before the command modules,
+   since several read configuration at load time.
+2. **`setTag.ts`** builds its choice list only from IDs that are configured,
+   and skips `addChoices` entirely when none are. An unconfigured tag now
+   simply does not appear.
+3. The command checks at runtime that the chosen tag is configured.
+
+### Third bug: /settag wiped a thread's existing tags
+
+`setAppliedTags([tagId])` replaced every tag on the thread, while the code
+immediately above computed `newTags` (append) and checked it against Discord's
+five-tag limit. The computed value was discarded, which also made that limit
+check unreachable. Now applies `newTags`.
+
+Also fixed: the five-tag guard replied and then fell through to reply a second
+time, throwing `InteractionAlreadyReplied`.
+
+### Test suite
+
+`npm test` — 272 assertions across five suites, all passing:
+
+| Suite | Assertions | Covers |
+| --- | --- | --- |
+| metrics | 148 | quota maths against a real reference report |
+| fans | 34 | snapshot round-trip, quota parsing, gap handling |
+| dashboard | 42 | auth, CSRF, XSS, redirects, tenancy |
+| timer | 33 | streaks, leaderboards, lifecycle |
+| scheduler | 15 | offline recovery, exactly-once delivery |
+
+---
+
 ## 2026-09-16 — Independent Training timer
 
 A 50-minute Independent Training timer with a button panel, persistence across

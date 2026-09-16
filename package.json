@@ -13,23 +13,28 @@
     "postinstall": "prisma generate",
     "test:timer": "ts-node --project tsconfig.scripts.json scripts/test-timer.ts",
     "test:scheduler": "ts-node --project tsconfig.scripts.json scripts/test-scheduler.ts",
-    "test": "npm run test:metrics && npm run test:fans && npm run test:timer && npm run test:scheduler",
+    "test": "npm run test:metrics && npm run test:fans && npm run test:dashboard && npm run test:timer && npm run test:scheduler",
     "test:metrics": "ts-node --project tsconfig.scripts.json scripts/test-metrics.ts",
-    "test:fans": "ts-node --project tsconfig.scripts.json scripts/test-fans.ts"
+    "test:fans": "ts-node --project tsconfig.scripts.json scripts/test-fans.ts",
+    "test:dashboard": "ts-node --project tsconfig.scripts.json scripts/test-dashboard.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.53",
     "@prisma/client": "^6.19.3",
+    "cookie-parser": "^1.4.7",
     "discord.js": "^14.27.0",
     "dotenv": "^16.4.5",
+    "express": "^5.2.1",
     "ioredis": "^6.0.0",
-    "prisma": "^6.19.3",
-    "@napi-rs/canvas": "^0.1.53"
+    "prisma": "^6.19.3"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
     "@types/node": "^26.2.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",

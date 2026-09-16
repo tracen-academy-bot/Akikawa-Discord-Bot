@@ -50,6 +50,37 @@ Timers are stored in Postgres, so a run that ends while the bot is offline
 still pings you when it comes back, and still counts toward your streak.
 Streak days are bucketed in `TIMER_STREAK_TIMEZONE` (default `Asia/Tokyo`).
 
+## Club fan tracking
+
+Backed by the [uma.moe](https://uma.moe) API, which needs an API key — the
+circle endpoints reject unauthenticated callers. Set `EXTERNAL_API_KEY`.
+
+| Command | Purpose |
+| --- | --- |
+| `/fans report` | Club quota leaderboard |
+| `/fans trainer` | One trainer's report |
+| `/fans benchmark` | Top 10 / 30 / 100 cutoffs |
+| `/fans link` | Link a Discord account to a uma.moe trainer |
+| `/fans circle add\|config\|sync\|list` | Manage tracked circles (Club Managers) |
+
+Report and alert channels can be threads. The daily job pulls from uma.moe and
+posts reports automatically; see `docs/quota-math.md` for how every column is
+derived and verified.
+
+## Dashboard
+
+Runs inside the bot process — no second container. Set `DISCORD_CLIENT_SECRET`,
+`DASHBOARD_BASE_URL`, `DASHBOARD_SESSION_SECRET` and `DASHBOARD_GUILD_ID` to
+enable it; leave them blank and the bot starts without it.
+
+Add `<DASHBOARD_BASE_URL>/auth/callback` to your Discord application's OAuth2
+redirect URIs. Any guild member can read; only `OFFICER_ROLE_IDS` holders can
+change anything.
+
+```bash
+openssl rand -hex 32    # DASHBOARD_SESSION_SECRET
+```
+
 ## Tests
 
 ```bash

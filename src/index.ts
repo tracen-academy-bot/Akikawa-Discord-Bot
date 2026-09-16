@@ -1,10 +1,18 @@
 import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events, MessageFlags } from 'discord.js';
 import 'dotenv/config';
+// Imported before the command modules: several of them read configuration at
+// module load, so this must run first to report what is missing in plain
+// language rather than letting the first consumer throw something opaque.
+import { reportEnvironment } from './lib/env';
+
+if (!reportEnvironment()) process.exit(1);
+
 import { commands } from './commands';
 import { assertDatabaseReady } from './db/prisma';
 import { classifyError, buildErrorEmbed } from './lib/errors';
 import { startScheduler } from './lib/timer/scheduler';
 import { startFanScheduler } from './lib/fans/scheduler';
+import { startDashboard } from './web/server';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 
 const client = new Client({intents: [GatewayIntentBits.Guilds]});
@@ -33,6 +41,10 @@ client.once(Events.ClientReady, async () => {
         console.log('Training timer scheduler started.');
 
         startFanScheduler(client);
+
+        // Runs in this process so the dashboard and the bot cannot disagree
+        // about the data. Disabled unless it is configured.
+        startDashboard(client);
     } catch (e) {
         console.error('FATAL: database preflight failed.');
         console.error(e instanceof Error ? e.message : e);

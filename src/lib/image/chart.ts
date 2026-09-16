@@ -128,8 +128,17 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
 
     // Keep zero as the baseline unless the data sits far above it, in which
     // case an offset baseline makes the variation legible.
-    const top = niceCeiling(peak);
-    const bottom = trough > top * 0.45 ? Math.floor((trough * 0.9) / (top / GRID_LINES)) * (top / GRID_LINES) : 0;
+    let top = niceCeiling(peak);
+    let bottom = trough > top * 0.45 ? Math.floor((trough * 0.9) / (top / GRID_LINES)) * (top / GRID_LINES) : 0;
+
+    // A flat series -- a trainer earning the same amount every day -- would
+    // otherwise be pinned against the bottom of an axis sized for a peak it
+    // never approaches. Centre it in a padded band instead.
+    if (peak > 0 && peak - trough <= peak * 0.02) {
+        bottom = Math.max(0, peak * 0.9);
+        top = peak * 1.1;
+    }
+
     const span = Math.max(1, top - bottom);
 
     const valueToY = (value: number) => plotY + plotH - ((value - bottom) / span) * plotH;

@@ -1,0 +1,571 @@
+import express, { type Request, type Response } from 'express';
+import cookieParser from 'cookie-parser';
+import type { Client } from 'discord.js';
+import { prisma } from '../db/prisma';
+import {
+    beginLogin,
+    completeLogin,
+    csrfToken,
+    loadWebConfig,
+    logout,
+    requireLogin,
+    requireOfficer,
+    sessionMiddleware,
+    verifyCsrf,
+    type WebConfig,
+} from './auth';
+import { csrfField, compact, esc, layout, loginPage, num, tile } from './views';
+import { currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
+import { buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
+import { toSafeNumber, type CircleProgress } from '../lib/fans/metrics';
+import { parseQuota } from '../commands/fans';
+import { renderFanReport } from '../lib/image/renderFanReport';
+import { renderTrainerReport } from '../lib/image/renderTrainerReport';
+import { renderBenchmark } from '../lib/image/renderBenchmark';
+import { renderTimerLeaderboard } from '../lib/image/renderTimerLeaderboard';
+import { getLeaderboard, getPanelContext, type LeaderboardPeriod } from '../lib/timer/service';
+
+/**
+ * The self-hosted dashboard.
+ *
+ * Runs in the bot's own process, so there is one container, one database
+ * connection pool, and no way for the dashboard's view of the data to drift
+ * from the bot's. Charts are served by the same renderers the bot posts to
+ * Discord, so every figure has exactly one implementation.
+ *
+ * Reading is open to any member of the guild; every mutation requires a Club
+ * Manager role and a CSRF token.
+ */
+
+/** Cache lifetime for rendered PNGs. Data refreshes daily, so this is generous. */
+const IMAGE_CACHE_SECONDS = 120;
+
+/**
+ * Reads a route parameter as a string.
+ *
+ * Express 5 types params as `string | string[] | undefined`, which no query or
+ * validation here accepts. Anything unexpected collapses to the empty string
+ * and then fails the lookup or the digit check below it.
+ */
+function param(req: Request, name: string): string {
+    const value = req.params[name];
+    return typeof value === 'string' ? value : '';
+}
+
+/** Sends a rendered PNG with caching headers. */
+function sendPng(res: Response, buffer: Buffer) {
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', `private, max-age=${IMAGE_CACHE_SECONDS}`);
+    res.send(buffer);
+}
+
+/** Renders a page, or a friendly 404 body. */
+function notFound(res: Response, user: Request['user'], message: string) {
+    res.status(404).send(
+        layout({
+            title: 'Not found',
+            user,
+            body: `<h1>Not found</h1><p class="sub">${esc(message)}</p><p><a href="/">Back to overview</a></p>`,
+        }),
+    );
+}
+
+/** Reads a one-shot status message passed back after a redirect. */
+function flash(req: Request): string {
+    const ok = typeof req.query.ok === 'string' ? req.query.ok : null;
+    const err = typeof req.query.err === 'string' ? req.query.err : null;
+    if (ok) return `<div class="notice ok">${esc(ok)}</div>`;
+    if (err) return `<div class="notice err">${esc(err)}</div>`;
+    return '';
+}
+
+/** Builds the member table shared by the circle page. */
+function memberRows(progress: CircleProgress, circleId: string): string {
+    return progress.members
+        .map((m) => {
+            const movement =
+                m.rankChange === null || m.rankChange === 0
+                    ? ''
+                    : `<span class="${m.rankChange > 0 ? 'good' : 'bad'}">${m.rankChange > 0 ? '↑' : '↓'}${Math.abs(m.rankChange)}</span>`;
+
+            return `<tr>
+        <td class="faint">${m.rank} ${movement}</td>
+        <td><a href="/circles/${esc(circleId)}/trainers/${m.viewerId}">${esc(m.trainerName)}</a></td>
+        <td class="right"><strong>${num(m.total)}</strong></td>
+        <td class="right faint">${num(m.expected)}</td>
+        <td class="right ${m.behind > 0 ? 'bad' : ''}">${m.behind > 0 ? num(m.behind) : ''}</td>
+        <td class="right muted">${num(m.avgPerDay)}</td>
+        <td class="right ${m.needPerDay !== null ? 'warn' : ''}">${m.needPerDay !== null ? num(m.needPerDay) : ''}</td>
+        <td class="right muted">${num(m.latestDayGain)}</td>
+        <td class="right"><span class="dot ${m.onPace ? 'ok' : 'behind'}"></span></td>
+      </tr>`;
+        })
+        .join('');
+}
+
+/** Builds and starts the dashboard. Returns null when it is not configured. */
+export function startDashboard(client: Client): (() => void) | null {
+    let config: WebConfig | null;
+    try {
+        config = loadWebConfig();
+    } catch (e) {
+        console.error('Dashboard configuration is invalid:', e instanceof Error ? e.message : e);
+        return null;
+    }
+
+    if (!config) {
+        console.log(
+            'Dashboard disabled: set DISCORD_CLIENT_SECRET, DASHBOARD_BASE_URL, ' +
+                'DASHBOARD_SESSION_SECRET and DASHBOARD_GUILD_ID to enable it.',
+        );
+        return null;
+    }
+
+    const cfg = config;
+    const app = express();
+
+    // Behind a reverse proxy, trust its forwarded headers so redirects and
+    // secure-cookie decisions use the external scheme, not the internal one.
+    app.set('trust proxy', 1);
+    app.use(cookieParser());
+    app.use(express.urlencoded({ extended: false }));
+    app.use(sessionMiddleware(cfg));
+
+    const guildId = cfg.guildId;
+    const csrf = (req: Request) => (req.user ? csrfToken(req.user, cfg.sessionSecret) : '');
+
+    // ── Auth ──────────────────────────────────────────────────────────────────
+    app.get('/login', (req, res) => beginLogin(cfg, req, res));
+
+    app.get('/auth/callback', async (req, res) => {
+        const error = await completeLogin(cfg, req, res);
+        if (error) return res.status(403).send(loginPage(error));
+        return res.redirect('/');
+    });
+
+    app.get('/logout', (_req, res) => {
+        logout(res);
+        res.redirect('/');
+    });
+
+    // ── Overview ──────────────────────────────────────────────────────────────
+    app.get('/', async (req, res) => {
+        if (!req.user) return res.send(loginPage());
+
+        const circles = await prisma.trackedCircle.findMany({ where: { guildId }, orderBy: { name: 'asc' } });
+        const timerContext = await getPanelContext(guildId);
+        const activeTimers = await prisma.trainingTimer.count({ where: { guildId } });
+
+        const cards = await Promise.all(
+            circles.map(async (circle) => {
+                const progress = await currentCircleProgress(circle);
+                const behind = progress?.members.filter((m) => !m.onPace).length ?? 0;
+                const total = progress?.totalFans ?? 0;
+
+                return `<a class="card" href="/circles/${esc(circle.id)}" style="display:block">
+                  <h3>${esc(circle.name)}${circle.active ? '' : ' <span class="faint">(paused)</span>'}</h3>
+                  <div class="meta">
+                    Quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} / member / month<br>
+                    ${progress ? `${progress.members.length} members · day ${progress.daysElapsed}/${progress.daysInMonth}` : 'No data ingested yet'}
+                  </div>
+                  <div style="margin-top:12px;display:flex;gap:18px">
+                    <div><div class="label faint" style="font-size:11px">TOTAL</div><strong>${esc(compact(total))}</strong></div>
+                    <div><div class="label faint" style="font-size:11px">BEHIND</div><strong class="${behind > 0 ? 'bad' : 'good'}">${behind}</strong></div>
+                  </div>
+                </a>`;
+            }),
+        );
+
+        return res.send(
+            layout({
+                title: 'Overview',
+                user: req.user,
+                active: 'overview',
+                body: `${flash(req)}
+          <h1>Overview</h1>
+          <p class="sub">Club fan quotas and training activity.</p>
+          <div class="tiles">
+            ${tile('Tracked circles', String(circles.length))}
+            ${tile('Training now', String(activeTimers), 'active timers')}
+            ${tile('Runs today', String(timerContext.runsToday), 'server-wide')}
+          </div>
+          <h2>Circles</h2>
+          ${
+              circles.length === 0
+                  ? `<div class="panel"><div class="empty">No circles tracked yet.${req.user.isOfficer ? ' Add one below.' : ' A Club Manager can add one.'}</div></div>`
+                  : `<div class="grid">${cards.join('')}</div>`
+          }
+          ${
+              req.user.isOfficer
+                  ? `<h2>Track a new circle</h2>
+                 <div class="card">
+                   <form class="inline" method="post" action="/circles">
+                     ${csrfField(csrf(req))}
+                     <div><label>uma.moe circle ID</label><input name="circle_id" required placeholder="123456"></div>
+                     <div><label>Monthly quota per member</label><input name="quota" required placeholder="80M"></div>
+                     <button type="submit">Add circle</button>
+                   </form>
+                   <p class="meta" style="margin-top:10px">Find the ID at <a href="https://uma.moe/circles" target="_blank" rel="noopener">uma.moe/circles</a>.</p>
+                 </div>`
+                  : ''
+          }`,
+            }),
+        );
+    });
+
+    // ── Circle detail ─────────────────────────────────────────────────────────
+    app.get('/circles/:id', requireLogin, async (req, res) => {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        if (!circle) return notFound(res, req.user, 'That circle is not tracked.');
+
+        const progress = await currentCircleProgress(circle);
+        const { year, month } = currentGameMonth();
+
+        const admin = req.user?.isOfficer
+            ? `<h2>Settings</h2>
+         <div class="card">
+           <form class="inline" method="post" action="/circles/${esc(circle.id)}">
+             ${csrfField(csrf(req))}
+             <div><label>Monthly quota per member</label><input name="quota" value="${esc(compact(toSafeNumber(circle.monthlyQuota)))}"></div>
+             <div><label>Report channel ID</label><input name="report_channel" value="${esc(circle.reportChannelId ?? '')}" placeholder="thread or channel ID"></div>
+             <div><label>Alert channel ID</label><input name="alert_channel" value="${esc(circle.alertChannelId ?? '')}" placeholder="thread or channel ID"></div>
+             <div><label>Syncing</label><select name="active">
+               <option value="true"${circle.active ? ' selected' : ''}>Active</option>
+               <option value="false"${circle.active ? '' : ' selected'}>Paused</option>
+             </select></div>
+             <button type="submit">Save</button>
+           </form>
+           <div style="display:flex;gap:10px;margin-top:16px">
+             <form method="post" action="/circles/${esc(circle.id)}/sync">${csrfField(csrf(req))}<button class="secondary" type="submit">Sync now</button></form>
+             <form method="post" action="/circles/${esc(circle.id)}/delete" onsubmit="return confirm('Stop tracking this circle and delete its snapshots?')">${csrfField(csrf(req))}<button class="danger" type="submit">Stop tracking</button></form>
+           </div>
+         </div>`
+            : '';
+
+        return res.send(
+            layout({
+                title: circle.name,
+                user: req.user,
+                body: `${flash(req)}
+          <h1>${esc(circle.name)}</h1>
+          <p class="sub">
+            Circle <code>${esc(String(circle.circleId))}</code> ·
+            Quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} per member per month ·
+            Last sync ${circle.lastSyncedAt ? esc(circle.lastSyncedAt.toUTCString()) : 'never'}
+          </p>
+          ${
+              progress
+                  ? `<div class="tiles">
+                   ${tile('Members', String(progress.members.length))}
+                   ${tile('Total fans', compact(progress.totalFans))}
+                   ${tile('Behind quota', String(progress.members.filter((m) => !m.onPace).length), 'of ' + progress.members.length, progress.members.some((m) => !m.onPace) ? 'bad' : 'good')}
+                   ${tile('Day', `${progress.daysElapsed}/${progress.daysInMonth}`, formatReportDate(year, month, progress.daysElapsed))}
+                 </div>
+                 <h2>Members</h2>
+                 <div class="panel">
+                   <table>
+                     <thead><tr>
+                       <th>#</th><th>Trainer</th><th class="right">Total</th><th class="right">Expected</th>
+                       <th class="right">Behind</th><th class="right">Avg/Day</th><th class="right">Need/Day</th>
+                       <th class="right">Day ${progress.daysElapsed}</th><th></th>
+                     </tr></thead>
+                     <tbody>${memberRows(progress, circle.id)}</tbody>
+                   </table>
+                 </div>
+                 <h2>Report image</h2>
+                 <img class="report" src="/circles/${esc(circle.id)}/report.png" alt="Fan quota report">`
+                  : `<div class="panel"><div class="empty">No fan data ingested yet.${req.user?.isOfficer ? ' Use “Sync now” below.' : ''}</div></div>`
+          }
+          ${admin}`,
+            }),
+        );
+    });
+
+    app.get('/circles/:id/report.png', requireLogin, async (req, res) => {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        if (!circle) return res.status(404).end();
+
+        const progress = await currentCircleProgress(circle);
+        if (!progress) return res.status(404).end();
+
+        const { year, month } = currentGameMonth();
+        return sendPng(
+            res,
+            await renderFanReport(progress, {
+                circleName: circle.name,
+                monthlyRank: null,
+                memberCount: progress.members.length,
+                dateLabel: formatReportDate(year, month, progress.daysElapsed),
+            }),
+        );
+    });
+
+    // ── Trainer detail ────────────────────────────────────────────────────────
+    app.get('/circles/:id/trainers/:viewerId', requireLogin, async (req, res) => {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        if (!circle) return notFound(res, req.user, 'That circle is not tracked.');
+
+        if (!/^\d+$/.test(param(req, 'viewerId'))) return notFound(res, req.user, 'Invalid trainer ID.');
+        const viewerId = BigInt(param(req, 'viewerId'));
+
+        const report = await buildTrainerReport(circle, viewerId, 30);
+        if (!report) return notFound(res, req.user, 'No data for that trainer this month.');
+
+        const link = await prisma.trainerLink.findFirst({ where: { guildId, viewerId } });
+
+        const rows = [...report.dailyGains]
+            .reverse()
+            .map(
+                (d) => `<tr><td>${esc(d.label)}</td><td class="right">${num(d.gain)}</td><td class="right muted">${esc(compact(d.gain))}</td></tr>`,
+            )
+            .join('');
+
+        const linkForm = req.user?.isOfficer
+            ? `<h2>Discord link</h2>
+         <div class="card">
+           <p class="meta">${link ? `Linked to Discord user <code>${esc(link.discordUserId)}</code>.` : 'Not linked to a Discord account.'}</p>
+           <form class="inline" method="post" action="/links" style="margin-top:10px">
+             ${csrfField(csrf(req))}
+             <input type="hidden" name="viewer_id" value="${esc(String(viewerId))}">
+             <input type="hidden" name="return_to" value="/circles/${esc(circle.id)}/trainers/${esc(String(viewerId))}">
+             <div><label>Discord user ID</label><input name="discord_user_id" value="${esc(link?.discordUserId ?? '')}" placeholder="18-digit ID"></div>
+             <button type="submit">${link ? 'Update link' : 'Link'}</button>
+           </form>
+         </div>`
+            : '';
+
+        return res.send(
+            layout({
+                title: report.trainerName,
+                user: req.user,
+                body: `${flash(req)}
+          <h1>${esc(report.trainerName)}</h1>
+          <p class="sub">${esc(circle.name)} · trainer <code>${esc(String(viewerId))}</code></p>
+          <img class="report" src="/circles/${esc(circle.id)}/trainers/${esc(String(viewerId))}/report.png" alt="Trainer report">
+          <h2>Daily gains</h2>
+          <div class="panel">
+            <table><thead><tr><th>Day</th><th class="right">Fans gained</th><th class="right"></th></tr></thead>
+            <tbody>${rows}</tbody></table>
+          </div>
+          ${linkForm}`,
+            }),
+        );
+    });
+
+    app.get('/circles/:id/trainers/:viewerId/report.png', requireLogin, async (req, res) => {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        if (!circle || !/^\d+$/.test(param(req, 'viewerId'))) return res.status(404).end();
+
+        const report = await buildTrainerReport(circle, BigInt(param(req, 'viewerId')));
+        if (!report) return res.status(404).end();
+        return sendPng(res, await renderTrainerReport(report));
+    });
+
+    // ── Benchmark ─────────────────────────────────────────────────────────────
+    app.get('/benchmark', requireLogin, async (req, res) => {
+        const data = await buildBenchmark();
+        return res.send(
+            layout({
+                title: 'Benchmark',
+                user: req.user,
+                active: 'benchmark',
+                body: `<h1>Benchmark</h1>
+          <p class="sub">What it currently takes to sit inside the top circles, in fans per member per day.</p>
+          <div class="tiles">
+            ${data.current.map((t) => tile(`Top ${t.tier} entry`, num(t.entry), `avg ${num(t.average)}`)).join('')}
+          </div>
+          <img class="report" src="/benchmark.png" alt="Benchmark">
+          ${data.historyNote ? `<p class="sub" style="margin-top:14px">${esc(data.historyNote)}</p>` : ''}`,
+            }),
+        );
+    });
+
+    app.get('/benchmark.png', requireLogin, async (_req, res) =>
+        sendPng(res, await renderBenchmark(await buildBenchmark())),
+    );
+
+    // ── Training ──────────────────────────────────────────────────────────────
+    app.get('/timer', requireLogin, async (req, res) => {
+        const period = (typeof req.query.period === 'string' ? req.query.period : 'week') as LeaderboardPeriod;
+        const valid: LeaderboardPeriod[] = ['week', 'month', 'all'];
+        const selected = valid.includes(period) ? period : 'week';
+
+        const rows = await getLeaderboard(guildId, selected, 50);
+        const context = await getPanelContext(guildId);
+        const active = await prisma.trainingTimer.findMany({ where: { guildId }, orderBy: { expiresAt: 'asc' } });
+
+        const body = rows
+            .map(
+                (r, i) =>
+                    `<tr><td class="faint">${i + 1}</td><td><code>${esc(r.discordUserId)}</code></td>
+           <td class="right"><strong>${num(r.runs)}</strong></td>
+           <td class="right muted">${Math.floor(r.minutes / 60)}h ${r.minutes % 60}m</td></tr>`,
+            )
+            .join('');
+
+        return res.send(
+            layout({
+                title: 'Training',
+                user: req.user,
+                active: 'timer',
+                body: `<h1>Independent Training</h1>
+          <p class="sub">50-minute runs tracked by the timer panel.</p>
+          <div class="tiles">
+            ${tile('Training now', String(active.length))}
+            ${tile('Runs today', String(context.runsToday))}
+            ${tile('Trainers ranked', String(rows.length))}
+          </div>
+          <h2>Leaderboard</h2>
+          <p class="sub">
+            ${valid.map((p) => `<a href="/timer?period=${p}" ${p === selected ? 'style="color:var(--text)"' : ''}>${p === 'all' ? 'All time' : p === 'week' ? 'Last 7 days' : 'Last 30 days'}</a>`).join(' · ')}
+          </p>
+          <div class="panel">
+            ${rows.length === 0 ? '<div class="empty">No runs recorded in this period.</div>' : `<table><thead><tr><th>#</th><th>Discord user</th><th class="right">Runs</th><th class="right">Time</th></tr></thead><tbody>${body}</tbody></table>`}
+          </div>`,
+            }),
+        );
+    });
+
+    app.get('/timer/leaderboard.png', requireLogin, async (req, res) => {
+        const rows = await getLeaderboard(guildId, 'week', 20);
+        const names = new Map<string, string>();
+
+        // Resolve display names through the bot's cache; the dashboard has no
+        // Discord token of its own.
+        const guild = client.guilds.cache.get(guildId);
+        for (const row of rows) {
+            names.set(row.discordUserId, guild?.members.cache.get(row.discordUserId)?.displayName ?? row.discordUserId);
+        }
+        return sendPng(res, await renderTimerLeaderboard(rows, names, 'week'));
+    });
+
+    // ── Mutations ─────────────────────────────────────────────────────────────
+    const mutate = [requireLogin, requireOfficer, verifyCsrf(cfg)] as const;
+
+    app.post('/circles', ...mutate, async (req, res) => {
+        const rawId = String(req.body.circle_id ?? '').trim();
+        const quota = parseQuota(String(req.body.quota ?? ''));
+
+        if (!/^\d+$/.test(rawId)) return res.redirect('/?err=Circle+ID+must+be+a+number.');
+        if (quota === null || quota <= 0) return res.redirect('/?err=Quota+must+be+a+positive+amount+like+80M.');
+
+        const circleId = BigInt(rawId);
+        if (await prisma.trackedCircle.findFirst({ where: { guildId, circleId } })) {
+            return res.redirect('/?err=That+circle+is+already+tracked.');
+        }
+
+        const circle = await prisma.trackedCircle.create({
+            data: { guildId, circleId, name: `Circle ${rawId}`, monthlyQuota: BigInt(quota) },
+        });
+
+        try {
+            const result = await syncCircle(circle);
+            return res.redirect(`/circles/${circle.id}?ok=${encodeURIComponent(`Tracking ${result.name}.`)}`);
+        } catch (e) {
+            // Roll back so a bad ID does not leave an empty circle behind.
+            await prisma.trackedCircle.delete({ where: { id: circle.id } });
+            return res.redirect(`/?err=${encodeURIComponent(e instanceof Error ? e.message : 'Sync failed.')}`);
+        }
+    });
+
+    app.post('/circles/:id', ...mutate, async (req, res) => {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        if (!circle) return res.redirect('/?err=Circle+not+found.');
+
+        const quota = parseQuota(String(req.body.quota ?? ''));
+        if (quota === null || quota <= 0) {
+            return res.redirect(`/circles/${circle.id}?err=Quota+must+be+a+positive+amount+like+80M.`);
+        }
+
+        const reportChannel = String(req.body.report_channel ?? '').trim();
+        const alertChannel = String(req.body.alert_channel ?? '').trim();
+
+        await prisma.trackedCircle.update({
+            where: { id: circle.id },
+            data: {
+                monthlyQuota: BigInt(quota),
+                reportChannelId: reportChannel || null,
+                alertChannelId: alertChannel || null,
+                active: String(req.body.active) === 'true',
+            },
+        });
+
+        return res.redirect(`/circles/${circle.id}?ok=Settings+saved.`);
+    });
+
+    app.post('/circles/:id/sync', ...mutate, async (req, res) => {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        if (!circle) return res.redirect('/?err=Circle+not+found.');
+
+        try {
+            const result = await syncCircle(circle);
+            await syncBenchmark().catch(() => undefined);
+            return res.redirect(
+                `/circles/${circle.id}?ok=${encodeURIComponent(`Synced ${result.membersSeen} members.`)}`,
+            );
+        } catch (e) {
+            return res.redirect(
+                `/circles/${circle.id}?err=${encodeURIComponent(e instanceof Error ? e.message : 'Sync failed.')}`,
+            );
+        }
+    });
+
+    app.post('/circles/:id/delete', ...mutate, async (req, res) => {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        if (!circle) return res.redirect('/?err=Circle+not+found.');
+
+        await prisma.trackedCircle.delete({ where: { id: circle.id } });
+        return res.redirect(`/?ok=${encodeURIComponent(`Stopped tracking ${circle.name}.`)}`);
+    });
+
+    app.post('/links', ...mutate, async (req, res) => {
+        const viewerRaw = String(req.body.viewer_id ?? '').trim();
+        const discordUserId = String(req.body.discord_user_id ?? '').trim();
+        const returnTo = String(req.body.return_to ?? '/');
+
+        // Only ever redirect to a path on this site, never to an absolute URL.
+        const safeReturn = returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/';
+
+        if (!/^\d+$/.test(viewerRaw)) return res.redirect(`${safeReturn}?err=Invalid+trainer+ID.`);
+
+        const viewerId = BigInt(viewerRaw);
+
+        if (!discordUserId) {
+            await prisma.trainerLink.deleteMany({ where: { guildId, viewerId } });
+            return res.redirect(`${safeReturn}?ok=Link+removed.`);
+        }
+
+        if (!/^\d{15,25}$/.test(discordUserId)) {
+            return res.redirect(`${safeReturn}?err=Discord+user+IDs+are+15-25+digits.`);
+        }
+
+        // One trainer per Discord account and vice versa; clear both sides first.
+        await prisma.trainerLink.deleteMany({
+            where: { guildId, OR: [{ viewerId }, { discordUserId }] },
+        });
+        await prisma.trainerLink.create({ data: { guildId, viewerId, discordUserId } });
+
+        return res.redirect(`${safeReturn}?ok=Link+saved.`);
+    });
+
+    // ── Errors ────────────────────────────────────────────────────────────────
+    app.use((req, res) => notFound(res, req.user, 'That page does not exist.'));
+
+    app.use((error: unknown, req: Request, res: Response, _next: unknown) => {
+        console.error('Dashboard error:', error);
+        if (res.headersSent) return;
+        res.status(500).send(
+            layout({
+                title: 'Error',
+                user: req.user,
+                body: '<h1>Something went wrong</h1><p class="sub">The failure was logged. Try again.</p>',
+            }),
+        );
+    });
+
+    const server = app.listen(cfg.port, () => {
+        console.log(`Dashboard listening on port ${cfg.port} (${cfg.baseUrl})`);
+    });
+
+    return () => server.close();
+}
