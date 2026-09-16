@@ -208,3 +208,16 @@ model BenchmarkSnapshot {
     @@unique([year, month, day, tier])
     @@index([year, month])
 }
+
+/// Last successful run of a named scheduled job.
+///
+/// Lets the daily sync stay idempotent across restarts: the job checks whether
+/// it has already run for the current day before syncing and posting, so a
+/// container restart cannot post the same report twice.
+model JobRun {
+    /// Job name, e.g. "daily-fan-sync".
+    id        String   @id
+    lastRunAt DateTime
+    /// Short outcome summary, for operators reading the table directly.
+    note      String?
+}

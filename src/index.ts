@@ -4,6 +4,7 @@ import { commands } from './commands';
 import { assertDatabaseReady } from './db/prisma';
 import { classifyError, buildErrorEmbed } from './lib/errors';
 import { startScheduler } from './lib/timer/scheduler';
+import { startFanScheduler } from './lib/fans/scheduler';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 
 const client = new Client({intents: [GatewayIntentBits.Guilds]});
@@ -30,6 +31,8 @@ client.once(Events.ClientReady, async () => {
         // timer that expired while the bot was offline.
         startScheduler(client);
         console.log('Training timer scheduler started.');
+
+        startFanScheduler(client);
     } catch (e) {
         console.error('FATAL: database preflight failed.');
         console.error(e instanceof Error ? e.message : e);

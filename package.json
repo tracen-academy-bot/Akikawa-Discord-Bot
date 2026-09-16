@@ -11,10 +11,11 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
-    "test:timer": "ts-node --compilerOptions {\"module\":\"commonjs\",\"types\":[\"node\"]} scripts/test-timer.ts",
-    "test:scheduler": "ts-node --compilerOptions {\"module\":\"commonjs\",\"types\":[\"node\"]} scripts/test-scheduler.ts",
-    "test": "npm run test:metrics && npm run test:timer && npm run test:scheduler",
-    "test:metrics": "ts-node --compilerOptions {\"module\":\"commonjs\",\"types\":[\"node\"]} scripts/test-metrics.ts"
+    "test:timer": "ts-node --project tsconfig.scripts.json scripts/test-timer.ts",
+    "test:scheduler": "ts-node --project tsconfig.scripts.json scripts/test-scheduler.ts",
+    "test": "npm run test:metrics && npm run test:fans && npm run test:timer && npm run test:scheduler",
+    "test:metrics": "ts-node --project tsconfig.scripts.json scripts/test-metrics.ts",
+    "test:fans": "ts-node --project tsconfig.scripts.json scripts/test-fans.ts"
   },
   "keywords": [],
   "author": "",

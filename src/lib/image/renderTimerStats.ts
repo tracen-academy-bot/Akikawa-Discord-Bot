@@ -1,6 +1,7 @@
 import { createCanvas } from '@napi-rs/canvas';
 import { roundRect } from './canvasUtils';
 import type { DailyRunCount, TrainerStats } from '../timer/service';
+import { drawTileRow, type Tile } from './tiles';
 import { font } from './fonts';
 
 /**
@@ -20,56 +21,12 @@ const TEXT_FAINT = '#6b7280';
 const ACCENT = '#f4b13f';
 const HAIRLINE = 'rgba(255, 255, 255, 0.08)';
 
-/** One headline figure on the card. */
-interface Tile {
-    label: string;
-    value: string;
-    /** Optional smaller line under the value, e.g. a personal best. */
-    detail?: string;
-    color: string;
-}
-
 /** Formats a duration in minutes as "12h 30m", or "45m" under an hour. */
 function formatDuration(totalMinutes: number): string {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     if (hours === 0) return `${minutes}m`;
     return `${hours}h ${minutes}m`;
-}
-
-/** Draws a rounded stat tile with a label, a large value, and optional detail. */
-function drawTile(
-    ctx: ReturnType<ReturnType<typeof createCanvas>['getContext']>,
-    tile: Tile,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-) {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-    roundRect(ctx, x, y, w, h, 14);
-    ctx.fill();
-    ctx.strokeStyle = HAIRLINE;
-    ctx.lineWidth = 1;
-    roundRect(ctx, x, y, w, h, 14);
-    ctx.stroke();
-
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-
-    ctx.font = font('bold 13px');
-    ctx.fillStyle = TEXT_FAINT;
-    ctx.fillText(tile.label.toUpperCase(), x + 18, y + 28);
-
-    ctx.font = font('bold 34px');
-    ctx.fillStyle = tile.color;
-    ctx.fillText(tile.value, x + 18, y + 70);
-
-    if (tile.detail) {
-        ctx.font = font('13px');
-        ctx.fillStyle = TEXT_MUTED;
-        ctx.fillText(tile.detail, x + 18, y + 92);
-    }
 }
 
 /**
@@ -214,11 +171,7 @@ export async function renderTimerStats(
         { label: 'Time Trained', value: formatDuration(stats.totalMinutes), detail: 'total', color: '#79c0ff' },
     ];
 
-    const gutter = 18;
-    const tileWidth = (WIDTH - 80 - gutter * 3) / 4;
-    tiles.forEach((tile, i) => {
-        drawTile(ctx, tile, 40 + i * (tileWidth + gutter), headerHeight + 22, tileWidth, tileHeight);
-    });
+    drawTileRow(ctx, tiles, 40, headerHeight + 22, WIDTH - 80, tileHeight);
 
     drawHistory(ctx, series, 40, headerHeight + tileHeight + 74, WIDTH - 80, chartHeight);
 
