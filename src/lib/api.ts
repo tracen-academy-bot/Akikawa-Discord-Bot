@@ -19,7 +19,12 @@ function buildUrl(path: string): string {
 
 function headers(): Record<string, string> {
     const h: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (MOE_API_KEY) h.authorization = `BEARER ${MOE_API_KEY}`;
+    // uma.moe authenticates server-to-server callers with an `X-API-Key`
+    // header, not a bearer token. Its OpenAPI spec (/api/docs/openapi.yaml)
+    // declares `ApiKeyAuth` as `in: header, name: X-API-Key`; sending
+    // `Authorization: BEARER ...` is ignored and the request is rejected with
+    // 403 `browser_proof_required`.
+    if (MOE_API_KEY) h['X-API-Key'] = MOE_API_KEY;
     return h;
 }
 

@@ -1,6 +1,8 @@
-import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events, EmbedBuilder} from 'discord.js';
+import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events } from 'discord.js';
 import 'dotenv/config';
 import { commands } from './commands';
+import { assertDatabaseReady } from './db/prisma';
+import { classifyError, buildErrorEmbed } from './lib/errors';
 
 const client = new Client({intents: [GatewayIntentBits.Guilds]});
 
@@ -10,7 +12,23 @@ const CASUAL_COUNCIL = process.env.CASUAL_COUNCIL_ROLE_ID!;
 
 const FORUM_ID = process.env.FORUM_CHANNEL_ID;
 
-client.once('ready', () => console.log(`Logged in as ${client.user?.tag}`));
+client.once(Events.ClientReady, async () => {
+    console.log(`Logged in as ${client.user?.tag}`);
+
+    // Verify the schema before accepting commands. A missing migration used to
+    // surface only as a generic in-Discord failure; now it is a fatal startup
+    // error. Exiting lets the container restart policy retry, so the bot
+    // recovers on its own once the database is migrated.
+    try {
+        await assertDatabaseReady();
+        console.log('Database is reachable and migrated.');
+    } catch (e) {
+        console.error('FATAL: database preflight failed.');
+        console.error(e instanceof Error ? e.message : e);
+        await client.destroy();
+        process.exit(1);
+    }
+});
 client.on('threadCreate', async (thread: ThreadChannel) => {
     try {
         if (thread.parent?.type != ChannelType.GuildForum) return;
@@ -82,16 +100,30 @@ client.on(Events.InteractionCreate, async (interaction) => {
     try {
         await command.execute(interaction);
     } catch (e) {
-        console.error(`Error running /${interaction.commandName}:`, e);
-        const errorReply = {
-            embeds: [
-                new EmbedBuilder().setColor(0xed4245).setTitle('Error').setDescription('Something went wrong running that command.'),
-            ]
-        };
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp(errorReply);
-        } else {
-            await interaction.reply(errorReply);
+        const classified = classifyError(e);
+
+        // Log the incident ID next to the stack trace so a user reporting the
+        // ID from Discord can be matched to the exact failure in the logs.
+        const label = classified.incidentId ? `[incident ${classified.incidentId}] ` : '';
+        console.error(
+            `${label}Error running /${interaction.commandName} ` +
+                `(user ${interaction.user.id}, guild ${interaction.guildId ?? 'none'}): ${classified.title}`,
+            e,
+        );
+
+        const errorReply = { embeds: [buildErrorEmbed(classified)] };
+
+        // Reporting the failure must never throw a second time on top of the
+        // first. If the interaction token already expired there is nowhere
+        // left to reply, and the log above is the only record.
+        try {
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp(errorReply);
+            } else {
+                await interaction.reply(errorReply);
+            }
+        } catch (replyError) {
+            console.error(`${label}Could not deliver the error reply to Discord:`, replyError);
         }
     }
 });
