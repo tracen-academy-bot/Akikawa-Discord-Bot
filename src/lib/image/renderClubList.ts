@@ -1,6 +1,7 @@
 import { createCanvas } from '@napi-rs/canvas';
 import { roundRect, drawRankBadge } from './canvasUtils';
 import type { Club } from '@prisma/client';
+import { font } from './fonts';
 
 export async function renderClubList(clubs: Club[]): Promise<Buffer> {
     const width = 1000;
@@ -30,9 +31,9 @@ export async function renderClubList(clubs: Club[]): Promise<Buffer> {
     // Header
     ctx.textAlign = 'left';
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 34px sans-serif';
+    ctx.font = font('bold 34px');
     ctx.fillText('Club Directory', 40, 55);
-    ctx.font = '18px sans-serif';
+    ctx.font = font('18px');
     ctx.fillStyle = '#9ba3b4';
     ctx.fillText(`${clubs.length} club${clubs.length === 1 ? '' : 's'}`, 40, 85);
 
@@ -43,7 +44,7 @@ export async function renderClubList(clubs: Club[]): Promise<Buffer> {
     ctx.stroke();
 
     const colRank = 60, colName = 150, colProgress = 430, colFan = 830;
-    ctx.font = 'bold 14px sans-serif';
+    ctx.font = font('bold 14px');
     ctx.fillStyle = '#6b7280';
     ctx.fillText('RANK', colRank, headerHeight + 20);
     ctx.fillText('CLUB', colName, headerHeight + 20);
@@ -53,7 +54,7 @@ export async function renderClubList(clubs: Club[]): Promise<Buffer> {
     let y = headerHeight + tableHeaderHeight;
 
     if (clubs.length === 0) {
-        ctx.font = '18px sans-serif';
+        ctx.font = font('18px');
         ctx.fillStyle = '#6b7280';
         ctx.textAlign = 'left';
         ctx.fillText('No clubs created yet.', colRank, y + 30);
@@ -70,7 +71,7 @@ export async function renderClubList(clubs: Club[]): Promise<Buffer> {
         await drawRankBadge(ctx, club.rank, colRank + 16, cy, 18, 14);
 
         ctx.textAlign = 'left';
-        ctx.font = 'bold 18px sans-serif';
+        ctx.font = font('bold 18px');
         ctx.fillStyle = '#e6e6e6';
         ctx.fillText(club.name, colName, cy + 6);
 
@@ -83,11 +84,11 @@ export async function renderClubList(clubs: Club[]): Promise<Buffer> {
         ctx.fillStyle = barColor;
         roundRect(ctx, colProgress, cy - barH / 2, Math.max(barW * pct, barH), barH, barH / 2);
         ctx.fill();
-        ctx.font = 'bold 14px sans-serif';
+        ctx.font = font('bold 14px');
         ctx.fillStyle = barColor;
         ctx.fillText(`${club.headcount}/30`, colProgress + barW + 16, cy + 5);
 
-        ctx.font = '16px sans-serif';
+        ctx.font = font('16px');
         ctx.fillStyle = '#9ba3b4';
         const fanText =
             club.fanCountAmount != null && club.fanCountPeriod

@@ -39,6 +39,7 @@ model Club {
     updatedAt      DateTime         @updatedAt
 
     members        ClubMember[]
+    trackedCircles TrackedCircle[]
 }
 
 model ClubMember {
@@ -107,4 +108,103 @@ model TimerNotification {
     deleteAt  DateTime
 
     @@index([deleteAt])
+}
+
+// ─── uma.moe fan tracking ─────────────────────────────────────────────────────
+
+/// A uma.moe circle this server tracks.
+///
+/// Fan counts are BigInt because the API returns int64. They are converted to
+/// JS numbers only at the presentation boundary, via `toSafeNumber`, which
+/// asserts the value is below Number.MAX_SAFE_INTEGER.
+model TrackedCircle {
+    id              String    @id @default(cuid())
+    guildId         String
+    /// uma.moe `circle_id`.
+    circleId        BigInt
+    name            String
+    /// Optional link to an internal Club record.
+    clubId          String?
+    /// Fans each member is expected to earn per month.
+    monthlyQuota    BigInt    @default(0)
+    /// Where scheduled reports are posted. May be a thread.
+    reportChannelId String?
+    /// Where behind-quota alerts are posted. May be a thread.
+    alertChannelId  String?
+    /// Paused circles are kept but skipped by the sync job.
+    active          Boolean   @default(true)
+    lastSyncedAt    DateTime?
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+
+    club      Club?         @relation(fields: [clubId], references: [id], onDelete: SetNull)
+    snapshots FanSnapshot[]
+
+    @@unique([guildId, circleId])
+    @@index([active])
+}
+
+/// Links a Discord account to a uma.moe trainer.
+///
+/// Lets `/trainer` default to the caller and lets alerts mention a real user
+/// rather than printing a bare viewer ID.
+model TrainerLink {
+    id            String   @id @default(cuid())
+    guildId       String
+    discordUserId String
+    /// uma.moe `viewer_id`.
+    viewerId      BigInt
+    trainerName   String?
+    createdAt     DateTime @default(now())
+
+    @@unique([guildId, discordUserId])
+    @@unique([guildId, viewerId])
+}
+
+/// One member's cumulative fan total on one game day.
+///
+/// Mirrors a single element of the API's 31-element `daily_fans` array. Storing
+/// one row per day keeps the sync idempotent: re-running it for a day simply
+/// overwrites that day rather than appending a duplicate.
+model FanSnapshot {
+    id             String   @id @default(cuid())
+    trackedCircleId String
+    viewerId       BigInt
+    trainerName    String?
+    year           Int
+    month          Int
+    /// Day of the game month, 1-31.
+    day            Int
+    /// Cumulative fans at the end of that day, as reported by uma.moe.
+    cumulativeFans BigInt
+    shameScore     Int?
+    recordedAt     DateTime @default(now())
+
+    circle TrackedCircle @relation(fields: [trackedCircleId], references: [id], onDelete: Cascade)
+
+    @@unique([trackedCircleId, viewerId, year, month, day])
+    @@index([trackedCircleId, year, month])
+    @@index([viewerId])
+}
+
+/// Daily fans-per-member-per-day figures at the top-N circle cutoffs.
+///
+/// uma.moe exposes only current circle totals, not their history, so the
+/// benchmark chart is built from snapshots this bot accumulates. History
+/// therefore starts from the first sync rather than from the start of time.
+model BenchmarkSnapshot {
+    id         String   @id @default(cuid())
+    year       Int
+    month      Int
+    day        Int
+    /// Cutoff size: 10, 30 or 100.
+    tier       Int
+    /// Value of the circle sitting exactly on the cutoff.
+    entryValue BigInt
+    /// Mean across every circle above the cutoff.
+    avgValue   BigInt
+    recordedAt DateTime @default(now())
+
+    @@unique([year, month, day, tier])
+    @@index([year, month])
 }

@@ -1,8 +1,19 @@
 FROM node:20-slim
 WORKDIR /app
 
-# OPEN SSL & FONT CONFIG
-RUN apt-get update -y && apt-get install -y openssl && apt-get install -y fontconfig && rm -rf /var/lib/apt/lists/*
+# OpenSSL is required by Prisma. The font packages are required by the image
+# renderers: @napi-rs/canvas does not fall back across families for missing
+# glyphs, so Japanese trainer names render as tofu boxes unless a CJK family is
+# installed. fonts-dejavu-core supplies Latin, fonts-wqy-zenhei supplies CJK.
+# See docs/fonts.md.
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        openssl \
+        fontconfig \
+        fonts-dejavu-core \
+        fonts-wqy-zenhei \
+    && fc-cache -f \
+    && rm -rf /var/lib/apt/lists/*
 
 # `prisma generate` runs during `npm ci` (postinstall) and wants DATABASE_URL
 # present. This is an ARG, not an ENV, on purpose: an ENV would bake a bogus

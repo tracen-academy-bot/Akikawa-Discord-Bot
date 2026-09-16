@@ -13,7 +13,8 @@
     "postinstall": "prisma generate",
     "test:timer": "ts-node --compilerOptions {\"module\":\"commonjs\",\"types\":[\"node\"]} scripts/test-timer.ts",
     "test:scheduler": "ts-node --compilerOptions {\"module\":\"commonjs\",\"types\":[\"node\"]} scripts/test-scheduler.ts",
-    "test": "npm run test:timer && npm run test:scheduler"
+    "test": "npm run test:metrics && npm run test:timer && npm run test:scheduler",
+    "test:metrics": "ts-node --compilerOptions {\"module\":\"commonjs\",\"types\":[\"node\"]} scripts/test-metrics.ts"
   },
   "keywords": [],
   "author": "",

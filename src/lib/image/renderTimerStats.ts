@@ -1,6 +1,7 @@
 import { createCanvas } from '@napi-rs/canvas';
 import { roundRect } from './canvasUtils';
 import type { DailyRunCount, TrainerStats } from '../timer/service';
+import { font } from './fonts';
 
 /**
  * Renders a trainer's Independent Training statistics card.
@@ -56,16 +57,16 @@ function drawTile(
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
 
-    ctx.font = 'bold 13px sans-serif';
+    ctx.font = font('bold 13px');
     ctx.fillStyle = TEXT_FAINT;
     ctx.fillText(tile.label.toUpperCase(), x + 18, y + 28);
 
-    ctx.font = 'bold 34px sans-serif';
+    ctx.font = font('bold 34px');
     ctx.fillStyle = tile.color;
     ctx.fillText(tile.value, x + 18, y + 70);
 
     if (tile.detail) {
-        ctx.font = '13px sans-serif';
+        ctx.font = font('13px');
         ctx.fillStyle = TEXT_MUTED;
         ctx.fillText(tile.detail, x + 18, y + 92);
     }
@@ -86,7 +87,7 @@ function drawHistory(
     h: number,
 ) {
     ctx.textAlign = 'left';
-    ctx.font = 'bold 15px sans-serif';
+    ctx.font = font('bold 15px');
     ctx.fillStyle = TEXT_FAINT;
     ctx.fillText(`LAST ${series.length} DAYS`, x, y - 14);
 
@@ -97,7 +98,7 @@ function drawHistory(
 
     // Gridlines and y-axis labels.
     ctx.textAlign = 'right';
-    ctx.font = '12px sans-serif';
+    ctx.font = font('12px');
     for (let value = 0; value <= top; value += step) {
         const lineY = y + h - (value / top) * h;
         ctx.strokeStyle = HAIRLINE;
@@ -126,7 +127,7 @@ function drawHistory(
             ctx.fill();
 
             ctx.textAlign = 'center';
-            ctx.font = 'bold 12px sans-serif';
+            ctx.font = font('bold 12px');
             ctx.fillStyle = TEXT_PRIMARY;
             ctx.fillText(String(day.runs), cx, y + h - barH - 7);
         } else {
@@ -139,7 +140,7 @@ function drawHistory(
         // Label every other day to avoid crowding on a 14-day axis.
         if (i % 2 === series.length % 2) {
             ctx.textAlign = 'center';
-            ctx.font = '11px sans-serif';
+            ctx.font = font('11px');
             ctx.fillStyle = TEXT_FAINT;
             ctx.fillText(day.label, cx, y + h + 18);
         }
@@ -179,10 +180,10 @@ export async function renderTimerStats(
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = TEXT_PRIMARY;
-    ctx.font = 'bold 34px sans-serif';
+    ctx.font = font('bold 34px');
     ctx.fillText(`Training Report — ${displayName}`, 40, 54);
 
-    ctx.font = '17px sans-serif';
+    ctx.font = font('17px');
     ctx.fillStyle = TEXT_MUTED;
     const placement =
         stats.rank === null
@@ -222,7 +223,7 @@ export async function renderTimerStats(
     drawHistory(ctx, series, 40, headerHeight + tileHeight + 74, WIDTH - 80, chartHeight);
 
     ctx.textAlign = 'left';
-    ctx.font = '13px sans-serif';
+    ctx.font = font('13px');
     ctx.fillStyle = '#555b6e';
     ctx.fillText('Independent Training • 50 minutes per run', 40, height - 22);
 

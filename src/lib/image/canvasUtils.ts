@@ -2,6 +2,7 @@ import { SKRSContext2D, Image, loadImage } from "@napi-rs/canvas";
 import * as path from 'path';
 import * as fs from 'fs';
 import { ClubRank } from '@prisma/client';
+import { font } from './fonts';
 
 export function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number) {
     ctx.beginPath();
@@ -70,7 +71,7 @@ export async function drawRankBadge(ctx: SKRSContext2D, rank: ClubRank, cx: numb
     ctx.strokeStyle = color;
     ctx.stroke();
 
-    ctx.font = `bold ${labelFontSize}px sans-serif`;
+    ctx.font = font(`bold ${labelFontSize}px`);
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -121,7 +122,7 @@ export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name:
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.font = `bold ${labelFontSize}px sans-serif`;
+    ctx.font = font(`bold ${labelFontSize}px`);
     ctx.fillStyle = '#12131f';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

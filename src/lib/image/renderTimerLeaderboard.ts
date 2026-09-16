@@ -1,6 +1,7 @@
 import { createCanvas } from '@napi-rs/canvas';
 import { roundRect } from './canvasUtils';
 import type { LeaderboardPeriod, LeaderboardRow } from '../timer/service';
+import { font } from './fonts';
 
 /**
  * Renders the Independent Training leaderboard.
@@ -62,10 +63,10 @@ export async function renderTimerLeaderboard(
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 32px sans-serif';
+    ctx.font = font('bold 32px');
     ctx.fillText('Independent Training Leaderboard', 40, 52);
 
-    ctx.font = '17px sans-serif';
+    ctx.font = font('17px');
     ctx.fillStyle = TEXT_MUTED;
     const totalRuns = rows.reduce((sum, r) => sum + r.runs, 0);
     ctx.fillText(`${PERIOD_LABELS[period]} • ${totalRuns} run${totalRuns === 1 ? '' : 's'} completed`, 40, 78);
@@ -84,7 +85,7 @@ export async function renderTimerLeaderboard(
     const colRuns = 790;
     const colTime = 880;
 
-    ctx.font = 'bold 13px sans-serif';
+    ctx.font = font('bold 13px');
     ctx.fillStyle = TEXT_FAINT;
     ctx.fillText('#', colPlace, HEADER_HEIGHT + 18);
     ctx.fillText('TRAINER', colName, HEADER_HEIGHT + 18);
@@ -94,7 +95,7 @@ export async function renderTimerLeaderboard(
     let y = HEADER_HEIGHT + TABLE_HEADER_HEIGHT;
 
     if (rows.length === 0) {
-        ctx.font = '18px sans-serif';
+        ctx.font = font('18px');
         ctx.fillStyle = TEXT_FAINT;
         ctx.fillText('No runs recorded in this period yet.', colPlace, y + 28);
         return canvas.encode('png');
@@ -113,11 +114,11 @@ export async function renderTimerLeaderboard(
         const placeColor = PLACE_COLORS[i] ?? TEXT_FAINT;
 
         ctx.textAlign = 'left';
-        ctx.font = 'bold 17px sans-serif';
+        ctx.font = font('bold 17px');
         ctx.fillStyle = placeColor;
         ctx.fillText(`${i + 1}`, colPlace, cy + 6);
 
-        ctx.font = '17px sans-serif';
+        ctx.font = font('17px');
         ctx.fillStyle = TEXT_PRIMARY;
         const name = names.get(row.discordUserId) ?? row.discordUserId;
         // Truncate rather than overflow into the bar column.
@@ -138,11 +139,11 @@ export async function renderTimerLeaderboard(
         roundRect(ctx, colBar, cy - barHeight / 2, filled, barHeight, barHeight / 2);
         ctx.fill();
 
-        ctx.font = 'bold 17px sans-serif';
+        ctx.font = font('bold 17px');
         ctx.fillStyle = TEXT_PRIMARY;
         ctx.fillText(String(row.runs), colRuns, cy + 6);
 
-        ctx.font = '15px sans-serif';
+        ctx.font = font('15px');
         ctx.fillStyle = TEXT_MUTED;
         ctx.fillText(formatDuration(row.minutes), colTime, cy + 6);
 
