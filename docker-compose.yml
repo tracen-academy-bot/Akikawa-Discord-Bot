@@ -8,8 +8,6 @@ services:
         # Wait for Postgres to actually accept connections, not merely to have
         # been created. Without this the bot races the database on first boot.
         condition: service_healthy
-      redis:
-        condition: service_started
     restart: unless-stopped
 
   postgres:
@@ -27,11 +25,6 @@ services:
     - "5432:5432"
     volumes:
     - pgdata:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7
-    ports:
-    - "6379:6379"
 
 volumes:
   pgdata:

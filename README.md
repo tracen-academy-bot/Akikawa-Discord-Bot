@@ -11,7 +11,13 @@ npm install
 
 ## Running
 
-### Docker (recommended)
+### Railway
+
+See [`docs/deploying.md`](docs/deploying.md). Two services: this repo and a
+Postgres database. `railway.json` pins the Dockerfile builder so migrations run
+on deploy — do not remove it.
+
+### Docker (recommended for local)
 
 ```bash
 docker compose up --build

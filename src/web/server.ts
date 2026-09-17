@@ -134,6 +134,24 @@ export function startDashboard(client: Client): (() => void) | null {
     const guildId = cfg.guildId;
     const csrf = (req: Request) => (req.user ? csrfToken(req.user, cfg.sessionSecret) : '');
 
+    /**
+     * Health check for the hosting platform.
+     *
+     * Deliberately unauthenticated and registered before every other route:
+     * the platform probes it without a session, and a probe that redirected to
+     * the login flow would be read as an unhealthy container and restart-loop
+     * the bot. It verifies the database too, so a deploy that cannot reach
+     * Postgres is reported as failed rather than silently serving errors.
+     */
+    app.get('/healthz', async (_req, res) => {
+        try {
+            await prisma.$queryRaw`SELECT 1`;
+            res.json({ ok: true, discord: client.isReady() });
+        } catch {
+            res.status(503).json({ ok: false, error: 'database unreachable' });
+        }
+    });
+
     // ── Auth ──────────────────────────────────────────────────────────────────
     app.get('/login', (req, res) => beginLogin(cfg, req, res));
 
@@ -563,8 +581,11 @@ export function startDashboard(client: Client): (() => void) | null {
         );
     });
 
-    const server = app.listen(cfg.port, () => {
-        console.log(`Dashboard listening on port ${cfg.port} (${cfg.baseUrl})`);
+    // Bind on every interface, not loopback. A container that listens only on
+    // 127.0.0.1 is unreachable from outside itself, so the platform's health
+    // check never connects.
+    const server = app.listen(cfg.port, '0.0.0.0', () => {
+        console.log(`Dashboard listening on 0.0.0.0:${cfg.port} (${cfg.baseUrl})`);
     });
 
     return () => server.close();

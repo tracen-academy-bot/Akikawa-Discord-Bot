@@ -66,9 +66,17 @@ export interface WebConfig {
 export function loadWebConfig(): WebConfig | null {
     const clientId = process.env.DISCORD_CLIENT_ID;
     const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-    const baseUrl = process.env.DASHBOARD_BASE_URL;
     const sessionSecret = process.env.DASHBOARD_SESSION_SECRET;
     const guildId = process.env.DASHBOARD_GUILD_ID;
+
+    // Platform-as-a-service hosts assign the public URL themselves. Railway
+    // exposes it as RAILWAY_PUBLIC_DOMAIN (host only, no scheme), so the base
+    // URL is derived from it rather than having to be pasted in by hand and
+    // kept in sync. An explicit DASHBOARD_BASE_URL always wins, which is what
+    // a custom domain or a local run needs.
+    const railwayDomain = process.env.RAILWAY_PUBLIC_DOMAIN;
+    const baseUrl =
+        process.env.DASHBOARD_BASE_URL || (railwayDomain ? `https://${railwayDomain}` : undefined);
 
     if (!clientId || !clientSecret || !baseUrl || !sessionSecret || !guildId) return null;
 
@@ -89,7 +97,11 @@ export function loadWebConfig(): WebConfig | null {
             .split(',')
             .map((id) => id.trim())
             .filter(Boolean),
-        port: Number(process.env.DASHBOARD_PORT ?? 3000),
+        // PORT is what the platform tells the container to bind, and it is not
+        // negotiable: bind anything else on Railway, Render or Fly and the
+        // health check fails and no traffic is ever routed to the dashboard.
+        // DASHBOARD_PORT stays as the local-development override.
+        port: Number(process.env.PORT ?? process.env.DASHBOARD_PORT ?? 3000),
     };
 }
 

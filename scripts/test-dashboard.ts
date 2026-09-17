@@ -16,6 +16,10 @@ process.env.DASHBOARD_SESSION_SECRET = 'a'.repeat(48);
 process.env.DASHBOARD_GUILD_ID = 'test-guild-web';
 process.env.DASHBOARD_PORT = '38123';
 process.env.OFFICER_ROLE_IDS = 'role-officer';
+// Cleared so an ambient PORT from the shell or a host platform cannot move the
+// server off the port these tests connect to.
+delete process.env.PORT;
+delete process.env.RAILWAY_PUBLIC_DOMAIN;
 
 import { prisma } from '../src/db/prisma';
 import { startDashboard } from '../src/web/server';

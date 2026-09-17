@@ -4,6 +4,62 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-09-17 — Hosting on Railway
+
+Everything runs in one process, so Railway needs two services: this repo and a
+Postgres database.
+
+### `railway.json` is load-bearing
+
+Railway's default builder ignores the `Dockerfile`. The `Dockerfile`'s
+entrypoint is what runs `prisma migrate deploy`, so building with anything else
+would leave the schema empty and reproduce the original P2021 outage exactly.
+`builder: "DOCKERFILE"` is pinned to prevent that.
+
+Also set: `sleepApplication: false` (a sleeping container drops the gateway and
+stops the schedulers), `numReplicas: 1` (timer delivery is already
+exactly-once via `DELETE … RETURNING`, but two replicas would race the daily
+job marker and could double-post reports), and a health check with a 300s
+timeout for the migration step on a cold deploy.
+
+### Port binding
+
+The dashboard read `DASHBOARD_PORT` only. Every PaaS injects `PORT` and routes
+traffic to it — binding anything else means the health check never connects and
+no traffic arrives. Precedence is now `PORT` → `DASHBOARD_PORT` → `3000`, and
+the server binds `0.0.0.0` explicitly rather than loopback.
+
+`DASHBOARD_BASE_URL` now falls back to `https://$RAILWAY_PUBLIC_DOMAIN`, so the
+OAuth callback URL does not have to be hand-copied and kept in sync. An
+explicit value still wins, for custom domains and local runs.
+
+### `/healthz`
+
+Unauthenticated and registered before every other route — a probe that
+redirected to the login flow would read as unhealthy and restart-loop the
+container. It checks the database as well as the process, so a deploy that
+cannot reach Postgres fails loudly.
+
+This was validated by accident: Postgres stopped mid-session and the endpoint
+correctly returned `503 {"ok":false,"error":"database unreachable"}`, then
+`200 {"ok":true,"discord":true}` once it came back.
+
+### Removed Redis
+
+`ioredis` and the Compose `redis` service were never imported anywhere in
+`src/`. On Railway that would have been a third service costing money to sit
+idle. Dependency and service both dropped; lockfile verified in sync so
+`npm ci` still succeeds.
+
+### Not verified here
+
+No Docker daemon in this environment, so the image was not built. Verified
+instead: the entrypoint is valid `sh`, both font packages resolve in Debian,
+the lockfile matches `package.json`, TypeScript compiles, and all 272
+assertions pass. The first Railway build is the real test of the image.
+
+---
+
 ## 2026-09-16 — Dashboard, and two more startup bugs
 
 ### Dashboard
