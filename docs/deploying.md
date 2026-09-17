@@ -78,6 +78,44 @@ The same file also sets:
    Set `DEV_GUILD_ID` too for instant registration in one guild; leave it unset
    to register globally, which can take up to an hour to propagate.
 
+## Deploying onto an existing database
+
+Every migration in this repo is **purely additive** — no `DROP`, no `TRUNCATE`,
+no column changes. Existing `Club` and `ClubMember` rows are untouched. The new
+migrations only add tables: `TrainingTimer`, `TrainingRun`, `TimerNotification`,
+`TrackedCircle`, `TrainerLink`, `FanSnapshot`, `BenchmarkSnapshot`, `JobRun`.
+
+There is one case that needs a manual step. Prisma refuses to migrate a
+database that already has tables but no migration history, because it cannot
+tell what is already applied:
+
+```
+Error: P3005
+The database schema is not empty.
+```
+
+This happens if the schema was created with `prisma db push` or by hand rather
+than by `migrate deploy`. Fix it by recording the first migration as already
+applied, then deploying normally:
+
+```bash
+DATABASE_URL="<railway postgres url>" npx prisma migrate resolve --applied 20260817060850_init
+DATABASE_URL="<railway postgres url>" npx prisma migrate deploy
+```
+
+Both paths were verified against a real Postgres: a clean apply from empty, and
+the P3005 recovery above.
+
+To check which state a database is in:
+
+```bash
+psql "<railway postgres url>" -c 'SELECT migration_name FROM _prisma_migrations ORDER BY finished_at'
+```
+
+An error saying `_prisma_migrations` does not exist means no history — use the
+baseline command above if the database also has `Club` in it, or just deploy if
+it is empty.
+
 ## Verifying a deploy
 
 ```bash
