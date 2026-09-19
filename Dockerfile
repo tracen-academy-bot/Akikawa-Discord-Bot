@@ -1,11 +1,10 @@
 FROM node:20-slim
 WORKDIR /app
 
-# OpenSSL is required by Prisma. The font packages are required by the image
-# renderers: @napi-rs/canvas does not fall back across families for missing
-# glyphs, so Japanese trainer names render as tofu boxes unless a CJK family is
-# installed. fonts-dejavu-core supplies Latin, fonts-wqy-zenhei supplies CJK.
-# See docs/fonts.md.
+# OpenSSL is required by Prisma. The renderers use fonts bundled in
+# src/assets/fonts (registered at startup), so the look does not depend on the
+# host. The apt font packages remain only as a last-resort fallback that keeps
+# CJK legible if bundled registration ever fails. See docs/fonts.md.
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
         openssl \
