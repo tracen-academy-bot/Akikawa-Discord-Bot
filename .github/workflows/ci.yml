@@ -47,8 +47,10 @@ jobs:
       # asset copy. Nothing is pushed anywhere.
       - run: docker build -t akikawa-ci .
       - name: Bundled fonts register inside the image
+        # --entrypoint bypasses docker-entrypoint.sh, which would otherwise run
+        # `prisma migrate deploy` first and fail here for want of a database.
         run: |
-          docker run --rm akikawa-ci node -e "
+          docker run --rm --entrypoint node akikawa-ci -e "
             const { GlobalFonts } = require('@napi-rs/canvas');
             require('./dist/lib/image/fonts.js');
             const fams = GlobalFonts.families.map(f => f.family);
