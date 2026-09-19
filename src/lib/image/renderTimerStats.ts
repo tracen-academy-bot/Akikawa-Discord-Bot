@@ -1,184 +1,98 @@
-import { createCanvas } from '@napi-rs/canvas';
-import { roundRect } from './canvasUtils';
-import type { DailyRunCount, TrainerStats } from '../timer/service';
+import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
+import { THEME, drawLabel, drawRule, drawText } from './theme';
 import { drawTileRow, type Tile } from './tiles';
-import { font } from './fonts';
+import type { DailyRunCount, TrainerStats } from '../timer/service';
 
 /**
- * Renders a trainer's Independent Training statistics card.
+ * A trainer's Independent Training statistics card.
  *
- * Drawn as an image rather than an embed because the point of the card is to
- * make accumulated effort feel substantial: large figures, a filled history
- * chart, and a consistent layout read better than embed fields.
+ * Drawn as an image so accumulated effort reads as substantial: large figures,
+ * a bar chart of the last two weeks, one layout. The y-axis is scaled in whole
+ * runs because a run is indivisible and fractional gridlines would be noise.
  */
 
 const WIDTH = 1000;
-const BACKGROUND_TOP = '#1a1c2e';
-const BACKGROUND_BOTTOM = '#12131f';
-const TEXT_PRIMARY = '#ffffff';
-const TEXT_MUTED = '#9ba3b4';
-const TEXT_FAINT = '#6b7280';
-const ACCENT = '#f4b13f';
-const HAIRLINE = 'rgba(255, 255, 255, 0.08)';
+const MARGIN = 40;
 
-/** Formats a duration in minutes as "12h 30m", or "45m" under an hour. */
+/** Formats minutes as "12h 30m", or "45m" under an hour. */
 function formatDuration(totalMinutes: number): string {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    if (hours === 0) return `${minutes}m`;
-    return `${hours}h ${minutes}m`;
+    return hours === 0 ? `${minutes}m` : `${hours}h ${minutes}m`;
 }
 
-/**
- * Draws the daily-run history as a bar chart.
- *
- * The y-axis is scaled to whole runs, because a run is an indivisible unit and
- * fractional gridlines would be meaningless.
- */
-function drawHistory(
-    ctx: ReturnType<ReturnType<typeof createCanvas>['getContext']>,
-    series: DailyRunCount[],
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-) {
-    ctx.textAlign = 'left';
-    ctx.font = font('bold 15px');
-    ctx.fillStyle = TEXT_FAINT;
-    ctx.fillText(`LAST ${series.length} DAYS`, x, y - 14);
+/** Bar chart of runs per day. */
+function drawHistory(ctx: SKRSContext2D, series: DailyRunCount[], x: number, y: number, w: number, h: number) {
+    drawLabel(ctx, `Last ${series.length} days`, x, y - 14, THEME.gold, 11);
 
     const peak = Math.max(1, ...series.map((d) => d.runs));
-    // At most 4 gridlines, and never a fractional number of runs.
     const step = Math.max(1, Math.ceil(peak / 4));
     const top = Math.ceil(peak / step) * step;
+    const axisW = 34;
 
-    // Gridlines and y-axis labels.
-    ctx.textAlign = 'right';
-    ctx.font = font('12px');
     for (let value = 0; value <= top; value += step) {
         const lineY = y + h - (value / top) * h;
-        ctx.strokeStyle = HAIRLINE;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x + 34, lineY);
-        ctx.lineTo(x + w, lineY);
-        ctx.stroke();
-
-        ctx.fillStyle = TEXT_FAINT;
-        ctx.fillText(String(value), x + 26, lineY + 4);
+        drawRule(ctx, x + axisW, lineY, w - axisW, THEME.line);
+        drawText(ctx, String(value), x + axisW - 10, lineY + 4, { spec: '400 11px', color: THEME.faint, align: 'right' });
     }
 
-    const plotX = x + 34;
-    const plotW = w - 34;
-    const slot = plotW / series.length;
-    const barW = Math.min(36, slot * 0.6);
+    const plotX = x + axisW;
+    const slot = (w - axisW) / series.length;
+    const barW = Math.min(30, slot * 0.55);
 
     series.forEach((day, i) => {
         const cx = plotX + slot * i + slot / 2;
         const barH = (day.runs / top) * h;
-
         if (day.runs > 0) {
-            ctx.fillStyle = ACCENT;
-            roundRect(ctx, cx - barW / 2, y + h - barH, barW, barH, Math.min(5, barW / 2));
-            ctx.fill();
-
-            ctx.textAlign = 'center';
-            ctx.font = font('bold 12px');
-            ctx.fillStyle = TEXT_PRIMARY;
-            ctx.fillText(String(day.runs), cx, y + h - barH - 7);
+            ctx.fillStyle = THEME.gold;
+            ctx.fillRect(cx - barW / 2, y + h - barH, barW, barH);
+            drawText(ctx, String(day.runs), cx, y + h - barH - 7, { spec: '500 11px', color: THEME.text, align: 'center' });
         } else {
-            // An empty day still gets a faint baseline so the axis reads evenly.
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-            roundRect(ctx, cx - barW / 2, y + h - 3, barW, 3, 1.5);
-            ctx.fill();
+            ctx.fillStyle = THEME.line;
+            ctx.fillRect(cx - barW / 2, y + h - 2, barW, 2);
         }
-
-        // Label every other day to avoid crowding on a 14-day axis.
         if (i % 2 === series.length % 2) {
-            ctx.textAlign = 'center';
-            ctx.font = font('11px');
-            ctx.fillStyle = TEXT_FAINT;
-            ctx.fillText(day.label, cx, y + h + 18);
+            drawText(ctx, day.label, cx, y + h + 18, { spec: '400 11px', color: THEME.faint, align: 'center' });
         }
     });
 }
 
-/**
- * Renders the full statistics card.
- *
- * @param displayName Trainer's server display name.
- * @param stats       Aggregated totals for that trainer.
- * @param series      Per-day run counts, oldest first.
- */
-export async function renderTimerStats(
-    displayName: string,
-    stats: TrainerStats,
-    series: DailyRunCount[],
-): Promise<Buffer> {
-    const headerHeight = 96;
-    const tileHeight = 108;
+export async function renderTimerStats(displayName: string, stats: TrainerStats, series: DailyRunCount[]): Promise<Buffer> {
+    const headerHeight = 104;
+    const tileHeight = 104;
     const chartHeight = 190;
-    // Bottom padding leaves room for the date axis under the chart plus the
-    // footer line, without the two crowding each other.
-    const height = headerHeight + tileHeight + chartHeight + 152;
+    const height = headerHeight + tileHeight + chartHeight + 156;
 
     const canvas = createCanvas(WIDTH, height);
     const ctx = canvas.getContext('2d');
+    ctx.fillStyle = THEME.bg;
+    ctx.fillRect(0, 0, WIDTH, height);
 
-    const bg = ctx.createLinearGradient(0, 0, WIDTH, height);
-    bg.addColorStop(0, BACKGROUND_TOP);
-    bg.addColorStop(1, BACKGROUND_BOTTOM);
-    ctx.fillStyle = bg;
-    roundRect(ctx, 0, 0, WIDTH, height, 24);
-    ctx.fill();
+    // ── Header ────────────────────────────────────────────────────────────────
+    drawLabel(ctx, 'Training report', MARGIN, 40, THEME.gold, 12);
+    drawText(ctx, displayName, MARGIN, 76, { spec: '500 30px', color: THEME.text });
 
-    // Header.
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = TEXT_PRIMARY;
-    ctx.font = font('bold 34px');
-    ctx.fillText(`Training Report — ${displayName}`, 40, 54);
+    const placement = stats.rank === null ? 'no runs yet' : `rank ${stats.rank} of ${stats.trainerCount}`;
+    const since = stats.firstRunAt ? ` · since ${stats.firstRunAt.toISOString().slice(0, 10)}` : '';
+    drawLabel(ctx, `${placement}${since}`, WIDTH - MARGIN, 40, THEME.muted, 12, 'right');
+    drawText(ctx, 'Independent Training · 50 min per run', WIDTH - MARGIN, 76, { spec: '400 14px', color: THEME.gold, align: 'right' });
+    drawRule(ctx, MARGIN, headerHeight - 8, WIDTH - MARGIN * 2, THEME.gold, 1.5);
 
-    ctx.font = font('17px');
-    ctx.fillStyle = TEXT_MUTED;
-    const placement =
-        stats.rank === null
-            ? 'No runs recorded yet'
-            : `Rank #${stats.rank} of ${stats.trainerCount} trainers`;
-    const since = stats.firstRunAt
-        ? ` • Training since ${stats.firstRunAt.toISOString().slice(0, 10)}`
-        : '';
-    ctx.fillText(`${placement}${since}`, 40, 80);
-
-    ctx.strokeStyle = HAIRLINE;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(40, headerHeight);
-    ctx.lineTo(WIDTH - 40, headerHeight);
-    ctx.stroke();
-
-    // Headline figures.
+    // ── Headline figures ──────────────────────────────────────────────────────
     const tiles: Tile[] = [
-        { label: 'Total Runs', value: String(stats.totalRuns), detail: `${stats.runsToday} today`, color: TEXT_PRIMARY },
+        { label: 'Total runs', value: String(stats.totalRuns), detail: `${stats.runsToday} today`, color: THEME.text },
         {
-            label: 'Current Streak',
+            label: 'Current streak',
             value: `${stats.currentStreakDays}d`,
-            detail: `Best ${stats.longestStreakDays}d`,
-            color: stats.currentStreakDays > 0 ? ACCENT : TEXT_FAINT,
+            detail: `best ${stats.longestStreakDays}d`,
+            color: stats.currentStreakDays > 0 ? THEME.gold : THEME.faint,
         },
-        { label: 'This Week', value: String(stats.runsThisWeek), detail: 'runs in 7 days', color: '#7ee787' },
-        { label: 'Time Trained', value: formatDuration(stats.totalMinutes), detail: 'total', color: '#79c0ff' },
+        { label: 'This week', value: String(stats.runsThisWeek), detail: 'runs in 7 days', color: THEME.text },
+        { label: 'Time trained', value: formatDuration(stats.totalMinutes), detail: 'total', color: THEME.text },
     ];
+    drawTileRow(ctx, tiles, MARGIN, headerHeight + 12, WIDTH - MARGIN * 2, tileHeight);
 
-    drawTileRow(ctx, tiles, 40, headerHeight + 22, WIDTH - 80, tileHeight);
-
-    drawHistory(ctx, series, 40, headerHeight + tileHeight + 74, WIDTH - 80, chartHeight);
-
-    ctx.textAlign = 'left';
-    ctx.font = font('13px');
-    ctx.fillStyle = '#555b6e';
-    ctx.fillText('Independent Training • 50 minutes per run', 40, height - 22);
+    drawHistory(ctx, series, MARGIN, headerHeight + tileHeight + 70, WIDTH - MARGIN * 2, chartHeight);
 
     return canvas.encode('png');
 }

@@ -14,7 +14,7 @@ import { isOfficer } from '../lib/permissions';
 import { errorEmbed, successEmbed, infoEmbed } from '../lib/embeds';
 import { autocompleteTrackedCircle } from '../lib/fans/circleAutocomplete';
 import { currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
-import { buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
+import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
 import { formatCompactFans, toSafeNumber } from '../lib/fans/metrics';
 import { isConfigured, searchCircles } from '../lib/umamoe/client';
 import { renderFanReport } from '../lib/image/renderFanReport';
@@ -59,7 +59,12 @@ export const data = new SlashCommandBuilder()
             ),
     )
     .addSubcommand((sub) =>
-        sub.setName('benchmark').setDescription('Show what it takes to sit in the top 10 / 30 / 100 circles.'),
+        sub
+            .setName('benchmark')
+            .setDescription('Show what it takes to sit in the top 10 / 30 / 100 circles, and where yours sits.')
+            .addStringOption((opt) =>
+                opt.setName('circle').setDescription('Overlay this circle (defaults to the first tracked)').setAutocomplete(true),
+            ),
     )
     .addSubcommand((sub) =>
         sub
@@ -314,7 +319,7 @@ async function handleTrainer(interaction: ChatInputCommandInteraction) {
         return;
     }
 
-    const report = await buildTrainerReport(circle, link.viewerId);
+    const report = await buildTrainerReport(circle, link.viewerId, TRAINER_WINDOW_DAYS, await currentCircleProgress(circle));
     if (!report) {
         await reply(
             interaction,
@@ -331,7 +336,15 @@ async function handleTrainer(interaction: ChatInputCommandInteraction) {
 
 async function handleBenchmark(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
-    const buffer = await renderBenchmark(await buildBenchmark());
+
+    // Overlay the named circle, else the first tracked one. Never an error:
+    // the benchmark is still useful with no club to compare against.
+    const named = interaction.options.getString('circle');
+    const circle = named
+        ? await prisma.trackedCircle.findFirst({ where: { id: named, guildId: interaction.guildId! } })
+        : await prisma.trackedCircle.findFirst({ where: { guildId: interaction.guildId!, active: true }, orderBy: { createdAt: 'asc' } });
+
+    const buffer = await renderBenchmark(await buildBenchmark(TRAINER_WINDOW_DAYS, circle));
     await interaction.editReply({ files: [new AttachmentBuilder(buffer, { name: 'benchmark.png' })] });
 }
 

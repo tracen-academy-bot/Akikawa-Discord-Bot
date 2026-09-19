@@ -1,60 +1,56 @@
 # Fonts in rendered images
 
-## The problem
+## Bundled, not installed
 
-`@napi-rs/canvas` resolves a font family and stops. Unlike a browser, it does
-**not** fall back to another family for individual glyphs the chosen family
-lacks.
+The renderers use fonts shipped in `src/assets/fonts` and registered at
+startup by `src/lib/image/fonts.ts`. Output is therefore identical on every
+machine and container. Previously the look depended on whatever `apt` had
+installed, which differed per host and, on a bare Debian image, rendered every
+Japanese trainer name as tofu boxes.
 
-A bare `sans-serif` resolves to whichever sans family fontconfig ranks first —
-on a stock Debian image, Liberation Sans. Liberation Sans has no CJK coverage,
-so a Japanese trainer name renders as a row of `□` tofu boxes. Umamusume
-trainer names are frequently Japanese, so this is a correctness bug, not a
-cosmetic one.
+| Family | Role | Weights | Licence |
+| --- | --- | --- | --- |
+| IBM Plex Mono | Latin, digits | 400, 500, 700 | SIL OFL 1.1 |
+| IBM Plex Sans JP | CJK | 400, 700 | SIL OFL 1.1 |
 
-Observed directly: with `sans-serif`, `『 』`, `ハルウララ` and `東海帝王` all
-rendered as tofu.
+Licence texts sit beside the files. Total ~5 MB.
 
-## The fix
+## Why these
 
-`src/lib/image/fonts.ts` defines one stack, used by every renderer through the
-`font()` helper:
+`@napi-rs/canvas` resolves one family per draw call and does **not** fall back
+per glyph, so the stack must be explicit and the CJK family must actually be
+present. Plex Mono and Plex Sans JP are one superfamily: a row mixing
+`Lucrezia` and `ハルウララ` reads as a single typeface.
 
-```
-"DejaVu Sans", "WenQuanYi Zen Hei", "Noto Sans CJK JP", sans-serif
-```
-
-Order matters:
-
-| Family | Role | Why not first |
-| --- | --- | --- |
-| DejaVu Sans | Latin | — |
-| WenQuanYi Zen Hei | CJK fallback | Latin coverage is weaker |
-| Noto Sans CJK JP | CJK, if installed | Not in the base image |
-
-**IPAGothic is deliberately excluded from the front of the stack.** It covers
-CJK correctly, but renders Latin at fixed width, so mixed-script tables come out
-looking like a terminal dump. Verified by rendering the same sample with
-IPAGothic leading: CJK was fine, `Fwoxieee` came out monospaced.
+Plex Mono's digits are tabular by nature. That matters because the canvas API
+has no way to enable a font's `tnum` feature, so a proportional-digit face
+(Inter, for example) would make every numeric column wobble.
 
 ## Usage
 
-```ts
-import { font } from './fonts';
+Never write a font string by hand. Go through the helpers in
+`src/lib/image/theme.ts`:
 
-ctx.font = font('bold 17px');      // not 'bold 17px sans-serif'
+```ts
+drawText(ctx, 'Freakrose', x, y, { spec: '500 19px', color: THEME.text });
+drawLabel(ctx, 'Total', x, y, THEME.muted);          // uppercase, tracked
 ```
 
-## Container requirements
+or, at the lowest level, `font('500 19px')` from `fonts.ts`, which appends the
+shared stack.
 
-The Dockerfile installs `fonts-dejavu-core` and `fonts-wqy-zenhei` and runs
-`fc-cache -f`. Removing either brings the tofu back.
+## Fallback
 
-To confirm the container can see them:
+`FONT_STACK` ends with `"DejaVu Sans Mono", "WenQuanYi Zen Hei", monospace`,
+and the Dockerfile still installs those packages. This is a safety net only:
+if bundled registration ever fails, CJK stays legible rather than becoming
+boxes. A warning is logged at startup when that happens.
+
+## Swapping
+
+Drop `.ttf`/`.otf` files into `src/assets/fonts`, update `FONT_STACK` with the
+family names the files declare, restart. Check what canvas sees with:
 
 ```bash
-docker compose run --rm bot node -e \
-  "console.log(require('@napi-rs/canvas').GlobalFonts.families.map(f=>f.family).join('\n'))"
+node -e "console.log(require('@napi-rs/canvas').GlobalFonts.families.map(f=>f.family))"
 ```
-
-`WenQuanYi Zen Hei` and `DejaVu Sans` must both appear.

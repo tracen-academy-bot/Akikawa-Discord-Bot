@@ -1,162 +1,142 @@
 import { createCanvas } from '@napi-rs/canvas';
-import { roundRect } from './canvasUtils';
-import { font } from './fonts';
+import { THEME, dashNum, drawLabel, drawRule, drawText } from './theme';
 import { drawChart, type ChartSeries } from './chart';
 import { formatCompactFans, formatFans } from '../fans/metrics';
 
 /**
- * Renders the competitive benchmark: what it currently takes to sit inside the
- * top 10, 30 and 100 circles, measured in fans per member per day.
- *
- * Normalising by member count and by day is what makes circles of different
- * sizes comparable, and is the figure a club actually sets its quota against.
+ * The competitive benchmark: what it takes to sit inside the top 10, 30 and
+ * 100 circles, in fans per member per day -- and, when a club is supplied,
+ * where that club sits against them. Normalising by member count and by day
+ * is what makes circles of different sizes comparable.
  */
 
 const WIDTH = 1200;
+const MARGIN = 40;
 const ROW_HEIGHT = 40;
 
-const TEXT_PRIMARY = '#e6e6e6';
-const TEXT_MUTED = '#9ba3b4';
-const TEXT_FAINT = '#6b7280';
-const HAIRLINE = 'rgba(255, 255, 255, 0.08)';
-
-/** Per-tier styling. Line style varies as well as colour, for colourblind legibility. */
+/** Per-tier styling. Line style varies as well as colour for legibility. */
 const TIER_STYLE: Record<number, { color: string; style: 'solid' | 'dashed' | 'dotted'; marker: 'circle' | 'triangle' | 'diamond' }> = {
-    10: { color: '#f4655f', style: 'solid', marker: 'circle' },
-    30: { color: '#e8c547', style: 'dashed', marker: 'triangle' },
-    100: { color: '#79c0ff', style: 'dotted', marker: 'diamond' },
+    10: { color: THEME.gold, style: 'solid', marker: 'circle' },
+    30: { color: THEME.text, style: 'dashed', marker: 'triangle' },
+    100: { color: THEME.muted, style: 'dotted', marker: 'diamond' },
 };
 
-/** Current cutoff figures for one tier. */
+/** The club's own line stands apart from every tier colour. */
+const CLUB_COLOR = THEME.place[0];
+
 export interface BenchmarkTier {
     tier: number;
-    /** Fans/member/day of the circle sitting exactly on the cutoff. */
     entry: number;
-    /** Mean fans/member/day across every circle above the cutoff. */
     average: number;
 }
 
-/** One day of history. */
 export interface BenchmarkHistoryPoint {
     label: string;
-    /** Entry value per tier. Missing tiers are simply absent. */
+    /** Entry value per tier for that day. */
     byTier: Record<number, number>;
 }
 
 export interface BenchmarkData {
     current: BenchmarkTier[];
     history: BenchmarkHistoryPoint[];
-    /** Shown when history is shorter than the requested window. */
     historyNote: string | null;
+    /** The club to overlay, with its fans/member/day keyed by game day. */
+    club: { name: string; rateByDay: Record<number, number> } | null;
+}
+
+/** Day number parsed back out of a "Day N" label. */
+function dayOf(label: string): number {
+    return Number(label.replace(/\D/g, '')) || 0;
+}
+
+/** Where a rate sits relative to the current tier cutoffs. */
+function describePosition(rate: number, tiers: BenchmarkTier[]): string {
+    const sorted = [...tiers].sort((a, b) => a.tier - b.tier);
+    for (const t of sorted) if (rate >= t.entry) return `inside top ${t.tier}`;
+    const widest = sorted[sorted.length - 1];
+    return widest ? `outside top ${widest.tier}` : 'unplaced';
 }
 
 export async function renderBenchmark(data: BenchmarkData): Promise<Buffer> {
-    const headerHeight = 70;
-    const tableHeight = 44 + Math.max(data.current.length, 1) * ROW_HEIGHT;
+    const headerHeight = 72;
+    const clubRows = data.club ? 1 : 0;
+    const tableHeight = 44 + (Math.max(data.current.length, 1) + clubRows) * ROW_HEIGHT;
     const chartHeight = 300;
-    const height = headerHeight + tableHeight + chartHeight + 140;
+    const height = headerHeight + tableHeight + chartHeight + 150;
 
     const canvas = createCanvas(WIDTH, height);
     const ctx = canvas.getContext('2d');
-
-    const bg = ctx.createLinearGradient(0, 0, WIDTH, height);
-    bg.addColorStop(0, '#191a24');
-    bg.addColorStop(1, '#101119');
-    ctx.fillStyle = bg;
-    roundRect(ctx, 0, 0, WIDTH, height, 20);
-    ctx.fill();
+    ctx.fillStyle = THEME.bg;
+    ctx.fillRect(0, 0, WIDTH, height);
 
     // ── Current benchmark table ───────────────────────────────────────────────
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = font('bold 22px');
-    ctx.fillText('Current Benchmark', 40, 46);
+    drawText(ctx, 'BENCHMARK', MARGIN, 46, { spec: '500 26px', color: THEME.gold, tracking: 4 });
+    drawLabel(ctx, 'fans / member / day', WIDTH - MARGIN, 44, THEME.muted, 12, 'right');
+    drawRule(ctx, MARGIN, headerHeight - 6, WIDTH - MARGIN * 2, THEME.gold, 1.5);
 
-    const colTier = 60;
+    const colTier = MARGIN + 22;
     const colEntry = 620;
-    const colAvg = 1060;
+    const colAvg = WIDTH - MARGIN;
+    const hy = headerHeight + 22;
+    drawLabel(ctx, 'Cutoff', colTier, hy, THEME.muted);
+    drawLabel(ctx, 'Entry', colEntry, hy, THEME.muted, 12, 'right');
+    drawLabel(ctx, 'Average', colAvg, hy, THEME.muted, 12, 'right');
+    drawRule(ctx, MARGIN, headerHeight + 32, WIDTH - MARGIN * 2, THEME.line);
 
-    const tableTop = headerHeight;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-    roundRect(ctx, 40, tableTop, WIDTH - 80, 44, 10);
-    ctx.fill();
-
-    ctx.font = font('bold 12px');
-    ctx.fillStyle = TEXT_FAINT;
-    ctx.textAlign = 'left';
-    ctx.fillText('BENCHMARK', colTier, tableTop + 27);
-    ctx.textAlign = 'right';
-    ctx.fillText('ENTRY  (FANS / MEMBER / DAY)', colEntry, tableTop + 27);
-    ctx.fillText('AVERAGE  (FANS / MEMBER / DAY)', colAvg, tableTop + 27);
-
-    let y = tableTop + 44;
-
+    let y = headerHeight + 44;
     if (data.current.length === 0) {
-        ctx.textAlign = 'left';
-        ctx.font = font('16px');
-        ctx.fillStyle = TEXT_FAINT;
-        ctx.fillText('No benchmark data collected yet. Run a sync first.', colTier, y + 26);
+        drawText(ctx, 'No benchmark data collected yet. Run a sync first.', colTier, y + 26, { spec: '400 15px', color: THEME.faint });
+        y += ROW_HEIGHT;
     }
 
     for (const tier of data.current) {
         const cy = y + ROW_HEIGHT / 2 + 5;
         const style = TIER_STYLE[tier.tier];
-
-        // Tier swatch, matching the chart's line colour for that tier.
         if (style) {
             ctx.fillStyle = style.color;
-            roundRect(ctx, 40, y + 10, 4, ROW_HEIGHT - 20, 2);
-            ctx.fill();
+            ctx.fillRect(MARGIN, y + 8, 3, ROW_HEIGHT - 16);
         }
-
-        ctx.textAlign = 'left';
-        ctx.font = font('bold 16px');
-        ctx.fillStyle = TEXT_PRIMARY;
-        ctx.fillText(`Top ${tier.tier}`, colTier, cy);
-
-        ctx.textAlign = 'right';
-        ctx.font = font('16px');
-        ctx.fillStyle = TEXT_MUTED;
-        ctx.fillText(formatFans(tier.entry), colEntry, cy);
-        ctx.fillStyle = TEXT_PRIMARY;
-        ctx.font = font('bold 16px');
-        ctx.fillText(formatFans(tier.average), colAvg, cy);
-
+        drawText(ctx, `Top ${tier.tier}`, colTier, cy, { spec: '500 16px', color: THEME.text });
+        drawText(ctx, formatFans(tier.entry), colEntry, cy, { spec: '400 16px', color: THEME.muted, align: 'right' });
+        drawText(ctx, formatFans(tier.average), colAvg, cy, { spec: '700 16px', color: THEME.text, align: 'right' });
         y += ROW_HEIGHT;
+        drawRule(ctx, MARGIN, y - 1, WIDTH - MARGIN * 2, THEME.line);
+    }
+
+    // The club row: its current rate and where that puts it.
+    if (data.club) {
+        const days = Object.keys(data.club.rateByDay).map(Number);
+        const latestDay = days.length ? Math.max(...days) : 0;
+        const rate = latestDay ? data.club.rateByDay[latestDay] ?? null : null;
+        const cy = y + ROW_HEIGHT / 2 + 5;
+        ctx.fillStyle = CLUB_COLOR;
+        ctx.fillRect(MARGIN, y + 8, 3, ROW_HEIGHT - 16);
+        drawText(ctx, data.club.name, colTier, cy, { spec: '500 16px', color: CLUB_COLOR });
+        drawText(ctx, rate === null ? '—' : describePosition(rate, data.current), colEntry, cy, { spec: '400 14px', color: THEME.muted, align: 'right' });
+        drawText(ctx, dashNum(rate), colAvg, cy, { spec: '700 16px', color: CLUB_COLOR, align: 'right' });
+        y += ROW_HEIGHT;
+        drawRule(ctx, MARGIN, y - 1, WIDTH - MARGIN * 2, THEME.line);
     }
 
     // ── Growth chart ──────────────────────────────────────────────────────────
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = font('bold 22px');
-    ctx.fillText('Daily Benchmark Growth', 40, y + 46);
-
-    const chartTop = y + 70;
+    drawLabel(ctx, 'Daily benchmark growth', MARGIN, y + 40, THEME.gold, 12);
+    const chartTop = y + 62;
 
     if (data.history.length < 2) {
-        ctx.font = font('16px');
-        ctx.fillStyle = TEXT_FAINT;
-        ctx.fillText(
-            'Not enough history yet. uma.moe does not publish past circle totals, so this chart',
-            40,
-            chartTop + 34,
-        );
-        ctx.fillText('fills in from the first sync onward — one point per day.', 40, chartTop + 58);
+        drawText(ctx, 'Not enough history yet. uma.moe does not publish past circle totals,', MARGIN, chartTop + 34, { spec: '400 15px', color: THEME.faint });
+        drawText(ctx, 'so this chart fills in from the first sync onward, one point per day.', MARGIN, chartTop + 58, { spec: '400 15px', color: THEME.faint });
     } else {
-        const tiers = [...new Set(data.history.flatMap((p) => Object.keys(p.byTier).map(Number)))].sort(
-            (a, b) => a - b,
-        );
+        const tiers = [...new Set(data.history.flatMap((p) => Object.keys(p.byTier).map(Number)))].sort((a, b) => a - b);
 
         const series: ChartSeries[] = tiers.map((tier) => {
-            const style = TIER_STYLE[tier] ?? { color: '#9ba3b4', style: 'solid' as const, marker: 'circle' as const };
+            const style = TIER_STYLE[tier] ?? { color: THEME.muted, style: 'solid' as const, marker: 'circle' as const };
             return {
                 label: `Top ${tier}`,
                 color: style.color,
                 style: style.style,
                 marker: style.marker,
-                // A day missing a tier carries the previous value forward rather
-                // than dropping to zero, which would draw a false cliff.
+                // A missing day carries the previous value forward rather than
+                // dropping to zero, which would draw a false cliff.
                 values: data.history.map((point, i) => {
                     const value = point.byTier[tier];
                     if (value !== undefined) return value;
@@ -169,26 +149,39 @@ export async function renderBenchmark(data: BenchmarkData): Promise<Buffer> {
             };
         });
 
+        // The club's line, aligned to the same days. Carried forward likewise.
+        if (data.club) {
+            let last = 0;
+            series.push({
+                label: data.club.name,
+                color: CLUB_COLOR,
+                style: 'solid',
+                marker: 'circle',
+                values: data.history.map((point) => {
+                    const v = data.club!.rateByDay[dayOf(point.label)];
+                    if (v !== undefined) last = v;
+                    return last;
+                }),
+            });
+        }
+
         drawChart(ctx, {
-            x: 40,
+            x: MARGIN,
             y: chartTop,
-            width: WIDTH - 80,
+            width: WIDTH - MARGIN * 2,
             height: chartHeight,
             labels: data.history.map((p) => p.label),
             series,
             formatValue: formatCompactFans,
             legend: true,
-            yAxisTitle: 'Fans / Member / Day',
+            yAxisTitle: 'Fans / member / day',
             xAxisTitle: 'Day',
         });
     }
 
     // ── Footer ────────────────────────────────────────────────────────────────
-    ctx.textAlign = 'left';
-    ctx.font = font('12px');
-    ctx.fillStyle = '#555b6e';
-    const note = data.historyNote ? `  |  ${data.historyNote}` : '';
-    ctx.fillText(`Data source: uma.moe${note}`, 40, height - 22);
+    const note = data.historyNote ? `  ·  ${data.historyNote}` : '';
+    drawText(ctx, `Data source: uma.moe${note}`, MARGIN, height - 22, { spec: '400 12px', color: THEME.faint });
 
     return canvas.encode('png');
 }

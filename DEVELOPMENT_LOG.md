@@ -4,6 +4,54 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-09-19 — Visual restyle and richer reports
+
+### Direction
+
+Reference supplied by the user: uma-legends-cup's race tables. Monospace
+throughout, tracked uppercase headings, one accent (gold) for structure and
+targets, red reserved for a single meaning, warm near-black, placement tints on
+a left bar, em dashes for empty cells. Every renderer now sits on
+`src/lib/image/theme.ts`, which owns the palette and the text helpers.
+
+### Fonts
+
+IBM Plex Mono (Latin, digits) and IBM Plex Sans JP (CJK), bundled in
+`src/assets/fonts` and registered at import. One superfamily, so mixed-script
+rows read as a single face. Plex Mono's digits are tabular by nature; canvas
+cannot toggle `tnum`, so a proportional face would make numeric columns wobble.
+Details in `docs/fonts.md`.
+
+### Additions (no extra API calls; all derived from ingested data)
+
+**Fan report** — seven-day sparkline per member scaled to their own range, so
+it shows the shape of the week rather than magnitude; straight-line month-end
+projection per member and for the club; a club-wide progress bar with a tick
+at where the club *should* be today, so it reads as pace rather than
+accumulation. Club-level figures stay in millions throughout.
+
+**Trainer report** — rank and percentile in the circle, best single day this
+month, consecutive days at or above the daily quota, and the daily quota drawn
+as a guide line on the chart so each day is read against the target.
+
+**Benchmark** — the club overlaid as a fourth series, with its current
+fans/member/day and where that places it ("outside top 100"). Turns "what does
+it take" into "where are we".
+
+### Fixes found while restyling
+
+- Chart point labels collided with the legend when the peak sat at the top of
+  the plot. The plot now reserves headroom when point labels are on.
+- A patch script swapped a colour literal before a regex that matched on it,
+  leaving the club directory on the old gradient. Replaced with a flat fill.
+
+### Not restyled
+
+Rank tier badges and headcount bar colours on the club directory encode
+meaning (tier, fill level) and were left alone.
+
+---
+
 ## 2026-09-19 — Removed the session secret; commands self-register
 
 ### `DASHBOARD_SESSION_SECRET` is no longer required

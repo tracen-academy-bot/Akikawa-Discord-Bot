@@ -49,6 +49,8 @@ export interface ChartOptions {
     yAxisTitle?: string;
     /** Label for the x-axis, centred beneath it. */
     xAxisTitle?: string;
+    /** Horizontal guide lines, e.g. the daily quota a trainer must clear. */
+    referenceLines?: { value: number; label: string; color: string }[];
 }
 
 /** Gridline count. Five lines give four bands, which reads cleanly at this size. */
@@ -120,10 +122,14 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
     const plotX = x + Y_AXIS_WIDTH;
     const plotW = width - Y_AXIS_WIDTH;
     const legendHeight = options.legend ? 26 : 0;
-    const plotY = y + legendHeight;
-    const plotH = height - legendHeight - 26;
+    // Point labels sit 12px above their point; without this headroom the label
+    // on a point at the very top of the plot lands on the legend row.
+    const labelHeadroom = options.pointLabels ? 18 : 0;
+    const plotY = y + legendHeight + labelHeadroom;
+    const plotH = height - legendHeight - labelHeadroom - 26;
 
-    const all = series.flatMap((s) => s.values);
+    // Reference lines take part in scaling so a guide is never drawn off-plot.
+    const all = [...series.flatMap((s) => s.values), ...(options.referenceLines ?? []).map((r) => r.value)];
     const peak = all.length > 0 ? Math.max(...all) : 1;
     const trough = all.length > 0 ? Math.min(...all) : 0;
 
@@ -188,6 +194,20 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
 
         ctx.fillStyle = TEXT_FAINT;
         ctx.fillText(formatValue(value), plotX - 12, lineY);
+    }
+
+    // ── Reference lines ───────────────────────────────────────────────────────
+    for (const ref of options.referenceLines ?? []) {
+        const ry = valueToY(ref.value);
+        ctx.strokeStyle = ref.color;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 5]);
+        ctx.beginPath();
+        ctx.moveTo(plotX, ry);
+        ctx.lineTo(plotX + plotW, ry);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawLabel(ctx, ref.label, plotX + plotW, ry - 6, ref.color, 10, 'right');
     }
 
     // ── Series ────────────────────────────────────────────────────────────────

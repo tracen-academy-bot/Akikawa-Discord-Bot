@@ -2,6 +2,7 @@ import { createCanvas } from "@napi-rs/canvas";
 import { roundRect, drawRankBadge, drawClubIcon, RANK_COLORS } from './canvasUtils';
 import type { Club, ClubMember } from '@prisma/client';
 import { font } from './fonts';
+import { THEME } from './theme';
 
 interface StaffRow {
     role: 'Trainer' | 'Assistant';
@@ -21,20 +22,9 @@ export async function renderClubView(club: Club & { members: ClubMember[] }, sta
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    const bg = ctx.createLinearGradient(0, 0, width, height);
-    bg.addColorStop(0, '#1a1c2e');
-    bg.addColorStop(1, '#12131f');
-    ctx.fillStyle = bg;
-    roundRect(ctx, 0, 0, width, height, 24);
-    ctx.fill();
+    ctx.fillStyle = THEME.bg;
+    ctx.fillRect(0, 0, width, height);
 
-    ctx.save();
-    roundRect(ctx, 0, 0, width, height, 24);
-    ctx.clip();
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
 
     // Shared vertical center for both the club icon and the rank badge
     const headerCy = 90;
@@ -46,12 +36,12 @@ export async function renderClubView(club: Club & { members: ClubMember[] }, sta
     // Title + subtitle
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = THEME.text;
     ctx.font = font('bold 40px');
     ctx.fillText(club.name, 135, 78);
 
     ctx.font = font('22px');
-    ctx.fillStyle = '#9ba3b4';
+    ctx.fillStyle = THEME.muted;
     const fanCountText =
         club.fanCountAmount != null && club.fanCountPeriod
             ? `${club.fanCountAmount}M / ${club.fanCountPeriod.toLowerCase()}`
@@ -62,13 +52,13 @@ export async function renderClubView(club: Club & { members: ClubMember[] }, sta
     const badgeX = width - 130, badgeR = 46;
     await drawRankBadge(ctx, club.rank, badgeX, headerCy, badgeR, 34);
     ctx.font = font('13px');
-    ctx.fillStyle = '#6b7280';
+    ctx.fillStyle = THEME.faint;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText('RANK', badgeX, headerCy + badgeR + 20);
 
     // Divider
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = THEME.line;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(40, headerHeight - 40);
@@ -78,26 +68,26 @@ export async function renderClubView(club: Club & { members: ClubMember[] }, sta
     // Staff table header
     ctx.textAlign = 'left';
     ctx.font = font('bold 15px');
-    ctx.fillStyle = '#6b7280';
+    ctx.fillStyle = THEME.faint;
     ctx.fillText('ROLE', 60, headerHeight);
     ctx.fillText('MEMBER', 220, headerHeight);
 
     let rowY = headerHeight + tableHeaderHeight;
     if (rows.length === 0) {
         ctx.font = font('16px');
-        ctx.fillStyle = '#6b7280';
+        ctx.fillStyle = THEME.faint;
         ctx.fillText('No trainers or assistants assigned yet.', 60, rowY);
     } else {
         rows.forEach((row, i) => {
             if (i % 2 === 0) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+                ctx.fillStyle = THEME.bgRaised;
                 ctx.fillRect(40, rowY - 22, width - 80, 40);
             }
             ctx.font = font('bold 18px');
             ctx.fillStyle = row.role === 'Trainer' ? '#ffd166' : '#79c0ff';
             ctx.fillText(row.role, 60, rowY);
             ctx.font = font('18px');
-            ctx.fillStyle = '#e6e6e6';
+            ctx.fillStyle = THEME.text;
             ctx.fillText(row.name, 220, rowY);
             rowY += rowHeight;
         });
@@ -105,7 +95,7 @@ export async function renderClubView(club: Club & { members: ClubMember[] }, sta
 
     // Footer
     ctx.font = font('13px');
-    ctx.fillStyle = '#555b6e';
+    ctx.fillStyle = THEME.faint;
     ctx.textAlign = 'left';
     ctx.fillText(`Club ID: ${club.id}`, 40, height - 20);
 

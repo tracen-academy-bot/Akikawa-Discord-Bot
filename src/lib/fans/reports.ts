@@ -43,6 +43,8 @@ export async function buildTrainerReport(
     circle: TrackedCircle,
     viewerId: bigint,
     windowDays = TRAINER_WINDOW_DAYS,
+    /** Circle progress, when the caller has it; supplies rank and percentile. */
+    progress: CircleProgress | null = null,
 ): Promise<TrainerReportData | null> {
     const { year, month } = currentGameMonth();
 
@@ -86,7 +88,26 @@ export async function buildTrainerReport(
     const daysInMonth = daysInCalendarMonth(year, month);
     const quotaPerDay = Math.floor(toSafeNumber(circle.monthlyQuota) / daysInMonth);
 
+    // Whole-month figures, independent of the plotted window.
+    let bestDay: { label: string; gain: number } | null = null;
+    let aboveQuotaStreak = 0;
+    let streakOpen = true;
+    for (let day = lastDay; day >= 1; day -= 1) {
+        const gain = Math.max(0, (cumulative[day] ?? 0) - (cumulative[day - 1] ?? 0));
+        if (bestDay === null || gain > bestDay.gain) bestDay = { label: `Day ${day}`, gain };
+        // Counted from the latest day backwards; the first miss ends it.
+        if (streakOpen && gain >= quotaPerDay && quotaPerDay > 0) aboveQuotaStreak += 1;
+        else streakOpen = false;
+    }
+
+    const member = progress?.members.find((m) => m.viewerId === toSafeNumber(viewerId)) ?? null;
+
     return {
+        rankInCircle: member?.rank ?? null,
+        circleSize: progress?.members.length ?? null,
+        bestDay,
+        aboveQuotaStreak,
+        quotaPerDay,
         trainerName,
         circleName: circle.name,
         dailyGains,
@@ -101,9 +122,42 @@ export async function buildTrainerReport(
     };
 }
 
-/** Builds the benchmark view from the newest snapshot plus accumulated history. */
-export async function buildBenchmark(windowDays = TRAINER_WINDOW_DAYS): Promise<BenchmarkData> {
+/**
+ * The club's own fans-per-member-per-day by game day, for overlaying on the
+ * benchmark. Member count is taken per day, so a mid-month join or leave does
+ * not distort the rate for the days before it.
+ */
+async function clubRateByDay(circle: TrackedCircle): Promise<Record<number, number>> {
+    const { year, month } = currentGameMonth();
+    const rows = await prisma.fanSnapshot.groupBy({
+        by: ['day'],
+        where: { trackedCircleId: circle.id, year, month },
+        _sum: { cumulativeFans: true },
+        _count: { viewerId: true },
+    });
+
+    const rateByDay: Record<number, number> = {};
+    for (const row of rows) {
+        const sum = row._sum.cumulativeFans;
+        const count = row._count.viewerId;
+        if (sum === null || count === 0 || row.day === 0) continue;
+        rateByDay[row.day] = Math.floor(toSafeNumber(sum) / count / row.day);
+    }
+    return rateByDay;
+}
+
+/**
+ * Builds the benchmark view from the newest snapshot plus accumulated history.
+ *
+ * With a circle supplied, the club's own rate is overlaid so the chart answers
+ * "where are we" rather than only "what does it take".
+ */
+export async function buildBenchmark(
+    windowDays = TRAINER_WINDOW_DAYS,
+    circle: TrackedCircle | null = null,
+): Promise<BenchmarkData> {
     const history = await loadBenchmarkHistory(windowDays);
+    const club = circle ? { name: circle.name, rateByDay: await clubRateByDay(circle) } : null;
 
     const latest = await prisma.benchmarkSnapshot.findMany({
         orderBy: [{ year: 'desc' }, { month: 'desc' }, { day: 'desc' }],
@@ -124,6 +178,7 @@ export async function buildBenchmark(windowDays = TRAINER_WINDOW_DAYS): Promise<
         : [];
 
     return {
+        club,
         current,
         history: history.map((point) => ({
             label: `Day ${point.day}`,

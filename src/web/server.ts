@@ -16,7 +16,7 @@ import {
 } from './auth';
 import { csrfField, compact, esc, layout, loginPage, num, tile } from './views';
 import { currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
-import { buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
+import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
 import { toSafeNumber, type CircleProgress } from '../lib/fans/metrics';
 import { parseQuota } from '../commands/fans';
 import { renderFanReport } from '../lib/image/renderFanReport';
@@ -384,7 +384,7 @@ export function startDashboard(client: Client): () => void {
         if (!/^\d+$/.test(param(req, 'viewerId'))) return notFound(res, req.user, 'Invalid trainer ID.');
         const viewerId = BigInt(param(req, 'viewerId'));
 
-        const report = await buildTrainerReport(circle, viewerId, 30);
+        const report = await buildTrainerReport(circle, viewerId, 30, await currentCircleProgress(circle));
         if (!report) return notFound(res, req.user, 'No data for that trainer this month.');
 
         const link = await prisma.trainerLink.findFirst({ where: { guildId, viewerId } });
@@ -432,14 +432,18 @@ export function startDashboard(client: Client): () => void {
         const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
         if (!circle || !/^\d+$/.test(param(req, 'viewerId'))) return res.status(404).end();
 
-        const report = await buildTrainerReport(circle, BigInt(param(req, 'viewerId')));
+        const report = await buildTrainerReport(circle, BigInt(param(req, 'viewerId')), TRAINER_WINDOW_DAYS, await currentCircleProgress(circle));
         if (!report) return res.status(404).end();
         return sendPng(res, await renderTrainerReport(report));
     });
 
     // ── Benchmark ─────────────────────────────────────────────────────────────
+    /** First tracked circle for the guild, for the benchmark overlay. */
+    const overlayCircle = () =>
+        prisma.trackedCircle.findFirst({ where: { guildId, active: true }, orderBy: { createdAt: 'asc' } });
+
     app.get('/benchmark', requireLogin, async (req, res) => {
-        const data = await buildBenchmark();
+        const data = await buildBenchmark(TRAINER_WINDOW_DAYS, await overlayCircle());
         return res.send(
             layout({
                 title: 'Benchmark',
@@ -457,7 +461,7 @@ export function startDashboard(client: Client): () => void {
     });
 
     app.get('/benchmark.png', requireLogin, async (_req, res) =>
-        sendPng(res, await renderBenchmark(await buildBenchmark())),
+        sendPng(res, await renderBenchmark(await buildBenchmark(TRAINER_WINDOW_DAYS, await overlayCircle()))),
     );
 
     // ── Training ──────────────────────────────────────────────────────────────

@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { ClubRank } from '@prisma/client';
 import { font } from './fonts';
+import { THEME } from './theme';
 
 export function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number) {
     ctx.beginPath();
@@ -112,7 +113,7 @@ export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name:
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.lineWidth = Math.max(2, r / 20);
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.strokeStyle = THEME.line;
         ctx.stroke();
         return;
     }
@@ -123,7 +124,7 @@ export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name:
     ctx.fillStyle = color;
     ctx.fill();
     ctx.font = font(`bold ${labelFontSize}px`);
-    ctx.fillStyle = '#12131f';
+    ctx.fillStyle = THEME.bg;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(club.name[0]?.toUpperCase() ?? '?', cx, cy + 2);
