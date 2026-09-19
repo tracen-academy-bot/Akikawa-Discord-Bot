@@ -47,6 +47,20 @@ without checking, and coupling HTTP liveness to Discord readiness.
 Both newest migrations were replayed against a production-shaped database
 while diagnosing, to rule them out. They apply cleanly.
 
+### Correction to the diagnosis
+
+While waiting for the fix to deploy I read a second cause into the timing --
+a ~2-minute 502 window looked like the entrypoint's migration retry loop, so
+I proposed a stuck migration (P3009) on the production database. That was
+wrong. When the fix finally went live, `/healthz` showed migrations applied on
+attempt 1. The real reason the fix "wasn't working" was simpler: five pushes
+in 25 minutes, and Railway builds them sequentially at 3–5 minutes each, so
+the commit I was probing for had not been deployed yet. The gateway-hang root
+cause was correct; the migration theory was over-fitted to timing.
+
+The migration-in-process change stands regardless: it made `/healthz` show
+the answer directly, which is what ended the guessing.
+
 ### Also this session
 
 - CI added: Postgres service, migrate, typecheck, all suites, build, and a

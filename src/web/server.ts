@@ -1,7 +1,7 @@
 import express, { type Request, type Response } from 'express';
 import * as path from 'path';
 import cookieParser from 'cookie-parser';
-import type { Client } from 'discord.js';
+import { GatewayIntentBits, type Client } from 'discord.js';
 import { prisma } from '../db/prisma';
 import { migrationStatus } from '../lib/migrate';
 import {
@@ -160,10 +160,15 @@ function registerHealthCheck(app: express.Express, client: () => Client) {
         }
         const discord = client().isReady();
         const migrations = { ...migrationStatus };
+        // Whether the privileged GuildMembers intent was granted. False here
+        // with discord=true means the bot fell back to base intents and names
+        // will show as IDs until the portal toggle is enabled.
+        const memberIntent = client().options.intents.has(GatewayIntentBits.GuildMembers);
         res.json({
             ok: database && migrations.state === 'applied' && discord,
             database,
             discord,
+            memberIntent,
             migrations,
             commit,
         });
