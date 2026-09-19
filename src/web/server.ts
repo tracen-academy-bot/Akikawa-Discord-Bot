@@ -103,14 +103,79 @@ function memberRows(progress: CircleProgress, circleId: string): string {
         .join('');
 }
 
+/**
+ * Health check for the hosting platform.
+ *
+ * Deliberately unauthenticated and registered before every other route: the
+ * platform probes it without a session, and a probe that redirected to the
+ * login flow would be read as an unhealthy container and restart-loop the bot.
+ * It verifies the database too, so a deploy that cannot reach Postgres is
+ * reported as failed rather than silently serving errors.
+ *
+ * Served whether or not the dashboard is configured. The health of the bot --
+ * connected to Discord, database reachable -- is independent of whether
+ * someone has set up OAuth yet, and the platform's deploy gate must reflect
+ * the former, not the latter.
+ */
+function registerHealthCheck(app: express.Express, client: Client) {
+    app.get('/healthz', async (_req, res) => {
+        try {
+            await prisma.$queryRaw`SELECT 1`;
+            res.json({ ok: true, discord: client.isReady() });
+        } catch {
+            res.status(503).json({ ok: false, error: 'database unreachable' });
+        }
+    });
+}
+
+/** Port to bind, whether or not the dashboard is configured. */
+function resolvePort(): number {
+    return Number(process.env.PORT ?? process.env.DASHBOARD_PORT ?? 3000);
+}
+
+/**
+ * Minimal server for when the dashboard is not configured.
+ *
+ * Exists so the platform health check passes and a visitor to the public URL
+ * sees why there is no dashboard, instead of a bare 502. Without this, a bot
+ * that is fully working on Discord would fail its deploy gate purely for
+ * lacking an OAuth client secret.
+ */
+function startFallbackServer(client: Client, missing: string[]): () => void {
+    const app = express();
+    app.set('trust proxy', 1);
+    registerHealthCheck(app, client);
+
+    app.get('/', (_req, res) => {
+        res.status(503).send(
+            layout({
+                title: 'Dashboard not configured',
+                body: `<h1>Dashboard not configured</h1>
+          <p class="sub">The bot is running, but the dashboard needs these variables:</p>
+          <ul>${missing.map((m) => `<li><code>${esc(m)}</code></li>`).join('')}</ul>
+          <p class="sub">See <code>.env.example</code>. The bot's Discord features are unaffected.</p>`,
+            }),
+        );
+    });
+
+    app.use((_req, res) => res.status(404).end());
+
+    const port = resolvePort();
+    const server = app.listen(port, '0.0.0.0', () => {
+        console.log(`Health check listening on 0.0.0.0:${port} (dashboard disabled)`);
+    });
+    return () => server.close();
+}
+
 /** Builds and starts the dashboard. Returns null when it is not configured. */
-export function startDashboard(client: Client): (() => void) | null {
+export function startDashboard(client: Client): () => void {
     let config: WebConfig | null;
     try {
         config = loadWebConfig();
     } catch (e) {
-        console.error('Dashboard configuration is invalid:', e instanceof Error ? e.message : e);
-        return null;
+        const message = e instanceof Error ? e.message : String(e);
+        console.error('Dashboard configuration is invalid:', message);
+        return startFallbackServer(client, [message]);
     }
 
     if (!config) {
@@ -121,9 +186,9 @@ export function startDashboard(client: Client): (() => void) | null {
             !process.env.DISCORD_CLIENT_SECRET && 'DISCORD_CLIENT_SECRET (OAuth2 client secret, not the bot token)',
             !process.env.DASHBOARD_BASE_URL && !process.env.RAILWAY_PUBLIC_DOMAIN && 'DASHBOARD_BASE_URL (or a Railway public domain)',
             !process.env.DASHBOARD_GUILD_ID && !process.env.DEV_GUILD_ID && 'DASHBOARD_GUILD_ID (or DEV_GUILD_ID)',
-        ].filter(Boolean);
+        ].filter((m): m is string => Boolean(m));
         console.log(`Dashboard disabled. Missing: ${missing.join(', ')}.`);
-        return null;
+        return startFallbackServer(client, missing);
     }
 
     const cfg = config;
@@ -139,23 +204,7 @@ export function startDashboard(client: Client): (() => void) | null {
     const guildId = cfg.guildId;
     const csrf = (req: Request) => (req.user ? csrfToken(req.user, cfg.sessionSecret) : '');
 
-    /**
-     * Health check for the hosting platform.
-     *
-     * Deliberately unauthenticated and registered before every other route:
-     * the platform probes it without a session, and a probe that redirected to
-     * the login flow would be read as an unhealthy container and restart-loop
-     * the bot. It verifies the database too, so a deploy that cannot reach
-     * Postgres is reported as failed rather than silently serving errors.
-     */
-    app.get('/healthz', async (_req, res) => {
-        try {
-            await prisma.$queryRaw`SELECT 1`;
-            res.json({ ok: true, discord: client.isReady() });
-        } catch {
-            res.status(503).json({ ok: false, error: 'database unreachable' });
-        }
-    });
+    registerHealthCheck(app, client);
 
     // ── Auth ──────────────────────────────────────────────────────────────────
     app.get('/login', (req, res) => beginLogin(cfg, req, res));
