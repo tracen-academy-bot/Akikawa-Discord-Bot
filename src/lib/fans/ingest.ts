@@ -82,11 +82,17 @@ export async function syncCircle(circle: TrackedCircle, month?: number, year?: n
                     day: row.day,
                     cumulativeFans: BigInt(row.cumulativeFans),
                     shameScore: member.shame_score,
+                    previousCircleId: member.previous_circle_id === null ? null : BigInt(member.previous_circle_id),
+                    previousCircleName: member.previous_circle_name,
+                    nextMonthStart: member.next_month_start === null ? null : BigInt(member.next_month_start),
                 },
                 update: {
                     trainerName: member.trainer_name,
                     cumulativeFans: BigInt(row.cumulativeFans),
                     shameScore: member.shame_score,
+                    previousCircleId: member.previous_circle_id === null ? null : BigInt(member.previous_circle_id),
+                    previousCircleName: member.previous_circle_name,
+                    nextMonthStart: member.next_month_start === null ? null : BigInt(member.next_month_start),
                 },
             });
             daysWritten += 1;

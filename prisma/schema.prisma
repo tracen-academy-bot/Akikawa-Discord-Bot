@@ -180,6 +180,12 @@ model FanSnapshot {
     /// Cumulative fans at the end of that day, as reported by uma.moe.
     cumulativeFans BigInt
     shameScore     Int?
+    /// uma.moe's transfer signals for this member-month. A member who moved
+    /// in mid-month carries the circle they came from; these are what settle
+    /// how many days of quota a late joiner owes (see docs/quota-math.md).
+    previousCircleId   BigInt?
+    previousCircleName String?
+    nextMonthStart     BigInt?
     recordedAt     DateTime @default(now())
 
     circle TrackedCircle @relation(fields: [trackedCircleId], references: [id], onDelete: Cascade)

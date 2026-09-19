@@ -135,6 +135,14 @@ export const data = new SlashCommandBuilder()
             )
             .addSubcommand((sub) =>
                 sub
+                    .setName('debug')
+                    .setDescription('Dump per-member join facts for this month (for diagnosing quota day counts).')
+                    .addStringOption((opt) =>
+                        opt.setName('circle').setDescription('Tracked circle (defaults to the only one)').setAutocomplete(true),
+                    ),
+            )
+            .addSubcommand((sub) =>
+                sub
                     .setName('sync')
                     .setDescription('Pull the latest fan data from uma.moe now.')
                     .addStringOption((opt) =>
@@ -429,7 +437,79 @@ async function handleCircleGroup(interaction: ChatInputCommandInteraction, sub: 
         case 'sync':
             await handleCircleSync(interaction);
             break;
+        case 'debug':
+            await handleCircleDebug(interaction);
+            break;
     }
+}
+
+/**
+ * Per-member join facts for the current month, as a JSON attachment.
+ *
+ * Exists to settle one open question in the quota maths: for a member who
+ * transferred in mid-month, does the reference report count expectation from
+ * their first day with data, or from the day after? uma.moe's
+ * `previous_circle_id` marks a transfer, and the first non-zero day marks
+ * when their fans started counting here. One real dump of both is enough.
+ */
+async function handleCircleDebug(interaction: ChatInputCommandInteraction) {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+    const circle = await resolveCircle(interaction, false);
+    if (!circle) return;
+
+    const { year, month } = currentGameMonth();
+    const snapshots = await prisma.fanSnapshot.findMany({
+        where: { trackedCircleId: circle.id, year, month },
+        orderBy: [{ viewerId: 'asc' }, { day: 'asc' }],
+    });
+
+    if (snapshots.length === 0) {
+        await reply(interaction, errorEmbed(`No snapshots for **${circle.name}** this month. Run \`/fans circle sync\` first.`));
+        return;
+    }
+
+    type Fact = {
+        viewerId: string; name: string | null; firstDay: number; lastDay: number; dataDays: number;
+        previousCircleId: string | null; previousCircleName: string | null; nextMonthStart: string | null;
+        dailyFans: number[];
+    };
+    const byViewer = new Map<string, Fact>();
+    for (const s of snapshots) {
+        const key = s.viewerId.toString();
+        let f = byViewer.get(key);
+        if (!f) {
+            f = { viewerId: key, name: s.trainerName, firstDay: s.day, lastDay: s.day, dataDays: 0,
+                  previousCircleId: s.previousCircleId?.toString() ?? null, previousCircleName: s.previousCircleName,
+                  nextMonthStart: s.nextMonthStart?.toString() ?? null, dailyFans: [] };
+            byViewer.set(key, f);
+        }
+        f.firstDay = Math.min(f.firstDay, s.day);
+        f.lastDay = Math.max(f.lastDay, s.day);
+        f.dataDays += 1;
+        f.dailyFans[s.day - 1] = toSafeNumber(s.cumulativeFans);
+        if (s.trainerName) f.name = s.trainerName;
+    }
+
+    const facts = [...byViewer.values()];
+    const interesting = facts.filter((f) => f.firstDay > 1 || f.previousCircleId !== null);
+
+    const summary = interesting.length === 0
+        ? 'Every member has data from day 1 and no transfer marker; nothing here distinguishes the two hypotheses.'
+        : interesting.slice(0, 12).map((f) =>
+            `**${f.name ?? f.viewerId}** — first day ${f.firstDay}, ${f.dataDays} days of data` +
+            (f.previousCircleName ? `, from *${f.previousCircleName}*` : f.previousCircleId ? `, from circle ${f.previousCircleId}` : ''),
+          ).join('\n');
+
+    const file = new AttachmentBuilder(Buffer.from(JSON.stringify({ circle: circle.name, year, month, members: facts }, null, 2)), {
+        name: `circle-debug-${circle.circleId}-${year}-${String(month).padStart(2, '0')}.json`,
+    });
+
+    await interaction.editReply({
+        embeds: [infoEmbed(`${circle.name} — join facts, ${year}-${String(month).padStart(2, '0')}`,
+            `${facts.length} members, ${interesting.length} joined late or transferred in.\n\n${summary}\n\nFull dump attached.`)],
+        files: [file],
+    });
 }
 
 async function handleCircleAdd(interaction: ChatInputCommandInteraction) {
