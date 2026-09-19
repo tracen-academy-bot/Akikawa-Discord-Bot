@@ -118,12 +118,16 @@ function memberRows(progress: CircleProgress, circleId: string): string {
  * the former, not the latter.
  */
 function registerHealthCheck(app: express.Express, client: Client) {
+    // Railway injects the deployed commit; reporting it makes "which build is
+    // actually running" answerable with one curl instead of guesswork.
+    const commit = (process.env.RAILWAY_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT_SHA ?? 'unknown').slice(0, 7);
+
     app.get('/healthz', async (_req, res) => {
         try {
             await prisma.$queryRaw`SELECT 1`;
-            res.json({ ok: true, discord: client.isReady() });
+            res.json({ ok: true, discord: client.isReady(), commit });
         } catch {
-            res.status(503).json({ ok: false, error: 'database unreachable' });
+            res.status(503).json({ ok: false, error: 'database unreachable', commit });
         }
     });
 }
