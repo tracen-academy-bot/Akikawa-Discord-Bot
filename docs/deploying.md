@@ -50,13 +50,14 @@ The same file also sets:
    DISCORD_TOKEN=
    DISCORD_CLIENT_ID=
    DISCORD_CLIENT_SECRET=
-   DASHBOARD_SESSION_SECRET=      # openssl rand -hex 32
    DASHBOARD_GUILD_ID=
    OFFICER_ROLE_IDS=
    EXTERNAL_API_KEY=              # uma.moe
    ```
 
-   `DASHBOARD_BASE_URL` and `PORT` are **not** needed. The base URL is derived
+   `DASHBOARD_BASE_URL`, `DASHBOARD_SESSION_SECRET` and `PORT` are **not**
+   needed. The base URL comes from `RAILWAY_PUBLIC_DOMAIN`, the cookie-signing
+   key is derived from `DISCORD_TOKEN`, and Railway injects `PORT`. The base URL is derived
    from `RAILWAY_PUBLIC_DOMAIN`, and Railway injects `PORT` itself. Set
    `DASHBOARD_BASE_URL` only for a custom domain.
 

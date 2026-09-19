@@ -75,16 +75,13 @@ derived and verified.
 ## Dashboard
 
 Runs inside the bot process — no second container. Set `DISCORD_CLIENT_SECRET`,
-`DASHBOARD_BASE_URL`, `DASHBOARD_SESSION_SECRET` and `DASHBOARD_GUILD_ID` to
-enable it; leave them blank and the bot starts without it.
+`DASHBOARD_BASE_URL` and `DASHBOARD_GUILD_ID` to enable it; leave them blank
+and the bot starts without it. Session cookies are signed with a key derived
+from `DISCORD_TOKEN`, so no separate secret is needed.
 
 Add `<DASHBOARD_BASE_URL>/auth/callback` to your Discord application's OAuth2
 redirect URIs. Any guild member can read; only `OFFICER_ROLE_IDS` holders can
 change anything.
-
-```bash
-openssl rand -hex 32    # DASHBOARD_SESSION_SECRET
-```
 
 ## Tests
 

@@ -4,6 +4,35 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-09-19 — Removed the session secret; commands self-register
+
+### `DASHBOARD_SESSION_SECRET` is no longer required
+
+Asking an operator with no terminal to "generate 32 random bytes" was a bad
+requirement. The bot already holds a secret nobody else has — its Discord
+token — and anyone in possession of that token owns the bot outright, so
+deriving the cookie-signing key from it adds no new attack surface.
+
+The key is `HMAC-SHA256(DISCORD_TOKEN, "akikawa:dashboard-session:v1")`, not
+the raw token, so what ends up in cookie signatures cannot be replayed against
+Discord. Rotating the bot token rotates the key and signs everyone out, which
+is the right outcome. An explicit `DASHBOARD_SESSION_SECRET` still overrides
+the derivation, for anyone who wants sessions to survive a token rotation.
+
+Verified: dashboard starts without the variable; derived key is 64 hex chars,
+stable across loads, distinct per token, and not equal to the token; a cookie
+sealed with it verifies through the real app; explicit override wins.
+
+### Slash commands register on startup
+
+`npm run deploy-commands` from a developer's machine is no longer part of a
+deploy. The bot bulk-PUTs its command set on `ClientReady`, using the
+application ID from the logged-in client. Idempotent, so every boot simply
+re-asserts the set. Failure is logged, not fatal. The script remains for
+pushing commands without starting the bot.
+
+---
+
 ## 2026-09-17 — Hosting on Railway
 
 Everything runs in one process, so Railway needs two services: this repo and a

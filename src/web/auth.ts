@@ -63,11 +63,34 @@ export interface WebConfig {
  * Returns null when the dashboard is not configured, so the bot starts
  * normally without it rather than refusing to boot.
  */
+/**
+ * Derives the cookie-signing key from the bot token.
+ *
+ * The bot token is already a secret that only the bot holds, and anyone who
+ * has it owns the bot outright, so deriving from it adds no new attack
+ * surface. It spares the operator from generating and managing a second
+ * secret for the sole purpose of signing dashboard cookies.
+ *
+ * HMAC with a fixed context string, rather than the raw token, so the key
+ * that ends up in cookie signatures is not the token itself and cannot be
+ * used to talk to Discord if it were ever recovered. Rotating the bot token
+ * rotates this too, which simply signs everyone out -- the correct outcome.
+ */
+function deriveSessionSecret(botToken: string): string {
+    return createHmac('sha256', botToken).update('akikawa:dashboard-session:v1').digest('hex');
+}
+
 export function loadWebConfig(): WebConfig | null {
     const clientId = process.env.DISCORD_CLIENT_ID;
     const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-    const sessionSecret = process.env.DASHBOARD_SESSION_SECRET;
     const guildId = process.env.DASHBOARD_GUILD_ID;
+    const botToken = process.env.DISCORD_TOKEN;
+
+    // An explicit secret is honoured, but none is required: absent one, the key
+    // is derived from the bot token, which is already present and already
+    // secret. See deriveSessionSecret.
+    const sessionSecret =
+        process.env.DASHBOARD_SESSION_SECRET || (botToken ? deriveSessionSecret(botToken) : undefined);
 
     // Platform-as-a-service hosts assign the public URL themselves. Railway
     // exposes it as RAILWAY_PUBLIC_DOMAIN (host only, no scheme), so the base
@@ -83,7 +106,7 @@ export function loadWebConfig(): WebConfig | null {
     if (sessionSecret.length < 32) {
         throw new Error(
             'DASHBOARD_SESSION_SECRET must be at least 32 characters. ' +
-                'Generate one with: openssl rand -hex 32',
+                'Leave it unset to derive one from the bot token automatically.',
         );
     }
 
