@@ -4,6 +4,60 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-09-19 — Incident: restart loop after enabling the GuildMembers intent
+
+### What happened
+
+Requesting the `GuildMembers` intent took the bot offline. It is a privileged
+intent that must also be enabled in the Discord developer portal; it was not,
+so Discord refused the gateway connection. Two follow-up fixes ("exit with a
+clear message", then "fall back to base intents") both changed nothing,
+because both keyed off `client.login()` rejecting — and it never does.
+
+### Root cause
+
+`discord.js/src/client/websocket/WebSocketManager.js`, lines 249–259: on an
+unrecoverable close code (4014 DisallowedIntents among them) the manager sets
+the shard to `Disconnected`, emits `shardDisconnect`, logs at debug level, and
+**returns**. No throw, no rejection, no `ready`. The process sat un-ready
+forever. The dashboard — and with it `/healthz` — was started inside the
+`ClientReady` handler, so nothing ever bound the port. Railway's health check
+failed after 300 s, the container was killed and restarted, and the public URL
+alternated between a hard timeout and a 502 indefinitely.
+
+Two independent mistakes compounded: assuming a library rejects on failure
+without checking, and coupling HTTP liveness to Discord readiness.
+
+### Fix
+
+- `src/lib/startup.ts`: `waitForConnectOutcome(client)` listens for `ready`
+  and for unrecoverable `shardDisconnect` codes and resolves to `ready`,
+  `disallowed-intents` or `fatal`. Recoverable blips are ignored.
+- `start()` races that against `login()`. On `disallowed-intents` it destroys
+  the client, logs the exact portal path, and reconnects with the base
+  intents. On `fatal` it exits naming the token.
+- The dashboard starts **before** any login, bound to a getter for the current
+  client. `/healthz` answers from the first second and reports
+  `discord: false` until the gateway is up. A Discord failure now degrades one
+  feature instead of taking the container down.
+- Tested without a network by driving a bare `Client`'s emitter (8 assertions,
+  including that the helper's listener is removed on settle, measured against
+  discord.js's own baseline listener).
+
+Both newest migrations were replayed against a production-shaped database
+while diagnosing, to rule them out. They apply cleanly.
+
+### Also this session
+
+- CI added: Postgres service, migrate, typecheck, all suites, build, and a
+  Docker image build with a font-registration smoke test inside the image. The
+  first run proved the Dockerfile builds; the only failure was the smoke test
+  running through the migration entrypoint, fixed with `--entrypoint node`.
+- `/fans circle debug` and stored transfer signals, for the late-joiner
+  question.
+
+---
+
 ## 2026-09-19 — Dashboard retheme, training heatmap, monthly rank
 
 ### Dashboard
