@@ -1,4 +1,5 @@
 import express, { type Request, type Response } from 'express';
+import * as path from 'path';
 import cookieParser from 'cookie-parser';
 import type { Client } from 'discord.js';
 import { prisma } from '../db/prisma';
@@ -14,9 +15,9 @@ import {
     verifyCsrf,
     type WebConfig,
 } from './auth';
-import { csrfField, compact, esc, layout, loginPage, num, tile } from './views';
-import { currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
-import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
+import { csrfField, compact, dash, esc, layout, loginPage, monthPicker, num, tile } from './views';
+import { currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle } from '../lib/fans/ingest';
+import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate, listCircleMonths } from '../lib/fans/reports';
 import { toSafeNumber, type CircleProgress } from '../lib/fans/metrics';
 import { parseQuota } from '../commands/fans';
 import { renderFanReport } from '../lib/image/renderFanReport';
@@ -70,6 +71,24 @@ function notFound(res: Response, user: Request['user'], message: string) {
     );
 }
 
+/** Bundled fonts, served to the browser so the dashboard matches the images. */
+const FONT_DIR = path.join(__dirname, '..', 'assets', 'fonts');
+
+/**
+ * Game month selected by `?year=&month=`, falling back to the current one.
+ * Out-of-range values fall back rather than erroring: a mistyped URL should
+ * show this month, not a 400.
+ */
+function selectedMonth(req: Request): { year: number; month: number } {
+    const current = currentGameMonth();
+    const year = Number(req.query.year);
+    const month = Number(req.query.month);
+    if (Number.isInteger(year) && year >= 2020 && year <= 2100 && Number.isInteger(month) && month >= 1 && month <= 12) {
+        return { year, month };
+    }
+    return { year: current.year, month: current.month };
+}
+
 /** Reads a one-shot status message passed back after a redirect. */
 function flash(req: Request): string {
     const ok = typeof req.query.ok === 'string' ? req.query.ok : null;
@@ -86,18 +105,22 @@ function memberRows(progress: CircleProgress, circleId: string): string {
             const movement =
                 m.rankChange === null || m.rankChange === 0
                     ? ''
-                    : `<span class="${m.rankChange > 0 ? 'good' : 'bad'}">${m.rankChange > 0 ? '↑' : '↓'}${Math.abs(m.rankChange)}</span>`;
+                    : ` <span class="${m.rankChange > 0 ? 'gold' : 'red'}">${m.rankChange > 0 ? '\u2191' : '\u2193'}${Math.abs(m.rankChange)}</span>`;
+            // Row class drives the left bar: placement tint for the top four,
+            // red for anyone behind, nothing otherwise.
+            const cls = m.rank <= 4 ? `p${m.rank}` : m.onPace ? '' : 'behind';
+            const projTone = m.projectedTotal >= progress.effectiveQuota ? 'green' : m.onPace ? 'muted' : 'red';
 
-            return `<tr>
-        <td class="faint">${m.rank} ${movement}</td>
-        <td><a href="/circles/${esc(circleId)}/trainers/${m.viewerId}">${esc(m.trainerName)}</a></td>
+            return `<tr class="${cls}">
+        <td class="faint" data-value="${m.rank}">${m.rank}${movement}</td>
+        <td class="name"><a href="/circles/${esc(circleId)}/trainers/${m.viewerId}">${esc(m.trainerName)}</a></td>
         <td class="right"><strong>${num(m.total)}</strong></td>
         <td class="right faint">${num(m.expected)}</td>
-        <td class="right ${m.behind > 0 ? 'bad' : ''}">${m.behind > 0 ? num(m.behind) : ''}</td>
+        <td class="right ${m.behind > 0 ? 'red' : 'faint'}">${dash(m.behind > 0 ? m.behind : null)}</td>
         <td class="right muted">${num(m.avgPerDay)}</td>
-        <td class="right ${m.needPerDay !== null ? 'warn' : ''}">${m.needPerDay !== null ? num(m.needPerDay) : ''}</td>
+        <td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>
         <td class="right muted">${num(m.latestDayGain)}</td>
-        <td class="right"><span class="dot ${m.onPace ? 'ok' : 'behind'}"></span></td>
+        <td class="right ${projTone}">${compact(m.projectedTotal)}</td>
       </tr>`;
         })
         .join('');
@@ -201,6 +224,7 @@ export function startDashboard(client: Client): () => void {
     // Behind a reverse proxy, trust its forwarded headers so redirects and
     // secure-cookie decisions use the external scheme, not the internal one.
     app.set('trust proxy', 1);
+    app.use('/fonts', express.static(FONT_DIR, { maxAge: '30d', immutable: true, fallthrough: false }));
     app.use(cookieParser());
     app.use(express.urlencoded({ extended: false }));
     app.use(sessionMiddleware(cfg));
@@ -244,9 +268,9 @@ export function startDashboard(client: Client): () => void {
                     Quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} / member / month<br>
                     ${progress ? `${progress.members.length} members · day ${progress.daysElapsed}/${progress.daysInMonth}` : 'No data ingested yet'}
                   </div>
-                  <div style="margin-top:12px;display:flex;gap:18px">
-                    <div><div class="label faint" style="font-size:11px">TOTAL</div><strong>${esc(compact(total))}</strong></div>
-                    <div><div class="label faint" style="font-size:11px">BEHIND</div><strong class="${behind > 0 ? 'bad' : 'good'}">${behind}</strong></div>
+                  <div style="margin-top:12px;display:flex;gap:24px">
+                    <div><div class="label">Total</div><strong>${esc(compact(total))}</strong></div>
+                    <div><div class="label">Behind</div><strong class="${behind > 0 ? 'red' : 'green'}">${behind}</strong></div>
                   </div>
                 </a>`;
             }),
@@ -294,8 +318,10 @@ export function startDashboard(client: Client): () => void {
         const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
         if (!circle) return notFound(res, req.user, 'That circle is not tracked.');
 
-        const progress = await currentCircleProgress(circle);
-        const { year, month } = currentGameMonth();
+        const { year, month } = selectedMonth(req);
+        const progress = await loadCircleProgress(circle, year, month);
+        const months = await listCircleMonths(circle);
+        const picker = monthPicker(`/circles/${circle.id}`, months, { year, month });
 
         const admin = req.user?.isOfficer
             ? `<h2>Settings</h2>
@@ -324,11 +350,9 @@ export function startDashboard(client: Client): () => void {
                 user: req.user,
                 body: `${flash(req)}
           <h1>${esc(circle.name)}</h1>
-          <p class="sub">
-            Circle <code>${esc(String(circle.circleId))}</code> ·
-            Quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} per member per month ·
-            Last sync ${circle.lastSyncedAt ? esc(circle.lastSyncedAt.toUTCString()) : 'never'}
-          </p>
+          <p class="sub gold">day ${progress?.daysElapsed ?? 0} of ${progress?.daysInMonth ?? '\u2014'} · quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} per member · ${progress ? esc(compact(progress.quotaPerDay)) : '\u2014'}/day</p>
+          <p class="sub">circle <code>${esc(String(circle.circleId))}</code> · last sync ${circle.lastSyncedAt ? esc(circle.lastSyncedAt.toUTCString()) : 'never'}</p>
+          ${picker}
           ${
               progress
                   ? `<div class="tiles">
@@ -339,17 +363,17 @@ export function startDashboard(client: Client): () => void {
                  </div>
                  <h2>Members</h2>
                  <div class="panel">
-                   <table>
+                   <table data-sortable>
                      <thead><tr>
-                       <th>#</th><th>Trainer</th><th class="right">Total</th><th class="right">Expected</th>
-                       <th class="right">Behind</th><th class="right">Avg/Day</th><th class="right">Need/Day</th>
-                       <th class="right">Day ${progress.daysElapsed}</th><th></th>
+                       <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Total</th><th class="right" data-sort>Expected</th>
+                       <th class="right" data-sort>Behind</th><th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Need/Day</th>
+                       <th class="right" data-sort>Day ${progress.daysElapsed}</th><th class="right" data-sort>Proj.</th>
                      </tr></thead>
                      <tbody>${memberRows(progress, circle.id)}</tbody>
                    </table>
                  </div>
                  <h2>Report image</h2>
-                 <img class="report" src="/circles/${esc(circle.id)}/report.png" alt="Fan quota report">`
+                 <img class="report" src="/circles/${esc(circle.id)}/report.png?year=${year}&month=${month}" alt="Fan quota report">`
                   : `<div class="panel"><div class="empty">No fan data ingested yet.${req.user?.isOfficer ? ' Use “Sync now” below.' : ''}</div></div>`
           }
           ${admin}`,
@@ -361,15 +385,15 @@ export function startDashboard(client: Client): () => void {
         const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
         if (!circle) return res.status(404).end();
 
-        const progress = await currentCircleProgress(circle);
+        const { year, month } = selectedMonth(req);
+        const progress = await loadCircleProgress(circle, year, month);
         if (!progress) return res.status(404).end();
 
-        const { year, month } = currentGameMonth();
         return sendPng(
             res,
             await renderFanReport(progress, {
                 circleName: circle.name,
-                monthlyRank: null,
+                monthlyRank: circle.monthlyRank,
                 memberCount: progress.members.length,
                 dateLabel: formatReportDate(year, month, progress.daysElapsed),
             }),
@@ -474,10 +498,15 @@ export function startDashboard(client: Client): () => void {
         const context = await getPanelContext(guildId);
         const active = await prisma.trainingTimer.findMany({ where: { guildId }, orderBy: { expiresAt: 'asc' } });
 
+        // Same resolution the leaderboard image uses: the bot's member cache,
+        // falling back to the ID for anyone not cached.
+        const guild = client.guilds.cache.get(guildId);
+        const nameOf = (id: string) => guild?.members.cache.get(id)?.displayName ?? id;
+
         const body = rows
             .map(
                 (r, i) =>
-                    `<tr><td class="faint">${i + 1}</td><td><code>${esc(r.discordUserId)}</code></td>
+                    `<tr class="${i < 4 ? `p${i + 1}` : ''}"><td class="faint" data-value="${i + 1}">${i + 1}</td><td class="name">${esc(nameOf(r.discordUserId))}</td>
            <td class="right"><strong>${num(r.runs)}</strong></td>
            <td class="right muted">${Math.floor(r.minutes / 60)}h ${r.minutes % 60}m</td></tr>`,
             )
@@ -500,7 +529,7 @@ export function startDashboard(client: Client): () => void {
             ${valid.map((p) => `<a href="/timer?period=${p}" ${p === selected ? 'style="color:var(--text)"' : ''}>${p === 'all' ? 'All time' : p === 'week' ? 'Last 7 days' : 'Last 30 days'}</a>`).join(' · ')}
           </p>
           <div class="panel">
-            ${rows.length === 0 ? '<div class="empty">No runs recorded in this period.</div>' : `<table><thead><tr><th>#</th><th>Discord user</th><th class="right">Runs</th><th class="right">Time</th></tr></thead><tbody>${body}</tbody></table>`}
+            ${rows.length === 0 ? '<div class="empty">No runs recorded in this period.</div>' : `<table data-sortable><thead><tr><th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Runs</th><th class="right" data-sort>Time</th></tr></thead><tbody>${body}</tbody></table>`}
           </div>`,
             }),
         );

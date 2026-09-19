@@ -58,7 +58,7 @@ async function postReport(client: Client, circleId: string): Promise<void> {
     const { year, month } = currentGameMonth();
     const buffer = await renderFanReport(progress, {
         circleName: circle.name,
-        monthlyRank: null,
+        monthlyRank: circle.monthlyRank,
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, progress.daysElapsed),
     });

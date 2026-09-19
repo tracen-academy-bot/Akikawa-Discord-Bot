@@ -131,6 +131,8 @@ model TrackedCircle {
     reportChannelId String?
     /// Where behind-quota alerts are posted. May be a thread.
     alertChannelId  String?
+    /// uma.moe monthly rank at the last sync. Shown in report headers.
+    monthlyRank     Int?
     /// Paused circles are kept but skipped by the sync job.
     active          Boolean   @default(true)
     lastSyncedAt    DateTime?

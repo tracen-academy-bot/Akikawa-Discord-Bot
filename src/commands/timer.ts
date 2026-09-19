@@ -19,6 +19,7 @@ import {
 import {
     TRAINING_MINUTES,
     getDailyRunCounts,
+    getHourlyHeatmap,
     getLeaderboard,
     getPanelContext,
     getTrainerStats,
@@ -129,13 +130,14 @@ async function handleStats(interaction: ChatInputCommandInteraction) {
 
     const guildId = interaction.guildId!;
     const target = interaction.options.getUser('trainer') ?? interaction.user;
-    const [stats, series] = await Promise.all([
+    const [stats, series, heatmap] = await Promise.all([
         getTrainerStats(guildId, target.id),
         getDailyRunCounts(guildId, target.id),
+        getHourlyHeatmap(guildId, target.id),
     ]);
 
     const displayName = await resolveDisplayName(interaction, target.id, target.username);
-    const buffer = await renderTimerStats(displayName, stats, series);
+    const buffer = await renderTimerStats(displayName, stats, series, heatmap);
 
     await interaction.editReply({
         files: [new AttachmentBuilder(buffer, { name: `training-${target.id}.png` })],
@@ -229,12 +231,13 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
         case BUTTON_STATS: {
             // Ephemeral so a busy panel is not buried under stat cards.
             await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-            const [stats, series] = await Promise.all([
+            const [stats, series, heatmap] = await Promise.all([
                 getTrainerStats(guildId, interaction.user.id),
                 getDailyRunCounts(guildId, interaction.user.id),
+                getHourlyHeatmap(guildId, interaction.user.id),
             ]);
             const displayName = await resolveDisplayName(interaction, interaction.user.id, interaction.user.username);
-            const buffer = await renderTimerStats(displayName, stats, series);
+            const buffer = await renderTimerStats(displayName, stats, series, heatmap);
             await interaction.editReply({
                 files: [new AttachmentBuilder(buffer, { name: 'training-stats.png' })],
             });

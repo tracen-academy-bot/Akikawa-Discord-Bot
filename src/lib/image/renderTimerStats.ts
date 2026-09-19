@@ -1,7 +1,7 @@
 import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
 import { THEME, drawLabel, drawRule, drawText } from './theme';
 import { drawTileRow, type Tile } from './tiles';
-import type { DailyRunCount, TrainerStats } from '../timer/service';
+import type { DailyRunCount, HourlyHeatmap, TrainerStats } from '../timer/service';
 
 /**
  * A trainer's Independent Training statistics card.
@@ -57,11 +57,59 @@ function drawHistory(ctx: SKRSContext2D, series: DailyRunCount[], x: number, y: 
     });
 }
 
-export async function renderTimerStats(displayName: string, stats: TrainerStats, series: DailyRunCount[]): Promise<Buffer> {
+/**
+ * Hour-of-week heatmap: when this trainer actually trains.
+ *
+ * Intensity is gold at increasing opacity against the theme background;
+ * empty cells keep a faint outline so the grid stays readable when sparse.
+ */
+function drawHeatmap(ctx: SKRSContext2D, heatmap: HourlyHeatmap, x: number, y: number, w: number) {
+    drawLabel(ctx, `When you train \u00b7 last ${heatmap.days} days`, x, y - 14, THEME.gold, 11);
+
+    const labelW = 34;
+    const cellGap = 2;
+    const cellW = (w - labelW - cellGap * 23) / 24;
+    const cellH = 14;
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    days.forEach((day, r) => {
+        const rowY = y + r * (cellH + cellGap);
+        drawText(ctx, day, x + labelW - 10, rowY + cellH - 3, { spec: '400 10px', color: THEME.faint, align: 'right' });
+        for (let h = 0; h < 24; h += 1) {
+            const count = heatmap.grid[r]?.[h] ?? 0;
+            const cx = x + labelW + h * (cellW + cellGap);
+            if (count === 0) {
+                ctx.fillStyle = THEME.line;
+                ctx.fillRect(cx, rowY, cellW, cellH);
+                continue;
+            }
+            const alpha = heatmap.max > 0 ? 0.25 + 0.75 * (count / heatmap.max) : 1;
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = THEME.gold;
+            ctx.fillRect(cx, rowY, cellW, cellH);
+            ctx.globalAlpha = 1;
+        }
+    });
+
+    const axisY = y + 7 * (cellH + cellGap) + 14;
+    for (let h = 0; h < 24; h += 3) {
+        const cx = x + labelW + h * (cellW + cellGap);
+        drawText(ctx, `${String(h).padStart(2, '0')}`, cx, axisY, { spec: '400 10px', color: THEME.faint });
+    }
+    drawText(ctx, 'JST', x + w, axisY, { spec: '400 10px', color: THEME.faint, align: 'right' });
+}
+
+export async function renderTimerStats(
+    displayName: string,
+    stats: TrainerStats,
+    series: DailyRunCount[],
+    heatmap: HourlyHeatmap,
+): Promise<Buffer> {
     const headerHeight = 104;
     const tileHeight = 104;
     const chartHeight = 190;
-    const height = headerHeight + tileHeight + chartHeight + 156;
+    const heatmapHeight = 7 * 16 + 30;
+    const height = headerHeight + tileHeight + chartHeight + heatmapHeight + 150;
 
     const canvas = createCanvas(WIDTH, height);
     const ctx = canvas.getContext('2d');
@@ -93,6 +141,7 @@ export async function renderTimerStats(displayName: string, stats: TrainerStats,
     drawTileRow(ctx, tiles, MARGIN, headerHeight + 12, WIDTH - MARGIN * 2, tileHeight);
 
     drawHistory(ctx, series, MARGIN, headerHeight + tileHeight + 70, WIDTH - MARGIN * 2, chartHeight);
+    drawHeatmap(ctx, heatmap, MARGIN, headerHeight + tileHeight + chartHeight + 140, WIDTH - MARGIN * 2);
 
     return canvas.encode('png');
 }

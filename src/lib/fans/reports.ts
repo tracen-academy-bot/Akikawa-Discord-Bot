@@ -16,6 +16,16 @@ import type { BenchmarkData } from '../image/renderBenchmark';
 /** Default number of days plotted on a trainer report. */
 export const TRAINER_WINDOW_DAYS = 14;
 
+/** Months a circle has snapshots for, newest first. */
+export async function listCircleMonths(circle: TrackedCircle): Promise<{ year: number; month: number }[]> {
+    const rows = await prisma.fanSnapshot.groupBy({
+        by: ['year', 'month'],
+        where: { trackedCircleId: circle.id },
+        orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    });
+    return rows.map((r) => ({ year: r.year, month: r.month }));
+}
+
 /** Circle progress for the current game month, or null if nothing is ingested. */
 export async function currentCircleProgress(circle: TrackedCircle): Promise<CircleProgress | null> {
     const { year, month } = currentGameMonth();

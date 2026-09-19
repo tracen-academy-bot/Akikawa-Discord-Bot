@@ -421,3 +421,54 @@ export async function getDailyRunCounts(
     }
     return series;
 }
+
+/** Runs bucketed by weekday and hour, for the training-time heatmap. */
+export interface HourlyHeatmap {
+    /** `grid[weekday][hour]`, weekday 0 = Monday through 6 = Sunday, hour 0-23. */
+    grid: number[][];
+    /** Highest cell count, for scaling. */
+    max: number;
+    /** Total runs counted. */
+    total: number;
+    /** Window covered, in days. */
+    days: number;
+}
+
+/**
+ * Buckets completed runs by weekday and hour in the streak timezone.
+ *
+ * Uses the run's completion time and the same timezone as streaks, so a run
+ * that finished at 00:30 JST on Tuesday lands on Tuesday, not on the Monday
+ * the UTC clock would report. This is the difference between a heatmap that
+ * shows when people actually train and one that is offset by nine hours.
+ */
+export async function getHourlyHeatmap(guildId: string, discordUserId: string | null, days = 28): Promise<HourlyHeatmap> {
+    const since = new Date(Date.now() - days * 86_400_000);
+    const runs = await prisma.trainingRun.findMany({
+        where: { guildId, ...(discordUserId ? { discordUserId } : {}), completedAt: { gte: since } },
+        select: { completedAt: true },
+    });
+
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: STREAK_TIMEZONE,
+        weekday: 'short',
+        hour: '2-digit',
+        hourCycle: 'h23',
+    });
+    const weekdayIndex: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
+
+    const grid = Array.from({ length: 7 }, () => new Array<number>(24).fill(0));
+    let max = 0;
+
+    for (const run of runs) {
+        const parts = formatter.formatToParts(run.completedAt);
+        const weekday = weekdayIndex[parts.find((p) => p.type === 'weekday')?.value ?? ''];
+        const hour = Number(parts.find((p) => p.type === 'hour')?.value);
+        if (weekday === undefined || !Number.isInteger(hour) || hour < 0 || hour > 23) continue;
+        const row = grid[weekday]!;
+        row[hour] = (row[hour] ?? 0) + 1;
+        if (row[hour]! > max) max = row[hour]!;
+    }
+
+    return { grid, max, total: runs.length, days };
+}

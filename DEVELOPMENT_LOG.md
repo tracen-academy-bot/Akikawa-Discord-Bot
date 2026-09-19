@@ -4,6 +4,41 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-09-19 — Dashboard retheme, training heatmap, monthly rank
+
+### Dashboard
+
+Moved onto the same system as the rendered images: IBM Plex served to the
+browser from the bundled files via `/fonts`, the theme palette in CSS,
+tracked uppercase headings, flat hairline panels, placement tints and the
+"behind" bar as a left border on table rows, em dashes for empty cells.
+
+Added: sortable tables (a tiny dependency-free script; numeric cells compare
+as numbers after stripping separators, dashes sort last), a month picker on
+the circle page backed by `listCircleMonths`, and the projected column. The
+training table now resolves display names through the bot's member cache
+rather than printing raw IDs.
+
+Verified by driving the real app in headless Chromium against seeded data and
+inspecting every page. Playwright is installed with `--no-save` for that, so
+it stays out of `package.json`.
+
+### Training heatmap
+
+`getHourlyHeatmap` buckets completed runs by weekday and hour in the streak
+timezone; the stats card draws it as a 7×24 grid under the bar chart. Tested
+with runs that cross the date line: Monday 15:30 UTC lands on Tuesday 00h JST,
+Sunday 14:00 UTC on Sunday 23h JST. Without that, the heatmap would be offset
+by nine hours and show people training at times they were asleep.
+
+### Monthly rank
+
+`syncCircle` received uma.moe's `monthly_rank` and discarded it, so every
+report header read "UNRANKED". Stored on `TrackedCircle` (nullable, additive
+migration) and passed to all three render sites.
+
+---
+
 ## 2026-09-19 — Visual restyle and richer reports
 
 ### Direction

@@ -95,7 +95,7 @@ export async function syncCircle(circle: TrackedCircle, month?: number, year?: n
 
     await prisma.trackedCircle.update({
         where: { id: circle.id },
-        data: { name: response.circle.name, lastSyncedAt: new Date() },
+        data: { name: response.circle.name, monthlyRank: response.circle.monthly_rank, lastSyncedAt: new Date() },
     });
 
     return {

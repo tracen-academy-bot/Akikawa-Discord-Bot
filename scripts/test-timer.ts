@@ -8,7 +8,7 @@
  *   DATABASE_URL=postgresql://... npm run test:timer
  */
 import { prisma } from '../src/db/prisma';
-import { getTrainerStats, getLeaderboard, startTimer, claimExpiredTimers, recordRun, stopTimer }
+import { getTrainerStats, getLeaderboard, startTimer, claimExpiredTimers, recordRun, stopTimer, getHourlyHeatmap }
     from '../src/lib/timer/service';
 
 const G = 'test-guild';
@@ -128,6 +128,19 @@ async function main() {
         where: { guildId: G, discordUserId: 'u_life' }, select: { deliveryLagS: true },
     });
     check('delivery lag recorded (~1800s)', Math.abs((lag?.deliveryLagS ?? 0) - 1800) < 10, true);
+
+    // ── Heatmap bucketing in JST ──────────────────────────────────────────
+    // Monday 15:30 UTC is Tuesday 00:30 JST; Sunday 14:00 UTC is Sunday 23:00 JST.
+    await prisma.trainingRun.deleteMany({ where: { guildId: G, discordUserId: 'u_heat' } });
+    for (const iso of ['2026-09-14T15:30:00Z', '2026-09-13T14:00:00Z', '2026-09-13T14:20:00Z']) {
+        const at = new Date(iso);
+        await prisma.trainingRun.create({ data: { guildId: G, discordUserId: 'u_heat', startedAt: at, completedAt: at } });
+    }
+    const heat = await getHourlyHeatmap(G, 'u_heat', 3650);
+    check('heatmap: Mon 15:30 UTC lands on Tue 00h JST', heat.grid[1]?.[0], 1);
+    check('heatmap: Sun 14:00 UTC lands on Sun 23h JST', heat.grid[6]?.[23], 2);
+    check('heatmap: nothing on the UTC weekday/hour', heat.grid[0]?.[15], 0);
+    check('heatmap: max and total', [heat.max, heat.total], [2, 3]);
 
     await prisma.trainingRun.deleteMany({ where: { guildId: G } });
     await prisma.trainingTimer.deleteMany({ where: { guildId: G } });
