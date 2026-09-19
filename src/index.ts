@@ -15,6 +15,7 @@ import { startFanScheduler } from './lib/fans/scheduler';
 import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
 import { waitForConnectOutcome } from './lib/startup';
+import { runMigrations } from './lib/migrate';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 
 /**
@@ -246,6 +247,12 @@ async function start(): Promise<void> {
     // the data. Disabled unless configured, but the health check is always
     // served. Bound to a getter: see (2) above.
     startDashboard(() => current);
+
+    // Migrations run here, after the port is bound, so their progress and any
+    // failure are visible on /healthz. This resolves only once they apply;
+    // until then the bot does not touch Discord, because commands against an
+    // unmigrated schema would fail anyway.
+    await runMigrations();
 
     const fatal = (message: string, e?: unknown): never => {
         console.error(`FATAL: ${message}`, e instanceof Error ? e.message : (e ?? ''));

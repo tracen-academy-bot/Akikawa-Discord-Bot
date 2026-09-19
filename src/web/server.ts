@@ -3,6 +3,7 @@ import * as path from 'path';
 import cookieParser from 'cookie-parser';
 import type { Client } from 'discord.js';
 import { prisma } from '../db/prisma';
+import { migrationStatus } from '../lib/migrate';
 import {
     beginLogin,
     completeLogin,
@@ -145,13 +146,27 @@ function registerHealthCheck(app: express.Express, client: () => Client) {
     // actually running" answerable with one curl instead of guesswork.
     const commit = (process.env.RAILWAY_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT_SHA ?? 'unknown').slice(0, 7);
 
+    // Always 200 once the server is up: this is a liveness signal for the
+    // host. Readiness -- database reachable, migrations applied, gateway
+    // connected -- is in the body, so a stuck deploy is diagnosable from a
+    // browser instead of restarting forever while the cause stays hidden.
     app.get('/healthz', async (_req, res) => {
+        let database = false;
         try {
             await prisma.$queryRaw`SELECT 1`;
-            res.json({ ok: true, discord: client().isReady(), commit });
+            database = true;
         } catch {
-            res.status(503).json({ ok: false, error: 'database unreachable', commit });
+            database = false;
         }
+        const discord = client().isReady();
+        const migrations = { ...migrationStatus };
+        res.json({
+            ok: database && migrations.state === 'applied' && discord,
+            database,
+            discord,
+            migrations,
+            commit,
+        });
     });
 }
 

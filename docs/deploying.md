@@ -129,14 +129,20 @@ gateway has not connected — usually a bad `DISCORD_TOKEN`.
 The deploy logs should show, in order:
 
 ```
-[entrypoint] Applying database migrations...
-[entrypoint] Migrations applied. Starting bot...
+[entrypoint] Starting bot (migrations run in-process; see /healthz for status)...
+Dashboard listening on 0.0.0.0:<port>
+[migrate] Migrations applied (attempt 1).
 Logged in as <bot>#0000
 Registered 5 global slash commands (propagation can take up to an hour).
 Database is reachable and migrated.
 Training timer scheduler started.
-Dashboard listening on 0.0.0.0:<port>
 ```
+
+`/healthz` answers as soon as the second line appears. Its body reports
+`database`, `discord` and a `migrations` object with `state`, `attempts`,
+`errorCode` and `error`; `ok` is true only when all three are good. A stuck
+migration therefore shows its Prisma error code at the URL instead of
+leaving the container in a restart loop.
 
 A missing variable is named explicitly at startup rather than crashing
 somewhere unrelated — see `src/lib/env.ts`.
