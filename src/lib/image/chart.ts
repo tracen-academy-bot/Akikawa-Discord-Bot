@@ -1,5 +1,6 @@
 import type { SKRSContext2D } from '@napi-rs/canvas';
 import { font } from './fonts';
+import { THEME, drawLabel } from './theme';
 
 /**
  * Line and area chart drawing, shared by the trainer report and the benchmark.
@@ -9,8 +10,8 @@ import { font } from './fonts';
  * so the x scale is always categorical.
  */
 
-const TEXT_FAINT = '#6b7280';
-const HAIRLINE = 'rgba(255, 255, 255, 0.08)';
+const TEXT_FAINT = THEME.faint;
+const HAIRLINE = THEME.line;
 
 /** How a series' line is stroked. Distinguishes series without relying on colour alone. */
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
@@ -68,7 +69,7 @@ function drawMarker(ctx: SKRSContext2D, marker: Marker, cx: number, cy: number, 
     if (marker === 'none') return;
 
     ctx.setLineDash([]);
-    ctx.fillStyle = '#12131f';
+    ctx.fillStyle = THEME.bg;
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     const r = 4.5;
@@ -160,10 +161,12 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
             ctx.stroke();
             ctx.setLineDash([]);
 
-            ctx.font = font('bold 12px');
-            ctx.fillStyle = '#c9d1d9';
-            ctx.fillText(s.label, legendX + 36, y + 12);
-            legendX += 36 + ctx.measureText(s.label).width + 28;
+            ctx.font = font('400 12px');
+            ctx.fillStyle = THEME.muted;
+            ctx.letterSpacing = '1.5px';
+            ctx.fillText(s.label.toUpperCase(), legendX + 36, y + 12);
+            legendX += 36 + ctx.measureText(s.label.toUpperCase()).width + 28;
+            ctx.letterSpacing = '0px';
         }
     }
 
@@ -218,8 +221,8 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
 
         if (options.pointLabels) {
             ctx.textBaseline = 'alphabetic';
-            ctx.font = font('bold 11px');
-            ctx.fillStyle = '#e6e6e6';
+            ctx.font = font('500 11px');
+            ctx.fillStyle = THEME.text;
             points.forEach((p, i) => {
                 // The first and last labels would otherwise be centred on the
                 // plot edge and spill over the axis. Anchor them inward.
@@ -245,20 +248,15 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
     });
 
     if (options.xAxisTitle) {
-        ctx.font = font('bold 11px');
-        ctx.fillStyle = TEXT_FAINT;
-        ctx.fillText(options.xAxisTitle, plotX + plotW / 2, plotY + plotH + 40);
+        drawLabel(ctx, options.xAxisTitle, plotX + plotW / 2, plotY + plotH + 40, TEXT_FAINT, 11, 'center');
     }
 
     if (options.yAxisTitle) {
         ctx.save();
         ctx.translate(x + 14, plotY + plotH / 2);
         ctx.rotate(-Math.PI / 2);
-        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = font('bold 11px');
-        ctx.fillStyle = TEXT_FAINT;
-        ctx.fillText(options.yAxisTitle, 0, 0);
+        drawLabel(ctx, options.yAxisTitle, 0, 0, TEXT_FAINT, 11, 'center');
         ctx.restore();
     }
 }

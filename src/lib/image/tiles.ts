@@ -1,15 +1,15 @@
 import type { SKRSContext2D } from '@napi-rs/canvas';
-import { roundRect } from './canvasUtils';
 import { font } from './fonts';
+import { THEME, drawLabel, drawText } from './theme';
 
 /**
  * Headline statistic tiles, shared by the timer stats card and the trainer
  * report. A tile is a label, one large figure, and an optional detail line.
+ *
+ * Flat panels with a hairline border rather than rounded cards: the reference
+ * design has no radii anywhere, and square edges keep the tracked uppercase
+ * labels feeling like part of the same system as the tables.
  */
-
-const TEXT_FAINT = '#6b7280';
-const TEXT_MUTED = '#9ba3b4';
-const HAIRLINE = 'rgba(255, 255, 255, 0.08)';
 
 /** One headline figure. */
 export interface Tile {
@@ -22,35 +22,25 @@ export interface Tile {
 
 /** Draws a single tile at the given box. */
 export function drawTile(ctx: SKRSContext2D, tile: Tile, x: number, y: number, w: number, h: number): void {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-    roundRect(ctx, x, y, w, h, 14);
-    ctx.fill();
-    ctx.strokeStyle = HAIRLINE;
+    ctx.fillStyle = THEME.bgRaised;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = THEME.line;
     ctx.lineWidth = 1;
-    roundRect(ctx, x, y, w, h, 14);
-    ctx.stroke();
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
 
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-
-    ctx.font = font('bold 13px');
-    ctx.fillStyle = TEXT_FAINT;
-    ctx.fillText(tile.label.toUpperCase(), x + 18, y + 28);
+    drawLabel(ctx, tile.label, x + 18, y + 28, THEME.muted, 11);
 
     // Shrink the figure rather than let it overflow its tile.
-    let size = 34;
-    ctx.font = font(`bold ${size}px`);
+    let size = 32;
+    ctx.font = font(`700 ${size}px`);
     while (ctx.measureText(tile.value).width > w - 36 && size > 16) {
         size -= 2;
-        ctx.font = font(`bold ${size}px`);
+        ctx.font = font(`700 ${size}px`);
     }
-    ctx.fillStyle = tile.color;
-    ctx.fillText(tile.value, x + 18, y + 70);
+    drawText(ctx, tile.value, x + 18, y + 70, { spec: `700 ${size}px`, color: tile.color });
 
     if (tile.detail) {
-        ctx.font = font('13px');
-        ctx.fillStyle = TEXT_MUTED;
-        ctx.fillText(tile.detail, x + 18, y + 92);
+        drawText(ctx, tile.detail, x + 18, y + 92, { spec: '400 12px', color: THEME.faint });
     }
 }
 

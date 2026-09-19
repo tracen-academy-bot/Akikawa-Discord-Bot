@@ -115,13 +115,13 @@ function drawClubProgress(ctx: SKRSContext2D, progress: CircleProgress, y: numbe
     ctx.fillRect(barX + barWidth * expectedRatio - 1, y - 4, 2, 12);
 
     const pct = progress.quotaTarget > 0 ? ((progress.totalFans / progress.quotaTarget) * 100).toFixed(1) : '0.0';
-    drawText(ctx, `${formatMillionsFans(progress.totalFans)} of ${formatCompactFans(progress.quotaTarget)} · ${pct}%`, barX, y + 26, {
+    drawText(ctx, `${formatMillionsFans(progress.totalFans)} of ${formatMillionsFans(progress.quotaTarget)} · ${pct}%`, barX, y + 26, {
         spec: '400 13px',
         color: THEME.muted,
     });
     drawText(
         ctx,
-        `${progress.onPaceCount} of ${progress.members.length} on pace · projected ${formatCompactFans(progress.projectedTotalFans)}`,
+        `${progress.onPaceCount} of ${progress.members.length} on pace · projected ${formatMillionsFans(progress.projectedTotalFans)}`,
         barX + barWidth,
         y + 26,
         { spec: '400 13px', color: THEME.muted, align: 'right' },
@@ -252,7 +252,7 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
         13,
     );
     drawText(ctx, formatMillionsFans(progress.totalFans), COL.total, y + 44, { spec: '700 19px', color: THEME.text, align: 'right' });
-    drawLabel(ctx, `projected ${formatCompactFans(progress.projectedTotalFans)} of ${formatCompactFans(progress.quotaTarget)}`, COL.projected, y + 42, THEME.muted, 12, 'right');
+    drawLabel(ctx, `projected ${formatMillionsFans(progress.projectedTotalFans)} of ${formatMillionsFans(progress.quotaTarget)}`, COL.projected, y + 42, THEME.muted, 12, 'right');
 
     return canvas.encode('png');
 }
