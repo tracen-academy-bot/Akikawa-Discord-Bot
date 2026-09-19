@@ -16,7 +16,11 @@ import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 
-const client = new Client({intents: [GatewayIntentBits.Guilds]});
+// GuildMembers is a privileged intent: it must also be switched on under
+// Bot -> Privileged Gateway Intents in the Discord developer portal, or the
+// gateway refuses the connection. It is what lets the bot resolve server
+// nicknames for leaderboards and reports instead of printing raw IDs.
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
 const COMP_COUNCIL = process.env.COMP_COUNCIL_ROLE_ID!;
 const SEMI_COMP_COUNCIL = process.env.SEMI_COMP_COUNCIL_ROLE_ID!;
@@ -57,6 +61,18 @@ client.once(Events.ClientReady, async (readyClient) => {
         console.log('Training timer scheduler started.');
 
         startFanScheduler(client);
+
+        // Warm the member cache so display names resolve immediately. With the
+        // GuildMembers intent the cache then stays current from gateway events.
+        // Not awaited: a large guild must not delay the rest of startup.
+        void Promise.all(
+            [...readyClient.guilds.cache.values()].map((guild) =>
+                guild.members
+                    .fetch()
+                    .then((members) => console.log(`Cached ${members.size} members for ${guild.name}.`))
+                    .catch((e) => console.warn(`Could not fetch members for ${guild.name}:`, e instanceof Error ? e.message : e)),
+            ),
+        );
 
         // Runs in this process so the dashboard and the bot cannot disagree
         // about the data. Disabled unless it is configured.
@@ -191,4 +207,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN).catch((e: unknown) => {
+    const code = typeof e === 'object' && e !== null ? (e as { code?: unknown }).code : undefined;
+    if (code === 'DisallowedIntents') {
+        // The most likely startup failure after this change, and the raw error
+        // does not say where the switch is.
+        console.error(
+            'FATAL: Discord refused the connection because a privileged intent is not enabled.\n' +
+                '  Open the Discord developer portal -> your application -> Bot -> Privileged Gateway Intents\n' +
+                '  and turn on "Server Members Intent", then restart the bot.',
+        );
+    } else {
+        console.error('FATAL: Discord login failed:', e instanceof Error ? e.message : e);
+    }
+    process.exit(1);
+});
