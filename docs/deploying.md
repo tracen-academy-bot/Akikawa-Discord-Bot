@@ -49,8 +49,8 @@ The same file also sets:
    ```
    DISCORD_TOKEN=
    DISCORD_CLIENT_ID=
-   DISCORD_CLIENT_SECRET=
-   DASHBOARD_GUILD_ID=
+   DISCORD_CLIENT_SECRET=         # OAuth2 client secret -- not the bot token
+   DEV_GUILD_ID=                  # your server ID; also gates the dashboard
    OFFICER_ROLE_IDS=
    EXTERNAL_API_KEY=              # uma.moe
    ```

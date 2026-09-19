@@ -83,8 +83,14 @@ function deriveSessionSecret(botToken: string): string {
 export function loadWebConfig(): WebConfig | null {
     const clientId = process.env.DISCORD_CLIENT_ID;
     const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-    const guildId = process.env.DASHBOARD_GUILD_ID;
     const botToken = process.env.DISCORD_TOKEN;
+
+    // A single-server bot has exactly one guild, and DEV_GUILD_ID already names
+    // it for command registration. Reusing it here means the same server ID
+    // does not have to be entered under a second name. DASHBOARD_GUILD_ID still
+    // wins when set, for a bot that registers commands globally but gates the
+    // dashboard on one specific server.
+    const guildId = process.env.DASHBOARD_GUILD_ID || process.env.DEV_GUILD_ID;
 
     // An explicit secret is honoured, but none is required: absent one, the key
     // is derived from the bot token, which is already present and already

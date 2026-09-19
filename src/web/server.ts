@@ -114,10 +114,15 @@ export function startDashboard(client: Client): (() => void) | null {
     }
 
     if (!config) {
-        console.log(
-            'Dashboard disabled: set DISCORD_CLIENT_SECRET, DASHBOARD_BASE_URL, ' +
-                'DASHBOARD_SESSION_SECRET and DASHBOARD_GUILD_ID to enable it.',
-        );
+        // Name exactly what is missing. "Dashboard disabled" on its own sent an
+        // operator hunting through five variables when only one was absent.
+        const missing = [
+            !process.env.DISCORD_CLIENT_ID && 'DISCORD_CLIENT_ID',
+            !process.env.DISCORD_CLIENT_SECRET && 'DISCORD_CLIENT_SECRET (OAuth2 client secret, not the bot token)',
+            !process.env.DASHBOARD_BASE_URL && !process.env.RAILWAY_PUBLIC_DOMAIN && 'DASHBOARD_BASE_URL (or a Railway public domain)',
+            !process.env.DASHBOARD_GUILD_ID && !process.env.DEV_GUILD_ID && 'DASHBOARD_GUILD_ID (or DEV_GUILD_ID)',
+        ].filter(Boolean);
+        console.log(`Dashboard disabled. Missing: ${missing.join(', ')}.`);
         return null;
     }
 
