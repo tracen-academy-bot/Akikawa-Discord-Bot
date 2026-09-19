@@ -140,7 +140,7 @@ function memberRows(progress: CircleProgress, circleId: string): string {
  * someone has set up OAuth yet, and the platform's deploy gate must reflect
  * the former, not the latter.
  */
-function registerHealthCheck(app: express.Express, client: Client) {
+function registerHealthCheck(app: express.Express, client: () => Client) {
     // Railway injects the deployed commit; reporting it makes "which build is
     // actually running" answerable with one curl instead of guesswork.
     const commit = (process.env.RAILWAY_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT_SHA ?? 'unknown').slice(0, 7);
@@ -148,7 +148,7 @@ function registerHealthCheck(app: express.Express, client: Client) {
     app.get('/healthz', async (_req, res) => {
         try {
             await prisma.$queryRaw`SELECT 1`;
-            res.json({ ok: true, discord: client.isReady(), commit });
+            res.json({ ok: true, discord: client().isReady(), commit });
         } catch {
             res.status(503).json({ ok: false, error: 'database unreachable', commit });
         }
@@ -168,7 +168,7 @@ function resolvePort(): number {
  * that is fully working on Discord would fail its deploy gate purely for
  * lacking an OAuth client secret.
  */
-function startFallbackServer(client: Client, missing: string[]): () => void {
+function startFallbackServer(client: () => Client, missing: string[]): () => void {
     const app = express();
     app.set('trust proxy', 1);
     registerHealthCheck(app, client);
@@ -195,7 +195,7 @@ function startFallbackServer(client: Client, missing: string[]): () => void {
 }
 
 /** Builds and starts the dashboard. Returns null when it is not configured. */
-export function startDashboard(client: Client): () => void {
+export function startDashboard(client: () => Client): () => void {
     let config: WebConfig | null;
     try {
         config = loadWebConfig();
@@ -500,7 +500,7 @@ export function startDashboard(client: Client): () => void {
 
         // Same resolution the leaderboard image uses: the bot's member cache,
         // falling back to the ID for anyone not cached.
-        const guild = client.guilds.cache.get(guildId);
+        const guild = client().guilds.cache.get(guildId);
         const nameOf = (id: string) => guild?.members.cache.get(id)?.displayName ?? id;
 
         const body = rows
@@ -541,7 +541,7 @@ export function startDashboard(client: Client): () => void {
 
         // Resolve display names through the bot's cache; the dashboard has no
         // Discord token of its own.
-        const guild = client.guilds.cache.get(guildId);
+        const guild = client().guilds.cache.get(guildId);
         for (const row of rows) {
             names.set(row.discordUserId, guild?.members.cache.get(row.discordUserId)?.displayName ?? row.discordUserId);
         }

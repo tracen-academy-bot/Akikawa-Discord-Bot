@@ -13,10 +13,11 @@
     "postinstall": "prisma generate",
     "test:timer": "ts-node --project tsconfig.scripts.json scripts/test-timer.ts",
     "test:scheduler": "ts-node --project tsconfig.scripts.json scripts/test-scheduler.ts",
-    "test": "npm run test:metrics && npm run test:fans && npm run test:dashboard && npm run test:timer && npm run test:scheduler",
+    "test": "npm run test:metrics && npm run test:startup && npm run test:fans && npm run test:dashboard && npm run test:timer && npm run test:scheduler",
     "test:metrics": "ts-node --project tsconfig.scripts.json scripts/test-metrics.ts",
     "test:fans": "ts-node --project tsconfig.scripts.json scripts/test-fans.ts",
-    "test:dashboard": "ts-node --project tsconfig.scripts.json scripts/test-dashboard.ts"
+    "test:dashboard": "ts-node --project tsconfig.scripts.json scripts/test-dashboard.ts",
+    "test:startup": "ts-node --project tsconfig.scripts.json scripts/test-startup.ts"
   },
   "keywords": [],
   "author": "",

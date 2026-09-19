@@ -14,6 +14,7 @@ import { startScheduler } from './lib/timer/scheduler';
 import { startFanScheduler } from './lib/fans/scheduler';
 import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
+import { waitForConnectOutcome } from './lib/startup';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 
 /**
@@ -78,9 +79,6 @@ client.once(Events.ClientReady, async (readyClient) => {
             ),
         );
 
-        // Runs in this process so the dashboard and the bot cannot disagree
-        // about the data. Disabled unless it is configured.
-        startDashboard(client);
     } catch (e) {
         console.error('FATAL: database preflight failed.');
         console.error(e instanceof Error ? e.message : e);
@@ -224,41 +222,56 @@ const BASE_INTENTS = [GatewayIntentBits.Guilds];
 /**
  * Connects, degrading gracefully if a privileged intent is not enabled.
  *
- * GuildMembers must also be switched on in the Discord developer portal. If
- * it is not, the gateway refuses the connection with DisallowedIntents. The
- * first version of this change exited on that error, which took the bot
- * offline until someone found the toggle -- a bad failure mode for a feature
- * that only affects how names are displayed. Now the bot logs exactly where
- * the switch is and reconnects with the base intents, so everything else keeps
- * working and names simply show as IDs until the toggle is flipped.
+ * Two things learned the hard way:
+ *
+ * 1. `login()` resolving means nothing. When Discord refuses a privileged
+ *    intent it closes the gateway with code 4014; discord.js emits
+ *    `shardDisconnect` and stops, without throwing and without ever emitting
+ *    `ready`. Earlier versions of this function keyed off a rejection that
+ *    never comes, so the bot hung un-ready until the host's health check
+ *    killed it -- a restart loop. `waitForConnectOutcome` listens for what
+ *    discord.js actually does.
+ *
+ * 2. The HTTP server must not wait for Discord. It starts before any login,
+ *    against a getter that always returns the current client, so /healthz
+ *    answers from the first second and reports `discord: false` honestly until
+ *    the gateway is up. A Discord problem then degrades one feature instead of
+ *    taking the whole container down.
  */
 async function start(): Promise<void> {
     const token = process.env.DISCORD_TOKEN;
-    const full = buildClient(FULL_INTENTS);
+    let current: Client = buildClient(FULL_INTENTS);
 
-    try {
-        await full.login(token);
-        return;
-    } catch (e: unknown) {
-        const code = typeof e === 'object' && e !== null ? (e as { code?: unknown }).code : undefined;
-        if (code !== 'DisallowedIntents') {
-            console.error('FATAL: Discord login failed:', e instanceof Error ? e.message : e);
-            process.exit(1);
-        }
-        await full.destroy();
+    // Runs in this process so the dashboard and the bot cannot disagree about
+    // the data. Disabled unless configured, but the health check is always
+    // served. Bound to a getter: see (2) above.
+    startDashboard(() => current);
+
+    const fatal = (message: string, e?: unknown): never => {
+        console.error(`FATAL: ${message}`, e instanceof Error ? e.message : (e ?? ''));
+        process.exit(1);
+    };
+
+    let outcome = waitForConnectOutcome(current);
+    await current.login(token).catch((e: unknown) => fatal('Discord login failed:', e));
+
+    if ((await outcome) === 'disallowed-intents') {
+        await current.destroy();
         console.warn(
             'Discord refused the GuildMembers intent, so server nicknames will not resolve and names may show as IDs.\n' +
                 '  To fix: Discord developer portal -> your application -> Bot -> Privileged Gateway Intents\n' +
                 '  -> enable "Server Members Intent" -> Save, then restart the bot.\n' +
                 '  Continuing with reduced intents.',
         );
+        current = buildClient(BASE_INTENTS);
+        outcome = waitForConnectOutcome(current);
+        await current.login(token).catch((e: unknown) => fatal('Discord login failed:', e));
     }
 
-    const reduced = buildClient(BASE_INTENTS);
-    await reduced.login(token).catch((e: unknown) => {
-        console.error('FATAL: Discord login failed:', e instanceof Error ? e.message : e);
-        process.exit(1);
-    });
+    const final = await outcome;
+    if (final !== 'ready') {
+        fatal(`Discord closed the gateway with an unrecoverable error (${final}). Check DISCORD_TOKEN.`);
+    }
 }
 
 void start();
