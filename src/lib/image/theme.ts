@@ -30,12 +30,15 @@ export function placeColor(rank: number): string | null {
     return THEME.place[rank - 1] ?? null;
 }
 
+/** Horizontal anchor. Declared locally so no DOM lib is needed to compile. */
+export type Align = 'left' | 'right' | 'center' | 'start' | 'end';
+
 /** Text drawing options. */
 export interface TextOptions {
     /** Weight and size, e.g. `'500 14px'`. */
     spec: string;
     color: string;
-    align?: CanvasTextAlign;
+    align?: Align;
     /** Extra tracking in pixels. Headings in the reference are tracked wide. */
     tracking?: number;
 }
@@ -59,7 +62,7 @@ export function drawText(ctx: SKRSContext2D, text: string, x: number, y: number,
 }
 
 /** Uppercase, tracked label -- the reference's heading and column style. */
-export function drawLabel(ctx: SKRSContext2D, text: string, x: number, y: number, color: string, size = 12, align: CanvasTextAlign = 'left') {
+export function drawLabel(ctx: SKRSContext2D, text: string, x: number, y: number, color: string, size = 12, align: Align = 'left') {
     drawText(ctx, text.toUpperCase(), x, y, { spec: `400 ${size}px`, color, align, tracking: Math.max(1.5, size * 0.16) });
 }
 

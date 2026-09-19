@@ -45,6 +45,18 @@ export interface MemberProgress {
     quotaDays: number;
     onPace: boolean;
     shameScore: number | null;
+    /**
+     * Fans gained on each of the last seven days with data, oldest first. Fewer
+     * than seven entries when the member has less history. Drives the trend
+     * sparkline; the shape matters more than the values.
+     */
+    recentGains: number[];
+    /**
+     * Where the member lands at month end if their average holds:
+     * `avgPerDay * daysInMonth`. A straight-line projection, deliberately
+     * simple so it can be reasoned about at a glance.
+     */
+    projectedTotal: number;
     /** 1-based placement by current total. */
     rank: number;
     /**
@@ -73,6 +85,12 @@ export interface CircleProgress {
     members: MemberProgress[];
     /** Sum of every member's cumulative total. */
     totalFans: number;
+    /** What the whole circle owes for the month: members times effective quota. */
+    quotaTarget: number;
+    /** Sum of every member's straight-line projection. */
+    projectedTotalFans: number;
+    /** Members currently at or ahead of expectation. */
+    onPaceCount: number;
 }
 
 /** Tuning for quota calculations. */
@@ -164,6 +182,16 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         // A cumulative series should never decrease; clamp in case it does.
         const latestDayGain = Math.max(0, total - previous);
 
+        // Daily gains over the trailing week, from the member's first day with
+        // data at the earliest. Day 1's gain is its cumulative value.
+        const recentGains: number[] = [];
+        const windowStart = Math.max(firstDay || 1, daysElapsed - 6);
+        for (let day = windowStart; day <= daysElapsed; day += 1) {
+            const today = member.dailyFans[day - 1] ?? 0;
+            const before = day >= 2 ? (member.dailyFans[day - 2] ?? 0) : 0;
+            recentGains.push(Math.max(0, today - before));
+        }
+
         const onPace = behind === 0;
         const shortfall = Math.max(0, effectiveQuota - total);
         const needPerDay = onPace || daysRemaining === 0 ? null : Math.floor(shortfall / daysRemaining);
@@ -177,6 +205,8 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
             avgPerDay,
             needPerDay,
             latestDayGain,
+            recentGains,
+            projectedTotal: avgPerDay * daysInMonth,
             dataDays,
             quotaDays,
             onPace,
@@ -216,6 +246,9 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         effectiveQuota,
         members,
         totalFans: members.reduce((sum, m) => sum + m.total, 0),
+        quotaTarget: members.length * effectiveQuota,
+        projectedTotalFans: members.reduce((sum, m) => sum + m.projectedTotal, 0),
+        onPaceCount: members.filter((m) => m.onPace).length,
     };
 }
 

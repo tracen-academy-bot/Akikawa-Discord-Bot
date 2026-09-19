@@ -1,232 +1,258 @@
 import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
-import { roundRect } from './canvasUtils';
-import { formatCompactFans, formatFans, formatMillionsFans, type CircleProgress } from '../fans/metrics';
+import { THEME, dashNum, drawLabel, drawRule, drawText, placeColor } from './theme';
 import { font } from './fonts';
+import { formatCompactFans, formatMillionsFans, type CircleProgress, type MemberProgress } from '../fans/metrics';
 
 /**
- * Renders the club fan-quota leaderboard.
+ * The club fan-quota leaderboard.
  *
- * Layout follows the report this feature replaces: one row per member, ranked
- * by cumulative fans, with a status dot that answers "is this trainer on pace?"
- * before any number is read. Columns that only apply to members who are behind
- * (`Behind`, `Need/Day`) are blank for everyone else, which keeps the eye on
- * the rows that need attention.
+ * One row per member ranked by cumulative fans. Colour is spent sparingly:
+ * gold for structure and the figure a trainer must hit, red for exactly one
+ * meaning -- behind -- and placement tints for the top four. Empty cells show
+ * an em dash rather than nothing, so a blank never reads as a missing value.
+ *
+ * Beyond the columns the reference report carried, each row gets a seven-day
+ * trend sparkline and a straight-line month-end projection, and the header
+ * shows the club's progress against its total quota. All of it derives from
+ * data already ingested; nothing here costs an extra API call.
  */
 
-const WIDTH = 1560;
-const ROW_HEIGHT = 40;
-const HEADER_HEIGHT = 96;
-const TABLE_HEADER_HEIGHT = 38;
-const FOOTER_HEIGHT = 56;
+const WIDTH = 1600;
+const MARGIN = 40;
+const ROW_HEIGHT = 46;
+const HEADER_HEIGHT = 196;
+const COLUMN_HEADER_HEIGHT = 44;
+const FOOTER_HEIGHT = 84;
 
-const TEXT_PRIMARY = '#e6e6e6';
-const TEXT_MUTED = '#9ba3b4';
-const TEXT_FAINT = '#6b7280';
-const TEXT_DIM = '#5a6072';
-const HAIRLINE = 'rgba(255, 255, 255, 0.08)';
-
-const ON_PACE = '#3b82f6';
-const BEHIND_MILD = '#e0a33e';
-const BEHIND_SEVERE = '#ef4444';
-const UP = '#3fb950';
-const DOWN = '#f85149';
-const GOLD = '#ffd166';
-
-/** Column x positions. Numeric columns are right-aligned on these. */
+/** Column anchors. Numeric columns right-align on these. */
 const COL = {
-    rank: 44,
-    trainer: 150,
-    total: 640,
-    expected: 840,
-    behind: 1030,
-    avgDay: 1200,
-    needDay: 1375,
-    dayN: 1500,
-    dot: 1528,
+    rank: 70,
+    trainer: 120,
+    trendLeft: 405,
+    trendWidth: 96,
+    total: 690,
+    expected: 850,
+    behind: 1000,
+    avgDay: 1150,
+    needDay: 1300,
+    dayN: 1430,
+    projected: WIDTH - MARGIN,
 } as const;
 
-/** Severity threshold: behind by more than this fraction of expected is severe. */
-const SEVERE_BEHIND_RATIO = 0.15;
+/** Widest a trainer name may draw before truncation. */
+const MAX_NAME_WIDTH = COL.trendLeft - COL.trainer - 24;
 
-/** Extra context the report header shows but the maths does not produce. */
 export interface FanReportMeta {
     circleName: string;
-    /** uma.moe monthly rank, if known. */
     monthlyRank: number | null;
     memberCount: number;
-    /** Date line, e.g. "September 14, 2026". */
+    /** e.g. "September 14, 2026" */
     dateLabel: string;
 }
 
-/** Colour for a member's behind-ness. */
-function behindColor(behind: number, expected: number): string {
-    if (behind === 0) return TEXT_DIM;
-    return behind > expected * SEVERE_BEHIND_RATIO ? BEHIND_SEVERE : BEHIND_MILD;
+/** Truncates with an ellipsis until the text fits the given width. */
+function fit(ctx: SKRSContext2D, text: string, maxWidth: number): string {
+    let out = text;
+    while (ctx.measureText(out).width > maxWidth && out.length > 1) out = `${out.slice(0, -2)}…`;
+    return out;
 }
 
-/** Draws the small movement arrow next to a rank. */
-function drawRankChange(ctx: SKRSContext2D, change: number | null, x: number, y: number) {
-    if (change === null || change === 0) return;
-    ctx.font = font('bold 12px');
-    ctx.fillStyle = change > 0 ? UP : DOWN;
-    ctx.textAlign = 'left';
-    ctx.fillText(`${change > 0 ? '↑' : '↓'}${Math.abs(change)}`, x, y);
+/**
+ * Draws a small trend line of recent daily gains.
+ *
+ * Scaled to the member's own range, so it shows the *shape* of their week --
+ * ramping, steady, collapsing -- rather than their magnitude, which the
+ * numbers beside it already give. The last point is marked so the eye lands on
+ * where they are now.
+ */
+function drawSparkline(ctx: SKRSContext2D, gains: number[], x: number, cy: number, width: number) {
+    const height = 18;
+    if (gains.length < 2) {
+        drawRule(ctx, x, cy, width, THEME.line, 1);
+        return;
+    }
+
+    const max = Math.max(...gains);
+    const min = Math.min(...gains);
+    const span = max - min || 1;
+    const step = width / (gains.length - 1);
+
+    const points = gains.map((g, i) => ({
+        px: x + i * step,
+        py: cy + height / 2 - ((g - min) / span) * height,
+    }));
+
+    ctx.strokeStyle = THEME.muted;
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    points.forEach((p, i) => (i === 0 ? ctx.moveTo(p.px, p.py) : ctx.lineTo(p.px, p.py)));
+    ctx.stroke();
+
+    const last = points[points.length - 1]!;
+    const previous = gains[gains.length - 2] ?? 0;
+    const latest = gains[gains.length - 1] ?? 0;
+    ctx.fillStyle = latest >= previous ? THEME.gold : THEME.red;
+    ctx.beginPath();
+    ctx.arc(last.px, last.py, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/** Draws the club-wide quota progress bar with its labels. */
+function drawClubProgress(ctx: SKRSContext2D, progress: CircleProgress, y: number) {
+    const barX = MARGIN;
+    const barWidth = WIDTH - MARGIN * 2;
+    const ratio = progress.quotaTarget > 0 ? Math.min(1, progress.totalFans / progress.quotaTarget) : 0;
+    const expectedRatio =
+        progress.daysInMonth > 0 ? Math.min(1, progress.daysElapsed / progress.daysInMonth) : 0;
+
+    drawRule(ctx, barX, y, barWidth, THEME.line, 4);
+    drawRule(ctx, barX, y, barWidth * ratio, THEME.gold, 4);
+
+    // A tick where the club *should* be today, so the bar reads as pace, not
+    // just accumulation.
+    ctx.fillStyle = THEME.text;
+    ctx.fillRect(barX + barWidth * expectedRatio - 1, y - 4, 2, 12);
+
+    const pct = progress.quotaTarget > 0 ? ((progress.totalFans / progress.quotaTarget) * 100).toFixed(1) : '0.0';
+    drawText(ctx, `${formatMillionsFans(progress.totalFans)} of ${formatCompactFans(progress.quotaTarget)} · ${pct}%`, barX, y + 26, {
+        spec: '400 13px',
+        color: THEME.muted,
+    });
+    drawText(
+        ctx,
+        `${progress.onPaceCount} of ${progress.members.length} on pace · projected ${formatCompactFans(progress.projectedTotalFans)}`,
+        barX + barWidth,
+        y + 26,
+        { spec: '400 13px', color: THEME.muted, align: 'right' },
+    );
+}
+
+/** Draws one member row. */
+function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number) {
+    const cy = y + ROW_HEIGHT / 2 + 6;
+    const tint = placeColor(m.rank);
+
+    // Left bar: placement for the top four, red for anyone behind.
+    const bar = tint ?? (m.onPace ? null : THEME.red);
+    if (bar) {
+        ctx.fillStyle = bar;
+        ctx.fillRect(MARGIN, y + 7, 3, ROW_HEIGHT - 14);
+    }
+
+    drawText(ctx, String(m.rank), COL.rank, cy, { spec: '400 15px', color: THEME.faint });
+    if (m.rankChange !== null && m.rankChange !== 0) {
+        const arrow = m.rankChange > 0 ? '↑' : '↓';
+        drawText(ctx, `${arrow}${Math.abs(m.rankChange)}`, COL.rank + 26, cy, {
+            spec: '400 12px',
+            color: m.rankChange > 0 ? THEME.gold : THEME.red,
+        });
+    }
+
+    // Measure with the same font the name is drawn in, or truncation is wrong.
+    ctx.font = font('500 19px');
+    drawText(ctx, fit(ctx, m.trainerName, MAX_NAME_WIDTH), COL.trainer, cy, {
+        spec: '500 19px',
+        color: tint ?? THEME.text,
+    });
+
+    drawSparkline(ctx, m.recentGains, COL.trendLeft, cy - 6, COL.trendWidth);
+
+    drawText(ctx, dashNum(m.total), COL.total, cy, { spec: '700 19px', color: THEME.text, align: 'right' });
+    drawText(ctx, dashNum(m.expected), COL.expected, cy, { spec: '400 15px', color: THEME.faint, align: 'right' });
+    drawText(ctx, dashNum(m.behind > 0 ? m.behind : null), COL.behind, cy, {
+        spec: '500 15px',
+        color: m.behind > 0 ? THEME.red : THEME.faint,
+        align: 'right',
+    });
+    drawText(ctx, dashNum(m.avgPerDay), COL.avgDay, cy, { spec: '400 15px', color: THEME.muted, align: 'right' });
+    drawText(ctx, dashNum(m.needPerDay), COL.needDay, cy, {
+        spec: '500 15px',
+        color: m.needPerDay !== null ? THEME.gold : THEME.faint,
+        align: 'right',
+    });
+    drawText(ctx, dashNum(m.latestDayGain), COL.dayN, cy, {
+        spec: '400 15px',
+        color: m.latestDayGain === 0 ? THEME.faint : THEME.muted,
+        align: 'right',
+    });
+
+    const willMakeQuota = m.projectedTotal >= quota;
+    drawText(ctx, formatCompactFans(m.projectedTotal), COL.projected, cy, {
+        spec: '400 15px',
+        color: willMakeQuota ? THEME.green : m.onPace ? THEME.muted : THEME.red,
+        align: 'right',
+    });
 }
 
 export async function renderFanReport(progress: CircleProgress, meta: FanReportMeta): Promise<Buffer> {
-    const height =
-        HEADER_HEIGHT + TABLE_HEADER_HEIGHT + Math.max(progress.members.length, 1) * ROW_HEIGHT + FOOTER_HEIGHT;
+    const rows = Math.max(progress.members.length, 1);
+    const height = HEADER_HEIGHT + COLUMN_HEADER_HEIGHT + rows * ROW_HEIGHT + FOOTER_HEIGHT;
 
     const canvas = createCanvas(WIDTH, height);
     const ctx = canvas.getContext('2d');
 
-    const bg = ctx.createLinearGradient(0, 0, WIDTH, height);
-    bg.addColorStop(0, '#15161f');
-    bg.addColorStop(1, '#0d0e15');
-    ctx.fillStyle = bg;
-    roundRect(ctx, 0, 0, WIDTH, height, 20);
-    ctx.fill();
+    ctx.fillStyle = THEME.bg;
+    ctx.fillRect(0, 0, WIDTH, height);
 
     // ── Header ────────────────────────────────────────────────────────────────
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = font('bold 36px');
-    ctx.fillText(meta.circleName, 40, 52);
+    drawText(ctx, meta.circleName.toUpperCase(), MARGIN, 62, { spec: '500 30px', color: THEME.gold, tracking: 5 });
 
-    ctx.font = font('15px');
-    ctx.fillStyle = TEXT_FAINT;
-    const quotaLabel = `${formatCompactFans(progress.effectiveQuota)} (${formatCompactFans(progress.quotaPerDay)}/day)`;
-    const rankLabel = meta.monthlyRank === null ? 'Unranked' : `Rank #${meta.monthlyRank}`;
-    ctx.fillText(
-        `${meta.dateLabel}  ·  ${rankLabel}  ·  ${meta.memberCount} members  ·  Quota ${quotaLabel}`,
-        40,
-        78,
+    const rankLabel = meta.monthlyRank === null ? 'UNRANKED' : `RANK #${meta.monthlyRank}`;
+    drawLabel(ctx, `${meta.dateLabel} · ${rankLabel} · ${meta.memberCount} MEMBERS`, WIDTH - MARGIN, 58, THEME.muted, 14, 'right');
+
+    drawText(
+        ctx,
+        `day ${progress.daysElapsed} of ${progress.daysInMonth} · quota ${formatCompactFans(progress.effectiveQuota)} per member · ${formatCompactFans(progress.quotaPerDay)}/day`,
+        MARGIN,
+        90,
+        { spec: '400 14px', color: THEME.gold },
     );
 
+    drawClubProgress(ctx, progress, 118);
+    drawRule(ctx, MARGIN, HEADER_HEIGHT - 4, WIDTH - MARGIN * 2, THEME.gold, 1.5);
+
     // ── Column headings ───────────────────────────────────────────────────────
-    ctx.font = font('bold 13px');
-    ctx.fillStyle = TEXT_FAINT;
-    ctx.textAlign = 'left';
-    ctx.fillText('#', COL.rank, HEADER_HEIGHT + 10);
-    ctx.fillText('TRAINER', COL.trainer, HEADER_HEIGHT + 10);
-    ctx.textAlign = 'right';
-    ctx.fillText('TOTAL', COL.total, HEADER_HEIGHT + 10);
-    ctx.fillText('EXPECTED', COL.expected, HEADER_HEIGHT + 10);
-    ctx.fillText('BEHIND', COL.behind, HEADER_HEIGHT + 10);
-    ctx.fillText('AVG/DAY', COL.avgDay, HEADER_HEIGHT + 10);
-    ctx.fillText('NEED/DAY', COL.needDay, HEADER_HEIGHT + 10);
-    ctx.fillText(`DAY ${progress.daysElapsed}`, COL.dayN, HEADER_HEIGHT + 10);
+    const hy = HEADER_HEIGHT + 24;
+    drawLabel(ctx, '#', COL.rank, hy, THEME.muted);
+    drawLabel(ctx, 'Trainer', COL.trainer, hy, THEME.muted);
+    drawLabel(ctx, '7d trend', COL.trendLeft, hy, THEME.muted);
+    drawLabel(ctx, 'Total', COL.total, hy, THEME.muted, 12, 'right');
+    drawLabel(ctx, 'Expected', COL.expected, hy, THEME.muted, 12, 'right');
+    drawLabel(ctx, 'Behind', COL.behind, hy, THEME.muted, 12, 'right');
+    drawLabel(ctx, 'Avg/day', COL.avgDay, hy, THEME.muted, 12, 'right');
+    drawLabel(ctx, 'Need/day', COL.needDay, hy, THEME.muted, 12, 'right');
+    drawLabel(ctx, `Day ${progress.daysElapsed}`, COL.dayN, hy, THEME.muted, 12, 'right');
+    drawLabel(ctx, 'Proj.', COL.projected, hy, THEME.muted, 12, 'right');
+    drawRule(ctx, MARGIN, HEADER_HEIGHT + COLUMN_HEADER_HEIGHT - 6, WIDTH - MARGIN * 2, THEME.line);
 
-    ctx.strokeStyle = 'rgba(88, 166, 255, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(32, HEADER_HEIGHT + 22);
-    ctx.lineTo(WIDTH - 32, HEADER_HEIGHT + 22);
-    ctx.stroke();
-
-    let y = HEADER_HEIGHT + TABLE_HEADER_HEIGHT;
+    let y = HEADER_HEIGHT + COLUMN_HEADER_HEIGHT;
 
     if (progress.members.length === 0) {
-        ctx.textAlign = 'left';
-        ctx.font = font('17px');
-        ctx.fillStyle = TEXT_FAINT;
-        ctx.fillText('No fan data ingested for this month yet.', COL.rank, y + 28);
+        drawText(ctx, 'No fan data ingested for this month yet.', COL.rank, y + 30, { spec: '400 16px', color: THEME.faint });
         return canvas.encode('png');
     }
 
     // ── Rows ──────────────────────────────────────────────────────────────────
     for (const member of progress.members) {
-        const cy = y + ROW_HEIGHT / 2 + 5;
-
-        if (member.rank % 2 === 1) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.025)';
-            ctx.fillRect(24, y, WIDTH - 48, ROW_HEIGHT);
-        }
-
-        // Rank, with the top three highlighted and a movement arrow.
-        ctx.textAlign = 'left';
-        ctx.font = font(member.rank <= 3 ? 'bold 16px' : '16px');
-        ctx.fillStyle = member.rank <= 3 ? GOLD : TEXT_FAINT;
-        const rankText = member.rank <= 3 ? `#${member.rank}` : String(member.rank);
-        ctx.fillText(rankText, COL.rank, cy);
-        drawRankChange(ctx, member.rankChange, COL.rank + ctx.measureText(rankText).width + 8, cy);
-
-        // Trainer name, truncated rather than allowed to overflow.
-        ctx.font = font(member.rank <= 3 ? 'bold 17px' : '17px');
-        ctx.fillStyle = member.rank === 1 ? GOLD : TEXT_PRIMARY;
-        let name = member.trainerName;
-        const maxName = COL.total - COL.trainer - 220;
-        while (ctx.measureText(name).width > maxName && name.length > 1) {
-            name = `${name.slice(0, -2)}…`;
-        }
-        ctx.fillText(name, COL.trainer, cy);
-
-        ctx.textAlign = 'right';
-
-        ctx.font = font('bold 17px');
-        ctx.fillStyle = TEXT_PRIMARY;
-        ctx.fillText(formatFans(member.total), COL.total, cy);
-
-        ctx.font = font('15px');
-        ctx.fillStyle = TEXT_DIM;
-        ctx.fillText(formatFans(member.expected), COL.expected, cy);
-
-        // Behind and Need/Day are shown only when they mean something.
-        if (member.behind > 0) {
-            ctx.font = font('bold 15px');
-            ctx.fillStyle = behindColor(member.behind, member.expected);
-            ctx.fillText(formatFans(member.behind), COL.behind, cy);
-        }
-
-        ctx.font = font('15px');
-        ctx.fillStyle = TEXT_MUTED;
-        ctx.fillText(formatFans(member.avgPerDay), COL.avgDay, cy);
-
-        if (member.needPerDay !== null) {
-            ctx.font = font('bold 15px');
-            ctx.fillStyle = behindColor(member.behind, member.expected);
-            ctx.fillText(formatFans(member.needPerDay), COL.needDay, cy);
-        }
-
-        ctx.font = font('15px');
-        ctx.fillStyle = member.latestDayGain === 0 ? TEXT_DIM : TEXT_MUTED;
-        ctx.fillText(formatFans(member.latestDayGain), COL.dayN, cy);
-
-        // Status dot: the fastest read on the row.
-        ctx.beginPath();
-        ctx.arc(COL.dot, cy - 5, 7, 0, Math.PI * 2);
-        ctx.fillStyle = member.onPace ? ON_PACE : BEHIND_SEVERE;
-        ctx.fill();
-
+        drawRow(ctx, member, y, progress.effectiveQuota);
         y += ROW_HEIGHT;
+        drawRule(ctx, MARGIN, y - 1, WIDTH - MARGIN * 2, THEME.line);
     }
 
-    // ── Footer total ──────────────────────────────────────────────────────────
-    ctx.strokeStyle = 'rgba(88, 166, 255, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(32, y + 6);
-    ctx.lineTo(WIDTH - 32, y + 6);
-    ctx.stroke();
-
-    const behindCount = progress.members.filter((m) => !m.onPace).length;
-
-    ctx.textAlign = 'left';
-    ctx.font = font('bold 15px');
-    ctx.fillStyle = TEXT_FAINT;
-    ctx.fillText('Σ', COL.rank, y + 34);
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.fillText(
-        `${progress.members.length} members  ·  ${behindCount} behind  ·  day ${progress.daysElapsed}/${progress.daysInMonth}`,
-        COL.trainer,
-        y + 34,
+    // ── Footer ────────────────────────────────────────────────────────────────
+    drawRule(ctx, MARGIN, y + 8, WIDTH - MARGIN * 2, THEME.gold, 1.5);
+    const behind = progress.members.length - progress.onPaceCount;
+    drawLabel(
+        ctx,
+        `Σ  ${progress.members.length} members · ${behind} behind · day ${progress.daysElapsed}/${progress.daysInMonth}`,
+        MARGIN,
+        y + 42,
+        THEME.gold,
+        13,
     );
-
-    ctx.textAlign = 'right';
-    ctx.font = font('bold 17px');
-    ctx.fillStyle = TEXT_PRIMARY;
-    ctx.fillText(formatMillionsFans(progress.totalFans), COL.total, y + 34);
+    drawText(ctx, formatMillionsFans(progress.totalFans), COL.total, y + 44, { spec: '700 19px', color: THEME.text, align: 'right' });
+    drawLabel(ctx, `projected ${formatCompactFans(progress.projectedTotalFans)} of ${formatCompactFans(progress.quotaTarget)}`, COL.projected, y + 42, THEME.muted, 12, 'right');
 
     return canvas.encode('png');
 }
