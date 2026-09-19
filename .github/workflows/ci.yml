@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  test:
+    name: Typecheck, test, build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bot
+          POSTGRES_PASSWORD: botpass
+          POSTGRES_DB: tracen_academy
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U bot -d tracen_academy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://bot:botpass@localhost:5432/tracen_academy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      # postinstall runs `prisma generate`, which needs DATABASE_URL (set above).
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx tsc --noEmit
+      # Suites run against the real Postgres service; each cleans up after itself.
+      - run: npm test
+      - run: npm run build
+
+  image:
+    name: Docker image builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Proves the Dockerfile Railway uses actually builds: fonts, npm ci, tsc,
+      # asset copy. Nothing is pushed anywhere.
+      - run: docker build -t akikawa-ci .
+      - name: Bundled fonts register inside the image
+        run: |
+          docker run --rm akikawa-ci node -e "
+            const { GlobalFonts } = require('@napi-rs/canvas');
+            require('./dist/lib/image/fonts.js');
+            const fams = GlobalFonts.families.map(f => f.family);
+            for (const need of ['IBM Plex Mono', 'IBM Plex Sans JP']) {
+              if (!fams.includes(need)) { console.error('missing font family: ' + need); process.exit(1); }
+            }
+            console.log('bundled fonts registered:', fams.filter(f => /Plex/.test(f)).join(', '));
+          "

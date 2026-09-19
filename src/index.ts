@@ -16,11 +16,15 @@ import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 
-// GuildMembers is a privileged intent: it must also be switched on under
-// Bot -> Privileged Gateway Intents in the Discord developer portal, or the
-// gateway refuses the connection. It is what lets the bot resolve server
-// nicknames for leaderboards and reports instead of printing raw IDs.
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
+/**
+ * Builds a client with every handler attached.
+ *
+ * A function rather than a top-level singleton because gateway intents are
+ * fixed at construction, and startup may need a second client with fewer of
+ * them (see `start`).
+ */
+function buildClient(intents: GatewayIntentBits[]): Client {
+const client = new Client({ intents });
 
 const COMP_COUNCIL = process.env.COMP_COUNCIL_ROLE_ID!;
 const SEMI_COMP_COUNCIL = process.env.SEMI_COMP_COUNCIL_ROLE_ID!;
@@ -207,18 +211,54 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 });
 
-client.login(process.env.DISCORD_TOKEN).catch((e: unknown) => {
-    const code = typeof e === 'object' && e !== null ? (e as { code?: unknown }).code : undefined;
-    if (code === 'DisallowedIntents') {
-        // The most likely startup failure after this change, and the raw error
-        // does not say where the switch is.
-        console.error(
-            'FATAL: Discord refused the connection because a privileged intent is not enabled.\n' +
-                '  Open the Discord developer portal -> your application -> Bot -> Privileged Gateway Intents\n' +
-                '  and turn on "Server Members Intent", then restart the bot.',
+
+return client;
+}
+
+/** Intents the bot wants. GuildMembers resolves server nicknames for reports. */
+const FULL_INTENTS = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers];
+
+/** Intents the bot can always get. Names fall back to IDs without GuildMembers. */
+const BASE_INTENTS = [GatewayIntentBits.Guilds];
+
+/**
+ * Connects, degrading gracefully if a privileged intent is not enabled.
+ *
+ * GuildMembers must also be switched on in the Discord developer portal. If
+ * it is not, the gateway refuses the connection with DisallowedIntents. The
+ * first version of this change exited on that error, which took the bot
+ * offline until someone found the toggle -- a bad failure mode for a feature
+ * that only affects how names are displayed. Now the bot logs exactly where
+ * the switch is and reconnects with the base intents, so everything else keeps
+ * working and names simply show as IDs until the toggle is flipped.
+ */
+async function start(): Promise<void> {
+    const token = process.env.DISCORD_TOKEN;
+    const full = buildClient(FULL_INTENTS);
+
+    try {
+        await full.login(token);
+        return;
+    } catch (e: unknown) {
+        const code = typeof e === 'object' && e !== null ? (e as { code?: unknown }).code : undefined;
+        if (code !== 'DisallowedIntents') {
+            console.error('FATAL: Discord login failed:', e instanceof Error ? e.message : e);
+            process.exit(1);
+        }
+        await full.destroy();
+        console.warn(
+            'Discord refused the GuildMembers intent, so server nicknames will not resolve and names may show as IDs.\n' +
+                '  To fix: Discord developer portal -> your application -> Bot -> Privileged Gateway Intents\n' +
+                '  -> enable "Server Members Intent" -> Save, then restart the bot.\n' +
+                '  Continuing with reduced intents.',
         );
-    } else {
-        console.error('FATAL: Discord login failed:', e instanceof Error ? e.message : e);
     }
-    process.exit(1);
-});
+
+    const reduced = buildClient(BASE_INTENTS);
+    await reduced.login(token).catch((e: unknown) => {
+        console.error('FATAL: Discord login failed:', e instanceof Error ? e.message : e);
+        process.exit(1);
+    });
+}
+
+void start();
