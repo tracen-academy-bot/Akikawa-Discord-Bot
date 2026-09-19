@@ -69,14 +69,13 @@ The same file also sets:
 
    It must match the deployed URL exactly, including scheme, or sign-in fails.
 
-7. **Register the slash commands.** Once, from your machine:
+7. **Slash commands register themselves.** The bot pushes its command set to
+   Discord on every startup, so there is nothing to run from your machine.
+   Global registration can take up to an hour to propagate; set `DEV_GUILD_ID`
+   to register to one guild instantly instead.
 
-   ```bash
-   DISCORD_TOKEN=... DISCORD_CLIENT_ID=... npm run deploy-commands
-   ```
-
-   Set `DEV_GUILD_ID` too for instant registration in one guild; leave it unset
-   to register globally, which can take up to an hour to propagate.
+   `npm run deploy-commands` still exists for pushing commands without starting
+   the bot, but a normal deploy never needs it.
 
 ## Deploying onto an existing database
 
@@ -132,6 +131,7 @@ The deploy logs should show, in order:
 [entrypoint] Applying database migrations...
 [entrypoint] Migrations applied. Starting bot...
 Logged in as <bot>#0000
+Registered 5 global slash commands (propagation can take up to an hour).
 Database is reachable and migrated.
 Training timer scheduler started.
 Dashboard listening on 0.0.0.0:<port>

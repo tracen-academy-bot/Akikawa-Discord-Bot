@@ -13,6 +13,7 @@ import { classifyError, buildErrorEmbed } from './lib/errors';
 import { startScheduler } from './lib/timer/scheduler';
 import { startFanScheduler } from './lib/fans/scheduler';
 import { startDashboard } from './web/server';
+import { registerCommands } from './lib/registerCommands';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 
 const client = new Client({intents: [GatewayIntentBits.Guilds]});
@@ -23,8 +24,23 @@ const CASUAL_COUNCIL = process.env.CASUAL_COUNCIL_ROLE_ID!;
 
 const FORUM_ID = process.env.FORUM_CHANNEL_ID;
 
-client.once(Events.ClientReady, async () => {
-    console.log(`Logged in as ${client.user?.tag}`);
+client.once(Events.ClientReady, async (readyClient) => {
+    console.log(`Logged in as ${readyClient.user.tag}`);
+
+    // Self-registering removes the "run deploy-commands from your laptop" step
+    // from every deploy. A failure here is logged, not fatal: commands
+    // registered by a previous boot keep working, and the bot is still useful
+    // for its schedulers and dashboard even if Discord rejects the update.
+    try {
+        const { count, guildId } = await registerCommands(readyClient);
+        console.log(
+            guildId
+                ? `Registered ${count} slash commands to guild ${guildId}.`
+                : `Registered ${count} global slash commands (propagation can take up to an hour).`,
+        );
+    } catch (e) {
+        console.error('Slash command registration failed; previously registered commands remain:', e);
+    }
 
     // Verify the schema before accepting commands. A missing migration used to
     // surface only as a generic in-Discord failure; now it is a fatal startup

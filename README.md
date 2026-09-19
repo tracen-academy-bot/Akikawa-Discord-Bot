@@ -31,8 +31,7 @@ starts. Set `DATABASE_URL` host to `postgres` (the Compose service name), not
 
 ```bash
 npx prisma migrate deploy    # required — creates the tables
-npm run deploy-commands      # register slash commands with Discord
-npm run dev
+npm run dev                  # slash commands register themselves on start
 ```
 
 > **If every `/club` command fails**, the database is almost certainly not
@@ -103,9 +102,10 @@ them at a scratch database, not production.
 | `npm run dev` | Run with hot reload |
 | `npm run build` | Compile TypeScript to `dist/` |
 | `npm start` | Run the compiled build |
-| `npm run deploy-commands` | Register slash commands |
+| `npm run deploy-commands` | Register slash commands without starting the bot (not needed for a normal deploy) |
 | `npm run prisma:migrate` | Create and apply a migration (development) |
 | `npm test` | Run the timer and scheduler test suites |
 
-Set `DEV_GUILD_ID` to register commands to a single guild instantly; leave it
-empty to register globally, which can take up to an hour to propagate.
+The bot registers its slash commands on every startup. Set `DEV_GUILD_ID` to
+register to a single guild instantly; leave it empty to register globally,
+which can take up to an hour to propagate.

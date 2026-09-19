@@ -24,7 +24,7 @@ const VARIABLES: EnvVar[] = [
     { name: 'DISCORD_TOKEN', required: true, purpose: 'signing in to Discord' },
     { name: 'DATABASE_URL', required: true, purpose: 'the database connection' },
 
-    { name: 'DISCORD_CLIENT_ID', required: false, purpose: 'registering slash commands' },
+    { name: 'DISCORD_CLIENT_ID', required: false, purpose: 'the standalone deploy-commands script and dashboard sign-in (the bot registers its own commands on start)' },
     { name: 'OFFICER_ROLE_IDS', required: false, purpose: 'Club Manager permission checks (nobody will be an officer)' },
     { name: 'CLUB_ROLE_IDS', required: false, purpose: '/role club-role swapping' },
     { name: 'DEFAULT_ROLE_ID', required: false, purpose: '/role fallback role assignment' },
