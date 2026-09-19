@@ -71,8 +71,6 @@ export function buildPanel(timers: TrainingTimer[], context: PanelContext) {
     }
     embed.addFields({ name: 'Today', value: progress.join('\n') });
 
-    // Timers persist in the database, so this promise holds across restarts.
-    embed.setFooter({ text: 'Timers survive bot restarts — a run that ends during downtime still pings you.' });
     embed.setTimestamp();
 
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
