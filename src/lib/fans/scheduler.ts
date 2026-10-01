@@ -4,7 +4,7 @@ import { isConfigured } from '../umamoe/client';
 import { currentGameMonth, syncAllCircles, syncBenchmark } from './ingest';
 import { currentCircleProgress, formatReportDate } from './reports';
 import { renderFanReport } from '../image/renderFanReport';
-import { formatCompactFans, formatFans } from './metrics';
+import { formatCompactFans, formatFans, describeQuota } from './metrics';
 
 /**
  * Daily fan sync and report posting.
@@ -94,7 +94,7 @@ async function postReport(client: Client, circleId: string): Promise<void> {
     await alertChannel.send({
         content:
             `**${circle.name}** — ${behind.length} trainer${behind.length === 1 ? '' : 's'} behind quota ` +
-            `(${formatCompactFans(progress.effectiveQuota)}/month, day ${progress.daysElapsed}/${progress.daysInMonth})\n` +
+            `(${describeQuota(progress.quota, progress.period)} · ${progress.windowLabel})\n` +
             lines.join('\n'),
         allowedMentions: { users: [...mentionByViewer.values()] },
     });

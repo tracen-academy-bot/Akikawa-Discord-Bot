@@ -16,6 +16,13 @@ enum ClubRank {
     S_PLUS
 }
 
+/// Window a tracked circle's fan quota is measured over.
+enum QuotaPeriod {
+    DAY
+    WEEK
+    MONTH
+}
+
 enum ClubMemberRole {
     TRAINER
     ASSISTANT
@@ -125,8 +132,13 @@ model TrackedCircle {
     name            String
     /// Optional link to an internal Club record.
     clubId          String?
-    /// Fans each member is expected to earn per month.
-    monthlyQuota    BigInt    @default(0)
+    /// Fans each member is expected to earn per `quotaPeriod` window. The
+    /// column keeps its original name so no data moves; it held a monthly
+    /// amount before periods existed, which is what MONTH still means.
+    quota           BigInt      @default(0) @map("monthlyQuota")
+    /// Window the quota applies to. Weeks are days 1-7, 8-14, ... of the game
+    /// month, so the last one is short and its goal scales by its length.
+    quotaPeriod     QuotaPeriod @default(MONTH)
     /// Where scheduled reports are posted. May be a thread.
     reportChannelId String?
     /// Where behind-quota alerts are posted. May be a thread.

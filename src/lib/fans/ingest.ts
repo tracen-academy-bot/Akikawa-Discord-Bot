@@ -263,7 +263,9 @@ export async function loadCircleProgress(
     }
 
     return computeCircleProgress([...byViewer.values()], {
-        monthlyQuota: toSafeNumber(circle.monthlyQuota),
+        quota: toSafeNumber(circle.quota),
+        period: circle.quotaPeriod,
+        monthName: new Date(Date.UTC(year, month - 1, 1)).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' }),
         daysInMonth: daysInCalendarMonth(year, month),
         quotaDaysOffset,
     });

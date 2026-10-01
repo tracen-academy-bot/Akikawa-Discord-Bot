@@ -39,6 +39,11 @@ async function main() {
     check('parseQuota rejects words', parseQuota('lots'), null);
     check('parseQuota rejects empty', parseQuota(''), null);
     check('parseQuota rejects bad suffix', parseQuota('80X'), null);
+    check('parseQuota uppercase K', parseQuota('500K'), 500_000);
+    check('parseQuota thousands separators', parseQuota('80,000,000'), 80_000_000);
+    check('parseQuota separators with suffix', parseQuota('1,500M'), 1_500_000_000);
+    check('parseQuota rejects a misplaced comma', parseQuota('8,0M'), null);
+    check('parseQuota rejects a decimal comma', parseQuota('1,5M'), null);
 
     // ── uma.moe members with fields omitted ──────────────────────────────────
     // The spec marks no field required. An omitted previous_circle_id used to
@@ -61,7 +66,7 @@ async function main() {
     // ── Seed a circle with two members ────────────────────────────────────────
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     const circle = await prisma.trackedCircle.create({
-        data: { guildId: GUILD, circleId: BigInt(999001), name: 'Testrose', monthlyQuota: BigInt(80_000_000) },
+        data: { guildId: GUILD, circleId: BigInt(999001), name: 'Testrose', quota: BigInt(80_000_000) },
     });
 
     // Steady earner: exactly 3,000,000 per day for 10 days.
