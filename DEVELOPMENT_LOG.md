@@ -36,7 +36,10 @@ Officers still type it. Akikawa now handles it.
 - Dyno still answers `;` with its deprecation notice. Change or disable Dyno's prefix,
   or set `COMMAND_PREFIX` to something else.
 
-**Known unrelated issues seen while testing**
-- `tsc` fails on Prisma types (client not generated here) and on `src/lib/image/canvasUtils.ts`.
-- `ts-node` (used by `npm run dev` / `deploy-commands`) rejects the TS 6 config
-  (`moduleResolution` errors TS5107/TS5109).
+**Verification**
+- `tsc --noEmit` passes with zero errors once `prisma generate` has run.
+  (`prisma generate` needs `DATABASE_URL` set, even a placeholder, because
+  `prisma.config.ts` uses `env()`; the Dockerfile already sets one.)
+- `ts-node src/index.ts` compiles and reaches Discord login with the env vars set.
+- An earlier note here claimed `tsc` and `ts-node` were broken. That was wrong: both
+  failures came from the test sandbox (no `DATABASE_URL`, a test file outside `src/`).
