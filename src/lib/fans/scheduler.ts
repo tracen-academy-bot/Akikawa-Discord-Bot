@@ -1,16 +1,19 @@
 import { AttachmentBuilder, type Client } from 'discord.js';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
-import { currentGameMonth, syncAllCircles, syncBenchmark } from './ingest';
+import { backfillOnce, currentGameMonth, syncAllCircles, syncBenchmark } from './ingest';
 import { currentCircleProgress, formatReportDate } from './reports';
 import { renderFanReport } from '../image/renderFanReport';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
 
 /**
- * Daily fan sync and report posting.
+ * Fan sync and report posting, as two jobs:
  *
- * uma.moe refreshes circle data once a day. The job therefore runs once a day,
- * shortly after that refresh, rather than polling continuously.
+ *   hourly  pulls every active circle (and the benchmark) from uma.moe, so the
+ *           dashboard and commands stay current. uma.moe now refreshes live
+ *           figures hourly for most circles (every 5 minutes for the top 100).
+ *   daily   syncs once more and posts each circle's report and alerts, once a
+ *           day at FAN_SYNC_HOUR_UTC, so channels are not spammed hourly.
  *
  * Idempotence matters more than precision here: the container can restart at
  * any moment, so the job records its last run in the database and checks that
@@ -19,6 +22,7 @@ import { formatCompactFans, formatFans, describeQuota } from './metrics';
  */
 
 const JOB_NAME = 'daily-fan-sync';
+const HOURLY_JOB_NAME = 'hourly-fan-sync';
 
 /**
  * UTC hour to run at. Defaults to 13:00, an hour after the 12:00 GMT refresh
@@ -36,6 +40,17 @@ const ALERT_LIMIT = 10;
 /** `YYYY-MM-DD` in UTC, the unit the daily job is scheduled in. */
 function utcDayKey(date: Date): string {
     return date.toISOString().slice(0, 10);
+}
+
+/** `YYYY-MM-DDTHH` in UTC, the unit the hourly job is scheduled in. */
+function utcHourKey(date: Date): string {
+    return date.toISOString().slice(0, 13);
+}
+
+/** True when the hourly job has not yet run in the current UTC hour. */
+async function isHourlyDue(now: Date): Promise<boolean> {
+    const record = await prisma.jobRun.findUnique({ where: { id: HOURLY_JOB_NAME } });
+    return !record || utcHourKey(record.lastRunAt) !== utcHourKey(now);
 }
 
 /** True when the daily job has not yet run for the current UTC day. */
@@ -126,7 +141,33 @@ export async function runDailySync(client: Client): Promise<string> {
 }
 
 /**
- * Starts the daily job.
+ * Refreshes every active circle and the benchmark without posting anything.
+ * Like the daily job, the marker is written first so a crash cannot loop.
+ */
+async function runHourlySync(now: Date): Promise<void> {
+    await prisma.jobRun.upsert({
+        where: { id: HOURLY_JOB_NAME },
+        create: { id: HOURLY_JOB_NAME, lastRunAt: now, note: 'started' },
+        update: { lastRunAt: now, note: 'started' },
+    });
+    const { results, errors } = await syncAllCircles();
+    let benchmark = 'ok';
+    await syncBenchmark().catch((e: unknown) => {
+        benchmark = e instanceof Error ? e.message : String(e);
+    });
+    const note = `synced:${results.length} errors:${errors.length} benchmark:${benchmark}`;
+    await prisma.jobRun.update({ where: { id: HOURLY_JOB_NAME }, data: { note } });
+    if (errors.length > 0) console.warn(`Hourly fan sync errors: ${errors.join('; ')}`);
+
+    // One-time history import for any circle that has not had one, including
+    // circles added before backfill existed. A no-op once each has run.
+    for (const circle of await prisma.trackedCircle.findMany({ where: { active: true } })) {
+        await backfillOnce(circle);
+    }
+}
+
+/**
+ * Starts the fan jobs: hourly data sync, daily reports.
  *
  * @returns A function that stops the loop.
  */
@@ -143,7 +184,11 @@ export function startFanScheduler(client: Client): () => void {
         running = true;
         try {
             const now = new Date();
-            if (!(await isDue(now))) return;
+            if (!(await isDue(now))) {
+                // Not report time: just keep the data fresh, once an hour.
+                if (await isHourlyDue(now)) await runHourlySync(now);
+                return;
+            }
 
             // The marker is written before the work, not after. A crash midway
             // through must not cause a retry loop that re-posts reports; the

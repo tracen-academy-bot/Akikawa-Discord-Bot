@@ -9,7 +9,7 @@
  *
  *   npm run test:metrics
  */
-import { computeCircleProgress, periodWindow, type MemberSeries } from '../src/lib/fans/metrics';
+import { computeCircleProgress, monthGains, periodWindow, type MemberSeries } from '../src/lib/fans/metrics';
 
 const DAYS_IN_MONTH = 30;
 const DAYS_ELAPSED = 14;
@@ -60,20 +60,31 @@ const ROWS: Row[] = [
  * final day contributed `day14Gain`. Earlier days ramp evenly; only day 13 and
  * day 14 affect any assertion here.
  */
+/**
+ * Lifetime fan count every fixture member starts the month on. uma.moe's
+ * `daily_fans` are lifetime counts: index 0 is this starting value and index
+ * d is it plus what was earned over the first d game days.
+ */
+const LIFETIME_BASE = 1_000_000_000;
+
 function buildSeries(name: string, index: number, total: number, day14Gain: number): MemberSeries {
     const dailyFans = new Array<number>(31).fill(0);
+    const base = LIFETIME_BASE + index * 7_919;
     const day13 = total - day14Gain;
+    dailyFans[0] = base;
     for (let day = 1; day <= 13; day += 1) {
-        dailyFans[day - 1] = Math.round((day13 * day) / 13);
+        dailyFans[day] = base + Math.round((day13 * day) / 13);
     }
-    dailyFans[13] = total;
+    dailyFans[14] = base + total;
     return { viewerId: index + 1, trainerName: name, dailyFans, shameScore: null };
 }
 
 /** A member earning `perDay` every day from `fromDay` through `toDay`. */
 function steady(viewerId: number, perDay: number, toDay: number, fromDay = 1): MemberSeries {
     const dailyFans = new Array<number>(31).fill(0);
-    for (let day = fromDay; day <= toDay; day += 1) dailyFans[day - 1] = perDay * (day - fromDay + 1);
+    // Starting snapshot the day before the member's first earning day.
+    dailyFans[fromDay - 1] = LIFETIME_BASE;
+    for (let day = fromDay; day <= toDay; day += 1) dailyFans[day] = LIFETIME_BASE + perDay * (day - fromDay + 1);
     return { viewerId, trainerName: `m${viewerId}`, dailyFans, shameScore: null };
 }
 
@@ -157,6 +168,44 @@ function periodChecks() {
     check('month label is the month name', month.windowLabel, 'October');
 }
 
+/**
+ * uma.moe sends lifetime fan counts. Production once reported fish@duck at
+ * 1,122,234,894 "fans this month" on day 1, while uma.moe's own page showed
+ * a monthly gain of +258,774. These pin the month to its starting snapshot.
+ */
+function lifetimeChecks() {
+    const raw = (values: number[]) => [...values, ...new Array<number>(31 - values.length).fill(0)];
+    const member = (viewerId: number, values: number[]): MemberSeries => ({ viewerId, trainerName: `l${viewerId}`, dailyFans: raw(values), shameScore: null });
+
+    // fish@duck, from the uma.moe circle page on 2026-10-01.
+    const fish = computeCircleProgress([member(1, [1_121_976_120, 1_122_234_894])], { quota: 240_000_000, daysInMonth: 31 });
+    check('monthly gain matches uma.moe, not the lifetime count', fish.members[0]!.total, 258_774);
+    check('one game day elapsed after the starting snapshot', fish.daysElapsed, 1);
+    check('latest day gain', fish.members[0]!.latestDayGain, 258_774);
+
+    // Only starting values so far: nobody has earned or owes anything yet.
+    const dayOne = computeCircleProgress([member(1, [900_000_000])], { quota: 240_000_000, daysInMonth: 31 });
+    check('starting snapshot alone counts as zero earned', dayOne.members[0]!.total, 0);
+    check('no game days elapsed yet', dayOne.daysElapsed, 0);
+    check('days remaining before any data covers the whole month', dayOne.daysRemaining, 31);
+
+    // A trainer who earned nothing for two days is still present and behind.
+    const idle = computeCircleProgress([member(1, [500, 500, 500, 2_500])], { quota: 31_000, daysInMonth: 31 });
+    const im = idle.members[0]!;
+    check('zero-gain days still count toward quota', im.quotaDays, 3);
+    check('idle member total', im.total, 2_000);
+    check('idle member behind', im.behind, 1_000);
+
+    // Joining on game day 3: starting snapshot at index 2, owes from day 3.
+    const join = monthGains(raw([0, 0, 700, 1_700, 2_700]));
+    check('mid-month joiner first owing day', join.firstDay, 3);
+    check('mid-month joiner earned through day 4', join.gains[3], 2_000);
+
+    // A missed sync carries forward instead of dropping to zero.
+    const gap = monthGains(raw([100, 200, 0, 400]));
+    check('missed sync is a zero-gain day', gap.gains.join(','), '100,100,300');
+}
+
 function main() {
     const series = ROWS.map(([name, total, , , , , gain], i) => buildSeries(name, i, total, gain));
 
@@ -193,6 +242,7 @@ function main() {
     console.log(`\n${rowsOk}/${ROWS.length} reference rows reproduced exactly.`);
 
     periodChecks();
+    lifetimeChecks();
     console.log(`${pass} assertions passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);
 }

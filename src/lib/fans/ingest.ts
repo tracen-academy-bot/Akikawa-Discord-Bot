@@ -33,7 +33,15 @@ export interface SyncResult {
     daysWritten: number;
 }
 
-/** Current game year and month, in the game's timezone. */
+/**
+ * Current game year, month and day, in the game's timezone.
+ *
+ * The game month starts on the 2nd JST, not the 1st (uma.moe's API: "the
+ * current game month starting at the 2nd JST"). The 1st is the previous
+ * month's final day and the new month's starting snapshot, so on the 1st this
+ * still returns the previous month, as uma.moe does. `day` is the game day:
+ * the 2nd is day 1.
+ */
 export function currentGameMonth(now = new Date()): { year: number; month: number; day: number } {
     const parts = new Intl.DateTimeFormat('en-CA', {
         timeZone: GAME_TIMEZONE,
@@ -42,8 +50,10 @@ export function currentGameMonth(now = new Date()): { year: number; month: numbe
         day: '2-digit',
     }).format(now);
 
-    const [year, month, day] = parts.split('-').map(Number);
-    return { year: year!, month: month!, day: day! };
+    const [y, m, d] = parts.split('-').map(Number);
+    // One calendar day back: the 2nd becomes day 1, the 1st the previous month's last.
+    const game = new Date(Date.UTC(y!, m! - 1, d! - 1));
+    return { year: game.getUTCFullYear(), month: game.getUTCMonth() + 1, day: game.getUTCDate() };
 }
 
 /** One member's fields as stored, with every optional API field resolved. */
@@ -100,7 +110,13 @@ export function normalizeMember(member: UmaCircleMember, fallback: { year: numbe
  * happened yet, or the member was not in the circle, and storing those would
  * make an absent member indistinguishable from one who earned nothing.
  */
-export async function syncCircle(circle: TrackedCircle, month?: number, year?: number): Promise<SyncResult> {
+export async function syncCircle(
+    circle: TrackedCircle,
+    month?: number,
+    year?: number,
+    /** False when importing a past month, so its name and rank do not overwrite today's. */
+    { updateCircle = true }: { updateCircle?: boolean } = {},
+): Promise<SyncResult> {
     const circleId = toSafeNumber(circle.circleId);
     const response = await getCircle(circleId, month, year);
 
@@ -152,12 +168,70 @@ export async function syncCircle(circle: TrackedCircle, month?: number, year?: n
     }
 
     const name = response.circle.name ?? circle.name;
-    await prisma.trackedCircle.update({
-        where: { id: circle.id },
-        data: { name, monthlyRank: response.circle.monthly_rank ?? null, lastSyncedAt: new Date() },
-    });
+    if (updateCircle) {
+        await prisma.trackedCircle.update({
+            where: { id: circle.id },
+            data: { name, monthlyRank: response.circle.monthly_rank ?? null, lastSyncedAt: new Date() },
+        });
+    }
 
     return { circleId, name, membersSeen: members.length, daysWritten };
+}
+
+/** How many past months a backfill reaches back, at most. */
+export const BACKFILL_MONTHS = 12;
+
+/** The game month `back` months before the given one. */
+export function monthsBefore(year: number, month: number, back: number): { year: number; month: number } {
+    const d = new Date(Date.UTC(year, month - 1 - back, 1));
+    return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1 };
+}
+
+/**
+ * Imports a circle's past months from uma.moe, newest first, stopping at the
+ * first month with no members (the circle did not exist yet, or uma.moe keeps
+ * no older history) or after BACKFILL_MONTHS. Snapshot writes are upserts, so
+ * running it twice is harmless.
+ *
+ * @returns The months imported, as "YYYY-MM".
+ */
+export async function backfillCircle(circle: TrackedCircle, maxMonths = BACKFILL_MONTHS): Promise<string[]> {
+    const { year, month } = currentGameMonth();
+    const imported: string[] = [];
+    for (let back = 1; back <= maxMonths; back += 1) {
+        const target = monthsBefore(year, month, back);
+        const result = await syncCircle(circle, target.month, target.year, { updateCircle: false });
+        if (result.membersSeen === 0) break;
+        imported.push(`${target.year}-${String(target.month).padStart(2, '0')}`);
+    }
+    return imported;
+}
+
+/**
+ * Runs `backfillCircle` once per circle, ever. The marker is written before
+ * the work so a crash or restart cannot start a second import alongside the
+ * first; a failed import records its error and can be retried by deleting
+ * the `backfill:<id>` JobRun row. Never throws.
+ */
+export async function backfillOnce(circle: TrackedCircle): Promise<void> {
+    const id = `backfill:${circle.id}`;
+    try {
+        // Creating the marker is the lock: if two callers race (the hourly job
+        // and an add-circle request), the second create fails and that caller
+        // backs off. Callers fire this without awaiting, so it must not throw.
+        await prisma.jobRun.create({ data: { id, lastRunAt: new Date(), note: 'started' } });
+    } catch {
+        return;
+    }
+    try {
+        const months = await backfillCircle(circle);
+        await prisma.jobRun.update({ where: { id }, data: { note: `imported ${months.length}: ${months.join(' ') || 'none'}` } });
+        console.log(`Backfilled ${circle.name}: ${months.length} past month(s).`);
+    } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        await prisma.jobRun.update({ where: { id }, data: { note: `failed: ${message}` } });
+        console.error(`Backfill for ${circle.name} failed:`, message);
+    }
 }
 
 /** Syncs every active tracked circle. Individual failures do not stop the run. */

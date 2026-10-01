@@ -78,17 +78,22 @@ async function main() {
         faller.push(day <= 5 ? 5_000_000 * day : 25_000_000 + 500_000 * (day - 5));
     }
 
-    for (let day = 1; day <= 10; day += 1) {
+    // Stored rows are uma.moe's lifetime counts: stored day 1 is the month's
+    // starting value, and stored day d + 1 adds what was earned through game
+    // day d. So 10 game days of earnings take 11 rows.
+    const BASE = 2_000_000_000;
+    for (let stored = 1; stored <= 11; stored += 1) {
+        const earned = (series: number[]) => (stored === 1 ? 0 : series[stored - 2]!);
         await prisma.fanSnapshot.create({
             data: {
                 trackedCircleId: circle.id, viewerId: BigInt(1), trainerName: 'Steady',
-                year: YEAR, month: MONTH, day, cumulativeFans: BigInt(steady[day - 1]!), shameScore: 4,
+                year: YEAR, month: MONTH, day: stored, cumulativeFans: BigInt(BASE + earned(steady)), shameScore: 4,
             },
         });
         await prisma.fanSnapshot.create({
             data: {
                 trackedCircleId: circle.id, viewerId: BigInt(2), trainerName: 'ハルウララ',
-                year: YEAR, month: MONTH, day, cumulativeFans: BigInt(faller[day - 1]!),
+                year: YEAR, month: MONTH, day: stored, cumulativeFans: BigInt(BASE + 7 + earned(faller)),
             },
         });
     }
@@ -140,7 +145,8 @@ async function main() {
 
     // ── Gap handling: a missed sync must read as a zero-gain day ──────────────
     await prisma.fanSnapshot.deleteMany({
-        where: { trackedCircleId: circle.id, viewerId: BigInt(1), day: 9 },
+        // Game day 9 is stored day 10 (stored day 1 is the starting value).
+        where: { trackedCircleId: circle.id, viewerId: BigInt(1), day: 10 },
     });
     const gapped = await buildTrainerReport(circle, BigInt(1), 4, null, { year: YEAR, month: MONTH });
     check('missing day reads as zero gain, not a spike',

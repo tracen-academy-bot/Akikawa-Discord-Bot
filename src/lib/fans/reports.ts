@@ -1,7 +1,7 @@
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { BENCHMARK_TIERS, currentGameMonth, loadBenchmarkHistory, loadCircleProgress } from './ingest';
-import { daysInCalendarMonth, toSafeNumber, type CircleProgress, quotaPerDayFor } from './metrics';
+import { daysInCalendarMonth, toSafeNumber, type CircleProgress, quotaPerDayFor, monthGains } from './metrics';
 import type { TrainerReportData } from '../image/renderTrainerReport';
 import type { BenchmarkData } from '../image/renderBenchmark';
 
@@ -34,7 +34,8 @@ export async function currentCircleProgress(circle: TrackedCircle): Promise<Circ
 
 /** Formats a game month as a report heading, e.g. "September 14, 2026". */
 export function formatReportDate(year: number, month: number, day: number): string {
-    return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString('en-US', {
+    // `day` is a game day; game day 1 is the 2nd of the calendar month.
+    return new Date(Date.UTC(year, month - 1, day + 1)).toLocaleDateString('en-US', {
         timeZone: 'UTC',
         year: 'numeric',
         month: 'long',
@@ -67,33 +68,30 @@ export async function buildTrainerReport(
 
     if (snapshots.length === 0) return null;
 
-    const cumulative = new Array<number>(32).fill(0);
+    // Snapshot rows hold lifetime counts; stored day k is index k-1.
+    const raw = new Array<number>(31).fill(0);
     let trainerName = viewerId.toString();
     let shameScore: number | null = null;
     let lastUpdated: Date | null = null;
-    let lastDay = 0;
 
     for (const snapshot of snapshots) {
-        cumulative[snapshot.day] = toSafeNumber(snapshot.cumulativeFans);
+        raw[snapshot.day - 1] = toSafeNumber(snapshot.cumulativeFans);
         if (snapshot.trainerName) trainerName = snapshot.trainerName;
         if (snapshot.shameScore !== null) shameScore = snapshot.shameScore;
         lastUpdated = snapshot.recordedAt;
-        lastDay = Math.max(lastDay, snapshot.day);
     }
 
-    // Carry totals forward across days with no row, so a missed sync reads as
-    // a zero-gain day rather than a drop to zero and a spike afterwards.
-    for (let day = 1; day <= lastDay; day += 1) {
-        if (cumulative[day] === 0) cumulative[day] = cumulative[day - 1] ?? 0;
-    }
+    // This month's gains by game day. Missed syncs carry forward inside
+    // monthGains, so they read as zero-gain days rather than spikes.
+    const earned = monthGains(raw);
+    const lastDay = earned.lastDay;
+    const earnedThrough = (day: number) => (day < 1 ? 0 : (earned.gains[day - 1] ?? 0));
+    const gainOn = (day: number) => Math.max(0, earnedThrough(day) - earnedThrough(day - 1));
 
-    const firstDay = Math.max(1, lastDay - windowDays + 1);
+    const firstDay = Math.max(earned.firstDay || 1, lastDay - windowDays + 1);
     const dailyGains: { label: string; gain: number }[] = [];
     for (let day = firstDay; day <= lastDay; day += 1) {
-        dailyGains.push({
-            label: `Day ${day}`,
-            gain: Math.max(0, (cumulative[day] ?? 0) - (cumulative[day - 1] ?? 0)),
-        });
+        dailyGains.push({ label: `Day ${day}`, gain: gainOn(day) });
     }
 
     const windowFans = dailyGains.reduce((sum, d) => sum + d.gain, 0);
@@ -106,8 +104,8 @@ export async function buildTrainerReport(
     let bestDay: { label: string; gain: number } | null = null;
     let aboveQuotaStreak = 0;
     let streakOpen = true;
-    for (let day = lastDay; day >= 1; day -= 1) {
-        const gain = Math.max(0, (cumulative[day] ?? 0) - (cumulative[day - 1] ?? 0));
+    for (let day = lastDay; day >= Math.max(1, earned.firstDay); day -= 1) {
+        const gain = gainOn(day);
         if (bestDay === null || gain > bestDay.gain) bestDay = { label: `Day ${day}`, gain };
         // Counted from the latest day backwards; the first miss ends it.
         if (streakOpen && gain >= quotaPerDay && quotaPerDay > 0) aboveQuotaStreak += 1;
@@ -143,19 +141,29 @@ export async function buildTrainerReport(
  */
 async function clubRateByDay(circle: TrackedCircle): Promise<Record<number, number>> {
     const { year, month } = currentGameMonth();
-    const rows = await prisma.fanSnapshot.groupBy({
-        by: ['day'],
+    const rows = await prisma.fanSnapshot.findMany({
         where: { trackedCircleId: circle.id, year, month },
-        _sum: { cumulativeFans: true },
-        _count: { viewerId: true },
+        select: { viewerId: true, day: true, cumulativeFans: true },
     });
 
-    const rateByDay: Record<number, number> = {};
+    // Snapshots are lifetime counts; rates need this month's gains per member.
+    const raw = new Map<string, number[]>();
     for (const row of rows) {
-        const sum = row._sum.cumulativeFans;
-        const count = row._count.viewerId;
-        if (sum === null || count === 0 || row.day === 0) continue;
-        rateByDay[row.day] = Math.floor(toSafeNumber(sum) / count / row.day);
+        const series = raw.get(String(row.viewerId)) ?? new Array<number>(31).fill(0);
+        series[row.day - 1] = toSafeNumber(row.cumulativeFans);
+        raw.set(String(row.viewerId), series);
+    }
+    const members = [...raw.values()].map(monthGains);
+    const lastDay = Math.max(0, ...members.map((g) => g.lastDay));
+
+    // Keyed by game day, the same day number the benchmark history uses
+    // (currentGameMonth().day); the starting snapshot itself has no rate.
+    const rateByDay: Record<number, number> = {};
+    for (let day = 1; day <= lastDay; day += 1) {
+        const present = members.filter((g) => g.firstDay > 0 && g.firstDay <= day && g.lastDay >= day);
+        if (present.length === 0) continue;
+        const earned = present.reduce((sum, g) => sum + (g.gains[day - 1] ?? 0), 0);
+        rateByDay[day] = Math.floor(earned / present.length / day);
     }
     return rateByDay;
 }
