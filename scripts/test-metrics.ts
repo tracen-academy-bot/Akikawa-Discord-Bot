@@ -9,7 +9,7 @@
  *
  *   npm run test:metrics
  */
-import { computeCircleProgress, type MemberSeries } from '../src/lib/fans/metrics';
+import { computeCircleProgress, periodWindow, type MemberSeries } from '../src/lib/fans/metrics';
 
 const DAYS_IN_MONTH = 30;
 const DAYS_ELAPSED = 14;
@@ -70,11 +70,98 @@ function buildSeries(name: string, index: number, total: number, day14Gain: numb
     return { viewerId: index + 1, trainerName: name, dailyFans, shameScore: null };
 }
 
+/** A member earning `perDay` every day from `fromDay` through `toDay`. */
+function steady(viewerId: number, perDay: number, toDay: number, fromDay = 1): MemberSeries {
+    const dailyFans = new Array<number>(31).fill(0);
+    for (let day = fromDay; day <= toDay; day += 1) dailyFans[day - 1] = perDay * (day - fromDay + 1);
+    return { viewerId, trainerName: `m${viewerId}`, dailyFans, shameScore: null };
+}
+
+/**
+ * Daily and weekly quota periods. Weeks are days 1-7, 8-14, ... of the game
+ * month; the last one is short and its goal scales by its length.
+ */
+function periodChecks() {
+    const w = (p: Parameters<typeof periodWindow>[0], day: number, dim: number) => {
+        const r = periodWindow(p, day, dim);
+        return `${r.start}-${r.end}#${r.index}`;
+    };
+    check('week 1 is days 1-7', w('WEEK', 1, 31), '1-7#1');
+    check('day 7 closes week 1', w('WEEK', 7, 31), '1-7#1');
+    check('day 8 opens week 2', w('WEEK', 8, 31), '8-14#2');
+    check('31-day month ends on a 3-day week', w('WEEK', 30, 31), '29-31#5');
+    check('30-day month ends on a 2-day week', w('WEEK', 29, 30), '29-30#5');
+    check('28-day February has four full weeks', w('WEEK', 28, 28), '22-28#4');
+    check('no data yet sits in week 1', w('WEEK', 0, 30), '1-7#1');
+    check('day window is the day itself', w('DAY', 9, 30), '9-9#1');
+    check('month window is the whole month', w('MONTH', 9, 30), '1-30#1');
+
+    // Weekly, mid-month: 10M/day for 9 days against 70M/week. Week 2 is days
+    // 8-14; two days in, the member has 20M of an expected 20M.
+    const weekly = computeCircleProgress([steady(1, 10_000_000, 9)], { quota: 70_000_000, period: 'WEEK', daysInMonth: 30 });
+    const wm = weekly.members[0]!;
+    check('weekly window', `${weekly.windowStart}-${weekly.windowEnd}`, '8-14');
+    check('weekly label', weekly.windowLabel, 'Week 2 · days 8–14');
+    check('weekly per-day rate', weekly.quotaPerDay, 10_000_000);
+    check('weekly goal for a full week', weekly.effectiveQuota, 70_000_000);
+    check('weekly total counts only this week', wm.total, 20_000_000);
+    check('weekly expected covers 2 days', wm.expected, 20_000_000);
+    check('weekly on pace', wm.onPace, true);
+    check('weekly days remaining in the week', weekly.daysRemaining, 6);
+    check('weekly projection is to the end of the week', wm.projectedTotal, 70_000_000);
+    check('weekly average is within the week', wm.avgPerDay, 10_000_000);
+
+    // Short final week: day 30 of a 31-day month, 9M/day against 70M/week.
+    // Days 29-31 owe 3/7 of 70M = 30M; two days in, 18M of an expected 20M.
+    const short = computeCircleProgress([steady(1, 9_000_000, 30)], { quota: 70_000_000, period: 'WEEK', daysInMonth: 31 });
+    const sm = short.members[0]!;
+    check('short week window', `${short.windowStart}-${short.windowEnd}`, '29-31');
+    check('short week goal scales by days', short.effectiveQuota, 30_000_000);
+    check('short week total', sm.total, 18_000_000);
+    check('short week behind', sm.behind, 2_000_000);
+    check('short week days remaining', short.daysRemaining, 2);
+    check('short week need/day spreads the shortfall', sm.needPerDay, 6_000_000);
+
+    // A member who joins mid-week owes quota only from their first day.
+    const joiner = computeCircleProgress([steady(1, 10_000_000, 12), steady(2, 10_000_000, 12, 10)], {
+        quota: 70_000_000,
+        period: 'WEEK',
+        daysInMonth: 30,
+    });
+    const late = joiner.members.find((m) => m.viewerId === 2)!;
+    check('mid-week joiner counts 3 days', late.quotaDays, 3);
+    check('mid-week joiner expected', late.expected, 30_000_000);
+    check('mid-week joiner total', late.total, 30_000_000);
+
+    // Rank movement resets with the window: none on a week's first day.
+    const firstDay = computeCircleProgress([steady(1, 10_000_000, 8), steady(2, 9_000_000, 8)], {
+        quota: 70_000_000,
+        period: 'WEEK',
+        daysInMonth: 30,
+    });
+    check('no rank movement on a week\'s first day', firstDay.members[0]!.rankChange, null);
+
+    // Daily: the window is the latest day; 7M earned on day 5 against 8M.
+    const daily = computeCircleProgress([steady(1, 7_000_000, 5)], { quota: 8_000_000, period: 'DAY', daysInMonth: 30 });
+    const dm = daily.members[0]!;
+    check('daily label', daily.windowLabel, 'Day 5');
+    check('daily goal is the quota', daily.effectiveQuota, 8_000_000);
+    check('daily total is that day\'s gain', dm.total, 7_000_000);
+    check('daily behind', dm.behind, 1_000_000);
+    check('daily need is the rest of today', dm.needPerDay, 1_000_000);
+    check('daily days remaining', daily.daysRemaining, 1);
+
+    // MONTH stays the default, labelled with the month name when given.
+    const month = computeCircleProgress([steady(1, 3_000_000, 5)], { quota: 90_000_000, daysInMonth: 30, monthName: 'October' });
+    check('month is the default period', month.period, 'MONTH');
+    check('month label is the month name', month.windowLabel, 'October');
+}
+
 function main() {
     const series = ROWS.map(([name, total, , , , , gain], i) => buildSeries(name, i, total, gain));
 
     const progress = computeCircleProgress(series, {
-        monthlyQuota: MONTHLY_QUOTA,
+        quota: MONTHLY_QUOTA,
         daysInMonth: DAYS_IN_MONTH,
     });
 
@@ -104,6 +191,8 @@ function main() {
     }
 
     console.log(`\n${rowsOk}/${ROWS.length} reference rows reproduced exactly.`);
+
+    periodChecks();
     console.log(`${pass} assertions passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);
 }

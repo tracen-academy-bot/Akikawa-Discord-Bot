@@ -1,7 +1,7 @@
 import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
 import { THEME, dashNum, drawLabel, drawRule, drawText, placeColor } from './theme';
 import { font } from './fonts';
-import { formatCompactFans, formatMillionsFans, type CircleProgress, type MemberProgress } from '../fans/metrics';
+import { describeQuota, formatCompactFans, formatMillionsFans, periodAdjective, type CircleProgress, type MemberProgress } from '../fans/metrics';
 
 /**
  * The club fan-quota leaderboard.
@@ -98,21 +98,27 @@ function drawSparkline(ctx: SKRSContext2D, gains: number[], x: number, cy: numbe
     ctx.fill();
 }
 
-/** Draws the club-wide quota progress bar with its labels. */
+/**
+ * Draws the club-wide quota progress bar for the current window (month, week
+ * or day) with its labels.
+ */
 function drawClubProgress(ctx: SKRSContext2D, progress: CircleProgress, y: number) {
     const barX = MARGIN;
     const barWidth = WIDTH - MARGIN * 2;
     const ratio = progress.quotaTarget > 0 ? Math.min(1, progress.totalFans / progress.quotaTarget) : 0;
+    const windowDays = progress.windowEnd - progress.windowStart + 1;
     const expectedRatio =
-        progress.daysInMonth > 0 ? Math.min(1, progress.daysElapsed / progress.daysInMonth) : 0;
+        windowDays > 0 ? Math.min(1, Math.max(0, progress.daysElapsed - progress.windowStart + 1) / windowDays) : 0;
 
     drawRule(ctx, barX, y, barWidth, THEME.line, 4);
     drawRule(ctx, barX, y, barWidth * ratio, THEME.gold, 4);
 
     // A tick where the club *should* be today, so the bar reads as pace, not
-    // just accumulation.
-    ctx.fillStyle = THEME.text;
-    ctx.fillRect(barX + barWidth * expectedRatio - 1, y - 4, 2, 12);
+    // just accumulation. Not in DAY mode, where today is the whole window.
+    if (progress.period !== 'DAY') {
+        ctx.fillStyle = THEME.text;
+        ctx.fillRect(barX + barWidth * expectedRatio - 1, y - 4, 2, 12);
+    }
 
     const pct = progress.quotaTarget > 0 ? ((progress.totalFans / progress.quotaTarget) * 100).toFixed(1) : '0.0';
     drawText(ctx, `${formatMillionsFans(progress.totalFans)} of ${formatMillionsFans(progress.quotaTarget)} · ${pct}%`, barX, y + 26, {
@@ -121,15 +127,20 @@ function drawClubProgress(ctx: SKRSContext2D, progress: CircleProgress, y: numbe
     });
     drawText(
         ctx,
-        `${progress.onPaceCount} of ${progress.members.length} on pace · projected ${formatMillionsFans(progress.projectedTotalFans)}`,
+        `${progress.onPaceCount} of ${progress.members.length} on pace` +
+            (progress.period === 'DAY' ? '' : ` · projected ${formatMillionsFans(progress.projectedTotalFans)}`),
         barX + barWidth,
         y + 26,
         { spec: '400 13px', color: THEME.muted, align: 'right' },
     );
 }
 
-/** Draws one member row. */
-function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number) {
+/**
+ * Draws one member row. `rates` is false in DAY mode, where the average,
+ * need per day, latest-day gain and projection would only repeat the day's
+ * total or its shortfall.
+ */
+function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number, rates: boolean) {
     const cy = y + ROW_HEIGHT / 2 + 6;
     const tint = placeColor(m.rank);
 
@@ -165,12 +176,15 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number
         color: m.behind > 0 ? THEME.red : THEME.faint,
         align: 'right',
     });
-    drawText(ctx, dashNum(m.avgPerDay), COL.avgDay, cy, { spec: '400 15px', color: THEME.muted, align: 'right' });
+    if (rates) drawText(ctx, dashNum(m.avgPerDay), COL.avgDay, cy, { spec: '400 15px', color: THEME.muted, align: 'right' });
+    if (!rates) return;
+
     drawText(ctx, dashNum(m.needPerDay), COL.needDay, cy, {
         spec: '500 15px',
         color: m.needPerDay !== null ? THEME.gold : THEME.faint,
         align: 'right',
     });
+
     drawText(ctx, dashNum(m.latestDayGain), COL.dayN, cy, {
         spec: '400 15px',
         color: m.latestDayGain === 0 ? THEME.faint : THEME.muted,
@@ -183,6 +197,21 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number
         color: willMakeQuota ? THEME.green : m.onPace ? THEME.muted : THEME.red,
         align: 'right',
     });
+}
+
+/**
+ * Header line: report kind, window, configured quota and per-day rate. A short
+ * final week says its goal was scaled, so a smaller target never reads as a
+ * mistake.
+ */
+function reportSubtitle(p: CircleProgress): string {
+    const parts = [`${periodAdjective(p.period).toLowerCase()} report`];
+    if (p.period !== 'DAY') parts.push(p.windowLabel.toLowerCase());
+    parts.push(`day ${p.daysElapsed} of ${p.daysInMonth}`, `quota ${describeQuota(p.quota, p.period)} per member`);
+    const windowDays = p.windowEnd - p.windowStart + 1;
+    if (p.period === 'WEEK' && windowDays < 7) parts.push(`${windowDays}-day week, goal ${formatCompactFans(p.effectiveQuota)}`);
+    if (p.period !== 'DAY') parts.push(`${formatCompactFans(p.quotaPerDay)}/day`);
+    return parts.join(' · ');
 }
 
 export async function renderFanReport(progress: CircleProgress, meta: FanReportMeta): Promise<Buffer> {
@@ -201,13 +230,7 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     const rankLabel = meta.monthlyRank === null ? 'UNRANKED' : `RANK #${meta.monthlyRank}`;
     drawLabel(ctx, `${meta.dateLabel} · ${rankLabel} · ${meta.memberCount} MEMBERS`, WIDTH - MARGIN, 58, THEME.muted, 14, 'right');
 
-    drawText(
-        ctx,
-        `day ${progress.daysElapsed} of ${progress.daysInMonth} · quota ${formatCompactFans(progress.effectiveQuota)} per member · ${formatCompactFans(progress.quotaPerDay)}/day`,
-        MARGIN,
-        90,
-        { spec: '400 14px', color: THEME.gold },
-    );
+    drawText(ctx, reportSubtitle(progress), MARGIN, 90, { spec: '400 14px', color: THEME.gold });
 
     drawClubProgress(ctx, progress, 118);
     drawRule(ctx, MARGIN, HEADER_HEIGHT - 4, WIDTH - MARGIN * 2, THEME.gold, 1.5);
@@ -217,13 +240,16 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     drawLabel(ctx, '#', COL.rank, hy, THEME.muted);
     drawLabel(ctx, 'Trainer', COL.trainer, hy, THEME.muted);
     drawLabel(ctx, '7d trend', COL.trendLeft, hy, THEME.muted);
-    drawLabel(ctx, 'Total', COL.total, hy, THEME.muted, 12, 'right');
+    const rates = progress.period !== 'DAY';
+    drawLabel(ctx, rates ? 'Total' : 'Today', COL.total, hy, THEME.muted, 12, 'right');
     drawLabel(ctx, 'Expected', COL.expected, hy, THEME.muted, 12, 'right');
     drawLabel(ctx, 'Behind', COL.behind, hy, THEME.muted, 12, 'right');
-    drawLabel(ctx, 'Avg/day', COL.avgDay, hy, THEME.muted, 12, 'right');
-    drawLabel(ctx, 'Need/day', COL.needDay, hy, THEME.muted, 12, 'right');
-    drawLabel(ctx, `Day ${progress.daysElapsed}`, COL.dayN, hy, THEME.muted, 12, 'right');
-    drawLabel(ctx, 'Proj.', COL.projected, hy, THEME.muted, 12, 'right');
+    if (rates) drawLabel(ctx, 'Avg/day', COL.avgDay, hy, THEME.muted, 12, 'right');
+    if (rates) drawLabel(ctx, 'Need/day', COL.needDay, hy, THEME.muted, 12, 'right');
+    if (rates) {
+        drawLabel(ctx, `Day ${progress.daysElapsed}`, COL.dayN, hy, THEME.muted, 12, 'right');
+        drawLabel(ctx, 'Proj.', COL.projected, hy, THEME.muted, 12, 'right');
+    }
     drawRule(ctx, MARGIN, HEADER_HEIGHT + COLUMN_HEADER_HEIGHT - 6, WIDTH - MARGIN * 2, THEME.line);
 
     let y = HEADER_HEIGHT + COLUMN_HEADER_HEIGHT;
@@ -235,7 +261,7 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
 
     // ── Rows ──────────────────────────────────────────────────────────────────
     for (const member of progress.members) {
-        drawRow(ctx, member, y, progress.effectiveQuota);
+        drawRow(ctx, member, y, progress.effectiveQuota, rates);
         y += ROW_HEIGHT;
         drawRule(ctx, MARGIN, y - 1, WIDTH - MARGIN * 2, THEME.line);
     }
@@ -245,14 +271,16 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     const behind = progress.members.length - progress.onPaceCount;
     drawLabel(
         ctx,
-        `Σ  ${progress.members.length} members · ${behind} behind · day ${progress.daysElapsed}/${progress.daysInMonth}`,
+        `Σ  ${progress.members.length} members · ${behind} behind · ${progress.windowLabel}`,
         MARGIN,
         y + 42,
         THEME.gold,
         13,
     );
     drawText(ctx, formatMillionsFans(progress.totalFans), COL.total, y + 44, { spec: '700 19px', color: THEME.text, align: 'right' });
-    drawLabel(ctx, `projected ${formatMillionsFans(progress.projectedTotalFans)} of ${formatMillionsFans(progress.quotaTarget)}`, COL.projected, y + 42, THEME.muted, 12, 'right');
+    if (rates) {
+        drawLabel(ctx, `projected ${formatMillionsFans(progress.projectedTotalFans)} of ${formatMillionsFans(progress.quotaTarget)}`, COL.projected, y + 42, THEME.muted, 12, 'right');
+    }
 
     return canvas.encode('png');
 }

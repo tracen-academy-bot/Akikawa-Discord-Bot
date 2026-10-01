@@ -100,3 +100,29 @@ under-reports someone who is behind.
 **To close this**: capture one real `/api/v4/circles` payload for a circle with
 a known mid-month transfer and compare `previous_circle_id` against that
 member's first non-zero day. That pins the rule down in a single observation.
+
+## Quota periods (added 2026-10-01)
+
+A circle's quota applies to a period, set with `/fans circle add|config period:`
+or the dashboard's "Per" selector. The amount is entered *for that period*
+("72M per week"). Everything above describes MONTH, which is the default and
+whose figures are unchanged (the reference rows in `scripts/test-metrics.ts`
+still reproduce exactly).
+
+| Period | Window | Per-day rate | Goal for the window |
+| --- | --- | --- | --- |
+| MONTH | days 1 to month end | `floor(quota / daysInMonth)` | rate × days in month |
+| WEEK | days 1-7, 8-14, 15-21, 22-28, 29 to month end | `floor(quota / 7)` | rate × days in window |
+| DAY | the latest day with data | `quota` | `quota` |
+
+Weeks restart on the 1st of every game month, so the last week is 2-3 days
+long (0 in a 28-day February) and its goal scales: a 3-day week owes 3/7 of
+the weekly quota.
+
+Inside the window, every figure is window-relative: `total` is fans earned
+since the window opened, `expected` counts days in the window from the
+member's first day with data (a mid-week joiner owes only their days),
+`needPerDay` spreads the window's shortfall over the days left in it, and the
+projection runs to the window's end. Rank movement compares with the previous
+day of the same window, so it is empty on a window's first day. The 7-day
+trend sparkline is deliberately not clipped to the window.

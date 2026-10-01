@@ -15,11 +15,23 @@ import { errorEmbed, successEmbed, infoEmbed } from '../lib/embeds';
 import { autocompleteTrackedCircle } from '../lib/fans/circleAutocomplete';
 import { currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
-import { formatCompactFans, toSafeNumber } from '../lib/fans/metrics';
+import { describeQuota, formatCompactFans, toSafeNumber, type QuotaPeriod } from '../lib/fans/metrics';
 import { isConfigured, searchCircles } from '../lib/umamoe/client';
 import { renderFanReport } from '../lib/image/renderFanReport';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
+
+/** Quota period choices for `/fans circle add` and `config`. Weeks restart on the 1st. */
+const QUOTA_PERIOD_CHOICES = [
+    { name: 'Daily', value: 'DAY' },
+    { name: 'Weekly (days 1-7, 8-14, ... of the month)', value: 'WEEK' },
+    { name: 'Monthly', value: 'MONTH' },
+] as const;
+
+/** Narrows a command option to a quota period, or null when absent or unknown. */
+export function parsePeriod(value: string | null | undefined): QuotaPeriod | null {
+    return value === 'DAY' || value === 'WEEK' || value === 'MONTH' ? value : null;
+}
 
 /**
  * Club fan-quota tracking backed by uma.moe.
@@ -93,7 +105,10 @@ export const data = new SlashCommandBuilder()
                         opt.setName('circle_id').setDescription('uma.moe circle ID (from uma.moe/circles)').setRequired(true),
                     )
                     .addStringOption((opt) =>
-                        opt.setName('quota').setDescription('Monthly fan quota per member, e.g. 80M').setRequired(true),
+                        opt.setName('quota').setDescription('Fan quota per member per period, e.g. 80M, 500K, 1.2B').setRequired(true),
+                    )
+                    .addStringOption((opt) =>
+                        opt.setName('period').setDescription('What the quota covers (default: monthly)').addChoices(...QUOTA_PERIOD_CHOICES),
                     ),
             )
             .addSubcommand((sub) =>
@@ -111,7 +126,10 @@ export const data = new SlashCommandBuilder()
                     .addStringOption((opt) =>
                         opt.setName('circle').setDescription('Tracked circle').setRequired(true).setAutocomplete(true),
                     )
-                    .addStringOption((opt) => opt.setName('quota').setDescription('Monthly fan quota per member, e.g. 80M'))
+                    .addStringOption((opt) => opt.setName('quota').setDescription('Fan quota per member per period, e.g. 80M, 500K'))
+                    .addStringOption((opt) =>
+                        opt.setName('period').setDescription('What the quota covers').addChoices(...QUOTA_PERIOD_CHOICES),
+                    )
                     .addChannelOption((opt) =>
                         opt
                             .setName('report_channel')
@@ -159,9 +177,16 @@ export async function autocomplete(interaction: AutocompleteInteraction) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Parses "80M", "80m", "1.5B" or a bare number into whole fans. */
+/**
+ * Parses a fan amount into whole fans: "80M", "80m", "2.5M", "500k", "1.5B",
+ * a bare number, or a number with thousands separators ("80,000,000",
+ * "1,500M"). K, M and B are case-insensitive; spaces are ignored.
+ */
 export function parseQuota(input: string): number | null {
-    const match = /^\s*(\d+(?:\.\d+)?)\s*([kmb])?\s*$/i.exec(input);
+    // Thousands separators only between digit groups, so "8,0M" is rejected
+    // rather than silently read as 80M.
+    const cleaned = /^\s*\d{1,3}(,\d{3})+(\.\d+)?\s*[kmb]?\s*$/i.test(input) ? input.replace(/,/g, '') : input;
+    const match = /^\s*(\d+(?:\.\d+)?)\s*([kmb])?\s*$/i.exec(cleaned);
     if (!match) return null;
 
     const amount = Number(match[1]);
@@ -524,9 +549,10 @@ async function handleCircleAdd(interaction: ChatInputCommandInteraction) {
 
     const quota = parseQuota(interaction.options.getString('quota', true));
     if (quota === null || quota <= 0) {
-        await reply(interaction, errorEmbed("Quota must be a positive amount like `80M`, `2.5M` or `80000000`."));
+        await reply(interaction, errorEmbed('Quota must be a positive amount like `80M`, `500K`, `1.2B` or `80,000,000`.'));
         return;
     }
+    const period = parsePeriod(interaction.options.getString('period')) ?? 'MONTH';
 
     const guildId = interaction.guildId!;
     const circleId = BigInt(rawId);
@@ -540,7 +566,7 @@ async function handleCircleAdd(interaction: ChatInputCommandInteraction) {
     // Created first so the sync has a row to attach snapshots to; a failed
     // first sync leaves a tracked circle with no data rather than losing it.
     const circle = await prisma.trackedCircle.create({
-        data: { guildId, circleId, name: `Circle ${rawId}`, monthlyQuota: BigInt(quota) },
+        data: { guildId, circleId, name: `Circle ${rawId}`, quota: BigInt(quota), quotaPeriod: period },
     });
 
     try {
@@ -549,7 +575,7 @@ async function handleCircleAdd(interaction: ChatInputCommandInteraction) {
             interaction,
             successEmbed(
                 'Circle tracked',
-                `Now tracking **${result.name}** with a quota of **${formatCompactFans(quota)}** per member per month.\n` +
+                `Now tracking **${result.name}** with a quota of **${describeQuota(quota, period)}** per member.\n` +
                     `Ingested ${result.daysWritten} day records across ${result.membersSeen} members.`,
             ),
         );
@@ -582,8 +608,9 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
     const reportChannel = interaction.options.getChannel('report_channel');
     const alertChannel = interaction.options.getChannel('alert_channel');
     const active = interaction.options.getBoolean('active');
+    const period = parsePeriod(interaction.options.getString('period'));
 
-    if (rawQuota === null && !reportChannel && !alertChannel && active === null) {
+    if (rawQuota === null && period === null && !reportChannel && !alertChannel && active === null) {
         await reply(interaction, errorEmbed('Give at least one setting to change.'));
         return;
     }
@@ -592,7 +619,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
     if (rawQuota !== null) {
         quota = parseQuota(rawQuota);
         if (quota === null || quota <= 0) {
-            await reply(interaction, errorEmbed("Quota must be a positive amount like `80M`."));
+            await reply(interaction, errorEmbed('Quota must be a positive amount like `80M`, `500K` or `1.2B`.'));
             return;
         }
     }
@@ -600,7 +627,8 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
     const updated = await prisma.trackedCircle.update({
         where: { id: circle.id },
         data: {
-            ...(quota !== null ? { monthlyQuota: BigInt(quota) } : {}),
+            ...(quota !== null ? { quota: BigInt(quota) } : {}),
+            ...(period !== null ? { quotaPeriod: period } : {}),
             ...(reportChannel ? { reportChannelId: reportChannel.id } : {}),
             ...(alertChannel ? { alertChannelId: alertChannel.id } : {}),
             ...(active !== null ? { active } : {}),
@@ -608,7 +636,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
     });
 
     const lines = [
-        `Quota: **${formatCompactFans(toSafeNumber(updated.monthlyQuota))}** per member per month`,
+        `Quota: **${describeQuota(toSafeNumber(updated.quota), updated.quotaPeriod)}** per member`,
         `Reports: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'not set'}`,
         `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'not set'}`,
         `Syncing: ${updated.active ? 'active' : 'paused'}`,
@@ -632,7 +660,7 @@ async function handleCircleList(interaction: ChatInputCommandInteraction) {
         circles.map((c) => ({
             name: `${c.name}${c.active ? '' : ' — paused'}`,
             value:
-                `ID \`${c.circleId}\` · Quota **${formatCompactFans(toSafeNumber(c.monthlyQuota))}**\n` +
+                `ID \`${c.circleId}\` · Quota **${describeQuota(toSafeNumber(c.quota), c.quotaPeriod)}**\n` +
                 `Reports: ${c.reportChannelId ? `<#${c.reportChannelId}>` : 'not set'} · ` +
                 `Last sync: ${c.lastSyncedAt ? `<t:${Math.floor(c.lastSyncedAt.getTime() / 1000)}:R>` : 'never'}`,
         })),

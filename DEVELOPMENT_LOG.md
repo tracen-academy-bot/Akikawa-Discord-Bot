@@ -4,6 +4,40 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-01 — Daily, weekly or monthly quotas
+
+### Why
+
+Requested: "allow daily/weekly (cuts off on the 1st too) or monthly". Decided
+with the user: weeks are days 1-7, 8-14, ... of the game month; the short
+final week's goal scales by its days; the quota is entered per period.
+
+### What
+
+- `TrackedCircle.quotaPeriod` (`DAY` | `WEEK` | `MONTH`, default `MONTH`).
+  The amount field is `quota` in code but keeps its `monthlyQuota` column via
+  `@map`, so the migration only adds the enum and column; no data moves.
+- `computeCircleProgress` measures inside the current window; see the new
+  section in `docs/quota-math.md`. `CircleProgress` gains `period`, `quota`,
+  `windowStart`, `windowEnd`, `windowLabel`.
+- `/fans circle add|config` take `period`; the dashboard forms get a "Per"
+  selector. An omitted period keeps the current one on update.
+- Reports say "weekly report", show the window ("week 2 · days 8–14") and
+  flag a scaled short week. DAY mode hides avg/day, need/day, latest-day gain
+  and projection, which would only repeat the day's total or its shortfall. Applied to the current
+  report design; the visual redesign is held back separately.
+- `parseQuota` also accepts thousands separators ("80,000,000", "1,500M").
+  K/M/B suffixes already worked.
+
+### Verified
+
+37 new metric checks (window edges incl. February and short weeks, weekly and
+daily pace, mid-week joiner, rank reset), 5 parser checks, 8 dashboard checks
+(set, reject, keep period). MONTH reference rows unchanged. Weekly and daily
+reports rendered through the real maths and inspected.
+
+---
+
 ## 2026-10-01 — Fix: adding a circle failed with "Cannot convert undefined to a BigInt"
 
 ### Root cause

@@ -19,8 +19,8 @@ import {
 import { csrfField, compact, dash, esc, layout, loginPage, monthPicker, num, tile } from './views';
 import { currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle } from '../lib/fans/ingest';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate, listCircleMonths } from '../lib/fans/reports';
-import { toSafeNumber, type CircleProgress } from '../lib/fans/metrics';
-import { parseQuota } from '../commands/fans';
+import { describeQuota, toSafeNumber, type CircleProgress, type QuotaPeriod } from '../lib/fans/metrics';
+import { parsePeriod, parseQuota } from '../commands/fans';
 import { renderFanReport } from '../lib/image/renderFanReport';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
@@ -99,8 +99,23 @@ function flash(req: Request): string {
     return '';
 }
 
+/** `<select>` for a circle's quota period. Weeks restart on the 1st of the month. */
+function periodSelect(selected: QuotaPeriod): string {
+    const options: [QuotaPeriod, string][] = [
+        ['DAY', 'Day'],
+        ['WEEK', 'Week (1-7, 8-14, ...)'],
+        ['MONTH', 'Month'],
+    ];
+    return `<select name="period">${options
+        .map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${label}</option>`)
+        .join('')}</select>`;
+}
+
 /** Builds the member table shared by the circle page. */
 function memberRows(progress: CircleProgress, circleId: string): string {
+    // In DAY mode the average, need/day, latest-day gain and projection only
+    // repeat the day's total or its shortfall.
+    const rates = progress.period !== 'DAY';
     return progress.members
         .map((m) => {
             const movement =
@@ -118,10 +133,10 @@ function memberRows(progress: CircleProgress, circleId: string): string {
         <td class="right"><strong>${num(m.total)}</strong></td>
         <td class="right faint">${num(m.expected)}</td>
         <td class="right ${m.behind > 0 ? 'red' : 'faint'}">${dash(m.behind > 0 ? m.behind : null)}</td>
-        <td class="right muted">${num(m.avgPerDay)}</td>
-        <td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>
-        <td class="right muted">${num(m.latestDayGain)}</td>
-        <td class="right ${projTone}">${compact(m.projectedTotal)}</td>
+        ${rates ? `<td class="right muted">${num(m.avgPerDay)}</td>` : ''}
+        ${rates ? `<td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>` : ''}
+        ${rates ? `<td class="right muted">${num(m.latestDayGain)}</td>` : ''}
+        ${rates ? `<td class="right ${projTone}">${compact(m.projectedTotal)}</td>` : ''}
       </tr>`;
         })
         .join('');
@@ -285,8 +300,8 @@ export function startDashboard(client: () => Client): () => void {
                 return `<a class="card" href="/circles/${esc(circle.id)}" style="display:block">
                   <h3>${esc(circle.name)}${circle.active ? '' : ' <span class="faint">(paused)</span>'}</h3>
                   <div class="meta">
-                    Quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} / member / month<br>
-                    ${progress ? `${progress.members.length} members · day ${progress.daysElapsed}/${progress.daysInMonth}` : 'No data ingested yet'}
+                    Quota ${esc(describeQuota(toSafeNumber(circle.quota), circle.quotaPeriod))} per member<br>
+                    ${progress ? `${progress.members.length} members · ${esc(progress.windowLabel)}` : 'No data ingested yet'}
                   </div>
                   <div style="margin-top:12px;display:flex;gap:24px">
                     <div><div class="label">Total</div><strong>${esc(compact(total))}</strong></div>
@@ -322,7 +337,8 @@ export function startDashboard(client: () => Client): () => void {
                    <form class="inline" method="post" action="/circles">
                      ${csrfField(csrf(req))}
                      <div><label>uma.moe circle ID</label><input name="circle_id" required placeholder="123456"></div>
-                     <div><label>Monthly quota per member</label><input name="quota" required placeholder="80M"></div>
+                     <div><label>Quota per member</label><input name="quota" required placeholder="80M, 500K, 1.2B"></div>
+                     <div><label>Per</label>${periodSelect('MONTH')}</div>
                      <button type="submit">Add circle</button>
                    </form>
                    <p class="meta" style="margin-top:10px">Find the ID at <a href="https://uma.moe/circles" target="_blank" rel="noopener">uma.moe/circles</a>.</p>
@@ -348,7 +364,8 @@ export function startDashboard(client: () => Client): () => void {
          <div class="card">
            <form class="inline" method="post" action="/circles/${esc(circle.id)}">
              ${csrfField(csrf(req))}
-             <div><label>Monthly quota per member</label><input name="quota" value="${esc(compact(toSafeNumber(circle.monthlyQuota)))}"></div>
+             <div><label>Quota per member</label><input name="quota" value="${esc(compact(toSafeNumber(circle.quota)))}"></div>
+             <div><label>Per</label>${periodSelect(circle.quotaPeriod)}</div>
              <div><label>Report channel ID</label><input name="report_channel" value="${esc(circle.reportChannelId ?? '')}" placeholder="thread or channel ID"></div>
              <div><label>Alert channel ID</label><input name="alert_channel" value="${esc(circle.alertChannelId ?? '')}" placeholder="thread or channel ID"></div>
              <div><label>Syncing</label><select name="active">
@@ -370,14 +387,14 @@ export function startDashboard(client: () => Client): () => void {
                 user: req.user,
                 body: `${flash(req)}
           <h1>${esc(circle.name)}</h1>
-          <p class="sub gold">day ${progress?.daysElapsed ?? 0} of ${progress?.daysInMonth ?? '\u2014'} · quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} per member · ${progress ? esc(compact(progress.quotaPerDay)) : '\u2014'}/day</p>
+          <p class="sub gold">${progress ? `${esc(progress.windowLabel.toLowerCase())} · ` : ''}day ${progress?.daysElapsed ?? 0} of ${progress?.daysInMonth ?? '\u2014'} · quota ${esc(describeQuota(toSafeNumber(circle.quota), circle.quotaPeriod))} per member${circle.quotaPeriod !== 'DAY' && progress ? ` · ${esc(compact(progress.quotaPerDay))}/day` : ''}</p>
           <p class="sub">circle <code>${esc(String(circle.circleId))}</code> · last sync ${circle.lastSyncedAt ? esc(circle.lastSyncedAt.toUTCString()) : 'never'}</p>
           ${picker}
           ${
               progress
                   ? `<div class="tiles">
                    ${tile('Members', String(progress.members.length))}
-                   ${tile('Total fans', compact(progress.totalFans))}
+                   ${tile(progress.period === 'MONTH' ? 'Total fans' : progress.period === 'WEEK' ? 'Fans this week' : 'Fans today', compact(progress.totalFans))}
                    ${tile('Behind quota', String(progress.members.filter((m) => !m.onPace).length), 'of ' + progress.members.length, progress.members.some((m) => !m.onPace) ? 'bad' : 'good')}
                    ${tile('Day', `${progress.daysElapsed}/${progress.daysInMonth}`, formatReportDate(year, month, progress.daysElapsed))}
                  </div>
@@ -385,9 +402,9 @@ export function startDashboard(client: () => Client): () => void {
                  <div class="panel">
                    <table data-sortable>
                      <thead><tr>
-                       <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Total</th><th class="right" data-sort>Expected</th>
-                       <th class="right" data-sort>Behind</th><th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Need/Day</th>
-                       <th class="right" data-sort>Day ${progress.daysElapsed}</th><th class="right" data-sort>Proj.</th>
+                       <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>${progress.period === 'DAY' ? 'Today' : 'Total'}</th><th class="right" data-sort>Expected</th>
+                       <th class="right" data-sort>Behind</th>${progress.period === 'DAY' ? '' : '<th class="right" data-sort>Avg/Day</th>'}${progress.period === 'DAY' ? '' : '<th class="right" data-sort>Need/Day</th>'}
+                       ${progress.period === 'DAY' ? '' : `<th class="right" data-sort>Day ${progress.daysElapsed}</th><th class="right" data-sort>Proj.</th>`}
                      </tr></thead>
                      <tbody>${memberRows(progress, circle.id)}</tbody>
                    </table>
@@ -576,7 +593,10 @@ export function startDashboard(client: () => Client): () => void {
         const quota = parseQuota(String(req.body.quota ?? ''));
 
         if (!/^\d+$/.test(rawId)) return res.redirect('/?err=Circle+ID+must+be+a+number.');
-        if (quota === null || quota <= 0) return res.redirect('/?err=Quota+must+be+a+positive+amount+like+80M.');
+        if (quota === null || quota <= 0) return res.redirect('/?err=Quota+must+be+a+positive+amount+like+80M%2C+500K+or+1.2B.');
+        const rawPeriod = req.body.period;
+        const period = rawPeriod === undefined || rawPeriod === '' ? 'MONTH' : parsePeriod(String(rawPeriod));
+        if (period === null) return res.redirect('/?err=Period+must+be+day%2C+week+or+month.');
 
         const circleId = BigInt(rawId);
         if (await prisma.trackedCircle.findFirst({ where: { guildId, circleId } })) {
@@ -584,7 +604,7 @@ export function startDashboard(client: () => Client): () => void {
         }
 
         const circle = await prisma.trackedCircle.create({
-            data: { guildId, circleId, name: `Circle ${rawId}`, monthlyQuota: BigInt(quota) },
+            data: { guildId, circleId, name: `Circle ${rawId}`, quota: BigInt(quota), quotaPeriod: period },
         });
 
         try {
@@ -603,8 +623,11 @@ export function startDashboard(client: () => Client): () => void {
 
         const quota = parseQuota(String(req.body.quota ?? ''));
         if (quota === null || quota <= 0) {
-            return res.redirect(`/circles/${circle.id}?err=Quota+must+be+a+positive+amount+like+80M.`);
+            return res.redirect(`/circles/${circle.id}?err=Quota+must+be+a+positive+amount+like+80M%2C+500K+or+1.2B.`);
         }
+        const rawPeriod = req.body.period;
+        const period = rawPeriod === undefined || rawPeriod === '' ? undefined : parsePeriod(String(rawPeriod));
+        if (period === null) return res.redirect(`/circles/${circle.id}?err=Period+must+be+day%2C+week+or+month.`);
 
         const reportChannel = String(req.body.report_channel ?? '').trim();
         const alertChannel = String(req.body.alert_channel ?? '').trim();
@@ -612,7 +635,9 @@ export function startDashboard(client: () => Client): () => void {
         await prisma.trackedCircle.update({
             where: { id: circle.id },
             data: {
-                monthlyQuota: BigInt(quota),
+                quota: BigInt(quota),
+                // Absent keeps the current period, so older forms still work.
+                ...(period !== undefined ? { quotaPeriod: period } : {}),
                 reportChannelId: reportChannel || null,
                 alertChannelId: alertChannel || null,
                 active: String(req.body.active) === 'true',

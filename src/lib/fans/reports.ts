@@ -1,7 +1,7 @@
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { BENCHMARK_TIERS, currentGameMonth, loadBenchmarkHistory, loadCircleProgress } from './ingest';
-import { daysInCalendarMonth, toSafeNumber, type CircleProgress } from './metrics';
+import { daysInCalendarMonth, toSafeNumber, type CircleProgress, quotaPerDayFor } from './metrics';
 import type { TrainerReportData } from '../image/renderTrainerReport';
 import type { BenchmarkData } from '../image/renderBenchmark';
 
@@ -98,7 +98,9 @@ export async function buildTrainerReport(
 
     const windowFans = dailyGains.reduce((sum, d) => sum + d.gain, 0);
     const daysInMonth = daysInCalendarMonth(year, month);
-    const quotaPerDay = Math.floor(toSafeNumber(circle.monthlyQuota) / daysInMonth);
+    // Per-day rate of whatever period the circle uses, so the chart's quota
+    // line and the goal tile mean the same thing in every mode.
+    const quotaPerDay = quotaPerDayFor(circle.quotaPeriod, toSafeNumber(circle.quota), daysInMonth);
 
     // Whole-month figures, independent of the plotted window.
     let bestDay: { label: string; gain: number } | null = null;

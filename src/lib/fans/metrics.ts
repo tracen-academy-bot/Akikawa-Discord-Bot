@@ -8,7 +8,21 @@
  *
  * All figures are whole fans. Fractions are floored, never rounded, so a
  * trainer is never told they are on pace when they are one fan short.
+ *
+ * A circle's quota applies to a *period*: a day, a week, or the whole month.
+ * Progress is measured inside the current window of that period:
+ *
+ *   MONTH  days 1 to month end (the original, reference-verified behaviour)
+ *   WEEK   days 1-7, 8-14, 15-21, 22-28, then 29 to month end. Weeks restart
+ *          on the 1st, so the last one is short; its goal scales by its
+ *          length (a 3-day week owes 3/7 of the weekly quota).
+ *   DAY    the latest day with data
+ *
+ * In MONTH mode every figure is identical to the pre-period code.
  */
+
+/** Window a quota is measured over. Mirrors the Prisma `QuotaPeriod` enum. */
+export type QuotaPeriod = 'DAY' | 'WEEK' | 'MONTH';
 
 /** A member's daily cumulative totals for one game month. */
 export interface MemberSeries {
@@ -27,19 +41,19 @@ export interface MemberSeries {
 export interface MemberProgress {
     viewerId: number;
     trainerName: string;
-    /** Cumulative fans as of the latest day with data. */
+    /** Fans earned inside the current window, as of the latest day with data. */
     total: number;
-    /** Fans this member should have by now. */
+    /** Fans this member should have earned in the window by now. */
     expected: number;
     /** How far short of `expected` they are. Zero when on pace. */
     behind: number;
-    /** Mean fans per day over the days they have data for. */
+    /** Mean fans per day over their days with data inside the window. */
     avgPerDay: number;
-    /** Fans per day needed to finish the month on quota. Null when on pace. */
+    /** Fans per day needed to finish the window on quota. Null when on pace. */
     needPerDay: number | null;
     /** Fans gained on the most recent day. */
     latestDayGain: number;
-    /** Days from this member's first day with data through the latest day. */
+    /** Days in the window from this member's first day with data through the latest day. */
     dataDays: number;
     /** Days counted toward `expected`. See `QuotaOptions.quotaDaysOffset`. */
     quotaDays: number;
@@ -52,16 +66,16 @@ export interface MemberProgress {
      */
     recentGains: number[];
     /**
-     * Where the member lands at month end if their average holds:
-     * `avgPerDay * daysInMonth`. A straight-line projection, deliberately
+     * Where the member lands at the end of the window if their average holds:
+     * `avgPerDay * windowDays`. A straight-line projection, deliberately
      * simple so it can be reasoned about at a glance.
      */
     projectedTotal: number;
-    /** 1-based placement by current total. */
+    /** 1-based placement by window total. */
     rank: number;
     /**
      * Places gained since the previous day. Positive is an improvement,
-     * negative a slip, zero no change. Null on the first day of the month,
+     * negative a slip, zero no change. Null on the first day of a window,
      * when there is nothing to compare against.
      */
     rankChange: number | null;
@@ -69,23 +83,32 @@ export interface MemberProgress {
 
 /** Whole-circle derived figures. */
 export interface CircleProgress {
+    period: QuotaPeriod;
+    /** The quota as configured, for the period. */
+    quota: number;
+    /** First and last day of the current window, 1-based and inclusive. */
+    windowStart: number;
+    windowEnd: number;
+    /** e.g. "October", "Week 2 · days 8–14", "Day 9". Month name supplied by the caller. */
+    windowLabel: string;
     /** Latest day of the game month that has data, 1-based. */
     daysElapsed: number;
     daysInMonth: number;
-    /** Days left including today. */
+    /** Days left in the window, including today. */
     daysRemaining: number;
-    /** Floor of the monthly quota divided by the days in the month. */
+    /** Per-day rate: quota / days in month, quota / 7, or quota, floored. */
     quotaPerDay: number;
     /**
-     * `quotaPerDay * daysInMonth`. Slightly below the configured monthly quota
-     * whenever the quota does not divide evenly. Using this rather than the raw
-     * quota is what makes `needPerDay` agree with the reference report exactly.
+     * Each member's goal for the current window: `quotaPerDay * windowDays`.
+     * In MONTH mode this sits slightly below the configured quota whenever it
+     * does not divide evenly, which is what makes `needPerDay` agree with the
+     * reference report exactly. In WEEK mode it is what scales a short week.
      */
     effectiveQuota: number;
     members: MemberProgress[];
-    /** Sum of every member's cumulative total. */
+    /** Sum of every member's window total. */
     totalFans: number;
-    /** What the whole circle owes for the month: members times effective quota. */
+    /** What the whole circle owes for the window: members times effective quota. */
     quotaTarget: number;
     /** Sum of every member's straight-line projection. */
     projectedTotalFans: number;
@@ -95,8 +118,12 @@ export interface CircleProgress {
 
 /** Tuning for quota calculations. */
 export interface QuotaOptions {
-    /** Fans each member is expected to earn across the whole month. */
-    monthlyQuota: number;
+    /** Fans each member is expected to earn per period. */
+    quota: number;
+    /** Period the quota applies to. Defaults to MONTH. */
+    period?: QuotaPeriod;
+    /** Window label in MONTH mode, e.g. "October". */
+    monthName?: string;
     /** Length of the game month. Defaults to the calendar month's length. */
     daysInMonth: number;
     /**
@@ -146,6 +173,61 @@ function firstDayWithData(dailyFans: number[]): number {
     return 0;
 }
 
+/** One window of a period inside the game month. */
+export interface PeriodWindow {
+    start: number;
+    end: number;
+    /** 1-based week number in WEEK mode; 1 otherwise. */
+    index: number;
+}
+
+/**
+ * The window containing `day` (1-based). Day 0, meaning "no data yet", is
+ * treated as day 1 so an empty circle still has a sensible window.
+ */
+export function periodWindow(period: QuotaPeriod, day: number, daysInMonth: number): PeriodWindow {
+    const d = Math.min(Math.max(1, day), daysInMonth);
+    if (period === 'DAY') return { start: d, end: d, index: 1 };
+    if (period === 'WEEK') {
+        const index = Math.floor((d - 1) / 7) + 1;
+        const start = (index - 1) * 7 + 1;
+        return { start, end: Math.min(start + 6, daysInMonth), index };
+    }
+    return { start: 1, end: daysInMonth, index: 1 };
+}
+
+/** Per-day rate for a quota, floored. */
+export function quotaPerDayFor(period: QuotaPeriod, quota: number, daysInMonth: number): number {
+    if (period === 'DAY') return quota;
+    if (period === 'WEEK') return Math.floor(quota / 7);
+    return Math.floor(quota / daysInMonth);
+}
+
+/** Lower-case unit for a period, as in "80.0M per week". */
+export function periodUnit(period: QuotaPeriod): string {
+    return period === 'DAY' ? 'day' : period === 'WEEK' ? 'week' : 'month';
+}
+
+/** "Daily" / "Weekly" / "Monthly". */
+export function periodAdjective(period: QuotaPeriod): string {
+    return period === 'DAY' ? 'Daily' : period === 'WEEK' ? 'Weekly' : 'Monthly';
+}
+
+/** e.g. "80.0M per week". */
+export function describeQuota(quota: number, period: QuotaPeriod): string {
+    return `${formatCompactFans(quota)} per ${periodUnit(period)}`;
+}
+
+/** Label for a window, e.g. "Week 2 · days 8–14". MONTH returns `monthName` as given. */
+export function windowLabel(period: QuotaPeriod, window: PeriodWindow, monthName = 'Month'): string {
+    if (period === 'DAY') return `Day ${window.start}`;
+    if (period === 'WEEK') {
+        const span = window.start === window.end ? `day ${window.start}` : `days ${window.start}–${window.end}`;
+        return `Week ${window.index} · ${span}`;
+    }
+    return monthName;
+}
+
 /**
  * Computes progress for every member of a circle.
  *
@@ -155,41 +237,51 @@ function firstDayWithData(dailyFans: number[]): number {
  * column for a day that has not been ingested yet.
  */
 export function computeCircleProgress(series: MemberSeries[], options: QuotaOptions): CircleProgress {
-    const { monthlyQuota, daysInMonth } = options;
+    const { quota, daysInMonth } = options;
+    const period = options.period ?? 'MONTH';
     const quotaDaysOffset = options.quotaDaysOffset ?? 0;
-
-    const quotaPerDay = Math.floor(monthlyQuota / daysInMonth);
-    const effectiveQuota = quotaPerDay * daysInMonth;
 
     const daysElapsed = Math.min(
         daysInMonth,
         Math.max(0, ...series.map((m) => lastDayWithData(m.dailyFans))),
     );
-    const daysRemaining = Math.max(0, daysInMonth - daysElapsed + 1);
+
+    const window = periodWindow(period, daysElapsed, daysInMonth);
+    const windowDays = window.end - window.start + 1;
+    const quotaPerDay = quotaPerDayFor(period, quota, daysInMonth);
+    const effectiveQuota = quotaPerDay * windowDays;
+    const daysRemaining = Math.max(0, window.end - daysElapsed + 1);
+
+    /** Cumulative total at the end of `day`; zero before day 1. */
+    const cumulativeAt = (dailyFans: number[], day: number) => (day >= 1 ? (dailyFans[day - 1] ?? 0) : 0);
+    /** Fans earned inside the window up to and including `day`. */
+    const windowTotal = (dailyFans: number[], day: number) =>
+        Math.max(0, cumulativeAt(dailyFans, day) - cumulativeAt(dailyFans, window.start - 1));
 
     const members = series.map<MemberProgress>((member) => {
-        const total = member.dailyFans[daysElapsed - 1] ?? 0;
+        const total = windowTotal(member.dailyFans, daysElapsed);
 
+        // A member who joined mid-window only owes quota from their first day.
         const firstDay = firstDayWithData(member.dailyFans);
-        const dataDays = firstDay === 0 ? 0 : Math.max(1, daysElapsed - firstDay + 1);
+        const countFrom = Math.max(window.start, firstDay);
+        const dataDays = firstDay === 0 || countFrom > daysElapsed ? 0 : Math.max(1, daysElapsed - countFrom + 1);
         const quotaDays = Math.max(0, dataDays - quotaDaysOffset);
 
         const expected = quotaPerDay * quotaDays;
         const behind = Math.max(0, expected - total);
         const avgPerDay = dataDays === 0 ? 0 : Math.floor(total / dataDays);
 
-        const previous = daysElapsed >= 2 ? (member.dailyFans[daysElapsed - 2] ?? 0) : 0;
+        const previous = cumulativeAt(member.dailyFans, daysElapsed - 1);
         // A cumulative series should never decrease; clamp in case it does.
-        const latestDayGain = Math.max(0, total - previous);
+        const latestDayGain = Math.max(0, cumulativeAt(member.dailyFans, daysElapsed) - previous);
 
         // Daily gains over the trailing week, from the member's first day with
-        // data at the earliest. Day 1's gain is its cumulative value.
+        // data at the earliest. Deliberately not clipped to the window: the
+        // sparkline shows momentum, which does not reset on a week boundary.
         const recentGains: number[] = [];
-        const windowStart = Math.max(firstDay || 1, daysElapsed - 6);
-        for (let day = windowStart; day <= daysElapsed; day += 1) {
-            const today = member.dailyFans[day - 1] ?? 0;
-            const before = day >= 2 ? (member.dailyFans[day - 2] ?? 0) : 0;
-            recentGains.push(Math.max(0, today - before));
+        const trendStart = Math.max(firstDay || 1, daysElapsed - 6);
+        for (let day = trendStart; day <= daysElapsed; day += 1) {
+            recentGains.push(Math.max(0, cumulativeAt(member.dailyFans, day) - cumulativeAt(member.dailyFans, day - 1)));
         }
 
         const onPace = behind === 0;
@@ -206,7 +298,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
             needPerDay,
             latestDayGain,
             recentGains,
-            projectedTotal: avgPerDay * daysInMonth,
+            projectedTotal: avgPerDay * windowDays,
             dataDays,
             quotaDays,
             onPace,
@@ -217,16 +309,16 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         };
     });
 
-    // Highest total first, matching how the reference report ranks members.
+    // Highest window total first, matching how the reference report ranks members.
     members.sort((a, b) => b.total - a.total);
 
-    // Yesterday's placement, for the movement arrows. Derived by re-ranking on
-    // the previous day's cumulative totals rather than stored, so it stays
-    // correct even if a day was ingested late.
+    // Yesterday's placement inside the same window, for the movement arrows.
+    // Derived by re-ranking rather than stored, so it stays correct even if a
+    // day was ingested late. None on a window's first day.
     const previousRanks = new Map<number, number>();
-    if (daysElapsed >= 2) {
+    if (daysElapsed - 1 >= window.start) {
         const yesterday = series
-            .map((m) => ({ viewerId: m.viewerId, total: m.dailyFans[daysElapsed - 2] ?? 0 }))
+            .map((m) => ({ viewerId: m.viewerId, total: windowTotal(m.dailyFans, daysElapsed - 1) }))
             .filter((m) => m.total > 0)
             .sort((a, b) => b.total - a.total);
         yesterday.forEach((m, index) => previousRanks.set(m.viewerId, index + 1));
@@ -239,6 +331,11 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
     });
 
     return {
+        period,
+        quota,
+        windowStart: window.start,
+        windowEnd: window.end,
+        windowLabel: windowLabel(period, window, options.monthName),
         daysElapsed,
         daysInMonth,
         daysRemaining,

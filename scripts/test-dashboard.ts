@@ -87,7 +87,7 @@ async function main() {
             guildId: GUILD,
             circleId: BigInt(424242),
             name: '<script>alert(1)</script>Freakrose',
-            monthlyQuota: BigInt(80_000_000),
+            quota: BigInt(80_000_000),
         },
     });
 
@@ -183,7 +183,7 @@ async function main() {
     check('anonymous mutation is refused', anonMutation.status, 401);
 
     const unchanged = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
-    check('refused mutations changed nothing', unchanged?.monthlyQuota, BigInt(80_000_000));
+    check('refused mutations changed nothing', unchanged?.quota, BigInt(80_000_000));
 
     const ok = await post(
         `/circles/${circle.id}`,
@@ -193,7 +193,7 @@ async function main() {
     check('officer mutation is accepted', ok.status, 302);
 
     const updated = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
-    check('quota was updated', updated?.monthlyQuota, BigInt(55_000_000));
+    check('quota was updated', updated?.quota, BigInt(55_000_000));
     check('report channel was set', updated?.reportChannelId, '12345');
     check('blank alert channel clears the value', updated?.alertChannelId, null);
 
@@ -204,7 +204,23 @@ async function main() {
     );
     check('invalid quota is rejected with a message', badQuota.location?.includes('err='), true);
     const afterBad = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
-    check('invalid quota left the old value intact', afterBad?.monthlyQuota, BigInt(55_000_000));
+    check('invalid quota left the old value intact', afterBad?.quota, BigInt(55_000_000));
+
+    // ── Quota periods ─────────────────────────────────────────────────────────
+    check('quota period defaults to monthly', afterBad?.quotaPeriod, 'MONTH');
+    const weekly = await post(`/circles/${circle.id}`, { quota: '72M', period: 'WEEK', active: 'true', _csrf: officerCsrf }, officer.cookie);
+    check('period change is accepted', weekly.status, 302);
+    const afterWeekly = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
+    check('period was set to weekly', afterWeekly?.quotaPeriod, 'WEEK');
+    check('weekly quota stored as given', afterWeekly?.quota, BigInt(72_000_000));
+    const weeklyPage = await get(`/circles/${circle.id}`, member.cookie);
+    check('circle page states the weekly quota', weeklyPage.body.includes('72.0M per week'), true);
+    const badPeriod = await post(`/circles/${circle.id}`, { quota: '72M', period: 'FORTNIGHT', active: 'true', _csrf: officerCsrf }, officer.cookie);
+    check('unknown period is rejected with a message', badPeriod.location?.includes('err='), true);
+    const omitted = await post(`/circles/${circle.id}`, { quota: '70M', active: 'true', _csrf: officerCsrf }, officer.cookie);
+    check('omitting the period is accepted', omitted.status, 302);
+    const afterOmitted = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
+    check('omitting the period keeps the current one', afterOmitted?.quotaPeriod, 'WEEK');
 
     // ── Trainer links, and the open-redirect guard ────────────────────────────
     const link = await post(
@@ -242,7 +258,7 @@ async function main() {
     check('unknown page is a 404', missingPage.status, 404);
 
     const otherGuild = await prisma.trackedCircle.create({
-        data: { guildId: 'some-other-guild', circleId: BigInt(555), name: 'Elsewhere', monthlyQuota: BigInt(1) },
+        data: { guildId: 'some-other-guild', circleId: BigInt(555), name: 'Elsewhere', quota: BigInt(1) },
     });
     const crossGuild = await get(`/circles/${otherGuild.id}`, officer.cookie);
     check("another guild's circle is not reachable", crossGuild.status, 404);
