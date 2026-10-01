@@ -14,7 +14,7 @@ import { startScheduler } from './lib/timer/scheduler';
 import { startFanScheduler } from './lib/fans/scheduler';
 import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
-import { waitForConnectOutcome } from './lib/startup';
+import { connect } from './lib/startup';
 import { runMigrations } from './lib/migrate';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 import { handlePrefixMessage } from './prefix';
@@ -288,11 +288,13 @@ async function start(): Promise<void> {
         process.exit(1);
     };
 
-    let outcome = waitForConnectOutcome(current);
-    await current.login(token).catch((e: unknown) => fatal('Discord login failed:', e));
+    const login = (client: Client) =>
+        connect(client, token).catch((e: unknown) => fatal('Discord login failed:', e));
+
+    let outcome = await login(current);
 
     for (const step of INTENT_LADDER.slice(1)) {
-        if ((await outcome) !== 'disallowed-intents') break;
+        if (outcome !== 'disallowed-intents') break;
         await current.destroy();
         console.warn(
             `Discord refused a privileged intent. Retrying with fewer: ${step.lost}.\n` +
@@ -300,11 +302,10 @@ async function start(): Promise<void> {
                 '  -> enable the intents named above -> Save, then restart the bot.',
         );
         current = buildClient(step.intents);
-        outcome = waitForConnectOutcome(current);
-        await current.login(token).catch((e: unknown) => fatal('Discord login failed:', e));
+        outcome = await login(current);
     }
 
-    const final = await outcome;
+    const final = outcome;
     if (final !== 'ready') {
         fatal(`Discord closed the gateway with an unrecoverable error (${final}). Check DISCORD_TOKEN.`);
     }

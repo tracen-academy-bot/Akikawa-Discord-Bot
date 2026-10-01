@@ -4,6 +4,27 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-01 — Incident: restart loop after the master merge
+
+After the merge into master, production restart-looped with "FATAL: Discord
+login failed: Used disallowed intents" and the site returned 502. The merge
+asked for MessageContent on the first connection attempt, and that toggle is
+off in the developer portal. The intent fallback added in the same merge never
+ran, because with @discordjs/ws 1.2.x a refused intent can surface as
+`login()` rejecting, and startup treated every login rejection as fatal. The
+earlier incident notes said login never rejects; I relied on that without
+testing the refusal path.
+
+`connect()` in `src/lib/startup.ts` now returns 'disallowed-intents' for
+either signal (the 4014 close event or that rejection) and rethrows anything
+else, and startup uses it for every attempt. Four new checks in
+`test-startup` cover it, including the exact production rejection. I also ran
+the built bot with `login()` stubbed to refuse MessageContent: it logged which
+toggle to enable, fell back to Guilds + GuildMembers, and `/healthz` returned
+200 with `messageContentIntent: false`.
+
+---
+
 ## 2026-10-01 — Daily, weekly or monthly quotas
 
 ### Why
