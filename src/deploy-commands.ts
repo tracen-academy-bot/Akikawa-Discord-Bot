@@ -1,23 +1,31 @@
-import { REST, Routes } from 'discord.js';
 import 'dotenv/config';
-import { commands } from './commands';
+import { registerCommandsWithToken } from './lib/registerCommands';
 
-const commandData = [...commands.values()].map((c) => c.data.toJSON());
-const rest = new REST().setToken(process.env.DISCORD_TOKEN!);
-
+/**
+ * Standalone command registration.
+ *
+ * Not required for a normal deploy: the bot registers its own commands on
+ * startup (see `src/lib/registerCommands.ts`). This script exists for pushing
+ * the command set without starting the bot, such as to an extra guild.
+ */
 (async () => {
-    try {
-        const clientId = process.env.DISCORD_CLIENT_ID!;
-        const guildId = process.env.DEV_GUILD_ID;
+    const token = process.env.DISCORD_TOKEN;
+    const applicationId = process.env.DISCORD_CLIENT_ID;
 
-        if (guildId) {
-            await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandData });
-            console.log(`Registered ${commandData.length} commands to guild ${guildId}`);
-        } else {
-            await rest.put(Routes.applicationCommands(clientId), { body: commandData });
-            console.log(`Registered ${commandData.length} global commands`)
-        }
+    if (!token || !applicationId) {
+        console.error('DISCORD_TOKEN and DISCORD_CLIENT_ID are required.');
+        process.exit(1);
+    }
+
+    try {
+        const result = await registerCommandsWithToken(token, applicationId, process.env.DEV_GUILD_ID?.trim() || null);
+        console.log(
+            result.guildId
+                ? `Registered ${result.count} commands to guild ${result.guildId}.`
+                : `Registered ${result.count} global commands. Propagation can take up to an hour.`,
+        );
     } catch (e) {
-        console.error('Failed to register: ', e);
+        console.error('Failed to register commands:', e);
+        process.exit(1);
     }
 })();

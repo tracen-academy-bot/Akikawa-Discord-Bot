@@ -2,6 +2,8 @@ import { SKRSContext2D, Image, loadImage } from "@napi-rs/canvas";
 import * as path from 'path';
 import * as fs from 'fs';
 import { ClubRank } from '@prisma/client';
+import { font } from './fonts';
+import { THEME } from './theme';
 
 export function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number) {
     ctx.beginPath();
@@ -70,7 +72,7 @@ export async function drawRankBadge(ctx: SKRSContext2D, rank: ClubRank, cx: numb
     ctx.strokeStyle = color;
     ctx.stroke();
 
-    ctx.font = `bold ${labelFontSize}px sans-serif`;
+    ctx.font = font(`bold ${labelFontSize}px`);
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -111,7 +113,7 @@ export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name:
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.lineWidth = Math.max(2, r / 20);
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.strokeStyle = THEME.line;
         ctx.stroke();
         return;
     }
@@ -121,8 +123,8 @@ export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name:
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.font = `bold ${labelFontSize}px sans-serif`;
-    ctx.fillStyle = '#12131f';
+    ctx.font = font(`bold ${labelFontSize}px`);
+    ctx.fillStyle = THEME.bg;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(club.name[0]?.toUpperCase() ?? '?', cx, cy + 2);

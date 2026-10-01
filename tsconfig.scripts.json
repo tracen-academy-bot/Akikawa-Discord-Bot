@@ -1,0 +1,16 @@
+{
+  // Config for the test scripts in scripts/.
+  //
+  // They need CommonJS (ts-node runs them directly) and the Node type
+  // definitions, neither of which the build config provides. Passing these as
+  // --compilerOptions on the command line does not survive the shell, which
+  // strips the quotes out of the inline JSON.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["scripts/**/*.ts", "src/**/*.ts"]
+}

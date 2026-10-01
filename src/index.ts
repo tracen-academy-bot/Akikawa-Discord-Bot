@@ -1,13 +1,33 @@
-import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events, EmbedBuilder} from 'discord.js';
+import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events, MessageFlags } from 'discord.js';
 import 'dotenv/config';
+// Imported before the command modules: several of them read configuration at
+// module load, so this must run first to report what is missing in plain
+// language rather than letting the first consumer throw something opaque.
+import { reportEnvironment } from './lib/env';
+
+if (!reportEnvironment()) process.exit(1);
+
 import { commands } from './commands';
+import { assertDatabaseReady } from './db/prisma';
+import { classifyError, buildErrorEmbed } from './lib/errors';
+import { startScheduler } from './lib/timer/scheduler';
+import { startFanScheduler } from './lib/fans/scheduler';
+import { startDashboard } from './web/server';
+import { registerCommands } from './lib/registerCommands';
+import { waitForConnectOutcome } from './lib/startup';
+import { runMigrations } from './lib/migrate';
+import { handleTimerButton, isTimerButton } from './commands/timer';
 import { handlePrefixMessage } from './prefix';
 
-// GuildMessages + MessageContent are for prefix commands (;role ...).
-// MessageContent is privileged: enable it in the developer portal or login fails.
-const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
-});
+/**
+ * Builds a client with every handler attached.
+ *
+ * A function rather than a top-level singleton because gateway intents are
+ * fixed at construction, and startup may need a second client with fewer of
+ * them (see `start`).
+ */
+function buildClient(intents: GatewayIntentBits[]): Client {
+const client = new Client({ intents });
 
 const COMP_COUNCIL = process.env.COMP_COUNCIL_ROLE_ID!;
 const SEMI_COMP_COUNCIL = process.env.SEMI_COMP_COUNCIL_ROLE_ID!;
@@ -15,7 +35,59 @@ const CASUAL_COUNCIL = process.env.CASUAL_COUNCIL_ROLE_ID!;
 
 const FORUM_ID = process.env.FORUM_CHANNEL_ID;
 
-client.once('ready', () => console.log(`Logged in as ${client.user?.tag}`));
+client.once(Events.ClientReady, async (readyClient) => {
+    console.log(`Logged in as ${readyClient.user.tag}`);
+
+    // Self-registering removes the "run deploy-commands from your laptop" step
+    // from every deploy. A failure here is logged, not fatal: commands
+    // registered by a previous boot keep working, and the bot is still useful
+    // for its schedulers and dashboard even if Discord rejects the update.
+    try {
+        const { count, guildId } = await registerCommands(readyClient);
+        console.log(
+            guildId
+                ? `Registered ${count} slash commands to guild ${guildId}.`
+                : `Registered ${count} global slash commands (propagation can take up to an hour).`,
+        );
+    } catch (e) {
+        console.error('Slash command registration failed; previously registered commands remain:', e);
+    }
+
+    // Verify the schema before accepting commands. A missing migration used to
+    // surface only as a generic in-Discord failure; now it is a fatal startup
+    // error. Exiting lets the container restart policy retry, so the bot
+    // recovers on its own once the database is migrated.
+    try {
+        await assertDatabaseReady();
+        console.log('Database is reachable and migrated.');
+
+        // Started only after the preflight passes, so the first tick cannot
+        // fail against an unmigrated schema. The first tick also delivers any
+        // timer that expired while the bot was offline.
+        startScheduler(client);
+        console.log('Training timer scheduler started.');
+
+        startFanScheduler(client);
+
+        // Warm the member cache so display names resolve immediately. With the
+        // GuildMembers intent the cache then stays current from gateway events.
+        // Not awaited: a large guild must not delay the rest of startup.
+        void Promise.all(
+            [...readyClient.guilds.cache.values()].map((guild) =>
+                guild.members
+                    .fetch()
+                    .then((members) => console.log(`Cached ${members.size} members for ${guild.name}.`))
+                    .catch((e) => console.warn(`Could not fetch members for ${guild.name}:`, e instanceof Error ? e.message : e)),
+            ),
+        );
+
+    } catch (e) {
+        console.error('FATAL: database preflight failed.');
+        console.error(e instanceof Error ? e.message : e);
+        await client.destroy();
+        process.exit(1);
+    }
+});
 client.on('threadCreate', async (thread: ThreadChannel) => {
     try {
         if (thread.parent?.type != ChannelType.GuildForum) return;
@@ -83,6 +155,30 @@ client.on(Events.InteractionCreate, async (interaction) => {
             return;
         }
 
+    // Panel buttons are routed by custom ID rather than a component collector,
+    // so panels posted before a restart keep working afterwards.
+    if (interaction.isButton()) {
+        if (!isTimerButton(interaction.customId)) return;
+        try {
+            await handleTimerButton(interaction);
+        } catch (e) {
+            const classified = classifyError(e);
+            const label = classified.incidentId ? `[incident ${classified.incidentId}] ` : '';
+            console.error(`${label}Error handling button ${interaction.customId}:`, e);
+            try {
+                const reply = { embeds: [buildErrorEmbed(classified)] };
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.followUp({ ...reply, flags: MessageFlags.Ephemeral });
+                } else {
+                    await interaction.reply({ ...reply, flags: MessageFlags.Ephemeral });
+                }
+            } catch (replyError) {
+                console.error(`${label}Could not deliver the button error reply:`, replyError);
+            }
+        }
+        return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
     
     const command = commands.get(interaction.commandName);
@@ -91,18 +187,127 @@ client.on(Events.InteractionCreate, async (interaction) => {
     try {
         await command.execute(interaction);
     } catch (e) {
-        console.error(`Error running /${interaction.commandName}:`, e);
-        const errorReply = {
-            embeds: [
-                new EmbedBuilder().setColor(0xed4245).setTitle('Error').setDescription('Something went wrong running that command.'),
-            ]
-        };
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp(errorReply);
-        } else {
-            await interaction.reply(errorReply);
+        const classified = classifyError(e);
+
+        // Log the incident ID next to the stack trace so a user reporting the
+        // ID from Discord can be matched to the exact failure in the logs.
+        const label = classified.incidentId ? `[incident ${classified.incidentId}] ` : '';
+        console.error(
+            `${label}Error running /${interaction.commandName} ` +
+                `(user ${interaction.user.id}, guild ${interaction.guildId ?? 'none'}): ${classified.title}`,
+            e,
+        );
+
+        const errorReply = { embeds: [buildErrorEmbed(classified)] };
+
+        // Reporting the failure must never throw a second time on top of the
+        // first. If the interaction token already expired there is nowhere
+        // left to reply, and the log above is the only record.
+        try {
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp(errorReply);
+            } else {
+                await interaction.reply(errorReply);
+            }
+        } catch (replyError) {
+            console.error(`${label}Could not deliver the error reply to Discord:`, replyError);
         }
     }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+
+return client;
+}
+
+/**
+ * Intent sets to try, most capable first. Two of the intents are privileged
+ * and must be switched on in the developer portal:
+ *
+ *   GuildMembers    resolves server nicknames in reports
+ *   MessageContent  lets prefix commands (`;role ...`) read the message
+ *
+ * Discord's refusal (close code 4014) does not say which one is missing, so
+ * startup walks down this list until one connects. GuildMessages is not
+ * privileged; it only delivers the messageCreate events.
+ */
+const INTENT_LADDER: { intents: GatewayIntentBits[]; lost: string }[] = [
+    {
+        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+        lost: '',
+    },
+    {
+        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+        lost: 'prefix commands (;role) are off. Enable "Message Content Intent"',
+    },
+    {
+        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+        lost: 'server nicknames will not resolve and names may show as IDs. Enable "Server Members Intent"',
+    },
+    {
+        intents: [GatewayIntentBits.Guilds],
+        lost: 'prefix commands are off and names may show as IDs. Enable "Server Members Intent" and "Message Content Intent"',
+    },
+];
+
+/**
+ * Connects, degrading gracefully if a privileged intent is not enabled.
+ *
+ * Two things learned the hard way:
+ *
+ * 1. `login()` resolving means nothing. When Discord refuses a privileged
+ *    intent it closes the gateway with code 4014; discord.js emits
+ *    `shardDisconnect` and stops, without throwing and without ever emitting
+ *    `ready`. Earlier versions of this function keyed off a rejection that
+ *    never comes, so the bot hung un-ready until the host's health check
+ *    killed it -- a restart loop. `waitForConnectOutcome` listens for what
+ *    discord.js actually does.
+ *
+ * 2. The HTTP server must not wait for Discord. It starts before any login,
+ *    against a getter that always returns the current client, so /healthz
+ *    answers from the first second and reports `discord: false` honestly until
+ *    the gateway is up. A Discord problem then degrades one feature instead of
+ *    taking the whole container down.
+ */
+async function start(): Promise<void> {
+    const token = process.env.DISCORD_TOKEN;
+    let current: Client = buildClient(INTENT_LADDER[0]!.intents);
+
+    // Runs in this process so the dashboard and the bot cannot disagree about
+    // the data. Disabled unless configured, but the health check is always
+    // served. Bound to a getter: see (2) above.
+    startDashboard(() => current);
+
+    // Migrations run here, after the port is bound, so their progress and any
+    // failure are visible on /healthz. This resolves only once they apply;
+    // until then the bot does not touch Discord, because commands against an
+    // unmigrated schema would fail anyway.
+    await runMigrations();
+
+    const fatal = (message: string, e?: unknown): never => {
+        console.error(`FATAL: ${message}`, e instanceof Error ? e.message : (e ?? ''));
+        process.exit(1);
+    };
+
+    let outcome = waitForConnectOutcome(current);
+    await current.login(token).catch((e: unknown) => fatal('Discord login failed:', e));
+
+    for (const step of INTENT_LADDER.slice(1)) {
+        if ((await outcome) !== 'disallowed-intents') break;
+        await current.destroy();
+        console.warn(
+            `Discord refused a privileged intent. Retrying with fewer: ${step.lost}.\n` +
+                '  To fix: Discord developer portal -> your application -> Bot -> Privileged Gateway Intents\n' +
+                '  -> enable the intents named above -> Save, then restart the bot.',
+        );
+        current = buildClient(step.intents);
+        outcome = waitForConnectOutcome(current);
+        await current.login(token).catch((e: unknown) => fatal('Discord login failed:', e));
+    }
+
+    const final = await outcome;
+    if (final !== 'ready') {
+        fatal(`Discord closed the gateway with an unrecoverable error (${final}). Check DISCORD_TOKEN.`);
+    }
+}
+
+void start();
