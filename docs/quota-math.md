@@ -8,11 +8,18 @@ verified.
 `GET /api/v4/circles?circle_id=…` returns each member with:
 
 ```
-daily_fans: int64[31]   // cumulative fan totals, one per day of the game month
+daily_fans: int64[31]   // the trainer's LIFETIME fan count, one snapshot per day
 ```
 
-The array is **cumulative**, not per-day. Day 1 is index 0. Days not yet
-reached, and days before the member joined the circle, are `0`.
+Corrected 2026-10-01: these are lifetime counts, not counts that restart each
+month. A trainer with 1.1B fans shows about 1.1B on every day. The game month
+starts on the 2nd JST, so index 0 (taken on the 1st) is the month's starting
+value and index $d$ is that plus everything earned over the first $d$ game
+days. A member who joins mid-month has their starting value at a later index.
+Days not reached, and days before the member joined, are `0`. uma.moe's own
+"Monthly Gain" is the latest snapshot minus the starting value, and
+`monthGains` in `src/lib/fans/metrics.ts` computes exactly that. Every formula
+below works on those gains, with day numbers meaning game days.
 
 ## Definitions
 
@@ -20,10 +27,10 @@ Let:
 
 - $Q$ — the configured monthly quota per member (e.g. $80{,}000{,}000$)
 - $D$ — days in the game month (e.g. $30$)
-- $e$ — days elapsed: the latest day any member has data for
-- $f_i$ — member $i$'s first day with data
-- $d_i$ — member $i$'s data days, $d_i = e - f_i + 1$
-- $T_i$ — member $i$'s cumulative total, $T_i = \text{daily\_fans}[e - 1]$
+- $e$ — game days elapsed: the latest index any member has a snapshot for
+- $s_i$ — the index of member $i$'s starting snapshot; their first owing day is $f_i = s_i + 1$
+- $d_i$ — member $i$'s data days, $d_i = e - f_i + 1 = e - s_i$
+- $T_i$ — member $i$'s fans this month, $T_i = \text{daily\_fans}[e] - \text{daily\_fans}[s_i]$
 
 ## Formulas
 
@@ -97,9 +104,13 @@ member owed quota. The effect is bounded: a late joiner's `Expected` may read
 one day's quota high, which is the conservative direction — it never
 under-reports someone who is behind.
 
-**To close this**: capture one real `/api/v4/circles` payload for a circle with
-a known mid-month transfer and compare `previous_circle_id` against that
-member's first non-zero day. That pins the rule down in a single observation.
+**Partly resolved (2026-10-01).** With snapshots read as lifetime counts, a
+member's first snapshot is their starting value, so they owe quota for one day
+fewer than their span of snapshots. That is exactly the reference's `Expected`
+for late joiners, with no offset needed. The reference's `Average per day` for
+those members still divides by the full span, while this bot divides by the
+days owed, so a late joiner's average here can read slightly higher than the
+reference's. Members present all month are unaffected.
 
 ## Quota periods (added 2026-10-01)
 

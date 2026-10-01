@@ -92,14 +92,16 @@ async function main() {
     });
 
     const { year, month } = currentGameMonth();
-    for (let day = 1; day <= 5; day += 1) {
+    // Lifetime counts, as uma.moe sends them: stored day 1 is the starting
+    // value, then 3,000,000 earned per game day for 5 days (15,000,000).
+    for (let day = 1; day <= 6; day += 1) {
         await prisma.fanSnapshot.create({
             data: {
                 trackedCircleId: circle.id,
                 viewerId: BigInt(7001),
                 trainerName: 'ハルウララ',
                 year, month, day,
-                cumulativeFans: BigInt(3_000_000 * day),
+                cumulativeFans: BigInt(1_500_000_000 + 3_000_000 * (day - 1)),
             },
         });
     }

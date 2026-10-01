@@ -24,14 +24,16 @@
 /** Window a quota is measured over. Mirrors the Prisma `QuotaPeriod` enum. */
 export type QuotaPeriod = 'DAY' | 'WEEK' | 'MONTH';
 
-/** A member's daily cumulative totals for one game month. */
+/** A member's daily fan figures for one game month. */
 export interface MemberSeries {
     viewerId: number;
     trainerName: string;
     /**
-     * Cumulative fan totals indexed by day, `daily_fans` straight from the API.
-     * Index 0 is day 1. Days not yet reached, and days before the member
-     * joined, are zero.
+     * `daily_fans` straight from the API: the trainer's *lifetime* fan count,
+     * one entry per snapshot. Index 0 is the month's starting value (taken at
+     * the game-month start, the 2nd JST), and index i is that plus everything
+     * earned over the first i game days. Zero means no snapshot: a day not yet
+     * reached, or before the member joined. See `monthGains`.
      */
     dailyFans: number[];
     shameScore: number | null;
@@ -157,20 +159,51 @@ export function toSafeNumber(value: bigint): number {
     return Number(value);
 }
 
-/** Index of the last day with a non-zero total, 1-based. Zero if there is none. */
-function lastDayWithData(dailyFans: number[]): number {
-    for (let i = dailyFans.length - 1; i >= 0; i -= 1) {
-        if ((dailyFans[i] ?? 0) > 0) return i + 1;
-    }
-    return 0;
+/** A member's fans earned this month, derived from lifetime snapshots. */
+export interface MonthGains {
+    /** Index d-1 holds fans earned through game day d. Zero before `firstDay`. */
+    gains: number[];
+    /** First game day the member can earn (and owes quota) in this month; 0 if no data. */
+    firstDay: number;
+    /** Latest game day with a snapshot; 0 if only the starting value exists. */
+    lastDay: number;
 }
 
-/** Index of the first day with a non-zero total, 1-based. Zero if there is none. */
-function firstDayWithData(dailyFans: number[]): number {
-    for (let i = 0; i < dailyFans.length; i += 1) {
-        if ((dailyFans[i] ?? 0) > 0) return i + 1;
+/**
+ * Turns uma.moe's lifetime snapshots into this month's gains.
+ *
+ * uma.moe's `daily_fans` holds lifetime fan counts, not counts that restart
+ * each month: a trainer with 1.1B lifetime fans shows ~1.1B on every day.
+ * The first snapshot of the month (index 0 for a member present from the
+ * start, a later index for someone who joined mid-month) is the baseline,
+ * and the month's gain is the latest snapshot minus it. That is exactly
+ * uma.moe's own "Monthly Gain", and it is why a mid-month joiner owes quota
+ * for one day fewer than their span of snapshots.
+ *
+ * A missing snapshot inside the span carries the previous value forward, so
+ * a missed sync reads as a zero-gain day rather than a drop and a spike.
+ */
+export function monthGains(raw: number[]): MonthGains {
+    let first = -1;
+    let last = -1;
+    raw.forEach((v, i) => {
+        if (v > 0) {
+            if (first < 0) first = i;
+            last = i;
+        }
+    });
+    if (first < 0) return { gains: [], firstDay: 0, lastDay: 0 };
+
+    const base = raw[first]!;
+    const gains = new Array<number>(last).fill(0);
+    let carried = base;
+    for (let i = first + 1; i <= last; i += 1) {
+        const v = raw[i] ?? 0;
+        // Lifetime counts never fall; treat a lower or missing value as no gain.
+        if (v > carried) carried = v;
+        gains[i - 1] = carried - base;
     }
-    return 0;
+    return { gains, firstDay: first + 1, lastDay: last };
 }
 
 /** One window of a period inside the game month. */
@@ -241,28 +274,37 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
     const period = options.period ?? 'MONTH';
     const quotaDaysOffset = options.quotaDaysOffset ?? 0;
 
-    const daysElapsed = Math.min(
-        daysInMonth,
-        Math.max(0, ...series.map((m) => lastDayWithData(m.dailyFans))),
-    );
+    // Everything below works on fans earned this month, not lifetime totals.
+    const month = new Map(series.map((m) => [m.viewerId, monthGains(m.dailyFans)]));
+    const gainsOf = (m: MemberSeries) => month.get(m.viewerId)!;
+
+    // Game days elapsed: the latest day any member has a snapshot for. Zero on
+    // the first day of the month, when only starting values exist.
+    const daysElapsed = Math.min(daysInMonth, Math.max(0, ...[...month.values()].map((g) => g.lastDay)));
 
     const window = periodWindow(period, daysElapsed, daysInMonth);
     const windowDays = window.end - window.start + 1;
     const quotaPerDay = quotaPerDayFor(period, quota, daysInMonth);
     const effectiveQuota = quotaPerDay * windowDays;
-    const daysRemaining = Math.max(0, window.end - daysElapsed + 1);
+    // Before the first day has any data, today is still day 1.
+    const daysRemaining = Math.max(0, window.end - Math.max(1, daysElapsed) + 1);
 
-    /** Cumulative total at the end of `day`; zero before day 1. */
-    const cumulativeAt = (dailyFans: number[], day: number) => (day >= 1 ? (dailyFans[day - 1] ?? 0) : 0);
+    /**
+     * Fans earned this month through the end of `day`: zero before day 1,
+     * and held at the member's latest value past their last snapshot.
+     */
+    const cumulativeAt = (g: MonthGains, day: number) =>
+        day < 1 || g.lastDay === 0 ? 0 : (g.gains[Math.min(day, g.lastDay) - 1] ?? 0);
     /** Fans earned inside the window up to and including `day`. */
-    const windowTotal = (dailyFans: number[], day: number) =>
-        Math.max(0, cumulativeAt(dailyFans, day) - cumulativeAt(dailyFans, window.start - 1));
+    const windowTotal = (g: MonthGains, day: number) =>
+        Math.max(0, cumulativeAt(g, day) - cumulativeAt(g, window.start - 1));
 
     const members = series.map<MemberProgress>((member) => {
-        const total = windowTotal(member.dailyFans, daysElapsed);
+        const g = gainsOf(member);
+        const total = windowTotal(g, daysElapsed);
 
         // A member who joined mid-window only owes quota from their first day.
-        const firstDay = firstDayWithData(member.dailyFans);
+        const firstDay = g.firstDay;
         const countFrom = Math.max(window.start, firstDay);
         const dataDays = firstDay === 0 || countFrom > daysElapsed ? 0 : Math.max(1, daysElapsed - countFrom + 1);
         const quotaDays = Math.max(0, dataDays - quotaDaysOffset);
@@ -271,9 +313,9 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         const behind = Math.max(0, expected - total);
         const avgPerDay = dataDays === 0 ? 0 : Math.floor(total / dataDays);
 
-        const previous = cumulativeAt(member.dailyFans, daysElapsed - 1);
+        const previous = cumulativeAt(g, daysElapsed - 1);
         // A cumulative series should never decrease; clamp in case it does.
-        const latestDayGain = Math.max(0, cumulativeAt(member.dailyFans, daysElapsed) - previous);
+        const latestDayGain = Math.max(0, cumulativeAt(g, daysElapsed) - previous);
 
         // Daily gains over the trailing week, from the member's first day with
         // data at the earliest. Deliberately not clipped to the window: the
@@ -281,7 +323,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         const recentGains: number[] = [];
         const trendStart = Math.max(firstDay || 1, daysElapsed - 6);
         for (let day = trendStart; day <= daysElapsed; day += 1) {
-            recentGains.push(Math.max(0, cumulativeAt(member.dailyFans, day) - cumulativeAt(member.dailyFans, day - 1)));
+            recentGains.push(Math.max(0, cumulativeAt(g, day) - cumulativeAt(g, day - 1)));
         }
 
         const onPace = behind === 0;
@@ -318,7 +360,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
     const previousRanks = new Map<number, number>();
     if (daysElapsed - 1 >= window.start) {
         const yesterday = series
-            .map((m) => ({ viewerId: m.viewerId, total: windowTotal(m.dailyFans, daysElapsed - 1) }))
+            .map((m) => ({ viewerId: m.viewerId, total: windowTotal(gainsOf(m), daysElapsed - 1) }))
             .filter((m) => m.total > 0)
             .sort((a, b) => b.total - a.total);
         yesterday.forEach((m, index) => previousRanks.set(m.viewerId, index + 1));

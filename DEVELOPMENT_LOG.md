@@ -4,6 +4,38 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-01 — Fans this month were lifetime totals; hourly sync and history backfill
+
+Production showed fish@duck with 1,122,234,894 fans on game day 1, while
+uma.moe's own page showed a monthly gain of +258,774. uma.moe's `daily_fans`
+are lifetime counts, and the bot had treated them as counts that restart each
+month. The API spec also says the game month starts on the 2nd JST, which is
+why the first snapshot is a starting value with no gain of its own.
+`monthGains` in `metrics.ts` now subtracts each member's starting snapshot,
+and the member table, trainer report and the benchmark's club line all go
+through it. It also records each member's first owing day explicitly, so a
+trainer who earned nothing on their first days still counts as present.
+Stored rows did not change, so no data migration was needed. Rewritten in
+lifetime form, the reference fixture still reproduces all 24 rows exactly,
+and a check uses the fish@duck numbers to assert +258,774.
+
+`currentGameMonth` now rolls over on the 2nd JST like uma.moe, so on the 1st
+the dashboard still shows the month that is ending, and report dates put game
+day 1 on the 2nd.
+
+uma.moe refreshes live figures hourly for most circles (every 5 minutes for
+the top 100), so the scheduler now syncs every active circle and the
+benchmark hourly and still posts reports once a day. Past months are
+imported once per circle (`backfillOnce`), newest first, up to 12 months or
+until uma.moe returns an empty month, without overwriting the circle's
+current name or rank. The hourly job runs it for every circle, including ones
+added before this change, and adding a circle starts it at once. Creating the
+`backfill:<id>` JobRun marker acts as the lock, so concurrent callers cannot
+double-import or throw. `scripts/test-backfill.ts` covers this against a
+local stand-in for uma.moe.
+
+---
+
 ## 2026-10-01 — Incident: restart loop after the master merge
 
 After the merge into master, production restart-looped with "FATAL: Discord

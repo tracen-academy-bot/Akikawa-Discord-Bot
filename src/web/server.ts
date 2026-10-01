@@ -17,7 +17,7 @@ import {
     type WebConfig,
 } from './auth';
 import { csrfField, compact, dash, esc, layout, loginPage, monthPicker, num, tile } from './views';
-import { currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle } from '../lib/fans/ingest';
+import { currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle, backfillOnce } from '../lib/fans/ingest';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate, listCircleMonths } from '../lib/fans/reports';
 import { describeQuota, toSafeNumber, type CircleProgress, type QuotaPeriod } from '../lib/fans/metrics';
 import { parsePeriod, parseQuota } from '../commands/fans';
@@ -612,7 +612,9 @@ export function startDashboard(client: () => Client): () => void {
 
         try {
             const result = await syncCircle(circle);
-            return res.redirect(`/circles/${circle.id}?ok=${encodeURIComponent(`Tracking ${result.name}.`)}`);
+            // Past months import in the background; the page shows them as they land.
+            void backfillOnce(circle);
+            return res.redirect(`/circles/${circle.id}?ok=${encodeURIComponent(`Tracking ${result.name}. Importing past months in the background.`)}`);
         } catch (e) {
             // Roll back so a bad ID does not leave an empty circle behind.
             await prisma.trackedCircle.delete({ where: { id: circle.id } });

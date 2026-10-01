@@ -13,7 +13,7 @@ import { prisma } from '../db/prisma';
 import { isOfficer } from '../lib/permissions';
 import { errorEmbed, successEmbed, infoEmbed } from '../lib/embeds';
 import { autocompleteTrackedCircle } from '../lib/fans/circleAutocomplete';
-import { currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
+import { backfillOnce, currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
 import { describeQuota, formatCompactFans, toSafeNumber, type QuotaPeriod } from '../lib/fans/metrics';
 import { isConfigured, searchCircles } from '../lib/umamoe/client';
@@ -571,12 +571,13 @@ async function handleCircleAdd(interaction: ChatInputCommandInteraction) {
 
     try {
         const result = await syncCircle(circle);
+        void backfillOnce(circle);
         await reply(
             interaction,
             successEmbed(
                 'Circle tracked',
                 `Now tracking **${result.name}** with a quota of **${describeQuota(quota, period)}** per member.\n` +
-                    `Ingested ${result.daysWritten} day records across ${result.membersSeen} members.`,
+                    `Ingested ${result.daysWritten} day records across ${result.membersSeen} members. Past months are importing in the background.`,
             ),
         );
     } catch (e) {
