@@ -1,103 +1,99 @@
-import { createCanvas } from "@napi-rs/canvas";
-import { roundRect, drawRankBadge, drawClubIcon, RANK_COLORS } from './canvasUtils';
+import { drawRankBadge, drawClubIcon } from './canvasUtils';
 import type { Club, ClubMember } from '@prisma/client';
-import { font } from './fonts';
-import { THEME } from './theme';
+import {
+    FOOTER_HEIGHT,
+    HEADER_HEIGHT,
+    MARGIN,
+    THEME,
+    beginCard,
+    drawEmpty,
+    drawFooter,
+    drawLabel,
+    drawProgressBar,
+    drawRule,
+    drawTableHead,
+    drawText,
+    drawZebra,
+    fit,
+    paceColor,
+} from './theme';
+
+/**
+ * One club's card: icon, name, rank badge, headcount and fan requirement,
+ * then its trainers and assistants.
+ *
+ * The header is custom rather than `drawHeader` because it carries the club
+ * icon and rank badge, but it keeps the same heights and divider so it lines
+ * up with every other image.
+ */
+
+const WIDTH = 1000;
+const ROW_HEIGHT = 48;
+const MAX_HEADCOUNT = 30;
 
 interface StaffRow {
     role: 'Trainer' | 'Assistant';
     name: string;
 }
 
-export async function renderClubView(club: Club & { members: ClubMember[] }, staffNames: Map<string, string> ): Promise<Buffer> {
-    const rows: StaffRow[] = club.members.slice().sort((a, b) => (a.role === b.role ? 0 : a.role === 'TRAINER' ? -1 : 1))
+export async function renderClubView(club: Club & { members: ClubMember[] }, staffNames: Map<string, string>): Promise<Buffer> {
+    const rows: StaffRow[] = club.members
+        .slice()
+        .sort((a, b) => (a.role === b.role ? 0 : a.role === 'TRAINER' ? -1 : 1))
         .map((m) => ({ role: m.role === 'TRAINER' ? 'Trainer' : 'Assistant', name: staffNames.get(m.discordUserId) ?? m.discordUserId }));
-    
-    const width = 1000;
-    const headerHeight = 200;
-    const tableHeaderHeight = 40;
-    const rowHeight = 40;
-    const height = headerHeight + tableHeaderHeight + Math.max(rows.length, 1) * rowHeight + 60;
 
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
+    const statsTop = HEADER_HEIGHT + 1;
+    const tableTop = statsTop + 108;
+    const height = tableTop + 40 + 8 + Math.max(rows.length, 1) * ROW_HEIGHT + FOOTER_HEIGHT + 12;
 
-    ctx.fillStyle = THEME.bg;
-    ctx.fillRect(0, 0, width, height);
+    const { canvas, ctx } = beginCard(WIDTH, height);
 
+    // ── Header: icon, name, badge ─────────────────────────────────────────────
+    const iconR = 40;
+    await drawClubIcon(ctx, club, MARGIN + iconR, 90, iconR, 36);
+    const textX = MARGIN + iconR * 2 + 22;
+    drawLabel(ctx, 'Club', textX, 64, THEME.accent, 12);
+    drawText(ctx, fit(ctx, club.name, WIDTH - MARGIN - 120 - textX, '700 38px'), textX, 108, { spec: '700 38px', color: THEME.text });
+    drawText(ctx, `${club.members.length} staff`, textX, 136, { spec: '400 16px', color: THEME.muted });
 
-    // Shared vertical center for both the club icon and the rank badge
-    const headerCy = 90;
+    await drawRankBadge(ctx, club.rank, WIDTH - MARGIN - 44, 92, 44, 32);
+    drawRule(ctx, MARGIN, HEADER_HEIGHT, WIDTH - MARGIN * 2, THEME.line);
 
-    // Club icon (custom image if set, otherwise initial-letter fallback)
-    const iconX = 70, iconR = 44;
-    await drawClubIcon(ctx, club, iconX, headerCy, iconR, 44);
+    // ── Headcount and fan requirement ─────────────────────────────────────────
+    const pct = (club.headcount / MAX_HEADCOUNT) * 100;
+    const color = paceColor(pct, 60);
+    drawLabel(ctx, 'Headcount', MARGIN, statsTop + 34, THEME.muted, 11);
+    drawText(ctx, `${club.headcount}/${MAX_HEADCOUNT}`, MARGIN, statsTop + 68, { spec: '700 26px', color });
+    drawProgressBar(ctx, MARGIN + 110, statsTop + 59, 300, 10, pct / 100, color);
 
-    // Title + subtitle
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = THEME.text;
-    ctx.font = font('bold 40px');
-    ctx.fillText(club.name, 135, 78);
+    const fanText =
+        club.fanCountAmount != null && club.fanCountPeriod ? `${club.fanCountAmount}M / ${club.fanCountPeriod.toLowerCase()}` : 'Not set';
+    drawLabel(ctx, 'Fan count', WIDTH - MARGIN, statsTop + 34, THEME.muted, 11, 'right');
+    drawText(ctx, fanText, WIDTH - MARGIN, statsTop + 68, {
+        spec: '700 26px',
+        color: fanText === 'Not set' ? THEME.faint : THEME.text,
+        align: 'right',
+    });
 
-    ctx.font = font('22px');
-    ctx.fillStyle = THEME.muted;
-    const fanCountText =
-        club.fanCountAmount != null && club.fanCountPeriod
-            ? `${club.fanCountAmount}M / ${club.fanCountPeriod.toLowerCase()}`
-            : 'Not set';
-    ctx.fillText(`Headcount: ${club.headcount}/30  •  Fan Count: ${fanCountText}`, 135, 112);
+    // ── Staff ─────────────────────────────────────────────────────────────────
+    const colRole = MARGIN + 20;
+    const colName = 240;
+    let y = drawTableHead(ctx, tableTop, WIDTH, [
+        { label: 'Role', x: colRole },
+        { label: 'Member', x: colName },
+    ]);
+    y += 8;
 
-    // Rank badge, top-right
-    const badgeX = width - 130, badgeR = 46;
-    await drawRankBadge(ctx, club.rank, badgeX, headerCy, badgeR, 34);
-    ctx.font = font('13px');
-    ctx.fillStyle = THEME.faint;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('RANK', badgeX, headerCy + badgeR + 20);
+    if (rows.length === 0) drawEmpty(ctx, y, 'No trainers or assistants assigned yet.');
 
-    // Divider
-    ctx.strokeStyle = THEME.line;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(40, headerHeight - 40);
-    ctx.lineTo(width - 40, headerHeight - 40);
-    ctx.stroke();
+    rows.forEach((row, i) => {
+        drawZebra(ctx, y, WIDTH, ROW_HEIGHT, i);
+        const base = y + ROW_HEIGHT / 2 + 6;
+        drawText(ctx, row.role, colRole, base, { spec: '700 17px', color: row.role === 'Trainer' ? THEME.place[0] : THEME.accent });
+        drawText(ctx, fit(ctx, row.name, WIDTH - MARGIN - colName, '400 17px'), colName, base, { spec: '400 17px', color: THEME.text });
+        y += ROW_HEIGHT;
+    });
 
-    // Staff table header
-    ctx.textAlign = 'left';
-    ctx.font = font('bold 15px');
-    ctx.fillStyle = THEME.faint;
-    ctx.fillText('ROLE', 60, headerHeight);
-    ctx.fillText('MEMBER', 220, headerHeight);
-
-    let rowY = headerHeight + tableHeaderHeight;
-    if (rows.length === 0) {
-        ctx.font = font('16px');
-        ctx.fillStyle = THEME.faint;
-        ctx.fillText('No trainers or assistants assigned yet.', 60, rowY);
-    } else {
-        rows.forEach((row, i) => {
-            if (i % 2 === 0) {
-                ctx.fillStyle = THEME.bgRaised;
-                ctx.fillRect(40, rowY - 22, width - 80, 40);
-            }
-            ctx.font = font('bold 18px');
-            ctx.fillStyle = row.role === 'Trainer' ? '#ffd166' : '#79c0ff';
-            ctx.fillText(row.role, 60, rowY);
-            ctx.font = font('18px');
-            ctx.fillStyle = THEME.text;
-            ctx.fillText(row.name, 220, rowY);
-            rowY += rowHeight;
-        });
-    }
-
-    // Footer
-    ctx.font = font('13px');
-    ctx.fillStyle = THEME.faint;
-    ctx.textAlign = 'left';
-    ctx.fillText(`Club ID: ${club.id}`, 40, height - 20);
-
+    drawFooter(ctx, WIDTH, height, `Club ID: ${club.id}`);
     return canvas.encode('png');
 }

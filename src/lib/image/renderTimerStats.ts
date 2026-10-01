@@ -1,5 +1,5 @@
-import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
-import { THEME, drawLabel, drawRule, drawText } from './theme';
+import type { SKRSContext2D } from '@napi-rs/canvas';
+import { FOOTER_HEIGHT, MARGIN, THEME, beginCard, drawFooter, drawHeader, drawLabel, drawRule, drawText, fillRoundRect } from './theme';
 import { drawTileRow, type Tile } from './tiles';
 import type { DailyRunCount, HourlyHeatmap, TrainerStats } from '../timer/service';
 
@@ -12,7 +12,6 @@ import type { DailyRunCount, HourlyHeatmap, TrainerStats } from '../timer/servic
  */
 
 const WIDTH = 1000;
-const MARGIN = 40;
 
 /** Formats minutes as "12h 30m", or "45m" under an hour. */
 function formatDuration(totalMinutes: number): string {
@@ -23,7 +22,7 @@ function formatDuration(totalMinutes: number): string {
 
 /** Bar chart of runs per day. */
 function drawHistory(ctx: SKRSContext2D, series: DailyRunCount[], x: number, y: number, w: number, h: number) {
-    drawLabel(ctx, `Last ${series.length} days`, x, y - 14, THEME.gold, 11);
+    drawLabel(ctx, `Last ${series.length} days`, x, y - 18, THEME.muted, 11);
 
     const peak = Math.max(1, ...series.map((d) => d.runs));
     const step = Math.max(1, Math.ceil(peak / 4));
@@ -44,9 +43,8 @@ function drawHistory(ctx: SKRSContext2D, series: DailyRunCount[], x: number, y: 
         const cx = plotX + slot * i + slot / 2;
         const barH = (day.runs / top) * h;
         if (day.runs > 0) {
-            ctx.fillStyle = THEME.gold;
-            ctx.fillRect(cx - barW / 2, y + h - barH, barW, barH);
-            drawText(ctx, String(day.runs), cx, y + h - barH - 7, { spec: '500 11px', color: THEME.text, align: 'center' });
+            fillRoundRect(ctx, cx - barW / 2, y + h - barH, barW, barH, Math.min(6, barW / 2), THEME.accent);
+            drawText(ctx, String(day.runs), cx, y + h - barH - 7, { spec: '700 12px', color: THEME.text, align: 'center' });
         } else {
             ctx.fillStyle = THEME.line;
             ctx.fillRect(cx - barW / 2, y + h - 2, barW, 2);
@@ -60,11 +58,11 @@ function drawHistory(ctx: SKRSContext2D, series: DailyRunCount[], x: number, y: 
 /**
  * Hour-of-week heatmap: when this trainer actually trains.
  *
- * Intensity is gold at increasing opacity against the theme background;
+ * Intensity is the accent at increasing opacity against the card;
  * empty cells keep a faint outline so the grid stays readable when sparse.
  */
 function drawHeatmap(ctx: SKRSContext2D, heatmap: HourlyHeatmap, x: number, y: number, w: number) {
-    drawLabel(ctx, `When you train \u00b7 last ${heatmap.days} days`, x, y - 14, THEME.gold, 11);
+    drawLabel(ctx, `When you train \u00b7 last ${heatmap.days} days`, x, y - 18, THEME.muted, 11);
 
     const labelW = 34;
     const cellGap = 2;
@@ -79,14 +77,12 @@ function drawHeatmap(ctx: SKRSContext2D, heatmap: HourlyHeatmap, x: number, y: n
             const count = heatmap.grid[r]?.[h] ?? 0;
             const cx = x + labelW + h * (cellW + cellGap);
             if (count === 0) {
-                ctx.fillStyle = THEME.line;
-                ctx.fillRect(cx, rowY, cellW, cellH);
+                fillRoundRect(ctx, cx, rowY, cellW, cellH, 3, THEME.surfaceAlt);
                 continue;
             }
             const alpha = heatmap.max > 0 ? 0.25 + 0.75 * (count / heatmap.max) : 1;
             ctx.globalAlpha = alpha;
-            ctx.fillStyle = THEME.gold;
-            ctx.fillRect(cx, rowY, cellW, cellH);
+            fillRoundRect(ctx, cx, rowY, cellW, cellH, 3, THEME.accent);
             ctx.globalAlpha = 1;
         }
     });
@@ -105,26 +101,24 @@ export async function renderTimerStats(
     series: DailyRunCount[],
     heatmap: HourlyHeatmap,
 ): Promise<Buffer> {
-    const headerHeight = 104;
-    const tileHeight = 104;
+    const headerBottom = 151;
+    const tileHeight = 108;
     const chartHeight = 190;
     const heatmapHeight = 7 * 16 + 30;
-    const height = headerHeight + tileHeight + chartHeight + heatmapHeight + 150;
+    const tilesTop = headerBottom + 24;
+    const chartTop = tilesTop + tileHeight + 70;
+    const heatmapTop = chartTop + chartHeight + 76;
+    const height = heatmapTop + heatmapHeight + FOOTER_HEIGHT + 10;
 
-    const canvas = createCanvas(WIDTH, height);
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = THEME.bg;
-    ctx.fillRect(0, 0, WIDTH, height);
+    const { canvas, ctx } = beginCard(WIDTH, height);
 
-    // ── Header ────────────────────────────────────────────────────────────────
-    drawLabel(ctx, 'Training report', MARGIN, 40, THEME.gold, 12);
-    drawText(ctx, displayName, MARGIN, 76, { spec: '500 30px', color: THEME.text });
-
-    const placement = stats.rank === null ? 'no runs yet' : `rank ${stats.rank} of ${stats.trainerCount}`;
-    const since = stats.firstRunAt ? ` · since ${stats.firstRunAt.toISOString().slice(0, 10)}` : '';
-    drawLabel(ctx, `${placement}${since}`, WIDTH - MARGIN, 40, THEME.muted, 12, 'right');
-    drawText(ctx, 'Independent Training · 50 min per run', WIDTH - MARGIN, 76, { spec: '400 14px', color: THEME.gold, align: 'right' });
-    drawRule(ctx, MARGIN, headerHeight - 8, WIDTH - MARGIN * 2, THEME.gold, 1.5);
+    const since = stats.firstRunAt ? `  ·  since ${stats.firstRunAt.toISOString().slice(0, 10)}` : '';
+    drawHeader(ctx, WIDTH, {
+        eyebrow: 'Training report',
+        title: displayName,
+        subtitle: `Independent Training  ·  50 min per run${since}`,
+        stats: [{ label: 'Rank', value: stats.rank === null ? '—' : `${stats.rank}/${stats.trainerCount}`, color: THEME.accent }],
+    });
 
     // ── Headline figures ──────────────────────────────────────────────────────
     const tiles: Tile[] = [
@@ -133,15 +127,16 @@ export async function renderTimerStats(
             label: 'Current streak',
             value: `${stats.currentStreakDays}d`,
             detail: `best ${stats.longestStreakDays}d`,
-            color: stats.currentStreakDays > 0 ? THEME.gold : THEME.faint,
+            color: stats.currentStreakDays > 0 ? THEME.accent : THEME.faint,
         },
         { label: 'This week', value: String(stats.runsThisWeek), detail: 'runs in 7 days', color: THEME.text },
         { label: 'Time trained', value: formatDuration(stats.totalMinutes), detail: 'total', color: THEME.text },
     ];
-    drawTileRow(ctx, tiles, MARGIN, headerHeight + 12, WIDTH - MARGIN * 2, tileHeight);
+    drawTileRow(ctx, tiles, MARGIN, tilesTop, WIDTH - MARGIN * 2, tileHeight, 16);
 
-    drawHistory(ctx, series, MARGIN, headerHeight + tileHeight + 70, WIDTH - MARGIN * 2, chartHeight);
-    drawHeatmap(ctx, heatmap, MARGIN, headerHeight + tileHeight + chartHeight + 140, WIDTH - MARGIN * 2);
+    drawHistory(ctx, series, MARGIN, chartTop, WIDTH - MARGIN * 2, chartHeight);
+    drawHeatmap(ctx, heatmap, MARGIN, heatmapTop, WIDTH - MARGIN * 2);
+    drawFooter(ctx, WIDTH, height, 'Akikawa  ·  times shown in JST');
 
     return canvas.encode('png');
 }

@@ -1,19 +1,29 @@
-import { createCanvas } from '@napi-rs/canvas';
-import { font } from './fonts';
-import { THEME, drawLabel, drawRule, drawText, placeColor } from './theme';
+import {
+    FOOTER_HEIGHT,
+    MARGIN,
+    THEME,
+    beginCard,
+    drawEmpty,
+    drawFooter,
+    drawHeader,
+    drawProgressBar,
+    drawRankChip,
+    drawTableHead,
+    drawText,
+    drawZebra,
+    fit,
+    placeColor,
+} from './theme';
 import type { LeaderboardPeriod, LeaderboardRow } from '../timer/service';
 
 /**
  * The Independent Training leaderboard. Each row carries a bar scaled to the
- * leader so relative standing reads at a glance; the top four take the
- * placement tints on a left bar, matching the fan report.
+ * leader so relative standing reads at a glance; the top three take the
+ * placement tints, matching the fan report.
  */
 
 const WIDTH = 1000;
-const MARGIN = 40;
-const ROW_HEIGHT = 44;
-const HEADER_HEIGHT = 104;
-const COLUMN_HEADER_HEIGHT = 40;
+const ROW_HEIGHT = 50;
 
 const PERIOD_LABELS: Record<LeaderboardPeriod, string> = {
     week: 'last 7 days',
@@ -29,68 +39,62 @@ function formatDuration(totalMinutes: number): string {
 }
 
 export async function renderTimerLeaderboard(rows: LeaderboardRow[], names: Map<string, string>, period: LeaderboardPeriod): Promise<Buffer> {
-    const height = HEADER_HEIGHT + COLUMN_HEADER_HEIGHT + Math.max(rows.length, 1) * ROW_HEIGHT + 56;
+    const headerBottom = 151;
+    const tableTop = headerBottom + 24;
+    const height = tableTop + 40 + 8 + Math.max(rows.length, 1) * ROW_HEIGHT + FOOTER_HEIGHT + 12;
 
-    const canvas = createCanvas(WIDTH, height);
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = THEME.bg;
-    ctx.fillRect(0, 0, WIDTH, height);
+    const { canvas, ctx } = beginCard(WIDTH, height);
 
-    // ── Header ────────────────────────────────────────────────────────────────
-    drawText(ctx, 'INDEPENDENT TRAINING', MARGIN, 58, { spec: '500 26px', color: THEME.gold, tracking: 4 });
     const totalRuns = rows.reduce((sum, r) => sum + r.runs, 0);
-    drawLabel(ctx, `${PERIOD_LABELS[period]} · ${totalRuns} run${totalRuns === 1 ? '' : 's'}`, WIDTH - MARGIN, 54, THEME.muted, 12, 'right');
-    drawRule(ctx, MARGIN, HEADER_HEIGHT - 8, WIDTH - MARGIN * 2, THEME.gold, 1.5);
+    const totalMinutes = rows.reduce((sum, r) => sum + r.minutes, 0);
+    drawHeader(ctx, WIDTH, {
+        eyebrow: `Independent Training  ·  ${PERIOD_LABELS[period]}`,
+        title: 'Training leaderboard',
+        subtitle: '50-minute runs tracked by the timer panel',
+        stats: [
+            { label: 'Runs', value: String(totalRuns), color: THEME.accent },
+            { label: 'Time', value: formatDuration(totalMinutes) },
+        ],
+    });
 
-    const colPlace = MARGIN + 22;
-    const colName = 104;
-    const colBar = 400;
-    const barWidth = 330;
+    const colRankCx = MARGIN + 16;
+    const colName = MARGIN + 50;
+    const colBar = 420;
+    const barWidth = 300;
     const colRuns = 820;
     const colTime = WIDTH - MARGIN;
 
-    const hy = HEADER_HEIGHT + 20;
-    drawLabel(ctx, '#', colPlace, hy, THEME.muted);
-    drawLabel(ctx, 'Trainer', colName, hy, THEME.muted);
-    drawLabel(ctx, 'Runs', colRuns, hy, THEME.muted, 12, 'right');
-    drawLabel(ctx, 'Time', colTime, hy, THEME.muted, 12, 'right');
-    drawRule(ctx, MARGIN, HEADER_HEIGHT + COLUMN_HEADER_HEIGHT - 6, WIDTH - MARGIN * 2, THEME.line);
-
-    let y = HEADER_HEIGHT + COLUMN_HEADER_HEIGHT;
+    let y = drawTableHead(ctx, tableTop, WIDTH, [
+        { label: '#', x: colRankCx, align: 'center' },
+        { label: 'Trainer', x: colName },
+        { label: 'Share of leader', x: colBar },
+        { label: 'Runs', x: colRuns, align: 'right' },
+        { label: 'Time', x: colTime, align: 'right' },
+    ]);
+    y += 8;
 
     if (rows.length === 0) {
-        drawText(ctx, 'No runs recorded in this period yet.', colPlace, y + 28, { spec: '400 16px', color: THEME.faint });
-        return canvas.encode('png');
+        drawEmpty(ctx, y, 'No runs recorded in this period yet.');
+    } else {
+        const leaderRuns = Math.max(1, rows[0]?.runs ?? 1);
+        rows.forEach((row, i) => {
+            const rank = i + 1;
+            const cy = y + ROW_HEIGHT / 2;
+            const tint = placeColor(rank);
+            drawZebra(ctx, y, WIDTH, ROW_HEIGHT, i);
+            drawRankChip(ctx, rank, colRankCx, cy);
+
+            const spec = '700 17px';
+            const name = fit(ctx, names.get(row.discordUserId) ?? row.discordUserId, colBar - colName - 24, spec);
+            drawText(ctx, name, colName, cy + 6, { spec, color: tint ?? THEME.text });
+
+            drawProgressBar(ctx, colBar, cy, barWidth, 10, row.runs / leaderRuns, tint ?? THEME.accent);
+            drawText(ctx, String(row.runs), colRuns, cy + 6, { spec: '700 17px', color: THEME.text, align: 'right' });
+            drawText(ctx, formatDuration(row.minutes), colTime, cy + 6, { spec: '400 15px', color: THEME.muted, align: 'right' });
+            y += ROW_HEIGHT;
+        });
     }
 
-    const leaderRuns = Math.max(1, rows[0]?.runs ?? 1);
-
-    rows.forEach((row, i) => {
-        const rank = i + 1;
-        const cy = y + ROW_HEIGHT / 2 + 6;
-        const tint = placeColor(rank);
-
-        if (tint) {
-            ctx.fillStyle = tint;
-            ctx.fillRect(MARGIN, y + 8, 3, ROW_HEIGHT - 16);
-        }
-
-        drawText(ctx, String(rank), colPlace, cy, { spec: '400 15px', color: THEME.faint });
-
-        ctx.font = font('500 17px');
-        let name = names.get(row.discordUserId) ?? row.discordUserId;
-        while (ctx.measureText(name).width > colBar - colName - 24 && name.length > 1) name = `${name.slice(0, -2)}…`;
-        drawText(ctx, name, colName, cy, { spec: '500 17px', color: tint ?? THEME.text });
-
-        drawRule(ctx, colBar, cy - 7, barWidth, THEME.line, 6);
-        drawRule(ctx, colBar, cy - 7, Math.max(6, barWidth * (row.runs / leaderRuns)), tint ?? THEME.muted, 6);
-
-        drawText(ctx, String(row.runs), colRuns, cy, { spec: '700 17px', color: THEME.text, align: 'right' });
-        drawText(ctx, formatDuration(row.minutes), colTime, cy, { spec: '400 14px', color: THEME.muted, align: 'right' });
-
-        y += ROW_HEIGHT;
-        drawRule(ctx, MARGIN, y - 1, WIDTH - MARGIN * 2, THEME.line);
-    });
-
+    drawFooter(ctx, WIDTH, height, 'Akikawa  ·  one run = 50 minutes of Independent Training');
     return canvas.encode('png');
 }

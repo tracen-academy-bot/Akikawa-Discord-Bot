@@ -15,13 +15,14 @@ export function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h
     ctx.closePath();
 }
 
+/** Fallback badge colours when a rank PNG is missing. Drawn from the shared theme. */
 export const RANK_COLORS: Record<ClubRank, string> = {
-    S_PLUS: '#ffd166',
-    S: '#f4b13f',
-    A_PLUS: '#7ee787',
-    A: '#56d364',
-    B_PLUS: '#79c0ff',
-    B: '#58a6ff'
+    S_PLUS: THEME.place[0],
+    S: THEME.place[0],
+    A_PLUS: THEME.violet,
+    A: THEME.violet,
+    B_PLUS: THEME.accent,
+    B: THEME.accent,
 };
 
 export const RANK_LABELS: Record<ClubRank, string> = {
@@ -66,13 +67,13 @@ export async function drawRankBadge(ctx: SKRSContext2D, rank: ClubRank, cx: numb
     const color = RANK_COLORS[rank];
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.fillStyle = THEME.surfaceAlt;
     ctx.fill();
     ctx.lineWidth = Math.max(2, r/12);
     ctx.strokeStyle = color;
     ctx.stroke();
 
-    ctx.font = font(`bold ${labelFontSize}px`);
+    ctx.font = font(`700 ${labelFontSize}px`);
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -123,8 +124,8 @@ export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name:
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.font = font(`bold ${labelFontSize}px`);
-    ctx.fillStyle = THEME.bg;
+    ctx.font = font(`700 ${labelFontSize}px`);
+    ctx.fillStyle = THEME.surface;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(club.name[0]?.toUpperCase() ?? '?', cx, cy + 2);

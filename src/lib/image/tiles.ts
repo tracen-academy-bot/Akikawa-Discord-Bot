@@ -1,14 +1,13 @@
 import type { SKRSContext2D } from '@napi-rs/canvas';
 import { font } from './fonts';
-import { THEME, drawLabel, drawText } from './theme';
+import { THEME, drawLabel, drawText, fillRoundRect } from './theme';
 
 /**
  * Headline statistic tiles, shared by the timer stats card and the trainer
  * report. A tile is a label, one large figure, and an optional detail line.
  *
- * Flat panels with a hairline border rather than rounded cards: the reference
- * design has no radii anywhere, and square edges keep the tracked uppercase
- * labels feeling like part of the same system as the tables.
+ * Rounded raised panels on the card surface, the same radius and fill as the
+ * table head band, so tiles and tables read as one system.
  */
 
 /** One headline figure. */
@@ -22,25 +21,21 @@ export interface Tile {
 
 /** Draws a single tile at the given box. */
 export function drawTile(ctx: SKRSContext2D, tile: Tile, x: number, y: number, w: number, h: number): void {
-    ctx.fillStyle = THEME.bgRaised;
-    ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = THEME.line;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    fillRoundRect(ctx, x, y, w, h, 14, THEME.surfaceAlt);
 
-    drawLabel(ctx, tile.label, x + 18, y + 28, THEME.muted, 11);
+    drawLabel(ctx, tile.label, x + 20, y + 30, THEME.muted, 11);
 
     // Shrink the figure rather than let it overflow its tile.
     let size = 32;
     ctx.font = font(`700 ${size}px`);
-    while (ctx.measureText(tile.value).width > w - 36 && size > 16) {
+    while (ctx.measureText(tile.value).width > w - 40 && size > 16) {
         size -= 2;
         ctx.font = font(`700 ${size}px`);
     }
-    drawText(ctx, tile.value, x + 18, y + 70, { spec: `700 ${size}px`, color: tile.color });
+    drawText(ctx, tile.value, x + 20, y + 72, { spec: `700 ${size}px`, color: tile.color });
 
     if (tile.detail) {
-        drawText(ctx, tile.detail, x + 18, y + 92, { spec: '400 12px', color: THEME.faint });
+        drawText(ctx, tile.detail, x + 20, y + 94, { spec: '400 13px', color: THEME.faint });
     }
 }
 
