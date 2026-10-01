@@ -1,5 +1,4 @@
-import { createCanvas } from '@napi-rs/canvas';
-import { THEME, drawLabel, drawRule, drawText } from './theme';
+import { FOOTER_HEIGHT, MARGIN, THEME, beginCard, drawFooter, drawHeader, drawLabel, drawText, paceColor, placeColor } from './theme';
 import { drawChart } from './chart';
 import { drawTileRow, type Tile } from './tiles';
 import { formatCompactFans, formatFans } from '../fans/metrics';
@@ -14,7 +13,6 @@ import { formatCompactFans, formatFans } from '../fans/metrics';
  */
 
 const WIDTH = 1200;
-const MARGIN = 40;
 
 export interface TrainerReportData {
     trainerName: string;
@@ -38,43 +36,36 @@ export interface TrainerReportData {
     quotaPerDay: number;
 }
 
-/** Green at or above target, gold within reach, red short. */
-function progressColor(pct: number): string {
-    if (pct >= 100) return THEME.green;
-    if (pct >= 80) return THEME.gold;
-    return THEME.red;
-}
-
 export async function renderTrainerReport(data: TrainerReportData): Promise<Buffer> {
-    const headerHeight = 112;
-    const tileHeight = 104;
-    const tileGap = 14;
+    const headerBottom = 151;
+    const tileHeight = 108;
+    const tileGap = 16;
     const chartHeight = 300;
-    const height = headerHeight + tileHeight * 2 + tileGap + chartHeight + 132;
+    const tilesTop = headerBottom + 24;
+    const height = tilesTop + tileHeight * 2 + tileGap + 56 + chartHeight + FOOTER_HEIGHT + 24;
 
-    const canvas = createCanvas(WIDTH, height);
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = THEME.bg;
-    ctx.fillRect(0, 0, WIDTH, height);
+    const { canvas, ctx } = beginCard(WIDTH, height);
 
-    // ── Header ────────────────────────────────────────────────────────────────
-    drawLabel(ctx, 'Trainer report', MARGIN, 40, THEME.gold, 12);
-    drawText(ctx, data.trainerName, MARGIN, 76, { spec: '500 30px', color: THEME.text });
-
-    const placement =
-        data.rankInCircle !== null && data.circleSize
-            ? `rank ${data.rankInCircle} of ${data.circleSize} · top ${Math.max(1, Math.round((data.rankInCircle / data.circleSize) * 100))}%`
-            : 'unranked';
-    drawLabel(ctx, `${data.circleName} · ${placement}`, WIDTH - MARGIN, 40, THEME.muted, 12, 'right');
-    drawText(ctx, `${data.windowLabel} · goal ${formatCompactFans(data.goal)} · quota ${formatCompactFans(data.quotaPerDay)}/day`, WIDTH - MARGIN, 76, {
-        spec: '400 14px',
-        color: THEME.gold,
-        align: 'right',
+    const progressPct = data.goal > 0 ? (data.windowFans / data.goal) * 100 : 0;
+    drawHeader(ctx, WIDTH, {
+        eyebrow: `Trainer report  ·  ${data.circleName}`,
+        title: data.trainerName,
+        subtitle: `${data.windowLabel}  ·  goal ${formatCompactFans(data.goal)}  ·  quota ${formatCompactFans(data.quotaPerDay)} per day`,
+        stats: [
+            {
+                label: 'Circle rank',
+                value: data.rankInCircle !== null && data.circleSize ? `${data.rankInCircle}/${data.circleSize}` : '—',
+                color: (data.rankInCircle !== null ? placeColor(data.rankInCircle) : null) ?? THEME.text,
+            },
+            {
+                label: 'Goal',
+                value: data.goal > 0 ? `${Math.floor(progressPct)}%` : '—',
+                color: data.goal > 0 ? paceColor(progressPct, 80) : THEME.faint,
+            },
+        ],
     });
-    drawRule(ctx, MARGIN, headerHeight - 8, WIDTH - MARGIN * 2, THEME.gold, 1.5);
 
     // ── Headline figures, two rows ────────────────────────────────────────────
-    const progressPct = data.goal > 0 ? (data.windowFans / data.goal) * 100 : 0;
     const days = data.dailyGains.length;
 
     const rowOne: Tile[] = [
@@ -84,7 +75,7 @@ export async function renderTrainerReport(data: TrainerReportData): Promise<Buff
             label: 'Goal progress',
             value: data.goal > 0 ? `${progressPct.toFixed(1)}%` : '—',
             ...(data.goal > 0 ? { detail: `of ${formatCompactFans(data.goal)}` } : {}),
-            color: data.goal > 0 ? progressColor(progressPct) : THEME.faint,
+            color: data.goal > 0 ? paceColor(progressPct, 80) : THEME.faint,
         },
     ];
     const rowTwo: Tile[] = [
@@ -98,7 +89,7 @@ export async function renderTrainerReport(data: TrainerReportData): Promise<Buff
             label: 'Above quota',
             value: `${data.aboveQuotaStreak}d`,
             detail: data.aboveQuotaStreak > 0 ? 'consecutive days' : 'not currently',
-            color: data.aboveQuotaStreak > 0 ? THEME.gold : THEME.faint,
+            color: data.aboveQuotaStreak > 0 ? THEME.accent : THEME.faint,
         },
         {
             label: 'Shame score',
@@ -108,11 +99,12 @@ export async function renderTrainerReport(data: TrainerReportData): Promise<Buff
         },
     ];
 
-    drawTileRow(ctx, rowOne, MARGIN, headerHeight + 12, WIDTH - MARGIN * 2, tileHeight);
-    drawTileRow(ctx, rowTwo, MARGIN, headerHeight + 12 + tileHeight + tileGap, WIDTH - MARGIN * 2, tileHeight);
+    drawTileRow(ctx, rowOne, MARGIN, tilesTop, WIDTH - MARGIN * 2, tileHeight, tileGap);
+    drawTileRow(ctx, rowTwo, MARGIN, tilesTop + tileHeight + tileGap, WIDTH - MARGIN * 2, tileHeight, tileGap);
 
     // ── Daily gains ───────────────────────────────────────────────────────────
-    const chartTop = headerHeight + 12 + tileHeight * 2 + tileGap + 44;
+    const chartTop = tilesTop + tileHeight * 2 + tileGap + 56;
+    drawLabel(ctx, 'Daily fans gained', MARGIN, chartTop - 14, THEME.muted, 11);
     if (data.dailyGains.length === 0) {
         drawText(ctx, 'No daily fan data for this window yet.', MARGIN, chartTop + 40, { spec: '400 16px', color: THEME.faint });
     } else {
@@ -122,17 +114,17 @@ export async function renderTrainerReport(data: TrainerReportData): Promise<Buff
             width: WIDTH - MARGIN * 2,
             height: chartHeight,
             labels: data.dailyGains.map((d) => d.label),
-            series: [{ label: 'Fans gained', color: THEME.gold, values: data.dailyGains.map((d) => d.gain), fill: true, marker: 'circle' }],
+            series: [{ label: 'Fans gained', color: THEME.accent, values: data.dailyGains.map((d) => d.gain), fill: true, marker: 'circle' }],
             formatValue: formatCompactFans,
             pointLabels: data.dailyGains.length <= 16,
-            legend: true,
-            ...(data.quotaPerDay > 0 ? { referenceLines: [{ value: data.quotaPerDay, label: 'Daily quota', color: THEME.muted }] } : {}),
+            legend: false,
+            ...(data.quotaPerDay > 0 ? { referenceLines: [{ value: data.quotaPerDay, label: 'Daily quota', color: THEME.amber }] } : {}),
         });
     }
 
     // ── Footer ────────────────────────────────────────────────────────────────
     const updated = data.lastUpdated ? data.lastUpdated.toUTCString() : 'unknown';
-    drawText(ctx, `Data source: uma.moe  ·  last updated ${updated}`, MARGIN, height - 22, { spec: '400 12px', color: THEME.faint });
+    drawFooter(ctx, WIDTH, height, `Data source: uma.moe  ·  last updated ${updated}`);
 
     return canvas.encode('png');
 }

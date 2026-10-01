@@ -11,11 +11,12 @@ import * as path from 'path';
  * Debian image, tofu boxes for every Japanese trainer name --
  * `@napi-rs/canvas` resolves one family and does not fall back per glyph.
  *
- * IBM Plex Mono carries Latin and digits; IBM Plex Sans JP carries CJK. They
- * are one superfamily, so a mixed-script row reads as one typeface rather than
- * two glued together. Plex Mono's digits are tabular by nature, which matters
- * because the canvas API offers no way to enable a font's `tnum` feature and
- * proportional digits would make every numeric column wobble.
+ * IBM Plex Sans JP is the primary face: it carries Latin, digits and CJK in
+ * one family, so a mixed-script row reads as one typeface. Its digits are
+ * tabular (every figure 0-9 has the same advance), which matters because the
+ * canvas API offers no way to enable a font's `tnum` feature and proportional
+ * digits would make every numeric column wobble. IBM Plex Mono stays
+ * registered for the rare place that wants a code-like face (IDs).
  *
  * Both are SIL Open Font License 1.1; the licence texts sit beside the files.
  * See `docs/fonts.md`.
@@ -28,8 +29,10 @@ const FONT_DIR = path.join(__dirname, '..', '..', 'assets', 'fonts');
  * Primary stack. The trailing system families are a safety net only: if
  * registration failed they keep CJK legible rather than rendering as boxes.
  */
-export const FONT_STACK =
-    '"IBM Plex Mono", "IBM Plex Sans JP", "DejaVu Sans Mono", "WenQuanYi Zen Hei", monospace';
+export const FONT_STACK = '"IBM Plex Sans JP", "IBM Plex Mono", "DejaVu Sans", "WenQuanYi Zen Hei", sans-serif';
+
+/** Monospace stack, for identifiers and anything that should read as code. */
+export const MONO_STACK = '"IBM Plex Mono", "IBM Plex Sans JP", "DejaVu Sans Mono", monospace';
 
 /** Registers every bundled font once. Idempotent; safe to import repeatedly. */
 function registerBundledFonts(): void {
@@ -63,4 +66,9 @@ registerBundledFonts();
  */
 export function font(spec: string): string {
     return `${spec} ${FONT_STACK}`;
+}
+
+/** Like `font`, with the monospace stack. */
+export function monoFont(spec: string): string {
+    return `${spec} ${MONO_STACK}`;
 }

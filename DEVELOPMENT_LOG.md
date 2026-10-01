@@ -4,6 +4,60 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-01 — Redesign: one visual system for every image and the dashboard
+
+### Why
+
+Requested: "redesign the whole thing", images and dashboard, with a reference
+fan-report screenshot from another bot (card layout, avatar/rank badge, pace
+bars with percentages, fewer columns). The palette was left open; the hard
+requirement was "nice and consistent". The old look was a dense gold-on-black
+terminal style, and the club list/view images ignored the theme entirely
+(GitHub-style blues and greens of their own).
+
+### The system (`src/lib/image/theme.ts`, mirrored in `src/web/views.ts`)
+
+- **Layout.** Every image is one rounded card on a darker page. Shared pieces:
+  `beginCard`, `drawHeader` (eyebrow, title, subtitle, right-hand stat block),
+  `drawTableHead` (tinted band), `drawZebra`, `drawProgressBar`,
+  `drawRankChip`, `drawFooter`. The dashboard has CSS/HTML twins of the same
+  pieces (`rankChip`, `paceBar`, `sparkline`).
+- **Colour = meaning, one meaning each.** Blue: brand and on track. Amber:
+  close, or needs attention (need/day). Red: behind, nothing else. Gold,
+  silver, bronze: 1st-3rd. Violet: a neutral second series (your club against
+  benchmark tiers). `paceColor(pct, closeAt)` is the single rule for every
+  pace/goal figure.
+- **Type.** IBM Plex Sans JP everywhere (see `docs/fonts.md`; digits verified
+  tabular), weights 400/700 only.
+
+### Notable changes
+
+- **Fan report.** Columns are now rank chip, trainer (+ movement), pace bar +
+  %, fans, avg/day, need/day (only when behind), 7-day trend, projected,
+  shame. Dropped: Expected (the same for everyone; implied by pace), Behind
+  (implied by pace and need/day), Day N gain (the sparkline shows it).
+  **Added: shame score**, which was ingested but never shown.
+- **Dashboard member table** uses the same columns, order and colours as the
+  image. Pages whose main content is an image no longer repeat its heading.
+- **Chart reference lines** (daily quota) are keyed in the legend row instead
+  of labelled on the plot. Two on-plot placements were tried; both collided
+  with a data label depending on where the last point fell.
+- Placement tints cover the top 3 (was top 4).
+
+### Fixed along the way
+
+The September date-bomb in `scripts/test-fans.ts` was found here; the fix
+shipped in the BigInt-fix entry below so production CI could go green first.
+
+### Verified
+
+`tsc --noEmit`, all six `npm test` suites against Postgres 16, `npm run build`.
+Every image rendered with sample data and inspected; every dashboard page
+screenshotted at 1400px and the circle page at 390px (no horizontal page
+overflow).
+
+---
+
 ## 2026-10-01 — Fix: adding a circle failed with "Cannot convert undefined to a BigInt"
 
 ### Root cause

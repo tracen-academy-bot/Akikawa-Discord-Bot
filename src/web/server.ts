@@ -16,7 +16,7 @@ import {
     verifyCsrf,
     type WebConfig,
 } from './auth';
-import { csrfField, compact, dash, esc, layout, loginPage, monthPicker, num, tile } from './views';
+import { csrfField, compact, dash, esc, layout, loginPage, monthPicker, millions, num, paceBar, rankChip, sparkline, tile } from './views';
 import { currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle } from '../lib/fans/ingest';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate, listCircleMonths } from '../lib/fans/reports';
 import { toSafeNumber, type CircleProgress } from '../lib/fans/metrics';
@@ -99,29 +99,30 @@ function flash(req: Request): string {
     return '';
 }
 
-/** Builds the member table shared by the circle page. */
+/**
+ * Builds the member table shared by the circle page. Same columns, order and
+ * colours as the fan report image, with the trend drawn as inline SVG.
+ */
 function memberRows(progress: CircleProgress, circleId: string): string {
     return progress.members
         .map((m) => {
             const movement =
                 m.rankChange === null || m.rankChange === 0
                     ? ''
-                    : ` <span class="${m.rankChange > 0 ? 'gold' : 'red'}">${m.rankChange > 0 ? '\u2191' : '\u2193'}${Math.abs(m.rankChange)}</span>`;
-            // Row class drives the left bar: placement tint for the top four,
-            // red for anyone behind, nothing otherwise.
-            const cls = m.rank <= 4 ? `p${m.rank}` : m.onPace ? '' : 'behind';
-            const projTone = m.projectedTotal >= progress.effectiveQuota ? 'green' : m.onPace ? 'muted' : 'red';
+                    : `<span class="move ${m.rankChange > 0 ? 'accent' : 'red'}">${m.rankChange > 0 ? '\u25B2' : '\u25BC'} ${Math.abs(m.rankChange)}</span>`;
+            const pct = m.expected > 0 ? (m.total / m.expected) * 100 : 100;
+            const projTone = m.projectedTotal >= progress.effectiveQuota ? 'accent' : 'red';
 
-            return `<tr class="${cls}">
-        <td class="faint" data-value="${m.rank}">${m.rank}${movement}</td>
+            return `<tr class="${m.rank <= 3 ? `p${m.rank}` : ''}">
+        <td data-value="${m.rank}">${rankChip(m.rank)}${movement}</td>
         <td class="name"><a href="/circles/${esc(circleId)}/trainers/${m.viewerId}">${esc(m.trainerName)}</a></td>
+        <td data-value="${pct.toFixed(2)}">${paceBar(pct)}</td>
         <td class="right"><strong>${num(m.total)}</strong></td>
-        <td class="right faint">${num(m.expected)}</td>
-        <td class="right ${m.behind > 0 ? 'red' : 'faint'}">${dash(m.behind > 0 ? m.behind : null)}</td>
         <td class="right muted">${num(m.avgPerDay)}</td>
-        <td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>
-        <td class="right muted">${num(m.latestDayGain)}</td>
-        <td class="right ${projTone}">${compact(m.projectedTotal)}</td>
+        <td class="right ${m.needPerDay !== null ? 'amber' : 'faint'}">${m.needPerDay !== null ? `<strong>${num(m.needPerDay)}</strong>` : '\u2014'}</td>
+        <td>${sparkline(m.recentGains)}</td>
+        <td class="right ${projTone}" data-value="${m.projectedTotal}"><strong>${compact(m.projectedTotal)}</strong></td>
+        <td class="right ${m.shameScore === null ? 'faint' : 'muted'}">${dash(m.shameScore)}</td>
       </tr>`;
         })
         .join('');
@@ -281,6 +282,9 @@ export function startDashboard(client: () => Client): () => void {
                 const progress = await currentCircleProgress(circle);
                 const behind = progress?.members.filter((m) => !m.onPace).length ?? 0;
                 const total = progress?.totalFans ?? 0;
+                // Circle-wide pace: total against what the whole circle should have by today.
+                const expectedToDate = progress && progress.daysInMonth > 0 ? (progress.quotaTarget * progress.daysElapsed) / progress.daysInMonth : 0;
+                const pace = expectedToDate > 0 ? (total / expectedToDate) * 100 : 0;
 
                 return `<a class="card" href="/circles/${esc(circle.id)}" style="display:block">
                   <h3>${esc(circle.name)}${circle.active ? '' : ' <span class="faint">(paused)</span>'}</h3>
@@ -288,9 +292,10 @@ export function startDashboard(client: () => Client): () => void {
                     Quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} / member / month<br>
                     ${progress ? `${progress.members.length} members · day ${progress.daysElapsed}/${progress.daysInMonth}` : 'No data ingested yet'}
                   </div>
-                  <div style="margin-top:12px;display:flex;gap:24px">
-                    <div><div class="label">Total</div><strong>${esc(compact(total))}</strong></div>
-                    <div><div class="label">Behind</div><strong class="${behind > 0 ? 'red' : 'green'}">${behind}</strong></div>
+                  ${progress ? `<div class="label" style="margin-top:16px">Pace today</div>${paceBar(pace)}` : ''}
+                  <div style="margin-top:12px;display:flex;gap:28px">
+                    <div><div class="label">Total</div><strong>${esc(millions(total))}</strong></div>
+                    <div><div class="label">Behind</div><strong class="${behind > 0 ? 'red' : 'accent'}">${behind}</strong></div>
                   </div>
                 </a>`;
             }),
@@ -302,6 +307,7 @@ export function startDashboard(client: () => Client): () => void {
                 user: req.user,
                 active: 'overview',
                 body: `${flash(req)}
+          <p class="eyebrow">Akikawa</p>
           <h1>Overview</h1>
           <p class="sub">Club fan quotas and training activity.</p>
           <div class="tiles">
@@ -369,15 +375,16 @@ export function startDashboard(client: () => Client): () => void {
                 title: circle.name,
                 user: req.user,
                 body: `${flash(req)}
+          <p class="eyebrow">Fan report${circle.monthlyRank !== null ? ` · monthly rank #${circle.monthlyRank}` : ''}</p>
           <h1>${esc(circle.name)}</h1>
-          <p class="sub gold">day ${progress?.daysElapsed ?? 0} of ${progress?.daysInMonth ?? '\u2014'} · quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} per member · ${progress ? esc(compact(progress.quotaPerDay)) : '\u2014'}/day</p>
-          <p class="sub">circle <code>${esc(String(circle.circleId))}</code> · last sync ${circle.lastSyncedAt ? esc(circle.lastSyncedAt.toUTCString()) : 'never'}</p>
+          <p class="sub">Day ${progress?.daysElapsed ?? 0} of ${progress?.daysInMonth ?? '\u2014'} · quota ${esc(compact(toSafeNumber(circle.monthlyQuota)))} per member · ${progress ? esc(compact(progress.quotaPerDay)) : '\u2014'} per day<br>
+          <span class="faint">Circle <code>${esc(String(circle.circleId))}</code> · last sync ${circle.lastSyncedAt ? esc(circle.lastSyncedAt.toUTCString()) : 'never'}</span></p>
           ${picker}
           ${
               progress
                   ? `<div class="tiles">
                    ${tile('Members', String(progress.members.length))}
-                   ${tile('Total fans', compact(progress.totalFans))}
+                   ${tile('Total fans', millions(progress.totalFans))}
                    ${tile('Behind quota', String(progress.members.filter((m) => !m.onPace).length), 'of ' + progress.members.length, progress.members.some((m) => !m.onPace) ? 'bad' : 'good')}
                    ${tile('Day', `${progress.daysElapsed}/${progress.daysInMonth}`, formatReportDate(year, month, progress.daysElapsed))}
                  </div>
@@ -385,9 +392,9 @@ export function startDashboard(client: () => Client): () => void {
                  <div class="panel">
                    <table data-sortable>
                      <thead><tr>
-                       <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Total</th><th class="right" data-sort>Expected</th>
-                       <th class="right" data-sort>Behind</th><th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Need/Day</th>
-                       <th class="right" data-sort>Day ${progress.daysElapsed}</th><th class="right" data-sort>Proj.</th>
+                       <th data-sort>#</th><th data-sort>Trainer</th><th data-sort>Pace</th><th class="right" data-sort>Fans</th>
+                       <th class="right" data-sort>Avg / day</th><th class="right" data-sort>Need / day</th><th>7-day trend</th>
+                       <th class="right" data-sort>Projected</th><th class="right" data-sort>Shame</th>
                      </tr></thead>
                      <tbody>${memberRows(progress, circle.id)}</tbody>
                    </table>
@@ -459,8 +466,7 @@ export function startDashboard(client: () => Client): () => void {
                 title: report.trainerName,
                 user: req.user,
                 body: `${flash(req)}
-          <h1>${esc(report.trainerName)}</h1>
-          <p class="sub">${esc(circle.name)} · trainer <code>${esc(String(viewerId))}</code></p>
+          <p class="sub"><a href="/circles/${esc(circle.id)}">\u2190 ${esc(circle.name)}</a> \u00b7 trainer <code>${esc(String(viewerId))}</code></p>
           <img class="report" src="/circles/${esc(circle.id)}/trainers/${esc(String(viewerId))}/report.png" alt="Trainer report">
           <h2>Daily gains</h2>
           <div class="panel">
@@ -493,13 +499,12 @@ export function startDashboard(client: () => Client): () => void {
                 title: 'Benchmark',
                 user: req.user,
                 active: 'benchmark',
-                body: `<h1>Benchmark</h1>
-          <p class="sub">What it currently takes to sit inside the top circles, in fans per member per day.</p>
-          <div class="tiles">
+                // The image carries the heading and the history note; the page
+                // adds only the headline tiles, which stay legible on a phone.
+                body: `<div class="tiles">
             ${data.current.map((t) => tile(`Top ${t.tier} entry`, num(t.entry), `avg ${num(t.average)}`)).join('')}
           </div>
-          <img class="report" src="/benchmark.png" alt="Benchmark">
-          ${data.historyNote ? `<p class="sub" style="margin-top:14px">${esc(data.historyNote)}</p>` : ''}`,
+          <img class="report" src="/benchmark.png" alt="Benchmark: what the top circles earn, in fans per member per day">`,
             }),
         );
     });
@@ -526,7 +531,7 @@ export function startDashboard(client: () => Client): () => void {
         const body = rows
             .map(
                 (r, i) =>
-                    `<tr class="${i < 4 ? `p${i + 1}` : ''}"><td class="faint" data-value="${i + 1}">${i + 1}</td><td class="name">${esc(nameOf(r.discordUserId))}</td>
+                    `<tr class="${i < 3 ? `p${i + 1}` : ''}"><td data-value="${i + 1}">${rankChip(i + 1)}</td><td class="name">${esc(nameOf(r.discordUserId))}</td>
            <td class="right"><strong>${num(r.runs)}</strong></td>
            <td class="right muted">${Math.floor(r.minutes / 60)}h ${r.minutes % 60}m</td></tr>`,
             )
@@ -537,7 +542,8 @@ export function startDashboard(client: () => Client): () => void {
                 title: 'Training',
                 user: req.user,
                 active: 'timer',
-                body: `<h1>Independent Training</h1>
+                body: `<p class="eyebrow">Independent Training</p>
+          <h1>Training leaderboard</h1>
           <p class="sub">50-minute runs tracked by the timer panel.</p>
           <div class="tiles">
             ${tile('Training now', String(active.length))}
@@ -545,9 +551,9 @@ export function startDashboard(client: () => Client): () => void {
             ${tile('Trainers ranked', String(rows.length))}
           </div>
           <h2>Leaderboard</h2>
-          <p class="sub">
-            ${valid.map((p) => `<a href="/timer?period=${p}" ${p === selected ? 'style="color:var(--text)"' : ''}>${p === 'all' ? 'All time' : p === 'week' ? 'Last 7 days' : 'Last 30 days'}</a>`).join(' · ')}
-          </p>
+          <div class="tabs">
+            ${valid.map((p) => `<a href="/timer?period=${p}" class="${p === selected ? 'on' : ''}">${p === 'all' ? 'All time' : p === 'week' ? 'Last 7 days' : 'Last 30 days'}</a>`).join('')}
+          </div>
           <div class="panel">
             ${rows.length === 0 ? '<div class="empty">No runs recorded in this period.</div>' : `<table data-sortable><thead><tr><th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Runs</th><th class="right" data-sort>Time</th></tr></thead><tbody>${body}</tbody></table>`}
           </div>`,

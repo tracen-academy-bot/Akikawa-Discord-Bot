@@ -71,7 +71,7 @@ function drawMarker(ctx: SKRSContext2D, marker: Marker, cx: number, cy: number, 
     if (marker === 'none') return;
 
     ctx.setLineDash([]);
-    ctx.fillStyle = THEME.bg;
+    ctx.fillStyle = THEME.surface;
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     const r = 4.5;
@@ -121,7 +121,10 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
 
     const plotX = x + Y_AXIS_WIDTH;
     const plotW = width - Y_AXIS_WIDTH;
-    const legendHeight = options.legend ? 26 : 0;
+    // Reference lines are keyed in the legend row rather than labelled on the
+    // plot, where a label can always land on a data point.
+    const refs = options.referenceLines ?? [];
+    const legendHeight = options.legend || refs.length > 0 ? 26 : 0;
     // Point labels sit 12px above their point; without this headroom the label
     // on a point at the very top of the plot lands on the legend row.
     const labelHeadroom = options.pointLabels ? 18 : 0;
@@ -167,19 +170,39 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
             ctx.stroke();
             ctx.setLineDash([]);
 
-            ctx.font = font('400 12px');
+            ctx.font = font('700 11px');
             ctx.fillStyle = THEME.muted;
-            ctx.letterSpacing = '1.5px';
+            ctx.letterSpacing = '1.1px';
             ctx.fillText(s.label.toUpperCase(), legendX + 36, y + 12);
             legendX += 36 + ctx.measureText(s.label.toUpperCase()).width + 28;
             ctx.letterSpacing = '0px';
         }
     }
 
+    // Reference-line keys, right-aligned on the legend row.
+    let refRight = plotX + plotW;
+    for (const ref of [...refs].reverse()) {
+        const text = `${ref.label} ${formatValue(ref.value)}`.toUpperCase();
+        ctx.font = font('700 11px');
+        ctx.letterSpacing = '1.1px';
+        const textW = ctx.measureText(text).width;
+        ctx.letterSpacing = '0px';
+        drawLabel(ctx, `${ref.label} ${formatValue(ref.value)}`, refRight, y + 16, ref.color, 11, 'right');
+        ctx.strokeStyle = ref.color;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 5]);
+        ctx.beginPath();
+        ctx.moveTo(refRight - textW - 40, y + 12);
+        ctx.lineTo(refRight - textW - 12, y + 12);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        refRight -= textW + 64;
+    }
+
     // ── Gridlines and y-axis ──────────────────────────────────────────────────
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    ctx.font = font('12px');
+    ctx.font = font('400 12px');
     for (let i = 0; i <= GRID_LINES; i += 1) {
         const value = bottom + (span * i) / GRID_LINES;
         const lineY = valueToY(value);
@@ -207,7 +230,6 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
         ctx.lineTo(plotX + plotW, ry);
         ctx.stroke();
         ctx.setLineDash([]);
-        drawLabel(ctx, ref.label, plotX + plotW, ry - 6, ref.color, 10, 'right');
     }
 
     // ── Series ────────────────────────────────────────────────────────────────
@@ -241,7 +263,7 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
 
         if (options.pointLabels) {
             ctx.textBaseline = 'alphabetic';
-            ctx.font = font('500 11px');
+            ctx.font = font('700 11px');
             ctx.fillStyle = THEME.text;
             points.forEach((p, i) => {
                 // The first and last labels would otherwise be centred on the
@@ -260,7 +282,7 @@ export function drawChart(ctx: SKRSContext2D, options: ChartOptions): void {
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.font = font('11px');
+    ctx.font = font('400 12px');
     ctx.fillStyle = TEXT_FAINT;
     labels.forEach((label, i) => {
         if (i % stride !== 0 && i !== labels.length - 1) return;
