@@ -55,8 +55,10 @@ export async function buildTrainerReport(
     windowDays = TRAINER_WINDOW_DAYS,
     /** Circle progress, when the caller has it; supplies rank and percentile. */
     progress: CircleProgress | null = null,
+    /** Game month to report on. Defaults to the current one; tests pin it. */
+    at: { year: number; month: number } = currentGameMonth(),
 ): Promise<TrainerReportData | null> {
-    const { year, month } = currentGameMonth();
+    const { year, month } = at;
 
     const snapshots = await prisma.fanSnapshot.findMany({
         where: { trackedCircleId: circle.id, viewerId, year, month },

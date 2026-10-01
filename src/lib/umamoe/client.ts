@@ -1,4 +1,4 @@
-import type { UmaCircleListResponse, UmaCircleResponse } from './types';
+import type { UmaCircle, UmaCircleListResponse, UmaCircleResponse } from './types';
 
 /**
  * Client for the uma.moe API.
@@ -136,9 +136,9 @@ export function searchCircles(query: string, limit = 25): Promise<UmaCircleListR
  * Used to compute the benchmark cutoffs. `limit` is capped at 100 per page by
  * the API, so larger requests are paged.
  */
-export async function getTopCircles(count: number): Promise<UmaCircleListResponse['circles']> {
+export async function getTopCircles(count: number): Promise<UmaCircle[]> {
     const pageSize = 100;
-    const circles: UmaCircleListResponse['circles'] = [];
+    const circles: UmaCircle[] = [];
 
     for (let page = 0; circles.length < count; page += 1) {
         const response = await get<UmaCircleListResponse>('/api/v4/circles/list', {
@@ -148,8 +148,9 @@ export async function getTopCircles(count: number): Promise<UmaCircleListRespons
             sort_dir: 'desc',
         });
 
-        circles.push(...response.circles);
-        if (response.circles.length < pageSize || page + 1 >= response.total_pages) break;
+        const batch = response.circles ?? [];
+        circles.push(...batch);
+        if (batch.length < pageSize || page + 1 >= (response.total_pages ?? 1)) break;
     }
 
     return circles.slice(0, count);
