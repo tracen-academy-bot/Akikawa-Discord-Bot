@@ -2,6 +2,8 @@ import { Collection, ChatInputCommandInteraction, AutocompleteInteraction, Slash
 import * as clubRole from './role';
 import * as threadTag from './setTag';
 import * as club from './club';
+import * as timer from './timer';
+import * as fans from './fans';
 
 export interface Command {
     data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
@@ -14,3 +16,5 @@ export const commands = new Collection<string, Command>();
 commands.set(clubRole.data.name, clubRole as Command);
 commands.set(threadTag.data.name, threadTag as Command);
 commands.set(club.data.name, club as Command);
+commands.set(timer.data.name, timer as Command);
+commands.set(fans.data.name, fans as Command);
