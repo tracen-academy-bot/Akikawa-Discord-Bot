@@ -12,6 +12,13 @@ import { Events, GatewayCloseCodes, type Client } from 'discord.js';
  * becomes a restart loop.
  *
  * This module turns that into an explicit result so startup can react.
+ *
+ * Correction (2026-10-01): with @discordjs/ws 1.2.x a refused privileged
+ * intent can *also* surface as `login()` rejecting with
+ * `Error("Used disallowed intents")`. Production hit exactly that after
+ * MessageContent was added to the requested intents: startup treated the
+ * rejection as fatal, exited, and Railway restart-looped the container.
+ * `connect` handles both paths.
  */
 
 export type ConnectOutcome = 'ready' | 'disallowed-intents' | 'fatal';
@@ -52,4 +59,26 @@ export function waitForConnectOutcome(client: Client): Promise<ConnectOutcome> {
         client.once(Events.ClientReady, onReady);
         client.on(Events.ShardDisconnect, onDisconnect);
     });
+}
+
+/** True for the error @discordjs/ws raises when a privileged intent is refused. */
+export function isDisallowedIntentsError(e: unknown): boolean {
+    return e instanceof Error && /disallowed intents/i.test(e.message);
+}
+
+/**
+ * Logs in and resolves with the connection outcome, whichever way discord.js
+ * reports it: the shardDisconnect close code, or `login()` rejecting.
+ * A refused privileged intent becomes 'disallowed-intents' either way. Any
+ * other login error is rethrown.
+ */
+export async function connect(client: Client, token: string | undefined): Promise<ConnectOutcome> {
+    const outcome = waitForConnectOutcome(client);
+    try {
+        await client.login(token);
+    } catch (e) {
+        if (isDisallowedIntentsError(e)) return 'disallowed-intents';
+        throw e;
+    }
+    return outcome;
 }
