@@ -412,8 +412,10 @@ export function startDashboard(client: () => Client): () => void {
                      <tbody>${memberRows(progress, circle.id)}</tbody>
                    </table>
                  </div>
-                 <h2>Report image</h2>
-                 <img class="report" src="/circles/${esc(circle.id)}/report.png?year=${year}&month=${month}" alt="Fan quota report">`
+                 <form method="get" action="/circles/${esc(circle.id)}/report.png" target="_blank" style="margin-top:18px">
+                   <input type="hidden" name="year" value="${year}"><input type="hidden" name="month" value="${month}">
+                   <button type="submit">Generate image</button>
+                 </form>`
                   : `<div class="panel"><div class="empty">No fan data ingested yet.${req.user?.isOfficer ? ' Use “Sync now” below.' : ''}</div></div>`
           }
           ${admin}`,

@@ -146,6 +146,8 @@ async function main() {
     check('circle page renders', detail.status, 200);
     check('circle page shows the trainer', detail.body.includes('ハルウララ'), true);
     check('circle page shows the total', detail.body.includes('15,000,000'), true);
+    check('circle page offers the report as a button', detail.body.includes('Generate image'), true);
+    check('circle page no longer embeds the report image', detail.body.includes('<img class="report"'), false);
     check('member sees no settings form', detail.body.includes('Stop tracking'), false);
 
     const officerDetail = await get(`/circles/${circle.id}`, officer.cookie);
