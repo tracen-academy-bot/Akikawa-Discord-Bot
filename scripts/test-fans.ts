@@ -11,6 +11,7 @@
 import { prisma } from '../src/db/prisma';
 import { loadCircleProgress } from '../src/lib/fans/ingest';
 import { buildTrainerReport } from '../src/lib/fans/reports';
+import { normalizeMember } from '../src/lib/fans/ingest';
 import { parseQuota } from '../src/commands/fans';
 
 const GUILD = 'test-guild-fans';
@@ -38,6 +39,24 @@ async function main() {
     check('parseQuota rejects words', parseQuota('lots'), null);
     check('parseQuota rejects empty', parseQuota(''), null);
     check('parseQuota rejects bad suffix', parseQuota('80X'), null);
+
+    // ── uma.moe members with fields omitted ──────────────────────────────────
+    // The spec marks no field required. An omitted previous_circle_id used to
+    // reach BigInt(undefined) and fail the whole sync with "Cannot convert
+    // undefined to a BigInt" -- the first sync after adding a circle included.
+    const fallback = { year: YEAR, month: MONTH };
+    const sparse = normalizeMember({ viewer_id: 42, daily_fans: [0, 1_000, 2_500, 0] }, fallback);
+    check('sparse member is kept', sparse !== null, true);
+    check('omitted previous_circle_id becomes null', sparse?.previousCircleId, null);
+    check('omitted next_month_start becomes null', sparse?.nextMonthStart, null);
+    check('omitted name and shame become null', [sparse?.trainerName, sparse?.shameScore], [null, null]);
+    check('omitted year and month fall back to the synced month', [sparse?.year, sparse?.month], [YEAR, MONTH]);
+    check('only non-zero days are kept', sparse?.days, [{ day: 2, cumulativeFans: 1_000 }, { day: 3, cumulativeFans: 2_500 }]);
+    check('explicit null is handled the same', normalizeMember({ viewer_id: 1, previous_circle_id: null, next_month_start: null }, fallback)?.previousCircleId, null);
+    // check() compares via JSON, which cannot serialise BigInt; compare as text.
+    check('present ids still convert', String(normalizeMember({ viewer_id: 7, previous_circle_id: 900, next_month_start: 5 }, fallback)?.previousCircleId), '900');
+    check('member without viewer_id is skipped', normalizeMember({ trainer_name: 'ghost', daily_fans: [5] }, fallback), null);
+    check('missing daily_fans means no days', normalizeMember({ viewer_id: 3 }, fallback)?.days, []);
 
     // ── Seed a circle with two members ────────────────────────────────────────
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
@@ -100,7 +119,7 @@ async function main() {
     check('circle total', progress.totalFans, 57_500_000);
 
     // ── Trainer report ────────────────────────────────────────────────────────
-    const report = await buildTrainerReport(circle, BigInt(2), 7);
+    const report = await buildTrainerReport(circle, BigInt(2), 7, null, { year: YEAR, month: MONTH });
     if (!report) throw new Error('buildTrainerReport returned null');
 
     // A 7-day window over 10 days of data covers days 4-10, so it catches two
@@ -118,7 +137,7 @@ async function main() {
     await prisma.fanSnapshot.deleteMany({
         where: { trackedCircleId: circle.id, viewerId: BigInt(1), day: 9 },
     });
-    const gapped = await buildTrainerReport(circle, BigInt(1), 4);
+    const gapped = await buildTrainerReport(circle, BigInt(1), 4, null, { year: YEAR, month: MONTH });
     check('missing day reads as zero gain, not a spike',
         gapped?.dailyGains.map((d) => d.gain),
         [3_000_000, 3_000_000, 0, 6_000_000]);

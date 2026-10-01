@@ -4,6 +4,35 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-01 — Fix: adding a circle failed with "Cannot convert undefined to a BigInt"
+
+### Root cause
+
+uma.moe's OpenAPI spec marks **no** property as required, but
+`src/lib/umamoe/types.ts` typed optional fields as `T | null`, i.e. always
+present. `syncCircle` guarded `previous_circle_id` and `next_month_start` with
+`=== null`; when uma.moe omitted them, `undefined` passed the guard and
+`BigInt(undefined)` threw. Adding a circle runs a sync immediately and rolls
+back on failure, so the error surfaced on the dashboard's add-circle form.
+
+Reproduced end to end: a local fake uma.moe returning a member without those
+fields makes the old `syncCircle` fail with exactly that message against a real
+Postgres; the fixed one writes the rows with `null`.
+
+### Fix
+
+- Every uma.moe field is now `?: T | null`, so the compiler flags any unsafe
+  use. It found ~20, all in `ingest.ts`, `client.ts` and `/fans circle search`.
+- `normalizeMember` (pure, tested) resolves one raw member: absent = `null`,
+  no `viewer_id` = skipped, missing year/month = the requested month.
+- A response with no `circle` object now fails with a readable message.
+- `scripts/test-fans.ts` gains 10 checks for omitted fields.
+
+Also carries the September date-bomb fix for `scripts/test-fans.ts` (see the
+redesign entry), since CI on this branch is red without it from 2026-10-01.
+
+---
+
 ## 2026-09-19 — Incident: restart loop after enabling the GuildMembers intent
 
 ### What happened

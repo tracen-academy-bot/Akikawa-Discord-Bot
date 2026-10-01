@@ -646,14 +646,14 @@ async function handleCircleSearch(interaction: ChatInputCommandInteraction) {
     if (!(await requireApiKey(interaction))) return;
 
     const name = interaction.options.getString('name', true);
-    const response = await searchCircles(name, 10);
+    const circles = (await searchCircles(name, 10)).circles ?? [];
 
-    if (response.circles.length === 0) {
+    if (circles.length === 0) {
         await reply(interaction, errorEmbed(`No circles on uma.moe matched **${name}**.`));
         return;
     }
 
-    const lines = response.circles.map(
+    const lines = circles.map(
         (c) =>
             `\`${c.circle_id}\` — **${c.name}** · ${c.member_count ?? '?'} members` +
             (c.monthly_rank ? ` · rank #${c.monthly_rank}` : ''),

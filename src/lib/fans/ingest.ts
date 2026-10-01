@@ -1,6 +1,7 @@
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { getCircle, getTopCircles, isConfigured } from '../umamoe/client';
+import type { UmaCircleMember } from '../umamoe/types';
 import {
     computeCircleProgress,
     daysInCalendarMonth,
@@ -45,6 +46,53 @@ export function currentGameMonth(now = new Date()): { year: number; month: numbe
     return { year: year!, month: month!, day: day! };
 }
 
+/** One member's fields as stored, with every optional API field resolved. */
+export interface MemberRecord {
+    viewerId: bigint;
+    trainerName: string | null;
+    shameScore: number | null;
+    year: number;
+    month: number;
+    previousCircleId: bigint | null;
+    previousCircleName: string | null;
+    nextMonthStart: bigint | null;
+    /** Days with a non-zero cumulative total, 1-based. */
+    days: { day: number; cumulativeFans: number }[];
+}
+
+/** `BigInt` for a field the API may send as a number, `null`, or not at all. */
+function optionalBigInt(value: number | null | undefined): bigint | null {
+    return value === null || value === undefined ? null : BigInt(value);
+}
+
+/**
+ * Resolves one raw uma.moe member into what gets stored.
+ *
+ * uma.moe's spec marks no field as required, so any of them can be absent.
+ * Absent and `null` are treated alike. A member without a `viewer_id` cannot
+ * be keyed and is skipped (returns null) rather than failing the whole sync;
+ * a missing year or month falls back to the month that was requested.
+ */
+export function normalizeMember(member: UmaCircleMember, fallback: { year: number; month: number }): MemberRecord | null {
+    if (member.viewer_id === null || member.viewer_id === undefined) return null;
+
+    const days = (member.daily_fans ?? [])
+        .map((cumulativeFans, index) => ({ day: index + 1, cumulativeFans }))
+        .filter((row) => typeof row.cumulativeFans === 'number' && row.cumulativeFans > 0);
+
+    return {
+        viewerId: BigInt(member.viewer_id),
+        trainerName: member.trainer_name ?? null,
+        shameScore: member.shame_score ?? null,
+        year: member.year ?? fallback.year,
+        month: member.month ?? fallback.month,
+        previousCircleId: optionalBigInt(member.previous_circle_id),
+        previousCircleName: member.previous_circle_name ?? null,
+        nextMonthStart: optionalBigInt(member.next_month_start),
+        days,
+    };
+}
+
 /**
  * Fetches one circle and writes its members' daily totals.
  *
@@ -53,21 +101,36 @@ export function currentGameMonth(now = new Date()): { year: number; month: numbe
  * make an absent member indistinguishable from one who earned nothing.
  */
 export async function syncCircle(circle: TrackedCircle, month?: number, year?: number): Promise<SyncResult> {
-    const response = await getCircle(toSafeNumber(circle.circleId), month, year);
+    const circleId = toSafeNumber(circle.circleId);
+    const response = await getCircle(circleId, month, year);
+
+    if (!response.circle || response.circle.circle_id === undefined) {
+        throw new Error(`uma.moe returned no circle for ID ${circleId}. Check the ID at uma.moe/circles.`);
+    }
+
+    const current = currentGameMonth();
+    const fallback = { year: year ?? current.year, month: month ?? current.month };
+    const members = (response.members ?? [])
+        .map((m) => normalizeMember(m, fallback))
+        .filter((m): m is MemberRecord => m !== null);
 
     let daysWritten = 0;
 
-    for (const member of response.members) {
-        const rows = member.daily_fans
-            .map((cumulativeFans, index) => ({ day: index + 1, cumulativeFans }))
-            .filter((row) => row.cumulativeFans > 0);
+    for (const member of members) {
+        const fields = {
+            trainerName: member.trainerName,
+            shameScore: member.shameScore,
+            previousCircleId: member.previousCircleId,
+            previousCircleName: member.previousCircleName,
+            nextMonthStart: member.nextMonthStart,
+        };
 
-        for (const row of rows) {
+        for (const row of member.days) {
             await prisma.fanSnapshot.upsert({
                 where: {
                     trackedCircleId_viewerId_year_month_day: {
                         trackedCircleId: circle.id,
-                        viewerId: BigInt(member.viewer_id),
+                        viewerId: member.viewerId,
                         year: member.year,
                         month: member.month,
                         day: row.day,
@@ -75,41 +138,26 @@ export async function syncCircle(circle: TrackedCircle, month?: number, year?: n
                 },
                 create: {
                     trackedCircleId: circle.id,
-                    viewerId: BigInt(member.viewer_id),
-                    trainerName: member.trainer_name,
+                    viewerId: member.viewerId,
                     year: member.year,
                     month: member.month,
                     day: row.day,
                     cumulativeFans: BigInt(row.cumulativeFans),
-                    shameScore: member.shame_score,
-                    previousCircleId: member.previous_circle_id === null ? null : BigInt(member.previous_circle_id),
-                    previousCircleName: member.previous_circle_name,
-                    nextMonthStart: member.next_month_start === null ? null : BigInt(member.next_month_start),
+                    ...fields,
                 },
-                update: {
-                    trainerName: member.trainer_name,
-                    cumulativeFans: BigInt(row.cumulativeFans),
-                    shameScore: member.shame_score,
-                    previousCircleId: member.previous_circle_id === null ? null : BigInt(member.previous_circle_id),
-                    previousCircleName: member.previous_circle_name,
-                    nextMonthStart: member.next_month_start === null ? null : BigInt(member.next_month_start),
-                },
+                update: { cumulativeFans: BigInt(row.cumulativeFans), ...fields },
             });
             daysWritten += 1;
         }
     }
 
+    const name = response.circle.name ?? circle.name;
     await prisma.trackedCircle.update({
         where: { id: circle.id },
-        data: { name: response.circle.name, monthlyRank: response.circle.monthly_rank, lastSyncedAt: new Date() },
+        data: { name, monthlyRank: response.circle.monthly_rank ?? null, lastSyncedAt: new Date() },
     });
 
-    return {
-        circleId: toSafeNumber(circle.circleId),
-        name: response.circle.name,
-        membersSeen: response.members.length,
-        daysWritten,
-    };
+    return { circleId, name, membersSeen: members.length, daysWritten };
 }
 
 /** Syncs every active tracked circle. Individual failures do not stop the run. */
