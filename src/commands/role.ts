@@ -1,8 +1,6 @@
-import { SlashCommandBuilder, PermissionFlagsBits, ChatInputCommandInteraction, GuildMember, MembershipScreeningFieldType } from 'discord.js';
-import { successEmbed } from '../lib/embeds';
-
-const CLUB_ROLE_IDS: string[] = (process.env.CLUB_ROLE_IDS!)?.split(',').map((id) => id.trim()).filter(Boolean);
-const DEFAULT_ROLE_ID = process.env.DEFAULT_ROLE_ID!;
+import { SlashCommandBuilder, PermissionFlagsBits, ChatInputCommandInteraction } from 'discord.js';
+import { successEmbed, errorEmbed } from '../lib/embeds';
+import { assignRole, unassignRole, checkRoleHierarchy } from '../lib/roleAssignment';
 
 export const data = new SlashCommandBuilder()
     .setName('role')
@@ -24,36 +22,31 @@ export const data = new SlashCommandBuilder()
     );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) return;
+    if (!interaction.inCachedGuild()) return;
 
     const subcommand = interaction.options.getSubcommand();
-    const targetMember = interaction.options.getUser('member', true);
+    const targetUser = interaction.options.getUser('member', true);
     const role = interaction.options.getRole('role', true);
-    const isClubRole = CLUB_ROLE_IDS.includes(role.id);
 
-    const member = (await interaction.guild!.members.fetch(targetMember.id)) as GuildMember;
+    const member = await interaction.guild.members.fetch(targetUser.id);
+
+    const hierarchyError = checkRoleHierarchy(interaction.member, role);
+    if (hierarchyError) {
+        await interaction.reply({ embeds: [errorEmbed(hierarchyError)] });
+        return;
+    }
+
+    const auditReason = `${subcommand === 'add' ? 'Added' : 'Removed'} by ${interaction.user.username} via /role`;
 
     if (subcommand === 'add') {
-        if (isClubRole || role.id === DEFAULT_ROLE_ID) {
-            const otherClubRoles = member.roles.cache.filter((r) => CLUB_ROLE_IDS.includes(r.id) && r.id !== role.id);
-            if (otherClubRoles.size > 0) { await member.roles.remove(otherClubRoles) }
-            
-            if (member.roles.cache.has(DEFAULT_ROLE_ID)) { await member.roles.remove(DEFAULT_ROLE_ID) }
-        }
-        
-        await member.roles.add(role.id);
+        await assignRole(member, role, auditReason);
 
         await interaction.reply({
             embeds: [successEmbed('Role Assigned', `Gave \`${member.displayName}\` the \`${role.name}\` role.`)]
         });
     } else {
-        await member.roles.remove(role.id);
+        await unassignRole(member, role, auditReason);
 
-        if (isClubRole) {
-            const otherClubRoles = member.roles.cache.filter((r) => CLUB_ROLE_IDS.includes(r.id) && r.id !== role.id);
-            if (otherClubRoles.size == 0) { await member.roles.add(DEFAULT_ROLE_ID) }
-        }
-        
         await interaction.reply({
             embeds: [successEmbed('Role Removed', `Removed \`${role.name}\` from \`${member.displayName}\`.`)]
         });

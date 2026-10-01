@@ -1,8 +1,13 @@
 import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events, EmbedBuilder} from 'discord.js';
 import 'dotenv/config';
 import { commands } from './commands';
+import { handlePrefixMessage } from './prefix';
 
-const client = new Client({intents: [GatewayIntentBits.Guilds]});
+// GuildMessages + MessageContent are for prefix commands (;role ...).
+// MessageContent is privileged: enable it in the developer portal or login fails.
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+});
 
 const COMP_COUNCIL = process.env.COMP_COUNCIL_ROLE_ID!;
 const SEMI_COMP_COUNCIL = process.env.SEMI_COMP_COUNCIL_ROLE_ID!;
@@ -60,6 +65,10 @@ client.on('threadCreate', async (thread: ThreadChannel) => {
     } catch (e) {
         console.error('Error handling ping: ', e)
     }
+});
+
+client.on(Events.MessageCreate, (message) => {
+    void handlePrefixMessage(message);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
