@@ -140,7 +140,7 @@ async function main() {
     check('me finds the circle without being told', me[0]?.embeds?.length, 1);
     check('me replies privately', me[0]?.ephemeral, true);
     check('me titles the trainer and circle', embed?.title, 'Behind · Checkrose');
-    check('me shows fans earned', field('Fans so far'), '300,000');
+    check('me shows fans earned', field('Fans this month'), '300,000');
     check('me ranks among current members only', field('Rank'), '2 of 2');
     check('me says how far behind', field('Status')?.startsWith('Behind by **'), true);
 

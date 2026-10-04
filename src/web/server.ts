@@ -19,7 +19,7 @@ import {
 import { csrfField, compact, dash, esc, layout, loginPage, monthPicker, num, tile } from './views';
 import { currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle, backfillOnce } from '../lib/fans/ingest';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate, listCircleMonths } from '../lib/fans/reports';
-import { describeQuota, toSafeNumber, type CircleProgress, type QuotaPeriod } from '../lib/fans/metrics';
+import { checkpointNote, describeQuota, toSafeNumber, type CircleProgress, type QuotaPeriod } from '../lib/fans/metrics';
 import { parsePeriod, parseQuota } from '../commands/fans';
 import { renderFanReport } from '../lib/image/renderFanReport';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
@@ -114,9 +114,6 @@ function periodSelect(selected: QuotaPeriod): string {
 
 /** Builds the member table shared by the circle page. */
 function memberRows(progress: CircleProgress, circleId: string): string {
-    // In DAY mode the average, need/day, latest-day gain and projection only
-    // repeat the day's total or its shortfall.
-    const rates = progress.period !== 'DAY';
     return progress.members
         .map((m) => {
             const movement =
@@ -134,10 +131,10 @@ function memberRows(progress: CircleProgress, circleId: string): string {
         <td class="right"><strong>${num(m.total)}</strong></td>
         <td class="right faint">${num(m.expected)}</td>
         <td class="right ${m.behind > 0 ? 'red' : 'faint'}">${dash(m.behind > 0 ? m.behind : null)}</td>
-        ${rates ? `<td class="right muted">${num(m.avgPerDay)}</td>` : ''}
-        ${rates ? `<td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>` : ''}
-        ${rates ? `<td class="right muted">${num(m.latestDayGain)}</td>` : ''}
-        ${rates ? `<td class="right ${projTone}">${compact(m.projectedTotal)}</td>` : ''}
+        <td class="right muted">${num(m.avgPerDay)}</td>
+        <td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>
+        <td class="right muted">${num(m.latestDayGain)}</td>
+        <td class="right ${projTone}">${compact(m.projectedTotal)}</td>
       </tr>`;
         })
         .join('');
@@ -391,14 +388,14 @@ export function startDashboard(client: () => Client): () => void {
                 user: req.user,
                 body: `${flash(req)}
           <h1>${esc(circle.name)}</h1>
-          <p class="sub gold">${progress ? `${esc(progress.windowLabel.toLowerCase())} · ` : ''}day ${progress?.daysElapsed ?? 0} of ${progress?.daysInMonth ?? '\u2014'} · quota ${esc(describeQuota(toSafeNumber(circle.quota), circle.quotaPeriod))} per member${circle.quotaPeriod !== 'DAY' && progress ? ` · ${esc(compact(progress.quotaPerDay))}/day` : ''}</p>
+          <p class="sub gold">${progress ? `${esc(progress.windowLabel.toLowerCase())} · ` : ''}day ${progress?.daysElapsed ?? 0} of ${progress?.daysInMonth ?? '\u2014'} · quota ${esc(describeQuota(toSafeNumber(circle.quota), circle.quotaPeriod))} per member${circle.quotaPeriod !== 'DAY' && progress ? ` · ${esc(compact(progress.quotaPerDay))}/day` : ''}${progress && checkpointNote(progress) ? ` · ${esc(checkpointNote(progress)!)}` : ''}</p>
           <p class="sub">circle <code>${esc(String(circle.circleId))}</code> · last sync ${circle.lastSyncedAt ? esc(circle.lastSyncedAt.toUTCString()) : 'never'}</p>
           ${picker}
           ${
               progress
                   ? `<div class="tiles">
                    ${tile('Members', String(progress.members.length))}
-                   ${tile({ MONTH: 'Total fans', BIWEEKLY: 'Fans these 2 weeks', WEEK: 'Fans this week', DAY: 'Fans today' }[progress.period], compact(progress.totalFans))}
+                   ${tile('Total fans', compact(progress.totalFans))}
                    ${tile('Behind quota', String(progress.members.filter((m) => !m.onPace).length), 'of ' + progress.members.length, progress.members.some((m) => !m.onPace) ? 'bad' : 'good')}
                    ${tile('Day', `${progress.daysElapsed}/${progress.daysInMonth}`, formatReportDate(year, month, progress.daysElapsed))}
                  </div>
@@ -406,9 +403,9 @@ export function startDashboard(client: () => Client): () => void {
                  <div class="panel">
                    <table data-sortable>
                      <thead><tr>
-                       <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>${progress.period === 'DAY' ? 'Today' : 'Total'}</th><th class="right" data-sort>Expected</th>
-                       <th class="right" data-sort>Behind</th>${progress.period === 'DAY' ? '' : '<th class="right" data-sort>Avg/Day</th>'}${progress.period === 'DAY' ? '' : '<th class="right" data-sort>Need/Day</th>'}
-                       ${progress.period === 'DAY' ? '' : `<th class="right" data-sort>Day ${progress.daysElapsed}</th><th class="right" data-sort>Proj.</th>`}
+                       <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Total</th><th class="right" data-sort>Expected</th>
+                       <th class="right" data-sort>Behind</th><th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Need/Day</th>
+                       <th class="right" data-sort>Day ${progress.daysElapsed}</th><th class="right" data-sort>Proj.</th>
                      </tr></thead>
                      <tbody>${memberRows(progress, circle.id)}</tbody>
                    </table>

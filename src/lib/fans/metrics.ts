@@ -10,16 +10,21 @@
  * trainer is never told they are on pace when they are one fan short.
  *
  * A circle's quota applies to a *period*: a day, a week, two weeks, or the
- * whole month. Progress is measured inside the current window of that period:
+ * whole month. Totals are always month-to-date; the period only decides when
+ * the requirement steps up and when people are judged against it.
  *
- *   MONTH     days 1 to month end (the original, reference-verified behaviour)
- *   BIWEEKLY  days 1-14, 15-28, then 29 to month end. Same rule as WEEK: the
- *             blocks restart on the 1st and the short last one scales its goal
- *             (a 3-day stub owes 3/14 of the quota).
- *   WEEK      days 1-7, 8-14, 15-21, 22-28, then 29 to month end. Weeks restart
- *             on the 1st, so the last one is short; its goal scales by its
- *             length (a 3-day week owes 3/7 of the weekly quota).
- *   DAY       the latest day with data
+ *   MONTH     the original, reference-verified behaviour: the requirement
+ *             grows by quota / days-in-month every day, today included, and
+ *             anyone under it is behind.
+ *   DAY, WEEK, BIWEEKLY
+ *             checkpoints at the end of every 1, 7 or 14 days (7, 14, 21, 28
+ *             and month end for WEEK; 14, 28 and month end for BIWEEKLY).
+ *             At each checkpoint the requirement steps up by one quota: a
+ *             14M weekly quota is 14M due by the end of day 7, 28M by day 14.
+ *             Nobody is behind until a checkpoint has passed; in between,
+ *             only what is due at the next one is shown. Periods restart on
+ *             the 1st, so the last one is short and its step scales by its
+ *             length (a 3-day stub owes 3/7 of a weekly quota).
  *
  * Only current members count. A member with no snapshot on the circle's latest
  * snapshot has left and is dropped entirely, and a member's fans count only
@@ -51,19 +56,31 @@ export interface MemberSeries {
 export interface MemberProgress {
     viewerId: number;
     trainerName: string;
-    /** Fans earned inside the current window, as of the latest day with data. */
+    /** Fans earned this month in the circle, as of the latest day with data. */
     total: number;
-    /** Fans this member should have earned in the window by now. */
+    /**
+     * Fans due by now. MONTH: grows every day. Checkpoint periods: what was
+     * due at the last checkpoint that has passed (zero before the first).
+     */
     expected: number;
     /** How far short of `expected` they are. Zero when on pace. */
     behind: number;
-    /** Mean fans per day over their days with data inside the window. */
+    /**
+     * Fans due by the next checkpoint (checkpoint periods), or by month end
+     * (MONTH). What `needPerDay` aims at.
+     */
+    target: number;
+    /** Mean fans per day over their days in the circle this month. */
     avgPerDay: number;
-    /** Fans per day needed to finish the window on quota. Null when on pace. */
+    /**
+     * Fans per day needed to reach `target` in the days left before it is
+     * due. MONTH: null when on pace. Checkpoint periods: null once `target`
+     * is already met.
+     */
     needPerDay: number | null;
     /** Fans gained on the most recent day. */
     latestDayGain: number;
-    /** Days in the window, through the latest day, that this member spent in the circle. */
+    /** Days this month, through the latest day, that this member spent in the circle. */
     dataDays: number;
     /** Days counted toward `expected`. See `QuotaOptions.quotaDaysOffset`. */
     quotaDays: number;
@@ -76,17 +93,17 @@ export interface MemberProgress {
      */
     recentGains: number[];
     /**
-     * Where the member lands at the end of the window if their average holds:
-     * `avgPerDay * windowDays`. A straight-line projection, deliberately
-     * simple so it can be reasoned about at a glance.
+     * Where the member lands at month end if their average holds. A
+     * straight-line projection, deliberately simple so it can be reasoned
+     * about at a glance.
      */
     projectedTotal: number;
-    /** 1-based placement by window total. */
+    /** 1-based placement by month-to-date total. */
     rank: number;
     /**
      * Places gained since the previous day. Positive is an improvement,
-     * negative a slip, zero no change. Null on the first day of a window,
-     * when there is nothing to compare against.
+     * negative a slip, zero no change. Null on the month's first day, when
+     * there is nothing to compare against.
      */
     rankChange: number | null;
 }
@@ -96,7 +113,10 @@ export interface CircleProgress {
     period: QuotaPeriod;
     /** The quota as configured, for the period. */
     quota: number;
-    /** First and last day of the current window, 1-based and inclusive. */
+    /**
+     * First and last day of the current period, 1-based and inclusive: the
+     * one the next checkpoint closes. The whole month in MONTH mode.
+     */
     windowStart: number;
     windowEnd: number;
     /** e.g. "October", "Week 2 · days 8–14", "Day 9". Month name supplied by the caller. */
@@ -104,21 +124,35 @@ export interface CircleProgress {
     /** Latest day of the game month that has data, 1-based. */
     daysElapsed: number;
     daysInMonth: number;
-    /** Days left in the window, including today. */
+    /**
+     * Checkpoint periods: the last checkpoint that has passed (0 before the
+     * first) and the next one, as game days. MONTH: `daysElapsed` and month end.
+     */
+    checkpointDay: number;
+    nextCheckpointDay: number;
+    /**
+     * True when the latest finished day was a checkpoint, so `behind` has just
+     * been judged. The daily alert waits for this in checkpoint periods.
+     * Always true in MONTH mode, which judges every day.
+     */
+    checkpointJustClosed: boolean;
+    /** Days left before `nextCheckpointDay` is due, including today. */
     daysRemaining: number;
-    /** Per-day rate: quota / days in month, quota / 7, or quota, floored. */
+    /** Per-day rate: quota / days in month, quota / 14, quota / 7, or quota, floored. */
     quotaPerDay: number;
     /**
-     * Each member's goal for the current window: `quotaPerDay * windowDays`.
-     * In MONTH mode this sits slightly below the configured quota whenever it
-     * does not divide evenly, which is what makes `needPerDay` agree with the
-     * reference report exactly. In WEEK mode it is what scales a short week.
+     * A full-month member's requirement at month end. In MONTH mode it is
+     * `quotaPerDay * daysInMonth`, which sits slightly below the configured
+     * quota whenever it does not divide evenly; that is what makes
+     * `needPerDay` agree with the reference report exactly.
      */
     effectiveQuota: number;
+    /** A full-period member's requirement at the next checkpoint. */
+    nextCheckpointTarget: number;
     members: MemberProgress[];
-    /** Sum of every member's window total. */
+    /** Sum of every member's month-to-date total. */
     totalFans: number;
-    /** What the whole circle owes for the window: members times effective quota. */
+    /** What the whole circle owes by month end: members times effective quota. */
     quotaTarget: number;
     /** Sum of every member's straight-line projection. */
     projectedTotalFans: number;
@@ -147,6 +181,12 @@ export interface QuotaOptions {
      * every day with data as a day the member owed quota.
      */
     quotaDaysOffset?: number;
+    /**
+     * The game day in progress, when this is the current month. That day is
+     * not over, so no checkpoint at its end has been judged yet. Omit for a
+     * past month, where every day with data is finished.
+     */
+    currentDay?: number;
 }
 
 /**
@@ -348,6 +388,17 @@ export function windowLabel(period: QuotaPeriod, window: PeriodWindow, monthName
 }
 
 /**
+ * One line on the checkpoint schedule for checkpoint periods, e.g.
+ * "next check end of day 14 · 28.0M due". Null in MONTH mode, which has no
+ * checkpoints, and once the month's last checkpoint has passed.
+ */
+export function checkpointNote(p: CircleProgress): string | null {
+    if (p.period === 'MONTH') return null;
+    if (p.daysRemaining === 0) return `month closed · ${formatCompactFans(p.effectiveQuota)} was due`;
+    return `next check end of day ${p.nextCheckpointDay} · ${formatCompactFans(p.nextCheckpointTarget)} due`;
+}
+
+/**
  * Computes progress for every member of a circle.
  *
  * `daysElapsed` is taken from the data rather than from the wall clock: it is
@@ -374,13 +425,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
     // Game days elapsed: the latest day any member has a snapshot for. Zero on
     // the first day of the month, when only starting values exist.
     const daysElapsed = Math.min(daysInMonth, Math.max(0, ...[...month.values()].map((g) => g.lastDay)));
-
-    const window = periodWindow(period, daysElapsed, daysInMonth);
-    const windowDays = window.end - window.start + 1;
     const quotaPerDay = quotaPerDayFor(period, quota, daysInMonth);
-    const effectiveQuota = quotaPerDay * windowDays;
-    // Before the first day has any data, today is still day 1.
-    const daysRemaining = Math.max(0, window.end - Math.max(1, daysElapsed) + 1);
 
     /**
      * Fans earned this month through the end of `day`: zero before day 1,
@@ -388,43 +433,89 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
      */
     const cumulativeAt = (g: MonthGains, day: number) =>
         day < 1 || g.lastDay === 0 ? 0 : (g.gains[Math.min(day, g.lastDay) - 1] ?? 0);
-    /** Fans earned inside the window up to and including `day`. */
-    const windowTotal = (g: MonthGains, day: number) =>
-        Math.max(0, cumulativeAt(g, day) - cumulativeAt(g, window.start - 1));
+    /** Days in the circle from day 1 through `day`, counting days not reached yet as in. */
+    const daysInCircleThrough = (g: MonthGains, day: number) => {
+        let count = 0;
+        for (let d = 1; d <= Math.min(day, daysElapsed); d += 1) if (g.inCircle[d - 1]) count += 1;
+        return count + Math.max(0, day - daysElapsed);
+    };
+
+    // ── Period schedule ──────────────────────────────────────────────────────
+    let window: PeriodWindow;
+    let checkpointDay: number;
+    let nextCheckpointDay: number;
+    let checkpointJustClosed: boolean;
+    let daysRemaining: number;
+    let effectiveQuota: number;
+    let nextCheckpointTarget: number;
+    /** Fans due for a given number of days owed. */
+    let requirement: (daysOwed: number) => number;
+
+    if (period === 'MONTH') {
+        window = periodWindow(period, daysElapsed, daysInMonth);
+        checkpointDay = daysElapsed;
+        nextCheckpointDay = daysInMonth;
+        checkpointJustClosed = true;
+        // Before the first day has any data, today is still day 1.
+        daysRemaining = Math.max(0, daysInMonth - Math.max(1, daysElapsed) + 1);
+        effectiveQuota = quotaPerDay * daysInMonth;
+        nextCheckpointTarget = effectiveQuota;
+        requirement = (days) => quotaPerDay * days;
+    } else {
+        const length = periodLength(period);
+        // Days that are over. The day in progress cannot have been missed yet.
+        const finished = options.currentDay === undefined ? daysElapsed : Math.min(daysElapsed, options.currentDay - 1);
+        checkpointDay = finished >= daysInMonth ? daysInMonth : Math.floor(Math.max(0, finished) / length) * length;
+        nextCheckpointDay = Math.min(checkpointDay + length, daysInMonth);
+        if (checkpointDay === daysInMonth) nextCheckpointDay = daysInMonth;
+        checkpointJustClosed = checkpointDay > 0 && finished === checkpointDay;
+        window = periodWindow(period, Math.max(1, nextCheckpointDay), daysInMonth);
+        daysRemaining = Math.max(0, nextCheckpointDay - finished);
+        // Exact division, floored once, so a 14M weekly quota is exactly 28M
+        // after two weeks and a 3-day stub owes 3/7 of a week.
+        requirement = (days) => Math.floor((quota * days) / length);
+        effectiveQuota = requirement(daysInMonth);
+        nextCheckpointTarget = requirement(nextCheckpointDay);
+    }
 
     const members = current.map<MemberProgress>((member) => {
         const g = gainsOf(member);
-        const total = windowTotal(g, daysElapsed);
+        const total = cumulativeAt(g, daysElapsed);
 
-        // Quota is owed only for days spent in the circle: a mid-window joiner
+        // Quota is owed only for days spent in the circle: a mid-month joiner
         // from their first full day, and a returning member not for the gap.
         const firstDay = g.firstDay;
-        let dataDays = 0;
-        for (let day = window.start; day <= daysElapsed; day += 1) {
-            if (g.inCircle[day - 1]) dataDays += 1;
-        }
-        const quotaDays = Math.max(0, dataDays - quotaDaysOffset);
+        const dataDays = daysInCircleThrough(g, daysElapsed);
+        const owedThrough = (day: number) => Math.max(0, daysInCircleThrough(g, day) - quotaDaysOffset);
+        const quotaDays = period === 'MONTH' ? Math.max(0, dataDays - quotaDaysOffset) : owedThrough(checkpointDay);
 
-        const expected = quotaPerDay * quotaDays;
+        const expected = requirement(quotaDays);
         const behind = Math.max(0, expected - total);
+        const onPace = behind === 0;
         const avgPerDay = dataDays === 0 ? 0 : Math.floor(total / dataDays);
+
+        let target: number;
+        let needPerDay: number | null;
+        if (period === 'MONTH') {
+            target = effectiveQuota;
+            const shortfall = Math.max(0, effectiveQuota - total);
+            needPerDay = onPace || daysRemaining === 0 ? null : Math.floor(shortfall / daysRemaining);
+        } else {
+            target = requirement(owedThrough(nextCheckpointDay));
+            needPerDay = daysRemaining === 0 || total >= target ? null : Math.floor((target - total) / daysRemaining);
+        }
 
         const previous = cumulativeAt(g, daysElapsed - 1);
         // A cumulative series should never decrease; clamp in case it does.
         const latestDayGain = Math.max(0, cumulativeAt(g, daysElapsed) - previous);
 
         // Daily gains over the trailing week, from the member's first day with
-        // data at the earliest. Deliberately not clipped to the window: the
-        // sparkline shows momentum, which does not reset on a week boundary.
+        // data at the earliest.
         const recentGains: number[] = [];
         const trendStart = Math.max(firstDay || 1, daysElapsed - 6);
         for (let day = trendStart; day <= daysElapsed; day += 1) {
             recentGains.push(Math.max(0, cumulativeAt(g, day) - cumulativeAt(g, day - 1)));
         }
-
-        const onPace = behind === 0;
-        const shortfall = Math.max(0, effectiveQuota - total);
-        const needPerDay = onPace || daysRemaining === 0 ? null : Math.floor(shortfall / daysRemaining);
 
         return {
             viewerId: member.viewerId,
@@ -432,11 +523,14 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
             total,
             expected,
             behind,
+            target,
             avgPerDay,
             needPerDay,
             latestDayGain,
             recentGains,
-            projectedTotal: avgPerDay * windowDays,
+            // MONTH keeps its reference-matching form; elsewhere a joiner is
+            // projected over the days they will actually be in the circle.
+            projectedTotal: period === 'MONTH' ? avgPerDay * daysInMonth : total + avgPerDay * (daysInMonth - daysElapsed),
             dataDays,
             quotaDays,
             onPace,
@@ -447,16 +541,15 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         };
     });
 
-    // Highest window total first, matching how the reference report ranks members.
+    // Highest month-to-date total first, matching the reference report.
     members.sort((a, b) => b.total - a.total);
 
-    // Yesterday's placement inside the same window, for the movement arrows.
-    // Derived by re-ranking rather than stored, so it stays correct even if a
-    // day was ingested late. None on a window's first day.
+    // Yesterday's placement, for the movement arrows. Derived by re-ranking
+    // rather than stored, so it stays correct even if a day was ingested late.
     const previousRanks = new Map<number, number>();
-    if (daysElapsed - 1 >= window.start) {
+    if (daysElapsed - 1 >= 1) {
         const yesterday = current
-            .map((m) => ({ viewerId: m.viewerId, total: windowTotal(gainsOf(m), daysElapsed - 1) }))
+            .map((m) => ({ viewerId: m.viewerId, total: cumulativeAt(gainsOf(m), daysElapsed - 1) }))
             .filter((m) => m.total > 0)
             .sort((a, b) => b.total - a.total);
         yesterday.forEach((m, index) => previousRanks.set(m.viewerId, index + 1));
@@ -476,9 +569,13 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         windowLabel: windowLabel(period, window, options.monthName),
         daysElapsed,
         daysInMonth,
+        checkpointDay,
+        nextCheckpointDay,
+        checkpointJustClosed,
         daysRemaining,
         quotaPerDay,
         effectiveQuota,
+        nextCheckpointTarget,
         members,
         totalFans: members.reduce((sum, m) => sum + m.total, 0),
         quotaTarget: members.length * effectiveQuota,

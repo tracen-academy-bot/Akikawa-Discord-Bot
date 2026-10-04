@@ -167,32 +167,59 @@ those days, and $d_i$ counts them. For someone present all month that is the
 same $T_i = \text{daily\_fans}[e] - \text{daily\_fans}[s_i]$ and
 $d_i = e - s_i$ as above, so the reference rows are unchanged.
 
-## Quota periods (added 2026-10-01)
+## Quota periods (added 2026-10-01, reworked 2026-10-04)
 
 A circle's quota applies to a period, set with `/fans circle add|config period:`
 or the dashboard's "Per" selector. The amount is entered *for that period*
-("72M per week"). Everything above describes MONTH, which is the default and
+("14M per week"). Everything above describes MONTH, which is the default and
 whose figures are unchanged (the reference rows in `scripts/test-metrics.ts`
 still reproduce exactly).
 
-| Period | Window | Per-day rate | Goal for the window |
-| --- | --- | --- | --- |
-| MONTH | days 1 to month end | `floor(quota / daysInMonth)` | rate × days in month |
-| BIWEEKLY | days 1-14, 15-28, 29 to month end | `floor(quota / 14)` | rate × days in window |
-| WEEK | days 1-7, 8-14, 15-21, 22-28, 29 to month end | `floor(quota / 7)` | rate × days in window |
-| DAY | the latest day with data | `quota` | `quota` |
+Totals are month-to-date in every period. The period decides only when the
+requirement steps up and when people are judged against it. The first
+version (2026-10-01) measured each week or day on its own, resetting totals
+at every boundary; the club pointed out that is not how a weekly quota works,
+and it was replaced by the checkpoint model below.
 
-Weeks restart on the 1st of every game month, so the last week is 2-3 days
-long (0 in a 28-day February) and its goal scales: a 3-day week owes 3/7 of
-the weekly quota. Biweekly windows follow the same rule (added 2026-10-04):
-the stub at month end is 2-3 days and owes 2/14 or 3/14 of the quota. Its
-label names the weekly weeks it covers ("Weeks 3–4 · days 15–28", and
-"Week 5 · days 29–31" for the stub).
+| Period | Checkpoints (end of game day) | Due at checkpoint $c$ |
+| --- | --- | --- |
+| MONTH | none; judged every day | `floor(quota / D)` × days so far, today included |
+| DAY | every day | $\lfloor Q \cdot c / 1 \rfloor$ |
+| WEEK | 7, 14, 21, 28, month end | $\lfloor Q \cdot c / 7 \rfloor$ |
+| BIWEEKLY | 14, 28, month end | $\lfloor Q \cdot c / 14 \rfloor$ |
 
-Inside the window, every figure is window-relative: `total` is fans earned
-since the window opened, `expected` counts days in the window from the
-member's first day with data (a mid-week joiner owes only their days),
-`needPerDay` spreads the window's shortfall over the days left in it, and the
-projection runs to the window's end. Rank movement compares with the previous
-day of the same window, so it is empty on a window's first day. The 7-day
-trend sparkline is deliberately not clipped to the window.
+Here $Q$ is the quota as entered for the period, $D$ the days in the game
+month, and $c$ the checkpoint's game day, counting only days the member was
+in the circle.
+
+So a 14M weekly quota is 14M due by the end of day 7 and 28M by day 14, and a
+2.5M daily quota is 2.5M by the end of day 1 and 5M by day 2. Periods restart
+on the 1st, so the last one is 2-3 days long and its step scales: a 31-day
+month with a 14M weekly quota ends at $\lfloor 14\text{M} \cdot 31 / 7 \rfloor
+= 62\text{M}$. Weekly labels read "Week 2 · days 8–14"; biweekly labels name the
+weekly weeks they cover ("Weeks 3–4 · days 15–28", "Week 5 · days 29–31").
+
+In checkpoint periods:
+
+- **`expected`** is what was due at the last checkpoint that has passed, zero
+  before the first. It only rises when a checkpoint passes.
+- **`behind`** is `expected` minus the month-to-date total, so nobody is
+  behind mid-period unless they missed an earlier checkpoint and have not
+  caught up.
+- **The day in progress is never judged.** `loadCircleProgress` passes the
+  current game day as `currentDay`, and only days before it count as over.
+  On day 7 of a weekly circle, week 1 has not been checked yet; on day 8 it
+  has.
+- **`target`** is what will be due at the next checkpoint, and `needPerDay`
+  spreads the gap to it over the days left, today included. It is shown even
+  for someone on pace, since that is the "increasing requirement".
+- **A joiner** owes the share of each period they were in the circle for: a
+  day-10 joiner owes 5/7 of week 2.
+- **The daily alert** is posted only when a checkpoint has just closed (the
+  latest finished day is a checkpoint), so a missed week is announced once,
+  the day after it ends. `/fans check` always includes it. Known gap: a
+  month's final checkpoint closes as the next game month starts, so its alert
+  is never posted automatically; `/fans check` on the last day covers it.
+
+The projection runs to month end: total plus the member's average for each
+remaining day.

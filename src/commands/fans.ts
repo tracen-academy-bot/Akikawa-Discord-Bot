@@ -475,21 +475,29 @@ async function handleMe(interaction: ChatInputCommandInteraction) {
 
     // Discord allows ten embeds per message; nobody is in more circles than that.
     const embeds = found.slice(0, 10).map(({ circle, progress, member }) => {
+        const checkpoints = progress.period !== 'MONTH';
         const status = member.onPace
-            ? `On pace (${formatFans(member.total - member.expected)} ahead of where you need to be)`
-            : `Behind by **${formatFans(member.behind)}**`;
+            ? checkpoints
+                ? 'Made every check so far'
+                : `On pace (${formatFans(member.total - member.expected)} ahead of where you need to be)`
+            : `Behind by **${formatFans(member.behind)}**${checkpoints ? ` since the day ${progress.checkpointDay} check` : ''}`;
         const fields = [
-            { name: 'Fans so far', value: formatFans(member.total), inline: true },
-            { name: 'Expected by now', value: formatFans(member.expected), inline: true },
+            { name: 'Fans this month', value: formatFans(member.total), inline: true },
+            {
+                name: checkpoints ? (progress.checkpointDay > 0 ? `Due at day ${progress.checkpointDay} check` : 'Due so far') : 'Expected by now',
+                value: formatFans(member.expected),
+                inline: true,
+            },
             { name: 'Rank', value: `${member.rank} of ${progress.members.length}`, inline: true },
             { name: 'Status', value: status, inline: false },
         ];
-        if (progress.period !== 'DAY') {
-            fields.push(
-                { name: 'Need per day', value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay), inline: true },
-                { name: 'Projected', value: `${formatCompactFans(member.projectedTotal)} of ${formatCompactFans(progress.effectiveQuota)}`, inline: true },
-            );
+        if (checkpoints && progress.daysRemaining > 0) {
+            fields.push({ name: `Due by end of day ${progress.nextCheckpointDay}`, value: formatFans(member.target), inline: true });
         }
+        fields.push(
+            { name: 'Need per day', value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay), inline: true },
+            { name: 'Projected', value: `${formatCompactFans(member.projectedTotal)} of ${formatCompactFans(progress.effectiveQuota)}`, inline: true },
+        );
         return infoEmbed(
             `${member.trainerName} · ${circle.name}`,
             `${progress.windowLabel} · day ${progress.daysElapsed} of ${progress.daysInMonth} · quota ${describeQuota(progress.quota, progress.period)}`,
