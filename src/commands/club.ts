@@ -30,7 +30,6 @@ const PERIOD_CHOICES: { name: string; value: FanCountPeriod }[] = [
     { name: 'Month', value: 'MONTH' },
 ];
 
-const FAN_AMOUNT_PATTERN = /^\d+(\.\d+)?M$/i;
 const MAX_HEADCOUNT = 30;
 
 // ================================================================================
@@ -334,6 +333,26 @@ async function handleHeadcount(interaction: ChatInputCommandInteraction, member:
     await interaction.reply({ embeds: [successEmbed('Headcount Updated', `**${updated.name}** headcount is now **${updated.headcount}/${MAX_HEADCOUNT}**.`)] });
 }
 
+/**
+ * Parses a club fan count into millions, the unit it is stored and shown in.
+ *
+ * The option says "in millions", so a bare number is millions ("50" is 50M).
+ * K, M and B are also accepted, in either case and with or without a space,
+ * as are thousands separators ("1,500M"). Only "50M" with no space used to
+ * pass, which rejected ordinary input like "50" or "50 m".
+ *
+ * @returns The amount in millions, or null when it is not a positive amount.
+ */
+export function parseClubFanAmount(input: string): number | null {
+    const cleaned = /^\s*\d{1,3}(,\d{3})+(\.\d+)?\s*[kmb]?\s*$/i.test(input) ? input.replace(/,/g, '') : input;
+    const match = /^\s*(\d+(?:\.\d+)?)\s*([kmb])?\s*$/i.exec(cleaned);
+    if (!match) return null;
+    const value = Number(match[1]);
+    const perMillion = { k: 0.001, m: 1, b: 1000 }[match[2]?.toLowerCase() ?? ''] ?? 1;
+    const amount = value * perMillion;
+    return Number.isFinite(amount) && amount > 0 ? amount : null;
+}
+
 async function handleFancount(interaction: ChatInputCommandInteraction, member: GuildMember) {
     const clubId = interaction.options.getString('club', true);
     const club = await findClubOrReply(interaction, clubId);
@@ -347,12 +366,11 @@ async function handleFancount(interaction: ChatInputCommandInteraction, member: 
     const rawAmount = interaction.options.getString('amount', true).trim();
     const period = interaction.options.getString('period') as FanCountPeriod | null;
 
-    if (!FAN_AMOUNT_PATTERN.test(rawAmount)) {
-        await interaction.reply({ embeds: [errorEmbed("Amount must be a number ending in 'M', e.g. '50M' or '0.25M'.")] });
+    const amount = parseClubFanAmount(rawAmount);
+    if (amount === null) {
+        await interaction.reply({ embeds: [errorEmbed("Amount must be a number like '50', '50M', '0.25M', '500K' or '1.2B'.")] });
         return;
     }
-
-    const amount = parseFloat(rawAmount.slice(0, -1));
 
     const updated = await prisma.club.update({
         where: { id: club.id }, data: { fanCountAmount: amount, fanCountPeriod: period },

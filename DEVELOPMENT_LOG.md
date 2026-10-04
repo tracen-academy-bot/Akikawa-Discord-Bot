@@ -4,6 +4,35 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — /uma-id
+
+Members did not find `/fans link`, which is what `/fans check me`, `/fans
+trainer` and alert tags rely on. `/uma-id id:` is a top-level shortcut for it;
+with no ID it shows the current link. It is not called "register" or
+"trainer", since Trainer is a club staff role here. Both commands share
+`linkTrainer`, so the rules are identical (Club Managers link others; one
+viewer ID per member). Messages that pointed at `/fans link` now point at
+`/uma-id`.
+
+---
+
+## 2026-10-04 — club and me run in any circle channel; /club fancount takes ordinary amounts
+
+`/fans check club` and `me` only ran in an actual thread (plus #staff-commands
+for `club`). Primrose reports to #bot, a plain channel, so neither could run
+there, and `me` was refused in #staff-commands. Both now run in any channel or
+thread a circle reports or alerts to, and in #staff-commands. The channel
+decides which circles are meant (all of them in #staff-commands); `me` shows
+the caller's card for each of those they are currently in, and `club` takes
+the named circle, the only one, or the one linked to the caller's club.
+
+`/club fancount` accepted only "50M" written exactly so, while its own option
+says "Amount in millions"; "50" or "50 m" were refused. `parseClubFanAmount`
+now takes a bare number as millions, plus K/M/B in either case, spaces and
+thousands separators.
+
+---
+
 ## 2026-10-04 — /fans check all, club and me
 
 The club asked for quota checks grouped by who runs them, rather than an

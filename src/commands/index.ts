@@ -4,6 +4,7 @@ import * as threadTag from './setTag';
 import * as club from './club';
 import * as timer from './timer';
 import * as fans from './fans';
+import * as umaId from './umaId';
 
 export interface Command {
     data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
@@ -18,3 +19,4 @@ commands.set(threadTag.data.name, threadTag as Command);
 commands.set(club.data.name, club as Command);
 commands.set(timer.data.name, timer as Command);
 commands.set(fans.data.name, fans as Command);
+commands.set(umaId.data.name, umaId as Command);
