@@ -389,6 +389,16 @@ async function main() {
     check('/club create refuses a taken name, ignoring case',
         desc(await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'fresh club', rank: 'B' } })), 'A club named **fresh club** already exists.');
 
+    // Casual sits below B.
+    await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'Casual Club', rank: 'CASUAL' } });
+    const casual = await prisma.trackedCircle.findFirstOrThrow({ where: { guildId: GUILD, name: 'Casual Club' } });
+    check('a club can be Casual', casual.rank, 'CASUAL');
+    const casualForm = clubCmd.buildClubEditModal(casual, true).toJSON() as unknown as ModalJson;
+    check('Casual is listed first, below B', pre(casualForm, 'Expected rank')?.options?.slice(0, 2).map((o) => o.value), ['CASUAL', 'B']);
+    const { renderClubList } = await import('../src/lib/image/renderClubList');
+    const png = await renderClubList([{ id: casual.id, name: casual.name, rank: 'CASUAL', headcount: null, quotaText: 'Not set' }]);
+    check('the club directory draws a Casual badge', png.subarray(1, 4).toString(), 'PNG');
+
     const allAgain = await run({ sub: 'all', userId: 'u-officer', officer: true });
     const allTitle = allAgain.filter((x) => x.kind === 'edit').at(-1)?.embeds?.[0]?.title;
     check('fan checks skip clubs without a uma.moe circle', allTitle, 'Quota check · 1 circle');

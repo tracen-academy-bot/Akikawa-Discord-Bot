@@ -25,6 +25,10 @@ headcount` are gone. The stored `headcount` column is left in place unused.
 "Rank" is now "Expected rank" in the form, `/club create` and the directory,
 so it is not confused with uma.moe's monthly rank.
 
+A Casual rank sits below B (`ClubRank` gains `CASUAL`, an additive enum
+migration). There is no badge artwork for it, so it uses the drawn badge, a
+muted "C".
+
 ---
 
 ## 2026-10-04 — Clubs and tracked circles are one table

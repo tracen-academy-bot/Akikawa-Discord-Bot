@@ -35,6 +35,7 @@ type Club = TrackedCircle;
 // ================================================================================
 
 const RANK_CHOICES: { name: string; value: ClubRank }[]= [
+    { name: 'Casual', value: 'CASUAL'},
     { name: 'B', value: 'B'},
     { name: 'B+', value: 'B_PLUS'},
     { name: 'A', value: 'A'},

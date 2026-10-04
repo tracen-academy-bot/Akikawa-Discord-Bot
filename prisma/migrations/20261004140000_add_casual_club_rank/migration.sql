@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "ClubRank" ADD VALUE 'CASUAL' BEFORE 'B';
