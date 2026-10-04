@@ -190,10 +190,12 @@ async function main() {
 
     const link = await run({ group: 'circle', sub: 'config', userId: 'u-officer', officer: true, circle: circle.id, club: club.id });
     check('circle config links the club', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } })).clubId, club.id);
-    check('circle config says Trainers can now check', link[0]?.embeds?.[0]?.description?.includes('/fans check club'), true);
+    check('circle config says the staff can now check', link[0]?.embeds?.[0]?.description?.includes('/fans check club'), true);
 
-    check("club refuses the club's Assistants",
-        desc(await run({ group: 'check', sub: 'club', userId: 'u-assistant', channel: 't-check' })), "Only **Checkrose**'s Trainers and Club Managers can run this.");
+    check("club lets the club's Assistant post too",
+        (await run({ group: 'check', sub: 'club', userId: 'u-assistant', channel: 't-check' })).some((s) => s.kind === 'edit' && s.files === 1), true);
+    check('club refuses someone who is not club staff',
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-behind', channel: 't-check' })), "Only **Checkrose**'s Trainers, Assistants and Club Managers can run this.");
     check('club refuses outside a thread',
         desc(await run({ group: 'check', sub: 'club', userId: 'u-trainer' })), "Run this inside your circle's thread.");
 

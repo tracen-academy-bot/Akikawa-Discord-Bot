@@ -79,7 +79,7 @@ export const data = new SlashCommandBuilder()
                 sub.setName('all').setDescription("Sync every active circle and post each report and alert to its channels (Club Managers)."),
             )
             .addSubcommand((sub) =>
-                sub.setName('club').setDescription("Sync this thread's circle and post its report and alert here (the club's Trainers)."),
+                sub.setName('club').setDescription("Sync this thread's circle and post its report and alert here (the club's staff)."),
             )
             .addSubcommand((sub) =>
                 sub.setName('me').setDescription("Your own progress in this thread's circle, visible only to you."),
@@ -170,7 +170,7 @@ export const data = new SlashCommandBuilder()
                     .addStringOption((opt) =>
                         opt
                             .setName('club')
-                            .setDescription("Link the circle's /club record, so its Trainers can run /fans check club")
+                            .setDescription("Link the circle's /club record, so its staff can run /fans check club")
                             .setAutocomplete(true),
                     ),
             )
@@ -511,7 +511,8 @@ async function circleForThread(interaction: ChatInputCommandInteraction): Promis
 
 /**
  * True when the caller may run `/fans check club` for a circle: a Club
- * Manager, or a Trainer on the `/club` record the circle is linked to.
+ * Manager, or a Trainer or Assistant on the `/club` record the circle is
+ * linked to.
  * Replies with the reason when not.
  */
 async function requireClubTrainer(interaction: ChatInputCommandInteraction, circle: TrackedCircle): Promise<boolean> {
@@ -527,8 +528,8 @@ async function requireClubTrainer(interaction: ChatInputCommandInteraction, circ
         return false;
     }
     const membership = await getClubMembership(circle.clubId, interaction.user.id);
-    if (membership?.role === 'TRAINER') return true;
-    await reply(interaction, errorEmbed(`Only **${circle.name}**'s Trainers and Club Managers can run this.`));
+    if (membership) return true;
+    await reply(interaction, errorEmbed(`Only **${circle.name}**'s Trainers, Assistants and Club Managers can run this.`));
     return false;
 }
 
@@ -978,7 +979,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
         `Reports: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'not set'}`,
         `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'not set'}`,
         `Syncing: ${updated.active ? 'active' : 'paused'}`,
-        `Club: ${updated.club ? `**${updated.club.name}** (its Trainers can run \`/fans check club\`)` : 'not linked'}`,
+        `Club: ${updated.club ? `**${updated.club.name}** (its Trainers and Assistants can run \`/fans check club\`)` : 'not linked'}`,
     ];
 
     await reply(interaction, successEmbed(`${updated.name} updated`, lines.join('\n')));
