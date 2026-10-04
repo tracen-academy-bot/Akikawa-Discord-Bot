@@ -115,60 +115,67 @@ function periodChecks() {
     check('day window is the day itself', w('DAY', 9, 30), '9-9#1');
     check('month window is the whole month', w('MONTH', 9, 30), '1-30#1');
 
-    // Weekly, mid-month: 10M/day for 9 days against 70M/week. Week 2 is days
-    // 8-14; two days in, the member has 20M of an expected 20M.
-    const weekly = computeCircleProgress([steady(1, 10_000_000, 9)], { quota: 70_000_000, period: 'WEEK', daysInMonth: 30 });
-    const wm = weekly.members[0]!;
-    check('weekly window', `${weekly.windowStart}-${weekly.windowEnd}`, '8-14');
-    check('weekly label', weekly.windowLabel, 'Week 2 · days 8–14');
-    check('weekly per-day rate', weekly.quotaPerDay, 10_000_000);
-    check('weekly goal for a full week', weekly.effectiveQuota, 70_000_000);
-    check('weekly total counts only this week', wm.total, 20_000_000);
-    check('weekly expected covers 2 days', wm.expected, 20_000_000);
-    check('weekly on pace', wm.onPace, true);
-    check('weekly days remaining in the week', weekly.daysRemaining, 6);
-    check('weekly projection is to the end of the week', wm.projectedTotal, 70_000_000);
-    check('weekly average is within the week', wm.avgPerDay, 10_000_000);
+    // ── Checkpoints: the requirement steps up at each period end ─────────────
+    // Weekly 14M, 31-day month. Checks at the end of days 7, 14, 21, 28, 31.
+    const weekOpts = { quota: 14_000_000, period: 'WEEK' as const, daysInMonth: 31 };
+    const w9 = computeCircleProgress([steady(1, 3_000_000, 9), steady(2, 1_000_000, 9)], weekOpts);
+    const strong = w9.members.find((m) => m.viewerId === 1)!;
+    const weak = w9.members.find((m) => m.viewerId === 2)!;
+    check('totals are month-to-date, not per week', strong.total, 27_000_000);
+    check('last check passed was day 7', w9.checkpointDay, 7);
+    check('next check is day 14', w9.nextCheckpointDay, 14);
+    check('the current period is week 2', w9.windowLabel, 'Week 2 · days 8–14');
+    check('due at the day 7 check is one weekly quota', strong.expected, 14_000_000);
+    check('due by day 14 is two', strong.target, 28_000_000);
+    check('made the day 7 check', strong.onPace, true);
+    check('need/day aims at the next check', strong.needPerDay, 200_000);
+    check('days until the next check', w9.daysRemaining, 5);
+    check('missed the day 7 check', weak.behind, 5_000_000);
+    check('month-end requirement scales the 3-day stub', w9.effectiveQuota, 62_000_000);
+    check('rank movement compares with yesterday', w9.members.map((m) => m.rankChange).join(','), '0,0');
 
-    // Short final week: day 30 of a 31-day month, 9M/day against 70M/week.
-    // Days 29-31 owe 3/7 of 70M = 30M; two days in, 18M of an expected 20M.
-    const short = computeCircleProgress([steady(1, 9_000_000, 30)], { quota: 70_000_000, period: 'WEEK', daysInMonth: 31 });
-    const sm = short.members[0]!;
-    check('short week window', `${short.windowStart}-${short.windowEnd}`, '29-31');
-    check('short week goal scales by days', short.effectiveQuota, 30_000_000);
-    check('short week total', sm.total, 18_000_000);
-    check('short week behind', sm.behind, 2_000_000);
-    check('short week days remaining', short.daysRemaining, 2);
-    check('short week need/day spreads the shortfall', sm.needPerDay, 6_000_000);
+    // Before the first check nobody is behind, however slow.
+    const w5 = computeCircleProgress([steady(1, 1_000_000, 5)], weekOpts);
+    check('nobody is behind before the first check', w5.members[0]!.behind, 0);
+    check('nothing is due before the first check', w5.members[0]!.expected, 0);
+    check('need/day spreads the first week', w5.members[0]!.needPerDay, 4_500_000);
 
-    // A member who joins mid-week owes quota only from their first day.
-    const joiner = computeCircleProgress([steady(1, 10_000_000, 12), steady(2, 10_000_000, 12, 10)], {
-        quota: 70_000_000,
-        period: 'WEEK',
-        daysInMonth: 30,
-    });
-    const late = joiner.members.find((m) => m.viewerId === 2)!;
-    check('mid-week joiner counts 3 days', late.quotaDays, 3);
-    check('mid-week joiner expected', late.expected, 30_000_000);
-    check('mid-week joiner total', late.total, 30_000_000);
+    // Today is not over, so its checkpoint is not judged yet.
+    const open7 = computeCircleProgress([steady(1, 1_000_000, 7)], { ...weekOpts, currentDay: 7 });
+    check('day 7 in progress: week 1 not judged', open7.checkpointDay, 0);
+    check('day 7 in progress: not behind', open7.members[0]!.behind, 0);
+    check('day 7 in progress: last day to make it', open7.daysRemaining, 1);
+    const closed = computeCircleProgress([steady(1, 1_000_000, 8)], { ...weekOpts, currentDay: 8 });
+    check('day 8: week 1 judged', closed.checkpointDay, 7);
+    check('day 8: the check has just closed', closed.checkpointJustClosed, true);
+    check('day 8: behind on week 1', closed.members[0]!.behind, 6_000_000);
+    const later = computeCircleProgress([steady(1, 1_000_000, 9)], { ...weekOpts, currentDay: 9 });
+    check('day 9: the check is no longer fresh', later.checkpointJustClosed, false);
 
-    // Rank movement resets with the window: none on a week's first day.
-    const firstDay = computeCircleProgress([steady(1, 10_000_000, 8), steady(2, 9_000_000, 8)], {
-        quota: 70_000_000,
-        period: 'WEEK',
-        daysInMonth: 30,
-    });
-    check('no rank movement on a week\'s first day', firstDay.members[0]!.rankChange, null);
+    // A finished month is judged at its last day, stub included.
+    const done = computeCircleProgress([steady(1, 2_000_000, 31)], weekOpts);
+    check('a finished month is judged at month end', done.checkpointDay, 31);
+    check('62M was due by month end', done.members[0]!.expected, 62_000_000);
+    check('exactly enough is on pace', done.members[0]!.onPace, true);
+    check('nothing left to do in a finished month', done.members[0]!.needPerDay, null);
 
-    // Daily: the window is the latest day; 7M earned on day 5 against 8M.
-    const daily = computeCircleProgress([steady(1, 7_000_000, 5)], { quota: 8_000_000, period: 'DAY', daysInMonth: 30 });
-    const dm = daily.members[0]!;
-    check('daily label', daily.windowLabel, 'Day 5');
-    check('daily goal is the quota', daily.effectiveQuota, 8_000_000);
-    check('daily total is that day\'s gain', dm.total, 7_000_000);
-    check('daily behind', dm.behind, 1_000_000);
-    check('daily need is the rest of today', dm.needPerDay, 1_000_000);
-    check('daily days remaining', daily.daysRemaining, 1);
+    // A day-10 joiner owes only their days in the circle: 5 of week 2's 7.
+    const joined = computeCircleProgress([steady(1, 3_000_000, 16), steady(2, 3_000_000, 16, 10)], weekOpts);
+    const late = joined.members.find((m) => m.viewerId === 2)!;
+    check('a joiner owes their share of the week they joined', late.expected, 10_000_000);
+    check('a joiner counts days in the circle', late.quotaDays, 5);
+
+    // Daily 2.5M: 2.5M due by end of day 1, 5M by end of day 2, and so on.
+    const dayOpts = { quota: 2_500_000, period: 'DAY' as const, daysInMonth: 30 };
+    const d5 = computeCircleProgress([steady(1, 2_000_000, 5)], dayOpts);
+    check('daily: due by end of day 5 is 12.5M', d5.members[0]!.expected, 12_500_000);
+    check('daily: 10M earned is 2.5M behind', d5.members[0]!.behind, 2_500_000);
+    check('daily: next check is day 6, 15M', `${d5.nextCheckpointDay}:${d5.nextCheckpointTarget}`, '6:15000000');
+    check('daily label names the day being checked next', d5.windowLabel, 'Day 6');
+    const dLive = computeCircleProgress([steady(1, 2_000_000, 5)], { ...dayOpts, currentDay: 5 });
+    check('daily, day 5 in progress: judged through day 4', dLive.members[0]!.expected, 10_000_000);
+    check('daily, day 5 in progress: not behind yet', dLive.members[0]!.behind, 0);
+    check('daily, day 5 in progress: 2.5M more today', dLive.members[0]!.needPerDay, 2_500_000);
 
     // MONTH stays the default, labelled with the month name when given.
     const month = computeCircleProgress([steady(1, 3_000_000, 5)], { quota: 90_000_000, daysInMonth: 30, monthName: 'October' });
@@ -193,23 +200,21 @@ function biweeklyChecks() {
     check('28-day February is exactly two', w(28, 28), '15-28#2');
     check('biweekly quota text', describeQuota(160_000_000, 'BIWEEKLY'), '160.0M per 2 weeks');
 
-    // Day 16 of 30, 10M/day against 140M per two weeks: window 15-28.
-    const mid = computeCircleProgress([steady(1, 10_000_000, 16)], { quota: 140_000_000, period: 'BIWEEKLY', daysInMonth: 30 });
-    const mm = mid.members[0]!;
-    check('biweekly window', `${mid.windowStart}-${mid.windowEnd}`, '15-28');
-    check('biweekly label names its weeks', mid.windowLabel, 'Weeks 3–4 · days 15–28');
-    check('biweekly per-day rate', mid.quotaPerDay, 10_000_000);
-    check('biweekly goal for a full window', mid.effectiveQuota, 140_000_000);
-    check('biweekly total counts only this window', mm.total, 20_000_000);
-    check('biweekly expected covers 2 days', mm.expected, 20_000_000);
-    check('biweekly days remaining', mid.daysRemaining, 13);
-
-    // Stub: day 30 of 31, 9M/day. Days 29-31 owe 3/14 of 140M = 30M.
-    const stub = computeCircleProgress([steady(1, 9_000_000, 30)], { quota: 140_000_000, period: 'BIWEEKLY', daysInMonth: 31 });
-    check('biweekly stub label', stub.windowLabel, 'Week 5 · days 29–31');
-    check('biweekly stub goal scales by days', stub.effectiveQuota, 30_000_000);
-    check('biweekly stub total', stub.members[0]!.total, 18_000_000);
-    check('biweekly stub behind', stub.members[0]!.behind, 2_000_000);
+    // Biweekly 28M: due 28M by end of day 14, 56M by day 28, scaled to month end.
+    const bOpts = { quota: 28_000_000, period: 'BIWEEKLY' as const, daysInMonth: 31 };
+    const b16 = computeCircleProgress([steady(1, 2_000_000, 16)], bOpts);
+    const bm = b16.members[0]!;
+    check('biweekly label names its weeks', b16.windowLabel, 'Weeks 3–4 · days 15–28');
+    check('biweekly per-day rate', b16.quotaPerDay, 2_000_000);
+    check('biweekly totals are month-to-date', bm.total, 32_000_000);
+    check('biweekly: 28M due at the day 14 check', bm.expected, 28_000_000);
+    check('biweekly: 56M due by day 28', bm.target, 56_000_000);
+    check('biweekly days until the next check', b16.daysRemaining, 12);
+    check('biweekly need/day', bm.needPerDay, 2_000_000);
+    const bDone = computeCircleProgress([steady(1, 2_000_000, 31)], bOpts);
+    check('biweekly 3-day stub scales: 62M due at month end', bDone.members[0]!.expected, 62_000_000);
+    const bLabel = computeCircleProgress([steady(1, 2_000_000, 30)], { ...bOpts, currentDay: 30 });
+    check('biweekly stub label', bLabel.windowLabel, 'Week 5 · days 29–31');
 }
 
 /**

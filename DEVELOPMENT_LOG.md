@@ -4,6 +4,36 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — Daily, weekly and biweekly quotas are checkpoints, not resets
+
+The first version of quota periods measured each week or day on its own:
+totals reset at every boundary and people were judged against a pro-rated
+share every day. The club's actual rule is different. Totals are always
+month-to-date, the requirement steps up by one quota at each period end (14M
+weekly is 14M due by day 7, 28M by day 14; 2.5M daily is 2.5M by end of day
+1, 5M by day 2), and nobody is reported until a checkpoint has passed.
+
+`computeCircleProgress` keeps its MONTH path exactly as it was (the reference
+rows still reproduce) and computes checkpoint periods separately: the last
+checkpoint passed, the next one, what was due and what will be due, with the
+day in progress never judged (`currentDay`, passed in for the current month).
+The daily job's alert now posts only on the day after a checkpoint closes; a
+manual `/fans check` always includes it. The dashboard and image show every
+column in every period and a "next check end of day N · X due" line.
+
+---
+
+## 2026-10-04 — /fans me and /fans trainer find the circle themselves
+
+In a server tracking several circles, `/fans me` refused to run without a
+`circle` option, though the caller's trainer link already says who they are.
+Both commands now look up the circles the trainer is currently in
+(`circlesForTrainer`, using the same membership rule as the reports, so a
+circle they left does not match). `/fans me` shows one card per circle;
+`/fans trainer` uses the first by name. Naming a circle still works.
+
+---
+
 ## 2026-10-04 — /fans check and /fans me
 
 Asked for an on-demand quota check like another bot's `/force_check`, plus

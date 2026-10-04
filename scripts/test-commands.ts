@@ -104,12 +104,18 @@ async function main() {
         data: { guildId: GUILD, circleId: BigInt(999777), name: 'Checkrose', quota: BigInt(31_000_000) },
     });
 
+    // A second circle, so a command that omits `circle` cannot just fall back
+    // to the guild's only one: it has to work out which circle is meant.
+    const other = await prisma.trackedCircle.create({
+        data: { guildId: GUILD, circleId: BigInt(999778), name: 'Otherrose', quota: BigInt(31_000_000) },
+    });
+
     const BASE = 1_000_000_000;
-    const seed = async (viewerId: number, name: string, perDay: number, lastStored: number) => {
+    const seed = async (viewerId: number, name: string, perDay: number, lastStored: number, into = circle) => {
         for (let stored = 1; stored <= lastStored; stored += 1) {
             await prisma.fanSnapshot.create({
                 data: {
-                    trackedCircleId: circle.id, viewerId: BigInt(viewerId), trainerName: name,
+                    trackedCircleId: into.id, viewerId: BigInt(viewerId), trainerName: name,
                     year, month, day: stored, cumulativeFans: BigInt(BASE + viewerId + perDay * (stored - 1)),
                 },
             });
@@ -118,6 +124,7 @@ async function main() {
     await seed(1, 'Ahead', 5_000_000, 4); // 15M over 3 days: on pace
     await seed(2, 'Behind', 100_000, 4); // 300K over 3 days: behind
     await seed(3, 'Gone', 9_000_000, 2); // left after day 1
+    await seed(4, 'Elsewhere', 2_000_000, 4, other);
 
     await prisma.trainerLink.createMany({
         data: [
@@ -130,9 +137,10 @@ async function main() {
     const me = await run({ sub: 'me', userId: 'u-behind' });
     const embed = me[0]?.embeds?.[0];
     const field = (name: string) => embed?.fields?.find((f) => f.name === name)?.value;
+    check('me finds the circle without being told', me[0]?.embeds?.length, 1);
     check('me replies privately', me[0]?.ephemeral, true);
     check('me titles the trainer and circle', embed?.title, 'Behind · Checkrose');
-    check('me shows fans earned', field('Fans so far'), '300,000');
+    check('me shows fans earned', field('Fans this month'), '300,000');
     check('me ranks among current members only', field('Rank'), '2 of 2');
     check('me says how far behind', field('Status')?.startsWith('Behind by **'), true);
 
@@ -142,12 +150,21 @@ async function main() {
     const gone = await run({ sub: 'me', userId: 'u-gone' });
     check('me for a leaver says not a current member', gone[0]?.embeds?.[0]?.description?.includes('not a current member'), true);
 
+    const named = await run({ sub: 'me', userId: 'u-behind', circle: other.id });
+    check('me with a circle they are not in says so', named[0]?.embeds?.[0]?.description?.includes('not a current member of that circle'), true);
+
+    // In two circles: one card each.
+    await seed(2, 'Behind', 100_000, 4, other);
+    const both = await run({ sub: 'me', userId: 'u-behind' });
+    check('me shows every circle the trainer is in', both[0]?.embeds?.map((e) => e.title), ['Behind · Checkrose', 'Behind · Otherrose']);
+    await prisma.fanSnapshot.deleteMany({ where: { trackedCircleId: other.id, viewerId: BigInt(2) } });
+
     // ── /fans check ───────────────────────────────────────────────────────────
-    const denied = await run({ sub: 'check', userId: 'u-behind' });
+    const denied = await run({ sub: 'check', userId: 'u-behind', circle: circle.id });
     check('check is for Club Managers', denied[0]?.embeds?.[0]?.description, 'Only Club Managers can run a quota check.');
 
     // No report channel: everything lands in the channel the command ran in.
-    const here = await run({ sub: 'check', userId: 'u-officer', officer: true });
+    const here = await run({ sub: 'check', userId: 'u-officer', officer: true, circle: circle.id });
     const posted = here.find((s) => s.kind === 'edit');
     check('check without a report channel replies publicly', here[0]?.ephemeral, false);
     check('check attaches the report image', posted?.files, 1);
@@ -158,7 +175,7 @@ async function main() {
 
     // Report and alert channels set: posted there, confirmed privately.
     await prisma.trackedCircle.update({ where: { id: circle.id }, data: { reportChannelId: 'c-report', alertChannelId: 'c-alert' } });
-    const there = await run({ sub: 'check', userId: 'u-officer', officer: true });
+    const there = await run({ sub: 'check', userId: 'u-officer', officer: true, circle: circle.id });
     const toReport = there.find((s) => s.kind === 'channel' && s.channelId === 'c-report');
     const toAlert = there.find((s) => s.kind === 'channel' && s.channelId === 'c-alert');
     const confirm = there.find((s) => s.kind === 'edit');

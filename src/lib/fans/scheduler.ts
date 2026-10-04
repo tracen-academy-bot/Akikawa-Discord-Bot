@@ -76,9 +76,14 @@ export interface CircleReport {
  * trainers who are behind, and tag them where a Discord link exists, so the
  * message is actionable rather than just informative.
  *
+ * In checkpoint periods (daily, weekly, biweekly) nobody is behind until a
+ * checkpoint passes, and `scheduled` reports leave the alert out unless one
+ * has just closed, so a missed week is announced once, the day after it
+ * ends, not every day of the next week. A manual check always includes it.
+ *
  * @returns Null when nothing has been ingested for the current month.
  */
-export async function buildCircleReport(circle: TrackedCircle): Promise<CircleReport | null> {
+export async function buildCircleReport(circle: TrackedCircle, { scheduled = false }: { scheduled?: boolean } = {}): Promise<CircleReport | null> {
     const progress = await currentCircleProgress(circle);
     if (!progress) return null;
 
@@ -94,6 +99,7 @@ export async function buildCircleReport(circle: TrackedCircle): Promise<CircleRe
     const allBehind = progress.members.filter((m) => !m.onPace);
     const behind = allBehind.slice(0, ALERT_LIMIT);
     if (behind.length === 0) return { image, alert: null, behindCount: 0 };
+    if (scheduled && !progress.checkpointJustClosed) return { image, alert: null, behindCount: allBehind.length };
 
     const links = await prisma.trainerLink.findMany({
         where: { guildId: circle.guildId, viewerId: { in: behind.map((m) => BigInt(m.viewerId)) } },
@@ -112,7 +118,8 @@ export async function buildCircleReport(circle: TrackedCircle): Promise<CircleRe
         alert: {
             content:
                 `**${circle.name}** — ${allBehind.length} trainer${allBehind.length === 1 ? '' : 's'} behind quota ` +
-                `(${describeQuota(progress.quota, progress.period)} · ${progress.windowLabel})\n` +
+                `(${describeQuota(progress.quota, progress.period)} · ` +
+                `${progress.period === 'MONTH' ? progress.windowLabel : `checked at end of day ${progress.checkpointDay}`})\n` +
                 lines.join('\n'),
             users: [...mentionByViewer.values()],
         },
@@ -137,11 +144,16 @@ type SendableChannel = Extract<NonNullable<Awaited<ReturnType<Client['channels']
  * @returns What was posted, or null when the circle has no report channel or
  *          no data this month.
  */
-export async function postReport(client: Client, circleId: string): Promise<{ behindCount: number; alerted: boolean } | null> {
+export async function postReport(
+    client: Client,
+    circleId: string,
+    /** True for the daily job; see `buildCircleReport`. */
+    { scheduled = false }: { scheduled?: boolean } = {},
+): Promise<{ behindCount: number; alerted: boolean } | null> {
     const circle = await prisma.trackedCircle.findUnique({ where: { id: circleId } });
     if (!circle?.reportChannelId) return null;
 
-    const report = await buildCircleReport(circle);
+    const report = await buildCircleReport(circle, { scheduled });
     if (!report) return null;
 
     if (!(await sendTo(client, circle.reportChannelId, { files: [report.image] }))) return null;
@@ -171,7 +183,7 @@ export async function runDailySync(client: Client): Promise<string> {
     const circles = await prisma.trackedCircle.findMany({ where: { active: true } });
     for (const circle of circles) {
         try {
-            await postReport(client, circle.id);
+            await postReport(client, circle.id, { scheduled: true });
         } catch (e) {
             // A channel the bot can no longer post to must not abort the run.
             console.error(`Failed to post fan report for ${circle.name}:`, e);

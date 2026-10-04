@@ -317,6 +317,7 @@ export async function loadCircleProgress(
 
     if (snapshots.length === 0) return null;
 
+    const now = currentGameMonth();
     const byViewer = new Map<string, MemberSeries>();
 
     for (const snapshot of snapshots) {
@@ -343,6 +344,8 @@ export async function loadCircleProgress(
         monthName: new Date(Date.UTC(year, month - 1, 1)).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' }),
         daysInMonth: daysInCalendarMonth(year, month),
         quotaDaysOffset,
+        // In the current month today is not over, so its checkpoint is still open.
+        ...(year === now.year && month === now.month ? { currentDay: now.day } : {}),
     });
 }
 
