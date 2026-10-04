@@ -152,11 +152,13 @@ as time outside the circle is correct, not merely cautious. In the user's
 circle, Primrose (130718412), the rule leaves exactly 27 current members on
 3 October, matching uma.moe's `member_count`.
 
-**Open: the last day of a month.** A month's index 30 often differs from
-`next_month_start`, which equals the next month's index 0 (they matched for
-273 of 908 September rows). Fans earned between those two snapshots fall in
-neither month here. Whether uma.moe's own past-month "Monthly Gain" uses
-`next_month_start` as the end value has not been checked.
+**The last day of a month is intentionally short.** A month's last index
+often differs from `next_month_start`, which equals the next month's index 0
+(they matched for 273 of 908 September rows). The game closes monthly counts
+some hours before the next month opens (about 5-6 hours, per the club; not
+checked against the API), so fans earned in that gap belong to neither
+month. The last index is the month's final count, and the bot ends the month
+there on purpose. Do not "fix" this by ending a month at `next_month_start`.
 
 Formally, member $i$ is in the circle on game day $d$ when they have a value at
 both index $d-1$ and index $d$ (an index nobody has counts as having one).

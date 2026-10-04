@@ -17,8 +17,10 @@ recorded while they were in another circle), never positive, so the first
 positive snapshot is the join and nothing earlier is counted.
 `previous_circle_id` is unreliable for mid-month moves and is not used.
 
-Still open: whether a past month should end at `next_month_start` rather
-than its last index (see docs/quota-math.md).
+A month's last index is lower than `next_month_start` for most members. The
+user confirmed this is expected: the game closes monthly counts some hours
+before the next month opens, so a month ends at its last index, not at
+`next_month_start` (see docs/quota-math.md).
 
 ---
 
