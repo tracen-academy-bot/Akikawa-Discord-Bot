@@ -17,6 +17,8 @@ import { registerCommands } from './lib/registerCommands';
 import { connect } from './lib/startup';
 import { runMigrations } from './lib/migrate';
 import { handleTimerButton, isTimerButton } from './commands/timer';
+import { handlePostModal, isPostModal } from './commands/post';
+import { handleClubModal, isClubModal } from './commands/club';
 import { handlePrefixMessage } from './prefix';
 
 /**
@@ -174,6 +176,30 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 }
             } catch (replyError) {
                 console.error(`${label}Could not deliver the button error reply:`, replyError);
+            }
+        }
+        return;
+    }
+
+    // Modal submits are routed by custom ID, like the panel buttons above.
+    if (interaction.isModalSubmit()) {
+        const handler = isPostModal(interaction.customId) ? handlePostModal : isClubModal(interaction.customId) ? handleClubModal : null;
+        if (!handler) return;
+        try {
+            await handler(interaction);
+        } catch (e) {
+            const classified = classifyError(e);
+            const label = classified.incidentId ? `[incident ${classified.incidentId}] ` : '';
+            console.error(`${label}Error handling modal ${interaction.customId}:`, e);
+            try {
+                const reply = { embeds: [buildErrorEmbed(classified)] };
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.editReply(reply);
+                } else {
+                    await interaction.reply({ ...reply, flags: MessageFlags.Ephemeral });
+                }
+            } catch (replyError) {
+                console.error(`${label}Could not deliver the modal error reply:`, replyError);
             }
         }
         return;

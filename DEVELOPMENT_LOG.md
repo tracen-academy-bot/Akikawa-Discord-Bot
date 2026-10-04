@@ -4,6 +4,31 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — /club edit form, /post, and shorter /fans commands
+
+`/club edit club:` now opens a form pre-filled with the club's info instead of
+taking name and rank as options. Club Managers get name, rank, headcount, fan
+count and its period; the club's own staff get headcount and fan count only,
+the same split `/club headcount` and `/club fancount` already had. The form's
+custom ID carries the club and which form it is, and the submit checks
+permission again, since it is a separate interaction. An empty fan count
+clears it.
+
+`/post` (Club Managers) opens a form to post as Akikawa: channel (a thread
+works), Markdown message, optional file, and whether to pin it. Member and
+role mentions work; @everyone and @here never ping.
+
+Both forms use Discord's newer modal components (channel and string selects,
+file upload, checkbox), supported since discord.js 14.27. Modal submits are
+routed by custom-ID prefix in `index.ts`, like the timer panel's buttons, so a
+form opened before a restart still submits.
+
+`/fans check all|club|me` lost the `check` level and are now `/fans all`,
+`/fans club` and `/fans me`. `/fans link` and `/fans unlink` are gone;
+`/uma-id id:` links and `/uma-id remove:true` unlinks, with the same rules.
+
+---
+
 ## 2026-10-04 — /uma-id
 
 Members did not find `/fans link`, which is what `/fans check me`, `/fans
