@@ -4,19 +4,27 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
-## 2026-10-04 — /fans check all:true checks every circle
+## 2026-10-04 — /fans check all, club and me
 
-`/fans check` used to need a circle when more than one was tracked. Setting
-`all:true` now checks every active circle in turn. It is opt-in on purpose
-(the club asked for it that way): a blank command still checks the only
-circle or asks which, so nobody posts to every circle's channels by
-accident, and a circle together with `all` is refused. With `all`: each is synced, then its
-report and alert go to its configured channels, or into the current channel
-as a public follow-up when it has none. The person running it gets a private
-summary with one line per circle, and one circle failing does not stop the
-rest. Naming a circle checks only that one, as before. Discord turns the
-first follow-up after a deferred reply into an edit of that reply, so the
-private reply is filled in before the first follow-up is sent.
+The club asked for quota checks grouped by who runs them, rather than an
+`all` flag that would be easy to fire by accident. `/fans check` is now a
+group:
+
+- `all` (Club Managers): syncs every active circle and posts each report and
+  alert to its configured channels, or into the current channel as a public
+  follow-up when it has none; the caller gets a private summary, and one
+  circle failing does not stop the rest. Discord turns the first follow-up
+  after a deferred reply into an edit of that reply, so the private reply is
+  filled in before the first follow-up is sent.
+- `club` (that club's Trainers, and Club Managers): run in a circle's thread,
+  syncs that circle and posts its report and alert there, publicly.
+- `me` (everyone): run in a circle's thread, shows the caller's own progress
+  privately. It replaces `/fans me`.
+
+A thread belongs to the circle whose report or alert channel it is. "Trainer"
+is the `/club` role, so a circle has to be linked to its club record first:
+`/fans circle config club:` sets the link (`None` unlinks). Until a circle is
+linked, only Club Managers can run `club` on it. Assistants are not included.
 
 ---
 
