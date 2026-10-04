@@ -20,6 +20,8 @@ import {
     formatCompactFans,
     formatFans,
     toSafeNumber,
+    type CircleProgress,
+    type MemberProgress,
     type QuotaPeriod,
 } from '../lib/fans/metrics';
 import { buildCircleReport, postReport } from '../lib/fans/scheduler';
@@ -82,7 +84,7 @@ export const data = new SlashCommandBuilder()
             .setName('me')
             .setDescription('Your own quota progress, visible only to you.')
             .addStringOption((opt) =>
-                opt.setName('circle').setDescription('Tracked circle (defaults to the only one)').setAutocomplete(true),
+                opt.setName('circle').setDescription('Tracked circle (defaults to every circle you are in)').setAutocomplete(true),
             ),
     )
     .addSubcommand((sub) =>
@@ -91,7 +93,7 @@ export const data = new SlashCommandBuilder()
             .setDescription("Show one trainer's fan report.")
             .addUserOption((opt) => opt.setName('member').setDescription('Discord member (defaults to you)'))
             .addStringOption((opt) =>
-                opt.setName('circle').setDescription('Tracked circle (defaults to the only one)').setAutocomplete(true),
+                opt.setName('circle').setDescription("Tracked circle (defaults to the trainer's own)").setAutocomplete(true),
             ),
     )
     .addSubcommand((sub) =>
@@ -418,14 +420,37 @@ async function handleCheck(interaction: ChatInputCommandInteraction) {
 }
 
 /**
+ * The tracked circles a trainer is currently in, with that circle's progress.
+ *
+ * Used when a command about one trainer omits `circle`: the trainer's link
+ * already says who they are, so the circle is found from the data instead of
+ * asked for. "Currently in" is the same rule the reports use, so someone who
+ * left a circle is not matched to it.
+ */
+async function circlesForTrainer(
+    guildId: string,
+    viewerId: bigint,
+): Promise<{ circle: TrackedCircle; progress: CircleProgress; member: MemberProgress }[]> {
+    const { year, month } = currentGameMonth();
+    const candidates = await prisma.trackedCircle.findMany({
+        where: { guildId, snapshots: { some: { viewerId, year, month } } },
+        orderBy: { name: 'asc' },
+    });
+    const found: { circle: TrackedCircle; progress: CircleProgress; member: MemberProgress }[] = [];
+    for (const circle of candidates) {
+        const progress = await currentCircleProgress(circle);
+        const member = progress?.members.find((m) => m.viewerId === toSafeNumber(viewerId));
+        if (progress && member) found.push({ circle, progress, member });
+    }
+    return found;
+}
+
+/**
  * The caller's own progress in the current window, privately. Uses the
  * trainer linked with `/fans link`; someone who has left the circle is not a
  * current member and is told so rather than shown stale figures.
  */
 async function handleMe(interaction: ChatInputCommandInteraction) {
-    const circle = await resolveCircle(interaction, false);
-    if (!circle) return;
-
     const link = await prisma.trainerLink.findUnique({
         where: { guildId_discordUserId: { guildId: interaction.guildId!, discordUserId: interaction.user.id } },
     });
@@ -434,42 +459,48 @@ async function handleMe(interaction: ChatInputCommandInteraction) {
         return;
     }
 
-    const progress = await currentCircleProgress(circle);
-    const member = progress?.members.find((m) => m.viewerId === toSafeNumber(link.viewerId));
-    if (!progress || !member) {
-        await reply(interaction, errorEmbed(`Trainer \`${link.viewerId}\` is not a current member of **${circle.name}**, or has no data this month yet.`));
+    // A named circle is honoured; otherwise every circle the trainer is in.
+    let found = await circlesForTrainer(interaction.guildId!, link.viewerId);
+    const named = interaction.options.getString('circle');
+    if (named) found = found.filter((f) => f.circle.id === named);
+    if (found.length === 0) {
+        await reply(
+            interaction,
+            errorEmbed(
+                `Trainer \`${link.viewerId}\` is not a current member of ${named ? 'that circle' : 'any tracked circle'}, or has no data this month yet.`,
+            ),
+        );
         return;
     }
 
-    const status = member.onPace
-        ? `On pace (${formatFans(member.total - member.expected)} ahead of where you need to be)`
-        : `Behind by **${formatFans(member.behind)}**`;
-    const fields = [
-        { name: 'Fans so far', value: formatFans(member.total), inline: true },
-        { name: 'Expected by now', value: formatFans(member.expected), inline: true },
-        { name: 'Rank', value: `${member.rank} of ${progress.members.length}`, inline: true },
-        { name: 'Status', value: status, inline: false },
-    ];
-    if (progress.period !== 'DAY') {
-        fields.push(
-            { name: 'Need per day', value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay), inline: true },
-            { name: 'Projected', value: `${formatCompactFans(member.projectedTotal)} of ${formatCompactFans(progress.effectiveQuota)}`, inline: true },
-        );
-    }
+    // Discord allows ten embeds per message; nobody is in more circles than that.
+    const embeds = found.slice(0, 10).map(({ circle, progress, member }) => {
+        const status = member.onPace
+            ? `On pace (${formatFans(member.total - member.expected)} ahead of where you need to be)`
+            : `Behind by **${formatFans(member.behind)}**`;
+        const fields = [
+            { name: 'Fans so far', value: formatFans(member.total), inline: true },
+            { name: 'Expected by now', value: formatFans(member.expected), inline: true },
+            { name: 'Rank', value: `${member.rank} of ${progress.members.length}`, inline: true },
+            { name: 'Status', value: status, inline: false },
+        ];
+        if (progress.period !== 'DAY') {
+            fields.push(
+                { name: 'Need per day', value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay), inline: true },
+                { name: 'Projected', value: `${formatCompactFans(member.projectedTotal)} of ${formatCompactFans(progress.effectiveQuota)}`, inline: true },
+            );
+        }
+        return infoEmbed(
+            `${member.trainerName} · ${circle.name}`,
+            `${progress.windowLabel} · day ${progress.daysElapsed} of ${progress.daysInMonth} · quota ${describeQuota(progress.quota, progress.period)}`,
+        ).addFields(fields);
+    });
 
-    const embed = infoEmbed(
-        `${member.trainerName} · ${circle.name}`,
-        `${progress.windowLabel} · day ${progress.daysElapsed} of ${progress.daysInMonth} · quota ${describeQuota(progress.quota, progress.period)}`,
-    ).addFields(fields);
-
-    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    await interaction.reply({ embeds, flags: MessageFlags.Ephemeral });
 }
 
 async function handleTrainer(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
-
-    const circle = await resolveCircle(interaction, false);
-    if (!circle) return;
 
     const target = interaction.options.getUser('member') ?? interaction.user;
     const link = await prisma.trainerLink.findUnique({
@@ -487,6 +518,20 @@ async function handleTrainer(interaction: ChatInputCommandInteraction) {
         );
         return;
     }
+
+    // Without a named circle, use the one the trainer is in (the first, by
+    // name, if they are in several) rather than asking.
+    let circle: TrackedCircle | null;
+    if (interaction.options.getString('circle')) {
+        circle = await resolveCircle(interaction, true);
+    } else {
+        circle = (await circlesForTrainer(interaction.guildId!, link.viewerId))[0]?.circle ?? null;
+        if (!circle) {
+            await reply(interaction, errorEmbed(`Trainer \`${link.viewerId}\` is not a current member of any tracked circle, or has no data this month yet.`));
+            return;
+        }
+    }
+    if (!circle) return;
 
     const report = await buildTrainerReport(circle, link.viewerId, TRAINER_WINDOW_DAYS, await currentCircleProgress(circle));
     if (!report) {

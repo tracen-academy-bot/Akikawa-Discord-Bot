@@ -4,6 +4,17 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — /fans me and /fans trainer find the circle themselves
+
+In a server tracking several circles, `/fans me` refused to run without a
+`circle` option, though the caller's trainer link already says who they are.
+Both commands now look up the circles the trainer is currently in
+(`circlesForTrainer`, using the same membership rule as the reports, so a
+circle they left does not match). `/fans me` shows one card per circle;
+`/fans trainer` uses the first by name. Naming a circle still works.
+
+---
+
 ## 2026-10-04 — /fans check and /fans me
 
 Asked for an on-demand quota check like another bot's `/force_check`, plus
