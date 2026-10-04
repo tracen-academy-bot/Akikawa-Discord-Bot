@@ -4,6 +4,50 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — Club staff roles matched by name
+
+A Cosmos Assistant ran `/fans club` and was refused. Club staff were only the
+people added with `/club member`, and nobody had been, although the server
+already gives staff roles like "Cosmos Trainer" and "Cosmos Assistant". The
+bot now reads the server's roles itself and matches them to clubs by name
+(`src/lib/clubLinks.ts`). A role counts as a club's staff role when its name
+contains the club's name and the word Trainer or Assistant. Anyone holding
+one is that club's staff everywhere `/club member` staff are (`/fans club`,
+the `/club edit` quota form, `/club fancount`). `/club member` entries still
+count too.
+
+Names are compared as words: lower-cased, accents and emoji dropped, split
+on anything that is not a letter or digit, and the club's words run together
+must equal a run of the role's words run together. So "Alt Lair" matches
+"AltLair Assistant", but "Cosmos" does not match "CosmosX Trainer" or
+"Cosmo Trainer", and a plain "Cosmos" member role is not a staff role.
+"the", "club" and "circle" are optional in a club's name. When one club's
+match sits inside a longer club's ("Cosmos" inside "Cosmos II Trainer") only
+the longer club gets it.
+
+`/club edit` has a Staff roles picker, pre-filled with the roles the bot
+actually uses. A stored list replaces the name matches. Saving the matches
+unchanged, or clearing the picker, stores nothing, so the club keeps
+following its name (a role made later is picked up). `/club links` lists
+every club's staff roles, marking which were matched by name.
+
+Channels are left alone: the club deferred matching them by name, so home
+channels are still set with `/club edit` and `/club links` does not list
+them. A first version of this change matched them by name too; it was taken
+out before merging.
+
+Schema: `TrackedCircle.staffRoleIds String[]`, an additive migration
+(`20261004150000_add_club_staff_roles`). Matching is done live from the
+bot's role cache, not stored, since the session has no access to the server
+or production database to read the IDs ahead of time.
+
+`test-commands` now has 123 checks: the matching rules, a role holder
+allowed and a plain member role or another club's role refused, the form's
+pre-fill, a stored list replacing the matches, channels not matched by
+name, and `/club links`.
+
+---
+
 ## 2026-10-04 — Club form: expected rank, the real quota, headcount from uma.moe
 
 After the merge a club carried two copies of one number: the old club "fan

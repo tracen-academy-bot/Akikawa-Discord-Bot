@@ -11,7 +11,8 @@ import {
 } from 'discord.js';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
-import { getClubMembership, isOfficer } from '../lib/permissions';
+import { isClubStaff, isOfficer, type StaffCandidate } from '../lib/permissions';
+import { guildClubs } from '../lib/clubLinks';
 import { errorEmbed, successEmbed, infoEmbed } from '../lib/embeds';
 import { autocompleteTrackedCircle } from '../lib/fans/circleAutocomplete';
 import { TRACKED, adoptUntrackedClub, backfillOnce, currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
@@ -499,13 +500,14 @@ async function circlesHere(interaction: ChatInputCommandInteraction): Promise<Tr
 
 /**
  * True when the caller may run `/fans club` for a club: a Club Manager, or one
- * of the club's staff (Trainer or Assistant, set with `/club member`).
- * Replies with the reason when not.
+ * of the club's staff (a Trainer or Assistant, added with `/club member` or
+ * holding the club's Trainer or Assistant role). Replies with the reason when
+ * not.
  */
 async function requireClubTrainer(interaction: ChatInputCommandInteraction, circle: TrackedCircle): Promise<boolean> {
-    if (isOfficer(interaction.member as GuildMember)) return true;
-    const membership = await getClubMembership(circle.id, interaction.user.id);
-    if (membership) return true;
+    const member = interaction.member as StaffCandidate;
+    if (isOfficer(member)) return true;
+    if (await isClubStaff(member, circle)) return true;
     await reply(interaction, errorEmbed(`Only **${circle.name}**'s Trainers, Assistants and Club Managers can run this.`));
     return false;
 }
@@ -525,9 +527,10 @@ async function circleForClubCheck(interaction: ChatInputCommandInteraction, pool
     }
     if (pool.length === 1) return pool[0]!;
 
-    const memberships = await prisma.clubMember.findMany({ where: { discordUserId: interaction.user.id }, select: { clubId: true } });
-    const clubIds = new Set(memberships.map((m) => m.clubId));
-    const mine = pool.filter((c) => clubIds.has(c.id));
+    const member = interaction.member as StaffCandidate;
+    const clubs = member.guild ? await guildClubs(interaction.guildId!) : [];
+    const mine: TrackedCircle[] = [];
+    for (const c of pool) if (await isClubStaff(member, c, clubs)) mine.push(c);
     if (mine.length === 1) return mine[0]!;
     await reply(
         interaction,

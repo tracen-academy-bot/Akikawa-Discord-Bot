@@ -10,12 +10,14 @@ import {
     ModalSubmitInteraction,
     StringSelectMenuBuilder,
     ChannelSelectMenuBuilder,
+    RoleSelectMenuBuilder,
     ChannelType,
     TextInputBuilder,
     TextInputStyle,
 } from "discord.js";
 import { prisma } from '../db/prisma';
 import { canManageClubStats, isOfficer } from "../lib/permissions";
+import { guildClubs, listToStore, matchedStaffRoleIds, staffRolesOf, type LinkableGuild, type Links } from '../lib/clubLinks';
 import { autoCompleteClubName } from "../lib/clubAutocomplete";
 import { successEmbed, errorEmbed, infoEmbed } from "../lib/embeds";
 import { renderClubList, type ClubSummary } from "../lib/image/renderClubList";
@@ -159,6 +161,7 @@ export const data = new SlashCommandBuilder()
             .addStringOption((opt) => opt.setName('club').setDescription('Club to view').setRequired(true).setAutocomplete(true))
     )
     .addSubcommand((sub) => sub.setName('list').setDescription('List all clubs.'))
+    .addSubcommand((sub) => sub.setName('links').setDescription("Show each club's staff roles, and which were matched by name."))
     .addSubcommand((sub) =>
         sub
             .setName('fancount')
@@ -237,6 +240,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             break;
         case 'list':
             await handleList(interaction);
+            break;
+        case 'links':
+            await handleLinks(interaction);
             break;
         case 'fancount':
             await handleFancount(interaction, member);
@@ -325,17 +331,47 @@ const EDIT_FIELD = {
     quota: 'club:quota',
     period: 'club:period',
     home: 'club:home',
+    roles: 'club:roles',
 } as const;
 /** Home channels a club may list. Threads inside them count without listing. */
 const MAX_HOME_CHANNELS = 10;
+/** Staff roles a club may list. */
+const MAX_STAFF_ROLES = 10;
+
+/** A club's home channels and staff roles as the form shows them. */
+export interface ClubFormLinks {
+    home: string[];
+    roles: string[];
+}
+
+/**
+ * The home channels and staff roles the form should show: the stored home
+ * channels, and the stored staff roles or, when none are stored, the roles
+ * matching the club's name, so the form shows what the bot actually uses.
+ */
+async function formLinks(club: Club, guild: LinkableGuild | null): Promise<ClubFormLinks> {
+    if (!guild) return { home: club.homeChannelIds, roles: club.staffRoleIds };
+    const clubs = await guildClubs(club.guildId);
+    // A role deleted since it was stored cannot be pre-selected.
+    const roleIds = new Set([...guild.roles.cache.values()].map((r) => r.id));
+    return { home: club.homeChannelIds, roles: staffRolesOf(club, clubs, guild).ids.filter((id) => roleIds.has(id)) };
+}
 
 /** True for a modal this module owns. */
 export function isClubModal(customId: string): boolean {
     return customId.startsWith(CLUB_MODAL_PREFIX);
 }
 
-/** Builds the edit form for a club. `full` is the Club Manager form. */
-export function buildClubEditModal(club: Club, full: boolean): ModalBuilder {
+/**
+ * Builds the edit form for a club. `full` is the Club Manager form. `links`
+ * pre-fills the home channels and staff roles; it defaults to the stored
+ * lists.
+ */
+export function buildClubEditModal(
+    club: Club,
+    full: boolean,
+    links: ClubFormLinks = { home: club.homeChannelIds, roles: club.staffRoleIds },
+): ModalBuilder {
     const labels: LabelBuilder[] = [];
     if (full && club.circleId === null) {
         labels.push(
@@ -375,12 +411,26 @@ export function buildClubEditModal(club: Club, full: boolean): ModalBuilder {
             .setRequired(false)
             .setMinValues(0)
             .setMaxValues(MAX_HOME_CHANNELS);
-        if (club.homeChannelIds.length > 0) home.setDefaultChannels(...club.homeChannelIds.slice(0, MAX_HOME_CHANNELS));
+        if (links.home.length > 0) home.setDefaultChannels(...links.home.slice(0, MAX_HOME_CHANNELS));
         labels.push(
             new LabelBuilder()
                 .setLabel('Home channels')
                 .setDescription("The club's own channels. Threads inside them count too.")
                 .setChannelSelectMenuComponent(home),
+        );
+    }
+    if (full) {
+        const roles = new RoleSelectMenuBuilder()
+            .setCustomId(EDIT_FIELD.roles)
+            .setRequired(false)
+            .setMinValues(0)
+            .setMaxValues(MAX_STAFF_ROLES);
+        if (links.roles.length > 0) roles.setDefaultRoles(...links.roles.slice(0, MAX_STAFF_ROLES));
+        labels.push(
+            new LabelBuilder()
+                .setLabel('Staff roles')
+                .setDescription(`Holders count as ${club.name}'s staff. Empty: its Trainer and Assistant roles by name.`.slice(0, 100))
+                .setRoleSelectMenuComponent(roles),
         );
     }
     return new ModalBuilder()
@@ -395,11 +445,12 @@ async function handleEdit(interaction: ChatInputCommandInteraction, member: Guil
     if (!club) return;
 
     const full = isOfficer(member);
-    if (!full && !(await canManageClubStats(member, club.id))) {
+    if (!full && !(await canManageClubStats(member, club))) {
         await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)] });
         return;
     }
-    await interaction.showModal(buildClubEditModal(club, full));
+    // A modal must answer within 3 seconds; this is two quick reads.
+    await interaction.showModal(buildClubEditModal(club, full, await formLinks(club, interaction.guild as LinkableGuild | null)));
 }
 
 /** Handles the submitted edit form. */
@@ -412,7 +463,7 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
 
     const member = interaction.member as GuildMember;
     const full = kind === 'full';
-    if (full ? !isOfficer(member) : !(await canManageClubStats(member, club.id))) {
+    if (full ? !isOfficer(member) : !(await canManageClubStats(member, club))) {
         return void (await refuse(full ? 'Only Club Managers can change a club\'s name, rank or channels.' : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
     }
 
@@ -422,6 +473,7 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
         name?: string;
         rank?: ClubRank;
         homeChannelIds?: string[];
+        staffRoleIds?: string[];
         quota: bigint;
         quotaPeriod: QuotaPeriod;
         fanCountAmount: null;
@@ -441,6 +493,15 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
         const picked = interaction.fields.getSelectedChannels(EDIT_FIELD.home, false);
         data.homeChannelIds = picked ? [...picked.keys()] : [];
     }
+    // A role list equal to the name matches is stored empty, so the club keeps
+    // following its name (a role made later is picked up).
+    const guild = interaction.guild as LinkableGuild | null;
+    const clubs = guild ? await guildClubs(club.guildId) : [];
+    if (full) {
+        const picked = interaction.fields.getSelectedRoles(EDIT_FIELD.roles, false);
+        const matched = guild ? matchedStaffRoleIds(club, clubs, guild.roles.cache.values()) : [];
+        data.staffRoleIds = listToStore(picked ? [...picked.keys()] : [], matched);
+    }
     if (full) {
         const rank = interaction.fields.getStringSelectValues(EDIT_FIELD.rank)[0] as ClubRank | undefined;
         if (rank && RANK_CHOICES.some((r) => r.value === rank)) data.rank = rank;
@@ -457,6 +518,9 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
 
     const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
     const headcount = await clubHeadcount(updated);
+    const after = guild ? await guildClubs(club.guildId) : [];
+    const home: Links = { ids: updated.homeChannelIds, matched: false };
+    const roles: Links = guild ? staffRolesOf(updated, after, guild) : { ids: updated.staffRoleIds, matched: false };
     await interaction.reply({
         embeds: [
             successEmbed(
@@ -465,13 +529,49 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
                     `**${updated.name}** · expected rank **${formatRank(updated.rank)}**`,
                     `Headcount: **${headcount === null ? '—' : `${headcount}/${MAX_HEADCOUNT}`}** (from uma.moe)`,
                     `Quota: **${clubQuotaText(updated)}** per member`,
-                    ...(updated.circleId !== null
-                        ? [`Home channels: ${updated.homeChannelIds.length > 0 ? updated.homeChannelIds.map((id) => `<#${id}>`).join(' ') : 'none'}`]
-                        : []),
+                    ...(updated.circleId !== null ? [`Home channels: ${linksText(home, (id) => `<#${id}>`)}`] : []),
+                    ...(full ? [`Staff roles: ${linksText(roles, (id) => `<@&${id}>`)}`] : []),
                 ].join('\n'),
             ),
         ],
     });
+}
+
+/** A list of roles or channels as text, saying when it was matched by name. */
+function linksText(links: Links, mention: (id: string) => string): string {
+    if (links.ids.length === 0) return links.matched ? 'none found by name' : 'none';
+    return `${links.ids.map(mention).join(' ')}${links.matched ? ' (matched by name)' : ''}`;
+}
+
+/**
+ * `/club links`: each club's staff roles, as the bot reads them from the
+ * server, so a Club Manager can see which were matched by name and fix them
+ * with `/club edit`. Role and channel mentions in an embed do not
+ * ping anyone.
+ */
+async function handleLinks(interaction: ChatInputCommandInteraction) {
+    const guild = interaction.guild as LinkableGuild | null;
+    const clubs = await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId! }, orderBy: { name: 'asc' } });
+    if (clubs.length === 0) {
+        await interaction.reply({ embeds: [infoEmbed('Club links', 'No clubs yet.')], flags: MessageFlags.Ephemeral });
+        return;
+    }
+    const lines = clubs.map((club) => {
+        const roles = guild ? staffRolesOf(club, clubs, guild) : { ids: club.staffRoleIds, matched: false };
+        return `**${club.name}**${club.circleId === null ? ' (no uma.moe circle)' : ''}\nStaff roles: ${linksText(roles, (id) => `<@&${id}>`)}`;
+    });
+    // An embed description holds 4096 characters; split across embeds if needed.
+    const embeds = [];
+    let chunk = '';
+    for (const line of lines) {
+        if (chunk && chunk.length + line.length + 2 > 4000) {
+            embeds.push(infoEmbed(embeds.length === 0 ? 'Club links' : 'Club links (cont.)', chunk));
+            chunk = '';
+        }
+        chunk = chunk ? `${chunk}\n\n${line}` : line;
+    }
+    if (chunk) embeds.push(infoEmbed(embeds.length === 0 ? 'Club links' : 'Club links (cont.)', chunk));
+    await interaction.reply({ embeds: embeds.slice(0, 10), flags: MessageFlags.Ephemeral });
 }
 
 async function handleDelete(interaction: ChatInputCommandInteraction, member: GuildMember) {
@@ -559,7 +659,7 @@ async function handleFancount(interaction: ChatInputCommandInteraction, member: 
     const club = await findClubOrReply(interaction, clubId);
     if (!club) return;
 
-    if (!(await canManageClubStats(member, club.id))) {
+    if (!(await canManageClubStats(member, club))) {
         await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)] });
         return;
     }

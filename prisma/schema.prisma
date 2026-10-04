@@ -144,6 +144,9 @@ model TrackedCircle {
     /// The club's own channels. `/fans club` and `/fans me` work in these and
     /// in any thread inside them, as well as in the report and alert channels.
     homeChannelIds  String[]  @default([])
+    /// Discord roles whose holders are the club's staff, like `/club member`.
+    /// Empty means the Trainer and Assistant roles whose names match the club's.
+    staffRoleIds    String[]  @default([])
 
     // Club info, from the former `Club` model.
     /// Intended tier (B to S+). Null when never set.

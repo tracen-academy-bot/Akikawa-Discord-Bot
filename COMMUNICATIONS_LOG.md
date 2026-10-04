@@ -4,6 +4,18 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-04 — Club staff roles matched by name; channels deferred
+
+A Cosmos Assistant was refused by `/fans club`: the server's "Cosmos
+Trainer" and "Cosmos Assistant" roles meant nothing to the bot. The club
+asked for the bot to read the role IDs itself and match them to clubs, and
+to connect channels the same way. Roles are now matched by name, with
+`/club edit` as the override and `/club links` to check what matched. Channel
+matching was built too, then the club asked to skip it and handle it later,
+so home channels stay set by hand as decided at the merge.
+
+---
+
 ## 2026-10-04 — Clubs and circles merged; live data migration approved
 
 The club said a club and its tracked circle are the same thing and should not
