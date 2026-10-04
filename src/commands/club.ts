@@ -1,4 +1,18 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction, GuildMember, EmbedBuilder, AttachmentBuilder } from "discord.js";
+import {
+    SlashCommandBuilder,
+    ChatInputCommandInteraction,
+    AutocompleteInteraction,
+    GuildMember,
+    EmbedBuilder,
+    AttachmentBuilder,
+    LabelBuilder,
+    MessageFlags,
+    ModalBuilder,
+    ModalSubmitInteraction,
+    StringSelectMenuBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+} from "discord.js";
 import { prisma } from '../db/prisma';
 import { canManageClubStats, isOfficer } from "../lib/permissions";
 import { autoCompleteClubName } from "../lib/clubAutocomplete";
@@ -94,10 +108,8 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('edit')
-            .setDescription("Edit an existing club's info. Club Managers only.")
+            .setDescription("Edit a club's info in a form (Club Managers; the club's staff for headcount and fan count).")
             .addStringOption((opt) => opt.setName('club').setDescription('Club to edit').setRequired(true).setAutocomplete(true))
-            .addStringOption((opt) => opt.setName('name').setDescription(' New club name').setRequired(false))
-            .addStringOption((opt) => opt.setName('rank').setDescription('New intended rank').setRequired(false).setChoices(...RANK_CHOICES))
     )
     .addSubcommand((sub) => 
         sub
@@ -228,34 +240,152 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
     await interaction.reply({ embeds: [successEmbed('Club created', `**${club.name}** was created at intended rank **${formatRank(club.rank)}**.`)] });
 }
 
-async function handleEdit(interaction: ChatInputCommandInteraction, member: GuildMember) {
-    if (!isOfficer(member)) {
-        await interaction.reply({ embeds: [errorEmbed('Only Club Managers can edit clubs.')] });
-        return;
-    }
+// ─── Edit form ────────────────────────────────────────────────────────────────
 
+/**
+ * `/club edit` opens a form pre-filled with the club's current info. Club
+ * Managers get every field; a club's own staff (Trainers and Assistants) get
+ * headcount and fan count only, the same split as `/club headcount` and
+ * `/club fancount` versus renaming. The custom ID carries the club and which
+ * form it is, and the submit checks permission again.
+ */
+const CLUB_MODAL_PREFIX = 'club:edit:';
+const EDIT_FIELD = {
+    name: 'club:name',
+    rank: 'club:rank',
+    headcount: 'club:headcount',
+    fanCount: 'club:fancount',
+    period: 'club:period',
+} as const;
+/** The period choice meaning "a flat total, not per period". */
+const FLAT_TOTAL = 'NONE';
+
+/** True for a modal this module owns. */
+export function isClubModal(customId: string): boolean {
+    return customId.startsWith(CLUB_MODAL_PREFIX);
+}
+
+/** Builds the edit form for a club. `full` adds name and rank (Club Managers). */
+export function buildClubEditModal(club: Club, full: boolean): ModalBuilder {
+    const labels: LabelBuilder[] = [];
+    if (full) {
+        labels.push(
+            new LabelBuilder()
+                .setLabel('Name')
+                .setTextInputComponent(new TextInputBuilder().setCustomId(EDIT_FIELD.name).setStyle(TextInputStyle.Short).setValue(club.name).setMaxLength(100)),
+            new LabelBuilder().setLabel('Rank').setStringSelectMenuComponent(
+                new StringSelectMenuBuilder()
+                    .setCustomId(EDIT_FIELD.rank)
+                    .addOptions(RANK_CHOICES.map((r) => ({ label: r.name, value: r.value, default: r.value === club.rank }))),
+            ),
+        );
+    }
+    labels.push(
+        new LabelBuilder()
+            .setLabel('Headcount')
+            .setDescription(`0 to ${MAX_HEADCOUNT}.`)
+            .setTextInputComponent(
+                new TextInputBuilder().setCustomId(EDIT_FIELD.headcount).setStyle(TextInputStyle.Short).setValue(String(club.headcount)).setMaxLength(2),
+            ),
+        new LabelBuilder()
+            .setLabel('Fan count')
+            .setDescription('In millions, e.g. 50M, 0.5M or 500K. Leave empty to clear it.')
+            .setTextInputComponent(
+                new TextInputBuilder()
+                    .setCustomId(EDIT_FIELD.fanCount)
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(false)
+                    .setMaxLength(20)
+                    .setValue(club.fanCountAmount === null ? '' : `${club.fanCountAmount}M`),
+            ),
+        new LabelBuilder().setLabel('Fan count period').setStringSelectMenuComponent(
+            new StringSelectMenuBuilder()
+                .setCustomId(EDIT_FIELD.period)
+                .addOptions(
+                    { label: 'Flat total', value: FLAT_TOTAL, default: club.fanCountPeriod === null },
+                    ...PERIOD_CHOICES.map((p) => ({ label: p.name, value: p.value, default: p.value === club.fanCountPeriod })),
+                ),
+        ),
+    );
+    return new ModalBuilder()
+        .setCustomId(`${CLUB_MODAL_PREFIX}${club.id}:${full ? 'full' : 'stats'}`)
+        .setTitle(`Edit ${club.name}`.slice(0, 45))
+        .addLabelComponents(...labels);
+}
+
+async function handleEdit(interaction: ChatInputCommandInteraction, member: GuildMember) {
     const clubId = interaction.options.getString('club', true);
     const club = await findClubOrReply(interaction, clubId);
     if (!club) return;
 
-    const name = interaction.options.getString('name');
-    const rank = interaction.options.getString('rank') as ClubRank | null;
-
-    if (!name && !rank) {
-        await interaction.reply({ embeds: [errorEmbed('Provide a new name and/or a new rank to edit.')] });
+    const full = isOfficer(member);
+    if (!full && !(await canManageClubStats(member, club.id))) {
+        await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)] });
         return;
     }
+    await interaction.showModal(buildClubEditModal(club, full));
+}
 
-    if (name) {
-        const nameTaken = await prisma.club.findFirst({ where: { name, NOT: { id: club.id } } });
-        if (nameTaken) {
-            await interaction.reply({ embeds: [errorEmbed(`A club named **${name}** already exists.`)] });
-            return;
-        }
+/** Handles the submitted edit form. */
+export async function handleClubModal(interaction: ModalSubmitInteraction) {
+    const [clubId, kind] = interaction.customId.slice(CLUB_MODAL_PREFIX.length).split(':');
+    const refuse = (text: string) => interaction.reply({ embeds: [errorEmbed(text)], flags: MessageFlags.Ephemeral });
+
+    const club = clubId ? await prisma.club.findUnique({ where: { id: clubId } }) : null;
+    if (!club) return void (await refuse('That club no longer exists.'));
+
+    const member = interaction.member as GuildMember;
+    const full = kind === 'full';
+    if (full ? !isOfficer(member) : !(await canManageClubStats(member, club.id))) {
+        return void (await refuse(full ? 'Only Club Managers can rename a club or change its rank.' : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
     }
 
-    const updated = await prisma.club.update({ where: { id: club.id }, data: { ...(name ? { name } : {}), ...(rank ? { rank } : {}) }});
-    await interaction.reply({ embeds: [successEmbed('Club updated', `Name of the club is **${updated.name}** and the rank of the club is **${formatRank(updated.rank)}**.`)] });
+    const data: { name?: string; rank?: ClubRank; headcount: number; fanCountAmount: number | null; fanCountPeriod: FanCountPeriod | null } = {
+        headcount: 0,
+        fanCountAmount: null,
+        fanCountPeriod: null,
+    };
+
+    if (full) {
+        const name = interaction.fields.getTextInputValue(EDIT_FIELD.name).trim();
+        if (!name) return void (await refuse('The club needs a name.'));
+        if (name !== club.name && (await prisma.club.findFirst({ where: { name, NOT: { id: club.id } } }))) {
+            return void (await refuse(`A club named **${name}** already exists.`));
+        }
+        data.name = name;
+        const rank = interaction.fields.getStringSelectValues(EDIT_FIELD.rank)[0] as ClubRank | undefined;
+        if (rank && RANK_CHOICES.some((r) => r.value === rank)) data.rank = rank;
+    }
+
+    const rawHeadcount = interaction.fields.getTextInputValue(EDIT_FIELD.headcount).trim();
+    const headcount = Number(rawHeadcount);
+    if (!/^\d+$/.test(rawHeadcount) || headcount > MAX_HEADCOUNT) {
+        return void (await refuse(`Headcount must be a whole number from 0 to ${MAX_HEADCOUNT}.`));
+    }
+    data.headcount = headcount;
+
+    const rawFans = interaction.fields.getTextInputValue(EDIT_FIELD.fanCount).trim();
+    if (rawFans) {
+        const amount = parseClubFanAmount(rawFans);
+        if (amount === null) return void (await refuse("Fan count must be a number like '50', '50M', '0.25M', '500K' or '1.2B', or empty."));
+        data.fanCountAmount = amount;
+        const period = interaction.fields.getStringSelectValues(EDIT_FIELD.period)[0];
+        data.fanCountPeriod = period && period !== FLAT_TOTAL ? (period as FanCountPeriod) : null;
+    }
+
+    const updated = await prisma.club.update({ where: { id: club.id }, data });
+    await interaction.reply({
+        embeds: [
+            successEmbed(
+                'Club updated',
+                [
+                    `**${updated.name}** · rank **${formatRank(updated.rank)}**`,
+                    `Headcount: **${updated.headcount}/${MAX_HEADCOUNT}**`,
+                    `Fan count: **${formatFanCount(updated.fanCountAmount, updated.fanCountPeriod)}**`,
+                ].join('\n'),
+            ),
+        ],
+    });
 }
 
 async function handleDelete(interaction: ChatInputCommandInteraction, member: GuildMember) {

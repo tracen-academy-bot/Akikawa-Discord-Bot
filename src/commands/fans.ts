@@ -72,25 +72,18 @@ export const data = new SlashCommandBuilder()
                 opt.setName('circle').setDescription('Tracked circle (defaults to the only one)').setAutocomplete(true),
             ),
     )
-    .addSubcommandGroup((group) =>
-        group
-            .setName('check')
-            .setDescription('Quota checks: every circle, this channel\'s circle, or just you.')
-            .addSubcommand((sub) =>
-                sub.setName('all').setDescription("Sync every active circle and post each report and alert to its channels (Club Managers)."),
-            )
-            .addSubcommand((sub) =>
-                sub
-                    .setName('club')
-                    .setDescription("Sync this channel's circle and post its report and alert here (the club's staff).")
-                    .addStringOption((opt) =>
-                        opt.setName('circle').setDescription('Which circle, when several could be meant (defaults to yours)').setAutocomplete(true),
-                    ),
-            )
-            .addSubcommand((sub) =>
-                sub.setName('me').setDescription("Your own progress in this channel's circle, visible only to you."),
+    .addSubcommand((sub) =>
+        sub.setName('all').setDescription("Sync every active circle and post each report and alert to its channels (Club Managers)."),
+    )
+    .addSubcommand((sub) =>
+        sub
+            .setName('club')
+            .setDescription("Sync this channel's circle and post its report and alert here (the club's staff).")
+            .addStringOption((opt) =>
+                opt.setName('circle').setDescription('Which circle, when several could be meant (defaults to yours)').setAutocomplete(true),
             ),
     )
+    .addSubcommand((sub) => sub.setName('me').setDescription("Your own progress in this channel's circle, visible only to you."))
     .addSubcommand((sub) =>
         sub
             .setName('trainer')
@@ -107,21 +100,6 @@ export const data = new SlashCommandBuilder()
             .addStringOption((opt) =>
                 opt.setName('circle').setDescription('Overlay this circle (defaults to the first tracked)').setAutocomplete(true),
             ),
-    )
-    .addSubcommand((sub) =>
-        sub
-            .setName('link')
-            .setDescription('Link a Discord member to a uma.moe trainer ID.')
-            .addStringOption((opt) =>
-                opt.setName('viewer_id').setDescription('uma.moe viewer ID (found on your trainer profile)').setRequired(true),
-            )
-            .addUserOption((opt) => opt.setName('member').setDescription('Member to link (Club Managers only)')),
-    )
-    .addSubcommand((sub) =>
-        sub
-            .setName('unlink')
-            .setDescription('Remove a trainer link.')
-            .addUserOption((opt) => opt.setName('member').setDescription('Member to unlink (Club Managers only)')),
     )
     .addSubcommandGroup((group) =>
         group
@@ -176,7 +154,7 @@ export const data = new SlashCommandBuilder()
                     .addStringOption((opt) =>
                         opt
                             .setName('club')
-                            .setDescription("Link the circle's /club record, so its staff can run /fans check club")
+                            .setDescription("Link the circle's /club record, so its staff can run /fans club")
                             .setAutocomplete(true),
                     ),
             )
@@ -206,8 +184,8 @@ export const data = new SlashCommandBuilder()
     );
 
 /**
- * Channels besides a circle's own report or alert channel where `/fans check
- * club` and `me` may run, comma-separated. Defaults to the club server's #staff-commands, so it works
+ * Channels besides a circle's own report or alert channel where `/fans club`
+ * and `/fans me` may run, comma-separated. Defaults to the club server's #staff-commands, so it works
  * without configuration; set `STAFF_COMMANDS_CHANNEL_IDS` to change it.
  */
 const STAFF_CHANNEL_IDS = new Set(
@@ -335,28 +313,25 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         await handleCircleGroup(interaction, sub);
         return;
     }
-    if (group === 'check') {
-        if (sub === 'all') await handleCheckAll(interaction);
-        else if (sub === 'club') await handleCheckClub(interaction);
-        else if (sub === 'me') await handleCheckMe(interaction);
-        return;
-    }
 
     switch (sub) {
         case 'report':
             await handleReport(interaction);
+            break;
+        case 'all':
+            await handleCheckAll(interaction);
+            break;
+        case 'club':
+            await handleCheckClub(interaction);
+            break;
+        case 'me':
+            await handleCheckMe(interaction);
             break;
         case 'trainer':
             await handleTrainer(interaction);
             break;
         case 'benchmark':
             await handleBenchmark(interaction);
-            break;
-        case 'link':
-            await handleLink(interaction);
-            break;
-        case 'unlink':
-            await handleUnlink(interaction);
             break;
     }
 }
@@ -452,7 +427,7 @@ async function checkCircle(
 }
 
 /**
- * `/fans check all`: the daily job's sync, report and alert for every active
+ * `/fans all`: the daily job's sync, report and alert for every active
  * circle, now. Club Managers only, since it posts to every circle's channels.
  *
  * Each circle is synced from uma.moe first so the figures are current, then
@@ -500,7 +475,7 @@ async function handleCheckAll(interaction: ChatInputCommandInteraction) {
 }
 
 /**
- * Where `/fans check club` and `me` may run, and which circles they may be
+ * Where `/fans club` and `me` may run, and which circles they may be
  * about there: every circle in a staff channel, else the circles that post
  * their report or alerts to this channel or thread. Replies with the reason
  * and returns null anywhere else.
@@ -527,7 +502,7 @@ async function circlesHere(interaction: ChatInputCommandInteraction): Promise<Tr
 }
 
 /**
- * True when the caller may run `/fans check club` for a circle: a Club
+ * True when the caller may run `/fans club` for a circle: a Club
  * Manager, or a Trainer or Assistant on the `/club` record the circle is
  * linked to.
  * Replies with the reason when not.
@@ -551,7 +526,7 @@ async function requireClubTrainer(interaction: ChatInputCommandInteraction, circ
 }
 
 /**
- * The one circle `/fans check club` is about: the one named with `circle`,
+ * The one circle `/fans club` is about: the one named with `circle`,
  * the only one this channel could mean, or the one linked to the caller's own
  * `/club` among them. Replies with the reason and returns null when that
  * does not pin down exactly one.
@@ -577,7 +552,7 @@ async function circleForClubCheck(interaction: ChatInputCommandInteraction, pool
 }
 
 /**
- * `/fans check club`: sync one circle and post its report and behind-quota
+ * `/fans club`: sync one circle and post its report and behind-quota
  * alert right here, publicly. Runs in a channel or thread the circle reports
  * or alerts to, so the club sees it where it talks, or in a staff channel
  * (#staff-commands). For the club's staff (Trainers and Assistants) and Club
@@ -631,7 +606,7 @@ async function circlesForTrainer(
     return found;
 }
 
-/** One member's progress card, as `/fans check me` shows it. */
+/** One member's progress card, as `/fans me` shows it. */
 function progressCard(circle: TrackedCircle, progress: CircleProgress, member: MemberProgress) {
     const checkpoints = progress.period !== 'MONTH';
     const status = member.onPace
@@ -663,9 +638,9 @@ function progressCard(circle: TrackedCircle, progress: CircleProgress, member: M
 }
 
 /**
- * `/fans check me`: the caller's own progress, privately, in each circle this
+ * `/fans me`: the caller's own progress, privately, in each circle this
  * channel could mean that they are currently in (usually one). Runs where
- * `club` does. Uses the trainer linked with `/fans link`; someone who is not a
+ * `club` does. Uses the trainer linked with `/uma-id`; someone who is not a
  * current member is told so rather than shown stale figures.
  */
 async function handleCheckMe(interaction: ChatInputCommandInteraction) {
@@ -757,14 +732,9 @@ async function handleBenchmark(interaction: ChatInputCommandInteraction) {
 
 // ─── Trainer links ────────────────────────────────────────────────────────────
 
-async function handleLink(interaction: ChatInputCommandInteraction) {
-    await linkTrainer(interaction, interaction.options.getString('viewer_id', true), interaction.options.getUser('member'));
-}
-
 /**
  * Links a Discord member to their uma.moe trainer: the caller themselves, or
- * `target` when a Club Manager links someone else. Shared by `/fans link` and
- * `/uma-id`.
+ * `target` when a Club Manager links someone else. Used by `/uma-id`.
  */
 export async function linkTrainer(interaction: ChatInputCommandInteraction, rawViewerId: string, target: User | null) {
     // Linking someone else is a moderation action; linking yourself is not.
@@ -800,8 +770,11 @@ export async function linkTrainer(interaction: ChatInputCommandInteraction, rawV
     await reply(interaction, successEmbed('Trainer linked', `<@${subject.id}> is now linked to trainer \`${raw}\`.`));
 }
 
-async function handleUnlink(interaction: ChatInputCommandInteraction) {
-    const target = interaction.options.getUser('member');
+/**
+ * Removes a member's uma.moe trainer link: the caller's own, or `target`'s
+ * when a Club Manager removes someone else's. Used by `/uma-id remove:true`.
+ */
+export async function unlinkTrainer(interaction: ChatInputCommandInteraction, target: User | null) {
     if (target && target.id !== interaction.user.id && !(await requireOfficer(interaction, 'unlink other members'))) {
         return;
     }
@@ -1037,7 +1010,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
         `Reports: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'not set'}`,
         `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'not set'}`,
         `Syncing: ${updated.active ? 'active' : 'paused'}`,
-        `Club: ${updated.club ? `**${updated.club.name}** (its Trainers and Assistants can run \`/fans check club\`)` : 'not linked'}`,
+        `Club: ${updated.club ? `**${updated.club.name}** (its Trainers and Assistants can run \`/fans club\`)` : 'not linked'}`,
     ];
 
     await reply(interaction, successEmbed(`${updated.name} updated`, lines.join('\n')));

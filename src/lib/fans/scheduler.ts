@@ -139,7 +139,7 @@ type SendableChannel = Extract<NonNullable<Awaited<ReturnType<Client['channels']
 /**
  * Sends a circle's report image to its configured report channel, and the
  * alert to its alert channel when anyone is behind. Used by the daily job and
- * by `/fans check`.
+ * by `/fans all` and `/fans club`.
  *
  * @returns What was posted, or null when the circle has no report channel or
  *          no data this month.
