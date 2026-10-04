@@ -10,7 +10,7 @@
  *
  *   DATABASE_URL=postgresql://... npm run test:commands
  */
-import { Collection } from 'discord.js';
+import { ChannelType, Collection } from 'discord.js';
 
 const OFFICER_ROLE = 'officer-role';
 process.env.OFFICER_ROLE_IDS = OFFICER_ROLE;
@@ -20,6 +20,21 @@ process.env.STAFF_COMMANDS_CHANNEL_IDS = 'c-staff';
 delete process.env.EXTERNAL_API_KEY;
 
 const GUILD = 'test-guild-commands';
+
+/**
+ * The server's roles and channels, as the bot's cache holds them. Empty to
+ * start; the name-matching checks add "Checkrose Trainer" and friends.
+ */
+const FAKE_GUILD = {
+    id: GUILD,
+    roles: { cache: new Collection<string, { id: string; name: string }>() },
+    channels: { cache: new Collection<string, { id: string; name: string; type: ChannelType }>() },
+};
+
+/** A member's role cache: the officer role if asked, plus any others. */
+function roleCache(officer: boolean | undefined, roles: string[] = []) {
+    return new Map([...(officer ? [OFFICER_ROLE] : []), ...roles].map((id) => [id, {}]));
+}
 let pass = 0;
 let fail = 0;
 
@@ -72,6 +87,8 @@ interface FakeOptions {
     inThread?: boolean;
     /** For a thread, the channel it is in. */
     parent?: string;
+    /** Discord roles the caller holds, besides the officer role. */
+    roles?: string[];
 }
 
 function fakeInteraction(opts: FakeOptions, log: Sent[]) {
@@ -79,8 +96,9 @@ function fakeInteraction(opts: FakeOptions, log: Sent[]) {
         payload.embeds?.map((e) => e.toJSON() as SentEmbed);
     const interaction = {
         guildId: GUILD,
+        guild: FAKE_GUILD,
         user: { id: opts.userId },
-        member: { id: opts.userId, roles: { cache: new Map(opts.officer ? [[OFFICER_ROLE, {}]] : []) } },
+        member: { id: opts.userId, roles: { cache: roleCache(opts.officer, opts.roles) }, guild: FAKE_GUILD },
         channelId: opts.channel ?? 'c-plain',
         channel: { isThread: () => opts.inThread ?? opts.channel !== undefined, parentId: opts.parent ?? null },
         deferred: false,
@@ -303,7 +321,7 @@ async function main() {
     const fullForm = clubCmd.buildClubEditModal(editable, true).toJSON() as unknown as ModalJson;
     const staffForm = clubCmd.buildClubEditModal(editable, false).toJSON() as unknown as ModalJson;
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
-    check('a tracked club form: expected rank, quota, period, home channels', fullForm.components.map((c) => c.label), ['Expected rank', 'Quota per member', 'Quota period', 'Home channels']);
+    check('a tracked club form: expected rank, quota, period, home channels, staff roles', fullForm.components.map((c) => c.label), ['Expected rank', 'Quota per member', 'Quota period', 'Home channels', 'Staff roles']);
     check('club form for staff has the quota only', staffForm.components.map((c) => c.label), ['Quota per member', 'Quota period']);
     check('headcount is not a field', fullForm.components.some((c) => c.label.toLowerCase().includes('headcount')), false);
     check('the form shows the real quota, exactly', pre(fullForm, 'Quota per member')?.value, '31M');
@@ -311,24 +329,28 @@ async function main() {
         [pre(fullForm, 'Expected rank')?.options?.find((o) => o.default)?.value, pre(fullForm, 'Quota period')?.options?.find((o) => o.default)?.value], ['S', 'MONTH']);
     const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B', fanCountAmount: 0.25 } });
     const looseForm = clubCmd.buildClubEditModal(loose, true).toJSON() as unknown as ModalJson;
-    check('an untracked club form has the name instead of home channels', looseForm.components.map((c) => c.label), ['Name', 'Expected rank', 'Quota per member', 'Quota period']);
+    check('an untracked club form has the name instead of home channels', looseForm.components.map((c) => c.label), ['Name', 'Expected rank', 'Quota per member', 'Quota period', 'Staff roles']);
     check('an untracked club form pre-fills the name', pre(looseForm, 'Name')?.value, 'Loose Club');
     check('with no quota yet, an old club fan count pre-fills it', pre(looseForm, 'Quota per member')?.value, '0.25M');
     check('club form is routed by its prefix', clubCmd.isClubModal(fullForm.custom_id), true);
 
     /** Submits the club form with the given values, as the given user. */
-    const submitClub = async (customId: string, userId: string, officer: boolean, values: Record<string, string>, home: string[] = []) => {
+    const submitClub = async (
+        customId: string, userId: string, officer: boolean, values: Record<string, string>, home: string[] = [], roles: string[] = [], held: string[] = [],
+    ) => {
         const out: { description?: string | undefined; ephemeral: boolean }[] = [];
         await clubCmd.handleClubModal({
             customId,
             user: { id: userId },
-            member: { id: userId, roles: { cache: new Map(officer ? [[OFFICER_ROLE, {}]] : []) } },
+            member: { id: userId, roles: { cache: roleCache(officer, held) }, guild: FAKE_GUILD },
             fields: {
                 getTextInputValue: (id: string) => values[id] ?? '',
                 getStringSelectValues: (id: string) => (values[id] ? [values[id]] : []),
                 getSelectedChannels: () => new Collection(home.map((id) => [id, { id }])),
+                getSelectedRoles: () => new Collection(roles.map((id) => [id, { id }])),
             },
             guildId: GUILD,
+            guild: FAKE_GUILD,
             reply: async (p: { embeds?: { toJSON(): { description?: string } }[]; flags?: unknown }) =>
                 void out.push({ description: p.embeds?.[0]?.toJSON().description, ephemeral: p.flags !== undefined }),
         } as never);
@@ -379,6 +401,86 @@ async function main() {
     };
     await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: '35', period: 'MONTH' } });
     check('/club fancount sets the quota', String((await reload()).quota), '35000000');
+
+    // ── Roles and channels matched by name ────────────────────────────────────
+    const links = await import('../src/lib/clubLinks');
+    const clubsNamed = (...names: string[]) => names.map((name, i) => ({ id: `x${i}`, name, homeChannelIds: [], staffRoleIds: [] }));
+    const owners = (clubs: { name: string }[], target: string) => links.clubsForName(clubs, target).map((c) => c.name);
+    const cosmos = clubsNamed('Cosmos', 'Cosmos II', 'Primrose', 'Alt Lair', 'First Room', 'Café');
+    check('"Cosmos Trainer" is Cosmos\'s', owners(cosmos, 'Cosmos Trainer'), ['Cosmos']);
+    check('the longest club name wins: "Cosmos II Trainer"', owners(cosmos, 'Cosmos II Trainer'), ['Cosmos II']);
+    check('emoji and punctuation are ignored', owners(cosmos, '🌌 Cosmos | Assistant'), ['Cosmos']);
+    check('a near miss does not match', owners(cosmos, 'Cosmo Trainer'), []);
+    check('a name run into another word does not match', owners(cosmos, 'cosmoschat'), []);
+    check('a channel with a trailing dash matches', owners(cosmos, 'primrose-'), ['Primrose']);
+    check('a bot channel matches', owners(cosmos, 'primrose-bot-'), ['Primrose']);
+    check('a two-word club matches its name run together', owners(cosmos, 'altlair'), ['Alt Lair']);
+    check('underscores split words', owners(cosmos, 'first_room'), ['First Room']);
+    check('accents are ignored', owners(cosmos, 'cafe-chat'), ['Café']);
+    check('a channel two clubs share goes to both', owners(cosmos, 'cosmos-primrose'), ['Cosmos', 'Primrose']);
+    check('"Club" in a club name is optional', owners(clubsNamed('Cosmos Club'), 'Cosmos Trainer'), ['Cosmos Club']);
+    check('a staff role needs Trainer or Assistant in its name',
+        [links.isStaffRoleName('Cosmos Trainer'), links.isStaffRoleName('Cosmos Assistants'), links.isStaffRoleName('Cosmos')], [true, true, false]);
+    check('a list equal to the matches is stored empty', links.listToStore(['b', 'a'], ['a', 'b']), []);
+    check('a different list is stored', links.listToStore(['a'], ['a', 'b']), ['a']);
+
+    // The server, as the bot reads it: Checkrose's roles and channels by name.
+    FAKE_GUILD.roles.cache.set('r-ck-trainer', { id: 'r-ck-trainer', name: 'Checkrose Trainer' });
+    FAKE_GUILD.roles.cache.set('r-ck-assistant', { id: 'r-ck-assistant', name: 'Checkrose Assistant' });
+    FAKE_GUILD.roles.cache.set('r-ck-member', { id: 'r-ck-member', name: 'Checkrose' });
+    FAKE_GUILD.roles.cache.set('r-other-trainer', { id: 'r-other-trainer', name: 'Otherrose Trainer' });
+    FAKE_GUILD.channels.cache.set('c-ck-chat', { id: 'c-ck-chat', name: 'checkrose-chat', type: ChannelType.GuildText });
+    FAKE_GUILD.channels.cache.set('c-ck-voice', { id: 'c-ck-voice', name: 'checkrose-vc', type: ChannelType.GuildVoice });
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { homeChannelIds: [], staffRoleIds: [] } });
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { active: true } });
+
+    const byRole = await run({ sub: 'club', userId: 'u-role-asst', roles: ['r-ck-assistant'], channel: 't-check' });
+    check('a "Checkrose Assistant" role holder can run /fans club', byRole.some((s) => s.kind === 'edit' && s.files === 1), true);
+    check('a plain "Checkrose" member role is not staff',
+        desc(await run({ sub: 'club', userId: 'u-role-member', roles: ['r-ck-member'], channel: 't-check' }))?.startsWith('Only **Checkrose**'), true);
+    check("another club's Trainer role is not staff",
+        desc(await run({ sub: 'club', userId: 'u-role-other', roles: ['r-other-trainer'], channel: 't-check' }))?.startsWith('Only **Checkrose**'), true);
+    const roleStaff = await run({ sub: 'club', userId: 'u-role-trainer', roles: ['r-ck-trainer'], channel: 'c-staff', inThread: false });
+    check("in the staff channel, a role holder's club is picked", roleStaff.find((s) => s.kind === 'edit')?.content?.includes('Checkrose'), true);
+
+    const inNamed = await run({ sub: 'me', userId: 'u-behind', channel: 'c-ck-chat', inThread: false });
+    check('a channel named after the club is a home channel', inNamed[0]?.embeds?.map((e) => e.title), ['Behind · Checkrose']);
+    const inNamedThread = await run({ sub: 'me', userId: 'u-behind', channel: 't-bot', parent: 'c-ck-chat' });
+    check('so is a thread inside it', inNamedThread[0]?.embeds?.map((e) => e.title), ['Behind · Checkrose']);
+    check('a voice channel is not',
+        desc(await run({ sub: 'me', userId: 'u-behind', channel: 'c-ck-voice', inThread: false }))?.startsWith(nowhere), true);
+
+    // The form shows what the bot uses: the matches, when nothing is stored.
+    const matchedClub = await reload();
+    const matchedForm = clubCmd.buildClubEditModal(matchedClub, true, { home: ['c-ck-chat'], roles: ['r-ck-trainer', 'r-ck-assistant'] }).toJSON() as unknown as {
+        custom_id: string; components: { label: string; component: { default_values?: { id: string }[] } }[];
+    };
+    const defaults = (label: string) => matchedForm.components.find((c) => c.label === label)?.component.default_values?.map((v) => v.id);
+    check('the form pre-fills the matched roles', defaults('Staff roles'), ['r-ck-trainer', 'r-ck-assistant']);
+    check('the form pre-fills the matched channels', defaults('Home channels'), ['c-ck-chat']);
+    const keep = await submitClub(matchedForm.custom_id, 'u-officer', true, { 'club:rank': 'A', 'club:quota': '35M', 'club:period': 'MONTH' },
+        ['c-ck-chat'], ['r-ck-assistant', 'r-ck-trainer']);
+    check('saving the matches unchanged keeps following the names', [(await reload()).staffRoleIds, (await reload()).homeChannelIds], [[], []]);
+    check('the confirmation says they were matched by name',
+        [keep?.description?.includes('Staff roles: <@&r-ck-trainer> <@&r-ck-assistant> (matched by name)'), keep?.description?.includes('Home channels: <#c-ck-chat> (matched by name)')], [true, true]);
+
+    await submitClub(matchedForm.custom_id, 'u-officer', true, { 'club:rank': 'A', 'club:quota': '35M', 'club:period': 'MONTH' }, ['c-ck-chat'], ['r-ck-trainer']);
+    check('a changed list is stored', (await reload()).staffRoleIds, ['r-ck-trainer']);
+    check('a stored list replaces the name matches',
+        desc(await run({ sub: 'club', userId: 'u-role-asst', roles: ['r-ck-assistant'], channel: 't-check' }))?.startsWith('Only **Checkrose**'), true);
+    check('a role holder on the stored list may use the quota form', (await submitClub(staffForm.custom_id, 'u-role-trainer', false, { 'club:quota': '36M' }, [], [], ['r-ck-trainer']))?.ephemeral, false);
+    check('and it saved', String((await reload()).quota), '36000000');
+
+    const linkList = await runClubCmd({ sub: 'links', userId: 'u-officer', officer: true });
+    const linkText = linkList[0]?.embeds?.map((e) => e.description).join('\n') ?? '';
+    check('/club links is private', linkList[0]?.ephemeral, true);
+    check('/club links shows a stored role list as set', linkText.includes('**Checkrose**\nStaff roles: <@&r-ck-trainer>\nHome channels: <#c-ck-chat> (matched by name)'), true);
+    check('/club links shows matched roles for another club', linkText.includes('**Otherrose**\nStaff roles: <@&r-other-trainer> (matched by name)'), true);
+    check('/club links says when nothing matched', linkText.includes('Home channels: none found by name'), true);
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { staffRoleIds: [] } });
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { active: false } });
+    FAKE_GUILD.roles.cache.clear();
+    FAKE_GUILD.channels.cache.clear();
 
     // ── Clubs and circles are one thing ───────────────────────────────────────
     const runClub = runClubCmd;
