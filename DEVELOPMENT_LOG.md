@@ -29,12 +29,12 @@ the longer club gets it.
 actually uses. A stored list replaces the name matches. Saving the matches
 unchanged, or clearing the picker, stores nothing, so the club keeps
 following its name (a role made later is picked up). `/club links` lists
-every club's staff roles, marking which were matched by name, and its home
-channels.
+every club's staff roles, marking which were matched by name.
 
-Home channels are not matched by name: the club deferred that, so they are
-still set with `/club edit`. A first version of this change matched them by
-name too; it was taken out before merging.
+Channels are left alone: the club deferred matching them by name, so home
+channels are still set with `/club edit` and `/club links` does not list
+them. A first version of this change matched them by name too; it was taken
+out before merging.
 
 Schema: `TrackedCircle.staffRoleIds String[]`, an additive migration
 (`20261004150000_add_club_staff_roles`). Matching is done live from the

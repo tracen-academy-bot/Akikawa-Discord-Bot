@@ -465,7 +465,8 @@ async function main() {
     const linkList = await runClubCmd({ sub: 'links', userId: 'u-officer', officer: true });
     const linkText = linkList[0]?.embeds?.map((e) => e.description).join('\n') ?? '';
     check('/club links is private', linkList[0]?.ephemeral, true);
-    check('/club links shows a stored role list as set', linkText.includes('**Checkrose**\nStaff roles: <@&r-ck-trainer>\nHome channels: <#c-ck-chat>'), true);
+    check('/club links shows a stored role list as set', linkText.includes('**Checkrose**\nStaff roles: <@&r-ck-trainer>'), true);
+    check('/club links does not list channels', linkText.includes('Home channels'), false);
     check('/club links shows matched roles for another club', linkText.includes('**Otherrose**\nStaff roles: <@&r-other-trainer> (matched by name)'), true);
     check('/club links says when no role matched', linkText.includes('Staff roles: none found by name'), true);
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { staffRoleIds: [] } });

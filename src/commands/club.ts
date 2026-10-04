@@ -161,7 +161,7 @@ export const data = new SlashCommandBuilder()
             .addStringOption((opt) => opt.setName('club').setDescription('Club to view').setRequired(true).setAutocomplete(true))
     )
     .addSubcommand((sub) => sub.setName('list').setDescription('List all clubs.'))
-    .addSubcommand((sub) => sub.setName('links').setDescription("Show each club's staff roles (and which were matched by name) and home channels."))
+    .addSubcommand((sub) => sub.setName('links').setDescription("Show each club's staff roles, and which were matched by name."))
     .addSubcommand((sub) =>
         sub
             .setName('fancount')
@@ -545,8 +545,8 @@ function linksText(links: Links, mention: (id: string) => string): string {
 
 /**
  * `/club links`: each club's staff roles, as the bot reads them from the
- * server, and its home channels, so a Club Manager can see which roles were
- * matched by name and fix them with `/club edit`. Role and channel mentions in an embed do not
+ * server, so a Club Manager can see which were matched by name and fix them
+ * with `/club edit`. Role and channel mentions in an embed do not
  * ping anyone.
  */
 async function handleLinks(interaction: ChatInputCommandInteraction) {
@@ -558,12 +558,7 @@ async function handleLinks(interaction: ChatInputCommandInteraction) {
     }
     const lines = clubs.map((club) => {
         const roles = guild ? staffRolesOf(club, clubs, guild) : { ids: club.staffRoleIds, matched: false };
-        const home: Links = { ids: club.homeChannelIds, matched: false };
-        return [
-            `**${club.name}**${club.circleId === null ? ' (no uma.moe circle)' : ''}`,
-            `Staff roles: ${linksText(roles, (id) => `<@&${id}>`)}`,
-            `Home channels: ${linksText(home, (id) => `<#${id}>`)}`,
-        ].join('\n');
+        return `**${club.name}**${club.circleId === null ? ' (no uma.moe circle)' : ''}\nStaff roles: ${linksText(roles, (id) => `<@&${id}>`)}`;
     });
     // An embed description holds 4096 characters; split across embeds if needed.
     const embeds = [];
