@@ -104,6 +104,7 @@ function periodSelect(selected: QuotaPeriod): string {
     const options: [QuotaPeriod, string][] = [
         ['DAY', 'Day'],
         ['WEEK', 'Week (1-7, 8-14, ...)'],
+        ['BIWEEKLY', '2 weeks (1-14, 15-28, ...)'],
         ['MONTH', 'Month'],
     ];
     return `<select name="period">${options
@@ -397,7 +398,7 @@ export function startDashboard(client: () => Client): () => void {
               progress
                   ? `<div class="tiles">
                    ${tile('Members', String(progress.members.length))}
-                   ${tile(progress.period === 'MONTH' ? 'Total fans' : progress.period === 'WEEK' ? 'Fans this week' : 'Fans today', compact(progress.totalFans))}
+                   ${tile({ MONTH: 'Total fans', BIWEEKLY: 'Fans these 2 weeks', WEEK: 'Fans this week', DAY: 'Fans today' }[progress.period], compact(progress.totalFans))}
                    ${tile('Behind quota', String(progress.members.filter((m) => !m.onPace).length), 'of ' + progress.members.length, progress.members.some((m) => !m.onPace) ? 'bad' : 'good')}
                    ${tile('Day', `${progress.daysElapsed}/${progress.daysInMonth}`, formatReportDate(year, month, progress.daysElapsed))}
                  </div>

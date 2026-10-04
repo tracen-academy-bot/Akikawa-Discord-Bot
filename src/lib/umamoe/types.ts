@@ -46,9 +46,11 @@ export interface UmaCircleMember {
     year?: number;
     month?: number;
     /**
-     * 31-element array of *cumulative* fan totals, one per day of the game
-     * month. Days that have not happened yet, and days before the member
-     * joined, are zero.
+     * The trainer's *lifetime* fan count per snapshot. The spec says 31
+     * elements; the live API sends 32 (checked 2026-10-04): index 0 is the
+     * month's starting value and indices 1-31 are game days. Zero means no
+     * snapshot: a day not reached yet, or a day the member was not in the
+     * circle. Members who left mid-month stay in the list, zero from then on.
      */
     daily_fans?: number[];
     last_updated?: string | null;

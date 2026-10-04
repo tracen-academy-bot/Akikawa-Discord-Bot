@@ -1,4 +1,5 @@
 import { AttachmentBuilder, type Client } from 'discord.js';
+import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
 import { backfillOnce, currentGameMonth, syncAllCircles, syncBenchmark } from './ingest';
@@ -62,13 +63,24 @@ async function isDue(now: Date): Promise<boolean> {
     return utcDayKey(record.lastRunAt) !== utcDayKey(now);
 }
 
-/** Sends a circle's report image to its configured channel, which may be a thread. */
-async function postReport(client: Client, circleId: string): Promise<void> {
-    const circle = await prisma.trackedCircle.findUnique({ where: { id: circleId } });
-    if (!circle?.reportChannelId) return;
+/** A rendered report and its behind-quota alert, ready to send anywhere. */
+export interface CircleReport {
+    image: AttachmentBuilder;
+    /** Null when nobody is behind. */
+    alert: { content: string; users: string[] } | null;
+    behindCount: number;
+}
 
+/**
+ * Renders a circle's report image and builds its alert. Alerts name the
+ * trainers who are behind, and tag them where a Discord link exists, so the
+ * message is actionable rather than just informative.
+ *
+ * @returns Null when nothing has been ingested for the current month.
+ */
+export async function buildCircleReport(circle: TrackedCircle): Promise<CircleReport | null> {
     const progress = await currentCircleProgress(circle);
-    if (!progress) return;
+    if (!progress) return null;
 
     const { year, month } = currentGameMonth();
     const buffer = await renderFanReport(progress, {
@@ -77,20 +89,11 @@ async function postReport(client: Client, circleId: string): Promise<void> {
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, progress.daysElapsed),
     });
+    const image = new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` });
 
-    const channel = await client.channels.fetch(circle.reportChannelId);
-    if (!channel?.isTextBased() || !('send' in channel)) return;
-
-    await channel.send({
-        files: [new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` })],
-    });
-
-    if (!circle.alertChannelId) return;
-
-    // Alerts name the trainers who are behind, and tag them where a Discord
-    // link exists, so the message is actionable rather than just informative.
-    const behind = progress.members.filter((m) => !m.onPace).slice(0, ALERT_LIMIT);
-    if (behind.length === 0) return;
+    const allBehind = progress.members.filter((m) => !m.onPace);
+    const behind = allBehind.slice(0, ALERT_LIMIT);
+    if (behind.length === 0) return { image, alert: null, behindCount: 0 };
 
     const links = await prisma.trainerLink.findMany({
         where: { guildId: circle.guildId, viewerId: { in: behind.map((m) => BigInt(m.viewerId)) } },
@@ -103,16 +106,54 @@ async function postReport(client: Client, circleId: string): Promise<void> {
         return `${who} — behind by **${formatFans(m.behind)}**, needs **${formatFans(m.needPerDay ?? 0)}**/day`;
     });
 
-    const alertChannel = await client.channels.fetch(circle.alertChannelId);
-    if (!alertChannel?.isTextBased() || !('send' in alertChannel)) return;
+    return {
+        image,
+        behindCount: allBehind.length,
+        alert: {
+            content:
+                `**${circle.name}** — ${allBehind.length} trainer${allBehind.length === 1 ? '' : 's'} behind quota ` +
+                `(${describeQuota(progress.quota, progress.period)} · ${progress.windowLabel})\n` +
+                lines.join('\n'),
+            users: [...mentionByViewer.values()],
+        },
+    };
+}
 
-    await alertChannel.send({
-        content:
-            `**${circle.name}** — ${behind.length} trainer${behind.length === 1 ? '' : 's'} behind quota ` +
-            `(${describeQuota(progress.quota, progress.period)} · ${progress.windowLabel})\n` +
-            lines.join('\n'),
-        allowedMentions: { users: [...mentionByViewer.values()] },
-    });
+/** Sends a message to a channel or thread by ID; false when it cannot be posted to. */
+async function sendTo(client: Client, channelId: string, message: Parameters<SendableChannel['send']>[0]): Promise<boolean> {
+    const channel = await client.channels.fetch(channelId);
+    if (!channel?.isTextBased() || !('send' in channel)) return false;
+    await channel.send(message);
+    return true;
+}
+
+type SendableChannel = Extract<NonNullable<Awaited<ReturnType<Client['channels']['fetch']>>>, { send: unknown }>;
+
+/**
+ * Sends a circle's report image to its configured report channel, and the
+ * alert to its alert channel when anyone is behind. Used by the daily job and
+ * by `/fans check`.
+ *
+ * @returns What was posted, or null when the circle has no report channel or
+ *          no data this month.
+ */
+export async function postReport(client: Client, circleId: string): Promise<{ behindCount: number; alerted: boolean } | null> {
+    const circle = await prisma.trackedCircle.findUnique({ where: { id: circleId } });
+    if (!circle?.reportChannelId) return null;
+
+    const report = await buildCircleReport(circle);
+    if (!report) return null;
+
+    if (!(await sendTo(client, circle.reportChannelId, { files: [report.image] }))) return null;
+
+    let alerted = false;
+    if (circle.alertChannelId && report.alert) {
+        alerted = await sendTo(client, circle.alertChannelId, {
+            content: report.alert.content,
+            allowedMentions: { users: report.alert.users },
+        });
+    }
+    return { behindCount: report.behindCount, alerted };
 }
 
 /** Runs the sync and posts reports. Exported so `/fans circle sync` can reuse it. */

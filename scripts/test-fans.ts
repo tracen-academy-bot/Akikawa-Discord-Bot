@@ -98,6 +98,19 @@ async function main() {
         });
     }
 
+    // A third member left after game day 5: their rows stop there. They must
+    // not appear anywhere, so every figure below covers only the two above.
+    for (let stored = 1; stored <= 6; stored += 1) {
+        await prisma.fanSnapshot.create({
+            data: {
+                trackedCircleId: circle.id, viewerId: BigInt(3), trainerName: 'Leaver',
+                year: YEAR, month: MONTH, day: stored, cumulativeFans: BigInt(BASE + 50_000_000 * stored),
+            },
+        });
+    }
+    check('a member who left has no trainer report',
+        await buildTrainerReport(circle, BigInt(3), 7, null, { year: YEAR, month: MONTH }), null);
+
     // ── Read back as circle progress ──────────────────────────────────────────
     const progress = await loadCircleProgress(circle, YEAR, MONTH);
     if (!progress) throw new Error('loadCircleProgress returned null');
@@ -105,7 +118,7 @@ async function main() {
     check('days elapsed from snapshots', progress.daysElapsed, 10);
     check('days in September', progress.daysInMonth, 30);
     check('quota per day floored', progress.quotaPerDay, 2_666_666);
-    check('two members loaded', progress.members.length, 2);
+    check('two members loaded; the leaver is dropped', progress.members.length, 2);
 
     // Steady ends on 30.0M, the faller on 27.5M: the faller's early lead does
     // not survive five days at a tenth of the pace.
@@ -143,15 +156,25 @@ async function main() {
     check('goal covers exactly the plotted days', report.goal, 2_666_666 * 7);
     check('trainer name from snapshot', report.trainerName, 'ハルウララ');
 
-    // ── Gap handling: a missed sync must read as a zero-gain day ──────────────
-    await prisma.fanSnapshot.deleteMany({
-        // Game day 9 is stored day 10 (stored day 1 is the starting value).
-        where: { trackedCircleId: circle.id, viewerId: BigInt(1), day: 10 },
-    });
-    const gapped = await buildTrainerReport(circle, BigInt(1), 4, null, { year: YEAR, month: MONTH });
-    check('missing day reads as zero gain, not a spike',
-        gapped?.dailyGains.map((d) => d.gain),
+    // ── Gap handling ──────────────────────────────────────────────────────────
+    // Game day 9 is stored day 10 (stored day 1 is the starting value).
+    // A day the whole circle is missing is a skipped scrape: it reads as a
+    // zero-gain day and the next snapshot catches up, rather than a drop.
+    await prisma.fanSnapshot.deleteMany({ where: { trackedCircleId: circle.id, day: 10 } });
+    const skipped = await buildTrainerReport(circle, BigInt(1), 4, null, { year: YEAR, month: MONTH });
+    check('a scrape the whole circle missed reads as zero gain, then catches up',
+        skipped?.dailyGains.map((d) => d.gain),
         [3_000_000, 3_000_000, 0, 6_000_000]);
+
+    // A day only this member is missing means they were out of the circle.
+    // Nothing earned across the gap counts; counting restarts on their return.
+    await prisma.fanSnapshot.create({
+        data: { trackedCircleId: circle.id, viewerId: BigInt(2), year: YEAR, month: MONTH, day: 10, cumulativeFans: BigInt(BASE + 7 + faller[8]!) },
+    });
+    const absent = await buildTrainerReport(circle, BigInt(1), 4, null, { year: YEAR, month: MONTH });
+    check('fans earned while out of the circle do not count',
+        absent?.dailyGains.map((d) => d.gain),
+        [3_000_000, 3_000_000, 0, 0]);
 
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.$disconnect();

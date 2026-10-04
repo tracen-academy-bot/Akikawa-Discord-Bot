@@ -4,6 +4,62 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — /fans check and /fans me
+
+Asked for an on-demand quota check like another bot's `/force_check`, plus
+a personal version. `/fans check` (Club Managers) syncs the circle from
+uma.moe, then posts the report image and the behind-quota alert exactly as
+the daily job does: to the configured channels with a private confirmation,
+or into the current channel when none is set. If the sync fails or no key
+is set, it reports from stored data and says so. To share that path, the
+scheduler's `postReport` was split into `buildCircleReport` (render and
+alert text) and the posting itself. The alert now gives the true number of
+trainers behind rather than the number listed, which is capped at ten.
+
+`/fans me` shows the caller's own window total, expectation, status, rank
+among current members, need per day and projection, privately. A trainer who
+has left is told they are not a current member.
+
+A bare quota under 1,000 was briefly going to be refused as a probable
+missing "M" (Primrose's quota is stored as 90). Dropped before shipping:
+quotas are taken literally, and some circles deliberately use tiny quotas
+for one-fan checks. No code path drops a typed suffix; Primrose was saved as
+"90" and needs re-entering as 90M.
+
+---
+
+## 2026-10-04 — Leavers no longer count; fans count only while in the circle; biweekly quotas
+
+People who had left a circle were still in its report. uma.moe keeps a leaver
+in that month's member list with zeros from the day they left, and the bot
+never deleted the rows it had already stored, so every leaver kept their
+partial month in the table, the circle total and the circle target. A data
+probe of 30 top circles' September payloads confirmed the shape (leavers
+trailing zeros, joiners leading zeros, no mid-month gap shared by a whole
+circle) and showed two things the spec does not: `daily_fans` has 32
+entries, not 31, and a member can carry negative values in a circle they are
+not really in. Negatives were already dropped at ingest.
+
+`metrics.ts` now works out membership from the snapshots themselves.
+`circleSnapshots` marks which indices the circle has at all, and
+`isCurrentMember` drops anyone without a value at the latest one, before any
+figure is computed. `monthGains` takes that mask and counts a day only when
+the member had a snapshot at both ends of it, so a joiner counts from
+joining, a returning member loses the gap and anything earned during it, and
+a gap the whole circle shares still reads as a skipped scrape that catches
+up. Quota days follow the same mask. The trainer report returns nothing for
+a leaver, and the benchmark's club line uses current members only. For
+members present all month nothing changes, so the 24 reference rows still
+reproduce. Past months follow the same rule, so a September report no longer
+lists people who left during September.
+
+A BIWEEKLY quota period joins DAY, WEEK and MONTH: days 1-14, 15-28, then a
+2-3 day stub whose goal scales, the same restart-on-the-1st rule as weeks.
+The enum migration only adds a value. Windows are labelled by the weekly
+weeks they cover, so the stub reads "Week 5 · days 29–31" in both modes.
+
+---
+
 ## 2026-10-01 — Fans this month were lifetime totals; hourly sync and history backfill
 
 Production showed fish@duck with 1,122,234,894 fans on game day 1, while

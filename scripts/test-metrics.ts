@@ -9,7 +9,15 @@
  *
  *   npm run test:metrics
  */
-import { computeCircleProgress, monthGains, periodWindow, type MemberSeries } from '../src/lib/fans/metrics';
+import {
+    circleSnapshots,
+    computeCircleProgress,
+    describeQuota,
+    isCurrentMember,
+    monthGains,
+    periodWindow,
+    type MemberSeries,
+} from '../src/lib/fans/metrics';
 
 const DAYS_IN_MONTH = 30;
 const DAYS_ELAPSED = 14;
@@ -169,6 +177,92 @@ function periodChecks() {
 }
 
 /**
+ * Biweekly: days 1-14, 15-28, then a short stub to month end, restarting on
+ * the 1st like weeks do. The stub's goal scales by its length.
+ */
+function biweeklyChecks() {
+    const w = (day: number, dim: number) => {
+        const r = periodWindow('BIWEEKLY', day, dim);
+        return `${r.start}-${r.end}#${r.index}`;
+    };
+    check('biweekly 1 is days 1-14', w(1, 31), '1-14#1');
+    check('day 14 closes biweekly 1', w(14, 31), '1-14#1');
+    check('day 15 opens biweekly 2', w(15, 31), '15-28#2');
+    check('31-day month ends on a 3-day stub', w(30, 31), '29-31#3');
+    check('30-day month ends on a 2-day stub', w(29, 30), '29-30#3');
+    check('28-day February is exactly two', w(28, 28), '15-28#2');
+    check('biweekly quota text', describeQuota(160_000_000, 'BIWEEKLY'), '160.0M per 2 weeks');
+
+    // Day 16 of 30, 10M/day against 140M per two weeks: window 15-28.
+    const mid = computeCircleProgress([steady(1, 10_000_000, 16)], { quota: 140_000_000, period: 'BIWEEKLY', daysInMonth: 30 });
+    const mm = mid.members[0]!;
+    check('biweekly window', `${mid.windowStart}-${mid.windowEnd}`, '15-28');
+    check('biweekly label names its weeks', mid.windowLabel, 'Weeks 3–4 · days 15–28');
+    check('biweekly per-day rate', mid.quotaPerDay, 10_000_000);
+    check('biweekly goal for a full window', mid.effectiveQuota, 140_000_000);
+    check('biweekly total counts only this window', mm.total, 20_000_000);
+    check('biweekly expected covers 2 days', mm.expected, 20_000_000);
+    check('biweekly days remaining', mid.daysRemaining, 13);
+
+    // Stub: day 30 of 31, 9M/day. Days 29-31 owe 3/14 of 140M = 30M.
+    const stub = computeCircleProgress([steady(1, 9_000_000, 30)], { quota: 140_000_000, period: 'BIWEEKLY', daysInMonth: 31 });
+    check('biweekly stub label', stub.windowLabel, 'Week 5 · days 29–31');
+    check('biweekly stub goal scales by days', stub.effectiveQuota, 30_000_000);
+    check('biweekly stub total', stub.members[0]!.total, 18_000_000);
+    check('biweekly stub behind', stub.members[0]!.behind, 2_000_000);
+}
+
+/**
+ * Only current members count, and only fans earned while in the circle.
+ * uma.moe scrapes a whole circle at once, so a value missing for one member
+ * on a day others have means that member was out of the circle.
+ */
+function membershipChecks() {
+    const opts = { quota: 300_000_000, daysInMonth: 30 };
+
+    // Member 2 left after game day 6; member 1 is still in on day 12.
+    const left = computeCircleProgress([steady(1, 10_000_000, 12), steady(2, 10_000_000, 6)], opts);
+    check('a leaver is dropped', left.members.length, 1);
+    check('a leaver is not in the list', left.members.some((m) => m.viewerId === 2), false);
+    check('a leaver adds nothing to the circle total', left.totalFans, 120_000_000);
+    check('a leaver adds nothing to the circle target', left.quotaTarget, left.effectiveQuota);
+    check('days elapsed still comes from current members', left.daysElapsed, 12);
+
+    // Member 2 joined on game day 10: only fans from then on count.
+    const joined = computeCircleProgress([steady(1, 10_000_000, 12), steady(2, 10_000_000, 12, 10)], opts);
+    const joiner = joined.members.find((m) => m.viewerId === 2)!;
+    check('a joiner counts only fans since joining', joiner.total, 30_000_000);
+    check('a joiner owes quota only since joining', joiner.dataDays, 3);
+
+    // Member 2 left after day 4, was out for indices 5-7 while earning 100M
+    // elsewhere, and came back at index 8. The gap and the 100M do not count.
+    const away = steady(2, 10_000_000, 12);
+    for (let i = 5; i <= 7; i += 1) away.dailyFans[i] = 0;
+    for (let i = 8; i <= 12; i += 1) away.dailyFans[i] = away.dailyFans[i]! + 100_000_000;
+    const back = computeCircleProgress([steady(1, 10_000_000, 12), away], opts);
+    const returner = back.members.find((m) => m.viewerId === 2)!;
+    check('a returning member counts only days in the circle', returner.total, 80_000_000);
+    check('a returning member owes quota only for days in the circle', returner.dataDays, 8);
+    check('a returning member expected', returner.expected, back.quotaPerDay * 8);
+
+    // Index 6 missing for everyone is a skipped scrape, not a mass exodus.
+    const a = steady(1, 10_000_000, 12);
+    const b = steady(2, 10_000_000, 12);
+    a.dailyFans[6] = 0;
+    b.dailyFans[6] = 0;
+    const skipped = computeCircleProgress([a, b], opts);
+    check('a skipped scrape keeps everyone', skipped.members.length, 2);
+    check('a skipped scrape loses no fans', skipped.members[0]!.total, 120_000_000);
+    check('a skipped scrape still owes quota', skipped.members[0]!.dataDays, 12);
+
+    // Building blocks.
+    check('no snapshots keeps everyone (nobody)', isCurrentMember([], circleSnapshots([])), true);
+    const carried = monthGains([5, 6, 0, 8]);
+    check('without circle context a hole carries forward', carried.gains.join(','), '1,1,3');
+    check('without circle context a hole is still in the circle', carried.inCircle.join(','), 'true,true,true');
+}
+
+/**
  * uma.moe sends lifetime fan counts. Production once reported fish@duck at
  * 1,122,234,894 "fans this month" on day 1, while uma.moe's own page showed
  * a monthly gain of +258,774. These pin the month to its starting snapshot.
@@ -242,6 +336,8 @@ function main() {
     console.log(`\n${rowsOk}/${ROWS.length} reference rows reproduced exactly.`);
 
     periodChecks();
+    biweeklyChecks();
+    membershipChecks();
     lifetimeChecks();
     console.log(`${pass} assertions passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);

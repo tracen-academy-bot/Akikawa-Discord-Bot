@@ -8,8 +8,11 @@ verified.
 `GET /api/v4/circles?circle_id=…` returns each member with:
 
 ```
-daily_fans: int64[31]   // the trainer's LIFETIME fan count, one snapshot per day
+daily_fans: int64[32]   // the trainer's LIFETIME fan count, one snapshot per day
 ```
+
+The spec says 31 elements; the live API sends 32 (index 0 plus up to 31 game
+days, checked 2026-10-04).
 
 Corrected 2026-10-01: these are lifetime counts, not counts that restart each
 month. A trainer with 1.1B fans shows about 1.1B on every day. The game month
@@ -112,6 +115,58 @@ those members still divides by the full span, while this bot divides by the
 days owed, so a late joiner's average here can read slightly higher than the
 reference's. Members present all month are unaffected.
 
+## Membership: leavers and joiners (added 2026-10-04)
+
+Only current members count, and only for days they spent in the circle.
+
+uma.moe keeps a member who left in that month's list, with zeros from the day
+they left (checked against 30 top circles' September data on 2026-10-04). A
+member who joined mid-month has zeros before joining. Values that are not
+positive (the API sometimes sends negatives for someone who is really in
+another circle) are never stored, so they read as zeros too. uma.moe scrapes a
+circle as a whole, so a snapshot index the circle has at all is one where
+every current member has a value.
+
+That gives the rules in `metrics.ts`:
+
+- **Leavers are dropped entirely.** Let $L$ be the latest index any member
+  has a value for. A member with no value at $L$ is not a current member and
+  appears nowhere: not in the table, the circle total, the circle target, the
+  trainer report or the benchmark's club line. For a past month, $L$ is the
+  month's last snapshot, so someone who left before month end is dropped
+  from that month too.
+- **Joiners count from joining.** Their first snapshot is the baseline, so
+  fans earned before they joined never count, and they owe quota from their
+  first full day in the circle.
+- **A gap only one member has is time outside the circle.** Nothing earned
+  across it counts, they owe no quota for it, and if they come back their
+  first snapshot after returning is a new baseline.
+- **A gap the whole circle has is a skipped scrape.** The previous value
+  carries forward and the next snapshot catches up. None were seen in the
+  September scan, but the rule costs nothing.
+
+The probe (31 circles, September and October) found 83 one-member gaps, all
+in three high-churn circles, and the ones cross-checked were members hopping
+to another circle and back, not missed scrapes. So treating a one-member gap
+as time outside the circle is correct, not merely cautious. In the user's
+circle, Primrose (130718412), the rule leaves exactly 27 current members on
+3 October, matching uma.moe's `member_count`.
+
+**The last day of a month is intentionally short.** A month's last index
+often differs from `next_month_start`, which equals the next month's index 0
+(they matched for 273 of 908 September rows). The game closes monthly counts
+some hours before the next month opens (about 5-6 hours, per the club; not
+checked against the API), so fans earned in that gap belong to neither
+month. The last index is the month's final count, and the bot ends the month
+there on purpose. Do not "fix" this by ending a month at `next_month_start`.
+
+Formally, member $i$ is in the circle on game day $d$ when they have a value at
+both index $d-1$ and index $d$ (an index nobody has counts as having one).
+$T_i$ is the sum of $\text{daily\_fans}[d] - \text{daily\_fans}[d-1]$ over
+those days, and $d_i$ counts them. For someone present all month that is the
+same $T_i = \text{daily\_fans}[e] - \text{daily\_fans}[s_i]$ and
+$d_i = e - s_i$ as above, so the reference rows are unchanged.
+
 ## Quota periods (added 2026-10-01)
 
 A circle's quota applies to a period, set with `/fans circle add|config period:`
@@ -123,12 +178,16 @@ still reproduce exactly).
 | Period | Window | Per-day rate | Goal for the window |
 | --- | --- | --- | --- |
 | MONTH | days 1 to month end | `floor(quota / daysInMonth)` | rate × days in month |
+| BIWEEKLY | days 1-14, 15-28, 29 to month end | `floor(quota / 14)` | rate × days in window |
 | WEEK | days 1-7, 8-14, 15-21, 22-28, 29 to month end | `floor(quota / 7)` | rate × days in window |
 | DAY | the latest day with data | `quota` | `quota` |
 
 Weeks restart on the 1st of every game month, so the last week is 2-3 days
 long (0 in a 28-day February) and its goal scales: a 3-day week owes 3/7 of
-the weekly quota.
+the weekly quota. Biweekly windows follow the same rule (added 2026-10-04):
+the stub at month end is 2-3 days and owes 2/14 or 3/14 of the quota. Its
+label names the weekly weeks it covers ("Weeks 3–4 · days 15–28", and
+"Week 5 · days 29–31" for the stub).
 
 Inside the window, every figure is window-relative: `total` is fans earned
 since the window opened, `expected` counts days in the window from the

@@ -9,20 +9,28 @@
  * All figures are whole fans. Fractions are floored, never rounded, so a
  * trainer is never told they are on pace when they are one fan short.
  *
- * A circle's quota applies to a *period*: a day, a week, or the whole month.
- * Progress is measured inside the current window of that period:
+ * A circle's quota applies to a *period*: a day, a week, two weeks, or the
+ * whole month. Progress is measured inside the current window of that period:
  *
- *   MONTH  days 1 to month end (the original, reference-verified behaviour)
- *   WEEK   days 1-7, 8-14, 15-21, 22-28, then 29 to month end. Weeks restart
- *          on the 1st, so the last one is short; its goal scales by its
- *          length (a 3-day week owes 3/7 of the weekly quota).
- *   DAY    the latest day with data
+ *   MONTH     days 1 to month end (the original, reference-verified behaviour)
+ *   BIWEEKLY  days 1-14, 15-28, then 29 to month end. Same rule as WEEK: the
+ *             blocks restart on the 1st and the short last one scales its goal
+ *             (a 3-day stub owes 3/14 of the quota).
+ *   WEEK      days 1-7, 8-14, 15-21, 22-28, then 29 to month end. Weeks restart
+ *             on the 1st, so the last one is short; its goal scales by its
+ *             length (a 3-day week owes 3/7 of the weekly quota).
+ *   DAY       the latest day with data
  *
- * In MONTH mode every figure is identical to the pre-period code.
+ * Only current members count. A member with no snapshot on the circle's latest
+ * snapshot has left and is dropped entirely, and a member's fans count only
+ * while they are in the circle. See `currentMembers` and `monthGains`.
+ *
+ * In MONTH mode, for a circle nobody has left, every figure is identical to the
+ * pre-period code.
  */
 
 /** Window a quota is measured over. Mirrors the Prisma `QuotaPeriod` enum. */
-export type QuotaPeriod = 'DAY' | 'WEEK' | 'MONTH';
+export type QuotaPeriod = 'DAY' | 'WEEK' | 'BIWEEKLY' | 'MONTH';
 
 /** A member's daily fan figures for one game month. */
 export interface MemberSeries {
@@ -33,7 +41,7 @@ export interface MemberSeries {
      * one entry per snapshot. Index 0 is the month's starting value (taken at
      * the game-month start, the 2nd JST), and index i is that plus everything
      * earned over the first i game days. Zero means no snapshot: a day not yet
-     * reached, or before the member joined. See `monthGains`.
+     * reached, or a day the member was not in the circle. See `monthGains`.
      */
     dailyFans: number[];
     shameScore: number | null;
@@ -55,7 +63,7 @@ export interface MemberProgress {
     needPerDay: number | null;
     /** Fans gained on the most recent day. */
     latestDayGain: number;
-    /** Days in the window from this member's first day with data through the latest day. */
+    /** Days in the window, through the latest day, that this member spent in the circle. */
     dataDays: number;
     /** Days counted toward `expected`. See `QuotaOptions.quotaDaysOffset`. */
     quotaDays: number;
@@ -141,6 +149,12 @@ export interface QuotaOptions {
     quotaDaysOffset?: number;
 }
 
+/**
+ * Length of a month's `daily_fans` array: the starting snapshot plus up to 31
+ * game days. Longer arrays are not an error; JavaScript arrays grow.
+ */
+export const DAILY_FANS_LENGTH = 32;
+
 /** Days in a calendar month. `month` is 1-based. */
 export function daysInCalendarMonth(year: number, month: number): number {
     // Day 0 of the next month is the last day of this one.
@@ -167,6 +181,43 @@ export interface MonthGains {
     firstDay: number;
     /** Latest game day with a snapshot; 0 if only the starting value exists. */
     lastDay: number;
+    /**
+     * Index d-1 is true when the member was in the circle for all of game day
+     * d: they had a snapshot at its start and at its end. Only these days earn
+     * fans and owe quota.
+     */
+    inCircle: boolean[];
+}
+
+/**
+ * Which snapshot indices the circle has at all: index i is true when any
+ * member has a non-zero value there.
+ *
+ * uma.moe scrapes a whole circle at once, so a missing value on an index that
+ * other members have means that member was not in the circle at that moment,
+ * while an index nobody has is a scrape that did not happen.
+ */
+export function circleSnapshots(raws: number[][]): boolean[] {
+    const length = Math.max(0, ...raws.map((r) => r.length));
+    return Array.from({ length }, (_, i) => raws.some((r) => (r[i] ?? 0) > 0));
+}
+
+/** Latest index the circle has a snapshot for, or -1 when it has none. */
+export function latestSnapshot(scraped: boolean[]): number {
+    return scraped.lastIndexOf(true);
+}
+
+/**
+ * True when the member is in the circle as of its latest snapshot.
+ *
+ * Someone who left has no value there: uma.moe stops recording them, and the
+ * bot's stored rows for them stop at the day they left. Either way they are
+ * not a current member and are not counted at all. A circle with no snapshots
+ * keeps everyone, which is nobody.
+ */
+export function isCurrentMember(raw: number[], scraped: boolean[]): boolean {
+    const latest = latestSnapshot(scraped);
+    return latest < 0 || (raw[latest] ?? 0) > 0;
 }
 
 /**
@@ -176,14 +227,23 @@ export interface MonthGains {
  * each month: a trainer with 1.1B lifetime fans shows ~1.1B on every day.
  * The first snapshot of the month (index 0 for a member present from the
  * start, a later index for someone who joined mid-month) is the baseline,
- * and the month's gain is the latest snapshot minus it. That is exactly
- * uma.moe's own "Monthly Gain", and it is why a mid-month joiner owes quota
- * for one day fewer than their span of snapshots.
+ * and a day's gain is the rise from one snapshot to the next. For a member
+ * present all month that totals exactly uma.moe's own "Monthly Gain"; for a
+ * mid-month joiner it counts only fans earned after joining, which is why
+ * they owe quota for one day fewer than their span of snapshots.
  *
- * A missing snapshot inside the span carries the previous value forward, so
- * a missed sync reads as a zero-gain day rather than a drop and a spike.
+ * `scraped` (from `circleSnapshots`) separates two kinds of hole:
+ *
+ *   - An index the whole circle is missing is a skipped scrape. The previous
+ *     value carries forward, so it reads as a zero-gain day rather than a drop
+ *     and a spike, and the member still counts as in the circle.
+ *   - An index only this member is missing means they were out of the circle.
+ *     Nothing earned across the gap counts; if they come back, counting
+ *     restarts from their first snapshot after returning.
+ *
+ * Without `scraped`, every hole is treated as a skipped scrape.
  */
-export function monthGains(raw: number[]): MonthGains {
+export function monthGains(raw: number[], scraped?: boolean[]): MonthGains {
     let first = -1;
     let last = -1;
     raw.forEach((v, i) => {
@@ -192,25 +252,40 @@ export function monthGains(raw: number[]): MonthGains {
             last = i;
         }
     });
-    if (first < 0) return { gains: [], firstDay: 0, lastDay: 0 };
+    if (first < 0) return { gains: [], firstDay: 0, lastDay: 0, inCircle: [] };
 
-    const base = raw[first]!;
     const gains = new Array<number>(last).fill(0);
-    let carried = base;
+    const inCircle = new Array<boolean>(last).fill(false);
+    let earned = 0;
+    // Latest value while in the circle; null after a day spent outside it.
+    let carried: number | null = raw[first]!;
     for (let i = first + 1; i <= last; i += 1) {
         const v = raw[i] ?? 0;
-        // Lifetime counts never fall; treat a lower or missing value as no gain.
-        if (v > carried) carried = v;
-        gains[i - 1] = carried - base;
+        if (v > 0) {
+            if (carried !== null) {
+                // Lifetime counts never fall; treat a lower value as no gain.
+                if (v > carried) earned += v - carried;
+                inCircle[i - 1] = true;
+                carried = Math.max(carried, v);
+            } else {
+                // Back in the circle: this snapshot is the new baseline.
+                carried = v;
+            }
+        } else if (scraped?.[i]) {
+            carried = null;
+        } else if (carried !== null) {
+            inCircle[i - 1] = true;
+        }
+        gains[i - 1] = earned;
     }
-    return { gains, firstDay: first + 1, lastDay: last };
+    return { gains, firstDay: first + 1, lastDay: last, inCircle };
 }
 
 /** One window of a period inside the game month. */
 export interface PeriodWindow {
     start: number;
     end: number;
-    /** 1-based week number in WEEK mode; 1 otherwise. */
+    /** 1-based block number in WEEK and BIWEEKLY mode; 1 otherwise. */
     index: number;
 }
 
@@ -221,29 +296,34 @@ export interface PeriodWindow {
 export function periodWindow(period: QuotaPeriod, day: number, daysInMonth: number): PeriodWindow {
     const d = Math.min(Math.max(1, day), daysInMonth);
     if (period === 'DAY') return { start: d, end: d, index: 1 };
-    if (period === 'WEEK') {
-        const index = Math.floor((d - 1) / 7) + 1;
-        const start = (index - 1) * 7 + 1;
-        return { start, end: Math.min(start + 6, daysInMonth), index };
+    if (period === 'WEEK' || period === 'BIWEEKLY') {
+        const length = periodLength(period);
+        const index = Math.floor((d - 1) / length) + 1;
+        const start = (index - 1) * length + 1;
+        return { start, end: Math.min(start + length - 1, daysInMonth), index };
     }
     return { start: 1, end: daysInMonth, index: 1 };
 }
 
+/** Full length in days of a fixed-length period. MONTH varies, so it is excluded. */
+function periodLength(period: 'DAY' | 'WEEK' | 'BIWEEKLY'): number {
+    return period === 'DAY' ? 1 : period === 'WEEK' ? 7 : 14;
+}
+
 /** Per-day rate for a quota, floored. */
 export function quotaPerDayFor(period: QuotaPeriod, quota: number, daysInMonth: number): number {
-    if (period === 'DAY') return quota;
-    if (period === 'WEEK') return Math.floor(quota / 7);
-    return Math.floor(quota / daysInMonth);
+    if (period === 'MONTH') return Math.floor(quota / daysInMonth);
+    return Math.floor(quota / periodLength(period));
 }
 
 /** Lower-case unit for a period, as in "80.0M per week". */
 export function periodUnit(period: QuotaPeriod): string {
-    return period === 'DAY' ? 'day' : period === 'WEEK' ? 'week' : 'month';
+    return { DAY: 'day', WEEK: 'week', BIWEEKLY: '2 weeks', MONTH: 'month' }[period];
 }
 
-/** "Daily" / "Weekly" / "Monthly". */
+/** "Daily" / "Weekly" / "Biweekly" / "Monthly". */
 export function periodAdjective(period: QuotaPeriod): string {
-    return period === 'DAY' ? 'Daily' : period === 'WEEK' ? 'Weekly' : 'Monthly';
+    return { DAY: 'Daily', WEEK: 'Weekly', BIWEEKLY: 'Biweekly', MONTH: 'Monthly' }[period];
 }
 
 /** e.g. "80.0M per week". */
@@ -251,14 +331,20 @@ export function describeQuota(quota: number, period: QuotaPeriod): string {
     return `${formatCompactFans(quota)} per ${periodUnit(period)}`;
 }
 
-/** Label for a window, e.g. "Week 2 · days 8–14". MONTH returns `monthName` as given. */
+/**
+ * Label for a window, e.g. "Week 2 · days 8–14" or "Weeks 3–4 · days 15–28".
+ * A biweekly window names the weekly weeks it covers, so the short stub at
+ * month end reads "Week 5 · days 29–31", the same as in WEEK mode. MONTH
+ * returns `monthName` as given.
+ */
 export function windowLabel(period: QuotaPeriod, window: PeriodWindow, monthName = 'Month'): string {
     if (period === 'DAY') return `Day ${window.start}`;
-    if (period === 'WEEK') {
-        const span = window.start === window.end ? `day ${window.start}` : `days ${window.start}–${window.end}`;
-        return `Week ${window.index} · ${span}`;
-    }
-    return monthName;
+    if (period === 'MONTH') return monthName;
+    const span = window.start === window.end ? `day ${window.start}` : `days ${window.start}–${window.end}`;
+    const firstWeek = Math.floor((window.start - 1) / 7) + 1;
+    const lastWeek = Math.floor((window.end - 1) / 7) + 1;
+    const weeks = firstWeek === lastWeek ? `Week ${firstWeek}` : `Weeks ${firstWeek}–${lastWeek}`;
+    return `${weeks} · ${span}`;
 }
 
 /**
@@ -268,14 +354,21 @@ export function windowLabel(period: QuotaPeriod, window: PeriodWindow, monthName
  * the latest day any member has a total for. That keeps the report consistent
  * with whatever uma.moe has actually published, instead of showing an empty
  * column for a day that has not been ingested yet.
+ *
+ * Members who have left (see `isCurrentMember`) are dropped before anything is
+ * computed: they appear nowhere and add nothing to the circle's totals.
  */
 export function computeCircleProgress(series: MemberSeries[], options: QuotaOptions): CircleProgress {
     const { quota, daysInMonth } = options;
     const period = options.period ?? 'MONTH';
     const quotaDaysOffset = options.quotaDaysOffset ?? 0;
 
-    // Everything below works on fans earned this month, not lifetime totals.
-    const month = new Map(series.map((m) => [m.viewerId, monthGains(m.dailyFans)]));
+    // Only people in the circle now count; leavers vanish from every figure.
+    const scraped = circleSnapshots(series.map((m) => m.dailyFans));
+    const current = series.filter((m) => isCurrentMember(m.dailyFans, scraped));
+
+    // Everything below works on fans earned in the circle, not lifetime totals.
+    const month = new Map(current.map((m) => [m.viewerId, monthGains(m.dailyFans, scraped)]));
     const gainsOf = (m: MemberSeries) => month.get(m.viewerId)!;
 
     // Game days elapsed: the latest day any member has a snapshot for. Zero on
@@ -299,14 +392,17 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
     const windowTotal = (g: MonthGains, day: number) =>
         Math.max(0, cumulativeAt(g, day) - cumulativeAt(g, window.start - 1));
 
-    const members = series.map<MemberProgress>((member) => {
+    const members = current.map<MemberProgress>((member) => {
         const g = gainsOf(member);
         const total = windowTotal(g, daysElapsed);
 
-        // A member who joined mid-window only owes quota from their first day.
+        // Quota is owed only for days spent in the circle: a mid-window joiner
+        // from their first full day, and a returning member not for the gap.
         const firstDay = g.firstDay;
-        const countFrom = Math.max(window.start, firstDay);
-        const dataDays = firstDay === 0 || countFrom > daysElapsed ? 0 : Math.max(1, daysElapsed - countFrom + 1);
+        let dataDays = 0;
+        for (let day = window.start; day <= daysElapsed; day += 1) {
+            if (g.inCircle[day - 1]) dataDays += 1;
+        }
         const quotaDays = Math.max(0, dataDays - quotaDaysOffset);
 
         const expected = quotaPerDay * quotaDays;
@@ -359,7 +455,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
     // day was ingested late. None on a window's first day.
     const previousRanks = new Map<number, number>();
     if (daysElapsed - 1 >= window.start) {
-        const yesterday = series
+        const yesterday = current
             .map((m) => ({ viewerId: m.viewerId, total: windowTotal(gainsOf(m), daysElapsed - 1) }))
             .filter((m) => m.total > 0)
             .sort((a, b) => b.total - a.total);

@@ -225,6 +225,14 @@ async function main() {
     check('omitting the period is accepted', omitted.status, 302);
     const afterOmitted = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
     check('omitting the period keeps the current one', afterOmitted?.quotaPeriod, 'WEEK');
+    const biweekly = await post(`/circles/${circle.id}`, { quota: '150M', period: 'BIWEEKLY', active: 'true', _csrf: officerCsrf }, officer.cookie);
+    check('biweekly is accepted', biweekly.status, 302);
+    const afterBiweekly = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
+    check('period was set to biweekly', afterBiweekly?.quotaPeriod, 'BIWEEKLY');
+    const biweeklyPage = await get(`/circles/${circle.id}`, officer.cookie);
+    check('circle page states the biweekly quota', biweeklyPage.body.includes('150.0M per 2 weeks'), true);
+    check('settings form offers biweekly, selected', biweeklyPage.body.includes('<option value="BIWEEKLY" selected>'), true);
+    await post(`/circles/${circle.id}`, { quota: '70M', period: 'WEEK', active: 'true', _csrf: officerCsrf }, officer.cookie);
 
     // ── Trainer links, and the open-redirect guard ────────────────────────────
     const link = await post(

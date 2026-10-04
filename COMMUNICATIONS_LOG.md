@@ -4,6 +4,26 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-04 — Leavers dropped; late-joiner question mostly closed
+
+Asked: people who left should not count at all, and fans should count only
+from when someone joins. Leavers are now removed from every figure, and a
+member earns (and owes quota) only on days they were in the circle.
+
+A read-only probe of the live API (31 circles including Primrose, using an
+API key held by the cloud environment) settled most of the 2026-09-16 open
+question: a joiner's values before joining are zero or negative (a count
+recorded while they were in another circle), never positive, so the first
+positive snapshot is the join and nothing earlier is counted.
+`previous_circle_id` is unreliable for mid-month moves and is not used.
+
+A month's last index is lower than `next_month_start` for most members. The
+user confirmed this is expected: the game closes monthly counts some hours
+before the next month opens, so a month ends at its last index, not at
+`next_month_start` (see docs/quota-math.md).
+
+---
+
 ## 2026-09-16 — Open question logged for the next session
 
 `docs/quota-math.md` records one unresolved detail in the quota maths. For
