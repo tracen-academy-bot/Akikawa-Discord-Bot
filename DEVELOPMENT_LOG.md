@@ -4,6 +4,33 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — Club form: expected rank, the real quota, headcount from uma.moe
+
+After the merge a club carried two copies of one number: the old club "fan
+count" and the fan-tracking quota. The edit form showed the empty fan count
+while Primrose's quota was 90M, so it looked as if it had not loaded the
+club's values. The form now edits the quota itself, pre-filled exactly (90M
+shows as "90M", so saving unchanged keeps the same number), with the quota
+periods `/fans` uses. Saving clears the old fan count so it never resurfaces;
+it is only shown, and pre-filled, for a club that never had a quota.
+`/club fancount` sets the quota too (in millions, as its option says;
+monthly unless a period is given). Quotas typed in the form are taken
+literally, like everywhere else.
+
+Headcount is no longer typed in. For a tracked club it is uma.moe's current
+members by the same rule the reports use, so it matches their member count;
+for an untracked club it shows as a dash. The form field and `/club
+headcount` are gone. The stored `headcount` column is left in place unused.
+
+"Rank" is now "Expected rank" in the form, `/club create` and the directory,
+so it is not confused with uma.moe's monthly rank.
+
+A Casual rank sits below B (`ClubRank` gains `CASUAL`, an additive enum
+migration). There is no badge artwork for it, so it uses the drawn badge, a
+muted "C".
+
+---
+
 ## 2026-10-04 — Clubs and tracked circles are one table
 
 To the club, a club and its uma.moe circle are the same thing, but the bot

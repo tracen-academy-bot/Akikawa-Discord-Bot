@@ -1,6 +1,7 @@
 import { createCanvas } from "@napi-rs/canvas";
 import { roundRect, drawRankBadge, drawClubIcon, RANK_COLORS } from './canvasUtils';
-import type { TrackedCircle as Club, ClubMember } from '@prisma/client';
+import type { ClubMember } from '@prisma/client';
+import type { ClubSummary } from './renderClubList';
 import { font } from './fonts';
 import { THEME } from './theme';
 
@@ -9,7 +10,7 @@ interface StaffRow {
     name: string;
 }
 
-export async function renderClubView(club: Club & { members: ClubMember[] }, staffNames: Map<string, string> ): Promise<Buffer> {
+export async function renderClubView(club: ClubSummary & { members: ClubMember[] }, staffNames: Map<string, string> ): Promise<Buffer> {
     const rows: StaffRow[] = club.members.slice().sort((a, b) => (a.role === b.role ? 0 : a.role === 'TRAINER' ? -1 : 1))
         .map((m) => ({ role: m.role === 'TRAINER' ? 'Trainer' : 'Assistant', name: staffNames.get(m.discordUserId) ?? m.discordUserId }));
     
@@ -42,11 +43,8 @@ export async function renderClubView(club: Club & { members: ClubMember[] }, sta
 
     ctx.font = font('22px');
     ctx.fillStyle = THEME.muted;
-    const fanCountText =
-        club.fanCountAmount != null && club.fanCountPeriod
-            ? `${club.fanCountAmount}M / ${club.fanCountPeriod.toLowerCase()}`
-            : 'Not set';
-    ctx.fillText(`Headcount: ${club.headcount}/30  •  Fan Count: ${fanCountText}`, 135, 112);
+    const headcountText = club.headcount === null ? '—' : `${club.headcount}/30`;
+    ctx.fillText(`Headcount: ${headcountText}  •  Quota: ${club.quotaText}`, 135, 112);
 
     // Rank badge, top-right
     const badgeX = width - 130, badgeR = 46;
