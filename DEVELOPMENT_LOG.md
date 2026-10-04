@@ -4,6 +4,18 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — /uma-id
+
+Members did not find `/fans link`, which is what `/fans check me`, `/fans
+trainer` and alert tags rely on. `/uma-id id:` is a top-level shortcut for it;
+with no ID it shows the current link. It is not called "register" or
+"trainer", since Trainer is a club staff role here. Both commands share
+`linkTrainer`, so the rules are identical (Club Managers link others; one
+viewer ID per member). Messages that pointed at `/fans link` now point at
+`/uma-id`.
+
+---
+
 ## 2026-10-04 — club and me run in any circle channel; /club fancount takes ordinary amounts
 
 `/fans check club` and `me` only ran in an actual thread (plus #staff-commands

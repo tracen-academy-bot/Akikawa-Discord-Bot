@@ -61,6 +61,8 @@ interface FakeOptions {
     officer?: boolean;
     circle?: string;
     club?: string;
+    /** `/uma-id id:` */
+    id?: string;
     /** Channel the command runs in; a thread unless `inThread` is false. */
     channel?: string;
     inThread?: boolean;
@@ -81,7 +83,8 @@ function fakeInteraction(opts: FakeOptions, log: Sent[]) {
         options: {
             getSubcommandGroup: () => opts.group ?? null,
             getSubcommand: () => opts.sub,
-            getString: (name: string) => (name === 'circle' ? opts.circle ?? null : name === 'club' ? opts.club ?? null : null),
+            getString: (name: string) =>
+                name === 'circle' ? opts.circle ?? null : name === 'club' ? opts.club ?? null : name === 'id' ? opts.id ?? null : null,
             getBoolean: () => null,
             getChannel: () => null,
             getUser: () => null,
@@ -208,9 +211,26 @@ async function main() {
     check("club works in a circle's plain report channel", clubPlain.find((s) => s.kind === 'edit')?.content?.includes('Otherrose'), true);
     await prisma.trackedCircle.update({ where: { id: other.id }, data: { reportChannelId: null, alertChannelId: null } });
     check('me without a link explains how to link',
-        desc(await run({ group: 'check', sub: 'me', userId: 'u-nobody', channel: 't-check' }))?.includes('/fans link'), true);
+        desc(await run({ group: 'check', sub: 'me', userId: 'u-nobody', channel: 't-check' }))?.includes('/uma-id'), true);
     check('me for a leaver says not a current member',
         desc(await run({ group: 'check', sub: 'me', userId: 'u-gone', channel: 't-check' }))?.includes('not a current member'), true);
+
+    // ── /uma-id ───────────────────────────────────────────────────────────────
+    const umaId = await import('../src/commands/umaId');
+    const runUma = async (opts: FakeOptions) => {
+        const log: Sent[] = [];
+        await umaId.execute(fakeInteraction(opts, log) as never);
+        return log;
+    };
+    check('uma-id with no ID says you are not linked',
+        desc(await runUma({ sub: '', userId: 'u-new' }))?.startsWith('You are not linked yet.'), true);
+    const linked = await runUma({ sub: '', userId: 'u-new', id: ' 555 ' });
+    check('uma-id links you', linked[0]?.embeds?.[0]?.description, '<@u-new> is now linked to trainer `555`.');
+    check('uma-id stores the link', String((await prisma.trainerLink.findUnique({ where: { guildId_discordUserId: { guildId: GUILD, discordUserId: 'u-new' } } }))?.viewerId), '555');
+    check('uma-id with no ID shows your link', desc(await runUma({ sub: '', userId: 'u-new' }))?.includes('`555`'), true);
+    check('uma-id refuses an ID someone else has',
+        desc(await runUma({ sub: '', userId: 'u-other', id: '555' })), 'That trainer ID is already linked to <@u-new>.');
+    check('uma-id refuses a non-number', desc(await runUma({ sub: '', userId: 'u-other', id: 'abc' }))?.startsWith('A viewer ID is a number'), true);
 
     // ── /fans check club ──────────────────────────────────────────────────────
     const unlinkedClub = await run({ group: 'check', sub: 'club', userId: 'u-trainer', channel: 't-check' });

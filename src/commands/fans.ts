@@ -7,6 +7,7 @@ import {
     GuildMember,
     MessageFlags,
     type TextBasedChannel,
+    type User,
 } from 'discord.js';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
@@ -675,7 +676,7 @@ async function handleCheckMe(interaction: ChatInputCommandInteraction) {
         where: { guildId_discordUserId: { guildId: interaction.guildId!, discordUserId: interaction.user.id } },
     });
     if (!link) {
-        await reply(interaction, errorEmbed('You are not linked to a uma.moe trainer yet. Use `/fans link` with your viewer ID.'));
+        await reply(interaction, errorEmbed('You are not linked to a uma.moe trainer yet. Use `/uma-id` with your viewer ID.'));
         return;
     }
 
@@ -704,7 +705,7 @@ async function handleTrainer(interaction: ChatInputCommandInteraction) {
             interaction,
             errorEmbed(
                 target.id === interaction.user.id
-                    ? 'You are not linked to a uma.moe trainer yet. Use `/fans link` with your viewer ID.'
+                    ? 'You are not linked to a uma.moe trainer yet. Use `/uma-id` with your viewer ID.'
                     : `<@${target.id}> is not linked to a uma.moe trainer yet.`,
             ),
         );
@@ -757,15 +758,22 @@ async function handleBenchmark(interaction: ChatInputCommandInteraction) {
 // ─── Trainer links ────────────────────────────────────────────────────────────
 
 async function handleLink(interaction: ChatInputCommandInteraction) {
-    const target = interaction.options.getUser('member');
+    await linkTrainer(interaction, interaction.options.getString('viewer_id', true), interaction.options.getUser('member'));
+}
 
+/**
+ * Links a Discord member to their uma.moe trainer: the caller themselves, or
+ * `target` when a Club Manager links someone else. Shared by `/fans link` and
+ * `/uma-id`.
+ */
+export async function linkTrainer(interaction: ChatInputCommandInteraction, rawViewerId: string, target: User | null) {
     // Linking someone else is a moderation action; linking yourself is not.
     if (target && target.id !== interaction.user.id && !(await requireOfficer(interaction, 'link other members'))) {
         return;
     }
 
     const subject = target ?? interaction.user;
-    const raw = interaction.options.getString('viewer_id', true).trim();
+    const raw = rawViewerId.trim();
 
     if (!/^\d+$/.test(raw)) {
         await reply(interaction, errorEmbed('A viewer ID is a number. Find yours on your uma.moe trainer profile.'));
