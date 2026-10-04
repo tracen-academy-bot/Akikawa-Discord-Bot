@@ -4,6 +4,30 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — /fans check and /fans me
+
+Asked for an on-demand quota check like another bot's `/force_check`, plus
+a personal version. `/fans check` (Club Managers) syncs the circle from
+uma.moe, then posts the report image and the behind-quota alert exactly as
+the daily job does: to the configured channels with a private confirmation,
+or into the current channel when none is set. If the sync fails or no key
+is set, it reports from stored data and says so. To share that path, the
+scheduler's `postReport` was split into `buildCircleReport` (render and
+alert text) and the posting itself. The alert now gives the true number of
+trainers behind rather than the number listed, which is capped at ten.
+
+`/fans me` shows the caller's own window total, expectation, status, rank
+among current members, need per day and projection, privately. A trainer who
+has left is told they are not a current member.
+
+A bare quota under 1,000 was briefly going to be refused as a probable
+missing "M" (Primrose's quota is stored as 90). Dropped before shipping:
+quotas are taken literally, and some circles deliberately use tiny quotas
+for one-fan checks. No code path drops a typed suffix; Primrose was saved as
+"90" and needs re-entering as 90M.
+
+---
+
 ## 2026-10-04 — Leavers no longer count; fans count only while in the circle; biweekly quotas
 
 People who had left a circle were still in its report. uma.moe keeps a leaver
