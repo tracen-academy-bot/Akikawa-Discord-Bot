@@ -4,6 +4,38 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — /fans check all, club and me
+
+The club asked for quota checks grouped by who runs them, rather than an
+`all` flag that would be easy to fire by accident. `/fans check` is now a
+group:
+
+- `all` (Club Managers): syncs every active circle and posts each report and
+  alert to its configured channels, or into the current channel as a public
+  follow-up when it has none; the caller gets a private summary, and one
+  circle failing does not stop the rest. Discord turns the first follow-up
+  after a deferred reply into an edit of that reply, so the private reply is
+  filled in before the first follow-up is sent.
+- `club` (that club's Trainers and Assistants, and Club Managers): run in a circle's thread,
+  syncs that circle and posts its report and alert there, publicly.
+- `me` (everyone): run in a circle's thread, shows the caller's own progress
+  privately. It replaces `/fans me`.
+
+A thread belongs to the circle whose report or alert channel it is. "Trainer"
+is the `/club` role, so a circle has to be linked to its club record first:
+`/fans circle config club:` sets the link (`None` unlinks). Until a circle is
+linked, only Club Managers can run `club` on it. The club's Assistants may run
+it too (asked for after the first version allowed Trainers only).
+
+`club` also runs in #staff-commands (`1427571157120450733`, overridable with
+`STAFF_COMMANDS_CHANNEL_IDS`; empty means the default). There is no thread
+to name the circle, so it is the one linked to the caller's own `/club`, or
+the one given with the new `circle:` option, which Club Managers and staff on
+several clubs need. Permission is checked against that circle the same way,
+and the report posts in the staff channel.
+
+---
+
 ## 2026-10-04 — Daily, weekly and biweekly quotas are checkpoints, not resets
 
 The first version of quota periods measured each week or day on its own:

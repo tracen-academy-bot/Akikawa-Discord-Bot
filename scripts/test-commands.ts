@@ -1,15 +1,19 @@
 /**
- * `/fans check` and `/fans me`, driven through the real command handler with
- * a fake Discord interaction and a real Postgres.
+ * `/fans check all|club|me` and `/fans circle config club:`, driven through
+ * the real command handler with a fake Discord interaction and a real
+ * Postgres.
  *
- * Seeds a circle in the current game month (both commands read the current
- * month) with a trainer on pace, one behind, and one who left, then checks
- * what each command replies and posts.
+ * Seeds two circles in the current game month (the checks read the current
+ * month): one with a trainer on pace, one behind, and one who left, its
+ * report going to a thread; another with no channels. Then checks who may run
+ * what, where, and what each command replies and posts.
  *
  *   DATABASE_URL=postgresql://... npm run test:commands
  */
 const OFFICER_ROLE = 'officer-role';
 process.env.OFFICER_ROLE_IDS = OFFICER_ROLE;
+// A plain channel standing in for #staff-commands.
+process.env.STAFF_COMMANDS_CHANNEL_IDS = 'c-staff';
 // No key: /fans check must still report from stored data, and say so.
 delete process.env.EXTERNAL_API_KEY;
 
@@ -30,7 +34,7 @@ interface SentEmbed {
     fields?: { name: string; value: string }[];
 }
 interface Sent {
-    kind: 'reply' | 'defer' | 'edit' | 'channel';
+    kind: 'reply' | 'defer' | 'edit' | 'followUp' | 'channel';
     channelId?: string | undefined;
     ephemeral?: boolean | undefined;
     content?: string | undefined;
@@ -50,20 +54,36 @@ function fakeChannel(id: string, log: Sent[]) {
 }
 
 /** The slice of ChatInputCommandInteraction the fans handlers use. */
-function fakeInteraction(opts: { sub: string; userId: string; officer?: boolean; circle?: string }, log: Sent[]) {
+interface FakeOptions {
+    sub: string;
+    group?: string;
+    userId: string;
+    officer?: boolean;
+    circle?: string;
+    club?: string;
+    /** Channel the command runs in; a thread unless `inThread` is false. */
+    channel?: string;
+    inThread?: boolean;
+}
+
+function fakeInteraction(opts: FakeOptions, log: Sent[]) {
     const embedsOf = (payload: { embeds?: { toJSON(): Record<string, unknown> }[] }) =>
         payload.embeds?.map((e) => e.toJSON() as SentEmbed);
     const interaction = {
         guildId: GUILD,
         user: { id: opts.userId },
         member: { roles: { cache: new Map(opts.officer ? [[OFFICER_ROLE, {}]] : []) } },
+        channelId: opts.channel ?? 'c-plain',
+        channel: { isThread: () => opts.inThread ?? opts.channel !== undefined },
         deferred: false,
         replied: false,
         inGuild: () => true,
         options: {
-            getSubcommandGroup: () => null,
+            getSubcommandGroup: () => opts.group ?? null,
             getSubcommand: () => opts.sub,
-            getString: (name: string) => (name === 'circle' ? opts.circle ?? null : null),
+            getString: (name: string) => (name === 'circle' ? opts.circle ?? null : name === 'club' ? opts.club ?? null : null),
+            getBoolean: () => null,
+            getChannel: () => null,
             getUser: () => null,
         },
         client: {
@@ -79,6 +99,9 @@ function fakeInteraction(opts: { sub: string; userId: string; officer?: boolean;
         },
         async editReply(payload: { content?: string; files?: unknown[]; embeds?: { toJSON(): Record<string, unknown> }[]; allowedMentions?: { users?: string[] } }) {
             log.push({ kind: 'edit', content: payload.content, files: payload.files?.length ?? 0, embeds: embedsOf(payload), users: payload.allowedMentions?.users });
+        },
+        async followUp(payload: { content?: string; files?: unknown[]; flags?: unknown; allowedMentions?: { users?: string[] } }) {
+            log.push({ kind: 'followUp', ephemeral: payload.flags !== undefined, content: payload.content, files: payload.files?.length ?? 0, users: payload.allowedMentions?.users });
         },
     };
     return interaction;
@@ -99,13 +122,23 @@ async function main() {
     const { year, month } = currentGameMonth();
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });
+    await prisma.club.deleteMany({ where: { name: 'Test Checkrose Club' } });
     // 31M a month over at most 31 days is at least 1M a day; 3 days owe ~3M.
     const circle = await prisma.trackedCircle.create({
-        data: { guildId: GUILD, circleId: BigInt(999777), name: 'Checkrose', quota: BigInt(31_000_000) },
+        data: {
+            guildId: GUILD, circleId: BigInt(999777), name: 'Checkrose', quota: BigInt(31_000_000),
+            reportChannelId: 't-check', alertChannelId: 'c-alert',
+        },
+    });
+    // Its /club record, with a Trainer and an Assistant.
+    const club = await prisma.club.create({
+        data: {
+            name: 'Test Checkrose Club', rank: 'S',
+            members: { create: [{ discordUserId: 'u-trainer', role: 'TRAINER' }, { discordUserId: 'u-assistant', role: 'ASSISTANT' }] },
+        },
     });
 
-    // A second circle, so a command that omits `circle` cannot just fall back
-    // to the guild's only one: it has to work out which circle is meant.
+    // A second circle with no channels, so `check all` has to post it here.
     const other = await prisma.trackedCircle.create({
         data: { guildId: GUILD, circleId: BigInt(999778), name: 'Otherrose', quota: BigInt(31_000_000) },
     });
@@ -133,59 +166,89 @@ async function main() {
         ],
     });
 
-    // ── /fans me ──────────────────────────────────────────────────────────────
-    const me = await run({ sub: 'me', userId: 'u-behind' });
+    const desc = (log: Sent[]) => log[0]?.embeds?.[0]?.description;
+
+    // ── /fans check me ────────────────────────────────────────────────────────
+    const me = await run({ group: 'check', sub: 'me', userId: 'u-behind', channel: 't-check' });
     const embed = me[0]?.embeds?.[0];
     const field = (name: string) => embed?.fields?.find((f) => f.name === name)?.value;
-    check('me finds the circle without being told', me[0]?.embeds?.length, 1);
     check('me replies privately', me[0]?.ephemeral, true);
-    check('me titles the trainer and circle', embed?.title, 'Behind · Checkrose');
+    check("me uses the thread's circle", embed?.title, 'Behind · Checkrose');
     check('me shows fans earned', field('Fans this month'), '300,000');
     check('me ranks among current members only', field('Rank'), '2 of 2');
     check('me says how far behind', field('Status')?.startsWith('Behind by **'), true);
 
-    const unlinked = await run({ sub: 'me', userId: 'u-nobody' });
-    check('me without a link explains how to link', unlinked[0]?.embeds?.[0]?.description?.includes('/fans link'), true);
+    check('me outside a thread is refused', desc(await run({ group: 'check', sub: 'me', userId: 'u-behind' })), "Run this inside your circle's thread.");
+    check('me in a thread no circle uses is refused',
+        desc(await run({ group: 'check', sub: 'me', userId: 'u-behind', channel: 't-random' }))?.includes('not a tracked circle'), true);
+    check('me without a link explains how to link',
+        desc(await run({ group: 'check', sub: 'me', userId: 'u-nobody', channel: 't-check' }))?.includes('/fans link'), true);
+    check('me for a leaver says not a current member',
+        desc(await run({ group: 'check', sub: 'me', userId: 'u-gone', channel: 't-check' }))?.includes('not a current member'), true);
 
-    const gone = await run({ sub: 'me', userId: 'u-gone' });
-    check('me for a leaver says not a current member', gone[0]?.embeds?.[0]?.description?.includes('not a current member'), true);
+    // ── /fans check club ──────────────────────────────────────────────────────
+    const unlinkedClub = await run({ group: 'check', sub: 'club', userId: 'u-trainer', channel: 't-check' });
+    check('club on an unlinked circle is for Club Managers only', desc(unlinkedClub)?.includes('not linked to a club yet'), true);
 
-    const named = await run({ sub: 'me', userId: 'u-behind', circle: other.id });
-    check('me with a circle they are not in says so', named[0]?.embeds?.[0]?.description?.includes('not a current member of that circle'), true);
+    const link = await run({ group: 'circle', sub: 'config', userId: 'u-officer', officer: true, circle: circle.id, club: club.id });
+    check('circle config links the club', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } })).clubId, club.id);
+    check('circle config says the staff can now check', link[0]?.embeds?.[0]?.description?.includes('/fans check club'), true);
 
-    // In two circles: one card each.
-    await seed(2, 'Behind', 100_000, 4, other);
-    const both = await run({ sub: 'me', userId: 'u-behind' });
-    check('me shows every circle the trainer is in', both[0]?.embeds?.map((e) => e.title), ['Behind · Checkrose', 'Behind · Otherrose']);
-    await prisma.fanSnapshot.deleteMany({ where: { trackedCircleId: other.id, viewerId: BigInt(2) } });
+    check("club lets the club's Assistant post too",
+        (await run({ group: 'check', sub: 'club', userId: 'u-assistant', channel: 't-check' })).some((s) => s.kind === 'edit' && s.files === 1), true);
+    check('club refuses someone who is not club staff',
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-behind', channel: 't-check' })), "Only **Checkrose**'s Trainers, Assistants and Club Managers can run this.");
+    check('club refuses outside a thread or the staff channel',
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-trainer' })), "Run this inside your circle's thread, or in <#c-staff>.");
 
-    // ── /fans check ───────────────────────────────────────────────────────────
-    const denied = await run({ sub: 'check', userId: 'u-behind', circle: circle.id });
-    check('check is for Club Managers', denied[0]?.embeds?.[0]?.description, 'Only Club Managers can run a quota check.');
+    // #staff-commands: not a thread, so the circle is the caller's club's.
+    const staff = await run({ group: 'check', sub: 'club', userId: 'u-trainer', channel: 'c-staff', inThread: false });
+    check("club in the staff channel uses the caller's club", staff.find((s) => s.kind === 'edit')?.content?.includes('Checkrose'), true);
+    check('club in the staff channel posts there, publicly', [staff[0]?.ephemeral, staff.find((s) => s.kind === 'edit')?.files], [false, 1]);
+    check('club in the staff channel needs a circle when the caller has no club',
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-officer', officer: true, channel: 'c-staff', inThread: false }))?.includes('Name a circle'), true);
+    const named = await run({ group: 'check', sub: 'club', userId: 'u-officer', officer: true, channel: 'c-staff', inThread: false, circle: other.id });
+    check('club in the staff channel takes a named circle', named.find((s) => s.kind === 'edit')?.content?.includes('Otherrose'), true);
+    check('club in the staff channel still checks permission',
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-behind', channel: 'c-staff', inThread: false, circle: circle.id }))?.startsWith('Only **Checkrose**'), true);
 
-    // No report channel: everything lands in the channel the command ran in.
-    const here = await run({ sub: 'check', userId: 'u-officer', officer: true, circle: circle.id });
-    const posted = here.find((s) => s.kind === 'edit');
-    check('check without a report channel replies publicly', here[0]?.ephemeral, false);
-    check('check attaches the report image', posted?.files, 1);
-    check('check names who is behind', posted?.content?.includes('1 trainer behind quota'), true);
-    check('check tags the linked trainer', posted?.users, ['u-behind']);
-    check('check says it used stored data without a key', posted?.content?.includes('No uma.moe API key'), true);
-    check('check does not list the leaver', posted?.content?.includes('Gone'), false);
+    const clubCheck = await run({ group: 'check', sub: 'club', userId: 'u-trainer', channel: 't-check' });
+    const posted = clubCheck.find((s) => s.kind === 'edit');
+    check("club lets the club's Trainer post", clubCheck[0]?.ephemeral, false);
+    check('club attaches the report image', posted?.files, 1);
+    check('club names who is behind', posted?.content?.includes('1 trainer behind quota'), true);
+    check('club tags the linked trainer', posted?.users, ['u-behind']);
+    check('club says it used stored data without a key', posted?.content?.includes('No uma.moe API key'), true);
+    check('club does not list the leaver', posted?.content?.includes('Gone'), false);
+    check('club posts in the thread, not to the channels', clubCheck.some((s) => s.kind === 'channel'), false);
 
-    // Report and alert channels set: posted there, confirmed privately.
-    await prisma.trackedCircle.update({ where: { id: circle.id }, data: { reportChannelId: 'c-report', alertChannelId: 'c-alert' } });
-    const there = await run({ sub: 'check', userId: 'u-officer', officer: true, circle: circle.id });
-    const toReport = there.find((s) => s.kind === 'channel' && s.channelId === 'c-report');
-    const toAlert = there.find((s) => s.kind === 'channel' && s.channelId === 'c-alert');
-    const confirm = there.find((s) => s.kind === 'edit');
-    check('check confirms privately when posting elsewhere', there[0]?.ephemeral, true);
-    check('check posts the image to the report channel', toReport?.files, 1);
-    check('check posts the alert to the alert channel', toAlert?.users, ['u-behind']);
-    check('check confirms where it posted', confirm?.embeds?.[0]?.description?.includes('<#c-report>'), true);
+    await run({ group: 'circle', sub: 'config', userId: 'u-officer', officer: true, circle: circle.id, club: 'none' });
+    check('circle config club:none unlinks', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } })).clubId, null);
+
+    // ── /fans check all ───────────────────────────────────────────────────────
+    check('all is for Club Managers', desc(await run({ group: 'check', sub: 'all', userId: 'u-trainer' })), 'Only Club Managers can check every circle.');
+
+    // Checkrose has channels; Otherrose has none, so its report comes here as
+    // a public follow-up.
+    const all = await run({ group: 'check', sub: 'all', userId: 'u-officer', officer: true });
+    const edits = all.filter((s) => s.kind === 'edit');
+    const followUps = all.filter((s) => s.kind === 'followUp');
+    const summary = edits[edits.length - 1]?.embeds?.[0];
+    check('all keeps the summary private', all[0]?.ephemeral, true);
+    check('all fills the reply before any follow-up', all.findIndex((s) => s.kind === 'edit') < all.findIndex((s) => s.kind === 'followUp'), true);
+    check('all posts Checkrose to its report thread', all.find((s) => s.kind === 'channel' && s.channelId === 't-check')?.files, 1);
+    check('all posts the alert to the alert channel', all.find((s) => s.kind === 'channel' && s.channelId === 'c-alert')?.users, ['u-behind']);
+    check('all posts Otherrose here, publicly', followUps.map((f) => [f.files, f.ephemeral]), [[1, false]]);
+    check('all summarises both circles', summary?.title, 'Quota check · 2 circles');
+    check('all names each circle', ['Checkrose', 'Otherrose'].every((n) => summary?.description?.includes(n)), true);
+
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { active: false } });
+    const activeOnly = await run({ group: 'check', sub: 'all', userId: 'u-officer', officer: true });
+    check('all skips paused circles', activeOnly.some((s) => s.kind === 'followUp'), false);
 
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });
+    await prisma.club.deleteMany({ where: { id: club.id } });
     await prisma.$disconnect();
 
     console.log(`\n${pass} passed, ${fail} failed`);

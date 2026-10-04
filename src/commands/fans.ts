@@ -10,7 +10,7 @@ import {
 } from 'discord.js';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
-import { isOfficer } from '../lib/permissions';
+import { getClubMembership, isOfficer } from '../lib/permissions';
 import { errorEmbed, successEmbed, infoEmbed } from '../lib/embeds';
 import { autocompleteTrackedCircle } from '../lib/fans/circleAutocomplete';
 import { backfillOnce, currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
@@ -71,20 +71,23 @@ export const data = new SlashCommandBuilder()
                 opt.setName('circle').setDescription('Tracked circle (defaults to the only one)').setAutocomplete(true),
             ),
     )
-    .addSubcommand((sub) =>
-        sub
+    .addSubcommandGroup((group) =>
+        group
             .setName('check')
-            .setDescription('Sync from uma.moe now, then post the quota report and behind-quota alert (Club Managers).')
-            .addStringOption((opt) =>
-                opt.setName('circle').setDescription('Tracked circle (defaults to the only one)').setAutocomplete(true),
-            ),
-    )
-    .addSubcommand((sub) =>
-        sub
-            .setName('me')
-            .setDescription('Your own quota progress, visible only to you.')
-            .addStringOption((opt) =>
-                opt.setName('circle').setDescription('Tracked circle (defaults to every circle you are in)').setAutocomplete(true),
+            .setDescription('Quota checks: every circle, this thread\'s circle, or just you.')
+            .addSubcommand((sub) =>
+                sub.setName('all').setDescription("Sync every active circle and post each report and alert to its channels (Club Managers)."),
+            )
+            .addSubcommand((sub) =>
+                sub
+                    .setName('club')
+                    .setDescription("Sync this thread's circle and post its report and alert here (the club's staff).")
+                    .addStringOption((opt) =>
+                        opt.setName('circle').setDescription("In #staff-commands only: which circle (defaults to your club's)").setAutocomplete(true),
+                    ),
+            )
+            .addSubcommand((sub) =>
+                sub.setName('me').setDescription("Your own progress in this thread's circle, visible only to you."),
             ),
     )
     .addSubcommand((sub) =>
@@ -168,7 +171,13 @@ export const data = new SlashCommandBuilder()
                             .setDescription('Where behind-quota alerts go. A thread works.')
                             .addChannelTypes(...REPORT_CHANNEL_TYPES),
                     )
-                    .addBooleanOption((opt) => opt.setName('active').setDescription('Pause or resume syncing')),
+                    .addBooleanOption((opt) => opt.setName('active').setDescription('Pause or resume syncing'))
+                    .addStringOption((opt) =>
+                        opt
+                            .setName('club')
+                            .setDescription("Link the circle's /club record, so its staff can run /fans check club")
+                            .setAutocomplete(true),
+                    ),
             )
             .addSubcommand((sub) => sub.setName('list').setDescription('List tracked circles.'))
             .addSubcommand((sub) =>
@@ -195,9 +204,32 @@ export const data = new SlashCommandBuilder()
             ),
     );
 
+/**
+ * Channels besides a circle's own thread where `/fans check club` may run,
+ * comma-separated. Defaults to the club server's #staff-commands, so it works
+ * without configuration; set `STAFF_COMMANDS_CHANNEL_IDS` to change it.
+ */
+const STAFF_CHANNEL_IDS = new Set(
+    (process.env.STAFF_COMMANDS_CHANNEL_IDS || '1427571157120450733')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean),
+);
+
+/** Choice that unlinks a circle from its club in `/fans circle config club:`. */
+const UNLINK_CLUB = 'none';
+
 export async function autocomplete(interaction: AutocompleteInteraction) {
-    if (interaction.options.getFocused(true).name === 'circle') {
+    const focused = interaction.options.getFocused(true);
+    if (focused.name === 'circle') {
         await autocompleteTrackedCircle(interaction);
+    } else if (focused.name === 'club') {
+        const clubs = await prisma.club.findMany({
+            where: { name: { contains: focused.value, mode: 'insensitive' } },
+            take: 24,
+            orderBy: { name: 'asc' },
+        });
+        await interaction.respond([...clubs.map((c) => ({ name: c.name, value: c.id })), { name: 'None (unlink)', value: UNLINK_CLUB }]);
     }
 }
 
@@ -302,16 +334,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         await handleCircleGroup(interaction, sub);
         return;
     }
+    if (group === 'check') {
+        if (sub === 'all') await handleCheckAll(interaction);
+        else if (sub === 'club') await handleCheckClub(interaction);
+        else if (sub === 'me') await handleCheckMe(interaction);
+        return;
+    }
 
     switch (sub) {
         case 'report':
             await handleReport(interaction);
-            break;
-        case 'check':
-            await handleCheck(interaction);
-            break;
-        case 'me':
-            await handleMe(interaction);
             break;
         case 'trainer':
             await handleTrainer(interaction);
@@ -361,52 +393,217 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
     });
 }
 
+/** A report as posted into the channel the command ran in. */
+type CheckPost = { content: string; files: AttachmentBuilder[]; allowedMentions: { users: string[] } };
+
 /**
- * A quota check on demand: the daily job's sync, report and alert, now.
+ * Refreshes one circle from uma.moe for a quota check.
  *
- * Syncs the circle from uma.moe first so the figures are current, then posts
- * the report image and the behind-quota alert to the circle's configured
- * channels, exactly as the daily job does. A circle with no report channel
- * gets both in the channel the command was run in. If the sync fails, the
- * check still reports from the last stored data and says so.
+ * @returns A note when the check has to fall back on stored data, else ''.
  */
-async function handleCheck(interaction: ChatInputCommandInteraction) {
-    if (!(await requireOfficer(interaction, 'run a quota check'))) return;
-    const circle = await resolveCircle(interaction, false);
-    if (!circle) return;
-
-    // Posting elsewhere: keep the confirmation private. Posting here: public.
-    const elsewhere = Boolean(circle.reportChannelId);
-    await interaction.deferReply(elsewhere ? { flags: MessageFlags.Ephemeral } : {});
-
-    let syncNote = '';
-    if (!isConfigured()) {
-        syncNote = 'No uma.moe API key is set, so this uses the last stored data.';
-    } else {
-        try {
-            await syncCircle(circle);
-        } catch (e) {
-            syncNote = `Sync failed (${e instanceof Error ? e.message : String(e)}), so this uses the last stored data.`;
-        }
+async function syncForCheck(circle: TrackedCircle): Promise<string> {
+    if (!isConfigured()) return 'No uma.moe API key is set, so this uses the last stored data.';
+    try {
+        await syncCircle(circle);
+        return '';
+    } catch (e) {
+        return `Sync failed (${e instanceof Error ? e.message : String(e)}), so this uses the last stored data.`;
     }
-    const fresh = await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } });
+}
 
-    if (elsewhere) {
+/**
+ * Checks one circle: sync, then post its report and alert to its configured
+ * channels, or hand them to `postHere` when it has no report channel.
+ *
+ * @returns One summary line for the person who ran the check.
+ */
+async function checkCircle(
+    interaction: ChatInputCommandInteraction,
+    circle: TrackedCircle,
+    postHere: (post: CheckPost) => Promise<void>,
+): Promise<string> {
+    const syncNote = await syncForCheck(circle);
+    const fresh = await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } });
+    const withNote = (line: string) => [line, syncNote].filter(Boolean).join(' ');
+
+    if (fresh.reportChannelId) {
         const posted = await postReport(interaction.client, fresh.id);
         if (!posted) {
-            await reply(interaction, errorEmbed(`Could not post to <#${fresh.reportChannelId}>. Check the bot can send messages there, or that **${fresh.name}** has data this month.`));
-            return;
+            return withNote(`**${fresh.name}** — could not post to <#${fresh.reportChannelId}>. Check the bot can send messages there, or that the circle has data this month.`);
         }
         const alertNote =
             posted.behindCount === 0
-                ? 'Nobody is behind.'
+                ? 'nobody is behind.'
                 : posted.alerted
                   ? `${posted.behindCount} behind, alerted in <#${fresh.alertChannelId}>.`
-                  : `${posted.behindCount} behind. No alert channel is set, so nobody was tagged.`;
-        await reply(interaction, successEmbed('Quota check posted', [`Report posted in <#${fresh.reportChannelId}>.`, alertNote, syncNote].filter(Boolean).join('\n')));
+                  : `${posted.behindCount} behind; no alert channel is set, so nobody was tagged.`;
+        return withNote(`**${fresh.name}** — report posted in <#${fresh.reportChannelId}>; ${alertNote}`);
+    }
+
+    const report = await buildCircleReport(fresh);
+    if (!report) return withNote(`**${fresh.name}** — no fan data this month yet.`);
+    await postHere({
+        content: [report.alert?.content ?? `**${fresh.name}** — nobody is behind quota.`, syncNote].filter(Boolean).join('\n'),
+        files: [report.image],
+        allowedMentions: { users: report.alert?.users ?? [] },
+    });
+    return `**${fresh.name}** — posted here; ${report.behindCount === 0 ? 'nobody is behind.' : `${report.behindCount} behind.`}`;
+}
+
+/**
+ * `/fans check all`: the daily job's sync, report and alert for every active
+ * circle, now. Club Managers only, since it posts to every circle's channels.
+ *
+ * Each circle is synced from uma.moe first so the figures are current, then
+ * its report image and behind-quota alert go to its configured channels; a
+ * circle with no report channel gets both in the channel the command was run
+ * in. The person running it gets a private summary. If a sync fails, that
+ * circle is reported from the last stored data and says so; one circle
+ * failing never stops the others.
+ */
+async function handleCheckAll(interaction: ChatInputCommandInteraction) {
+    if (!(await requireOfficer(interaction, 'check every circle'))) return;
+
+    const circles = await prisma.trackedCircle.findMany({
+        where: { guildId: interaction.guildId!, active: true },
+        orderBy: { name: 'asc' },
+    });
+    if (circles.length === 0) {
+        await reply(interaction, errorEmbed('No active circles to check.'));
         return;
     }
 
+    // A private summary. Reports for circles without a channel go here as
+    // public follow-ups. Discord turns the first follow-up after a deferred
+    // reply into an edit of it, so the private reply is filled in before any
+    // follow-up is sent.
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    let acknowledged = false;
+    const postHere = async (post: CheckPost) => {
+        if (!acknowledged) {
+            await interaction.editReply({ embeds: [infoEmbed('Quota check', 'Posting reports below.')] });
+            acknowledged = true;
+        }
+        await interaction.followUp(post);
+    };
+
+    const lines: string[] = [];
+    for (const circle of circles) {
+        try {
+            lines.push(await checkCircle(interaction, circle, postHere));
+        } catch (e) {
+            lines.push(`**${circle.name}** — failed: ${e instanceof Error ? e.message : String(e)}`);
+        }
+    }
+    await interaction.editReply({ embeds: [successEmbed(`Quota check · ${circles.length} circle${circles.length === 1 ? '' : 's'}`, lines.join('\n'))] });
+}
+
+/**
+ * The circle a thread belongs to: the one whose report or alert channel it
+ * is. Replies with the reason and returns null when the command was not run
+ * in such a thread. `notInThread` replaces the default refusal.
+ */
+async function circleForThread(
+    interaction: ChatInputCommandInteraction,
+    notInThread = "Run this inside your circle's thread.",
+): Promise<TrackedCircle | null> {
+    if (!interaction.channel?.isThread()) {
+        await reply(interaction, errorEmbed(notInThread));
+        return null;
+    }
+    const circle = await prisma.trackedCircle.findFirst({
+        where: {
+            guildId: interaction.guildId!,
+            OR: [{ reportChannelId: interaction.channelId }, { alertChannelId: interaction.channelId }],
+        },
+    });
+    if (!circle) {
+        await reply(
+            interaction,
+            errorEmbed(
+                "This thread is not a tracked circle's report or alert thread. " +
+                    'A Club Manager can set it with `/fans circle config report_channel:`.',
+            ),
+        );
+    }
+    return circle;
+}
+
+/**
+ * True when the caller may run `/fans check club` for a circle: a Club
+ * Manager, or a Trainer or Assistant on the `/club` record the circle is
+ * linked to.
+ * Replies with the reason when not.
+ */
+async function requireClubTrainer(interaction: ChatInputCommandInteraction, circle: TrackedCircle): Promise<boolean> {
+    if (isOfficer(interaction.member as GuildMember)) return true;
+    if (!circle.clubId) {
+        await reply(
+            interaction,
+            errorEmbed(
+                `**${circle.name}** is not linked to a club yet, so only Club Managers can check it. ` +
+                    'A Club Manager can link it with `/fans circle config club:`.',
+            ),
+        );
+        return false;
+    }
+    const membership = await getClubMembership(circle.clubId, interaction.user.id);
+    if (membership) return true;
+    await reply(interaction, errorEmbed(`Only **${circle.name}**'s Trainers, Assistants and Club Managers can run this.`));
+    return false;
+}
+
+/**
+ * The circle a staff channel command is about: the one named with `circle`,
+ * else the one linked to the caller's own `/club`. Replies with the reason
+ * and returns null when that does not pin down exactly one.
+ */
+async function circleForStaff(interaction: ChatInputCommandInteraction): Promise<TrackedCircle | null> {
+    const guildId = interaction.guildId!;
+    const named = interaction.options.getString('circle');
+    if (named) {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: named, guildId } });
+        if (!circle) await reply(interaction, errorEmbed('That tracked circle could not be found.'));
+        return circle;
+    }
+    const memberships = await prisma.clubMember.findMany({ where: { discordUserId: interaction.user.id }, select: { clubId: true } });
+    const circles = await prisma.trackedCircle.findMany({
+        where: { guildId, clubId: { in: memberships.map((m) => m.clubId) } },
+        orderBy: { name: 'asc' },
+    });
+    if (circles.length === 1) return circles[0]!;
+    await reply(
+        interaction,
+        errorEmbed(
+            circles.length === 0
+                ? 'Name a circle with `circle:`. None is linked to a club you are staff on.'
+                : 'You are staff on several circles. Name one with `circle:`.',
+        ),
+    );
+    return null;
+}
+
+/**
+ * `/fans check club`: sync one circle and post its report and behind-quota
+ * alert right here, publicly. Run in the circle's own thread, so the club
+ * sees it where it talks, or in a staff channel (#staff-commands), where the
+ * circle is the caller's club's or the one named. For the club's staff
+ * (Trainers and Assistants) and Club Managers.
+ */
+async function handleCheckClub(interaction: ChatInputCommandInteraction) {
+    const staffChannel = [...STAFF_CHANNEL_IDS][0];
+    const circle = STAFF_CHANNEL_IDS.has(interaction.channelId)
+        ? await circleForStaff(interaction)
+        : await circleForThread(
+              interaction,
+              `Run this inside your circle's thread${staffChannel ? `, or in <#${staffChannel}>` : ''}.`,
+          );
+    if (!circle) return;
+    if (!(await requireClubTrainer(interaction, circle))) return;
+
+    await interaction.deferReply();
+    const syncNote = await syncForCheck(circle);
+    const fresh = await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } });
     const report = await buildCircleReport(fresh);
     if (!report) {
         await reply(interaction, errorEmbed(`No fan data for **${fresh.name}** this month yet.${syncNote ? ` ${syncNote}` : ''}`));
@@ -445,12 +642,46 @@ async function circlesForTrainer(
     return found;
 }
 
+/** One member's progress card, as `/fans check me` shows it. */
+function progressCard(circle: TrackedCircle, progress: CircleProgress, member: MemberProgress) {
+    const checkpoints = progress.period !== 'MONTH';
+    const status = member.onPace
+        ? checkpoints
+            ? 'Made every check so far'
+            : `On pace (${formatFans(member.total - member.expected)} ahead of where you need to be)`
+        : `Behind by **${formatFans(member.behind)}**${checkpoints ? ` since the day ${progress.checkpointDay} check` : ''}`;
+    const fields = [
+        { name: 'Fans this month', value: formatFans(member.total), inline: true },
+        {
+            name: checkpoints ? (progress.checkpointDay > 0 ? `Due at day ${progress.checkpointDay} check` : 'Due so far') : 'Expected by now',
+            value: formatFans(member.expected),
+            inline: true,
+        },
+        { name: 'Rank', value: `${member.rank} of ${progress.members.length}`, inline: true },
+        { name: 'Status', value: status, inline: false },
+    ];
+    if (checkpoints && progress.daysRemaining > 0) {
+        fields.push({ name: `Due by end of day ${progress.nextCheckpointDay}`, value: formatFans(member.target), inline: true });
+    }
+    fields.push(
+        { name: 'Need per day', value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay), inline: true },
+        { name: 'Projected', value: `${formatCompactFans(member.projectedTotal)} of ${formatCompactFans(progress.effectiveQuota)}`, inline: true },
+    );
+    return infoEmbed(
+        `${member.trainerName} · ${circle.name}`,
+        `${progress.windowLabel} · day ${progress.daysElapsed} of ${progress.daysInMonth} · quota ${describeQuota(progress.quota, progress.period)}`,
+    ).addFields(fields);
+}
+
 /**
- * The caller's own progress in the current window, privately. Uses the
- * trainer linked with `/fans link`; someone who has left the circle is not a
- * current member and is told so rather than shown stale figures.
+ * `/fans check me`: the caller's own progress in this thread's circle,
+ * privately. Uses the trainer linked with `/fans link`; someone who is not a
+ * current member of the circle is told so rather than shown stale figures.
  */
-async function handleMe(interaction: ChatInputCommandInteraction) {
+async function handleCheckMe(interaction: ChatInputCommandInteraction) {
+    const circle = await circleForThread(interaction);
+    if (!circle) return;
+
     const link = await prisma.trainerLink.findUnique({
         where: { guildId_discordUserId: { guildId: interaction.guildId!, discordUserId: interaction.user.id } },
     });
@@ -459,52 +690,13 @@ async function handleMe(interaction: ChatInputCommandInteraction) {
         return;
     }
 
-    // A named circle is honoured; otherwise every circle the trainer is in.
-    let found = await circlesForTrainer(interaction.guildId!, link.viewerId);
-    const named = interaction.options.getString('circle');
-    if (named) found = found.filter((f) => f.circle.id === named);
-    if (found.length === 0) {
-        await reply(
-            interaction,
-            errorEmbed(
-                `Trainer \`${link.viewerId}\` is not a current member of ${named ? 'that circle' : 'any tracked circle'}, or has no data this month yet.`,
-            ),
-        );
+    const progress = await currentCircleProgress(circle);
+    const member = progress?.members.find((m) => m.viewerId === toSafeNumber(link.viewerId));
+    if (!progress || !member) {
+        await reply(interaction, errorEmbed(`Trainer \`${link.viewerId}\` is not a current member of **${circle.name}**, or has no data this month yet.`));
         return;
     }
-
-    // Discord allows ten embeds per message; nobody is in more circles than that.
-    const embeds = found.slice(0, 10).map(({ circle, progress, member }) => {
-        const checkpoints = progress.period !== 'MONTH';
-        const status = member.onPace
-            ? checkpoints
-                ? 'Made every check so far'
-                : `On pace (${formatFans(member.total - member.expected)} ahead of where you need to be)`
-            : `Behind by **${formatFans(member.behind)}**${checkpoints ? ` since the day ${progress.checkpointDay} check` : ''}`;
-        const fields = [
-            { name: 'Fans this month', value: formatFans(member.total), inline: true },
-            {
-                name: checkpoints ? (progress.checkpointDay > 0 ? `Due at day ${progress.checkpointDay} check` : 'Due so far') : 'Expected by now',
-                value: formatFans(member.expected),
-                inline: true,
-            },
-            { name: 'Rank', value: `${member.rank} of ${progress.members.length}`, inline: true },
-            { name: 'Status', value: status, inline: false },
-        ];
-        if (checkpoints && progress.daysRemaining > 0) {
-            fields.push({ name: `Due by end of day ${progress.nextCheckpointDay}`, value: formatFans(member.target), inline: true });
-        }
-        fields.push(
-            { name: 'Need per day', value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay), inline: true },
-            { name: 'Projected', value: `${formatCompactFans(member.projectedTotal)} of ${formatCompactFans(progress.effectiveQuota)}`, inline: true },
-        );
-        return infoEmbed(
-            `${member.trainerName} · ${circle.name}`,
-            `${progress.windowLabel} · day ${progress.daysElapsed} of ${progress.daysInMonth} · quota ${describeQuota(progress.quota, progress.period)}`,
-        ).addFields(fields);
-    });
-
-    await interaction.reply({ embeds, flags: MessageFlags.Ephemeral });
+    await interaction.reply({ embeds: [progressCard(circle, progress, member)], flags: MessageFlags.Ephemeral });
 }
 
 async function handleTrainer(interaction: ChatInputCommandInteraction) {
@@ -799,8 +991,9 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
     const alertChannel = interaction.options.getChannel('alert_channel');
     const active = interaction.options.getBoolean('active');
     const period = parsePeriod(interaction.options.getString('period'));
+    const rawClub = interaction.options.getString('club');
 
-    if (rawQuota === null && period === null && !reportChannel && !alertChannel && active === null) {
+    if (rawQuota === null && period === null && !reportChannel && !alertChannel && active === null && rawClub === null) {
         await reply(interaction, errorEmbed('Give at least one setting to change.'));
         return;
     }
@@ -814,9 +1007,23 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
         }
     }
 
+    let clubId: string | null | undefined;
+    if (rawClub === UNLINK_CLUB) {
+        clubId = null;
+    } else if (rawClub !== null) {
+        const club = await prisma.club.findUnique({ where: { id: rawClub } });
+        if (!club) {
+            await reply(interaction, errorEmbed('That club could not be found. Pick one from the list.'));
+            return;
+        }
+        clubId = club.id;
+    }
+
     const updated = await prisma.trackedCircle.update({
         where: { id: circle.id },
+        include: { club: true },
         data: {
+            ...(clubId !== undefined ? { clubId } : {}),
             ...(quota !== null ? { quota: BigInt(quota) } : {}),
             ...(period !== null ? { quotaPeriod: period } : {}),
             ...(reportChannel ? { reportChannelId: reportChannel.id } : {}),
@@ -830,6 +1037,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
         `Reports: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'not set'}`,
         `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'not set'}`,
         `Syncing: ${updated.active ? 'active' : 'paused'}`,
+        `Club: ${updated.club ? `**${updated.club.name}** (its Trainers and Assistants can run \`/fans check club\`)` : 'not linked'}`,
     ];
 
     await reply(interaction, successEmbed(`${updated.name} updated`, lines.join('\n')));
