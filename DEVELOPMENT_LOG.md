@@ -4,6 +4,51 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — Clubs and tracked circles are one table
+
+To the club, a club and its uma.moe circle are the same thing, but the bot
+kept them apart: a `Club` row (rank, headcount, fan count, staff) and a
+`TrackedCircle` row (uma.moe ID, quota, channels, fan history), joined only
+by an optional link nobody had set. `/club edit` found nothing because the
+only club record had been deleted, while the circles were all there.
+
+They are now one row, kept under the `TrackedCircle` name to avoid renaming
+every query. The club fields moved onto it, `circleId` became optional (a
+club need not be tracked), and `ClubMember` points at it.
+
+Migration `20261004130000_merge_clubs_into_circles`, approved explicitly by
+the club because it moves live data, decides each club's row in order: the
+circle already linked to it, else the one circle with the same name ignoring
+case that no other club claimed, else a new row of its own (reusing the club
+ID, `circleId` NULL, same guild as the existing circles). It copies rank,
+headcount and fan count, moves staff (dropping a duplicate if two clubs land
+on one row), and renames `Club` to `Club_backup_20261004` rather than
+dropping it. Checked by hand on a scratch database seeded with a linked club,
+a name-only match in different case, a club with no circle and staff on each,
+and on an empty database. The startup "is it migrated" check now looks for
+`TrackedCircle`, since `Club` no longer exists under that name.
+
+Behaviour that follows:
+
+- Every fan query spreads `TRACKED` (`circleId` not null), so clubs without a
+  uma.moe circle never sync, report or appear in `/fans` or the dashboard;
+  `syncCircle` refuses one outright.
+- `/club create` takes an optional `circle_id` that starts tracking at once.
+  `/fans circle add` (and the dashboard's add form) folds into an untracked
+  club with the same uma.moe name instead of making a second club
+  (`adoptUntrackedClub`, one transaction).
+- `/fans club` staff checks read the row's own staff; the circle-to-club link
+  and `/fans circle config club:` are gone.
+- Home channels: `/club edit` on a tracked club sets the club's own channels,
+  and `/fans club` and `/fans me` work in those and in any thread inside them,
+  besides the report and alert channels and #staff-commands. Channel names
+  are not matched: the Club Hall's names are too inconsistent to guess safely.
+  A tracked club's name comes from uma.moe and is refreshed on sync, so the
+  form offers the name only for untracked clubs (a modal holds five fields).
+- `/club delete` removes the club's fan history and staff too.
+
+---
+
 ## 2026-10-04 — /club edit form, /post, and shorter /fans commands
 
 `/club edit club:` now opens a form pre-filled with the club's info instead of

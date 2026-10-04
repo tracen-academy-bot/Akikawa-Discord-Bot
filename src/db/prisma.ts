@@ -26,12 +26,12 @@ export async function assertDatabaseReady(): Promise<void> {
     // instead of raising, so a missing schema is reported as our own clear
     // error rather than a raw Prisma P2021 at some later, unrelated moment.
     const rows = await prisma.$queryRaw<{ table: string | null }[]>`
-        SELECT to_regclass('public."Club"')::text AS table
+        SELECT to_regclass('public."TrackedCircle"')::text AS table
     `;
 
     if (rows[0]?.table == null) {
         throw new Error(
-            'Database is reachable but not migrated: the "Club" table does not exist. ' +
+            'Database is reachable but not migrated: the "TrackedCircle" table does not exist. ' +
                 'Run `npx prisma migrate deploy` against DATABASE_URL, then restart the bot.',
         );
     }

@@ -36,23 +36,12 @@ enum FanCountPeriod {
     MONTH
 }
 
-model Club {
-    id             String           @id @default(cuid())
-    name           String           @unique
-    rank           ClubRank
-    headcount      Int              @default(0)
-    fanCountAmount Float?
-    fanCountPeriod FanCountPeriod?
-    createdAt      DateTime         @default(now())
-    updatedAt      DateTime         @updatedAt
-
-    members        ClubMember[]
-    trackedCircles TrackedCircle[]
-}
-
+/// A club's staff: its Trainers and Assistants. `clubId` is the club's
+/// `TrackedCircle` row (clubs and tracked circles are one table since
+/// 2026-10-04).
 model ClubMember {
     id            String         @id @default(cuid())
-    club          Club           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+    club          TrackedCircle  @relation(fields: [clubId], references: [id], onDelete: Cascade)
     clubId        String
     discordUserId String
     role          ClubMemberRole
@@ -120,7 +109,11 @@ model TimerNotification {
 
 // ─── uma.moe fan tracking ─────────────────────────────────────────────────────
 
-/// A uma.moe circle this server tracks.
+/// A club. Clubs and tracked uma.moe circles are the same thing to the
+/// server, so since 2026-10-04 they are one row: the club's info (rank,
+/// headcount, fan count, staff) and, when `circleId` is set, its uma.moe fan
+/// tracking. `/club` and `/fans` both work on these rows. The model keeps its
+/// older name to avoid renaming every query.
 ///
 /// Fan counts are BigInt because the API returns int64. They are converted to
 /// JS numbers only at the presentation boundary, via `toSafeNumber`, which
@@ -128,11 +121,9 @@ model TimerNotification {
 model TrackedCircle {
     id              String    @id @default(cuid())
     guildId         String
-    /// uma.moe `circle_id`.
-    circleId        BigInt
+    /// uma.moe `circle_id`. Null for a club whose fans are not tracked.
+    circleId        BigInt?
     name            String
-    /// Optional link to an internal Club record.
-    clubId          String?
     /// Fans each member is expected to earn per `quotaPeriod` window. The
     /// column keeps its original name so no data moves; it held a monthly
     /// amount before periods existed, which is what MONTH still means.
@@ -149,10 +140,23 @@ model TrackedCircle {
     /// Paused circles are kept but skipped by the sync job.
     active          Boolean   @default(true)
     lastSyncedAt    DateTime?
+    /// The club's own channels. `/fans club` and `/fans me` work in these and
+    /// in any thread inside them, as well as in the report and alert channels.
+    homeChannelIds  String[]  @default([])
+
+    // Club info, from the former `Club` model.
+    /// Intended tier (B to S+). Null when never set.
+    rank            ClubRank?
+    headcount       Int       @default(0)
+    /// Club fan count target, in millions.
+    fanCountAmount  Float?
+    /// Period of `fanCountAmount`; null means a flat total.
+    fanCountPeriod  FanCountPeriod?
+
     createdAt       DateTime  @default(now())
     updatedAt       DateTime  @updatedAt
 
-    club      Club?         @relation(fields: [clubId], references: [id], onDelete: SetNull)
+    members   ClubMember[]
     snapshots FanSnapshot[]
 
     @@unique([guildId, circleId])

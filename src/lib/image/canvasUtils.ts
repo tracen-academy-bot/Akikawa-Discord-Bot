@@ -55,7 +55,21 @@ export async function loadRankIcon(rank: ClubRank): Promise<Image | null> {
     }
 }
 
-export async function drawRankBadge(ctx: SKRSContext2D, rank: ClubRank, cx: number, cy: number, r: number, labelFontSize: number) {
+export async function drawRankBadge(ctx: SKRSContext2D, rank: ClubRank | null, cx: number, cy: number, r: number, labelFontSize: number) {
+    // A club whose rank was never set gets a plain grey dash.
+    if (rank === null) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.lineWidth = Math.max(2, r / 12);
+        ctx.strokeStyle = '#5e5b55';
+        ctx.stroke();
+        ctx.font = font(`bold ${labelFontSize}px`);
+        ctx.fillStyle = '#5e5b55';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\u2014', cx, cy + 2);
+        return;
+    }
     const icon = await loadRankIcon(rank);
 
     if (icon) {
@@ -98,7 +112,7 @@ export async function loadClubIcon(clubId: string): Promise<Image | null> {
     }
 }
 
-export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name: string; rank: ClubRank }, cx: number, cy: number, r: number, labelFontSize: number) {
+export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name: string; rank: ClubRank | null }, cx: number, cy: number, r: number, labelFontSize: number) {
     const icon = await loadClubIcon(club.id);
 
     if (icon) {
@@ -118,7 +132,8 @@ export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name:
         return;
     }
 
-    const color = RANK_COLORS[club.rank];
+    // No rank set: a neutral grey disc rather than a tier colour.
+    const color = club.rank === null ? '#5e5b55' : RANK_COLORS[club.rank];
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.fillStyle = color;

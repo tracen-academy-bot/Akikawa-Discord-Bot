@@ -17,7 +17,7 @@ import {
     type WebConfig,
 } from './auth';
 import { csrfField, compact, dash, esc, layout, loginPage, monthPicker, num, tile } from './views';
-import { currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle, backfillOnce } from '../lib/fans/ingest';
+import { TRACKED, adoptUntrackedClub, currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle, backfillOnce } from '../lib/fans/ingest';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate, listCircleMonths } from '../lib/fans/reports';
 import { checkpointNote, describeQuota, toSafeNumber, type CircleProgress, type QuotaPeriod } from '../lib/fans/metrics';
 import { parsePeriod, parseQuota } from '../commands/fans';
@@ -288,7 +288,7 @@ export function startDashboard(client: () => Client): () => void {
     app.get('/', async (req, res) => {
         if (!req.user) return res.send(loginPage());
 
-        const circles = await prisma.trackedCircle.findMany({ where: { guildId }, orderBy: { name: 'asc' } });
+        const circles = await prisma.trackedCircle.findMany({ where: { guildId, ...TRACKED }, orderBy: { name: 'asc' } });
         const timerContext = await getPanelContext(guildId);
         const activeTimers = await prisma.trainingTimer.count({ where: { guildId } });
 
@@ -352,7 +352,7 @@ export function startDashboard(client: () => Client): () => void {
 
     // ── Circle detail ─────────────────────────────────────────────────────────
     app.get('/circles/:id', requireLogin, async (req, res) => {
-        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId, ...TRACKED } });
         if (!circle) return notFound(res, req.user, 'That circle is not tracked.');
 
         const { year, month } = selectedMonth(req);
@@ -422,7 +422,7 @@ export function startDashboard(client: () => Client): () => void {
     });
 
     app.get('/circles/:id/report.png', requireLogin, async (req, res) => {
-        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId, ...TRACKED } });
         if (!circle) return res.status(404).end();
 
         const { year, month } = selectedMonth(req);
@@ -442,7 +442,7 @@ export function startDashboard(client: () => Client): () => void {
 
     // ── Trainer detail ────────────────────────────────────────────────────────
     app.get('/circles/:id/trainers/:viewerId', requireLogin, async (req, res) => {
-        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId, ...TRACKED } });
         if (!circle) return notFound(res, req.user, 'That circle is not tracked.');
 
         if (!/^\d+$/.test(param(req, 'viewerId'))) return notFound(res, req.user, 'Invalid trainer ID.');
@@ -493,7 +493,7 @@ export function startDashboard(client: () => Client): () => void {
     });
 
     app.get('/circles/:id/trainers/:viewerId/report.png', requireLogin, async (req, res) => {
-        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId, ...TRACKED } });
         if (!circle || !/^\d+$/.test(param(req, 'viewerId'))) return res.status(404).end();
 
         const report = await buildTrainerReport(circle, BigInt(param(req, 'viewerId')), TRAINER_WINDOW_DAYS, await currentCircleProgress(circle));
@@ -504,7 +504,7 @@ export function startDashboard(client: () => Client): () => void {
     // ── Benchmark ─────────────────────────────────────────────────────────────
     /** First tracked circle for the guild, for the benchmark overlay. */
     const overlayCircle = () =>
-        prisma.trackedCircle.findFirst({ where: { guildId, active: true }, orderBy: { createdAt: 'asc' } });
+        prisma.trackedCircle.findFirst({ where: { guildId, active: true, ...TRACKED }, orderBy: { createdAt: 'asc' } });
 
     app.get('/benchmark', requireLogin, async (req, res) => {
         const data = await buildBenchmark(TRAINER_WINDOW_DAYS, await overlayCircle());
@@ -612,9 +612,11 @@ export function startDashboard(client: () => Client): () => void {
 
         try {
             const result = await syncCircle(circle);
+            // A club made with /club create under the same name takes the tracking.
+            const tracking = await adoptUntrackedClub(circle);
             // Past months import in the background; the page shows them as they land.
-            void backfillOnce(circle);
-            return res.redirect(`/circles/${circle.id}?ok=${encodeURIComponent(`Tracking ${result.name}. Importing past months in the background.`)}`);
+            void backfillOnce(tracking);
+            return res.redirect(`/circles/${tracking.id}?ok=${encodeURIComponent(`Tracking ${result.name}. Importing past months in the background.`)}`);
         } catch (e) {
             // Roll back so a bad ID does not leave an empty circle behind.
             await prisma.trackedCircle.delete({ where: { id: circle.id } });
@@ -623,7 +625,7 @@ export function startDashboard(client: () => Client): () => void {
     });
 
     app.post('/circles/:id', ...mutate, async (req, res) => {
-        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId, ...TRACKED } });
         if (!circle) return res.redirect('/?err=Circle+not+found.');
 
         const quota = parseQuota(String(req.body.quota ?? ''));
@@ -653,7 +655,7 @@ export function startDashboard(client: () => Client): () => void {
     });
 
     app.post('/circles/:id/sync', ...mutate, async (req, res) => {
-        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId, ...TRACKED } });
         if (!circle) return res.redirect('/?err=Circle+not+found.');
 
         try {
@@ -670,7 +672,7 @@ export function startDashboard(client: () => Client): () => void {
     });
 
     app.post('/circles/:id/delete', ...mutate, async (req, res) => {
-        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId } });
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: param(req, 'id'), guildId, ...TRACKED } });
         if (!circle) return res.redirect('/?err=Circle+not+found.');
 
         await prisma.trackedCircle.delete({ where: { id: circle.id } });
