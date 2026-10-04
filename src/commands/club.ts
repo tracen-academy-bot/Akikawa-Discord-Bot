@@ -3,7 +3,6 @@ import {
     ChatInputCommandInteraction,
     AutocompleteInteraction,
     GuildMember,
-    EmbedBuilder,
     AttachmentBuilder,
     LabelBuilder,
     MessageFlags,
@@ -18,11 +17,14 @@ import {
 import { prisma } from '../db/prisma';
 import { canManageClubStats, isOfficer } from "../lib/permissions";
 import { autoCompleteClubName } from "../lib/clubAutocomplete";
-import { successEmbed, errorEmbed, infoEmbed, COLORS } from "../lib/embeds";
-import { renderClubList  } from "../lib/image/renderClubList";
+import { successEmbed, errorEmbed, infoEmbed } from "../lib/embeds";
+import { renderClubList, type ClubSummary } from "../lib/image/renderClubList";
 import { renderClubView } from "../lib/image/renderClubView";
-import type { TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod } from '@prisma/client';
+import type { TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
+import { currentCircleProgress } from '../lib/fans/reports';
+import { describeQuota, toSafeNumber } from '../lib/fans/metrics';
+import { parseQuota } from './fans';
 
 /**
  * A club is a `TrackedCircle` row: clubs and tracked uma.moe circles were
@@ -76,22 +78,43 @@ function formatFanCount(amount: number | null, period: FanCountPeriod | null): s
     return period ? `${amountLabel}/${formatPeriod(period)}` : amountLabel;
 }
 
-function clubEmbed(club: Club, members: ClubMember[]): EmbedBuilder {
-    const trainers = members.filter((m) => m.role === 'TRAINER');
-    const assistants = members.filter((m) => m.role === 'ASSISTANT');
+/**
+ * Headcount is not typed in: for a tracked club it is uma.moe's current
+ * members, by the same rule the fan reports use (so it matches their member
+ * count). Null for a club without a uma.moe circle, or before any data.
+ */
+async function clubHeadcount(club: Club): Promise<number | null> {
+    if (club.circleId === null) return null;
+    return (await currentCircleProgress(club))?.members.length ?? null;
+}
 
-    return new EmbedBuilder()
-        .setColor(COLORS.info)
-        .setTitle(club.name)
-        .addFields(
-            { name: 'Rank', value: formatRank(club.rank), inline: true },
-            { name: 'Headcount', value: `${club.headcount}/${MAX_HEADCOUNT}`, inline: true},
-            { name: 'Fan Count', value: formatFanCount(club.fanCountAmount, club.fanCountPeriod), inline: true},
-            { name: 'Trainer', value: trainers.length ? trainers.map((m) => `<@${m.discordUserId}>`).join('\n') : 'None assigned', inline: true},
-            { name: `Assistants (${assistants.length})`, value: assistants.length ? assistants.map((m) => `<@${m.discordUserId}>`).join('\n') : 'None assigned', inline: true},
-        )
-        .setFooter({ text: `CLUB ID: ${club.id}` })
-        .setTimestamp(club.updatedAt);
+/**
+ * The club's fan quota as text. Clubs and circles share one quota since the
+ * merge; an old club fan count is shown only if no quota was ever set.
+ */
+function clubQuotaText(club: Club): string {
+    const quota = toSafeNumber(club.quota);
+    if (quota > 0) return describeQuota(quota, club.quotaPeriod);
+    return club.fanCountAmount === null ? 'Not set' : formatFanCount(club.fanCountAmount, club.fanCountPeriod);
+}
+
+/** What the club directory and club card show for a club. */
+async function clubSummary(club: Club): Promise<ClubSummary> {
+    return { id: club.id, name: club.name, rank: club.rank, headcount: await clubHeadcount(club), quotaText: clubQuotaText(club) };
+}
+
+/**
+ * The quota as the form's text field shows it, exactly, so saving the form
+ * unchanged keeps the same number: 90000000 is "90M", 2500000 is "2500K".
+ * An old club fan count (in millions) stands in when no quota was set.
+ */
+function quotaInputValue(club: Club): string {
+    const quota = toSafeNumber(club.quota);
+    if (quota === 0) return club.fanCountAmount === null ? '' : `${club.fanCountAmount}M`;
+    if (quota % 1_000_000_000 === 0) return `${quota / 1_000_000_000}B`;
+    if (quota % 1_000_000 === 0) return `${quota / 1_000_000}M`;
+    if (quota % 1_000 === 0) return `${quota / 1_000}K`;
+    return String(quota);
 }
 
 async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId: string): Promise<Club | null> {
@@ -113,13 +136,13 @@ export const data = new SlashCommandBuilder()
             .setName('create')
             .setDescription('Create a new club. Club Managers only.')
             .addStringOption((opt) => opt.setName('name').setDescription('Club name').setRequired(true))
-            .addStringOption((opt) => opt.setName('rank').setDescription('Intended rank').setRequired(true).setChoices(...RANK_CHOICES))
+            .addStringOption((opt) => opt.setName('rank').setDescription('Expected rank').setRequired(true).setChoices(...RANK_CHOICES))
             .addStringOption((opt) => opt.setName('circle_id').setDescription('uma.moe circle ID, to track its fans (from uma.moe/circles)'))
     )
     .addSubcommand((sub) =>
         sub
             .setName('edit')
-            .setDescription("Edit a club's info in a form (Club Managers; the club's staff for headcount and fan count).")
+            .setDescription("Edit a club's info in a form (Club Managers; the club's staff for its quota).")
             .addStringOption((opt) => opt.setName('club').setDescription('Club to edit').setRequired(true).setAutocomplete(true))
     )
     .addSubcommand((sub) => 
@@ -137,18 +160,11 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) => sub.setName('list').setDescription('List all clubs.'))
     .addSubcommand((sub) =>
         sub
-            .setName('headcount')
-            .setDescription("Set a club's headcount (max 30). Club trainers/assistants or Club Managers only.")
-            .addStringOption((opt) => opt.setName('club').setDescription('Club to update').setRequired(true).setAutocomplete(true))
-            .addIntegerOption((opt) => opt.setName('count').setDescription('New headcount').setRequired(true).setMinValue(0).setMaxValue(30))
-    )
-    .addSubcommand((sub) =>
-        sub
             .setName('fancount')
-            .setDescription("Set a club's fancount. Club trainers/assistants or Club Managers only.")
+            .setDescription("Set a club's quota per member. Club trainers/assistants or Club Managers only.")
             .addStringOption((opt) => opt.setName('club').setDescription('Club to update').setRequired(true).setAutocomplete(true))
-            .addStringOption((opt) => opt.setName('amount').setDescription('Amount in millions, e.g. 50M, 0.5M').setRequired(true))
-            .addStringOption((opt) => opt.setName('period').setDescription('Leave empty for a flat total').setRequired(false).addChoices(...PERIOD_CHOICES))
+            .addStringOption((opt) => opt.setName('amount').setDescription('Per member, in millions, e.g. 50M, 0.5M').setRequired(true))
+            .addStringOption((opt) => opt.setName('period').setDescription('Per day, week, 2 weeks or month (default month)').setRequired(false).addChoices(...PERIOD_CHOICES))
     )
     .addSubcommandGroup((group) =>
         group
@@ -221,9 +237,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         case 'list':
             await handleList(interaction);
             break;
-        case 'headcount':
-            await handleHeadcount(interaction, member);
-            break;
         case 'fancount':
             await handleFancount(interaction, member);
             break;
@@ -264,7 +277,7 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
     await interaction.deferReply();
     const club = await prisma.trackedCircle.create({ data: { guildId, name, rank, circleId } });
     if (circleId === null) {
-        await interaction.editReply({ embeds: [successEmbed('Club created', `**${club.name}** was created at intended rank **${formatRank(club.rank)}**.`)] });
+        await interaction.editReply({ embeds: [successEmbed('Club created', `**${club.name}** was created at expected rank **${formatRank(club.rank)}**.`)] });
         return;
     }
 
@@ -276,7 +289,7 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
             embeds: [
                 successEmbed(
                     'Club created',
-                    `**${result.name}** was created at intended rank **${formatRank(club.rank)}** and its fans are tracked ` +
+                    `**${result.name}** was created at expected rank **${formatRank(club.rank)}** and its fans are tracked ` +
                         `(${result.membersSeen} members). Set its quota with \`/fans circle config\`.` +
                         (result.name !== name ? ` Its name comes from uma.moe, so it is **${result.name}** rather than **${name}**.` : ''),
                 ),
@@ -293,34 +306,34 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
 
 /**
  * `/club edit` opens a form pre-filled with the club's current info. Club
- * Managers get rank, headcount, fan count and period, plus the name for a
- * club without uma.moe tracking (a tracked club's name comes from uma.moe and
- * is refreshed on every sync) or its home channels for a tracked one: a modal
- * holds five fields at most. A club's own staff (Trainers and Assistants) get
- * headcount and fan count only, the same split as `/club headcount` and
- * `/club fancount`. The custom ID carries the club and which form it is, and
- * the submit checks permission again.
+ * Managers get the expected rank and the quota, plus the name for a club
+ * without uma.moe tracking (a tracked club's name comes from uma.moe and is
+ * refreshed on every sync) or its home channels for a tracked one. A club's
+ * own staff (Trainers and Assistants) get the quota only, as `/club fancount`
+ * allowed. Headcount is not a field: it is worked out from uma.moe.
+ *
+ * The quota is the same one `/fans` measures against (clubs and circles are
+ * one row), so the form shows and changes the real quota. The custom ID
+ * carries the club and which form it is, and the submit checks permission
+ * again.
  */
 const CLUB_MODAL_PREFIX = 'club:edit:';
 const EDIT_FIELD = {
     name: 'club:name',
     rank: 'club:rank',
-    headcount: 'club:headcount',
-    fanCount: 'club:fancount',
+    quota: 'club:quota',
     period: 'club:period',
     home: 'club:home',
 } as const;
 /** Home channels a club may list. Threads inside them count without listing. */
 const MAX_HOME_CHANNELS = 10;
-/** The period choice meaning "a flat total, not per period". */
-const FLAT_TOTAL = 'NONE';
 
 /** True for a modal this module owns. */
 export function isClubModal(customId: string): boolean {
     return customId.startsWith(CLUB_MODAL_PREFIX);
 }
 
-/** Builds the edit form for a club. `full` adds name and rank (Club Managers). */
+/** Builds the edit form for a club. `full` is the Club Manager form. */
 export function buildClubEditModal(club: Club, full: boolean): ModalBuilder {
     const labels: LabelBuilder[] = [];
     if (full && club.circleId === null) {
@@ -332,38 +345,26 @@ export function buildClubEditModal(club: Club, full: boolean): ModalBuilder {
     }
     if (full) {
         labels.push(
-            new LabelBuilder().setLabel('Rank').setStringSelectMenuComponent(
+            new LabelBuilder().setLabel('Expected rank').setStringSelectMenuComponent(
                 new StringSelectMenuBuilder()
                     .setCustomId(EDIT_FIELD.rank)
+                    .setPlaceholder('Not set')
                     .addOptions(RANK_CHOICES.map((r) => ({ label: r.name, value: r.value, default: r.value === club.rank }))),
             ),
         );
     }
+    const quotaValue = quotaInputValue(club);
+    const quota = new TextInputBuilder().setCustomId(EDIT_FIELD.quota).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(20);
+    if (quotaValue) quota.setValue(quotaValue);
     labels.push(
         new LabelBuilder()
-            .setLabel('Headcount')
-            .setDescription(`0 to ${MAX_HEADCOUNT}.`)
-            .setTextInputComponent(
-                new TextInputBuilder().setCustomId(EDIT_FIELD.headcount).setStyle(TextInputStyle.Short).setValue(String(club.headcount)).setMaxLength(2),
-            ),
-        new LabelBuilder()
-            .setLabel('Fan count')
-            .setDescription('In millions, e.g. 50M, 0.5M or 500K. Leave empty to clear it.')
-            .setTextInputComponent(
-                new TextInputBuilder()
-                    .setCustomId(EDIT_FIELD.fanCount)
-                    .setStyle(TextInputStyle.Short)
-                    .setRequired(false)
-                    .setMaxLength(20)
-                    .setValue(club.fanCountAmount === null ? '' : `${club.fanCountAmount}M`),
-            ),
-        new LabelBuilder().setLabel('Fan count period').setStringSelectMenuComponent(
+            .setLabel('Quota per member')
+            .setDescription('Fans each member owes per period, e.g. 90M, 500K or 1.2B. Empty to clear.')
+            .setTextInputComponent(quota),
+        new LabelBuilder().setLabel('Quota period').setStringSelectMenuComponent(
             new StringSelectMenuBuilder()
                 .setCustomId(EDIT_FIELD.period)
-                .addOptions(
-                    { label: 'Flat total', value: FLAT_TOTAL, default: club.fanCountPeriod === null },
-                    ...PERIOD_CHOICES.map((p) => ({ label: p.name, value: p.value, default: p.value === club.fanCountPeriod })),
-                ),
+                .addOptions(PERIOD_CHOICES.map((p) => ({ label: p.name, value: p.value, default: p.value === club.quotaPeriod }))),
         ),
     );
     if (full && club.circleId !== null) {
@@ -411,21 +412,20 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
     const member = interaction.member as GuildMember;
     const full = kind === 'full';
     if (full ? !isOfficer(member) : !(await canManageClubStats(member, club.id))) {
-        return void (await refuse(full ? 'Only Club Managers can rename a club or change its rank.' : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
+        return void (await refuse(full ? 'Only Club Managers can change a club\'s name, rank or channels.' : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
     }
 
+    // The quota replaces the old club fan count, which is cleared so it
+    // never shows as a second, stale number.
     const data: {
         name?: string;
         rank?: ClubRank;
         homeChannelIds?: string[];
-        headcount: number;
-        fanCountAmount: number | null;
-        fanCountPeriod: FanCountPeriod | null;
-    } = {
-        headcount: 0,
-        fanCountAmount: null,
-        fanCountPeriod: null,
-    };
+        quota: bigint;
+        quotaPeriod: QuotaPeriod;
+        fanCountAmount: null;
+        fanCountPeriod: null;
+    } = { quota: BigInt(0), quotaPeriod: club.quotaPeriod, fanCountAmount: null, fanCountPeriod: null };
 
     if (full && club.circleId === null) {
         const name = interaction.fields.getTextInputValue(EDIT_FIELD.name).trim();
@@ -445,31 +445,25 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
         if (rank && RANK_CHOICES.some((r) => r.value === rank)) data.rank = rank;
     }
 
-    const rawHeadcount = interaction.fields.getTextInputValue(EDIT_FIELD.headcount).trim();
-    const headcount = Number(rawHeadcount);
-    if (!/^\d+$/.test(rawHeadcount) || headcount > MAX_HEADCOUNT) {
-        return void (await refuse(`Headcount must be a whole number from 0 to ${MAX_HEADCOUNT}.`));
+    const rawQuota = interaction.fields.getTextInputValue(EDIT_FIELD.quota).trim();
+    if (rawQuota) {
+        const quota = parseQuota(rawQuota);
+        if (quota === null || quota <= 0) return void (await refuse('Quota must be an amount like 90M, 500K, 1.2B or 80,000,000, or empty.'));
+        data.quota = BigInt(quota);
     }
-    data.headcount = headcount;
-
-    const rawFans = interaction.fields.getTextInputValue(EDIT_FIELD.fanCount).trim();
-    if (rawFans) {
-        const amount = parseClubFanAmount(rawFans);
-        if (amount === null) return void (await refuse("Fan count must be a number like '50', '50M', '0.25M', '500K' or '1.2B', or empty."));
-        data.fanCountAmount = amount;
-        const period = interaction.fields.getStringSelectValues(EDIT_FIELD.period)[0];
-        data.fanCountPeriod = period && period !== FLAT_TOTAL ? (period as FanCountPeriod) : null;
-    }
+    const period = interaction.fields.getStringSelectValues(EDIT_FIELD.period)[0];
+    if (period && PERIOD_CHOICES.some((p) => p.value === period)) data.quotaPeriod = period as QuotaPeriod;
 
     const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
+    const headcount = await clubHeadcount(updated);
     await interaction.reply({
         embeds: [
             successEmbed(
                 'Club updated',
                 [
-                    `**${updated.name}** · rank **${formatRank(updated.rank)}**`,
-                    `Headcount: **${updated.headcount}/${MAX_HEADCOUNT}**`,
-                    `Fan count: **${formatFanCount(updated.fanCountAmount, updated.fanCountPeriod)}**`,
+                    `**${updated.name}** · expected rank **${formatRank(updated.rank)}**`,
+                    `Headcount: **${headcount === null ? '—' : `${headcount}/${MAX_HEADCOUNT}`}** (from uma.moe)`,
+                    `Quota: **${clubQuotaText(updated)}** per member`,
                     ...(updated.circleId !== null
                         ? [`Home channels: ${updated.homeChannelIds.length > 0 ? updated.homeChannelIds.map((id) => `<#${id}>`).join(' ') : 'none'}`]
                         : []),
@@ -514,7 +508,7 @@ async function handleView(interaction: ChatInputCommandInteraction) {
         }
     }
     
-    const buffer = await renderClubView({ ...club, members }, staffNames);
+    const buffer = await renderClubView({ ...(await clubSummary(club)), members }, staffNames);
     const attachment = new AttachmentBuilder(buffer, { name: `club-view-${club.name}.png` });
     await interaction.editReply({ files: [attachment] });
 }
@@ -534,25 +528,9 @@ async function handleList(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
     
     const clubs = await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId! }, orderBy: { name: 'asc' } });
-    const buffer = await renderClubList(clubs);
+    const buffer = await renderClubList(await Promise.all(clubs.map(clubSummary)));
     const attachment = new AttachmentBuilder(buffer, { name: 'club-directory.png' });
     await interaction.editReply({ files: [attachment] });
-}
-
-async function handleHeadcount(interaction: ChatInputCommandInteraction, member: GuildMember) {
-    const clubId = interaction.options.getString('club', true);
-    const club = await findClubOrReply(interaction, clubId);
-    if (!club) return;
-
-    if (!(await canManageClubStats(member, club.id))) {
-        await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)] });
-        return;
-    }
-
-    const count = interaction.options.getInteger('count', true);
-    const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data: { headcount: count } });
-
-    await interaction.reply({ embeds: [successEmbed('Headcount Updated', `**${updated.name}** headcount is now **${updated.headcount}/${MAX_HEADCOUNT}**.`)] });
 }
 
 /**
@@ -594,10 +572,12 @@ async function handleFancount(interaction: ChatInputCommandInteraction, member: 
         return;
     }
 
+    // The club fan count is the quota now; amounts here are in millions.
     const updated = await prisma.trackedCircle.update({
-        where: { id: club.id }, data: { fanCountAmount: amount, fanCountPeriod: period },
+        where: { id: club.id },
+        data: { quota: BigInt(Math.round(amount * 1_000_000)), quotaPeriod: (period ?? 'MONTH') as QuotaPeriod, fanCountAmount: null, fanCountPeriod: null },
     });
-    await interaction.reply({ embeds: [successEmbed('Fan Count Updated', `**${updated.name}** fan count is now **${formatFanCount(updated.fanCountAmount, updated.fanCountPeriod)}**.`)] });
+    await interaction.reply({ embeds: [successEmbed('Quota Updated', `**${updated.name}** quota is now **${clubQuotaText(updated)}** per member.`)] });
 }
 
 async function handleMemberSubcommand(interaction: ChatInputCommandInteraction, member: GuildMember, sub: string) {

@@ -80,7 +80,7 @@ function fakeInteraction(opts: FakeOptions, log: Sent[]) {
     const interaction = {
         guildId: GUILD,
         user: { id: opts.userId },
-        member: { roles: { cache: new Map(opts.officer ? [[OFFICER_ROLE, {}]] : []) } },
+        member: { id: opts.userId, roles: { cache: new Map(opts.officer ? [[OFFICER_ROLE, {}]] : []) } },
         channelId: opts.channel ?? 'c-plain',
         channel: { isThread: () => opts.inThread ?? opts.channel !== undefined, parentId: opts.parent ?? null },
         deferred: false,
@@ -297,20 +297,23 @@ async function main() {
 
     // ── /club edit form ───────────────────────────────────────────────────────
     const clubCmd = await import('../src/commands/club');
-    const editable = await prisma.trackedCircle.update({ where: { id: club.id }, data: { rank: 'S', headcount: 8, fanCountAmount: 50, fanCountPeriod: 'MONTH' } });
+    // Checkrose's real quota is 31M a month; the form must show that, not a separate fan count.
+    const editable = await prisma.trackedCircle.update({ where: { id: club.id }, data: { rank: 'S', headcount: 99, fanCountAmount: 50, fanCountPeriod: 'MONTH' } });
     type ModalJson = { custom_id: string; components: { label: string; component: { custom_id: string; value?: string; options?: { value: string; default?: boolean }[] } }[] };
     const fullForm = clubCmd.buildClubEditModal(editable, true).toJSON() as unknown as ModalJson;
     const staffForm = clubCmd.buildClubEditModal(editable, false).toJSON() as unknown as ModalJson;
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
-    check('a tracked club form has home channels, not the uma.moe-owned name', fullForm.components.map((c) => c.label), ['Rank', 'Headcount', 'Fan count', 'Fan count period', 'Home channels']);
-    check('club form for staff has the stats only', staffForm.components.map((c) => c.label), ['Headcount', 'Fan count', 'Fan count period']);
-    check('club form is pre-filled', [pre(fullForm, 'Headcount')?.value, pre(fullForm, 'Fan count')?.value], ['8', '50M']);
-    const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B' } });
+    check('a tracked club form: expected rank, quota, period, home channels', fullForm.components.map((c) => c.label), ['Expected rank', 'Quota per member', 'Quota period', 'Home channels']);
+    check('club form for staff has the quota only', staffForm.components.map((c) => c.label), ['Quota per member', 'Quota period']);
+    check('headcount is not a field', fullForm.components.some((c) => c.label.toLowerCase().includes('headcount')), false);
+    check('the form shows the real quota, exactly', pre(fullForm, 'Quota per member')?.value, '31M');
+    check('club form pre-selects expected rank and quota period',
+        [pre(fullForm, 'Expected rank')?.options?.find((o) => o.default)?.value, pre(fullForm, 'Quota period')?.options?.find((o) => o.default)?.value], ['S', 'MONTH']);
+    const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B', fanCountAmount: 0.25 } });
     const looseForm = clubCmd.buildClubEditModal(loose, true).toJSON() as unknown as ModalJson;
-    check('an untracked club form has the name instead', looseForm.components.map((c) => c.label), ['Name', 'Rank', 'Headcount', 'Fan count', 'Fan count period']);
+    check('an untracked club form has the name instead of home channels', looseForm.components.map((c) => c.label), ['Name', 'Expected rank', 'Quota per member', 'Quota period']);
     check('an untracked club form pre-fills the name', pre(looseForm, 'Name')?.value, 'Loose Club');
-    check('club form pre-selects rank and period',
-        [pre(fullForm, 'Rank')?.options?.find((o) => o.default)?.value, pre(fullForm, 'Fan count period')?.options?.find((o) => o.default)?.value], ['S', 'MONTH']);
+    check('with no quota yet, an old club fan count pre-fills it', pre(looseForm, 'Quota per member')?.value, '0.25M');
     check('club form is routed by its prefix', clubCmd.isClubModal(fullForm.custom_id), true);
 
     /** Submits the club form with the given values, as the given user. */
@@ -334,12 +337,14 @@ async function main() {
     const reload = () => prisma.trackedCircle.findUniqueOrThrow({ where: { id: club.id } });
 
     const saved = await submitClub(fullForm.custom_id, 'u-officer', true, {
-        'club:rank': 'A_PLUS', 'club:headcount': '12', 'club:fancount': '0.5M', 'club:period': 'WEEK',
+        'club:rank': 'A_PLUS', 'club:quota': '14M', 'club:period': 'WEEK',
     }, ['c-room', 'c-room-bot']);
     const afterFull = await reload();
-    check('club form saves every field', [afterFull.rank, afterFull.headcount, afterFull.fanCountAmount, afterFull.fanCountPeriod], ['A_PLUS', 12, 0.5, 'WEEK']);
+    check('club form saves expected rank and the real quota', [afterFull.rank, String(afterFull.quota), afterFull.quotaPeriod], ['A_PLUS', '14000000', 'WEEK']);
+    check('the old club fan count is cleared, not left as a second number', [afterFull.fanCountAmount, afterFull.fanCountPeriod], [null, null]);
     check('club form saves home channels', afterFull.homeChannelIds, ['c-room', 'c-room-bot']);
-    check('club form confirms publicly', [saved?.ephemeral, saved?.description?.includes('0.5M/week')], [false, true]);
+    check('club form confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M per week')], [false, true]);
+    check('headcount comes from uma.moe, not the stored column', saved?.description?.includes('Headcount: **2/30** (from uma.moe)'), true);
 
     // Home channels: the room itself, and any thread inside it, now resolve to the club.
     const inRoom = await run({ sub: 'me', userId: 'u-behind', channel: 'c-room', inThread: false });
@@ -349,33 +354,34 @@ async function main() {
     check('a thread elsewhere still does not',
         desc(await run({ sub: 'me', userId: 'u-behind', channel: 't-private', parent: 'c-other' }))?.startsWith(nowhere), true);
 
-    await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'Looser Club', 'club:rank': 'B', 'club:headcount': '3' });
+    await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'Looser Club', 'club:rank': 'B', 'club:quota': '0.25M', 'club:period': 'MONTH' });
     check('an untracked club can be renamed', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: loose.id } })).name, 'Looser Club');
     check('renaming to a taken name is refused, ignoring case',
-        (await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'checkrose', 'club:rank': 'B', 'club:headcount': '3' }))?.description,
+        (await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'checkrose', 'club:rank': 'B' }))?.description,
         'A club named **checkrose** already exists.');
 
-    await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:headcount': '13', 'club:fancount': '', 'club:period': 'WEEK' });
-    const afterStaff = await reload();
-    check("club staff can save the stats", afterStaff.headcount, 13);
-    check('an empty fan count clears it', [afterStaff.fanCountAmount, afterStaff.fanCountPeriod], [null, null]);
+    await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:quota': '31M', 'club:period': 'MONTH' });
+    check('club staff can change the quota', [String((await reload()).quota), (await reload()).quotaPeriod], ['31000000', 'MONTH']);
     check('staff cannot submit the full form',
-        (await submitClub(fullForm.custom_id, 'u-assistant', false, { 'club:name': 'Hijacked', 'club:headcount': '1' }))?.description,
-        'Only Club Managers can rename a club or change its rank.');
-    check('outsiders cannot submit the stats form',
-        (await submitClub(staffForm.custom_id, 'u-behind', false, { 'club:headcount': '1' }))?.description?.startsWith('You must be a trainer or assistant'), true);
-    check('headcount over the limit is refused',
-        (await submitClub(staffForm.custom_id, 'u-trainer', false, { 'club:headcount': '31' }))?.description, 'Headcount must be a whole number from 0 to 30.');
-    check('a bad fan count is refused',
-        (await submitClub(staffForm.custom_id, 'u-trainer', false, { 'club:headcount': '5', 'club:fancount': 'lots' }))?.description?.startsWith('Fan count must be'), true);
-    check('refusals leave the club unchanged', (await reload()).headcount, 13);
+        (await submitClub(fullForm.custom_id, 'u-assistant', false, { 'club:rank': 'B', 'club:quota': '1M' }))?.description,
+        "Only Club Managers can change a club's name, rank or channels.");
+    check('outsiders cannot submit the quota form',
+        (await submitClub(staffForm.custom_id, 'u-behind', false, { 'club:quota': '1M' }))?.description?.startsWith('You must be a trainer or assistant'), true);
+    check('a bad quota is refused',
+        (await submitClub(staffForm.custom_id, 'u-trainer', false, { 'club:quota': 'lots' }))?.description?.startsWith('Quota must be'), true);
+    check('refusals leave the club unchanged', String((await reload()).quota), '31000000');
 
-    // ── Clubs and circles are one thing ───────────────────────────────────────
-    const runClub = async (opts: FakeOptions) => {
+    // /club fancount sets the same quota (in millions, as its option says).
+    const runClubCmd = async (opts: FakeOptions) => {
         const log: Sent[] = [];
         await clubCmd.execute(fakeInteraction(opts, log) as never);
         return log;
     };
+    await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: '35', period: 'MONTH' } });
+    check('/club fancount sets the quota', String((await reload()).quota), '35000000');
+
+    // ── Clubs and circles are one thing ───────────────────────────────────────
+    const runClub = runClubCmd;
     const created = await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'Fresh Club', rank: 'A' } });
     const fresh = await prisma.trackedCircle.findFirst({ where: { guildId: GUILD, name: 'Fresh Club' } });
     check('/club create without a circle makes an untracked club', [fresh?.circleId, fresh?.rank], [null, 'A']);

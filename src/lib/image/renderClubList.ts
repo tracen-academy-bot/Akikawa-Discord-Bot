@@ -1,10 +1,24 @@
 import { createCanvas } from '@napi-rs/canvas';
 import { roundRect, drawRankBadge } from './canvasUtils';
-import type { TrackedCircle as Club } from '@prisma/client';
+import type { ClubRank } from '@prisma/client';
 import { font } from './fonts';
 import { THEME } from './theme';
 
-export async function renderClubList(clubs: Club[]): Promise<Buffer> {
+/**
+ * One club as the directory and the club card show it. Headcount and quota
+ * are worked out by the caller: headcount from uma.moe's current members
+ * (null when the club is not tracked or has no data yet), quota from the
+ * club's fan quota.
+ */
+export interface ClubSummary {
+    id: string;
+    name: string;
+    rank: ClubRank | null;
+    headcount: number | null;
+    quotaText: string;
+}
+
+export async function renderClubList(clubs: ClubSummary[]): Promise<Buffer> {
     const width = 1000;
     const rowHeight = 56;
     const headerHeight = 110;
@@ -36,10 +50,10 @@ export async function renderClubList(clubs: Club[]): Promise<Buffer> {
     const colRank = 60, colName = 150, colProgress = 430, colFan = 830;
     ctx.font = font('bold 14px');
     ctx.fillStyle = THEME.faint;
-    ctx.fillText('RANK', colRank, headerHeight + 20);
+    ctx.fillText('EXP. RANK', colRank - 12, headerHeight + 20);
     ctx.fillText('CLUB', colName, headerHeight + 20);
     ctx.fillText('HEADCOUNT', colProgress, headerHeight + 20);
-    ctx.fillText('FAN COUNT', colFan, headerHeight + 20);
+    ctx.fillText('QUOTA', colFan, headerHeight + 20);
 
     let y = headerHeight + tableHeaderHeight;
 
@@ -66,7 +80,7 @@ export async function renderClubList(clubs: Club[]): Promise<Buffer> {
         ctx.fillText(club.name, colName, cy + 6);
 
         const barW = 300, barH = 10;
-        const pct = Math.min(club.headcount / 30, 1);
+        const pct = Math.min((club.headcount ?? 0) / 30, 1);
         ctx.fillStyle = THEME.line;
         roundRect(ctx, colProgress, cy - barH / 2, barW, barH, barH / 2);
         ctx.fill();
@@ -76,15 +90,11 @@ export async function renderClubList(clubs: Club[]): Promise<Buffer> {
         ctx.fill();
         ctx.font = font('bold 14px');
         ctx.fillStyle = barColor;
-        ctx.fillText(`${club.headcount}/30`, colProgress + barW + 16, cy + 5);
+        ctx.fillText(club.headcount === null ? '—' : `${club.headcount}/30`, colProgress + barW + 16, cy + 5);
 
         ctx.font = font('16px');
         ctx.fillStyle = THEME.muted;
-        const fanText =
-            club.fanCountAmount != null && club.fanCountPeriod
-                ? `${club.fanCountAmount}M/${club.fanCountPeriod.toLowerCase()}`
-                : '—';
-        ctx.fillText(fanText, colFan, cy + 6);
+        ctx.fillText(club.quotaText, colFan, cy + 6);
 
         y += rowHeight;
     }
