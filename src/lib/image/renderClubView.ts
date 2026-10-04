@@ -1,6 +1,6 @@
 import { createCanvas } from "@napi-rs/canvas";
 import { roundRect, drawRankBadge, drawClubIcon, RANK_COLORS } from './canvasUtils';
-import type { Club, ClubMember } from '@prisma/client';
+import type { TrackedCircle as Club, ClubMember } from '@prisma/client';
 import { font } from './fonts';
 import { THEME } from './theme';
 

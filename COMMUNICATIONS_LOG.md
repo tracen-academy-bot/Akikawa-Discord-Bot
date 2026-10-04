@@ -4,6 +4,23 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-04 — Clubs and circles merged; live data migration approved
+
+The club said a club and its tracked circle are the same thing and should not
+be managed separately. Asked whether merging the tables was risky, the honest
+answer was that the data risk is small (copy first, keep a backup table) and
+the real cost is code churn. They chose the full merge. The migration that
+moves the data was blocked once by the session's safety check as a
+production data change; the club then approved it explicitly ("allow").
+
+Which channel belongs to which club is set per club (home channels, threads
+included) rather than guessed from channel names.
+
+The old `Club` table survives as `Club_backup_20261004`. Once the merged data
+has been checked in production, a later migration can drop it.
+
+---
+
 ## 2026-10-04 — Leavers dropped; late-joiner question mostly closed
 
 Asked: people who left should not count at all, and fans should count only

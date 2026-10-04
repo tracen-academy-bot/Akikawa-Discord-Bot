@@ -8,7 +8,7 @@
  *
  *   DATABASE_URL=postgresql://... npm run test:fans
  */
-import { prisma } from '../src/db/prisma';
+import { assertDatabaseReady, prisma } from '../src/db/prisma';
 import { loadCircleProgress } from '../src/lib/fans/ingest';
 import { buildTrainerReport } from '../src/lib/fans/reports';
 import { normalizeMember } from '../src/lib/fans/ingest';
@@ -62,6 +62,12 @@ async function main() {
     check('present ids still convert', String(normalizeMember({ viewer_id: 7, previous_circle_id: 900, next_month_start: 5 }, fallback)?.previousCircleId), '900');
     check('member without viewer_id is skipped', normalizeMember({ trainer_name: 'ghost', daily_fans: [5] }, fallback), null);
     check('missing daily_fans means no days', normalizeMember({ viewer_id: 3 }, fallback)?.days, []);
+
+    // ── Startup check ─────────────────────────────────────────────────────────
+    // It names a table to prove migrations ran; the club merge renamed "Club",
+    // so a stale name here would stop the bot starting on a migrated database.
+    check('the startup check passes on a migrated database',
+        await assertDatabaseReady().then(() => 'ready', (e: Error) => e.message), 'ready');
 
     // ── Seed a circle with two members ────────────────────────────────────────
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });

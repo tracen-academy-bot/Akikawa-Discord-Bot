@@ -2,7 +2,7 @@ import { AttachmentBuilder, type Client } from 'discord.js';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
-import { backfillOnce, currentGameMonth, syncAllCircles, syncBenchmark } from './ingest';
+import { TRACKED, backfillOnce, currentGameMonth, syncAllCircles, syncBenchmark } from './ingest';
 import { currentCircleProgress, formatReportDate } from './reports';
 import { renderFanReport } from '../image/renderFanReport';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
@@ -180,7 +180,7 @@ export async function runDailySync(client: Client): Promise<string> {
         benchmarkNote = ` benchmark failed: ${e instanceof Error ? e.message : String(e)}`;
     }
 
-    const circles = await prisma.trackedCircle.findMany({ where: { active: true } });
+    const circles = await prisma.trackedCircle.findMany({ where: { active: true, ...TRACKED } });
     for (const circle of circles) {
         try {
             await postReport(client, circle.id, { scheduled: true });
@@ -214,7 +214,7 @@ async function runHourlySync(now: Date): Promise<void> {
 
     // One-time history import for any circle that has not had one, including
     // circles added before backfill existed. A no-op once each has run.
-    for (const circle of await prisma.trackedCircle.findMany({ where: { active: true } })) {
+    for (const circle of await prisma.trackedCircle.findMany({ where: { active: true, ...TRACKED } })) {
         await backfillOnce(circle);
     }
 }

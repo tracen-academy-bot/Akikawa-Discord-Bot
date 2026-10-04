@@ -10,6 +10,8 @@ import {
     ModalBuilder,
     ModalSubmitInteraction,
     StringSelectMenuBuilder,
+    ChannelSelectMenuBuilder,
+    ChannelType,
     TextInputBuilder,
     TextInputStyle,
 } from "discord.js";
@@ -19,7 +21,14 @@ import { autoCompleteClubName } from "../lib/clubAutocomplete";
 import { successEmbed, errorEmbed, infoEmbed, COLORS } from "../lib/embeds";
 import { renderClubList  } from "../lib/image/renderClubList";
 import { renderClubView } from "../lib/image/renderClubView";
-import type { Club, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod } from '@prisma/client';
+import type { TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod } from '@prisma/client';
+import { backfillOnce, syncCircle } from '../lib/fans/ingest';
+
+/**
+ * A club is a `TrackedCircle` row: clubs and tracked uma.moe circles were
+ * merged on 2026-10-04. `circleId` is set when the club's fans are tracked.
+ */
+type Club = TrackedCircle;
 
 // ================================================================================
 
@@ -48,7 +57,8 @@ const MAX_HEADCOUNT = 30;
 
 // ================================================================================
 
-function formatRank(rank: ClubRank): string {
+function formatRank(rank: ClubRank | null): string {
+    if (rank === null) return 'Not set';
     return RANK_CHOICES.find((r) => r.value === rank)?.name ?? rank;
 }
 
@@ -85,7 +95,7 @@ function clubEmbed(club: Club, members: ClubMember[]): EmbedBuilder {
 }
 
 async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId: string): Promise<Club | null> {
-    const club = await prisma.club.findUnique({ where: {id: clubId} });
+    const club = await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId! } });
     if (!club) {
         await interaction.reply({ embeds: [errorEmbed('That club could not be found.')]});
         return null;
@@ -104,6 +114,7 @@ export const data = new SlashCommandBuilder()
             .setDescription('Create a new club. Club Managers only.')
             .addStringOption((opt) => opt.setName('name').setDescription('Club name').setRequired(true))
             .addStringOption((opt) => opt.setName('rank').setDescription('Intended rank').setRequired(true).setChoices(...RANK_CHOICES))
+            .addStringOption((opt) => opt.setName('circle_id').setDescription('uma.moe circle ID, to track its fans (from uma.moe/circles)'))
     )
     .addSubcommand((sub) =>
         sub
@@ -114,14 +125,14 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) => 
         sub
             .setName('delete')
-            .setDescription('Delete a club. Club Managers only.')
+            .setDescription('Delete a club and its fan history. Club Managers only.')
             .addStringOption((opt) => opt.setName('club').setDescription('Club to delete').setRequired(true).setAutocomplete(true))
     )
     .addSubcommand((sub) =>
         sub
             .setName('view')
             .setDescription("View a club's info.")
-            .addStringOption((opt) => opt.setName('club').setDescription('Club to delete').setRequired(true).setAutocomplete(true))
+            .addStringOption((opt) => opt.setName('club').setDescription('Club to view').setRequired(true).setAutocomplete(true))
     )
     .addSubcommand((sub) => sub.setName('list').setDescription('List all clubs.'))
     .addSubcommand((sub) =>
@@ -227,27 +238,68 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
         return;
     }
 
+    const guildId = interaction.guildId!;
     const name = interaction.options.getString('name', true).trim();
     const rank = interaction.options.getString('rank', true) as ClubRank;
+    const rawCircleId = interaction.options.getString('circle_id')?.trim() ?? null;
 
-    const existing = await prisma.club.findUnique({ where: { name } });
-    if (existing) {
+    if (await prisma.trackedCircle.findFirst({ where: { guildId, name: { equals: name, mode: 'insensitive' } } })) {
         await interaction.reply({ embeds: [errorEmbed(`A club named **${name}** already exists.`)] });
         return;
     }
+    if (rawCircleId !== null && !/^\d+$/.test(rawCircleId)) {
+        await interaction.reply({ embeds: [errorEmbed('A uma.moe circle ID is a number. Find it at uma.moe/circles.')] });
+        return;
+    }
+    const circleId = rawCircleId === null ? null : BigInt(rawCircleId);
+    if (circleId !== null) {
+        const tracked = await prisma.trackedCircle.findFirst({ where: { guildId, circleId } });
+        if (tracked) {
+            await interaction.reply({ embeds: [errorEmbed(`That uma.moe circle is already **${tracked.name}**.`)] });
+            return;
+        }
+    }
 
-    const club = await prisma.club.create({ data: {name, rank} });
-    await interaction.reply({ embeds: [successEmbed('Club created', `**${club.name}** was created at intended rank **${formatRank(club.rank)}**.`)] });
+    // Tracking needs a uma.moe round trip, which can outlast the 3-second reply window.
+    await interaction.deferReply();
+    const club = await prisma.trackedCircle.create({ data: { guildId, name, rank, circleId } });
+    if (circleId === null) {
+        await interaction.editReply({ embeds: [successEmbed('Club created', `**${club.name}** was created at intended rank **${formatRank(club.rank)}**.`)] });
+        return;
+    }
+
+    try {
+        const result = await syncCircle(club);
+        // Past months import in the background, as with /fans circle add.
+        void backfillOnce(club);
+        await interaction.editReply({
+            embeds: [
+                successEmbed(
+                    'Club created',
+                    `**${result.name}** was created at intended rank **${formatRank(club.rank)}** and its fans are tracked ` +
+                        `(${result.membersSeen} members). Set its quota with \`/fans circle config\`.` +
+                        (result.name !== name ? ` Its name comes from uma.moe, so it is **${result.name}** rather than **${name}**.` : ''),
+                ),
+            ],
+        });
+    } catch (e) {
+        // A bad circle ID must not leave a half-made club behind.
+        await prisma.trackedCircle.delete({ where: { id: club.id } });
+        await interaction.editReply({ embeds: [errorEmbed(`Could not track that circle: ${e instanceof Error ? e.message : String(e)}`)] });
+    }
 }
 
 // ─── Edit form ────────────────────────────────────────────────────────────────
 
 /**
  * `/club edit` opens a form pre-filled with the club's current info. Club
- * Managers get every field; a club's own staff (Trainers and Assistants) get
+ * Managers get rank, headcount, fan count and period, plus the name for a
+ * club without uma.moe tracking (a tracked club's name comes from uma.moe and
+ * is refreshed on every sync) or its home channels for a tracked one: a modal
+ * holds five fields at most. A club's own staff (Trainers and Assistants) get
  * headcount and fan count only, the same split as `/club headcount` and
- * `/club fancount` versus renaming. The custom ID carries the club and which
- * form it is, and the submit checks permission again.
+ * `/club fancount`. The custom ID carries the club and which form it is, and
+ * the submit checks permission again.
  */
 const CLUB_MODAL_PREFIX = 'club:edit:';
 const EDIT_FIELD = {
@@ -256,7 +308,10 @@ const EDIT_FIELD = {
     headcount: 'club:headcount',
     fanCount: 'club:fancount',
     period: 'club:period',
+    home: 'club:home',
 } as const;
+/** Home channels a club may list. Threads inside them count without listing. */
+const MAX_HOME_CHANNELS = 10;
 /** The period choice meaning "a flat total, not per period". */
 const FLAT_TOTAL = 'NONE';
 
@@ -268,11 +323,15 @@ export function isClubModal(customId: string): boolean {
 /** Builds the edit form for a club. `full` adds name and rank (Club Managers). */
 export function buildClubEditModal(club: Club, full: boolean): ModalBuilder {
     const labels: LabelBuilder[] = [];
-    if (full) {
+    if (full && club.circleId === null) {
         labels.push(
             new LabelBuilder()
                 .setLabel('Name')
                 .setTextInputComponent(new TextInputBuilder().setCustomId(EDIT_FIELD.name).setStyle(TextInputStyle.Short).setValue(club.name).setMaxLength(100)),
+        );
+    }
+    if (full) {
+        labels.push(
             new LabelBuilder().setLabel('Rank').setStringSelectMenuComponent(
                 new StringSelectMenuBuilder()
                     .setCustomId(EDIT_FIELD.rank)
@@ -307,6 +366,21 @@ export function buildClubEditModal(club: Club, full: boolean): ModalBuilder {
                 ),
         ),
     );
+    if (full && club.circleId !== null) {
+        const home = new ChannelSelectMenuBuilder()
+            .setCustomId(EDIT_FIELD.home)
+            .setChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildForum)
+            .setRequired(false)
+            .setMinValues(0)
+            .setMaxValues(MAX_HOME_CHANNELS);
+        if (club.homeChannelIds.length > 0) home.setDefaultChannels(...club.homeChannelIds.slice(0, MAX_HOME_CHANNELS));
+        labels.push(
+            new LabelBuilder()
+                .setLabel('Home channels')
+                .setDescription("The club's own channels. Threads inside them count too.")
+                .setChannelSelectMenuComponent(home),
+        );
+    }
     return new ModalBuilder()
         .setCustomId(`${CLUB_MODAL_PREFIX}${club.id}:${full ? 'full' : 'stats'}`)
         .setTitle(`Edit ${club.name}`.slice(0, 45))
@@ -331,7 +405,7 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
     const [clubId, kind] = interaction.customId.slice(CLUB_MODAL_PREFIX.length).split(':');
     const refuse = (text: string) => interaction.reply({ embeds: [errorEmbed(text)], flags: MessageFlags.Ephemeral });
 
-    const club = clubId ? await prisma.club.findUnique({ where: { id: clubId } }) : null;
+    const club = clubId ? await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId ?? '' } }) : null;
     if (!club) return void (await refuse('That club no longer exists.'));
 
     const member = interaction.member as GuildMember;
@@ -340,19 +414,33 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
         return void (await refuse(full ? 'Only Club Managers can rename a club or change its rank.' : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
     }
 
-    const data: { name?: string; rank?: ClubRank; headcount: number; fanCountAmount: number | null; fanCountPeriod: FanCountPeriod | null } = {
+    const data: {
+        name?: string;
+        rank?: ClubRank;
+        homeChannelIds?: string[];
+        headcount: number;
+        fanCountAmount: number | null;
+        fanCountPeriod: FanCountPeriod | null;
+    } = {
         headcount: 0,
         fanCountAmount: null,
         fanCountPeriod: null,
     };
 
-    if (full) {
+    if (full && club.circleId === null) {
         const name = interaction.fields.getTextInputValue(EDIT_FIELD.name).trim();
         if (!name) return void (await refuse('The club needs a name.'));
-        if (name !== club.name && (await prisma.club.findFirst({ where: { name, NOT: { id: club.id } } }))) {
-            return void (await refuse(`A club named **${name}** already exists.`));
-        }
+        const taken = await prisma.trackedCircle.findFirst({
+            where: { guildId: club.guildId, name: { equals: name, mode: 'insensitive' }, NOT: { id: club.id } },
+        });
+        if (taken) return void (await refuse(`A club named **${name}** already exists.`));
         data.name = name;
+    }
+    if (full && club.circleId !== null) {
+        const picked = interaction.fields.getSelectedChannels(EDIT_FIELD.home, false);
+        data.homeChannelIds = picked ? [...picked.keys()] : [];
+    }
+    if (full) {
         const rank = interaction.fields.getStringSelectValues(EDIT_FIELD.rank)[0] as ClubRank | undefined;
         if (rank && RANK_CHOICES.some((r) => r.value === rank)) data.rank = rank;
     }
@@ -373,7 +461,7 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
         data.fanCountPeriod = period && period !== FLAT_TOTAL ? (period as FanCountPeriod) : null;
     }
 
-    const updated = await prisma.club.update({ where: { id: club.id }, data });
+    const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
     await interaction.reply({
         embeds: [
             successEmbed(
@@ -382,6 +470,9 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
                     `**${updated.name}** · rank **${formatRank(updated.rank)}**`,
                     `Headcount: **${updated.headcount}/${MAX_HEADCOUNT}**`,
                     `Fan count: **${formatFanCount(updated.fanCountAmount, updated.fanCountPeriod)}**`,
+                    ...(updated.circleId !== null
+                        ? [`Home channels: ${updated.homeChannelIds.length > 0 ? updated.homeChannelIds.map((id) => `<#${id}>`).join(' ') : 'none'}`]
+                        : []),
                 ].join('\n'),
             ),
         ],
@@ -398,8 +489,9 @@ async function handleDelete(interaction: ChatInputCommandInteraction, member: Gu
     const club = await findClubOrReply(interaction, clubId);
     if (!club) return;
 
-    await prisma.club.delete({ where: { id: club.id } });
-    await interaction.reply({ embeds: [successEmbed('Club deleted', `**${club.name}** and its records were removed.`)] });
+    // Fan snapshots and staff go with it (cascade); the old Club backup table is untouched.
+    await prisma.trackedCircle.delete({ where: { id: club.id } });
+    await interaction.reply({ embeds: [successEmbed('Club deleted', `**${club.name}**, its staff and its fan history were removed.`)] });
 }
 
 async function handleView(interaction: ChatInputCommandInteraction) {
@@ -441,7 +533,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
 
     await interaction.deferReply();
     
-    const clubs = await prisma.club.findMany({ orderBy: { name: 'asc' } });
+    const clubs = await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId! }, orderBy: { name: 'asc' } });
     const buffer = await renderClubList(clubs);
     const attachment = new AttachmentBuilder(buffer, { name: 'club-directory.png' });
     await interaction.editReply({ files: [attachment] });
@@ -458,7 +550,7 @@ async function handleHeadcount(interaction: ChatInputCommandInteraction, member:
     }
 
     const count = interaction.options.getInteger('count', true);
-    const updated = await prisma.club.update({ where: { id: club.id }, data: { headcount: count } });
+    const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data: { headcount: count } });
 
     await interaction.reply({ embeds: [successEmbed('Headcount Updated', `**${updated.name}** headcount is now **${updated.headcount}/${MAX_HEADCOUNT}**.`)] });
 }
@@ -502,7 +594,7 @@ async function handleFancount(interaction: ChatInputCommandInteraction, member: 
         return;
     }
 
-    const updated = await prisma.club.update({
+    const updated = await prisma.trackedCircle.update({
         where: { id: club.id }, data: { fanCountAmount: amount, fanCountPeriod: period },
     });
     await interaction.reply({ embeds: [successEmbed('Fan Count Updated', `**${updated.name}** fan count is now **${formatFanCount(updated.fanCountAmount, updated.fanCountPeriod)}**.`)] });

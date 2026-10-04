@@ -14,7 +14,7 @@ import { prisma } from '../db/prisma';
 import { getClubMembership, isOfficer } from '../lib/permissions';
 import { errorEmbed, successEmbed, infoEmbed } from '../lib/embeds';
 import { autocompleteTrackedCircle } from '../lib/fans/circleAutocomplete';
-import { backfillOnce, currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
+import { TRACKED, adoptUntrackedClub, backfillOnce, currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
 import {
     describeQuota,
@@ -150,13 +150,7 @@ export const data = new SlashCommandBuilder()
                             .setDescription('Where behind-quota alerts go. A thread works.')
                             .addChannelTypes(...REPORT_CHANNEL_TYPES),
                     )
-                    .addBooleanOption((opt) => opt.setName('active').setDescription('Pause or resume syncing'))
-                    .addStringOption((opt) =>
-                        opt
-                            .setName('club')
-                            .setDescription("Link the circle's /club record, so its staff can run /fans club")
-                            .setAutocomplete(true),
-                    ),
+                    .addBooleanOption((opt) => opt.setName('active').setDescription('Pause or resume syncing')),
             )
             .addSubcommand((sub) => sub.setName('list').setDescription('List tracked circles.'))
             .addSubcommand((sub) =>
@@ -195,20 +189,9 @@ const STAFF_CHANNEL_IDS = new Set(
         .filter(Boolean),
 );
 
-/** Choice that unlinks a circle from its club in `/fans circle config club:`. */
-const UNLINK_CLUB = 'none';
-
 export async function autocomplete(interaction: AutocompleteInteraction) {
-    const focused = interaction.options.getFocused(true);
-    if (focused.name === 'circle') {
+    if (interaction.options.getFocused(true).name === 'circle') {
         await autocompleteTrackedCircle(interaction);
-    } else if (focused.name === 'club') {
-        const clubs = await prisma.club.findMany({
-            where: { name: { contains: focused.value, mode: 'insensitive' } },
-            take: 24,
-            orderBy: { name: 'asc' },
-        });
-        await interaction.respond([...clubs.map((c) => ({ name: c.name, value: c.id })), { name: 'None (unlink)', value: UNLINK_CLUB }]);
     }
 }
 
@@ -247,7 +230,7 @@ async function resolveCircle(
     const id = interaction.options.getString('circle');
 
     if (id) {
-        const circle = await prisma.trackedCircle.findFirst({ where: { id, guildId } });
+        const circle = await prisma.trackedCircle.findFirst({ where: { id, guildId, ...TRACKED } });
         if (!circle) {
             await reply(interaction, errorEmbed('That tracked circle could not be found.'));
             return null;
@@ -255,7 +238,7 @@ async function resolveCircle(
         return circle;
     }
 
-    const circles = await prisma.trackedCircle.findMany({ where: { guildId } });
+    const circles = await prisma.trackedCircle.findMany({ where: { guildId, ...TRACKED } });
     if (circles.length === 1) return circles[0]!;
 
     if (required || circles.length > 1) {
@@ -441,7 +424,7 @@ async function handleCheckAll(interaction: ChatInputCommandInteraction) {
     if (!(await requireOfficer(interaction, 'check every circle'))) return;
 
     const circles = await prisma.trackedCircle.findMany({
-        where: { guildId: interaction.guildId!, active: true },
+        where: { guildId: interaction.guildId!, active: true, ...TRACKED },
         orderBy: { name: 'asc' },
     });
     if (circles.length === 0) {
@@ -475,18 +458,31 @@ async function handleCheckAll(interaction: ChatInputCommandInteraction) {
 }
 
 /**
- * Where `/fans club` and `me` may run, and which circles they may be
- * about there: every circle in a staff channel, else the circles that post
- * their report or alerts to this channel or thread. Replies with the reason
- * and returns null anywhere else.
+ * Where `/fans club` and `me` may run, and which clubs they may be about
+ * there. In a staff channel, every tracked club. Elsewhere, the tracked clubs
+ * whose home channels include this channel (or, in a thread, the channel the
+ * thread is in), or that post their report or alerts here. Replies with the
+ * reason and returns null anywhere else.
  */
 async function circlesHere(interaction: ChatInputCommandInteraction): Promise<TrackedCircle[] | null> {
     const guildId = interaction.guildId!;
+    // Only clubs with a uma.moe circle have fan figures to check.
+    const tracked = { guildId, ...TRACKED };
     if (STAFF_CHANNEL_IDS.has(interaction.channelId)) {
-        return prisma.trackedCircle.findMany({ where: { guildId }, orderBy: { name: 'asc' } });
+        return prisma.trackedCircle.findMany({ where: tracked, orderBy: { name: 'asc' } });
     }
+    const channelId = interaction.channelId;
+    const parentId = interaction.channel?.isThread() ? interaction.channel.parentId : null;
     const here = await prisma.trackedCircle.findMany({
-        where: { guildId, OR: [{ reportChannelId: interaction.channelId }, { alertChannelId: interaction.channelId }] },
+        where: {
+            ...tracked,
+            OR: [
+                { reportChannelId: channelId },
+                { alertChannelId: channelId },
+                { homeChannelIds: { has: channelId } },
+                ...(parentId ? [{ homeChannelIds: { has: parentId } }] : []),
+            ],
+        },
         orderBy: { name: 'asc' },
     });
     if (here.length > 0) return here;
@@ -494,32 +490,21 @@ async function circlesHere(interaction: ChatInputCommandInteraction): Promise<Tr
     await reply(
         interaction,
         errorEmbed(
-            `Run this in your circle's report or alert channel${staffChannel ? `, or in <#${staffChannel}>` : ''}. ` +
-                'A Club Manager can set those with `/fans circle config report_channel:`.',
+            `Run this in one of your club's channels${staffChannel ? `, or in <#${staffChannel}>` : ''}. ` +
+                "A Club Manager can set a club's home channels with `/club edit`.",
         ),
     );
     return null;
 }
 
 /**
- * True when the caller may run `/fans club` for a circle: a Club
- * Manager, or a Trainer or Assistant on the `/club` record the circle is
- * linked to.
+ * True when the caller may run `/fans club` for a club: a Club Manager, or one
+ * of the club's staff (Trainer or Assistant, set with `/club member`).
  * Replies with the reason when not.
  */
 async function requireClubTrainer(interaction: ChatInputCommandInteraction, circle: TrackedCircle): Promise<boolean> {
     if (isOfficer(interaction.member as GuildMember)) return true;
-    if (!circle.clubId) {
-        await reply(
-            interaction,
-            errorEmbed(
-                `**${circle.name}** is not linked to a club yet, so only Club Managers can check it. ` +
-                    'A Club Manager can link it with `/fans circle config club:`.',
-            ),
-        );
-        return false;
-    }
-    const membership = await getClubMembership(circle.clubId, interaction.user.id);
+    const membership = await getClubMembership(circle.id, interaction.user.id);
     if (membership) return true;
     await reply(interaction, errorEmbed(`Only **${circle.name}**'s Trainers, Assistants and Club Managers can run this.`));
     return false;
@@ -542,7 +527,7 @@ async function circleForClubCheck(interaction: ChatInputCommandInteraction, pool
 
     const memberships = await prisma.clubMember.findMany({ where: { discordUserId: interaction.user.id }, select: { clubId: true } });
     const clubIds = new Set(memberships.map((m) => m.clubId));
-    const mine = pool.filter((c) => c.clubId !== null && clubIds.has(c.clubId));
+    const mine = pool.filter((c) => clubIds.has(c.id));
     if (mine.length === 1) return mine[0]!;
     await reply(
         interaction,
@@ -723,8 +708,8 @@ async function handleBenchmark(interaction: ChatInputCommandInteraction) {
     // the benchmark is still useful with no club to compare against.
     const named = interaction.options.getString('circle');
     const circle = named
-        ? await prisma.trackedCircle.findFirst({ where: { id: named, guildId: interaction.guildId! } })
-        : await prisma.trackedCircle.findFirst({ where: { guildId: interaction.guildId!, active: true }, orderBy: { createdAt: 'asc' } });
+        ? await prisma.trackedCircle.findFirst({ where: { id: named, guildId: interaction.guildId!, ...TRACKED } })
+        : await prisma.trackedCircle.findFirst({ where: { guildId: interaction.guildId!, active: true, ...TRACKED }, orderBy: { createdAt: 'asc' } });
 
     const buffer = await renderBenchmark(await buildBenchmark(TRAINER_WINDOW_DAYS, circle));
     await interaction.editReply({ files: [new AttachmentBuilder(buffer, { name: 'benchmark.png' })] });
@@ -925,7 +910,9 @@ async function handleCircleAdd(interaction: ChatInputCommandInteraction) {
 
     try {
         const result = await syncCircle(circle);
-        void backfillOnce(circle);
+        // A club made with /club create under the same name takes the tracking.
+        const tracking = await adoptUntrackedClub(circle);
+        void backfillOnce(tracking);
         await reply(
             interaction,
             successEmbed(
@@ -964,9 +951,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
     const alertChannel = interaction.options.getChannel('alert_channel');
     const active = interaction.options.getBoolean('active');
     const period = parsePeriod(interaction.options.getString('period'));
-    const rawClub = interaction.options.getString('club');
-
-    if (rawQuota === null && period === null && !reportChannel && !alertChannel && active === null && rawClub === null) {
+    if (rawQuota === null && period === null && !reportChannel && !alertChannel && active === null) {
         await reply(interaction, errorEmbed('Give at least one setting to change.'));
         return;
     }
@@ -980,23 +965,9 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
         }
     }
 
-    let clubId: string | null | undefined;
-    if (rawClub === UNLINK_CLUB) {
-        clubId = null;
-    } else if (rawClub !== null) {
-        const club = await prisma.club.findUnique({ where: { id: rawClub } });
-        if (!club) {
-            await reply(interaction, errorEmbed('That club could not be found. Pick one from the list.'));
-            return;
-        }
-        clubId = club.id;
-    }
-
     const updated = await prisma.trackedCircle.update({
         where: { id: circle.id },
-        include: { club: true },
         data: {
-            ...(clubId !== undefined ? { clubId } : {}),
             ...(quota !== null ? { quota: BigInt(quota) } : {}),
             ...(period !== null ? { quotaPeriod: period } : {}),
             ...(reportChannel ? { reportChannelId: reportChannel.id } : {}),
@@ -1010,7 +981,6 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
         `Reports: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'not set'}`,
         `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'not set'}`,
         `Syncing: ${updated.active ? 'active' : 'paused'}`,
-        `Club: ${updated.club ? `**${updated.club.name}** (its Trainers and Assistants can run \`/fans club\`)` : 'not linked'}`,
     ];
 
     await reply(interaction, successEmbed(`${updated.name} updated`, lines.join('\n')));
@@ -1018,7 +988,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
 
 async function handleCircleList(interaction: ChatInputCommandInteraction) {
     const circles = await prisma.trackedCircle.findMany({
-        where: { guildId: interaction.guildId! },
+        where: { guildId: interaction.guildId!, ...TRACKED },
         orderBy: { name: 'asc' },
     });
 
@@ -1070,8 +1040,8 @@ async function handleCircleSync(interaction: ChatInputCommandInteraction) {
 
     const named = interaction.options.getString('circle');
     const circles = named
-        ? await prisma.trackedCircle.findMany({ where: { id: named, guildId: interaction.guildId! } })
-        : await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId!, active: true } });
+        ? await prisma.trackedCircle.findMany({ where: { id: named, guildId: interaction.guildId!, ...TRACKED } })
+        : await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId!, active: true, ...TRACKED } });
 
     if (circles.length === 0) {
         await reply(interaction, errorEmbed('No circles to sync.'));

@@ -1,12 +1,14 @@
 import type { AutocompleteInteraction } from 'discord.js';
 import { prisma } from '../../db/prisma';
+import { TRACKED } from './ingest';
 
-/** Autocompletes tracked circles for this guild by name. */
+/** Autocompletes tracked circles (clubs with a uma.moe circle) for this guild by name. */
 export async function autocompleteTrackedCircle(interaction: AutocompleteInteraction): Promise<void> {
     const focused = interaction.options.getFocused().toLowerCase();
 
     const circles = await prisma.trackedCircle.findMany({
-        where: { guildId: interaction.guildId ?? '' },
+        // Fan commands only make sense for clubs with a uma.moe circle.
+        where: { guildId: interaction.guildId ?? '', ...TRACKED },
         orderBy: { name: 'asc' },
         take: 25,
     });

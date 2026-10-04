@@ -10,6 +10,8 @@
  *
  *   DATABASE_URL=postgresql://... npm run test:commands
  */
+import { Collection } from 'discord.js';
+
 const OFFICER_ROLE = 'officer-role';
 process.env.OFFICER_ROLE_IDS = OFFICER_ROLE;
 // A plain channel standing in for #staff-commands.
@@ -60,13 +62,16 @@ interface FakeOptions {
     userId: string;
     officer?: boolean;
     circle?: string;
-    club?: string;
+    /** Any other string options, by name (e.g. `/club create name:`). */
+    strings?: Record<string, string>;
     /** `/uma-id id:` and `remove:` */
     id?: string;
     remove?: boolean;
     /** Channel the command runs in; a thread unless `inThread` is false. */
     channel?: string;
     inThread?: boolean;
+    /** For a thread, the channel it is in. */
+    parent?: string;
 }
 
 function fakeInteraction(opts: FakeOptions, log: Sent[]) {
@@ -77,7 +82,7 @@ function fakeInteraction(opts: FakeOptions, log: Sent[]) {
         user: { id: opts.userId },
         member: { roles: { cache: new Map(opts.officer ? [[OFFICER_ROLE, {}]] : []) } },
         channelId: opts.channel ?? 'c-plain',
-        channel: { isThread: () => opts.inThread ?? opts.channel !== undefined },
+        channel: { isThread: () => opts.inThread ?? opts.channel !== undefined, parentId: opts.parent ?? null },
         deferred: false,
         replied: false,
         inGuild: () => true,
@@ -85,7 +90,7 @@ function fakeInteraction(opts: FakeOptions, log: Sent[]) {
             getSubcommandGroup: () => opts.group ?? null,
             getSubcommand: () => opts.sub,
             getString: (name: string) =>
-                name === 'circle' ? opts.circle ?? null : name === 'club' ? opts.club ?? null : name === 'id' ? opts.id ?? null : null,
+                opts.strings?.[name] ?? (name === 'circle' ? opts.circle ?? null : name === 'id' ? opts.id ?? null : null),
             getBoolean: (name: string) => (name === 'remove' ? opts.remove ?? null : null),
             getChannel: () => null,
             getUser: () => null,
@@ -126,7 +131,6 @@ async function main() {
     const { year, month } = currentGameMonth();
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });
-    await prisma.club.deleteMany({ where: { name: 'Test Checkrose Club' } });
     // 31M a month over at most 31 days is at least 1M a day; 3 days owe ~3M.
     const circle = await prisma.trackedCircle.create({
         data: {
@@ -134,13 +138,14 @@ async function main() {
             reportChannelId: 't-check', alertChannelId: 'c-alert',
         },
     });
-    // Its /club record, with a Trainer and an Assistant.
-    const club = await prisma.club.create({
-        data: {
-            name: 'Test Checkrose Club', rank: 'S',
-            members: { create: [{ discordUserId: 'u-trainer', role: 'TRAINER' }, { discordUserId: 'u-assistant', role: 'ASSISTANT' }] },
-        },
+    // Clubs and circles are one row now: its staff, a Trainer and an Assistant.
+    await prisma.clubMember.createMany({
+        data: [
+            { clubId: circle.id, discordUserId: 'u-trainer', role: 'TRAINER' },
+            { clubId: circle.id, discordUserId: 'u-assistant', role: 'ASSISTANT' },
+        ],
     });
+    const club = circle;
 
     // A second circle with no channels, so `check all` has to post it here.
     const other = await prisma.trackedCircle.create({
@@ -194,7 +199,7 @@ async function main() {
     check('me ranks among current members only', field('Rank'), '2 of 2');
     check('me says how far behind', field('Status')?.startsWith('Behind by **'), true);
 
-    const nowhere = "Run this in your circle's report or alert channel, or in <#c-staff>.";
+    const nowhere = "Run this in one of your club's channels, or in <#c-staff>.";
     check('me in a channel no circle uses is refused', desc(await run({ sub: 'me', userId: 'u-behind' }))?.startsWith(nowhere), true);
     check('me in a thread no circle uses is refused',
         desc(await run({ sub: 'me', userId: 'u-behind', channel: 't-random' }))?.startsWith(nowhere), true);
@@ -241,13 +246,6 @@ async function main() {
         desc(await runUma({ sub: '', userId: 'u-new', remove: true })), '<@u-new> was not linked to a trainer.');
 
     // ── /fans club ────────────────────────────────────────────────────────────
-    const unlinkedClub = await run({ sub: 'club', userId: 'u-trainer', channel: 't-check' });
-    check('club on an unlinked circle is for Club Managers only', desc(unlinkedClub)?.includes('not linked to a club yet'), true);
-
-    const link = await run({ group: 'circle', sub: 'config', userId: 'u-officer', officer: true, circle: circle.id, club: club.id });
-    check('circle config links the club', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } })).clubId, club.id);
-    check('circle config says the staff can now check', link[0]?.embeds?.[0]?.description?.includes('/fans club'), true);
-
     check("club lets the club's Assistant post too",
         (await run({ sub: 'club', userId: 'u-assistant', channel: 't-check' })).some((s) => s.kind === 'edit' && s.files === 1), true);
     check('club refuses someone who is not club staff',
@@ -276,9 +274,6 @@ async function main() {
     check('club does not list the leaver', posted?.content?.includes('Gone'), false);
     check('club posts in the thread, not to the channels', clubCheck.some((s) => s.kind === 'channel'), false);
 
-    await run({ group: 'circle', sub: 'config', userId: 'u-officer', officer: true, circle: circle.id, club: 'none' });
-    check('circle config club:none unlinks', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } })).clubId, null);
-
     // ── /fans all ─────────────────────────────────────────────────────────────
     check('all is for Club Managers', desc(await run({ sub: 'all', userId: 'u-trainer' })), 'Only Club Managers can check every circle.');
 
@@ -302,20 +297,24 @@ async function main() {
 
     // ── /club edit form ───────────────────────────────────────────────────────
     const clubCmd = await import('../src/commands/club');
-    const editable = await prisma.club.update({ where: { id: club.id }, data: { headcount: 8, fanCountAmount: 50, fanCountPeriod: 'MONTH' } });
+    const editable = await prisma.trackedCircle.update({ where: { id: club.id }, data: { rank: 'S', headcount: 8, fanCountAmount: 50, fanCountPeriod: 'MONTH' } });
     type ModalJson = { custom_id: string; components: { label: string; component: { custom_id: string; value?: string; options?: { value: string; default?: boolean }[] } }[] };
     const fullForm = clubCmd.buildClubEditModal(editable, true).toJSON() as unknown as ModalJson;
     const staffForm = clubCmd.buildClubEditModal(editable, false).toJSON() as unknown as ModalJson;
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
-    check('club form for Club Managers has every field', fullForm.components.map((c) => c.label), ['Name', 'Rank', 'Headcount', 'Fan count', 'Fan count period']);
+    check('a tracked club form has home channels, not the uma.moe-owned name', fullForm.components.map((c) => c.label), ['Rank', 'Headcount', 'Fan count', 'Fan count period', 'Home channels']);
     check('club form for staff has the stats only', staffForm.components.map((c) => c.label), ['Headcount', 'Fan count', 'Fan count period']);
-    check('club form is pre-filled', [pre(fullForm, 'Name')?.value, pre(fullForm, 'Headcount')?.value, pre(fullForm, 'Fan count')?.value], ['Test Checkrose Club', '8', '50M']);
+    check('club form is pre-filled', [pre(fullForm, 'Headcount')?.value, pre(fullForm, 'Fan count')?.value], ['8', '50M']);
+    const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B' } });
+    const looseForm = clubCmd.buildClubEditModal(loose, true).toJSON() as unknown as ModalJson;
+    check('an untracked club form has the name instead', looseForm.components.map((c) => c.label), ['Name', 'Rank', 'Headcount', 'Fan count', 'Fan count period']);
+    check('an untracked club form pre-fills the name', pre(looseForm, 'Name')?.value, 'Loose Club');
     check('club form pre-selects rank and period',
         [pre(fullForm, 'Rank')?.options?.find((o) => o.default)?.value, pre(fullForm, 'Fan count period')?.options?.find((o) => o.default)?.value], ['S', 'MONTH']);
     check('club form is routed by its prefix', clubCmd.isClubModal(fullForm.custom_id), true);
 
     /** Submits the club form with the given values, as the given user. */
-    const submitClub = async (customId: string, userId: string, officer: boolean, values: Record<string, string>) => {
+    const submitClub = async (customId: string, userId: string, officer: boolean, values: Record<string, string>, home: string[] = []) => {
         const out: { description?: string | undefined; ephemeral: boolean }[] = [];
         await clubCmd.handleClubModal({
             customId,
@@ -324,20 +323,37 @@ async function main() {
             fields: {
                 getTextInputValue: (id: string) => values[id] ?? '',
                 getStringSelectValues: (id: string) => (values[id] ? [values[id]] : []),
+                getSelectedChannels: () => new Collection(home.map((id) => [id, { id }])),
             },
+            guildId: GUILD,
             reply: async (p: { embeds?: { toJSON(): { description?: string } }[]; flags?: unknown }) =>
                 void out.push({ description: p.embeds?.[0]?.toJSON().description, ephemeral: p.flags !== undefined }),
         } as never);
         return out[0];
     };
-    const reload = () => prisma.club.findUniqueOrThrow({ where: { id: club.id } });
+    const reload = () => prisma.trackedCircle.findUniqueOrThrow({ where: { id: club.id } });
 
     const saved = await submitClub(fullForm.custom_id, 'u-officer', true, {
-        'club:name': 'Test Checkrose Club', 'club:rank': 'A_PLUS', 'club:headcount': '12', 'club:fancount': '0.5M', 'club:period': 'WEEK',
-    });
+        'club:rank': 'A_PLUS', 'club:headcount': '12', 'club:fancount': '0.5M', 'club:period': 'WEEK',
+    }, ['c-room', 'c-room-bot']);
     const afterFull = await reload();
     check('club form saves every field', [afterFull.rank, afterFull.headcount, afterFull.fanCountAmount, afterFull.fanCountPeriod], ['A_PLUS', 12, 0.5, 'WEEK']);
+    check('club form saves home channels', afterFull.homeChannelIds, ['c-room', 'c-room-bot']);
     check('club form confirms publicly', [saved?.ephemeral, saved?.description?.includes('0.5M/week')], [false, true]);
+
+    // Home channels: the room itself, and any thread inside it, now resolve to the club.
+    const inRoom = await run({ sub: 'me', userId: 'u-behind', channel: 'c-room', inThread: false });
+    check('me works in a home channel', inRoom[0]?.embeds?.map((e) => e.title), ['Behind · Checkrose']);
+    const inThreadOfRoom = await run({ sub: 'me', userId: 'u-behind', channel: 't-private', parent: 'c-room' });
+    check('me works in a thread inside a home channel', inThreadOfRoom[0]?.embeds?.map((e) => e.title), ['Behind · Checkrose']);
+    check('a thread elsewhere still does not',
+        desc(await run({ sub: 'me', userId: 'u-behind', channel: 't-private', parent: 'c-other' }))?.startsWith(nowhere), true);
+
+    await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'Looser Club', 'club:rank': 'B', 'club:headcount': '3' });
+    check('an untracked club can be renamed', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: loose.id } })).name, 'Looser Club');
+    check('renaming to a taken name is refused, ignoring case',
+        (await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'checkrose', 'club:rank': 'B', 'club:headcount': '3' }))?.description,
+        'A club named **checkrose** already exists.');
 
     await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:headcount': '13', 'club:fancount': '', 'club:period': 'WEEK' });
     const afterStaff = await reload();
@@ -354,9 +370,38 @@ async function main() {
         (await submitClub(staffForm.custom_id, 'u-trainer', false, { 'club:headcount': '5', 'club:fancount': 'lots' }))?.description?.startsWith('Fan count must be'), true);
     check('refusals leave the club unchanged', (await reload()).headcount, 13);
 
+    // ── Clubs and circles are one thing ───────────────────────────────────────
+    const runClub = async (opts: FakeOptions) => {
+        const log: Sent[] = [];
+        await clubCmd.execute(fakeInteraction(opts, log) as never);
+        return log;
+    };
+    const created = await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'Fresh Club', rank: 'A' } });
+    const fresh = await prisma.trackedCircle.findFirst({ where: { guildId: GUILD, name: 'Fresh Club' } });
+    check('/club create without a circle makes an untracked club', [fresh?.circleId, fresh?.rank], [null, 'A']);
+    check('/club create confirms', created.find((x) => x.kind === 'edit')?.embeds?.[0]?.title, 'Club created');
+    check('/club create refuses a taken name, ignoring case',
+        desc(await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'fresh club', rank: 'B' } })), 'A club named **fresh club** already exists.');
+
+    const allAgain = await run({ sub: 'all', userId: 'u-officer', officer: true });
+    const allTitle = allAgain.filter((x) => x.kind === 'edit').at(-1)?.embeds?.[0]?.title;
+    check('fan checks skip clubs without a uma.moe circle', allTitle, 'Quota check · 1 circle');
+
+    // /fans circle add for a circle whose uma.moe name matches an untracked club
+    // folds into that club instead of making a second one.
+    const { adoptUntrackedClub } = await import('../src/lib/fans/ingest');
+    const added = await prisma.trackedCircle.create({ data: { guildId: GUILD, circleId: BigInt(999990), name: 'fresh CLUB', quota: BigInt(70_000_000) } });
+    await prisma.fanSnapshot.create({ data: { trackedCircleId: added.id, viewerId: BigInt(77), year, month, day: 1, cumulativeFans: BigInt(5) } });
+    const survivor = await adoptUntrackedClub(added);
+    check('the club takes over the tracking', [survivor.id, String(survivor.circleId), String(survivor.quota)], [fresh?.id, '999990', '70000000']);
+    check('the club keeps its own info', survivor.rank, 'A');
+    check('the duplicate row is gone', await prisma.trackedCircle.count({ where: { id: added.id } }), 0);
+    check('its fan data moved to the club', await prisma.fanSnapshot.count({ where: { trackedCircleId: survivor.id } }), 1);
+    const other2 = await prisma.trackedCircle.create({ data: { guildId: GUILD, circleId: BigInt(999991), name: 'No Match' } });
+    check('no same-name club means no change', (await adoptUntrackedClub(other2)).id, other2.id);
+
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });
-    await prisma.club.deleteMany({ where: { id: club.id } });
     await prisma.$disconnect();
 
     console.log(`\n${pass} passed, ${fail} failed`);

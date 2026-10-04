@@ -20,6 +20,13 @@ import {
  * as often as needed and can safely retry after a failure.
  */
 
+/**
+ * Where-clause fragment for clubs whose fans are tracked. Clubs and circles
+ * share one table since 2026-10-04, and a club without a uma.moe circle has
+ * nothing to sync or report, so every fan query spreads this in.
+ */
+export const TRACKED = { circleId: { not: null } } as const;
+
 /** Cutoffs tracked for the benchmark chart. */
 export const BENCHMARK_TIERS = [10, 30, 100] as const;
 
@@ -118,6 +125,9 @@ export async function syncCircle(
     /** False when importing a past month, so its name and rank do not overwrite today's. */
     { updateCircle = true }: { updateCircle?: boolean } = {},
 ): Promise<SyncResult> {
+    if (circle.circleId === null) {
+        throw new Error(`${circle.name} has no uma.moe circle to sync. Add one with \`/club create circle_id:\` or \`/fans circle add\`.`);
+    }
     const circleId = toSafeNumber(circle.circleId);
     const response = await getCircle(circleId, month, year);
 
@@ -179,6 +189,47 @@ export async function syncCircle(
     return { circleId, name, membersSeen: members.length, daysWritten };
 }
 
+/**
+ * After a new tracked circle's first sync, folds it into an existing club of
+ * the same name that has no uma.moe circle yet, so adding tracking for a club
+ * created with `/club create` does not make a second club.
+ *
+ * The match is the synced uma.moe name against club names, ignoring case, and
+ * only when exactly one untracked club has it. The new row's snapshots move to
+ * the club, the new row is removed, and the club takes its circle ID and
+ * tracking settings, in one transaction.
+ *
+ * @returns The row that now tracks the circle: the club, or `circle` itself
+ *          when there was nothing to fold into.
+ */
+export async function adoptUntrackedClub(circle: TrackedCircle): Promise<TrackedCircle> {
+    const fresh = await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } });
+    const clubs = await prisma.trackedCircle.findMany({
+        where: { guildId: fresh.guildId, circleId: null, name: { equals: fresh.name, mode: 'insensitive' }, NOT: { id: fresh.id } },
+    });
+    if (clubs.length !== 1) return fresh;
+    const club = clubs[0]!;
+
+    const [, , adopted] = await prisma.$transaction([
+        prisma.fanSnapshot.updateMany({ where: { trackedCircleId: fresh.id }, data: { trackedCircleId: club.id } }),
+        // Removed before the club takes the circle ID, which must stay unique.
+        prisma.trackedCircle.delete({ where: { id: fresh.id } }),
+        prisma.trackedCircle.update({
+            where: { id: club.id },
+            data: {
+                circleId: fresh.circleId,
+                name: fresh.name,
+                quota: fresh.quota,
+                quotaPeriod: fresh.quotaPeriod,
+                monthlyRank: fresh.monthlyRank,
+                lastSyncedAt: fresh.lastSyncedAt,
+                active: true,
+            },
+        }),
+    ]);
+    return adopted;
+}
+
 /** How many past months a backfill reaches back, at most. */
 export const BACKFILL_MONTHS = 12;
 
@@ -237,7 +288,7 @@ export async function backfillOnce(circle: TrackedCircle): Promise<void> {
 
 /** Syncs every active tracked circle. Individual failures do not stop the run. */
 export async function syncAllCircles(): Promise<{ results: SyncResult[]; errors: string[] }> {
-    const circles = await prisma.trackedCircle.findMany({ where: { active: true } });
+    const circles = await prisma.trackedCircle.findMany({ where: { active: true, ...TRACKED } });
     const results: SyncResult[] = [];
     const errors: string[] = [];
 
