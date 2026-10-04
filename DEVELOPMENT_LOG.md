@@ -4,10 +4,13 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
-## 2026-10-04 — /fans check with no circle checks all of them
+## 2026-10-04 — /fans check all:true checks every circle
 
-`/fans check` used to need a circle when more than one was tracked. Now
-leaving it out checks every active circle in turn: each is synced, then its
+`/fans check` used to need a circle when more than one was tracked. Setting
+`all:true` now checks every active circle in turn. It is opt-in on purpose
+(the club asked for it that way): a blank command still checks the only
+circle or asks which, so nobody posts to every circle's channels by
+accident, and a circle together with `all` is refused. With `all`: each is synced, then its
 report and alert go to its configured channels, or into the current channel
 as a public follow-up when it has none. The person running it gets a private
 summary with one line per circle, and one circle failing does not stop the

@@ -76,8 +76,9 @@ export const data = new SlashCommandBuilder()
             .setName('check')
             .setDescription('Sync from uma.moe now, then post the quota report and behind-quota alert (Club Managers).')
             .addStringOption((opt) =>
-                opt.setName('circle').setDescription('Tracked circle (defaults to every active circle)').setAutocomplete(true),
-            ),
+                opt.setName('circle').setDescription('Tracked circle (defaults to the only one)').setAutocomplete(true),
+            )
+            .addBooleanOption((opt) => opt.setName('all').setDescription('Check every active circle (leave circle empty)')),
     )
     .addSubcommand((sub) =>
         sub
@@ -421,7 +422,7 @@ async function checkCircle(
 /**
  * A quota check on demand: the daily job's sync, report and alert, now.
  *
- * Checks the named circle, or every active circle when none is named. Each is
+ * Checks one circle, or every active circle with `all:true`. Each is
  * synced from uma.moe first so the figures are current, then its report image
  * and behind-quota alert go to its configured channels, exactly as the daily
  * job does; a circle with no report channel gets both in the channel the
@@ -432,14 +433,24 @@ async function checkCircle(
 async function handleCheck(interaction: ChatInputCommandInteraction) {
     if (!(await requireOfficer(interaction, 'run a quota check'))) return;
 
-    const guildId = interaction.guildId!;
-    const named = interaction.options.getString('circle');
-    const circles = named
-        ? await prisma.trackedCircle.findMany({ where: { id: named, guildId } })
-        : await prisma.trackedCircle.findMany({ where: { guildId, active: true }, orderBy: { name: 'asc' } });
-    if (circles.length === 0) {
-        await reply(interaction, errorEmbed(named ? 'That tracked circle could not be found.' : 'No active circles to check.'));
+    // Checking everything is opt-in, so a blank command never posts to every
+    // circle's channels by accident.
+    const all = interaction.options.getBoolean('all') ?? false;
+    if (all && interaction.options.getString('circle')) {
+        await reply(interaction, errorEmbed('Pick a circle or set `all`, not both.'));
         return;
+    }
+    let circles: TrackedCircle[];
+    if (all) {
+        circles = await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId!, active: true }, orderBy: { name: 'asc' } });
+        if (circles.length === 0) {
+            await reply(interaction, errorEmbed('No active circles to check.'));
+            return;
+        }
+    } else {
+        const circle = await resolveCircle(interaction, false);
+        if (!circle) return;
+        circles = [circle];
     }
 
     // One circle with nowhere configured to post: answer right here, publicly.

@@ -50,7 +50,7 @@ function fakeChannel(id: string, log: Sent[]) {
 }
 
 /** The slice of ChatInputCommandInteraction the fans handlers use. */
-function fakeInteraction(opts: { sub: string; userId: string; officer?: boolean; circle?: string }, log: Sent[]) {
+function fakeInteraction(opts: { sub: string; userId: string; officer?: boolean; circle?: string; all?: boolean }, log: Sent[]) {
     const embedsOf = (payload: { embeds?: { toJSON(): Record<string, unknown> }[] }) =>
         payload.embeds?.map((e) => e.toJSON() as SentEmbed);
     const interaction = {
@@ -64,6 +64,7 @@ function fakeInteraction(opts: { sub: string; userId: string; officer?: boolean;
             getSubcommandGroup: () => null,
             getSubcommand: () => opts.sub,
             getString: (name: string) => (name === 'circle' ? opts.circle ?? null : null),
+            getBoolean: (name: string) => (name === 'all' ? opts.all ?? null : null),
             getUser: () => null,
         },
         client: {
@@ -187,9 +188,15 @@ async function main() {
     check('check posts the alert to the alert channel', toAlert?.users, ['u-behind']);
     check('check confirms where it posted', confirm?.embeds?.[0]?.description?.includes('<#c-report>'), true);
 
-    // No circle named: every active circle. Checkrose has channels; Otherrose
+    // Blank does not mean everything: with two circles it asks which.
+    const blank = await run({ sub: 'check', userId: 'u-officer', officer: true });
+    check('check with nothing set asks which circle', blank[0]?.embeds?.[0]?.description?.includes('several circles'), true);
+    const conflict = await run({ sub: 'check', userId: 'u-officer', officer: true, all: true, circle: circle.id });
+    check('check refuses a circle and all together', conflict[0]?.embeds?.[0]?.description, 'Pick a circle or set `all`, not both.');
+
+    // all:true checks every active circle. Checkrose has channels; Otherrose
     // has none, so its report comes here as a public follow-up.
-    const all = await run({ sub: 'check', userId: 'u-officer', officer: true });
+    const all = await run({ sub: 'check', userId: 'u-officer', officer: true, all: true });
     const edits = all.filter((s) => s.kind === 'edit');
     const followUps = all.filter((s) => s.kind === 'followUp');
     const summary = edits[edits.length - 1]?.embeds?.[0];
@@ -201,7 +208,7 @@ async function main() {
     check('check all names each circle', ['Checkrose', 'Otherrose'].every((n) => summary?.description?.includes(n)), true);
 
     await prisma.trackedCircle.update({ where: { id: other.id }, data: { active: false } });
-    const activeOnly = await run({ sub: 'check', userId: 'u-officer', officer: true });
+    const activeOnly = await run({ sub: 'check', userId: 'u-officer', officer: true, all: true });
     check('check all skips paused circles', activeOnly.some((s) => s.kind === 'followUp'), false);
 
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
