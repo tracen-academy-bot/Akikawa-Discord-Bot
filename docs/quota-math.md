@@ -145,6 +145,19 @@ That gives the rules in `metrics.ts`:
   carries forward and the next snapshot catches up. None were seen in the
   September scan, but the rule costs nothing.
 
+The probe (31 circles, September and October) found 83 one-member gaps, all
+in three high-churn circles, and the ones cross-checked were members hopping
+to another circle and back, not missed scrapes. So treating a one-member gap
+as time outside the circle is correct, not merely cautious. In the user's
+circle, Primrose (130718412), the rule leaves exactly 27 current members on
+3 October, matching uma.moe's `member_count`.
+
+**Open: the last day of a month.** A month's index 30 often differs from
+`next_month_start`, which equals the next month's index 0 (they matched for
+273 of 908 September rows). Fans earned between those two snapshots fall in
+neither month here. Whether uma.moe's own past-month "Monthly Gain" uses
+`next_month_start` as the end value has not been checked.
+
 Formally, member $i$ is in the circle on game day $d$ when they have a value at
 both index $d-1$ and index $d$ (an index nobody has counts as having one).
 $T_i$ is the sum of $\text{daily\_fans}[d] - \text{daily\_fans}[d-1]$ over
