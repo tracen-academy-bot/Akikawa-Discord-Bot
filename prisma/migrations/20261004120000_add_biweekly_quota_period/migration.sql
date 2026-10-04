@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "QuotaPeriod" ADD VALUE 'BIWEEKLY' BEFORE 'MONTH';

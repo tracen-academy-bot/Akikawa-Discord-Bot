@@ -20,6 +20,7 @@ enum ClubRank {
 enum QuotaPeriod {
     DAY
     WEEK
+    BIWEEKLY
     MONTH
 }
 

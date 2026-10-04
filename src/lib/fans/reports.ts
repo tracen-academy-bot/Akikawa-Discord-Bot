@@ -1,7 +1,16 @@
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { BENCHMARK_TIERS, currentGameMonth, loadBenchmarkHistory, loadCircleProgress } from './ingest';
-import { daysInCalendarMonth, toSafeNumber, type CircleProgress, quotaPerDayFor, monthGains } from './metrics';
+import {
+    circleSnapshots,
+    DAILY_FANS_LENGTH,
+    daysInCalendarMonth,
+    isCurrentMember,
+    monthGains,
+    quotaPerDayFor,
+    toSafeNumber,
+    type CircleProgress,
+} from './metrics';
 import type { TrainerReportData } from '../image/renderTrainerReport';
 import type { BenchmarkData } from '../image/renderBenchmark';
 
@@ -24,6 +33,24 @@ export async function listCircleMonths(circle: TrackedCircle): Promise<{ year: n
         orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
     return rows.map((r) => ({ year: r.year, month: r.month }));
+}
+
+/**
+ * Every member's lifetime snapshots for one month, keyed by viewer ID, as raw
+ * `daily_fans` arrays (stored day k is index k-1).
+ */
+async function loadMonthRaw(circle: TrackedCircle, year: number, month: number): Promise<Map<string, number[]>> {
+    const rows = await prisma.fanSnapshot.findMany({
+        where: { trackedCircleId: circle.id, year, month },
+        select: { viewerId: true, day: true, cumulativeFans: true },
+    });
+    const raw = new Map<string, number[]>();
+    for (const row of rows) {
+        const series = raw.get(String(row.viewerId)) ?? new Array<number>(DAILY_FANS_LENGTH).fill(0);
+        series[row.day - 1] = toSafeNumber(row.cumulativeFans);
+        raw.set(String(row.viewerId), series);
+    }
+    return raw;
 }
 
 /** Circle progress for the current game month, or null if nothing is ingested. */
@@ -49,6 +76,9 @@ export function formatReportDate(year: number, month: number, day: number): stri
  * Gains are differences between consecutive cumulative totals. The day before
  * the window is read as well, so the first plotted day shows a true gain rather
  * than the whole month-to-date total.
+ *
+ * Returns null for a trainer who has left the circle: leavers are not counted
+ * anywhere, the same rule the circle report applies.
  */
 export async function buildTrainerReport(
     circle: TrackedCircle,
@@ -68,8 +98,12 @@ export async function buildTrainerReport(
 
     if (snapshots.length === 0) return null;
 
+    // The whole circle's snapshot days tell a skipped scrape from a day this
+    // trainer was out of the circle, and whether they are still in it.
+    const scraped = circleSnapshots([...(await loadMonthRaw(circle, year, month)).values()]);
+
     // Snapshot rows hold lifetime counts; stored day k is index k-1.
-    const raw = new Array<number>(31).fill(0);
+    const raw = new Array<number>(DAILY_FANS_LENGTH).fill(0);
     let trainerName = viewerId.toString();
     let shameScore: number | null = null;
     let lastUpdated: Date | null = null;
@@ -81,9 +115,12 @@ export async function buildTrainerReport(
         lastUpdated = snapshot.recordedAt;
     }
 
-    // This month's gains by game day. Missed syncs carry forward inside
-    // monthGains, so they read as zero-gain days rather than spikes.
-    const earned = monthGains(raw);
+    if (!isCurrentMember(raw, scraped)) return null;
+
+    // This month's gains by game day, counting only days in the circle. Missed
+    // scrapes carry forward inside monthGains, so they read as zero-gain days
+    // rather than spikes.
+    const earned = monthGains(raw, scraped);
     const lastDay = earned.lastDay;
     const earnedThrough = (day: number) => (day < 1 ? 0 : (earned.gains[day - 1] ?? 0));
     const gainOn = (day: number) => Math.max(0, earnedThrough(day) - earnedThrough(day - 1));
@@ -136,24 +173,16 @@ export async function buildTrainerReport(
 
 /**
  * The club's own fans-per-member-per-day by game day, for overlaying on the
- * benchmark. Member count is taken per day, so a mid-month join or leave does
- * not distort the rate for the days before it.
+ * benchmark. Only current members count, and member count is taken per day,
+ * so a mid-month join does not distort the rate for the days before it.
  */
 async function clubRateByDay(circle: TrackedCircle): Promise<Record<number, number>> {
     const { year, month } = currentGameMonth();
-    const rows = await prisma.fanSnapshot.findMany({
-        where: { trackedCircleId: circle.id, year, month },
-        select: { viewerId: true, day: true, cumulativeFans: true },
-    });
 
-    // Snapshots are lifetime counts; rates need this month's gains per member.
-    const raw = new Map<string, number[]>();
-    for (const row of rows) {
-        const series = raw.get(String(row.viewerId)) ?? new Array<number>(31).fill(0);
-        series[row.day - 1] = toSafeNumber(row.cumulativeFans);
-        raw.set(String(row.viewerId), series);
-    }
-    const members = [...raw.values()].map(monthGains);
+    // Snapshots are lifetime counts; rates need fans earned in the circle.
+    const raws = [...(await loadMonthRaw(circle, year, month)).values()];
+    const scraped = circleSnapshots(raws);
+    const members = raws.filter((r) => isCurrentMember(r, scraped)).map((r) => monthGains(r, scraped));
     const lastDay = Math.max(0, ...members.map((g) => g.lastDay));
 
     // Keyed by game day, the same day number the benchmark history uses

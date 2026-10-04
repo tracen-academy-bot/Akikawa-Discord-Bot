@@ -4,6 +4,7 @@ import { getCircle, getTopCircles, isConfigured } from '../umamoe/client';
 import type { UmaCircleMember } from '../umamoe/types';
 import {
     computeCircleProgress,
+    DAILY_FANS_LENGTH,
     daysInCalendarMonth,
     toSafeNumber,
     type CircleProgress,
@@ -325,7 +326,7 @@ export async function loadCircleProgress(
             series = {
                 viewerId: toSafeNumber(snapshot.viewerId),
                 trainerName: snapshot.trainerName ?? key,
-                dailyFans: new Array<number>(31).fill(0),
+                dailyFans: new Array<number>(DAILY_FANS_LENGTH).fill(0),
                 shameScore: snapshot.shameScore,
             };
             byViewer.set(key, series);

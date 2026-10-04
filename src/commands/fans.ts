@@ -25,12 +25,13 @@ import { renderBenchmark } from '../lib/image/renderBenchmark';
 const QUOTA_PERIOD_CHOICES = [
     { name: 'Daily', value: 'DAY' },
     { name: 'Weekly (days 1-7, 8-14, ... of the month)', value: 'WEEK' },
+    { name: 'Biweekly (days 1-14, 15-28, ... of the month)', value: 'BIWEEKLY' },
     { name: 'Monthly', value: 'MONTH' },
 ] as const;
 
 /** Narrows a command option to a quota period, or null when absent or unknown. */
 export function parsePeriod(value: string | null | undefined): QuotaPeriod | null {
-    return value === 'DAY' || value === 'WEEK' || value === 'MONTH' ? value : null;
+    return value === 'DAY' || value === 'WEEK' || value === 'BIWEEKLY' || value === 'MONTH' ? value : null;
 }
 
 /**

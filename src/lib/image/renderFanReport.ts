@@ -201,7 +201,7 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number
 
 /**
  * Header line: report kind, window, configured quota and per-day rate. A short
- * final week says its goal was scaled, so a smaller target never reads as a
+ * final week or two-week stretch says its goal was scaled, so a smaller target never reads as a
  * mistake.
  */
 function reportSubtitle(p: CircleProgress): string {
@@ -210,6 +210,7 @@ function reportSubtitle(p: CircleProgress): string {
     parts.push(`day ${p.daysElapsed} of ${p.daysInMonth}`, `quota ${describeQuota(p.quota, p.period)} per member`);
     const windowDays = p.windowEnd - p.windowStart + 1;
     if (p.period === 'WEEK' && windowDays < 7) parts.push(`${windowDays}-day week, goal ${formatCompactFans(p.effectiveQuota)}`);
+    if (p.period === 'BIWEEKLY' && windowDays < 14) parts.push(`${windowDays}-day stretch, goal ${formatCompactFans(p.effectiveQuota)}`);
     if (p.period !== 'DAY') parts.push(`${formatCompactFans(p.quotaPerDay)}/day`);
     return parts.join(' · ');
 }

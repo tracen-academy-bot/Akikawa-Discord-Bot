@@ -4,6 +4,38 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — Leavers no longer count; fans count only while in the circle; biweekly quotas
+
+People who had left a circle were still in its report. uma.moe keeps a leaver
+in that month's member list with zeros from the day they left, and the bot
+never deleted the rows it had already stored, so every leaver kept their
+partial month in the table, the circle total and the circle target. A data
+probe of 30 top circles' September payloads confirmed the shape (leavers
+trailing zeros, joiners leading zeros, no mid-month gap shared by a whole
+circle) and showed two things the spec does not: `daily_fans` has 32
+entries, not 31, and a member can carry negative values in a circle they are
+not really in. Negatives were already dropped at ingest.
+
+`metrics.ts` now works out membership from the snapshots themselves.
+`circleSnapshots` marks which indices the circle has at all, and
+`isCurrentMember` drops anyone without a value at the latest one, before any
+figure is computed. `monthGains` takes that mask and counts a day only when
+the member had a snapshot at both ends of it, so a joiner counts from
+joining, a returning member loses the gap and anything earned during it, and
+a gap the whole circle shares still reads as a skipped scrape that catches
+up. Quota days follow the same mask. The trainer report returns nothing for
+a leaver, and the benchmark's club line uses current members only. For
+members present all month nothing changes, so the 24 reference rows still
+reproduce. Past months follow the same rule, so a September report no longer
+lists people who left during September.
+
+A BIWEEKLY quota period joins DAY, WEEK and MONTH: days 1-14, 15-28, then a
+2-3 day stub whose goal scales, the same restart-on-the-1st rule as weeks.
+The enum migration only adds a value. Windows are labelled by the weekly
+weeks they cover, so the stub reads "Week 5 · days 29–31" in both modes.
+
+---
+
 ## 2026-10-01 — Fans this month were lifetime totals; hourly sync and history backfill
 
 Production showed fish@duck with 1,122,234,894 fans on game day 1, while
