@@ -4,6 +4,19 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-04 — /fans check with no circle checks all of them
+
+`/fans check` used to need a circle when more than one was tracked. Now
+leaving it out checks every active circle in turn: each is synced, then its
+report and alert go to its configured channels, or into the current channel
+as a public follow-up when it has none. The person running it gets a private
+summary with one line per circle, and one circle failing does not stop the
+rest. Naming a circle checks only that one, as before. Discord turns the
+first follow-up after a deferred reply into an edit of that reply, so the
+private reply is filled in before the first follow-up is sent.
+
+---
+
 ## 2026-10-04 — Daily, weekly and biweekly quotas are checkpoints, not resets
 
 The first version of quota periods measured each week or day on its own:

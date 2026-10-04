@@ -30,7 +30,7 @@ interface SentEmbed {
     fields?: { name: string; value: string }[];
 }
 interface Sent {
-    kind: 'reply' | 'defer' | 'edit' | 'channel';
+    kind: 'reply' | 'defer' | 'edit' | 'followUp' | 'channel';
     channelId?: string | undefined;
     ephemeral?: boolean | undefined;
     content?: string | undefined;
@@ -79,6 +79,9 @@ function fakeInteraction(opts: { sub: string; userId: string; officer?: boolean;
         },
         async editReply(payload: { content?: string; files?: unknown[]; embeds?: { toJSON(): Record<string, unknown> }[]; allowedMentions?: { users?: string[] } }) {
             log.push({ kind: 'edit', content: payload.content, files: payload.files?.length ?? 0, embeds: embedsOf(payload), users: payload.allowedMentions?.users });
+        },
+        async followUp(payload: { content?: string; files?: unknown[]; flags?: unknown; allowedMentions?: { users?: string[] } }) {
+            log.push({ kind: 'followUp', ephemeral: payload.flags !== undefined, content: payload.content, files: payload.files?.length ?? 0, users: payload.allowedMentions?.users });
         },
     };
     return interaction;
@@ -183,6 +186,23 @@ async function main() {
     check('check posts the image to the report channel', toReport?.files, 1);
     check('check posts the alert to the alert channel', toAlert?.users, ['u-behind']);
     check('check confirms where it posted', confirm?.embeds?.[0]?.description?.includes('<#c-report>'), true);
+
+    // No circle named: every active circle. Checkrose has channels; Otherrose
+    // has none, so its report comes here as a public follow-up.
+    const all = await run({ sub: 'check', userId: 'u-officer', officer: true });
+    const edits = all.filter((s) => s.kind === 'edit');
+    const followUps = all.filter((s) => s.kind === 'followUp');
+    const summary = edits[edits.length - 1]?.embeds?.[0];
+    check('check all keeps the summary private', all[0]?.ephemeral, true);
+    check('check all fills the reply before any follow-up', all.findIndex((s) => s.kind === 'edit') < all.findIndex((s) => s.kind === 'followUp'), true);
+    check('check all posts Checkrose to its channel', all.some((s) => s.kind === 'channel' && s.channelId === 'c-report'), true);
+    check('check all posts Otherrose here, publicly', followUps.map((f) => [f.files, f.ephemeral]), [[1, false]]);
+    check('check all summarises both circles', summary?.title, 'Quota check · 2 circles');
+    check('check all names each circle', ['Checkrose', 'Otherrose'].every((n) => summary?.description?.includes(n)), true);
+
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { active: false } });
+    const activeOnly = await run({ sub: 'check', userId: 'u-officer', officer: true });
+    check('check all skips paused circles', activeOnly.some((s) => s.kind === 'followUp'), false);
 
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });

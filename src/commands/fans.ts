@@ -76,7 +76,7 @@ export const data = new SlashCommandBuilder()
             .setName('check')
             .setDescription('Sync from uma.moe now, then post the quota report and behind-quota alert (Club Managers).')
             .addStringOption((opt) =>
-                opt.setName('circle').setDescription('Tracked circle (defaults to the only one)').setAutocomplete(true),
+                opt.setName('circle').setDescription('Tracked circle (defaults to every active circle)').setAutocomplete(true),
             ),
     )
     .addSubcommand((sub) =>
@@ -361,62 +361,123 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
     });
 }
 
+/** A report as posted into the channel the command ran in. */
+type CheckPost = { content: string; files: AttachmentBuilder[]; allowedMentions: { users: string[] } };
+
 /**
- * A quota check on demand: the daily job's sync, report and alert, now.
+ * Refreshes one circle from uma.moe for a quota check.
  *
- * Syncs the circle from uma.moe first so the figures are current, then posts
- * the report image and the behind-quota alert to the circle's configured
- * channels, exactly as the daily job does. A circle with no report channel
- * gets both in the channel the command was run in. If the sync fails, the
- * check still reports from the last stored data and says so.
+ * @returns A note when the check has to fall back on stored data, else ''.
  */
-async function handleCheck(interaction: ChatInputCommandInteraction) {
-    if (!(await requireOfficer(interaction, 'run a quota check'))) return;
-    const circle = await resolveCircle(interaction, false);
-    if (!circle) return;
-
-    // Posting elsewhere: keep the confirmation private. Posting here: public.
-    const elsewhere = Boolean(circle.reportChannelId);
-    await interaction.deferReply(elsewhere ? { flags: MessageFlags.Ephemeral } : {});
-
-    let syncNote = '';
-    if (!isConfigured()) {
-        syncNote = 'No uma.moe API key is set, so this uses the last stored data.';
-    } else {
-        try {
-            await syncCircle(circle);
-        } catch (e) {
-            syncNote = `Sync failed (${e instanceof Error ? e.message : String(e)}), so this uses the last stored data.`;
-        }
+async function syncForCheck(circle: TrackedCircle): Promise<string> {
+    if (!isConfigured()) return 'No uma.moe API key is set, so this uses the last stored data.';
+    try {
+        await syncCircle(circle);
+        return '';
+    } catch (e) {
+        return `Sync failed (${e instanceof Error ? e.message : String(e)}), so this uses the last stored data.`;
     }
-    const fresh = await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } });
+}
 
-    if (elsewhere) {
+/**
+ * Checks one circle: sync, then post its report and alert to its configured
+ * channels, or hand them to `postHere` when it has no report channel.
+ *
+ * @returns One summary line for the person who ran the check.
+ */
+async function checkCircle(
+    interaction: ChatInputCommandInteraction,
+    circle: TrackedCircle,
+    postHere: (post: CheckPost) => Promise<void>,
+): Promise<string> {
+    const syncNote = await syncForCheck(circle);
+    const fresh = await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } });
+    const withNote = (line: string) => [line, syncNote].filter(Boolean).join(' ');
+
+    if (fresh.reportChannelId) {
         const posted = await postReport(interaction.client, fresh.id);
         if (!posted) {
-            await reply(interaction, errorEmbed(`Could not post to <#${fresh.reportChannelId}>. Check the bot can send messages there, or that **${fresh.name}** has data this month.`));
-            return;
+            return withNote(`**${fresh.name}** — could not post to <#${fresh.reportChannelId}>. Check the bot can send messages there, or that the circle has data this month.`);
         }
         const alertNote =
             posted.behindCount === 0
-                ? 'Nobody is behind.'
+                ? 'nobody is behind.'
                 : posted.alerted
                   ? `${posted.behindCount} behind, alerted in <#${fresh.alertChannelId}>.`
-                  : `${posted.behindCount} behind. No alert channel is set, so nobody was tagged.`;
-        await reply(interaction, successEmbed('Quota check posted', [`Report posted in <#${fresh.reportChannelId}>.`, alertNote, syncNote].filter(Boolean).join('\n')));
-        return;
+                  : `${posted.behindCount} behind; no alert channel is set, so nobody was tagged.`;
+        return withNote(`**${fresh.name}** — report posted in <#${fresh.reportChannelId}>; ${alertNote}`);
     }
 
     const report = await buildCircleReport(fresh);
-    if (!report) {
-        await reply(interaction, errorEmbed(`No fan data for **${fresh.name}** this month yet.${syncNote ? ` ${syncNote}` : ''}`));
-        return;
-    }
-    await interaction.editReply({
+    if (!report) return withNote(`**${fresh.name}** — no fan data this month yet.`);
+    await postHere({
         content: [report.alert?.content ?? `**${fresh.name}** — nobody is behind quota.`, syncNote].filter(Boolean).join('\n'),
         files: [report.image],
         allowedMentions: { users: report.alert?.users ?? [] },
     });
+    return `**${fresh.name}** — posted here; ${report.behindCount === 0 ? 'nobody is behind.' : `${report.behindCount} behind.`}`;
+}
+
+/**
+ * A quota check on demand: the daily job's sync, report and alert, now.
+ *
+ * Checks the named circle, or every active circle when none is named. Each is
+ * synced from uma.moe first so the figures are current, then its report image
+ * and behind-quota alert go to its configured channels, exactly as the daily
+ * job does; a circle with no report channel gets both in the channel the
+ * command was run in. The person running it gets a private summary. If a
+ * sync fails, that circle is reported from the last stored data and says so;
+ * one circle failing never stops the others.
+ */
+async function handleCheck(interaction: ChatInputCommandInteraction) {
+    if (!(await requireOfficer(interaction, 'run a quota check'))) return;
+
+    const guildId = interaction.guildId!;
+    const named = interaction.options.getString('circle');
+    const circles = named
+        ? await prisma.trackedCircle.findMany({ where: { id: named, guildId } })
+        : await prisma.trackedCircle.findMany({ where: { guildId, active: true }, orderBy: { name: 'asc' } });
+    if (circles.length === 0) {
+        await reply(interaction, errorEmbed(named ? 'That tracked circle could not be found.' : 'No active circles to check.'));
+        return;
+    }
+
+    // One circle with nowhere configured to post: answer right here, publicly.
+    const single = circles.length === 1 && !circles[0]!.reportChannelId;
+    if (single) {
+        await interaction.deferReply();
+        let posted = false;
+        const line = await checkCircle(interaction, circles[0]!, async (post) => {
+            await interaction.editReply(post);
+            posted = true;
+        });
+        if (!posted) await reply(interaction, errorEmbed(line));
+        return;
+    }
+
+    // Otherwise a private summary. Reports for circles without a channel go
+    // here as public follow-ups. Discord turns the first follow-up after a
+    // deferred reply into an edit of it, so the private reply is filled in
+    // before any follow-up is sent.
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    let acknowledged = false;
+    const postHere = async (post: CheckPost) => {
+        if (!acknowledged) {
+            await interaction.editReply({ embeds: [infoEmbed('Quota check', 'Posting reports below.')] });
+            acknowledged = true;
+        }
+        await interaction.followUp(post);
+    };
+
+    const lines: string[] = [];
+    for (const circle of circles) {
+        try {
+            lines.push(await checkCircle(interaction, circle, postHere));
+        } catch (e) {
+            lines.push(`**${circle.name}** — failed: ${e instanceof Error ? e.message : String(e)}`);
+        }
+    }
+    await interaction.editReply({ embeds: [successEmbed(`Quota check · ${circles.length} circle${circles.length === 1 ? '' : 's'}`, lines.join('\n'))] });
 }
 
 /**
