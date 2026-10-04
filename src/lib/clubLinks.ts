@@ -1,40 +1,39 @@
-import { ChannelType } from 'discord.js';
 import { prisma } from '../db/prisma';
 
 /**
- * A club's Discord roles and channels, found by name.
+ * A club's staff roles, found by name.
  *
- * The server already has roles like "Cosmos Trainer" and "Cosmos Assistant"
- * and channels like `#primrose-` and `#primrose-bot-`. Rather than make Club
- * Managers list them again, the bot reads the server's roles and channels and
- * matches them to clubs by name. A Club Manager can override either list with
+ * The server already gives club staff roles like "Cosmos Trainer" and
+ * "Cosmos Assistant". Rather than make Club Managers add every Trainer and
+ * Assistant with `/club member`, the bot reads the server's roles and matches
+ * them to clubs by name. A Club Manager can override the list with
  * `/club edit`; a club with a stored list uses that list only, and a club
  * with an empty one uses the name matches.
  *
  * Matching works on words: names are lower-cased, accents and emoji dropped,
  * and split on anything that is not a letter or digit. A club matches a role
- * or channel when the club's words, run together, equal a run of the
- * target's words run together. So "Cosmos" matches "Cosmos Trainer" and
- * `#cosmos-chat`, "Alt Lair" matches `#altlair`, and "First Room" matches
- * `#first_room`, but "Cosmos" does not match `#cosmoschat` or "Cosmo Trainer".
- * When one club's match sits inside a longer club's match, the longer one
- * wins, so "Cosmos II Trainer" goes to "Cosmos II" and not to "Cosmos". Matches
- * in different parts of the name all count, so `#cosmos-primrose` belongs to
- * both Cosmos and Primrose (a channel two clubs share).
+ * when the club's words, run together, equal a run of the role's words run
+ * together. So "Cosmos" matches "Cosmos Trainer" and "Alt Lair" matches
+ * "AltLair Assistant", but "Cosmos" does not match "CosmosX Trainer" or
+ * "Cosmo Trainer". When one club's match sits inside a longer club's match,
+ * the longer one wins, so "Cosmos II Trainer" goes to "Cosmos II" and not to
+ * "Cosmos". Matches in different parts of the name all count, so a
+ * "Cosmos Primrose Trainer" role belongs to both clubs.
  *
  * A role must also have a staff word in it (Trainer or Assistant), so a
  * plain "Cosmos" member role does not make every member club staff.
+ *
+ * Home channels are not matched by name (yet); they are set with `/club edit`.
  */
 
 /** The parts of a club this module reads. */
 export interface LinkableClub {
     id: string;
     name: string;
-    homeChannelIds: string[];
     staffRoleIds: string[];
 }
 
-/** The parts of a role or channel this module reads. */
+/** The parts of a role this module reads. */
 export interface NamedThing {
     id: string;
     name: string;
@@ -44,15 +43,12 @@ export interface NamedThing {
 export interface LinkableGuild {
     id: string;
     roles: { cache: { values(): Iterable<NamedThing> } };
-    channels: { cache: { values(): Iterable<NamedThing & { type: ChannelType }> } };
 }
 
 /** Words that say what a role is for. */
 const STAFF_WORDS = new Set(['trainer', 'trainers', 'assistant', 'assistants']);
 /** Words left out of a club's name when matching, unless nothing else is left. */
 const GENERIC_WORDS = new Set(['the', 'club', 'circle']);
-/** Channel types a club's home can be. Threads count through their channel. */
-const HOME_TYPES = new Set<ChannelType>([ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildForum]);
 
 /** Splits a name into lower-case words, dropping accents, emoji and punctuation. */
 export function nameWords(name: string): string[] {
@@ -97,7 +93,7 @@ function strictlyCovers(outer: Span, inner: Span): boolean {
 }
 
 /**
- * The clubs a role or channel name belongs to: those whose name it contains,
+ * The clubs a role name belongs to: those whose name it contains,
  * leaving out a club whose every match sits inside a longer club's match.
  * Empty when none match.
  */
@@ -124,21 +120,7 @@ export function matchedStaffRoleIds(club: LinkableClub, clubs: LinkableClub[], r
     return ids;
 }
 
-/** The text, announcement and forum channels whose names match `club`, by ID. */
-export function matchedHomeChannelIds(
-    club: LinkableClub,
-    clubs: LinkableClub[],
-    channels: Iterable<NamedThing & { type: ChannelType }>,
-): string[] {
-    const ids: string[] = [];
-    for (const channel of channels) {
-        if (!HOME_TYPES.has(channel.type)) continue;
-        if (clubsForName(clubs, channel.name).some((c) => c.id === club.id)) ids.push(channel.id);
-    }
-    return ids;
-}
-
-/** A club's roles or channels, and whether they were set by hand or matched by name. */
+/** A club's roles (or channels), and whether they were set by hand or matched by name. */
 export interface Links {
     ids: string[];
     matched: boolean;
@@ -150,17 +132,11 @@ export function staffRolesOf(club: LinkableClub, clubs: LinkableClub[], guild: L
     return { ids: matchedStaffRoleIds(club, clubs, guild.roles.cache.values()), matched: true };
 }
 
-/** A club's home channels: the stored list, or the name matches when it is empty. */
-export function homeChannelsOf(club: LinkableClub, clubs: LinkableClub[], guild: LinkableGuild): Links {
-    if (club.homeChannelIds.length > 0) return { ids: club.homeChannelIds, matched: false };
-    return { ids: matchedHomeChannelIds(club, clubs, guild.channels.cache.values()), matched: true };
-}
-
 /** Every club in a guild, for matching. Matching needs all of them to pick the longest name. */
 export function guildClubs(guildId: string): Promise<LinkableClub[]> {
     return prisma.trackedCircle.findMany({
         where: { guildId },
-        select: { id: true, name: true, homeChannelIds: true, staffRoleIds: true },
+        select: { id: true, name: true, staffRoleIds: true },
     });
 }
 

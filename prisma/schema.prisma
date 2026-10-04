@@ -143,7 +143,6 @@ model TrackedCircle {
     lastSyncedAt    DateTime?
     /// The club's own channels. `/fans club` and `/fans me` work in these and
     /// in any thread inside them, as well as in the report and alert channels.
-    /// Empty means the channels whose names match the club's (see clubLinks.ts).
     homeChannelIds  String[]  @default([])
     /// Discord roles whose holders are the club's staff, like `/club member`.
     /// Empty means the Trainer and Assistant roles whose names match the club's.

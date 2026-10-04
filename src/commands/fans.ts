@@ -12,7 +12,7 @@ import {
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { isClubStaff, isOfficer, type StaffCandidate } from '../lib/permissions';
-import { guildClubs, homeChannelsOf, type LinkableGuild } from '../lib/clubLinks';
+import { guildClubs } from '../lib/clubLinks';
 import { errorEmbed, successEmbed, infoEmbed } from '../lib/embeds';
 import { autocompleteTrackedCircle } from '../lib/fans/circleAutocomplete';
 import { TRACKED, adoptUntrackedClub, backfillOnce, currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
@@ -462,26 +462,29 @@ async function handleCheckAll(interaction: ChatInputCommandInteraction) {
  * Where `/fans club` and `me` may run, and which clubs they may be about
  * there. In a staff channel, every tracked club. Elsewhere, the tracked clubs
  * whose home channels include this channel (or, in a thread, the channel the
- * thread is in), or that post their report or alerts here. Home channels are
- * the ones set with `/club edit`, or else the channels named after the club
- * (see `clubLinks.ts`). Replies with the reason and returns null anywhere
- * else.
+ * thread is in), or that post their report or alerts here. Replies with the
+ * reason and returns null anywhere else.
  */
 async function circlesHere(interaction: ChatInputCommandInteraction): Promise<TrackedCircle[] | null> {
     const guildId = interaction.guildId!;
     // Only clubs with a uma.moe circle have fan figures to check.
-    const tracked = await prisma.trackedCircle.findMany({ where: { guildId, ...TRACKED }, orderBy: { name: 'asc' } });
-    if (STAFF_CHANNEL_IDS.has(interaction.channelId)) return tracked;
-
+    const tracked = { guildId, ...TRACKED };
+    if (STAFF_CHANNEL_IDS.has(interaction.channelId)) {
+        return prisma.trackedCircle.findMany({ where: tracked, orderBy: { name: 'asc' } });
+    }
     const channelId = interaction.channelId;
     const parentId = interaction.channel?.isThread() ? interaction.channel.parentId : null;
-    const guild = interaction.guild as LinkableGuild | null;
-    // Name matching picks the longest matching club name, so it needs every club.
-    const clubs = guild ? await guildClubs(guildId) : [];
-    const here = tracked.filter((circle) => {
-        if (circle.reportChannelId === channelId || circle.alertChannelId === channelId) return true;
-        const home = guild ? homeChannelsOf(circle, clubs, guild).ids : circle.homeChannelIds;
-        return home.includes(channelId) || (parentId !== null && home.includes(parentId));
+    const here = await prisma.trackedCircle.findMany({
+        where: {
+            ...tracked,
+            OR: [
+                { reportChannelId: channelId },
+                { alertChannelId: channelId },
+                { homeChannelIds: { has: channelId } },
+                ...(parentId ? [{ homeChannelIds: { has: parentId } }] : []),
+            ],
+        },
+        orderBy: { name: 'asc' },
     });
     if (here.length > 0) return here;
     const staffChannel = [...STAFF_CHANNEL_IDS][0];

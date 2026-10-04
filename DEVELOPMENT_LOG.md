@@ -4,49 +4,47 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
-## 2026-10-04 — Club staff roles and home channels matched by name
+## 2026-10-04 — Club staff roles matched by name
 
 A Cosmos Assistant ran `/fans club` and was refused. Club staff were only the
 people added with `/club member`, and nobody had been, although the server
 already gives staff roles like "Cosmos Trainer" and "Cosmos Assistant". The
-bot now reads the server's roles and channels itself and matches them to
-clubs by name (`src/lib/clubLinks.ts`):
-
-- A role counts as a club's staff role when its name contains the club's
-  name and the word Trainer or Assistant. Anyone holding one is that club's
-  staff everywhere `/club member` staff are (`/fans club`, the `/club edit`
-  quota form, `/club fancount`). `/club member` entries still count too.
-- A text, announcement or forum channel whose name contains the club's name
-  is one of its home channels, and threads inside it count, as before.
+bot now reads the server's roles itself and matches them to clubs by name
+(`src/lib/clubLinks.ts`). A role counts as a club's staff role when its name
+contains the club's name and the word Trainer or Assistant. Anyone holding
+one is that club's staff everywhere `/club member` staff are (`/fans club`,
+the `/club edit` quota form, `/club fancount`). `/club member` entries still
+count too.
 
 Names are compared as words: lower-cased, accents and emoji dropped, split
 on anything that is not a letter or digit, and the club's words run together
-must equal a run of the target's words run together. So "Alt Lair" matches
-`#altlair` and "First Room" matches `#first_room`, but "Cosmos" does not
-match `#cosmoschat` or "Cosmo Trainer". "the", "club" and "circle" are
-optional in a club's name. When one club's match sits inside a longer
-club's ("Cosmos" inside "Cosmos II Trainer") only the longer club gets it;
-matches in different parts of a name all count, so `#cosmos-primrose`
-belongs to both clubs.
+must equal a run of the role's words run together. So "Alt Lair" matches
+"AltLair Assistant", but "Cosmos" does not match "CosmosX Trainer" or
+"Cosmo Trainer", and a plain "Cosmos" member role is not a staff role.
+"the", "club" and "circle" are optional in a club's name. When one club's
+match sits inside a longer club's ("Cosmos" inside "Cosmos II Trainer") only
+the longer club gets it.
 
-Either list can be overridden in `/club edit`, which now has a Staff roles
-picker next to Home channels, both pre-filled with what the bot actually
-uses. A stored list replaces the name matches. Saving the matches unchanged,
-or clearing the picker, stores nothing, so the club keeps following its name
-(a channel or role made later is picked up). `/club links` lists every
-club's staff roles and home channels and marks which were matched by name,
-so a wrong or missing match can be seen and fixed.
+`/club edit` has a Staff roles picker, pre-filled with the roles the bot
+actually uses. A stored list replaces the name matches. Saving the matches
+unchanged, or clearing the picker, stores nothing, so the club keeps
+following its name (a role made later is picked up). `/club links` lists
+every club's staff roles, marking which were matched by name, and its home
+channels.
+
+Home channels are not matched by name: the club deferred that, so they are
+still set with `/club edit`. A first version of this change matched them by
+name too; it was taken out before merging.
 
 Schema: `TrackedCircle.staffRoleIds String[]`, an additive migration
 (`20261004150000_add_club_staff_roles`). Matching is done live from the
-bot's role and channel cache, not stored, since the session has no access to
-the server or production database to read the IDs ahead of time.
+bot's role cache, not stored, since the session has no access to the server
+or production database to read the IDs ahead of time.
 
-`test-commands` now has 127 checks: the matching rules, a role holder
-allowed and a plain member role or another club's role refused, a channel
-named after the club and a thread in it working while a voice channel does
-not, the form's pre-fill, a stored list replacing the matches, and
-`/club links`.
+`test-commands` now has 123 checks: the matching rules, a role holder
+allowed and a plain member role or another club's role refused, the form's
+pre-fill, a stored list replacing the matches, channels not matched by
+name, and `/club links`.
 
 ---
 

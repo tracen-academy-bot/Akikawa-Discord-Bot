@@ -17,7 +17,7 @@ import {
 } from "discord.js";
 import { prisma } from '../db/prisma';
 import { canManageClubStats, isOfficer } from "../lib/permissions";
-import { guildClubs, homeChannelsOf, listToStore, matchedHomeChannelIds, matchedStaffRoleIds, staffRolesOf, type LinkableGuild, type Links } from '../lib/clubLinks';
+import { guildClubs, listToStore, matchedStaffRoleIds, staffRolesOf, type LinkableGuild, type Links } from '../lib/clubLinks';
 import { autoCompleteClubName } from "../lib/clubAutocomplete";
 import { successEmbed, errorEmbed, infoEmbed } from "../lib/embeds";
 import { renderClubList, type ClubSummary } from "../lib/image/renderClubList";
@@ -161,7 +161,7 @@ export const data = new SlashCommandBuilder()
             .addStringOption((opt) => opt.setName('club').setDescription('Club to view').setRequired(true).setAutocomplete(true))
     )
     .addSubcommand((sub) => sub.setName('list').setDescription('List all clubs.'))
-    .addSubcommand((sub) => sub.setName('links').setDescription("Show each club's staff roles and home channels, and which were matched by name."))
+    .addSubcommand((sub) => sub.setName('links').setDescription("Show each club's staff roles (and which were matched by name) and home channels."))
     .addSubcommand((sub) =>
         sub
             .setName('fancount')
@@ -345,20 +345,16 @@ export interface ClubFormLinks {
 }
 
 /**
- * The home channels and staff roles the form should show: the stored lists,
- * or what matches the club's name when they are empty, so the form shows what
- * the bot actually uses.
+ * The home channels and staff roles the form should show: the stored home
+ * channels, and the stored staff roles or, when none are stored, the roles
+ * matching the club's name, so the form shows what the bot actually uses.
  */
 async function formLinks(club: Club, guild: LinkableGuild | null): Promise<ClubFormLinks> {
     if (!guild) return { home: club.homeChannelIds, roles: club.staffRoleIds };
     const clubs = await guildClubs(club.guildId);
-    // A role or channel deleted since it was stored cannot be pre-selected.
+    // A role deleted since it was stored cannot be pre-selected.
     const roleIds = new Set([...guild.roles.cache.values()].map((r) => r.id));
-    const channelIds = new Set([...guild.channels.cache.values()].map((c) => c.id));
-    return {
-        home: homeChannelsOf(club, clubs, guild).ids.filter((id) => channelIds.has(id)),
-        roles: staffRolesOf(club, clubs, guild).ids.filter((id) => roleIds.has(id)),
-    };
+    return { home: club.homeChannelIds, roles: staffRolesOf(club, clubs, guild).ids.filter((id) => roleIds.has(id)) };
 }
 
 /** True for a modal this module owns. */
@@ -419,7 +415,7 @@ export function buildClubEditModal(
         labels.push(
             new LabelBuilder()
                 .setLabel('Home channels')
-                .setDescription("The club's own channels; threads inside count too. Empty: channels named after the club.")
+                .setDescription("The club's own channels. Threads inside them count too.")
                 .setChannelSelectMenuComponent(home),
         );
     }
@@ -493,15 +489,14 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
         if (taken) return void (await refuse(`A club named **${name}** already exists.`));
         data.name = name;
     }
-    // A list equal to the name matches is stored empty, so the club keeps
-    // following its name (a channel or role added later is picked up).
-    const guild = interaction.guild as LinkableGuild | null;
-    const clubs = guild ? await guildClubs(club.guildId) : [];
     if (full && club.circleId !== null) {
         const picked = interaction.fields.getSelectedChannels(EDIT_FIELD.home, false);
-        const matched = guild ? matchedHomeChannelIds(club, clubs, guild.channels.cache.values()) : [];
-        data.homeChannelIds = listToStore(picked ? [...picked.keys()] : [], matched);
+        data.homeChannelIds = picked ? [...picked.keys()] : [];
     }
+    // A role list equal to the name matches is stored empty, so the club keeps
+    // following its name (a role made later is picked up).
+    const guild = interaction.guild as LinkableGuild | null;
+    const clubs = guild ? await guildClubs(club.guildId) : [];
     if (full) {
         const picked = interaction.fields.getSelectedRoles(EDIT_FIELD.roles, false);
         const matched = guild ? matchedStaffRoleIds(club, clubs, guild.roles.cache.values()) : [];
@@ -524,7 +519,7 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
     const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
     const headcount = await clubHeadcount(updated);
     const after = guild ? await guildClubs(club.guildId) : [];
-    const home: Links = guild ? homeChannelsOf(updated, after, guild) : { ids: updated.homeChannelIds, matched: false };
+    const home: Links = { ids: updated.homeChannelIds, matched: false };
     const roles: Links = guild ? staffRolesOf(updated, after, guild) : { ids: updated.staffRoleIds, matched: false };
     await interaction.reply({
         embeds: [
@@ -549,9 +544,9 @@ function linksText(links: Links, mention: (id: string) => string): string {
 }
 
 /**
- * `/club links`: each club's staff roles and home channels, as the bot reads
- * them from the server, so a Club Manager can see what was matched by name
- * and fix it with `/club edit`. Role and channel mentions in an embed do not
+ * `/club links`: each club's staff roles, as the bot reads them from the
+ * server, and its home channels, so a Club Manager can see which roles were
+ * matched by name and fix them with `/club edit`. Role and channel mentions in an embed do not
  * ping anyone.
  */
 async function handleLinks(interaction: ChatInputCommandInteraction) {
@@ -563,7 +558,7 @@ async function handleLinks(interaction: ChatInputCommandInteraction) {
     }
     const lines = clubs.map((club) => {
         const roles = guild ? staffRolesOf(club, clubs, guild) : { ids: club.staffRoleIds, matched: false };
-        const home = guild ? homeChannelsOf(club, clubs, guild) : { ids: club.homeChannelIds, matched: false };
+        const home: Links = { ids: club.homeChannelIds, matched: false };
         return [
             `**${club.name}**${club.circleId === null ? ' (no uma.moe circle)' : ''}`,
             `Staff roles: ${linksText(roles, (id) => `<@&${id}>`)}`,
