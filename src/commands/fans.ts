@@ -79,7 +79,12 @@ export const data = new SlashCommandBuilder()
                 sub.setName('all').setDescription("Sync every active circle and post each report and alert to its channels (Club Managers)."),
             )
             .addSubcommand((sub) =>
-                sub.setName('club').setDescription("Sync this thread's circle and post its report and alert here (the club's staff)."),
+                sub
+                    .setName('club')
+                    .setDescription("Sync this thread's circle and post its report and alert here (the club's staff).")
+                    .addStringOption((opt) =>
+                        opt.setName('circle').setDescription("In #staff-commands only: which circle (defaults to your club's)").setAutocomplete(true),
+                    ),
             )
             .addSubcommand((sub) =>
                 sub.setName('me').setDescription("Your own progress in this thread's circle, visible only to you."),
@@ -198,6 +203,18 @@ export const data = new SlashCommandBuilder()
                     ),
             ),
     );
+
+/**
+ * Channels besides a circle's own thread where `/fans check club` may run,
+ * comma-separated. Defaults to the club server's #staff-commands, so it works
+ * without configuration; set `STAFF_COMMANDS_CHANNEL_IDS` to change it.
+ */
+const STAFF_CHANNEL_IDS = new Set(
+    (process.env.STAFF_COMMANDS_CHANNEL_IDS || '1427571157120450733')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean),
+);
 
 /** Choice that unlinks a circle from its club in `/fans circle config club:`. */
 const UNLINK_CLUB = 'none';
@@ -484,11 +501,14 @@ async function handleCheckAll(interaction: ChatInputCommandInteraction) {
 /**
  * The circle a thread belongs to: the one whose report or alert channel it
  * is. Replies with the reason and returns null when the command was not run
- * in such a thread.
+ * in such a thread. `notInThread` replaces the default refusal.
  */
-async function circleForThread(interaction: ChatInputCommandInteraction): Promise<TrackedCircle | null> {
+async function circleForThread(
+    interaction: ChatInputCommandInteraction,
+    notInThread = "Run this inside your circle's thread.",
+): Promise<TrackedCircle | null> {
     if (!interaction.channel?.isThread()) {
-        await reply(interaction, errorEmbed("Run this inside your circle's thread."));
+        await reply(interaction, errorEmbed(notInThread));
         return null;
     }
     const circle = await prisma.trackedCircle.findFirst({
@@ -534,12 +554,50 @@ async function requireClubTrainer(interaction: ChatInputCommandInteraction, circ
 }
 
 /**
- * `/fans check club`: sync this thread's circle and post its report and
- * behind-quota alert right here, publicly, so the club sees it where it
- * talks. For the club's Trainers and Club Managers.
+ * The circle a staff channel command is about: the one named with `circle`,
+ * else the one linked to the caller's own `/club`. Replies with the reason
+ * and returns null when that does not pin down exactly one.
+ */
+async function circleForStaff(interaction: ChatInputCommandInteraction): Promise<TrackedCircle | null> {
+    const guildId = interaction.guildId!;
+    const named = interaction.options.getString('circle');
+    if (named) {
+        const circle = await prisma.trackedCircle.findFirst({ where: { id: named, guildId } });
+        if (!circle) await reply(interaction, errorEmbed('That tracked circle could not be found.'));
+        return circle;
+    }
+    const memberships = await prisma.clubMember.findMany({ where: { discordUserId: interaction.user.id }, select: { clubId: true } });
+    const circles = await prisma.trackedCircle.findMany({
+        where: { guildId, clubId: { in: memberships.map((m) => m.clubId) } },
+        orderBy: { name: 'asc' },
+    });
+    if (circles.length === 1) return circles[0]!;
+    await reply(
+        interaction,
+        errorEmbed(
+            circles.length === 0
+                ? 'Name a circle with `circle:`. None is linked to a club you are staff on.'
+                : 'You are staff on several circles. Name one with `circle:`.',
+        ),
+    );
+    return null;
+}
+
+/**
+ * `/fans check club`: sync one circle and post its report and behind-quota
+ * alert right here, publicly. Run in the circle's own thread, so the club
+ * sees it where it talks, or in a staff channel (#staff-commands), where the
+ * circle is the caller's club's or the one named. For the club's staff
+ * (Trainers and Assistants) and Club Managers.
  */
 async function handleCheckClub(interaction: ChatInputCommandInteraction) {
-    const circle = await circleForThread(interaction);
+    const staffChannel = [...STAFF_CHANNEL_IDS][0];
+    const circle = STAFF_CHANNEL_IDS.has(interaction.channelId)
+        ? await circleForStaff(interaction)
+        : await circleForThread(
+              interaction,
+              `Run this inside your circle's thread${staffChannel ? `, or in <#${staffChannel}>` : ''}.`,
+          );
     if (!circle) return;
     if (!(await requireClubTrainer(interaction, circle))) return;
 

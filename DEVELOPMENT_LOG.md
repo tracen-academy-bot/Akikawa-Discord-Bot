@@ -27,6 +27,13 @@ is the `/club` role, so a circle has to be linked to its club record first:
 linked, only Club Managers can run `club` on it. The club's Assistants may run
 it too (asked for after the first version allowed Trainers only).
 
+`club` also runs in #staff-commands (`1427571157120450733`, overridable with
+`STAFF_COMMANDS_CHANNEL_IDS`; empty means the default). There is no thread
+to name the circle, so it is the one linked to the caller's own `/club`, or
+the one given with the new `circle:` option, which Club Managers and staff on
+several clubs need. Permission is checked against that circle the same way,
+and the report posts in the staff channel.
+
 ---
 
 ## 2026-10-04 — Daily, weekly and biweekly quotas are checkpoints, not resets

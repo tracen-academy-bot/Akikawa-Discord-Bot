@@ -12,6 +12,8 @@
  */
 const OFFICER_ROLE = 'officer-role';
 process.env.OFFICER_ROLE_IDS = OFFICER_ROLE;
+// A plain channel standing in for #staff-commands.
+process.env.STAFF_COMMANDS_CHANNEL_IDS = 'c-staff';
 // No key: /fans check must still report from stored data, and say so.
 delete process.env.EXTERNAL_API_KEY;
 
@@ -196,8 +198,19 @@ async function main() {
         (await run({ group: 'check', sub: 'club', userId: 'u-assistant', channel: 't-check' })).some((s) => s.kind === 'edit' && s.files === 1), true);
     check('club refuses someone who is not club staff',
         desc(await run({ group: 'check', sub: 'club', userId: 'u-behind', channel: 't-check' })), "Only **Checkrose**'s Trainers, Assistants and Club Managers can run this.");
-    check('club refuses outside a thread',
-        desc(await run({ group: 'check', sub: 'club', userId: 'u-trainer' })), "Run this inside your circle's thread.");
+    check('club refuses outside a thread or the staff channel',
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-trainer' })), "Run this inside your circle's thread, or in <#c-staff>.");
+
+    // #staff-commands: not a thread, so the circle is the caller's club's.
+    const staff = await run({ group: 'check', sub: 'club', userId: 'u-trainer', channel: 'c-staff', inThread: false });
+    check("club in the staff channel uses the caller's club", staff.find((s) => s.kind === 'edit')?.content?.includes('Checkrose'), true);
+    check('club in the staff channel posts there, publicly', [staff[0]?.ephemeral, staff.find((s) => s.kind === 'edit')?.files], [false, 1]);
+    check('club in the staff channel needs a circle when the caller has no club',
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-officer', officer: true, channel: 'c-staff', inThread: false }))?.includes('Name a circle'), true);
+    const named = await run({ group: 'check', sub: 'club', userId: 'u-officer', officer: true, channel: 'c-staff', inThread: false, circle: other.id });
+    check('club in the staff channel takes a named circle', named.find((s) => s.kind === 'edit')?.content?.includes('Otherrose'), true);
+    check('club in the staff channel still checks permission',
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-behind', channel: 'c-staff', inThread: false, circle: circle.id }))?.startsWith('Only **Checkrose**'), true);
 
     const clubCheck = await run({ group: 'check', sub: 'club', userId: 'u-trainer', channel: 't-check' });
     const posted = clubCheck.find((s) => s.kind === 'edit');
