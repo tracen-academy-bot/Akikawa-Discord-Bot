@@ -168,6 +168,18 @@ async function main() {
 
     const desc = (log: Sent[]) => log[0]?.embeds?.[0]?.description;
 
+    // ── /club fancount amounts (stored in millions) ───────────────────────────
+    const { parseClubFanAmount } = await import('../src/commands/club');
+    check('club fan amount: bare number is millions', parseClubFanAmount('50'), 50);
+    check('club fan amount: 50M', parseClubFanAmount('50M'), 50);
+    check('club fan amount: lowercase with a space', parseClubFanAmount(' 50 m '), 50);
+    check('club fan amount: fraction', parseClubFanAmount('0.25M'), 0.25);
+    check('club fan amount: thousands', parseClubFanAmount('500K'), 0.5);
+    check('club fan amount: billions', parseClubFanAmount('1.2B'), 1200);
+    check('club fan amount: separators', parseClubFanAmount('1,500M'), 1500);
+    check('club fan amount: words rejected', parseClubFanAmount('lots'), null);
+    check('club fan amount: zero rejected', parseClubFanAmount('0'), null);
+
     // ── /fans check me ────────────────────────────────────────────────────────
     const me = await run({ group: 'check', sub: 'me', userId: 'u-behind', channel: 't-check' });
     const embed = me[0]?.embeds?.[0];
@@ -178,9 +190,23 @@ async function main() {
     check('me ranks among current members only', field('Rank'), '2 of 2');
     check('me says how far behind', field('Status')?.startsWith('Behind by **'), true);
 
-    check('me outside a thread is refused', desc(await run({ group: 'check', sub: 'me', userId: 'u-behind' })), "Run this inside your circle's thread.");
+    const nowhere = "Run this in your circle's report or alert channel, or in <#c-staff>.";
+    check('me in a channel no circle uses is refused', desc(await run({ group: 'check', sub: 'me', userId: 'u-behind' }))?.startsWith(nowhere), true);
     check('me in a thread no circle uses is refused',
-        desc(await run({ group: 'check', sub: 'me', userId: 'u-behind', channel: 't-random' }))?.includes('not a tracked circle'), true);
+        desc(await run({ group: 'check', sub: 'me', userId: 'u-behind', channel: 't-random' }))?.startsWith(nowhere), true);
+    const meStaff = await run({ group: 'check', sub: 'me', userId: 'u-behind', channel: 'c-staff', inThread: false });
+    check('me works in the staff channel too', meStaff[0]?.embeds?.map((e) => e.title), ['Behind · Checkrose']);
+
+    // A plain channel (not a thread) that a circle reports to works the same.
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { reportChannelId: 'c-bot', alertChannelId: 'c-bot' } });
+    await prisma.trainerLink.create({ data: { guildId: GUILD, discordUserId: 'u-else', viewerId: BigInt(4) } });
+    const mePlain = await run({ group: 'check', sub: 'me', userId: 'u-else', channel: 'c-bot', inThread: false });
+    check("me works in a circle's plain report channel", mePlain[0]?.embeds?.map((e) => e.title), ['Elsewhere · Otherrose']);
+    check('me in another circle\'s channel says not a member there',
+        desc(await run({ group: 'check', sub: 'me', userId: 'u-behind', channel: 'c-bot', inThread: false }))?.includes('**Otherrose**'), true);
+    const clubPlain = await run({ group: 'check', sub: 'club', userId: 'u-officer', officer: true, channel: 'c-bot', inThread: false });
+    check("club works in a circle's plain report channel", clubPlain.find((s) => s.kind === 'edit')?.content?.includes('Otherrose'), true);
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { reportChannelId: null, alertChannelId: null } });
     check('me without a link explains how to link',
         desc(await run({ group: 'check', sub: 'me', userId: 'u-nobody', channel: 't-check' }))?.includes('/fans link'), true);
     check('me for a leaver says not a current member',
@@ -198,15 +224,15 @@ async function main() {
         (await run({ group: 'check', sub: 'club', userId: 'u-assistant', channel: 't-check' })).some((s) => s.kind === 'edit' && s.files === 1), true);
     check('club refuses someone who is not club staff',
         desc(await run({ group: 'check', sub: 'club', userId: 'u-behind', channel: 't-check' })), "Only **Checkrose**'s Trainers, Assistants and Club Managers can run this.");
-    check('club refuses outside a thread or the staff channel',
-        desc(await run({ group: 'check', sub: 'club', userId: 'u-trainer' })), "Run this inside your circle's thread, or in <#c-staff>.");
+    check("club refuses outside a circle's channel or the staff channel",
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-trainer' }))?.startsWith(nowhere), true);
 
     // #staff-commands: not a thread, so the circle is the caller's club's.
     const staff = await run({ group: 'check', sub: 'club', userId: 'u-trainer', channel: 'c-staff', inThread: false });
     check("club in the staff channel uses the caller's club", staff.find((s) => s.kind === 'edit')?.content?.includes('Checkrose'), true);
     check('club in the staff channel posts there, publicly', [staff[0]?.ephemeral, staff.find((s) => s.kind === 'edit')?.files], [false, 1]);
     check('club in the staff channel needs a circle when the caller has no club',
-        desc(await run({ group: 'check', sub: 'club', userId: 'u-officer', officer: true, channel: 'c-staff', inThread: false }))?.includes('Name a circle'), true);
+        desc(await run({ group: 'check', sub: 'club', userId: 'u-officer', officer: true, channel: 'c-staff', inThread: false }))?.includes('Name one with `circle:`'), true);
     const named = await run({ group: 'check', sub: 'club', userId: 'u-officer', officer: true, channel: 'c-staff', inThread: false, circle: other.id });
     check('club in the staff channel takes a named circle', named.find((s) => s.kind === 'edit')?.content?.includes('Otherrose'), true);
     check('club in the staff channel still checks permission',
