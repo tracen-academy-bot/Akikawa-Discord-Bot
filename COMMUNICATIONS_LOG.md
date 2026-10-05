@@ -8,7 +8,8 @@ Decisions that changed project direction. Newest first.
 
 The club set each expected rank's cutoff: "S+ is top 30, S is top 100, A+ is
 top 500, A is top 1000, B+ is top 3000. remove B if any. do +/- as you wish,
-but don't make radius too big". Chosen: 10% either side, capped at 50 places.
+but don't make radius too big". Chosen: 10% either side, capped at 50 places; then, at the club's
+suggestion, 475 to 525 for A+.
 This replaces showing T1000 under every competitive rank.
 
 ---

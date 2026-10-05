@@ -42,7 +42,7 @@ async function main() {
     check('the cutoffs, by expected rank', cutoff.CUTOFF_BY_RANK, { S_PLUS: 30, S: 100, A_PLUS: 500, A: 1000, B_PLUS: 3000 });
     check('T30 takes every place from 27 to 33', cutoff.bandRanks(30), steps(27, 1, 7));
     check('T100 samples 90 to 110', cutoff.bandRanks(100), steps(90, 2, 11));
-    check('T500 is capped at 50 either side', cutoff.bandRanks(500), steps(450, 10, 11));
+    check('T500 is set by hand to 475 to 525', cutoff.bandRanks(500), steps(475, 5, 11));
     check('T1000 runs 950 to 1050', cutoff.bandRanks(1000), steps(950, 10, 11));
     check('T3000 runs 2950 to 3050', cutoff.bandRanks(3000), steps(2950, 10, 11));
     check('the band never goes below 1st', cutoff.bandRanks(1), [1]);

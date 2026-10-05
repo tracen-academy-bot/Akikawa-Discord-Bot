@@ -16,7 +16,8 @@ import { currentGameMonth, monthsBefore } from './ingest';
  * One circle sitting exactly on a cutoff is noisy, so each figure pools a
  * band around it: 10% either side, but never more than 50 places (27 to 33
  * for T30, 90 to 110 for T100, 950 to 1050 for T1000, 2950 to 3050 for
- * T3000). At most 11 evenly spaced places in a band are sampled, to keep
+ * T3000), except where `CUTOFF_RADIUS` sets it (475 to 525 for T500, as the
+ * club chose). At most 11 evenly spaced places in a band are sampled, to keep
  * uma.moe requests down (about 60 for all five cutoffs).
  *
  * A day's figure is the fans all sampled circles' members earned that game
@@ -46,6 +47,8 @@ export const CUTOFF_BY_RANK: Partial<Record<ClubRank, number>> = {
 export const CUTOFF_BAND = 0.1;
 /** ...but never more places than this either side. */
 export const CUTOFF_MAX_RADIUS = 50;
+/** Bands set by hand, as places either side, overriding the rule above. */
+export const CUTOFF_RADIUS: Record<number, number> = { 500: 25 };
 /** Most places sampled in a band. */
 export const CUTOFF_SAMPLES = 11;
 /** How many completed game days to show. */
@@ -106,7 +109,7 @@ export function setCutoffsForTest(series: CutoffSeries[]): void {
  * 27 to 33.
  */
 export function bandRanks(rank: number, band = CUTOFF_BAND, samples = CUTOFF_SAMPLES, maxRadius = CUTOFF_MAX_RADIUS): number[] {
-    const radius = Math.min(Math.round(rank * band), maxRadius);
+    const radius = CUTOFF_RADIUS[rank] ?? Math.min(Math.round(rank * band), maxRadius);
     const from = Math.max(1, rank - radius);
     const to = rank + radius;
     const span = to - from;

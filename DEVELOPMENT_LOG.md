@@ -12,7 +12,8 @@ Each expected rank now has its own cutoff, as the club set them: S+ is top
 cutoff's figures, and saving shows the chosen rank's. Casual has none.
 
 The band is 10% either side but at most 50 places ("don't make radius too
-big"): 27 to 33, 90 to 110, 450 to 550, 950 to 1050, 2950 to 3050. At most
+big"): 27 to 33, 90 to 110, 950 to 1050, 2950 to 3050; A+'s is 475 to 525,
+as the club chose (`CUTOFF_RADIUS`). At most
 11 places are sampled per band, so all five cutoffs together take about 60
 uma.moe requests. A cutoff that fails (the ranking may not reach 3000 early
 in a month) keeps its last figures and does not stop the others; the
