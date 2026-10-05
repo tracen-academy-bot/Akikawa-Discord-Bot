@@ -1,5 +1,5 @@
 import { AttachmentBuilder, type Client } from 'discord.js';
-import { refreshCutoff } from './cutoff';
+import { refreshCutoff, refreshCutoffIfStale } from './cutoff';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
@@ -212,8 +212,9 @@ async function runHourlySync(now: Date): Promise<void> {
     await syncBenchmark().catch((e: unknown) => {
         benchmark = e instanceof Error ? e.message : String(e);
     });
+    // The figures change once a game day; ~24 uma.moe requests, so not every hour.
     let cutoff = 'ok';
-    await refreshCutoff().catch((e: unknown) => {
+    await refreshCutoffIfStale().catch((e: unknown) => {
         cutoff = e instanceof Error ? e.message : String(e);
     });
     const note = `synced:${results.length} errors:${errors.length} benchmark:${benchmark} t1000:${cutoff}`;

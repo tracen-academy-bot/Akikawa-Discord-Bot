@@ -131,19 +131,29 @@ export function searchCircles(query: string, limit = 25): Promise<UmaCircleListR
 }
 
 /**
- * The circle at one place in this month's ranking by monthly points (1 is
- * the top), or null when the ranking is shorter than that. One request: the
- * list is paged 100 at a time, so rank 1000 is the last entry of page 9.
+ * The circles at the given places in this month's ranking by monthly points
+ * (1 is the top), keyed by place. Places past the end of the ranking are
+ * missing from the result. The list is paged 100 at a time; each page needed
+ * is fetched once, so ranks 900 to 1100 take three requests.
  */
-export async function getCircleAtRank(rank: number): Promise<UmaCircle | null> {
+export async function getCirclesAtRanks(ranks: number[]): Promise<Map<number, UmaCircle>> {
     const pageSize = 100;
-    const response = await get<UmaCircleListResponse>('/api/v4/circles/list', {
-        limit: pageSize,
-        page: Math.floor((rank - 1) / pageSize),
-        sort_by: 'monthly_point',
-        sort_dir: 'desc',
-    });
-    return response.circles?.[(rank - 1) % pageSize] ?? null;
+    const found = new Map<number, UmaCircle>();
+    const pages = [...new Set(ranks.map((r) => Math.floor((r - 1) / pageSize)))].sort((a, b) => a - b);
+    for (const page of pages) {
+        const response = await get<UmaCircleListResponse>('/api/v4/circles/list', {
+            limit: pageSize,
+            page,
+            sort_by: 'monthly_point',
+            sort_dir: 'desc',
+        });
+        for (const rank of ranks) {
+            if (Math.floor((rank - 1) / pageSize) !== page) continue;
+            const circle = response.circles?.[(rank - 1) % pageSize];
+            if (circle) found.set(rank, circle);
+        }
+    }
+    return found;
 }
 
 /**
