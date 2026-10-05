@@ -4,6 +4,71 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-05 — Club profiles, the club directory, and T1000 figures in /club edit
+
+**Club profiles.** `/club profile` opens a second form (`/club edit` already
+has Discord's limit of five fields). A club's staff (by `/club member` or by
+staff role) and Club Managers edit its bio (1500 characters), rules (1000;
+text, or a link shown as one) and banner (an image up to 8 MB, downloaded
+from Discord's CDN at submit and stored, since upload URLs expire). Club
+Managers also set its tier. The reply is the card as the directory will show
+it.
+
+**Tiers** are G1 [Competitive], G2 [Semi Competitive+], G3 [Semi-Competitive]
+and Debut [Casual], with the blurbs and estimated ranks from the server's
+existing directory post. A tier is set explicitly, not derived from the
+expected rank: the ranges overlap (A is in G2 and G3). A club with no tier is
+left out of the directory, so nothing appears until Club Managers set them.
+
+**The directory.** `/club directory channel:` (Club Managers) posts, in
+order: the tier explainer (four embeds), then per tier with clubs a "Current
+G1 Clubs" heading and one card per club by name, then an index embed of jump
+links. A card is the banner as an image-only embed (so it sits above, like the
+existing banners) and an embed in the tier's colour with Trainers and
+Assistants, Requirements (the quota, so it is never typed twice), expected
+rank, rules and the bio as a quote. Staff are `/club member` entries plus
+holders of the club's staff roles ("Assistant" roles' holders are Assistants);
+without the Server Members intent the role itself is mentioned. Nothing pings.
+
+It updates itself after any club change: `/club profile`, `/club edit`,
+`/club fancount`, create, delete, staff changes. When the same messages still
+fit, it edits in place, and only messages whose content changed (each is
+fingerprinted, banners included), so one club's edit does not re-upload every
+banner. A new layout (a club added, removed or moved between tiers) deletes
+the old run and posts it again, since Discord cannot insert messages. Running
+`/club directory` again rewrites every message, which also repairs any deleted
+by hand; with no channel it refreshes where it is, with one it moves.
+Refreshes queue per guild so two changes in a row cannot post over each
+other.
+
+Schema (one additive migration, `20261005090000_add_club_profiles_and_directory`):
+`ClubTier` enum; `tier`, `bio`, `rules` on `TrackedCircle`; `ClubBanner`
+(kept apart so ordinary club queries never load image bytes); `ClubDirectory`
+(channel, layout, message IDs, fingerprints).
+
+**T1000 figures.** A Discord form cannot change as it is filled in, so the
+figures cannot appear only after a rank is picked. Instead every competitive
+rank option (not Casual) carries them as its dropdown description: fans per
+member per day over the last 7 completed game days, oldest first, crossing
+into last month when needed. Saving a competitive rank repeats them with
+dates in the confirmation. The figure pools a band 10% either side of the
+cutoff (ranks 900 to 1100), sampling at most 21 evenly spaced places to keep
+it to about 24 uma.moe requests: a day is all sampled circles' fans that day
+over all their members in the circle all day, by the `monthGains` rules, with
+days next to a skipped scrape left out. They are the circles in the band now,
+not whichever were there each day. Worked out at start, hourly when over six
+hours old, and in the daily run; kept in memory because a form must open
+within 3 seconds. `src/lib/fans/cutoff.ts`; `bandRanks` takes any cutoff
+(T100 gives 90 to 110, T500 450 to 550).
+
+Tests: new `test-cutoff` (24 checks: per-day maths, joiners, leavers, skipped
+scrapes, the band, page requests, pooling, the month crossing, staleness,
+text) with uma.moe stubbed; `test-commands` to 175 (profile forms and saves,
+banner upload and refusals, the card, the directory's posting, edit-only-what-
+changed, reposting, moving, and the T1000 option lines).
+
+---
+
 ## 2026-10-05 — Club staff can set the expected rank
 
 A club's own Trainers and Assistants opening `/club edit` got the quota and
