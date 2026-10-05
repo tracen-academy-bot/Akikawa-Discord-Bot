@@ -131,6 +131,22 @@ export function searchCircles(query: string, limit = 25): Promise<UmaCircleListR
 }
 
 /**
+ * The circle at one place in this month's ranking by monthly points (1 is
+ * the top), or null when the ranking is shorter than that. One request: the
+ * list is paged 100 at a time, so rank 1000 is the last entry of page 9.
+ */
+export async function getCircleAtRank(rank: number): Promise<UmaCircle | null> {
+    const pageSize = 100;
+    const response = await get<UmaCircleListResponse>('/api/v4/circles/list', {
+        limit: pageSize,
+        page: Math.floor((rank - 1) / pageSize),
+        sort_by: 'monthly_point',
+        sort_dir: 'desc',
+    });
+    return response.circles?.[(rank - 1) % pageSize] ?? null;
+}
+
+/**
  * Fetches the top circles by monthly points, best first.
  *
  * Used to compute the benchmark cutoffs. `limit` is capped at 100 per page by

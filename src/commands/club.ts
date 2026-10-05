@@ -25,7 +25,9 @@ import { renderClubView } from "../lib/image/renderClubView";
 import type { TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
-import { describeQuota, toSafeNumber } from '../lib/fans/metrics';
+import { toSafeNumber } from '../lib/fans/metrics';
+import { PERIOD_CHOICES, RANK_CHOICES, clubQuotaText, formatRank } from '../lib/clubFormat';
+import { currentCutoff, cutoffDetail, cutoffLine } from '../lib/fans/cutoff';
 import { parseQuota } from './fans';
 
 /**
@@ -36,49 +38,17 @@ type Club = TrackedCircle;
 
 // ================================================================================
 
-const RANK_CHOICES: { name: string; value: ClubRank }[]= [
-    { name: 'Casual', value: 'CASUAL'},
-    { name: 'B', value: 'B'},
-    { name: 'B+', value: 'B_PLUS'},
-    { name: 'A', value: 'A'},
-    { name: 'A+', value: 'A_PLUS'},
-    { name: 'S', value: 'S'},
-    { name: 'S+', value: 'S_PLUS'},
-];
-
 const MEMBER_ROLE_CHOICES: {name: string; value: ClubMemberRole }[] = [
     { name: 'Trainer', value: 'TRAINER' },
     { name: 'Assistant', value: 'ASSISTANT' }
-];
-
-const PERIOD_CHOICES: { name: string; value: FanCountPeriod }[] = [
-    { name: 'Day', value: 'DAY' },
-    { name: 'Week', value: 'WEEK' },
-    { name: 'Biweekly', value: 'BIWEEKLY' },
-    { name: 'Month', value: 'MONTH' },
 ];
 
 const MAX_HEADCOUNT = 30;
 
 // ================================================================================
 
-function formatRank(rank: ClubRank | null): string {
-    if (rank === null) return 'Not set';
-    return RANK_CHOICES.find((r) => r.value === rank)?.name ?? rank;
-}
-
 function formatMemberRole(role: ClubMemberRole): string {
     return MEMBER_ROLE_CHOICES.find((r) => r.value === role)?.name ?? role;
-}
-
-function formatPeriod(period: FanCountPeriod): string {
-    return PERIOD_CHOICES.find((p)  => p.value === period)?.name.toLowerCase() ?? period.toLowerCase();
-}
-
-function formatFanCount(amount: number | null, period: FanCountPeriod | null): string {
-    if (amount === null) return 'Not set';
-    const amountLabel = `${amount}M`;
-    return period ? `${amountLabel}/${formatPeriod(period)}` : amountLabel;
 }
 
 /**
@@ -89,16 +59,6 @@ function formatFanCount(amount: number | null, period: FanCountPeriod | null): s
 async function clubHeadcount(club: Club): Promise<number | null> {
     if (club.circleId === null) return null;
     return (await currentCircleProgress(club))?.members.length ?? null;
-}
-
-/**
- * The club's fan quota as text. Clubs and circles share one quota since the
- * merge; an old club fan count is shown only if no quota was ever set.
- */
-function clubQuotaText(club: Club): string {
-    const quota = toSafeNumber(club.quota);
-    if (quota > 0) return describeQuota(quota, club.quotaPeriod);
-    return club.fanCountAmount === null ? 'Not set' : formatFanCount(club.fanCountAmount, club.fanCountPeriod);
 }
 
 /** What the club directory and club card show for a club. */
@@ -373,6 +333,7 @@ export function buildClubEditModal(
     links: ClubFormLinks = { home: club.homeChannelIds, roles: club.staffRoleIds },
 ): ModalBuilder {
     const labels: LabelBuilder[] = [];
+    const t1000 = cutoffLine(currentCutoff());
     if (full && club.circleId === null) {
         labels.push(
             new LabelBuilder()
@@ -385,7 +346,16 @@ export function buildClubEditModal(
             new StringSelectMenuBuilder()
                 .setCustomId(EDIT_FIELD.rank)
                 .setPlaceholder('Not set')
-                .addOptions(RANK_CHOICES.map((r) => ({ label: r.name, value: r.value, default: r.value === club.rank }))),
+                .addOptions(
+                    RANK_CHOICES.map((r) => ({
+                        label: r.name,
+                        value: r.value,
+                        default: r.value === club.rank,
+                        // A form cannot change as it is filled in, so every
+                        // competitive rank carries the T1000 figures beneath it.
+                        ...(r.value !== 'CASUAL' && t1000 ? { description: t1000 } : {}),
+                    })),
+                ),
         ),
     );
     const quotaValue = quotaInputValue(club);
@@ -526,6 +496,8 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
                     `**${updated.name}** · expected rank **${formatRank(updated.rank)}**`,
                     `Headcount: **${headcount === null ? '—' : `${headcount}/${MAX_HEADCOUNT}`}** (from uma.moe)`,
                     `Quota: **${clubQuotaText(updated)}** per member`,
+                    // What a competitive rank is up against, next to the quota it informs.
+                    ...(updated.rank !== null && updated.rank !== 'CASUAL' && cutoffDetail(currentCutoff()) ? [cutoffDetail(currentCutoff())!] : []),
                     ...(updated.circleId !== null ? [`Home channels: ${linksText(home, (id) => `<#${id}>`)}`] : []),
                     ...(full ? [`Staff roles: ${linksText(roles, (id) => `<@&${id}>`)}`] : []),
                 ].join('\n'),

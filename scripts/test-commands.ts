@@ -327,6 +327,20 @@ async function main() {
     check('the form shows the real quota, exactly', pre(fullForm, 'Quota per member')?.value, '31M');
     check('club form pre-selects expected rank and quota period',
         [pre(fullForm, 'Expected rank')?.options?.find((o) => o.default)?.value, pre(fullForm, 'Quota period')?.options?.find((o) => o.default)?.value], ['S', 'MONTH']);
+
+    // The T1000 figures sit under every competitive rank, not under Casual.
+    const cutoff = await import('../src/lib/fans/cutoff');
+    check('with no T1000 figures yet, no option has a line', pre(fullForm, 'Expected rank')?.options?.some((o) => 'description' in o), false);
+    cutoff.setCutoffForTest({
+        rank: 1000, circleId: 1, circleName: 'Cutoff Circle', computedAt: new Date(),
+        days: [27, 28, 29, 30].map((day) => ({ year: 2026, month: 9, day, perMember: 1_200_000, members: 30 })),
+    });
+    type RankOption = { value: string; description?: string };
+    const ranked = (clubCmd.buildClubEditModal(editable, false).toJSON() as unknown as ModalJson).components
+        .find((c) => c.label === 'Expected rank')?.component.options as RankOption[] | undefined;
+    check('competitive ranks show the T1000 line', ranked?.find((o) => o.value === 'A')?.description, 'T1000 per member/day, last 4 days: 1.20M 1.20M 1.20M 1.20M');
+    check('every competitive rank has it', ranked?.filter((o) => o.description).map((o) => o.value), ['B', 'B_PLUS', 'A', 'A_PLUS', 'S', 'S_PLUS']);
+    check('Casual does not', ranked?.find((o) => o.value === 'CASUAL')?.description, undefined);
     const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B', fanCountAmount: 0.25 } });
     const looseForm = clubCmd.buildClubEditModal(loose, true).toJSON() as unknown as ModalJson;
     check('an untracked club form has the name instead of home channels', looseForm.components.map((c) => c.label), ['Name', 'Expected rank', 'Quota per member', 'Quota period', 'Staff roles']);
@@ -385,6 +399,11 @@ async function main() {
     await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:rank': 'B_PLUS', 'club:quota': '31M', 'club:period': 'MONTH' });
     check('club staff can change the quota', [String((await reload()).quota), (await reload()).quotaPeriod], ['31000000', 'MONTH']);
     check('club staff can change the expected rank', (await reload()).rank, 'B_PLUS');
+    const competitive = await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:rank': 'A', 'club:quota': '31M', 'club:period': 'MONTH' });
+    check('saving a competitive rank shows the dated T1000 figures', competitive?.description?.includes('T1000 (Cutoff Circle), fans per member per day: 9/27: **1.20M**'), true);
+    const casualSaved = await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:rank': 'CASUAL', 'club:quota': '31M', 'club:period': 'MONTH' });
+    check('saving Casual does not', casualSaved?.description?.includes('T1000'), false);
+    cutoff.setCutoffForTest(null);
     check('staff cannot submit the full form',
         (await submitClub(fullForm.custom_id, 'u-assistant', false, { 'club:rank': 'B', 'club:quota': '1M' }))?.description,
         "Only Club Managers can change a club's name, channels or staff roles.");

@@ -1,4 +1,5 @@
 import { AttachmentBuilder, type Client } from 'discord.js';
+import { refreshCutoff } from './cutoff';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
@@ -179,6 +180,9 @@ export async function runDailySync(client: Client): Promise<string> {
     } catch (e) {
         benchmarkNote = ` benchmark failed: ${e instanceof Error ? e.message : String(e)}`;
     }
+    const cutoffNote = await refreshCutoff()
+        .then((c) => ` t${c.rank}:${c.days.length}d`)
+        .catch((e: unknown) => ` t1000 failed: ${e instanceof Error ? e.message : String(e)}`);
 
     const circles = await prisma.trackedCircle.findMany({ where: { active: true, ...TRACKED } });
     for (const circle of circles) {
@@ -190,7 +194,7 @@ export async function runDailySync(client: Client): Promise<string> {
         }
     }
 
-    return `synced:${results.length} errors:${errors.length}${benchmarkNote}`;
+    return `synced:${results.length} errors:${errors.length}${benchmarkNote}${cutoffNote}`;
 }
 
 /**
@@ -208,7 +212,11 @@ async function runHourlySync(now: Date): Promise<void> {
     await syncBenchmark().catch((e: unknown) => {
         benchmark = e instanceof Error ? e.message : String(e);
     });
-    const note = `synced:${results.length} errors:${errors.length} benchmark:${benchmark}`;
+    let cutoff = 'ok';
+    await refreshCutoff().catch((e: unknown) => {
+        cutoff = e instanceof Error ? e.message : String(e);
+    });
+    const note = `synced:${results.length} errors:${errors.length} benchmark:${benchmark} t1000:${cutoff}`;
     await prisma.jobRun.update({ where: { id: HOURLY_JOB_NAME }, data: { note } });
     if (errors.length > 0) console.warn(`Hourly fan sync errors: ${errors.join('; ')}`);
 
@@ -231,6 +239,9 @@ export function startFanScheduler(client: Client): () => void {
     }
 
     let running = false;
+    // The T1000 figures live in memory, so work them out now rather than at
+    // the next hourly run; /club edit shows nothing until they exist.
+    void refreshCutoff().catch((e: unknown) => console.warn('T1000 figures failed:', e instanceof Error ? e.message : e));
 
     const check = async () => {
         if (running) return;
