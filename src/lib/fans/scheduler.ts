@@ -1,5 +1,5 @@
 import { AttachmentBuilder, type Client } from 'discord.js';
-import { refreshCutoff, refreshCutoffIfStale } from './cutoff';
+import { refreshCutoffs, refreshCutoffsIfStale } from './cutoff';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
@@ -180,9 +180,9 @@ export async function runDailySync(client: Client): Promise<string> {
     } catch (e) {
         benchmarkNote = ` benchmark failed: ${e instanceof Error ? e.message : String(e)}`;
     }
-    const cutoffNote = await refreshCutoff()
-        .then((c) => ` t${c.rank}:${c.days.length}d`)
-        .catch((e: unknown) => ` t1000 failed: ${e instanceof Error ? e.message : String(e)}`);
+    const cutoffNote = await refreshCutoffs()
+        .then((r) => ` cutoffs:${r.done.length}${r.failed.length > 0 ? ` (${r.failed.join('; ')})` : ''}`)
+        .catch((e: unknown) => ` cutoffs failed: ${e instanceof Error ? e.message : String(e)}`);
 
     const circles = await prisma.trackedCircle.findMany({ where: { active: true, ...TRACKED } });
     for (const circle of circles) {
@@ -212,12 +212,16 @@ async function runHourlySync(now: Date): Promise<void> {
     await syncBenchmark().catch((e: unknown) => {
         benchmark = e instanceof Error ? e.message : String(e);
     });
-    // The figures change once a game day; ~24 uma.moe requests, so not every hour.
-    let cutoff = 'ok';
-    await refreshCutoffIfStale().catch((e: unknown) => {
-        cutoff = e instanceof Error ? e.message : String(e);
-    });
-    const note = `synced:${results.length} errors:${errors.length} benchmark:${benchmark} t1000:${cutoff}`;
+    // The figures change once a game day; ~60 uma.moe requests, so not every hour.
+    let cutoff = 'fresh';
+    await refreshCutoffsIfStale()
+        .then((r) => {
+            if (r) cutoff = r.failed.length > 0 ? r.failed.join('; ') : 'ok';
+        })
+        .catch((e: unknown) => {
+            cutoff = e instanceof Error ? e.message : String(e);
+        });
+    const note = `synced:${results.length} errors:${errors.length} benchmark:${benchmark} cutoffs:${cutoff}`;
     await prisma.jobRun.update({ where: { id: HOURLY_JOB_NAME }, data: { note } });
     if (errors.length > 0) console.warn(`Hourly fan sync errors: ${errors.join('; ')}`);
 
@@ -240,9 +244,11 @@ export function startFanScheduler(client: Client): () => void {
     }
 
     let running = false;
-    // The T1000 figures live in memory, so work them out now rather than at
-    // the next hourly run; /club edit shows nothing until they exist.
-    void refreshCutoff().catch((e: unknown) => console.warn('T1000 figures failed:', e instanceof Error ? e.message : e));
+    // The rank cutoff figures live in memory, so work them out now rather
+    // than at the next hourly run; /club edit shows nothing until they exist.
+    void refreshCutoffs()
+        .then((r) => r.failed.length > 0 && console.warn(`Rank cutoff figures failed: ${r.failed.join('; ')}`))
+        .catch((e: unknown) => console.warn('Rank cutoff figures failed:', e instanceof Error ? e.message : e));
 
     const check = async () => {
         if (running) return;

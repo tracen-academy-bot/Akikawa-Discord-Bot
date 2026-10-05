@@ -1,19 +1,23 @@
+import type { ClubRank } from '@prisma/client';
 import { getCircle, getCirclesAtRanks } from '../umamoe/client';
 import type { UmaCircleMember } from '../umamoe/types';
 import { circleSnapshots, latestSnapshot, monthGains } from './metrics';
 import { currentGameMonth, monthsBefore } from './ingest';
 
 /**
- * What it takes to keep up with T1000: fans per member per day over the last
- * 7 completed game days, for the circles ranked around 1000th by monthly
- * points on uma.moe. Shown under the non-Casual expected ranks in
+ * What each expected rank is up against: fans per member per day over the
+ * last 7 completed game days, for the circles ranked around that rank's
+ * cutoff by monthly points on uma.moe. Shown under each expected rank in
  * `/club edit`, next to the quota it informs.
  *
- * One circle sitting exactly on 1000th is noisy, so the figure pools a band
- * 10% either side of the cutoff (900th to 1100th for T1000, 90th to 110th
- * for T100). Fetching every circle in a wide band would mean hundreds of
- * uma.moe requests, so at most 21 evenly spaced places are sampled (every
- * 10th from 900 to 1100; every place from 90 to 110).
+ * The cutoffs, as the club set them on 2026-10-05: S+ is top 30, S top 100,
+ * A+ top 500, A top 1000, B+ top 3000. Casual has none.
+ *
+ * One circle sitting exactly on a cutoff is noisy, so each figure pools a
+ * band around it: 10% either side, but never more than 50 places (27 to 33
+ * for T30, 90 to 110 for T100, 950 to 1050 for T1000, 2950 to 3050 for
+ * T3000). At most 11 evenly spaced places in a band are sampled, to keep
+ * uma.moe requests down (about 60 for all five cutoffs).
  *
  * A day's figure is the fans all sampled circles' members earned that game
  * day, divided by how many members were in their circle all day, by the same
@@ -30,12 +34,20 @@ import { currentGameMonth, monthsBefore } from './ingest';
  * fan scheduler and kept in memory.
  */
 
-/** The ranking place the figures are for. */
-export const CUTOFF_RANK = 1000;
-/** How far either side of the cutoff the band reaches, as a share of it. */
+/** Each expected rank's cutoff: the ranking place it means being within. */
+export const CUTOFF_BY_RANK: Partial<Record<ClubRank, number>> = {
+    S_PLUS: 30,
+    S: 100,
+    A_PLUS: 500,
+    A: 1000,
+    B_PLUS: 3000,
+};
+/** How far either side of a cutoff its band reaches, as a share of it... */
 export const CUTOFF_BAND = 0.1;
-/** Most places sampled in the band. */
-export const CUTOFF_SAMPLES = 21;
+/** ...but never more places than this either side. */
+export const CUTOFF_MAX_RADIUS = 50;
+/** Most places sampled in a band. */
+export const CUTOFF_SAMPLES = 11;
 /** How many completed game days to show. */
 export const CUTOFF_DAYS = 7;
 /** How old the figures may get before the hourly sync works them out again. */
@@ -65,26 +77,38 @@ export interface CutoffSeries {
     computedAt: Date;
 }
 
-let latest: CutoffSeries | null = null;
+/** The figures as last worked out, by cutoff. */
+const latest = new Map<number, CutoffSeries>();
+/** When every cutoff was last attempted, whether or not each succeeded. */
+let lastRefreshAt: Date | null = null;
 
-/** The figures as last worked out, or null before the first run succeeds. */
-export function currentCutoff(): CutoffSeries | null {
-    return latest;
+/** A cutoff's figures as last worked out, or null before its first run succeeds. */
+export function currentCutoff(cutoff: number): CutoffSeries | null {
+    return latest.get(cutoff) ?? null;
 }
 
-/** Replaces the kept figures. For tests. */
-export function setCutoffForTest(series: CutoffSeries | null): void {
-    latest = series;
+/** The figures for an expected rank's cutoff; null for Casual, no rank, or none yet. */
+export function cutoffForRank(rank: ClubRank | null): CutoffSeries | null {
+    const cutoff = rank ? CUTOFF_BY_RANK[rank] : undefined;
+    return cutoff ? currentCutoff(cutoff) : null;
+}
+
+/** Replaces all kept figures. For tests. */
+export function setCutoffsForTest(series: CutoffSeries[]): void {
+    latest.clear();
+    lastRefreshAt = null;
+    for (const s of series) latest.set(s.rank, s);
 }
 
 /**
- * The places sampled for a cutoff: up to `samples` evenly spaced from
- * `rank - band` to `rank + band`, ends included. T1000 gives 900, 910, ...,
- * 1100; T100 gives every place from 90 to 110.
+ * The places sampled for a cutoff: up to `samples` evenly spaced across its
+ * band, ends included. T1000 gives 950, 960, ..., 1050; T30 every place from
+ * 27 to 33.
  */
-export function bandRanks(rank: number, band = CUTOFF_BAND, samples = CUTOFF_SAMPLES): number[] {
-    const from = Math.max(1, Math.round(rank * (1 - band)));
-    const to = Math.round(rank * (1 + band));
+export function bandRanks(rank: number, band = CUTOFF_BAND, samples = CUTOFF_SAMPLES, maxRadius = CUTOFF_MAX_RADIUS): number[] {
+    const radius = Math.min(Math.round(rank * band), maxRadius);
+    const from = Math.max(1, rank - radius);
+    const to = rank + radius;
     const span = to - from;
     if (span + 1 <= samples) return Array.from({ length: span + 1 }, (_, i) => from + i);
     return [...new Set(Array.from({ length: samples }, (_, i) => from + Math.round((span * i) / (samples - 1))))];
@@ -127,11 +151,11 @@ function raws(members: UmaCircleMember[] | undefined): number[][] {
 }
 
 /**
- * Samples the band around `CUTOFF_RANK` and works out the last
- * `CUTOFF_DAYS` days, keeping the result for `currentCutoff`.
+ * Samples the band around one cutoff and works out the last `CUTOFF_DAYS`
+ * days, keeping the result for `currentCutoff`.
  */
-export async function refreshCutoff(now = new Date()): Promise<CutoffSeries> {
-    const places = bandRanks(CUTOFF_RANK);
+export async function refreshCutoff(cutoff: number, now = new Date()): Promise<CutoffSeries> {
+    const places = bandRanks(cutoff);
     const circles = [...(await getCirclesAtRanks(places)).values()].filter((c) => c.circle_id);
     if (circles.length === 0) throw new Error(`uma.moe has no circles ranked ${places[0]} to ${places.at(-1)}`);
 
@@ -162,21 +186,46 @@ export async function refreshCutoff(now = new Date()): Promise<CutoffSeries> {
         .sort((a, b) => a.year - b.year || a.month - b.month || a.day - b.day)
         .map((d) => ({ year: d.year, month: d.month, day: d.day, perMember: Math.round(d.total / d.members), members: d.members }));
 
-    latest = {
-        rank: CUTOFF_RANK,
+    const series: CutoffSeries = {
+        rank: cutoff,
         from: places[0]!,
         to: places.at(-1)!,
         circles: contributed,
         days: days.slice(-CUTOFF_DAYS),
         computedAt: now,
     };
-    return latest;
+    latest.set(cutoff, series);
+    return series;
 }
 
-/** Works the figures out again when there are none or they are older than `CUTOFF_MAX_AGE_MS`. */
-export async function refreshCutoffIfStale(now = new Date()): Promise<CutoffSeries | null> {
-    if (latest && now.getTime() - latest.computedAt.getTime() < CUTOFF_MAX_AGE_MS) return null;
-    return refreshCutoff(now);
+/**
+ * Works out every rank's cutoff, one after another. A cutoff that fails (the
+ * ranking may not reach 3000 early in a month) keeps its last figures and is
+ * reported; the rest still update.
+ */
+export async function refreshCutoffs(now = new Date()): Promise<{ done: number[]; failed: string[] }> {
+    lastRefreshAt = now;
+    const done: number[] = [];
+    const failed: string[] = [];
+    for (const cutoff of [...new Set(Object.values(CUTOFF_BY_RANK))].sort((a, b) => a - b)) {
+        try {
+            await refreshCutoff(cutoff, now);
+            done.push(cutoff);
+        } catch (e) {
+            failed.push(`T${cutoff}: ${e instanceof Error ? e.message : String(e)}`);
+        }
+    }
+    return { done, failed };
+}
+
+/**
+ * Works the figures out again when the last attempt is older than
+ * `CUTOFF_MAX_AGE_MS`. Timed from the attempt, not each cutoff's success, so
+ * a cutoff that keeps failing is retried every six hours, not every hour.
+ */
+export async function refreshCutoffsIfStale(now = new Date()): Promise<{ done: number[]; failed: string[] } | null> {
+    if (lastRefreshAt && now.getTime() - lastRefreshAt.getTime() < CUTOFF_MAX_AGE_MS) return null;
+    return refreshCutoffs(now);
 }
 
 /** A per-member figure as millions with two decimals: 1234567 is "1.23M". */
@@ -190,7 +239,7 @@ function millions(value: number): string {
  */
 export function cutoffLine(series: CutoffSeries | null): string | null {
     if (!series || series.days.length === 0) return null;
-    const line = `T${series.rank} (±10%) per member/day, last ${series.days.length} days: ${series.days.map((d) => millions(d.perMember)).join(' ')}`;
+    const line = `T${series.rank} (${series.from}–${series.to}) per member/day, last ${series.days.length} days: ${series.days.map((d) => millions(d.perMember)).join(' ')}`;
     return line.slice(0, 100);
 }
 

@@ -4,6 +4,15 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-05 — Rank cutoffs set; B removed
+
+The club set each expected rank's cutoff: "S+ is top 30, S is top 100, A+ is
+top 500, A is top 1000, B+ is top 3000. remove B if any. do +/- as you wish,
+but don't make radius too big". Chosen: 10% either side, capped at 50 places.
+This replaces showing T1000 under every competitive rank.
+
+---
+
 ## 2026-10-05 — Club directory designed; T1000 shown under competitive ranks
 
 Shown the server's existing directory (Dia's tier posts, then per-club banner

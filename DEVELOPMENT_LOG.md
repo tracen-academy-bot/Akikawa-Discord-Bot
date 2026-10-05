@@ -4,6 +4,29 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-05 — A cutoff per expected rank; B removed
+
+Each expected rank now has its own cutoff, as the club set them: S+ is top
+30, S top 100, A+ top 500, A top 1000, B+ top 3000 (`CUTOFF_BY_RANK` in
+`src/lib/fans/cutoff.ts`). Each rank's option in `/club edit` shows its own
+cutoff's figures, and saving shows the chosen rank's. Casual has none.
+
+The band is 10% either side but at most 50 places ("don't make radius too
+big"): 27 to 33, 90 to 110, 450 to 550, 950 to 1050, 2950 to 3050. At most
+11 places are sampled per band, so all five cutoffs together take about 60
+uma.moe requests. A cutoff that fails (the ranking may not reach 3000 early
+in a month) keeps its last figures and does not stop the others; the
+six-hour staleness is timed from the last attempt, so a failing cutoff does
+not make every hourly sync refetch everything.
+
+B is no longer a rank (`20261005100000_remove_club_rank_b`). Postgres cannot
+drop an enum value, so the type is rebuilt; a club set to B becomes unset.
+The pre-merge backup table's rank column becomes text first, keeping its
+values. Checked on a database seeded with a B club and a B backup row, and
+on an empty one. The B badge image is removed.
+
+---
+
 ## 2026-10-05 — Club profiles, the club directory, and T1000 figures in /club edit
 
 **Club profiles.** `/club profile` opens a second form (`/club edit` already

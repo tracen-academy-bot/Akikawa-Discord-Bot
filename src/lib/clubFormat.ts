@@ -8,7 +8,6 @@ import { describeQuota, toSafeNumber } from './fans/metrics';
 
 export const RANK_CHOICES: { name: string; value: ClubRank }[] = [
     { name: 'Casual', value: 'CASUAL' },
-    { name: 'B', value: 'B' },
     { name: 'B+', value: 'B_PLUS' },
     { name: 'A', value: 'A' },
     { name: 'A+', value: 'A_PLUS' },

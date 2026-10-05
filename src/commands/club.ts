@@ -27,7 +27,7 @@ import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
 import { toSafeNumber } from '../lib/fans/metrics';
 import { PERIOD_CHOICES, RANK_CHOICES, clubQuotaText, formatRank } from '../lib/clubFormat';
-import { currentCutoff, cutoffDetail, cutoffLine } from '../lib/fans/cutoff';
+import { cutoffDetail, cutoffForRank, cutoffLine } from '../lib/fans/cutoff';
 import { publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
 import { buildProfileModal } from './clubProfile';
 import { parseQuota } from './fans';
@@ -362,7 +362,6 @@ export function buildClubEditModal(
     links: ClubFormLinks = { home: club.homeChannelIds, roles: club.staffRoleIds },
 ): ModalBuilder {
     const labels: LabelBuilder[] = [];
-    const t1000 = cutoffLine(currentCutoff());
     if (full && club.circleId === null) {
         labels.push(
             new LabelBuilder()
@@ -380,9 +379,9 @@ export function buildClubEditModal(
                         label: r.name,
                         value: r.value,
                         default: r.value === club.rank,
-                        // A form cannot change as it is filled in, so every
-                        // competitive rank carries the T1000 figures beneath it.
-                        ...(r.value !== 'CASUAL' && t1000 ? { description: t1000 } : {}),
+                        // A form cannot change as it is filled in, so each
+                        // rank carries its own cutoff's figures beneath it.
+                        ...(cutoffLine(cutoffForRank(r.value)) ? { description: cutoffLine(cutoffForRank(r.value))! } : {}),
                     })),
                 ),
         ),
@@ -525,8 +524,8 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
                     `**${updated.name}** · expected rank **${formatRank(updated.rank)}**`,
                     `Headcount: **${headcount === null ? '—' : `${headcount}/${MAX_HEADCOUNT}`}** (from uma.moe)`,
                     `Quota: **${clubQuotaText(updated)}** per member`,
-                    // What a competitive rank is up against, next to the quota it informs.
-                    ...(updated.rank !== null && updated.rank !== 'CASUAL' && cutoffDetail(currentCutoff()) ? [cutoffDetail(currentCutoff())!] : []),
+                    // What the expected rank is up against, next to the quota it informs.
+                    ...(cutoffDetail(cutoffForRank(updated.rank)) ? [cutoffDetail(cutoffForRank(updated.rank))!] : []),
                     ...(updated.circleId !== null ? [`Home channels: ${linksText(home, (id) => `<#${id}>`)}`] : []),
                     ...(full ? [`Staff roles: ${linksText(roles, (id) => `<@&${id}>`)}`] : []),
                 ].join('\n'),

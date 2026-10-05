@@ -37,16 +37,20 @@ async function main() {
     check('the day in progress is not shown', cutoff.dailyPerMember([fans(100, 110)]).map((d) => d.day), [1]);
     check('no data, no days', cutoff.dailyPerMember([]), []);
 
-    // ── The band ──────────────────────────────────────────────────────────────
-    check('T1000 samples every 10th place from 900 to 1100', cutoff.bandRanks(1000), Array.from({ length: 21 }, (_, i) => 900 + i * 10));
-    check('T100 takes every place from 90 to 110', cutoff.bandRanks(100), Array.from({ length: 21 }, (_, i) => 90 + i));
-    check('T500 runs 450 to 550', [cutoff.bandRanks(500)[0], cutoff.bandRanks(500).at(-1), cutoff.bandRanks(500).length], [450, 550, 21]);
+    // ── The bands ─────────────────────────────────────────────────────────────
+    const steps = (from: number, step: number, n: number) => Array.from({ length: n }, (_, i) => from + i * step);
+    check('the cutoffs, by expected rank', cutoff.CUTOFF_BY_RANK, { S_PLUS: 30, S: 100, A_PLUS: 500, A: 1000, B_PLUS: 3000 });
+    check('T30 takes every place from 27 to 33', cutoff.bandRanks(30), steps(27, 1, 7));
+    check('T100 samples 90 to 110', cutoff.bandRanks(100), steps(90, 2, 11));
+    check('T500 is capped at 50 either side', cutoff.bandRanks(500), steps(450, 10, 11));
+    check('T1000 runs 950 to 1050', cutoff.bandRanks(1000), steps(950, 10, 11));
+    check('T3000 runs 2950 to 3050', cutoff.bandRanks(3000), steps(2950, 10, 11));
     check('the band never goes below 1st', cutoff.bandRanks(1), [1]);
 
     // ── The uma.moe lookups ───────────────────────────────────────────────────
     // October has three game days of data, so four days come from September.
     // Every 20th place is a one-member circle earning 1M a day; the rest have
-    // three members earning 2M a day each. Pooled: (11 x 1M + 10 x 6M) / 41.
+    // three members earning 2M a day each.
     const now = new Date('2026-10-04T12:00:00Z');
     const requests: string[] = [];
     const daily = (start: number, perDay: number, days: number) => fans(...Array.from({ length: days + 1 }, (_, d) => start + d * perDay));
@@ -60,8 +64,8 @@ async function main() {
         let body: unknown;
         if (url.pathname === '/api/v4/circles/list') {
             const page = Number(url.searchParams.get('page'));
-            // The ranking ends at 1050th: the band's top end is missing.
-            const size = Math.max(0, Math.min(100, 1050 - page * 100));
+            // The ranking ends at 1030th: T1000's top end is missing, and T3000's band is empty.
+            const size = Math.max(0, Math.min(100, 1030 - page * 100));
             body = { circles: Array.from({ length: size }, (_, i) => ({ circle_id: page * 100 + i + 1, name: `Circle ${page * 100 + i + 1}` })) };
         } else {
             const id = Number(url.searchParams.get('circle_id'));
@@ -70,25 +74,34 @@ async function main() {
         return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } });
     }) as typeof fetch;
 
-    const series = await cutoff.refreshCutoff(now);
+    const series = await cutoff.refreshCutoff(1000, now);
     const lists = requests.filter((r) => r.startsWith('/api/v4/circles/list'));
-    check('each page of the band is fetched once', lists.map((r) => /page=(\d+)/.exec(r)?.[1]), ['8', '9', '10']);
-    check('places past the end of the ranking are skipped', [series.circles, series.from, series.to], [16, 900, 1100]);
-    check('this month, then last month when it is short', requests.filter((r) => r.includes('circle_id=900&')).map((r) => /month=(\d+)/.exec(r)?.[1]), ['10', '9']);
+    check('each page of the band is fetched once', lists.map((r) => /page=(\d+)/.exec(r)?.[1]), ['9', '10']);
+    check('places past the end of the ranking are skipped', [series.circles, series.from, series.to], [9, 950, 1050]);
+    check('this month, then last month when it is short', requests.filter((r) => r.includes('circle_id=950&')).map((r) => /month=(\d+)/.exec(r)?.[1]), ['10', '9']);
     check('the last 7 days, oldest first, across the months',
         series.days.map((d) => `${d.month}/${d.day}`), ['9/27', '9/28', '9/29', '9/30', '10/1', '10/2', '10/3']);
-    // 900..1050 sampled: 900, 920, ..., 1040 are one-member (8); 910, ..., 1050 are three-member (8).
-    check('circles are pooled by member, not averaged', series.days[0]?.perMember, Math.round((8 * 1_000_000 + 8 * 6_000_000) / (8 + 24)));
-    check('members counted across circles', series.days[0]?.members, 32);
-    check('kept for the form', cutoff.currentCutoff()?.circles, 16);
-    check('fresh figures are not fetched again', await cutoff.refreshCutoffIfStale(new Date(now.getTime() + 60_000)), null);
-    check('stale ones are', (await cutoff.refreshCutoffIfStale(new Date(now.getTime() + cutoff.CUTOFF_MAX_AGE_MS)))?.circles, 16);
+    // Sampled 950..1030: 960, 980, 1000, 1020 are one-member (4); 950, 970, 990, 1010, 1030 three-member (5).
+    check('circles are pooled by member, not averaged', series.days[0]?.perMember, Math.round((4 * 1_000_000 + 5 * 6_000_000) / (4 + 15)));
+    check('members counted across circles', series.days[0]?.members, 19);
+    check('kept for the A rank', cutoff.cutoffForRank('A')?.circles, 9);
+    check('Casual and no rank have none', [cutoff.cutoffForRank('CASUAL'), cutoff.cutoffForRank(null)], [null, null]);
+
+    const all = await cutoff.refreshCutoffs(now);
+    check('every rank\'s cutoff is worked out', all.done, [30, 100, 500, 1000]);
+    check('one the ranking does not reach fails on its own', all.failed.map((f) => f.split(':')[0]), ['T3000']);
+    check('and B+ has nothing to show', cutoff.cutoffForRank('B_PLUS'), null);
+    check('S+ has T30', cutoff.cutoffForRank('S_PLUS')?.from, 27);
+    check('a recent attempt is not repeated', await cutoff.refreshCutoffsIfStale(new Date(now.getTime() + 60_000)), null);
+    check('even though T3000 failed', cutoff.cutoffForRank('B_PLUS'), null);
+    check('an old one is', (await cutoff.refreshCutoffsIfStale(new Date(now.getTime() + cutoff.CUTOFF_MAX_AGE_MS)))?.done.length, 4);
 
     // ── The text ──────────────────────────────────────────────────────────────
     const line = cutoff.cutoffLine(series);
-    check('the option line', line, 'T1000 (±10%) per member/day, last 7 days: 1.75M 1.75M 1.75M 1.75M 1.75M 1.75M 1.75M');
-    check('fits a select option description', (line?.length ?? 0) <= 100, true);
-    check('the dated detail', cutoff.cutoffDetail(series)?.startsWith('T1000 (16 circles ranked 900–1100), fans per member per day: 9/27: **1.75M** · '), true);
+    check('the option line', line, 'T1000 (950–1050) per member/day, last 7 days: 1.79M 1.79M 1.79M 1.79M 1.79M 1.79M 1.79M');
+    const widest = cutoff.cutoffLine({ ...series, rank: 3000, from: 2950, to: 3050, days: series.days.map((d) => ({ ...d, perMember: 12_345_678 })) });
+    check('even T3000 with big numbers fits an option description', (widest?.length ?? 0) <= 100, true);
+    check('the dated detail', cutoff.cutoffDetail(series)?.startsWith('T1000 (9 circles ranked 950–1050), fans per member per day: 9/27: **1.79M** · '), true);
     check('nothing to show before the first run', [cutoff.cutoffLine(null), cutoff.cutoffDetail(null)], [null, null]);
 
     console.log(`\n${pass} passed, ${fail} failed`);

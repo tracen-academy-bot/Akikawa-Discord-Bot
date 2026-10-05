@@ -9,7 +9,6 @@ generator client {
 
 enum ClubRank {
     CASUAL
-    B
     B_PLUS
     A
     A_PLUS

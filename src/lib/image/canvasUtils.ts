@@ -21,7 +21,6 @@ export const RANK_COLORS: Record<ClubRank, string> = {
     A_PLUS: '#7ee787',
     A: '#56d364',
     B_PLUS: '#79c0ff',
-    B: '#58a6ff',
     CASUAL: '#a8a29e',
 };
 
@@ -31,7 +30,6 @@ export const RANK_LABELS: Record<ClubRank, string> = {
     A_PLUS: 'A',
     A: 'A',
     B_PLUS: 'B',
-    B: 'B',
     // No badge artwork exists for Casual, so it uses the drawn badge.
     CASUAL: 'C',
 };
