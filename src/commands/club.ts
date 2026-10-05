@@ -145,7 +145,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('edit')
-            .setDescription("Edit a club's info in a form (Club Managers; the club's staff for its quota).")
+            .setDescription("Edit a club's info in a form (Club Managers; the club's staff for its rank and quota).")
             .addStringOption((opt) => opt.setName('club').setDescription('Club to edit').setRequired(true).setAutocomplete(true))
     )
     .addSubcommand((sub) => 
@@ -315,9 +315,9 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
  * `/club edit` opens a form pre-filled with the club's current info. Club
  * Managers get the expected rank and the quota, plus the name for a club
  * without uma.moe tracking (a tracked club's name comes from uma.moe and is
- * refreshed on every sync) or its home channels for a tracked one. A club's
- * own staff (Trainers and Assistants) get the quota only, as `/club fancount`
- * allowed. Headcount is not a field: it is worked out from uma.moe.
+ * refreshed on every sync) or its home channels for a tracked one, and its
+ * staff roles. A club's own staff (Trainers and Assistants) get the expected
+ * rank and the quota. Headcount is not a field: it is worked out from uma.moe.
  *
  * The quota is the same one `/fans` measures against (clubs and circles are
  * one row), so the form shows and changes the real quota. The custom ID
@@ -380,16 +380,14 @@ export function buildClubEditModal(
                 .setTextInputComponent(new TextInputBuilder().setCustomId(EDIT_FIELD.name).setStyle(TextInputStyle.Short).setValue(club.name).setMaxLength(100)),
         );
     }
-    if (full) {
-        labels.push(
-            new LabelBuilder().setLabel('Expected rank').setStringSelectMenuComponent(
-                new StringSelectMenuBuilder()
-                    .setCustomId(EDIT_FIELD.rank)
-                    .setPlaceholder('Not set')
-                    .addOptions(RANK_CHOICES.map((r) => ({ label: r.name, value: r.value, default: r.value === club.rank }))),
-            ),
-        );
-    }
+    labels.push(
+        new LabelBuilder().setLabel('Expected rank').setStringSelectMenuComponent(
+            new StringSelectMenuBuilder()
+                .setCustomId(EDIT_FIELD.rank)
+                .setPlaceholder('Not set')
+                .addOptions(RANK_CHOICES.map((r) => ({ label: r.name, value: r.value, default: r.value === club.rank }))),
+        ),
+    );
     const quotaValue = quotaInputValue(club);
     const quota = new TextInputBuilder().setCustomId(EDIT_FIELD.quota).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(20);
     if (quotaValue) quota.setValue(quotaValue);
@@ -464,7 +462,7 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
     const member = interaction.member as GuildMember;
     const full = kind === 'full';
     if (full ? !isOfficer(member) : !(await canManageClubStats(member, club))) {
-        return void (await refuse(full ? 'Only Club Managers can change a club\'s name, rank or channels.' : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
+        return void (await refuse(full ? 'Only Club Managers can change a club\'s name, channels or staff roles.' : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
     }
 
     // The quota replaces the old club fan count, which is cleared so it
@@ -502,10 +500,9 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
         const matched = guild ? matchedStaffRoleIds(club, clubs, guild.roles.cache.values()) : [];
         data.staffRoleIds = listToStore(picked ? [...picked.keys()] : [], matched);
     }
-    if (full) {
-        const rank = interaction.fields.getStringSelectValues(EDIT_FIELD.rank)[0] as ClubRank | undefined;
-        if (rank && RANK_CHOICES.some((r) => r.value === rank)) data.rank = rank;
-    }
+    // Both forms have the expected rank: Club Managers and the club's staff.
+    const rank = interaction.fields.getStringSelectValues(EDIT_FIELD.rank)[0] as ClubRank | undefined;
+    if (rank && RANK_CHOICES.some((r) => r.value === rank)) data.rank = rank;
 
     const rawQuota = interaction.fields.getTextInputValue(EDIT_FIELD.quota).trim();
     if (rawQuota) {

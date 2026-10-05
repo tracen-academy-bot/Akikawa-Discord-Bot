@@ -4,6 +4,16 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-05 — Club staff can set the expected rank
+
+A club's own Trainers and Assistants opening `/club edit` got the quota and
+its period only; the expected rank was Club Managers' alone. The club wants
+staff to set it too, so the staff form now has Expected rank above the
+quota, pre-selected like the Club Manager form, and the submit saves it for
+either form. Name, home channels and staff roles stay Club Managers' only.
+
+---
+
 ## 2026-10-04 — Club staff roles matched by name
 
 A Cosmos Assistant ran `/fans club` and was refused. Club staff were only the

@@ -321,7 +321,8 @@ async function main() {
     const staffForm = clubCmd.buildClubEditModal(editable, false).toJSON() as unknown as ModalJson;
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
     check('a tracked club form: expected rank, quota, period, home channels, staff roles', fullForm.components.map((c) => c.label), ['Expected rank', 'Quota per member', 'Quota period', 'Home channels', 'Staff roles']);
-    check('club form for staff has the quota only', staffForm.components.map((c) => c.label), ['Quota per member', 'Quota period']);
+    check('club form for staff has the expected rank and quota', staffForm.components.map((c) => c.label), ['Expected rank', 'Quota per member', 'Quota period']);
+    check('the staff form pre-selects the expected rank', pre(staffForm, 'Expected rank')?.options?.find((o) => o.default)?.value, 'S');
     check('headcount is not a field', fullForm.components.some((c) => c.label.toLowerCase().includes('headcount')), false);
     check('the form shows the real quota, exactly', pre(fullForm, 'Quota per member')?.value, '31M');
     check('club form pre-selects expected rank and quota period',
@@ -381,11 +382,12 @@ async function main() {
         (await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'checkrose', 'club:rank': 'B' }))?.description,
         'A club named **checkrose** already exists.');
 
-    await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:quota': '31M', 'club:period': 'MONTH' });
+    await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:rank': 'B_PLUS', 'club:quota': '31M', 'club:period': 'MONTH' });
     check('club staff can change the quota', [String((await reload()).quota), (await reload()).quotaPeriod], ['31000000', 'MONTH']);
+    check('club staff can change the expected rank', (await reload()).rank, 'B_PLUS');
     check('staff cannot submit the full form',
         (await submitClub(fullForm.custom_id, 'u-assistant', false, { 'club:rank': 'B', 'club:quota': '1M' }))?.description,
-        "Only Club Managers can change a club's name, rank or channels.");
+        "Only Club Managers can change a club's name, channels or staff roles.");
     check('outsiders cannot submit the quota form',
         (await submitClub(staffForm.custom_id, 'u-behind', false, { 'club:quota': '1M' }))?.description?.startsWith('You must be a trainer or assistant'), true);
     check('a bad quota is refused',
