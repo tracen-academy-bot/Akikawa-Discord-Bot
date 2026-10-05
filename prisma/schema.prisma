@@ -9,7 +9,6 @@ generator client {
 
 enum ClubRank {
     CASUAL
-    B
     B_PLUS
     A
     A_PLUS
@@ -23,6 +22,15 @@ enum QuotaPeriod {
     WEEK
     BIWEEKLY
     MONTH
+}
+
+/// The network's club tiers, as the club directory groups them. Set by Club
+/// Managers; not derived from the expected rank, whose ranges overlap.
+enum ClubTier {
+    G1
+    G2
+    G3
+    DEBUT
 }
 
 enum ClubMemberRole {
@@ -160,8 +168,16 @@ model TrackedCircle {
     createdAt       DateTime  @default(now())
     updatedAt       DateTime  @updatedAt
 
+    /// Directory tier; null keeps the club out of the directory.
+    tier            ClubTier?
+    /// The club's own description, shown on its directory card.
+    bio             String?
+    /// The club's rules: text, or a link to a rules post.
+    rules           String?
+
     members   ClubMember[]
     snapshots FanSnapshot[]
+    banner    ClubBanner?
 
     @@unique([guildId, circleId])
     @@index([active])
@@ -249,4 +265,29 @@ model JobRun {
     lastRunAt DateTime
     /// Short outcome summary, for operators reading the table directly.
     note      String?
+}
+
+/// A club's banner image, shown above its directory card. Kept apart from
+/// `TrackedCircle` so ordinary club queries never load the image.
+model ClubBanner {
+    clubId      String        @id
+    club        TrackedCircle @relation(fields: [clubId], references: [id], onDelete: Cascade)
+    data        Bytes
+    fileName    String
+    contentType String
+    updatedAt   DateTime      @updatedAt
+}
+
+/// Where a guild's club directory is posted, so it can be updated in place.
+/// `layout` names what each message in `messageIds` holds, in order
+/// (`tiers`, `tier:G1`, `club:<id>`, `index`); a new layout means reposting.
+/// `signatures` fingerprints each message's content, so a refresh edits only
+/// the messages that changed.
+model ClubDirectory {
+    guildId    String   @id
+    channelId  String
+    layout     String[] @default([])
+    messageIds String[] @default([])
+    signatures String[] @default([])
+    updatedAt  DateTime @updatedAt
 }

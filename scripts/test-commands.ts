@@ -27,7 +27,17 @@ const GUILD = 'test-guild-commands';
  */
 const FAKE_GUILD = {
     id: GUILD,
-    roles: { cache: new Collection<string, { id: string; name: string }>() },
+    roles: { cache: new Collection<string, { id: string; name: string; members?: Collection<string, unknown> }>() },
+    /** Whether the member list loads (the Server Members intent). */
+    membersLoad: true,
+    members: {
+        fetch: async () => {
+            if (!FAKE_GUILD.membersLoad) throw new Error('Used disallowed intents');
+        },
+    },
+    /** Channels the bot can fetch, by ID; the club directory's live here. */
+    channelsById: new Map<string, unknown>(),
+    channels: { fetch: async (id: string) => FAKE_GUILD.channelsById.get(id) ?? null },
 };
 
 /** A member's role cache: the officer role if asked, plus any others. */
@@ -109,11 +119,11 @@ function fakeInteraction(opts: FakeOptions, log: Sent[]) {
             getString: (name: string) =>
                 opts.strings?.[name] ?? (name === 'circle' ? opts.circle ?? null : name === 'id' ? opts.id ?? null : null),
             getBoolean: (name: string) => (name === 'remove' ? opts.remove ?? null : null),
-            getChannel: () => null,
+            getChannel: (name: string) => (opts.strings?.[name] ? { id: opts.strings[name] } : null),
             getUser: () => null,
         },
         client: {
-            channels: { fetch: async (id: string) => fakeChannel(id, log) },
+            channels: { fetch: async (id: string) => FAKE_GUILD.channelsById.get(id) ?? fakeChannel(id, log) },
         },
         async reply(payload: { embeds?: { toJSON(): Record<string, unknown> }[]; flags?: unknown }) {
             interaction.replied = true;
@@ -327,7 +337,24 @@ async function main() {
     check('the form shows the real quota, exactly', pre(fullForm, 'Quota per member')?.value, '31M');
     check('club form pre-selects expected rank and quota period',
         [pre(fullForm, 'Expected rank')?.options?.find((o) => o.default)?.value, pre(fullForm, 'Quota period')?.options?.find((o) => o.default)?.value], ['S', 'MONTH']);
-    const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B', fanCountAmount: 0.25 } });
+
+    // Each rank's cutoff figures sit under it: A is T1000, S+ is T30; none under Casual.
+    const cutoff = await import('../src/lib/fans/cutoff');
+    check('with no cutoff figures yet, no option has a line', pre(fullForm, 'Expected rank')?.options?.some((o) => 'description' in o), false);
+    const days = [27, 28, 29, 30].map((day) => ({ year: 2026, month: 9, day, perMember: 1_200_000, members: 30 }));
+    cutoff.setCutoffsForTest([
+        { rank: 1000, from: 950, to: 1050, circles: 11, computedAt: new Date(), days },
+        { rank: 30, from: 27, to: 33, circles: 7, computedAt: new Date(), days: days.map((d) => ({ ...d, perMember: 4_000_000 })) },
+    ]);
+    type RankOption = { value: string; description?: string };
+    const ranked = (clubCmd.buildClubEditModal(editable, false).toJSON() as unknown as ModalJson).components
+        .find((c) => c.label === 'Expected rank')?.component.options as RankOption[] | undefined;
+    check('A shows the T1000 line', ranked?.find((o) => o.value === 'A')?.description, 'T1000 (950–1050) per member/day, last 4 days: 1.20M 1.20M 1.20M 1.20M');
+    check('S+ shows T30', ranked?.find((o) => o.value === 'S_PLUS')?.description, 'T30 (27–33) per member/day, last 4 days: 4.00M 4.00M 4.00M 4.00M');
+    check('ranks whose cutoff has no figures yet show none', ranked?.filter((o) => o.description).map((o) => o.value), ['A', 'S_PLUS']);
+    check('B is gone', ranked?.map((o) => o.value), ['CASUAL', 'B_PLUS', 'A', 'A_PLUS', 'S', 'S_PLUS']);
+    check('Casual does not', ranked?.find((o) => o.value === 'CASUAL')?.description, undefined);
+    const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B_PLUS', fanCountAmount: 0.25 } });
     const looseForm = clubCmd.buildClubEditModal(loose, true).toJSON() as unknown as ModalJson;
     check('an untracked club form has the name instead of home channels', looseForm.components.map((c) => c.label), ['Name', 'Expected rank', 'Quota per member', 'Quota period', 'Staff roles']);
     check('an untracked club form pre-fills the name', pre(looseForm, 'Name')?.value, 'Loose Club');
@@ -376,17 +403,22 @@ async function main() {
     check('a thread elsewhere still does not',
         desc(await run({ sub: 'me', userId: 'u-behind', channel: 't-private', parent: 'c-other' }))?.startsWith(nowhere), true);
 
-    await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'Looser Club', 'club:rank': 'B', 'club:quota': '0.25M', 'club:period': 'MONTH' });
+    await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'Looser Club', 'club:rank': 'B_PLUS', 'club:quota': '0.25M', 'club:period': 'MONTH' });
     check('an untracked club can be renamed', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: loose.id } })).name, 'Looser Club');
     check('renaming to a taken name is refused, ignoring case',
-        (await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'checkrose', 'club:rank': 'B' }))?.description,
+        (await submitClub(looseForm.custom_id, 'u-officer', true, { 'club:name': 'checkrose', 'club:rank': 'B_PLUS' }))?.description,
         'A club named **checkrose** already exists.');
 
     await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:rank': 'B_PLUS', 'club:quota': '31M', 'club:period': 'MONTH' });
     check('club staff can change the quota', [String((await reload()).quota), (await reload()).quotaPeriod], ['31000000', 'MONTH']);
     check('club staff can change the expected rank', (await reload()).rank, 'B_PLUS');
+    const competitive = await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:rank': 'A', 'club:quota': '31M', 'club:period': 'MONTH' });
+    check('saving a competitive rank shows the dated T1000 figures', competitive?.description?.includes('T1000 (11 circles ranked 950–1050), fans per member per day: 9/27: **1.20M**'), true);
+    const casualSaved = await submitClub(staffForm.custom_id, 'u-assistant', false, { 'club:rank': 'CASUAL', 'club:quota': '31M', 'club:period': 'MONTH' });
+    check('saving Casual does not', casualSaved?.description?.includes('T1000'), false);
+    cutoff.setCutoffsForTest([]);
     check('staff cannot submit the full form',
-        (await submitClub(fullForm.custom_id, 'u-assistant', false, { 'club:rank': 'B', 'club:quota': '1M' }))?.description,
+        (await submitClub(fullForm.custom_id, 'u-assistant', false, { 'club:rank': 'B_PLUS', 'club:quota': '1M' }))?.description,
         "Only Club Managers can change a club's name, channels or staff roles.");
     check('outsiders cannot submit the quota form',
         (await submitClub(staffForm.custom_id, 'u-behind', false, { 'club:quota': '1M' }))?.description?.startsWith('You must be a trainer or assistant'), true);
@@ -475,6 +507,195 @@ async function main() {
     await prisma.trackedCircle.update({ where: { id: other.id }, data: { active: false } });
     FAKE_GUILD.roles.cache.clear();
 
+    // ── Club profiles ─────────────────────────────────────────────────────────
+    const profile = await import('../src/commands/clubProfile');
+    const directory = await import('../src/lib/clubDirectory');
+    const { clubQuotaText } = await import('../src/lib/clubFormat');
+    await prisma.clubDirectory.deleteMany({ where: { guildId: GUILD } });
+    FAKE_GUILD.roles.cache.set('r-ck-asst', { id: 'r-ck-asst', name: 'Checkrose Assistant', members: new Collection([['u-role-asst', {}]]) });
+
+    type ProfileJson = { custom_id: string; components: { label: string; component: { options?: { value: string; default?: boolean }[] } }[] };
+    const profileForm = (c: Awaited<ReturnType<typeof reload>>, full: boolean, hasBanner: boolean) =>
+        profile.buildProfileModal(c, full, hasBanner).toJSON() as unknown as ProfileJson;
+    const ck = await reload();
+    const staffProfile = profileForm(ck, false, false).custom_id;
+    const fullProfile = profileForm(ck, true, false).custom_id;
+    check('the staff profile form: bio, rules, banner', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner']);
+    check('Club Managers also set the tier', profileForm(ck, true, false).components.map((c) => c.label), ['Tier', 'Bio', 'Rules', 'Banner']);
+    check('a club starts not listed', profileForm(ck, true, false).components[0]?.component.options?.find((o) => o.default)?.value, 'NONE');
+    check('a remove box only when there is a banner', profileForm(ck, false, true).components.map((c) => c.label).at(-1), 'Remove banner');
+
+    type Upload = { url: string; name: string; contentType: string; size: number };
+    /** Submits the profile form; returns what the bot replied, in order. */
+    const submitProfile = async (
+        customId: string, userId: string, officer: boolean, values: Record<string, string>,
+        opts: { upload?: Upload; remove?: boolean; held?: string[] } = {},
+    ) => {
+        const out: { kind: string; content?: string | undefined; description?: string | undefined; embeds?: number | undefined; files?: number | undefined }[] = [];
+        const present = new Map<string, unknown>(Object.keys(values).map((k) => [k, {}]));
+        if (opts.remove !== undefined) present.set('club:profile:remove-banner', {});
+        type Reply = { content?: string; embeds?: { toJSON(): { description?: string } }[]; files?: unknown[] };
+        const interaction = {
+            customId, guildId: GUILD, guild: FAKE_GUILD, user: { id: userId }, deferred: false,
+            member: { id: userId, roles: { cache: roleCache(officer, opts.held) }, guild: FAKE_GUILD },
+            fields: {
+                fields: present,
+                getTextInputValue: (id: string) => values[id] ?? '',
+                getStringSelectValues: (id: string) => (values[id] ? [values[id]] : []),
+                getUploadedFiles: () => (opts.upload ? new Collection([['a1', opts.upload]]) : null),
+                getCheckbox: () => opts.remove ?? false,
+            },
+            reply: async (p: Reply) => void out.push({ kind: 'reply', description: p.embeds?.[0]?.toJSON().description }),
+            deferReply: async () => {
+                interaction.deferred = true;
+                out.push({ kind: 'defer' });
+            },
+            editReply: async (p: Reply) =>
+                void out.push({ kind: 'edit', content: p.content, description: p.embeds?.at(-1)?.toJSON().description, embeds: p.embeds?.length, files: p.files?.length }),
+        };
+        await profile.handleProfileModal(interaction as never);
+        return out;
+    };
+    const BIO = 'Text Chat Heavy\nWordle Boomers';
+    const RULES = 'https://discord.com/channels/g/c/rules';
+    const kept = { 'club:profile:bio': BIO, 'club:profile:rules': RULES };
+
+    const staffSave = await submitProfile(staffProfile, 'u-assistant', false, kept);
+    check('club staff can save the bio and rules', [(await reload()).bio, (await reload()).rules], [BIO, RULES]);
+    check('the reply is private and shows the card', [staffSave[0]?.kind, staffSave.at(-1)?.content],
+        ['defer', 'Saved. **Checkrose** is not listed in the directory (a Club Manager sets its tier). Its card:']);
+    check('staff cannot submit the tier form',
+        (await submitProfile(fullProfile, 'u-assistant', false, { 'club:profile:tier': 'G1', ...kept }))[0]?.description, "Only Club Managers can change a club's tier.");
+    check('outsiders cannot edit the profile',
+        (await submitProfile(staffProfile, 'u-behind', false, kept))[0]?.description?.startsWith('You must be a trainer or assistant'), true);
+    check('a staff role holder can', (await submitProfile(staffProfile, 'u-role-asst', false, kept, { held: ['r-ck-asst'] })).at(-1)?.kind, 'edit');
+    const tiered = await submitProfile(fullProfile, 'u-officer', true, { 'club:profile:tier': 'G1', ...kept });
+    check('a Club Manager sets the tier', (await reload()).tier, 'G1');
+    check('and is told where it is listed', tiered.at(-1)?.content, 'Saved. **Checkrose** is listed under **G1 [Competitive]**. Its card:');
+
+    // The banner: downloaded from Discord's CDN (stubbed) and stored.
+    const bannerPng = Buffer.from('89504e470d0a1a0a', 'hex');
+    const realFetch = globalThis.fetch;
+    const bannerUpload: Upload = { url: 'https://cdn.test/b.png', name: 'Spica banner.png', contentType: 'image/png', size: bannerPng.length };
+    globalThis.fetch = (async () => new Response(bannerPng)) as typeof fetch;
+    const withBanner = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: bannerUpload });
+    const storedBanner = await prisma.clubBanner.findUnique({ where: { clubId: club.id } });
+    check('the banner is stored', [storedBanner ? Buffer.from(storedBanner.data).equals(bannerPng) : false, storedBanner?.fileName], [true, 'Spica banner.png']);
+    check('the card shows it above the details', [withBanner.at(-1)?.embeds, withBanner.at(-1)?.files], [2, 1]);
+    check('a non-image banner is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, contentType: 'application/pdf' } }))[0]?.description,
+        'The banner must be an image (PNG, JPEG, GIF or WebP).');
+    check('so is an oversized one',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, size: 9 * 1024 * 1024 } }))[0]?.description,
+        'The banner must be 8 MB or smaller.');
+    globalThis.fetch = (async () => new Response('gone', { status: 404 })) as typeof fetch;
+    check('a failed download says so',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: bannerUpload })).at(-1)?.description?.startsWith('Could not read the banner: Discord returned 404'), true);
+    globalThis.fetch = realFetch;
+    check('and keeps the old banner', await prisma.clubBanner.count({ where: { clubId: club.id } }), 1);
+
+    // ── The card ──────────────────────────────────────────────────────────────
+    const { guildClubs } = await import('../src/lib/clubLinks');
+    const ckFull = await prisma.trackedCircle.findUniqueOrThrow({ where: { id: club.id }, include: { banner: true } });
+    const ckStaff = await directory.clubStaff(ckFull, await guildClubs(GUILD), FAKE_GUILD, true);
+    check('staff: /club member entries and role holders', ckStaff, { trainers: ['<@u-trainer>'], assistants: ['<@u-assistant>', '<@u-role-asst>'] });
+    check('without the member list, the role is mentioned',
+        (await directory.clubStaff(ckFull, await guildClubs(GUILD), FAKE_GUILD, false)).assistants, ['<@u-assistant>', '<@&r-ck-asst>']);
+    const ckCard = directory.clubCard(ckFull, ckStaff, ckFull.banner);
+    const [bannerEmbed, cardEmbed] = ckCard.embeds.map((e) => e.toJSON());
+    check('the banner embed points at the attached file', [bannerEmbed?.image?.url, ckCard.files.length], [`attachment://banner-${club.id}.png`, 1]);
+    check('the card is in its tier colour', [bannerEmbed?.color, cardEmbed?.color], [directory.TIERS.G1.color, directory.TIERS.G1.color]);
+    check('the card lists staff, requirements and expected rank', cardEmbed?.description?.split('\n').slice(0, 4),
+        ['**Trainer**: <@u-trainer>', '**Assistants**: <@u-assistant>, <@u-role-asst>', `**Requirements**: ${clubQuotaText(ckFull)}`, '**Expected rank**: A']);
+    check('rules as a link, then the bio as a quote', cardEmbed?.description?.endsWith(`[Checkrose goals and rules](${RULES})\n\n> Text Chat Heavy\n> Wordle Boomers`), true);
+    check('rules as text get a heading',
+        directory.clubCard({ ...ckFull, rules: 'Be active.' }, ckStaff, null).embeds[0]?.toJSON().description?.includes('**Rules**\nBe active.'), true);
+    check('no banner, one embed', directory.clubCard(ckFull, ckStaff, null).embeds.length, 1);
+
+    // ── The directory ─────────────────────────────────────────────────────────
+    type DirSent = { content?: string; embeds: { toJSON(): { title?: string; description?: string } }[]; files: unknown[]; allowedMentions?: { parse?: unknown[] } };
+    /** A channel that keeps what is posted in it, and what is edited or deleted. */
+    const dirChannel = (id: string) => {
+        const rec = { sent: [] as { id: string; payload: DirSent }[], edits: [] as string[], deleted: [] as string[], live: new Map<string, DirSent>() };
+        let n = 0;
+        const channel = {
+            id,
+            send: async (payload: DirSent) => {
+                n += 1;
+                const mid = `${id}-m${n}`;
+                rec.live.set(mid, payload);
+                rec.sent.push({ id: mid, payload });
+                return { id: mid };
+            },
+            messages: {
+                fetch: async (mid: string) => {
+                    if (!rec.live.has(mid)) throw new Error('Unknown Message');
+                    return {
+                        id: mid,
+                        edit: async (p: DirSent) => {
+                            rec.live.set(mid, p);
+                            rec.edits.push(mid);
+                        },
+                        delete: async () => {
+                            rec.live.delete(mid);
+                            rec.deleted.push(mid);
+                        },
+                    };
+                },
+            },
+        };
+        FAKE_GUILD.channelsById.set(id, channel);
+        return { channel, rec };
+    };
+    const shape = (p: DirSent) => `${p.content ?? ''}|${p.embeds.length}|${p.files.length}`;
+    const lastDesc = (log: Sent[]) => log.at(-1)?.embeds?.[0]?.description ?? '';
+
+    check('/club directory is for Club Managers', desc(await runClubCmd({ sub: 'directory', userId: 'u-trainer' })), 'Only Club Managers can post the club directory.');
+    check('/club directory needs a channel the first time', desc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })), 'Pick a channel to post the directory in.');
+
+    const dirA = dirChannel('c-directory');
+    const dirPostedText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory' } }));
+    check('/club directory posts it', dirPostedText.startsWith('Posted the directory in <#c-directory> with 1 club.'), true);
+    check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no tier yet:') && dirPostedText.includes('**Otherrose**'), true);
+    check('its messages: tiers, a heading, the card, the index', dirA.rec.sent.map((m) => shape(m.payload)), ['|4|0', '## Current G1 Clubs|0|0', '|2|1', '|1|0']);
+    check('the tiers explain themselves', dirA.rec.sent[0]?.payload.embeds.map((e) => e.toJSON().title),
+        ['G1 [Competitive]', 'G2 [Semi Competitive+]', 'G3 [Semi-Competitive]', 'Debut [Casual]']);
+    check('the index links to the card', dirA.rec.sent[3]?.payload.embeds[0]?.toJSON().description,
+        `**G1**: [Checkrose](https://discord.com/channels/${GUILD}/c-directory/c-directory-m3)`);
+    check('nothing in it pings', dirA.rec.sent.every((m) => JSON.stringify(m.payload.allowedMentions?.parse) === '[]'), true);
+
+    // Same clubs: edited in place, and only what changed.
+    const dirAgain = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
+    check('a refresh with nothing changed edits nothing', [dirAgain.mode, dirA.rec.edits.length, dirA.rec.sent.length], ['edited', 0, 4]);
+    check('a forced refresh edits every message', [(await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, dirA.rec.edits.length], ['edited', 4]);
+    // A profile change refreshes it on its own: just that card.
+    await submitProfile(staffProfile, 'u-trainer', false, { ...kept, 'club:profile:bio': 'Now T30 pushing' });
+    await directory.refreshDirectory(FAKE_GUILD);
+    check('saving a profile updates the card', dirA.rec.live.get('c-directory-m3')?.embeds.at(-1)?.toJSON().description?.endsWith('> Now T30 pushing'), true);
+    check('and only the card', dirA.rec.edits.slice(4), ['c-directory-m3']);
+
+    // A club joins a tier: the run no longer fits, so it is posted afresh.
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { tier: 'G2' } });
+    const dirRegrouped = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
+    check('a new club reposts the directory', [dirRegrouped.mode, dirRegrouped.listed, dirA.rec.deleted.length, dirA.rec.live.size], ['posted', 2, 4, 6]);
+    check('with a section per tier', [...dirA.rec.live.values()].map((p) => p.content).filter(Boolean), ['## Current G1 Clubs', '## Current G2 Clubs']);
+    // A message deleted by hand: posted afresh too.
+    dirA.rec.live.delete([...dirA.rec.live.keys()][2]!);
+    check('an automatic refresh with nothing changed does not look', (await directory.publishDirectory(FAKE_GUILD, dirA.channel)).mode, 'edited');
+    check('a forced one finds it and reposts', (await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, 'posted');
+
+    const dirB = dirChannel('c-directory-2');
+    const dirMoveText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory-2' } }));
+    check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, dirA.rec.live.size], [true, 6, 0]);
+    check('/club directory with no channel refreshes it where it is',
+        lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })).startsWith('Updated the directory in <#c-directory-2>'), true);
+
+    await directory.refreshDirectory(FAKE_GUILD);
+    await prisma.clubDirectory.deleteMany({ where: { guildId: GUILD } });
+    await prisma.trackedCircle.updateMany({ where: { guildId: GUILD }, data: { tier: null } });
+    FAKE_GUILD.roles.cache.clear();
+    FAKE_GUILD.channelsById.clear();
+
     // ── Clubs and circles are one thing ───────────────────────────────────────
     const runClub = runClubCmd;
     const created = await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'Fresh Club', rank: 'A' } });
@@ -482,14 +703,14 @@ async function main() {
     check('/club create without a circle makes an untracked club', [fresh?.circleId, fresh?.rank], [null, 'A']);
     check('/club create confirms', created.find((x) => x.kind === 'edit')?.embeds?.[0]?.title, 'Club created');
     check('/club create refuses a taken name, ignoring case',
-        desc(await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'fresh club', rank: 'B' } })), 'A club named **fresh club** already exists.');
+        desc(await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'fresh club', rank: 'B_PLUS' } })), 'A club named **fresh club** already exists.');
 
     // Casual sits below B.
     await runClub({ sub: 'create', userId: 'u-officer', officer: true, strings: { name: 'Casual Club', rank: 'CASUAL' } });
     const casual = await prisma.trackedCircle.findFirstOrThrow({ where: { guildId: GUILD, name: 'Casual Club' } });
     check('a club can be Casual', casual.rank, 'CASUAL');
     const casualForm = clubCmd.buildClubEditModal(casual, true).toJSON() as unknown as ModalJson;
-    check('Casual is listed first, below B', pre(casualForm, 'Expected rank')?.options?.slice(0, 2).map((o) => o.value), ['CASUAL', 'B']);
+    check('Casual is listed first, below B+', pre(casualForm, 'Expected rank')?.options?.slice(0, 2).map((o) => o.value), ['CASUAL', 'B_PLUS']);
     const { renderClubList } = await import('../src/lib/image/renderClubList');
     const png = await renderClubList([{ id: casual.id, name: casual.name, rank: 'CASUAL', headcount: null, quotaText: 'Not set' }]);
     check('the club directory draws a Casual badge', png.subarray(1, 4).toString(), 'PNG');
@@ -511,6 +732,7 @@ async function main() {
     const other2 = await prisma.trackedCircle.create({ data: { guildId: GUILD, circleId: BigInt(999991), name: 'No Match' } });
     check('no same-name club means no change', (await adoptUntrackedClub(other2)).id, other2.id);
 
+    await prisma.clubDirectory.deleteMany({ where: { guildId: GUILD } });
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });
     await prisma.$disconnect();

@@ -25,7 +25,11 @@ import { renderClubView } from "../lib/image/renderClubView";
 import type { TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
-import { describeQuota, toSafeNumber } from '../lib/fans/metrics';
+import { toSafeNumber } from '../lib/fans/metrics';
+import { PERIOD_CHOICES, RANK_CHOICES, clubQuotaText, formatRank } from '../lib/clubFormat';
+import { cutoffDetail, cutoffForRank, cutoffLine } from '../lib/fans/cutoff';
+import { publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
+import { buildProfileModal } from './clubProfile';
 import { parseQuota } from './fans';
 
 /**
@@ -36,49 +40,17 @@ type Club = TrackedCircle;
 
 // ================================================================================
 
-const RANK_CHOICES: { name: string; value: ClubRank }[]= [
-    { name: 'Casual', value: 'CASUAL'},
-    { name: 'B', value: 'B'},
-    { name: 'B+', value: 'B_PLUS'},
-    { name: 'A', value: 'A'},
-    { name: 'A+', value: 'A_PLUS'},
-    { name: 'S', value: 'S'},
-    { name: 'S+', value: 'S_PLUS'},
-];
-
 const MEMBER_ROLE_CHOICES: {name: string; value: ClubMemberRole }[] = [
     { name: 'Trainer', value: 'TRAINER' },
     { name: 'Assistant', value: 'ASSISTANT' }
-];
-
-const PERIOD_CHOICES: { name: string; value: FanCountPeriod }[] = [
-    { name: 'Day', value: 'DAY' },
-    { name: 'Week', value: 'WEEK' },
-    { name: 'Biweekly', value: 'BIWEEKLY' },
-    { name: 'Month', value: 'MONTH' },
 ];
 
 const MAX_HEADCOUNT = 30;
 
 // ================================================================================
 
-function formatRank(rank: ClubRank | null): string {
-    if (rank === null) return 'Not set';
-    return RANK_CHOICES.find((r) => r.value === rank)?.name ?? rank;
-}
-
 function formatMemberRole(role: ClubMemberRole): string {
     return MEMBER_ROLE_CHOICES.find((r) => r.value === role)?.name ?? role;
-}
-
-function formatPeriod(period: FanCountPeriod): string {
-    return PERIOD_CHOICES.find((p)  => p.value === period)?.name.toLowerCase() ?? period.toLowerCase();
-}
-
-function formatFanCount(amount: number | null, period: FanCountPeriod | null): string {
-    if (amount === null) return 'Not set';
-    const amountLabel = `${amount}M`;
-    return period ? `${amountLabel}/${formatPeriod(period)}` : amountLabel;
 }
 
 /**
@@ -89,16 +61,6 @@ function formatFanCount(amount: number | null, period: FanCountPeriod | null): s
 async function clubHeadcount(club: Club): Promise<number | null> {
     if (club.circleId === null) return null;
     return (await currentCircleProgress(club))?.members.length ?? null;
-}
-
-/**
- * The club's fan quota as text. Clubs and circles share one quota since the
- * merge; an old club fan count is shown only if no quota was ever set.
- */
-function clubQuotaText(club: Club): string {
-    const quota = toSafeNumber(club.quota);
-    if (quota > 0) return describeQuota(quota, club.quotaPeriod);
-    return club.fanCountAmount === null ? 'Not set' : formatFanCount(club.fanCountAmount, club.fanCountPeriod);
 }
 
 /** What the club directory and club card show for a club. */
@@ -164,6 +126,23 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) => sub.setName('links').setDescription("Show each club's staff roles, and which were matched by name."))
     .addSubcommand((sub) =>
         sub
+            .setName('profile')
+            .setDescription("Edit a club's bio, rules and banner (its staff; Club Managers also set its tier).")
+            .addStringOption((opt) => opt.setName('club').setDescription('Club').setRequired(true).setAutocomplete(true))
+    )
+    .addSubcommand((sub) =>
+        sub
+            .setName('directory')
+            .setDescription('Post or refresh the club directory. Club Managers only.')
+            .addChannelOption((opt) =>
+                opt
+                    .setName('channel')
+                    .setDescription('Where to post it. Leave empty to refresh it where it is.')
+                    .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+            )
+    )
+    .addSubcommand((sub) =>
+        sub
             .setName('fancount')
             .setDescription("Set a club's quota per member. Club trainers/assistants or Club Managers only.")
             .addStringOption((opt) => opt.setName('club').setDescription('Club to update').setRequired(true).setAutocomplete(true))
@@ -222,6 +201,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     if (group === 'member') {
         await handleMemberSubcommand(interaction, member, sub);
+        // Staff are listed on the directory cards.
+        if (sub !== 'list') void refreshDirectory(interaction.guild as unknown as DirectoryGuild | null);
         return;
     }
 
@@ -244,10 +225,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         case 'links':
             await handleLinks(interaction);
             break;
+        case 'profile':
+            await handleProfile(interaction, member);
+            break;
+        case 'directory':
+            await handleDirectory(interaction, member);
+            break;
         case 'fancount':
             await handleFancount(interaction, member);
             break;
     }
+    // A club's card shows its name, rank and quota; create and delete change the list.
+    if (['create', 'delete', 'fancount'].includes(sub)) void refreshDirectory(interaction.guild as unknown as DirectoryGuild | null);
 }
 
 // ================================================================================
@@ -385,7 +374,16 @@ export function buildClubEditModal(
             new StringSelectMenuBuilder()
                 .setCustomId(EDIT_FIELD.rank)
                 .setPlaceholder('Not set')
-                .addOptions(RANK_CHOICES.map((r) => ({ label: r.name, value: r.value, default: r.value === club.rank }))),
+                .addOptions(
+                    RANK_CHOICES.map((r) => ({
+                        label: r.name,
+                        value: r.value,
+                        default: r.value === club.rank,
+                        // A form cannot change as it is filled in, so each
+                        // rank carries its own cutoff's figures beneath it.
+                        ...(cutoffLine(cutoffForRank(r.value)) ? { description: cutoffLine(cutoffForRank(r.value))! } : {}),
+                    })),
+                ),
         ),
     );
     const quotaValue = quotaInputValue(club);
@@ -526,12 +524,15 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
                     `**${updated.name}** · expected rank **${formatRank(updated.rank)}**`,
                     `Headcount: **${headcount === null ? '—' : `${headcount}/${MAX_HEADCOUNT}`}** (from uma.moe)`,
                     `Quota: **${clubQuotaText(updated)}** per member`,
+                    // What the expected rank is up against, next to the quota it informs.
+                    ...(cutoffDetail(cutoffForRank(updated.rank)) ? [cutoffDetail(cutoffForRank(updated.rank))!] : []),
                     ...(updated.circleId !== null ? [`Home channels: ${linksText(home, (id) => `<#${id}>`)}`] : []),
                     ...(full ? [`Staff roles: ${linksText(roles, (id) => `<@&${id}>`)}`] : []),
                 ].join('\n'),
             ),
         ],
     });
+    void refreshDirectory(interaction.guild as unknown as DirectoryGuild | null);
 }
 
 /** A list of roles or channels as text, saying when it was matched by name. */
@@ -569,6 +570,68 @@ async function handleLinks(interaction: ChatInputCommandInteraction) {
     }
     if (chunk) embeds.push(infoEmbed(embeds.length === 0 ? 'Club links' : 'Club links (cont.)', chunk));
     await interaction.reply({ embeds: embeds.slice(0, 10), flags: MessageFlags.Ephemeral });
+}
+
+/**
+ * `/club profile`: opens the profile form for the club's staff and Club
+ * Managers (see `clubProfile.ts`).
+ */
+async function handleProfile(interaction: ChatInputCommandInteraction, member: GuildMember) {
+    const club = await findClubOrReply(interaction, interaction.options.getString('club', true));
+    if (!club) return;
+    const full = isOfficer(member);
+    if (!full && !(await canManageClubStats(member, club))) {
+        await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)], flags: MessageFlags.Ephemeral });
+        return;
+    }
+    const hasBanner = (await prisma.clubBanner.count({ where: { clubId: club.id } })) > 0;
+    await interaction.showModal(buildProfileModal(club, full, hasBanner));
+}
+
+/**
+ * `/club directory`: posts the club directory in a channel, or refreshes it
+ * where it is. Club Managers only. After this, club changes refresh it on
+ * their own.
+ */
+async function handleDirectory(interaction: ChatInputCommandInteraction, member: GuildMember) {
+    if (!isOfficer(member)) {
+        await interaction.reply({ embeds: [errorEmbed('Only Club Managers can post the club directory.')], flags: MessageFlags.Ephemeral });
+        return;
+    }
+    const existing = await prisma.clubDirectory.findUnique({ where: { guildId: interaction.guildId! } });
+    const channelId = interaction.options.getChannel('channel')?.id ?? existing?.channelId ?? null;
+    if (!channelId) {
+        await interaction.reply({ embeds: [errorEmbed('Pick a channel to post the directory in.')], flags: MessageFlags.Ephemeral });
+        return;
+    }
+
+    // Posting a card per club takes longer than Discord's 3-second reply window.
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    const fetchChannel = async (id: string) => {
+        const channel = await interaction.client.channels.fetch(id).catch(() => null);
+        return channel && 'send' in channel && 'messages' in channel ? (channel as unknown as DirectoryChannel) : null;
+    };
+    const channel = await fetchChannel(channelId);
+    if (!channel) {
+        await interaction.editReply({ embeds: [errorEmbed(`Akikawa cannot post in <#${channelId}>.`)] });
+        return;
+    }
+    try {
+        // Every message is rewritten, which also finds any deleted by hand.
+        const result = await publishDirectory(interaction.guild as unknown as DirectoryGuild, channel, fetchChannel, { force: true });
+        const lines = [
+            `${result.mode === 'edited' ? 'Updated' : 'Posted'} the directory in <#${channel.id}> with ${result.listed} club${result.listed === 1 ? '' : 's'}.`,
+            ...(result.untiered.length > 0
+                ? [`Not listed, with no tier yet: ${result.untiered.map((n) => `**${n}**`).join(', ')}. Set one with \`/club profile\`.`]
+                : []),
+            'It updates itself when a club changes.',
+        ];
+        await interaction.editReply({ embeds: [successEmbed('Club directory', lines.join('\n'))] });
+    } catch (e) {
+        await interaction.editReply({
+            embeds: [errorEmbed(`Could not post the directory in <#${channel.id}>: ${e instanceof Error ? e.message : String(e)}. Check Akikawa can send messages, embed links and attach files there.`)],
+        });
+    }
 }
 
 async function handleDelete(interaction: ChatInputCommandInteraction, member: GuildMember) {

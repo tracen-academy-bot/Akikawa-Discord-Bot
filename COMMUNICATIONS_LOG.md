@@ -4,6 +4,38 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-05 — Rank cutoffs set; B removed
+
+The club set each expected rank's cutoff: "S+ is top 30, S is top 100, A+ is
+top 500, A is top 1000, B+ is top 3000. remove B if any. do +/- as you wish,
+but don't make radius too big". Chosen: 10% either side, capped at 50 places; then, at the club's
+suggestion, 475 to 525 for A+.
+This replaces showing T1000 under every competitive rank.
+
+---
+
+## 2026-10-05 — Club directory designed; T1000 shown under competitive ranks
+
+Shown the server's existing directory (Dia's tier posts, then per-club banner
+and card posts), the club asked for it to be designed, with each club able
+to edit its bio and rules. Decisions taken: tiers are set explicitly by Club
+Managers (the published rank ranges overlap); requirements come from the
+quota; staff come from roles and `/club member`; club staff edit their own
+bio, rules and banner; the directory keeps itself up to date.
+
+The club also asked for the T1000 requirement over the last 7 days, per day,
+to appear under the expected-rank selection whenever it is not Casual. A
+Discord form cannot react to a selection, so the figures sit under each
+competitive option in the dropdown and in the saved confirmation instead.
+Then: "you can use the last 7 days in general" (not only this month's), and
+"pull the bottom 10% above and below ... top 100: get t90-110 and average ...
+design numbers as you wish". Chosen: a band 10% either side, sampled at 21
+places, pooled per member. T1000 is shown for every competitive rank as first
+asked; other cutoffs per rank (T100 for S, say) are a small change if wanted.
+The live uma.moe stats could not be checked from the session (no key).
+
+---
+
 ## 2026-10-04 — Club staff roles matched by name; channels deferred
 
 A Cosmos Assistant was refused by `/fans club`: the server's "Cosmos

@@ -19,6 +19,7 @@ import { runMigrations } from './lib/migrate';
 import { handleTimerButton, isTimerButton } from './commands/timer';
 import { handlePostModal, isPostModal } from './commands/post';
 import { handleClubModal, isClubModal } from './commands/club';
+import { handleProfileModal, isProfileModal } from './commands/clubProfile';
 import { handlePrefixMessage } from './prefix';
 
 /**
@@ -183,7 +184,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     // Modal submits are routed by custom ID, like the panel buttons above.
     if (interaction.isModalSubmit()) {
-        const handler = isPostModal(interaction.customId) ? handlePostModal : isClubModal(interaction.customId) ? handleClubModal : null;
+        const handler = isPostModal(interaction.customId)
+            ? handlePostModal
+            : isProfileModal(interaction.customId)
+              ? handleProfileModal
+              : isClubModal(interaction.customId)
+                ? handleClubModal
+                : null;
         if (!handler) return;
         try {
             await handler(interaction);
