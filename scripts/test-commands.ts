@@ -612,6 +612,18 @@ async function main() {
         directory.clubCard({ ...ckFull, rules: 'Be active.' }, ckStaff, null).embeds[0]?.toJSON().description?.includes('**Rules**\nBe active.'), true);
     check('no banner, one embed', directory.clubCard(ckFull, ckStaff, null).embeds.length, 1);
 
+    // ── Avatars: fixed files in assets/clubs, matched by a word of the name ──
+    const { clubAvatarPath } = await import('../src/lib/clubAvatar');
+    const avatarOf = (name: string) => clubAvatarPath(name)?.split(/[\\/]/).pop() ?? null;
+    check('an avatar matches the club name', avatarOf('Cosmos'), 'cosmos.png');
+    check('any word of the name, any case', avatarOf('Team COSMOS!'), 'cosmos.png');
+    check('part of a word is not a match', avatarOf('Checkrose'), null);
+    check('a name matching two avatars gets neither', avatarOf('Rose Lily'), null);
+    check('no avatar for an unknown club', ckCard.embeds[1]?.toJSON().thumbnail, undefined);
+    const avCard = directory.clubCard({ ...ckFull, name: 'Cosmos' }, ckStaff, null);
+    check('the avatar is the card thumbnail', [avCard.embeds[0]?.toJSON().thumbnail?.url, avCard.files.map((f) => f.name)],
+        [`attachment://avatar-${club.id}.png`, [`avatar-${club.id}.png`]]);
+
     // ── The directory ─────────────────────────────────────────────────────────
     type DirSent = { content?: string; embeds: { toJSON(): { title?: string; description?: string } }[]; files: unknown[]; allowedMentions?: { parse?: unknown[] } };
     /** A channel that keeps what is posted in it, and what is edited or deleted. */

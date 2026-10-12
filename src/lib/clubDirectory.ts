@@ -3,6 +3,7 @@ import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
 import type { ClubTier, TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { COLORS } from './embeds';
+import { clubAvatar } from './clubAvatar';
 import { clubQuotaText, formatRank } from './clubFormat';
 import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing } from './clubLinks';
 
@@ -194,7 +195,8 @@ export interface Banner {
 
 /**
  * A club's directory card: its banner (when it has one) as an image-only
- * embed above the card, so it reads as a header, then the card itself.
+ * embed above the card, so it reads as a header, then the card itself, with
+ * the club's avatar (see `clubAvatar`) as its thumbnail.
  */
 export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Banner | null): Payload {
     const color = club.tier ? TIERS[club.tier].color : COLORS.info;
@@ -221,6 +223,12 @@ export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Bann
     if (club.bio) lines.push('', club.bio.split('\n').map((l) => `> ${l}`).join('\n'));
 
     const card = new EmbedBuilder().setColor(color).setTitle(club.name);
+    const avatar = clubAvatar(club.name);
+    if (avatar) {
+        const name = `avatar-${club.id}.png`;
+        files.push(new AttachmentBuilder(avatar, { name }));
+        card.setThumbnail(`attachment://${name}`);
+    }
     const description = lines.join('\n').trim();
     if (description) card.setDescription(description.slice(0, 4096));
     embeds.push(card);

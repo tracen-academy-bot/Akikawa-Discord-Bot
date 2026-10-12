@@ -4,6 +4,32 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-12 — Club avatars
+
+The 14 club pictures uploaded to `bleh bleh bleh/` are now in
+`src/assets/clubs/`, resized from about 400–500 px to 256×256 (roughly
+75 KB each instead of about 200 KB). Discord shows thumbnails at about
+80 px, and `/club view` draws the icon at 88 px, so 256 px leaves room for
+high-DPI screens.
+
+`src/lib/clubAvatar.ts` matches a club to a file when exactly one word of
+its name is a file name: "Cosmos" and "Team Cosmos" get `cosmos.png`,
+"Checkrose" gets nothing, and a name matching two files gets neither. As
+decided, the files are fixed in the repo rather than uploaded per club. A
+new or renamed club needs a file in that folder.
+
+The avatar is used in two places:
+
+- Directory cards: it is the card's thumbnail. The message fingerprint
+  includes files, so the first refresh after deploy re-edits every card
+  once.
+- `/club view`: `loadClubIcon` used to look for `assets/clubs/<club id>.png`.
+  It now uses the name match, so the avatar replaces the rank badge there.
+
+Per-club colours are still parked.
+
+---
+
 ## 2026-10-12 — Biweekly is two halves: days 1-14 and 15 to month end
 
 Biweekly quotas used to run in 14-day blocks: 1-14, 15-28, then a stub

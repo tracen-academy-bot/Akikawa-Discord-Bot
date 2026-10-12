@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import { ClubRank } from '@prisma/client';
 import { font } from './fonts';
 import { THEME } from './theme';
+import { clubAvatarPath } from '../clubAvatar';
 
 export function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number) {
     ctx.beginPath();
@@ -94,27 +95,24 @@ export async function drawRankBadge(ctx: SKRSContext2D, rank: ClubRank | null, c
     ctx.fillText(RANK_LABELS[rank], cx, cy + 2);
 }
 
-export async function loadClubIcon(clubId: string): Promise<Image | null> {
-    if (clubIconCache.has(clubId)) return clubIconCache.get(clubId)!;
-
-    const filePath = path.join(__dirname, '..', '..', 'assets', 'clubs', `${clubId}.png`);
-    if (!fs.existsSync(filePath)) {
-        clubIconCache.set(clubId, null);
-        return null;
-    }
+/** A club's avatar (see `clubAvatarPath`), or null when it has none. */
+export async function loadClubIcon(clubName: string): Promise<Image | null> {
+    const filePath = clubAvatarPath(clubName);
+    if (!filePath) return null;
+    if (clubIconCache.has(filePath)) return clubIconCache.get(filePath)!;
 
     try {
         const img = await loadImage(filePath);
-        clubIconCache.set(clubId, img);
+        clubIconCache.set(filePath, img);
         return img;
     } catch {
-        clubIconCache.set(clubId, null);
+        clubIconCache.set(filePath, null);
         return null;
     }
 }
 
 export async function drawClubIcon(ctx: SKRSContext2D, club: { id: string; name: string; rank: ClubRank | null }, cx: number, cy: number, r: number, labelFontSize: number) {
-    const icon = await loadClubIcon(club.id);
+    const icon = await loadClubIcon(club.name);
 
     if (icon) {
         ctx.save();
