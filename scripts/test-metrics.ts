@@ -195,37 +195,44 @@ function periodChecks() {
 }
 
 /**
- * Biweekly: days 1-14, 15-28, then a short stub to month end, restarting on
- * the 1st like weeks do. The stub's goal scales by its length.
+ * Biweekly: two halves, days 1-14 and 15 to month end, with checks at the end
+ * of day 14 and of the month. The rate is quota / 14 per day all month, so a
+ * long second half owes more than one quota and a short one less.
  */
 function biweeklyChecks() {
     const w = (day: number, dim: number) => {
         const r = periodWindow('BIWEEKLY', day, dim);
         return `${r.start}-${r.end}#${r.index}`;
     };
-    check('biweekly 1 is days 1-14', w(1, 31), '1-14#1');
-    check('day 14 closes biweekly 1', w(14, 31), '1-14#1');
-    check('day 15 opens biweekly 2', w(15, 31), '15-28#2');
-    check('31-day month ends on a 3-day stub', w(30, 31), '29-31#3');
-    check('30-day month ends on a 2-day stub', w(29, 30), '29-30#3');
-    check('28-day February is exactly two', w(28, 28), '15-28#2');
+    check('first half is days 1-14', w(1, 31), '1-14#1');
+    check('day 14 closes the first half', w(14, 31), '1-14#1');
+    check('day 15 opens the second half to month end', w(15, 31), '15-31#2');
+    check('day 30 is still the second half', w(30, 31), '15-31#2');
+    check('30-day month: second half is 15-30', w(29, 30), '15-30#2');
+    check('28-day February: second half is 15-28', w(28, 28), '15-28#2');
     check('biweekly quota text', describeQuota(160_000_000, 'BIWEEKLY'), '160.0M per 2 weeks');
 
-    // Biweekly 28M: due 28M by end of day 14, 56M by day 28, scaled to month end.
+    // Biweekly 28M, 31-day month: 28M due by day 14, 62M (31/14) by day 31.
     const bOpts = { quota: 28_000_000, period: 'BIWEEKLY' as const, daysInMonth: 31 };
     const b16 = computeCircleProgress([steady(1, 2_000_000, 16)], bOpts);
     const bm = b16.members[0]!;
-    check('biweekly label names its weeks', b16.windowLabel, 'Weeks 3–4 · days 15–28');
+    check('biweekly label names its half', b16.windowLabel, 'Second half · days 15–31');
     check('biweekly per-day rate', b16.quotaPerDay, 2_000_000);
     check('biweekly totals are month-to-date', bm.total, 32_000_000);
     check('biweekly: 32M due by day 16', bm.expected, 32_000_000);
-    check('biweekly: 56M due by day 28', bm.target, 56_000_000);
-    check('biweekly days until the next check', b16.daysRemaining, 12);
+    check('biweekly: last check was day 14', b16.checkpointDay, 14);
+    check('biweekly: next check is month end', b16.nextCheckpointDay, 31);
+    check('biweekly: 62M due by month end', bm.target, 62_000_000);
+    check('biweekly days until the next check', b16.daysRemaining, 15);
     check('biweekly need/day', bm.needPerDay, 2_000_000);
+    const b29 = computeCircleProgress([steady(1, 2_000_000, 29)], { ...bOpts, currentDay: 30 });
+    check('biweekly: day 28 is not a check', b29.checkpointDay, 14);
+    check('biweekly: no alert after day 28', b29.checkpointJustClosed, false);
     const bDone = computeCircleProgress([steady(1, 2_000_000, 31)], bOpts);
-    check('biweekly 3-day stub scales: 62M due at month end', bDone.members[0]!.expected, 62_000_000);
-    const bLabel = computeCircleProgress([steady(1, 2_000_000, 30)], { ...bOpts, currentDay: 30 });
-    check('biweekly stub label', bLabel.windowLabel, 'Week 5 · days 29–31');
+    check('biweekly: 62M due at month end', bDone.members[0]!.expected, 62_000_000);
+    check('biweekly: month end is a check', bDone.checkpointDay, 31);
+    const b10 = computeCircleProgress([steady(1, 2_000_000, 10)], { ...bOpts, currentDay: 11 });
+    check('biweekly first half label', b10.windowLabel, 'First half · days 1–14');
 }
 
 /**

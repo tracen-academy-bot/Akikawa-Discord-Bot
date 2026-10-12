@@ -17,8 +17,9 @@
  *             grows by quota / days-in-month every day, today included, and
  *             anyone under it is behind.
  *   DAY, WEEK, BIWEEKLY
- *             checkpoints at the end of every 1, 7 or 14 days (7, 14, 21, 28
- *             and month end for WEEK; 14, 28 and month end for BIWEEKLY).
+ *             checkpoints at the end of every day; of days 7, 14, 21, 28 and
+ *             month end for WEEK; and of day 14 and month end for BIWEEKLY,
+ *             whose second half runs from day 15 to month end.
  *             The requirement grows by quota / period-length every day, so a
  *             14M weekly quota is 2M by the end of day 1 and 14M by the end
  *             of day 7, 28M by day 14. Only finished days are judged: the day
@@ -327,7 +328,7 @@ export function monthGains(raw: number[], scraped?: boolean[]): MonthGains {
 export interface PeriodWindow {
     start: number;
     end: number;
-    /** 1-based block number in WEEK and BIWEEKLY mode; 1 otherwise. */
+    /** 1-based block number in WEEK mode, half (1 or 2) in BIWEEKLY; 1 otherwise. */
     index: number;
 }
 
@@ -338,7 +339,10 @@ export interface PeriodWindow {
 export function periodWindow(period: QuotaPeriod, day: number, daysInMonth: number): PeriodWindow {
     const d = Math.min(Math.max(1, day), daysInMonth);
     if (period === 'DAY') return { start: d, end: d, index: 1 };
-    if (period === 'WEEK' || period === 'BIWEEKLY') {
+    if (period === 'BIWEEKLY') {
+        return d <= BIWEEKLY_HALF ? { start: 1, end: Math.min(BIWEEKLY_HALF, daysInMonth), index: 1 } : { start: BIWEEKLY_HALF + 1, end: daysInMonth, index: 2 };
+    }
+    if (period === 'WEEK') {
         const length = periodLength(period);
         const index = Math.floor((d - 1) / length) + 1;
         const start = (index - 1) * length + 1;
@@ -347,7 +351,28 @@ export function periodWindow(period: QuotaPeriod, day: number, daysInMonth: numb
     return { start: 1, end: daysInMonth, index: 1 };
 }
 
-/** Full length in days of a fixed-length period. MONTH varies, so it is excluded. */
+/** Biweekly halves are days 1-14 and 15 to month end. */
+const BIWEEKLY_HALF = 14;
+
+/**
+ * Days whose end is a checkpoint: the last one passed by `finished` (0 if
+ * none) and the next one (month end once every check has passed).
+ */
+function checkpointsAround(period: 'DAY' | 'WEEK' | 'BIWEEKLY', finished: number, daysInMonth: number): { last: number; next: number } {
+    if (finished >= daysInMonth) return { last: daysInMonth, next: daysInMonth };
+    if (period === 'BIWEEKLY') {
+        return finished >= BIWEEKLY_HALF ? { last: BIWEEKLY_HALF, next: daysInMonth } : { last: 0, next: Math.min(BIWEEKLY_HALF, daysInMonth) };
+    }
+    const length = periodLength(period);
+    const last = Math.floor(Math.max(0, finished) / length) * length;
+    return { last, next: Math.min(last + length, daysInMonth) };
+}
+
+/**
+ * Days over which one quota is earned, for the per-day rate. MONTH varies, so
+ * it is excluded. A biweekly half longer or shorter than 14 days owes its
+ * length / 14 of a quota.
+ */
 function periodLength(period: 'DAY' | 'WEEK' | 'BIWEEKLY'): number {
     return period === 'DAY' ? 1 : period === 'WEEK' ? 7 : 14;
 }
@@ -374,15 +399,14 @@ export function describeQuota(quota: number, period: QuotaPeriod): string {
 }
 
 /**
- * Label for a window, e.g. "Week 2 · days 8–14" or "Weeks 3–4 · days 15–28".
- * A biweekly window names the weekly weeks it covers, so the short stub at
- * month end reads "Week 5 · days 29–31", the same as in WEEK mode. MONTH
- * returns `monthName` as given.
+ * Label for a window, e.g. "Week 2 · days 8–14" or "Second half · days 15–31".
+ * MONTH returns `monthName` as given.
  */
 export function windowLabel(period: QuotaPeriod, window: PeriodWindow, monthName = 'Month'): string {
     if (period === 'DAY') return `Day ${window.start}`;
     if (period === 'MONTH') return monthName;
     const span = window.start === window.end ? `day ${window.start}` : `days ${window.start}–${window.end}`;
+    if (period === 'BIWEEKLY') return `${window.index === 1 ? 'First' : 'Second'} half · ${span}`;
     const firstWeek = Math.floor((window.start - 1) / 7) + 1;
     const lastWeek = Math.floor((window.end - 1) / 7) + 1;
     const weeks = firstWeek === lastWeek ? `Week ${firstWeek}` : `Weeks ${firstWeek}–${lastWeek}`;
@@ -470,15 +494,14 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         const length = periodLength(period);
         // Days that are over. The day in progress cannot have been missed yet.
         const finished = options.currentDay === undefined ? daysElapsed : Math.min(daysElapsed, options.currentDay - 1);
-        checkpointDay = finished >= daysInMonth ? daysInMonth : Math.floor(Math.max(0, finished) / length) * length;
-        nextCheckpointDay = Math.min(checkpointDay + length, daysInMonth);
-        if (checkpointDay === daysInMonth) nextCheckpointDay = daysInMonth;
+        ({ last: checkpointDay, next: nextCheckpointDay } = checkpointsAround(period, finished, daysInMonth));
         checkpointJustClosed = checkpointDay > 0 && finished === checkpointDay;
         window = periodWindow(period, Math.max(1, nextCheckpointDay), daysInMonth);
         daysRemaining = Math.max(0, nextCheckpointDay - finished);
         judgedDay = Math.max(0, finished);
         // Exact division, floored once, so a 14M weekly quota is exactly 28M
-        // after two weeks and a 3-day stub owes 3/7 of a week.
+        // after two weeks and a 3-day stub owes 3/7 of a week. The same rate
+        // runs all month, so a 17-day biweekly half owes 17/14 of a quota.
         requirement = (days) => Math.floor((quota * days) / length);
         effectiveQuota = requirement(daysInMonth);
         nextCheckpointTarget = requirement(nextCheckpointDay);

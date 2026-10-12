@@ -36,7 +36,7 @@ import { renderBenchmark } from '../lib/image/renderBenchmark';
 const QUOTA_PERIOD_CHOICES = [
     { name: 'Daily', value: 'DAY' },
     { name: 'Weekly (days 1-7, 8-14, ... of the month)', value: 'WEEK' },
-    { name: 'Biweekly (days 1-14, 15-28, ... of the month)', value: 'BIWEEKLY' },
+    { name: 'Biweekly (days 1-14, then 15 to month end)', value: 'BIWEEKLY' },
     { name: 'Monthly', value: 'MONTH' },
 ] as const;
 

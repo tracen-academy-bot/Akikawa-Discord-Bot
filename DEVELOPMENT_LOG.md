@@ -4,6 +4,28 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-12 — Biweekly is two halves: days 1-14 and 15 to month end
+
+Biweekly quotas used to run in 14-day blocks: 1-14, 15-28, then a stub
+from 29 to month end, with checkpoints at 14, 28 and month end. The club's
+rule is two halves, days 1-14 and day 15 to month end, so checkpoints are
+now only at the end of day 14 and at month end. Day 28 no longer triggers
+the alert.
+
+The second half owes quota × its length / 14. For a 31-day month that is
+17/14 of a quota, at the same per-day rate as the first half (decided
+2026-10-12). The rate was already quota / 14 per day, so Expected is
+unchanged. Only the windows, checkpoints, need/day target and labels
+("First half · days 1–14", "Second half · days 15–31") moved. Weekly is
+unchanged: its 29-to-month-end stub stays.
+
+Carry-over, also decided 2026-10-12: totals and Expected stay
+month-to-date, so a shortfall carries into the next period, and so does a
+surplus. Cancelling the surplus at each checkpoint was considered and
+deferred, because there was no clear way to show it on the report.
+
+---
+
 ## 2026-10-12 — Checkpoint quotas scale daily, like MONTH
 
 This supersedes the "nothing due until a checkpoint" rule from 2026-10-04.
