@@ -19,14 +19,14 @@
  *   DAY, WEEK, BIWEEKLY
  *             checkpoints at the end of every 1, 7 or 14 days (7, 14, 21, 28
  *             and month end for WEEK; 14, 28 and month end for BIWEEKLY).
- *             At each checkpoint the requirement steps up by one quota: a
- *             14M weekly quota is 14M due by the end of day 7, 28M by day 14.
- *             Nobody is behind until a checkpoint has passed; in between,
- *             only what is due at the next one is shown. "Behind" is the
- *             shortfall at the last checkpoint, counting only fans earned by
- *             then, so it holds steady until the next checkpoint. Periods restart on
- *             the 1st, so the last one is short and its step scales by its
- *             length (a 3-day stub owes 3/7 of a weekly quota).
+ *             The requirement grows by quota / period-length every day, so a
+ *             14M weekly quota is 2M by the end of day 1 and 14M by the end
+ *             of day 7, 28M by day 14. Only finished days are judged: the day
+ *             in progress is not, so a partial day never flags anyone. The
+ *             checkpoints drive need/day (aimed at the next one) and the
+ *             scheduled alert (posted the day after one closes). Periods
+ *             restart on the 1st, so the last one is short and its target
+ *             scales by its length (a 3-day stub owes 3/7 of a weekly quota).
  *
  * Only current members count. A member with no snapshot on the circle's latest
  * snapshot has left and is dropped entirely, and a member's fans count only
@@ -61,11 +61,11 @@ export interface MemberProgress {
     /** Fans earned this month in the circle, as of the latest day with data. */
     total: number;
     /**
-     * Fans due by now. MONTH: grows every day. Checkpoint periods: what was
-     * due at the last checkpoint that has passed (zero before the first).
+     * Fans due by now; grows every day. Checkpoint periods count finished
+     * days only.
      */
     expected: number;
-    /** How far short of `expected` they were at the last checkpoint. Zero when on pace. */
+    /** How far short of `expected` they are, by the same days. Zero when on pace. */
     behind: number;
     /**
      * Fans due by the next checkpoint (checkpoint periods), or by month end
@@ -448,6 +448,8 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
     let nextCheckpointDay: number;
     let checkpointJustClosed: boolean;
     let daysRemaining: number;
+    /** Last day judged: today in MONTH, the last finished day otherwise. */
+    let judgedDay: number;
     let effectiveQuota: number;
     let nextCheckpointTarget: number;
     /** Fans due for a given number of days owed. */
@@ -460,6 +462,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         checkpointJustClosed = true;
         // Before the first day has any data, today is still day 1.
         daysRemaining = Math.max(0, daysInMonth - Math.max(1, daysElapsed) + 1);
+        judgedDay = daysElapsed;
         effectiveQuota = quotaPerDay * daysInMonth;
         nextCheckpointTarget = effectiveQuota;
         requirement = (days) => quotaPerDay * days;
@@ -473,6 +476,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         checkpointJustClosed = checkpointDay > 0 && finished === checkpointDay;
         window = periodWindow(period, Math.max(1, nextCheckpointDay), daysInMonth);
         daysRemaining = Math.max(0, nextCheckpointDay - finished);
+        judgedDay = Math.max(0, finished);
         // Exact division, floored once, so a 14M weekly quota is exactly 28M
         // after two weeks and a 3-day stub owes 3/7 of a week.
         requirement = (days) => Math.floor((quota * days) / length);
@@ -489,12 +493,11 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         const firstDay = g.firstDay;
         const dataDays = daysInCircleThrough(g, daysElapsed);
         const owedThrough = (day: number) => Math.max(0, daysInCircleThrough(g, day) - quotaDaysOffset);
-        const quotaDays = period === 'MONTH' ? Math.max(0, dataDays - quotaDaysOffset) : owedThrough(checkpointDay);
+        const quotaDays = period === 'MONTH' ? Math.max(0, dataDays - quotaDaysOffset) : owedThrough(judgedDay);
 
         const expected = requirement(quotaDays);
-        // Judged on what was earned by the checkpoint, not since: fans from the
-        // next period must not hide a missed one. In MONTH this is `total`.
-        const behind = Math.max(0, expected - cumulativeAt(g, checkpointDay));
+        // Fans and requirement over the same days. In MONTH this is `total`.
+        const behind = Math.max(0, expected - cumulativeAt(g, judgedDay));
         const onPace = behind === 0;
         const avgPerDay = dataDays === 0 ? 0 : Math.floor(total / dataDays);
 

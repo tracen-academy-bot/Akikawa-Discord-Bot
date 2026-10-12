@@ -125,25 +125,25 @@ function periodChecks() {
     check('last check passed was day 7', w9.checkpointDay, 7);
     check('next check is day 14', w9.nextCheckpointDay, 14);
     check('the current period is week 2', w9.windowLabel, 'Week 2 · days 8–14');
-    check('due at the day 7 check is one weekly quota', strong.expected, 14_000_000);
+    check('due by day 9 is 9/7 of a weekly quota', strong.expected, 18_000_000);
     check('due by day 14 is two', strong.target, 28_000_000);
-    check('made the day 7 check', strong.onPace, true);
+    check('27M against 18M is on pace', strong.onPace, true);
     check('need/day aims at the next check', strong.needPerDay, 200_000);
     check('days until the next check', w9.daysRemaining, 5);
-    check('missed the day 7 check by its own shortfall', weak.behind, 7_000_000);
+    check('9M against 18M is 9M behind', weak.behind, 9_000_000);
     check('month-end requirement scales the 3-day stub', w9.effectiveQuota, 62_000_000);
     check('rank movement compares with yesterday', w9.members.map((m) => m.rankChange).join(','), '0,0');
 
-    // Before the first check nobody is behind, however slow.
+    // Expected scales daily before the first check too, like MONTH.
     const w5 = computeCircleProgress([steady(1, 1_000_000, 5)], weekOpts);
-    check('nobody is behind before the first check', w5.members[0]!.behind, 0);
-    check('nothing is due before the first check', w5.members[0]!.expected, 0);
+    check('expected scales before the first check', w5.members[0]!.expected, 10_000_000);
+    check('behind before the first check', w5.members[0]!.behind, 5_000_000);
     check('need/day spreads the first week', w5.members[0]!.needPerDay, 4_500_000);
 
-    // Today is not over, so its checkpoint is not judged yet.
+    // Today is not over, so it is not judged yet.
     const open7 = computeCircleProgress([steady(1, 1_000_000, 7)], { ...weekOpts, currentDay: 7 });
     check('day 7 in progress: week 1 not judged', open7.checkpointDay, 0);
-    check('day 7 in progress: not behind', open7.members[0]!.behind, 0);
+    check('day 7 in progress: judged through day 6', open7.members[0]!.behind, 6_000_000);
     check('day 7 in progress: last day to make it', open7.daysRemaining, 1);
     const closed = computeCircleProgress([steady(1, 1_000_000, 8)], { ...weekOpts, currentDay: 8 });
     check('day 8: week 1 judged', closed.checkpointDay, 7);
@@ -152,11 +152,10 @@ function periodChecks() {
     const later = computeCircleProgress([steady(1, 1_000_000, 9)], { ...weekOpts, currentDay: 9 });
     check('day 9: the check is no longer fresh', later.checkpointJustClosed, false);
 
-    // Week 2 fans must not erase a missed week 1. At half pace the month-to-date
-    // total reaches the day 7 requirement on day 14; the miss still stands.
+    // Half pace stays behind all through week 2; the gap keeps growing.
     const day14 = computeCircleProgress([steady(1, 1_000_000, 14)], { ...weekOpts, currentDay: 14 });
     check('day 14 in progress: still judged at day 7', day14.checkpointDay, 7);
-    check('day 14: week 2 fans do not clear the week 1 miss', day14.members[0]!.behind, 7_000_000);
+    check('day 14 in progress: 13M short through day 13', day14.members[0]!.behind, 13_000_000);
     check('day 14: still flagged', day14.members[0]!.onPace, false);
 
     // Daily quota: yesterday's check ignores today's fans.
@@ -171,11 +170,11 @@ function periodChecks() {
     check('exactly enough is on pace', done.members[0]!.onPace, true);
     check('nothing left to do in a finished month', done.members[0]!.needPerDay, null);
 
-    // A day-10 joiner owes only their days in the circle: 5 of week 2's 7.
+    // A day-10 joiner owes only their days in the circle: days 10-16.
     const joined = computeCircleProgress([steady(1, 3_000_000, 16), steady(2, 3_000_000, 16, 10)], weekOpts);
     const late = joined.members.find((m) => m.viewerId === 2)!;
-    check('a joiner owes their share of the week they joined', late.expected, 10_000_000);
-    check('a joiner counts days in the circle', late.quotaDays, 5);
+    check('a joiner owes only days in the circle', late.expected, 14_000_000);
+    check('a joiner counts days in the circle', late.quotaDays, 7);
 
     // Daily 2.5M: 2.5M due by end of day 1, 5M by end of day 2, and so on.
     const dayOpts = { quota: 2_500_000, period: 'DAY' as const, daysInMonth: 30 };
@@ -219,7 +218,7 @@ function biweeklyChecks() {
     check('biweekly label names its weeks', b16.windowLabel, 'Weeks 3–4 · days 15–28');
     check('biweekly per-day rate', b16.quotaPerDay, 2_000_000);
     check('biweekly totals are month-to-date', bm.total, 32_000_000);
-    check('biweekly: 28M due at the day 14 check', bm.expected, 28_000_000);
+    check('biweekly: 32M due by day 16', bm.expected, 32_000_000);
     check('biweekly: 56M due by day 28', bm.target, 56_000_000);
     check('biweekly days until the next check', b16.daysRemaining, 12);
     check('biweekly need/day', bm.needPerDay, 2_000_000);

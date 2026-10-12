@@ -598,17 +598,11 @@ async function circlesForTrainer(
 function progressCard(circle: TrackedCircle, progress: CircleProgress, member: MemberProgress) {
     const checkpoints = progress.period !== 'MONTH';
     const status = member.onPace
-        ? checkpoints
-            ? 'Made every check so far'
-            : `On pace (${formatFans(member.total - member.expected)} ahead of where you need to be)`
-        : `Behind by **${formatFans(member.behind)}**${checkpoints ? ` since the day ${progress.checkpointDay} check` : ''}`;
+        ? `On pace (${formatFans(Math.max(0, member.total - member.expected))} ahead of where you need to be)`
+        : `Behind by **${formatFans(member.behind)}**`;
     const fields = [
         { name: 'Fans this month', value: formatFans(member.total), inline: true },
-        {
-            name: checkpoints ? (progress.checkpointDay > 0 ? `Due at day ${progress.checkpointDay} check` : 'Due so far') : 'Expected by now',
-            value: formatFans(member.expected),
-            inline: true,
-        },
+        { name: 'Expected by now', value: formatFans(member.expected), inline: true },
         { name: 'Rank', value: `${member.rank} of ${progress.members.length}`, inline: true },
         { name: 'Status', value: status, inline: false },
     ];

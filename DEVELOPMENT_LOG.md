@@ -4,6 +4,28 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-12 — Checkpoint quotas scale daily, like MONTH
+
+This supersedes the "nothing due until a checkpoint" rule from 2026-10-04.
+A biweekly Cosmos report on day 11 showed Expected 0 for all 30 members
+and nobody behind, because the first check is day 14. That rule is
+replaced: in daily, weekly and biweekly periods Expected now grows by
+quota / period-length every day, the same way MONTH grows by
+quota / days-in-month. A 47.5M biweekly quota on day 11 expects 33.9M
+(10/14 of the quota through day 10).
+
+The difference from MONTH: only finished days are judged. Both Expected
+and the fans compared against it stop at the last finished day
+(`judgedDay`), so a partly played day never flags anyone. Checkpoints
+still set need/day (aimed at the next one), the "next check" header line,
+and the scheduled alert, which still posts only on the day after a
+checkpoint closes. On that day, Behind equals the checkpoint's shortfall.
+
+`/fans me` now uses the MONTH wording ("Expected by now", "On pace (X
+ahead)", "Behind by X") for every period.
+
+---
+
 ## 2026-10-12 — Missed checkpoints stay flagged
 
 Reported in Discord: the "behind" flags were missing on weekly and daily
