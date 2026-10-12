@@ -130,7 +130,7 @@ function periodChecks() {
     check('made the day 7 check', strong.onPace, true);
     check('need/day aims at the next check', strong.needPerDay, 200_000);
     check('days until the next check', w9.daysRemaining, 5);
-    check('missed the day 7 check', weak.behind, 5_000_000);
+    check('missed the day 7 check by its own shortfall', weak.behind, 7_000_000);
     check('month-end requirement scales the 3-day stub', w9.effectiveQuota, 62_000_000);
     check('rank movement compares with yesterday', w9.members.map((m) => m.rankChange).join(','), '0,0');
 
@@ -148,9 +148,21 @@ function periodChecks() {
     const closed = computeCircleProgress([steady(1, 1_000_000, 8)], { ...weekOpts, currentDay: 8 });
     check('day 8: week 1 judged', closed.checkpointDay, 7);
     check('day 8: the check has just closed', closed.checkpointJustClosed, true);
-    check('day 8: behind on week 1', closed.members[0]!.behind, 6_000_000);
+    check('day 8: behind on week 1', closed.members[0]!.behind, 7_000_000);
     const later = computeCircleProgress([steady(1, 1_000_000, 9)], { ...weekOpts, currentDay: 9 });
     check('day 9: the check is no longer fresh', later.checkpointJustClosed, false);
+
+    // Week 2 fans must not erase a missed week 1. At half pace the month-to-date
+    // total reaches the day 7 requirement on day 14; the miss still stands.
+    const day14 = computeCircleProgress([steady(1, 1_000_000, 14)], { ...weekOpts, currentDay: 14 });
+    check('day 14 in progress: still judged at day 7', day14.checkpointDay, 7);
+    check('day 14: week 2 fans do not clear the week 1 miss', day14.members[0]!.behind, 7_000_000);
+    check('day 14: still flagged', day14.members[0]!.onPace, false);
+
+    // Daily quota: yesterday's check ignores today's fans.
+    const d20 = computeCircleProgress([steady(1, 1_900_000, 20)], { quota: 2_000_000, period: 'DAY', daysInMonth: 31, currentDay: 20 });
+    check('daily: judged at yesterday', d20.checkpointDay, 19);
+    check('daily: 95% pace is behind', d20.members[0]!.behind, 1_900_000);
 
     // A finished month is judged at its last day, stub included.
     const done = computeCircleProgress([steady(1, 2_000_000, 31)], weekOpts);
@@ -174,7 +186,7 @@ function periodChecks() {
     check('daily label names the day being checked next', d5.windowLabel, 'Day 6');
     const dLive = computeCircleProgress([steady(1, 2_000_000, 5)], { ...dayOpts, currentDay: 5 });
     check('daily, day 5 in progress: judged through day 4', dLive.members[0]!.expected, 10_000_000);
-    check('daily, day 5 in progress: not behind yet', dLive.members[0]!.behind, 0);
+    check('daily, day 5 in progress: short 2M at the day 4 check', dLive.members[0]!.behind, 2_000_000);
     check('daily, day 5 in progress: 2.5M more today', dLive.members[0]!.needPerDay, 2_500_000);
 
     // MONTH stays the default, labelled with the month name when given.

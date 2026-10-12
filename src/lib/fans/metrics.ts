@@ -22,7 +22,9 @@
  *             At each checkpoint the requirement steps up by one quota: a
  *             14M weekly quota is 14M due by the end of day 7, 28M by day 14.
  *             Nobody is behind until a checkpoint has passed; in between,
- *             only what is due at the next one is shown. Periods restart on
+ *             only what is due at the next one is shown. "Behind" is the
+ *             shortfall at the last checkpoint, counting only fans earned by
+ *             then, so it holds steady until the next checkpoint. Periods restart on
  *             the 1st, so the last one is short and its step scales by its
  *             length (a 3-day stub owes 3/7 of a weekly quota).
  *
@@ -63,7 +65,7 @@ export interface MemberProgress {
      * due at the last checkpoint that has passed (zero before the first).
      */
     expected: number;
-    /** How far short of `expected` they are. Zero when on pace. */
+    /** How far short of `expected` they were at the last checkpoint. Zero when on pace. */
     behind: number;
     /**
      * Fans due by the next checkpoint (checkpoint periods), or by month end
@@ -490,7 +492,9 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         const quotaDays = period === 'MONTH' ? Math.max(0, dataDays - quotaDaysOffset) : owedThrough(checkpointDay);
 
         const expected = requirement(quotaDays);
-        const behind = Math.max(0, expected - total);
+        // Judged on what was earned by the checkpoint, not since: fans from the
+        // next period must not hide a missed one. In MONTH this is `total`.
+        const behind = Math.max(0, expected - cumulativeAt(g, checkpointDay));
         const onPace = behind === 0;
         const avgPerDay = dataDays === 0 ? 0 : Math.floor(total / dataDays);
 

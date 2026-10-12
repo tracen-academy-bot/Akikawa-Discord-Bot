@@ -4,6 +4,30 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-12 — Missed checkpoints stay flagged
+
+Reported in Discord: the "behind" flags were missing on weekly and daily
+quotas. They were. In checkpoint periods, `computeCircleProgress` compared
+what was due at the last checkpoint with the month-to-date total. That total
+includes fans earned *after* the checkpoint, so the next period's fans paid
+off the missed one. With a 14M weekly quota, a trainer earning 1M/day was
+shown 6M behind on day 8 (the real miss was 7M), 3M on day 11, and on pace
+on day 14. In general, a trainer at a fraction $p$ of quota pace lost the
+flag on day $7/p$: day 9 at 80%, day 12 at 60%. Daily quotas had a smaller
+version of the same bug: today's fans counted against yesterday's check.
+
+`behind` now uses the fans earned by the checkpoint day
+(`cumulativeAt(g, checkpointDay)`), so a miss stands until the next
+checkpoint. `total`, `target` and need/day are unchanged, and need/day still
+carries the debt forward to the next check. MONTH is unaffected, because its
+checkpoint is today.
+
+Three tests in `scripts/test-metrics.ts` had encoded the bug (6M, 5M and 0
+behind). They now expect 7M, 7M and 2M. Regression checks were added for
+week-1 misses on day 14 and for daily quotas at 95% pace.
+
+---
+
 ## 2026-10-05 — A cutoff per expected rank; B removed
 
 Each expected rank now has its own cutoff, as the club set them: S+ is top
