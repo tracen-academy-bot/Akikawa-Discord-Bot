@@ -104,7 +104,7 @@ function periodSelect(selected: QuotaPeriod): string {
     const options: [QuotaPeriod, string][] = [
         ['DAY', 'Day'],
         ['WEEK', 'Week (1-7, 8-14, ...)'],
-        ['BIWEEKLY', '2 weeks (1-14, 15-28, ...)'],
+        ['BIWEEKLY', '2 weeks (days 1-14, then 15 to month end)'],
         ['MONTH', 'Month'],
     ];
     return `<select name="period">${options

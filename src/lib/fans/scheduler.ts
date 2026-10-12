@@ -77,10 +77,10 @@ export interface CircleReport {
  * trainers who are behind, and tag them where a Discord link exists, so the
  * message is actionable rather than just informative.
  *
- * In checkpoint periods (daily, weekly, biweekly) nobody is behind until a
- * checkpoint passes, and `scheduled` reports leave the alert out unless one
- * has just closed, so a missed week is announced once, the day after it
- * ends, not every day of the next week. A manual check always includes it.
+ * In checkpoint periods (daily, weekly, biweekly) `scheduled` reports leave
+ * the alert out unless a checkpoint has just closed, so a missed week is
+ * announced once, the day after it ends, not every day of the next week. A
+ * manual check always includes it.
  *
  * @returns Null when nothing has been ingested for the current month.
  */

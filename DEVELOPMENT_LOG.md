@@ -4,6 +4,100 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-12 — Club avatars
+
+The 14 club pictures uploaded to `bleh bleh bleh/` are now in
+`src/assets/clubs/`, resized from about 400–500 px to 256×256 (roughly
+75 KB each instead of about 200 KB). Discord shows thumbnails at about
+80 px, and `/club view` draws the icon at 88 px, so 256 px leaves room for
+high-DPI screens.
+
+`src/lib/clubAvatar.ts` matches a club to a file when exactly one word of
+its name is a file name: "Cosmos" and "Team Cosmos" get `cosmos.png`,
+"Checkrose" gets nothing, and a name matching two files gets neither. As
+decided, the files are fixed in the repo rather than uploaded per club. A
+new or renamed club needs a file in that folder.
+
+The avatar is used in two places:
+
+- Directory cards: it is the card's thumbnail. The message fingerprint
+  includes files, so the first refresh after deploy re-edits every card
+  once.
+- `/club view`: `loadClubIcon` used to look for `assets/clubs/<club id>.png`.
+  It now uses the name match, so the avatar replaces the rank badge there.
+
+Per-club colours are still parked.
+
+---
+
+## 2026-10-12 — Biweekly is two halves: days 1-14 and 15 to month end
+
+Biweekly quotas used to run in 14-day blocks: 1-14, 15-28, then a stub
+from 29 to month end, with checkpoints at 14, 28 and month end. The club's
+rule is two halves, days 1-14 and day 15 to month end, so checkpoints are
+now only at the end of day 14 and at month end. Day 28 no longer triggers
+the alert.
+
+The second half owes quota × its length / 14. For a 31-day month that is
+17/14 of a quota, at the same per-day rate as the first half (decided
+2026-10-12). The rate was already quota / 14 per day, so Expected is
+unchanged. Only the windows, checkpoints, need/day target and labels
+("First half · days 1–14", "Second half · days 15–31") moved. Weekly is
+unchanged: its 29-to-month-end stub stays.
+
+Carry-over, also decided 2026-10-12: totals and Expected stay
+month-to-date, so a shortfall carries into the next period, and so does a
+surplus. Cancelling the surplus at each checkpoint was considered and
+deferred, because there was no clear way to show it on the report.
+
+---
+
+## 2026-10-12 — Checkpoint quotas scale daily, like MONTH
+
+This supersedes the "nothing due until a checkpoint" rule from 2026-10-04.
+A biweekly Cosmos report on day 11 showed Expected 0 for all 30 members
+and nobody behind, because the first check is day 14. That rule is
+replaced: in daily, weekly and biweekly periods Expected now grows by
+quota / period-length every day, the same way MONTH grows by
+quota / days-in-month. A 47.5M biweekly quota on day 11 expects 33.9M
+(10/14 of the quota through day 10).
+
+The difference from MONTH: only finished days are judged. Both Expected
+and the fans compared against it stop at the last finished day
+(`judgedDay`), so a partly played day never flags anyone. Checkpoints
+still set need/day (aimed at the next one), the "next check" header line,
+and the scheduled alert, which still posts only on the day after a
+checkpoint closes. On that day, Behind equals the checkpoint's shortfall.
+
+`/fans me` now uses the MONTH wording ("Expected by now", "On pace (X
+ahead)", "Behind by X") for every period.
+
+---
+
+## 2026-10-12 — Missed checkpoints stay flagged
+
+Reported in Discord: the "behind" flags were missing on weekly and daily
+quotas. They were. In checkpoint periods, `computeCircleProgress` compared
+what was due at the last checkpoint with the month-to-date total. That total
+includes fans earned *after* the checkpoint, so the next period's fans paid
+off the missed one. With a 14M weekly quota, a trainer earning 1M/day was
+shown 6M behind on day 8 (the real miss was 7M), 3M on day 11, and on pace
+on day 14. In general, a trainer at a fraction $p$ of quota pace lost the
+flag on day $7/p$: day 9 at 80%, day 12 at 60%. Daily quotas had a smaller
+version of the same bug: today's fans counted against yesterday's check.
+
+`behind` now uses the fans earned by the checkpoint day
+(`cumulativeAt(g, checkpointDay)`), so a miss stands until the next
+checkpoint. `total`, `target` and need/day are unchanged, and need/day still
+carries the debt forward to the next check. MONTH is unaffected, because its
+checkpoint is today.
+
+Three tests in `scripts/test-metrics.ts` had encoded the bug (6M, 5M and 0
+behind). They now expect 7M, 7M and 2M. Regression checks were added for
+week-1 misses on day 14 and for daily quotas at 95% pace.
+
+---
+
 ## 2026-10-05 — A cutoff per expected rank; B removed
 
 Each expected rank now has its own cutoff, as the club set them: S+ is top

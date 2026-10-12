@@ -36,7 +36,7 @@ import { renderBenchmark } from '../lib/image/renderBenchmark';
 const QUOTA_PERIOD_CHOICES = [
     { name: 'Daily', value: 'DAY' },
     { name: 'Weekly (days 1-7, 8-14, ... of the month)', value: 'WEEK' },
-    { name: 'Biweekly (days 1-14, 15-28, ... of the month)', value: 'BIWEEKLY' },
+    { name: 'Biweekly (days 1-14, then 15 to month end)', value: 'BIWEEKLY' },
     { name: 'Monthly', value: 'MONTH' },
 ] as const;
 
@@ -598,17 +598,11 @@ async function circlesForTrainer(
 function progressCard(circle: TrackedCircle, progress: CircleProgress, member: MemberProgress) {
     const checkpoints = progress.period !== 'MONTH';
     const status = member.onPace
-        ? checkpoints
-            ? 'Made every check so far'
-            : `On pace (${formatFans(member.total - member.expected)} ahead of where you need to be)`
-        : `Behind by **${formatFans(member.behind)}**${checkpoints ? ` since the day ${progress.checkpointDay} check` : ''}`;
+        ? `On pace (${formatFans(Math.max(0, member.total - member.expected))} ahead of where you need to be)`
+        : `Behind by **${formatFans(member.behind)}**`;
     const fields = [
         { name: 'Fans this month', value: formatFans(member.total), inline: true },
-        {
-            name: checkpoints ? (progress.checkpointDay > 0 ? `Due at day ${progress.checkpointDay} check` : 'Due so far') : 'Expected by now',
-            value: formatFans(member.expected),
-            inline: true,
-        },
+        { name: 'Expected by now', value: formatFans(member.expected), inline: true },
         { name: 'Rank', value: `${member.rank} of ${progress.members.length}`, inline: true },
         { name: 'Status', value: status, inline: false },
     ];
