@@ -353,14 +353,6 @@ const FIELD = {
     reportChannel: 'club:report-channel',
     alertChannel: 'club:alert-channel',
 } as const;
-/** Where reports and alerts may go: channels and threads. */
-const REPORT_CHANNEL_TYPES = [
-    ChannelType.GuildText,
-    ChannelType.GuildAnnouncement,
-    ChannelType.PublicThread,
-    ChannelType.PrivateThread,
-    ChannelType.AnnouncementThread,
-] as const;
 /** Home channels a club may list. Threads inside them count without listing. */
 const MAX_HOME_CHANNELS = 10;
 /** Staff roles a club may list. */
@@ -396,11 +388,47 @@ export async function handleClubModal(interaction: ModalSubmitInteraction) {
     return handleReportsModal(interaction);
 }
 
-/** A single-channel picker for reports or alerts, pre-set to `current`. */
-function reportChannelSelect(id: string, current: string | null): ChannelSelectMenuBuilder {
-    const select = new ChannelSelectMenuBuilder().setCustomId(id).setChannelTypes(...REPORT_CHANNEL_TYPES).setRequired(false).setMinValues(0).setMaxValues(1);
-    if (current) select.setDefaultChannels(current);
-    return select;
+/**
+ * A text field for a report or alert channel, pre-filled with its ID.
+ * Text, not a channel picker: Discord's picker does not list threads, and
+ * reports often go to one.
+ */
+function reportChannelInput(id: string, current: string | null): TextInputBuilder {
+    const input = new TextInputBuilder().setCustomId(id).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(120).setPlaceholder('Channel or thread ID, #mention or link');
+    if (current) input.setValue(current);
+    return input;
+}
+
+/**
+ * The channel or thread ID in what was typed: a bare ID, a `<#id>` mention,
+ * or a link (`discord.com/channels/<server>/<channel>`, message links too).
+ * Null when there is none.
+ */
+export function parseChannelRef(text: string): string | null {
+    const t = text.trim();
+    const link = /channels\/[\w@-]+\/([\w-]{1,32})/.exec(t);
+    if (link) return link[1]!;
+    const mention = /^<#([\w-]{1,32})>$/.exec(t);
+    if (mention) return mention[1]!;
+    // A bare ID; the lookup that follows rejects anything that is not one.
+    return /^[\w-]{1,32}$/.test(t) ? t : null;
+}
+
+/**
+ * Resolves a typed report or alert channel: null for empty, the ID for a
+ * channel or thread in this server that messages can be sent to, or an error
+ * to show.
+ */
+async function resolveReportChannel(interaction: ModalSubmitInteraction, field: string, label: string): Promise<{ id: string | null } | { error: string }> {
+    const typed = interaction.fields.getTextInputValue(field).trim();
+    if (!typed) return { id: null };
+    const id = parseChannelRef(typed);
+    if (!id) return { error: `${label}: **${typed.slice(0, 80)}** is not a channel. Paste its ID, #mention or link.` };
+    const channel = await interaction.client.channels.fetch(id).catch(() => null);
+    if (!channel || !('guildId' in channel) || channel.guildId !== interaction.guildId || !channel.isTextBased()) {
+        return { error: `${label}: no channel or thread with ID ${id} in this server that I can see. Check the ID, and that I can view it.` };
+    }
+    return { id };
 }
 
 // ─── /club reports ────────────────────────────────────────────────────────────
@@ -607,12 +635,12 @@ export function buildAdminModal(club: Club, links: ClubFormLinks = { home: club.
         labels.push(
             new LabelBuilder()
                 .setLabel('Report channel')
-                .setDescription('Where the daily report image posts. Empty: no report.')
-                .setChannelSelectMenuComponent(reportChannelSelect(FIELD.reportChannel, club.reportChannelId)),
+                .setDescription('Channel or thread for the daily report: ID, #mention or link. Empty: no report.')
+                .setTextInputComponent(reportChannelInput(FIELD.reportChannel, club.reportChannelId)),
             new LabelBuilder()
                 .setLabel('Alert channel')
-                .setDescription('Where trainers behind quota are pinged. Empty: no alerts.')
-                .setChannelSelectMenuComponent(reportChannelSelect(FIELD.alertChannel, club.alertChannelId)),
+                .setDescription('Channel or thread for behind-quota pings: ID, #mention or link. Empty: no alerts.')
+                .setTextInputComponent(reportChannelInput(FIELD.alertChannel, club.alertChannelId)),
         );
     }
     return new ModalBuilder()
@@ -654,8 +682,12 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
     } else {
         const picked = interaction.fields.getSelectedChannels(FIELD.home, false);
         data.homeChannelIds = picked ? [...picked.keys()] : [];
-        data.reportChannelId = interaction.fields.getSelectedChannels(FIELD.reportChannel, false)?.first()?.id ?? null;
-        data.alertChannelId = interaction.fields.getSelectedChannels(FIELD.alertChannel, false)?.first()?.id ?? null;
+        const report = await resolveReportChannel(interaction, FIELD.reportChannel, 'Report channel');
+        if ('error' in report) return void (await refuse(report.error));
+        const alert = await resolveReportChannel(interaction, FIELD.alertChannel, 'Alert channel');
+        if ('error' in alert) return void (await refuse(alert.error));
+        data.reportChannelId = report.id;
+        data.alertChannelId = alert.id;
     }
     // A role list equal to the name matches is stored empty, so the club keeps
     // following its name (a role made later is picked up).
