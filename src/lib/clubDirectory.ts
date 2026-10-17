@@ -21,7 +21,7 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  *   3. `index`: jump links to every card.
  *
  * Clubs without a tier are left out. `/club directory` posts it; after that
- * any change to a club (its profile, `/club info`, staff, create, delete)
+ * any change to a club (`/club reports`, `/club profile`, `/club admin`, staff, create, delete)
  * refreshes it. When the same messages still fit (same clubs, same order)
  * they are edited in place, and only those whose content changed (each
  * message's content is fingerprinted), so one club's edit does not re-upload

@@ -4,27 +4,37 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
-## 2026-10-17 — Each club sets its report time; `/club edit` is now `/club info`
+## 2026-10-17 — Each club sets its report time; club forms split by who edits them
 
 Every club's daily report used to post at one time for all clubs:
 FAN_SYNC_HOUR_UTC, 13:00 UTC by default. A club's staff (or a Club Manager)
-now set their own time in **`/club reports`**, a form with:
+now set their own report time and time zone.
 
-- the report time ("21:00", "9pm"; empty means the server default), and
-- the time zone, from 23 common zones. Japan time is listed first and is
-  the default, since the game runs on it. The others cover staff local time
-  and follow daylight saving: "US Eastern" is New York's clock, not a fixed
-  UTC-5.
+**Club forms.** `/club edit` is gone. A club's settings are now three forms,
+split by who may change them, within Discord's five-field limit. The user
+chose this layout and the name `admin`.
 
-For Club Managers only, the form also has the report and alert channels;
-`/fans circle config` still sets those too. The reply gives the next report
-as a Discord timestamp, so each reader sees it in their own local time.
+| Form | Who | Fields |
+| --- | --- | --- |
+| `/club reports` | the club's staff and Club Managers | expected rank, quota, quota period; for a tracked club, report time and time zone |
+| `/club profile` | the club's staff; Club Managers also set the tier | bio, rules, banner, tier (unchanged) |
+| `/club admin` | Club Managers only | name (untracked club) or home channels (tracked), staff roles; for a tracked club, report and alert channels |
 
-The form exists because `/club edit` already had Discord's five-field
-limit, the same reason `/club profile` was split out. At the user's
-suggestion, `/club edit` was renamed **`/club info`** so the commands pair
-up as info / profile / reports. Commands register at startup, so the rename
-takes effect on deploy; `/club edit` stops existing.
+Everything that decides *who* counts as staff, and *where* things post,
+is now Club Manager only, in one place. `/club member` was already Club
+Manager only. Staff roles matched by name ("Cosmos Trainer") still count
+when a club has no stored list. Whoever can assign server roles controls
+those; dropping that fallback is an open question for the user.
+
+**Report time** ("21:00", "9pm"; empty means the server default). The time
+zone comes from 23 common zones. Japan time is listed first and is the
+default, since the game runs on it. The others cover staff local time and
+follow daylight saving: "US Eastern" is New York's clock, not a fixed
+UTC-5. Replies give the next report as a Discord timestamp, so each reader
+sees it in their own local time. `/fans circle config` still sets the
+report and alert channels too.
+
+Commands register at startup, so `/club edit` disappears on deploy.
 
 **Scheduler.** The daily job keeps the sync, benchmark and cutoff upkeep at
 FAN_SYNC_HOUR_UTC but no longer posts. `postDueReports` runs on the
@@ -51,7 +61,8 @@ Tests: `scripts/test-report-time.ts` (39 checks: parsing; Japan and New
 York times, including New York leaving daylight saving on 2026-11-01; the
 scheduler posting three clubs at three times over two days, never posting a
 club with no channel or a paused one). `scripts/test-commands.ts` covers
-the form for staff and Club Managers.
+both new forms: their fields for tracked and untracked clubs, pre-filled
+values, staff refused from `/club admin`, and the report time round trip.
 
 ---
 

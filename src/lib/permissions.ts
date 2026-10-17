@@ -21,7 +21,7 @@ export async function getClubMembership(clubId: string, discordUserId: string) {
 
 /**
  * True when `member` holds one of the club's staff roles: the roles set with
- * `/club info`, or else the Trainer and Assistant roles named after the club
+ * `/club admin`, or else the Trainer and Assistant roles named after the club
  * ("Cosmos Trainer"). `clubs` is every club in the guild, for name matching;
  * it is loaded when not given.
  */

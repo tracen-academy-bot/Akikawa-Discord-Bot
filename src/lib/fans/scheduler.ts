@@ -285,7 +285,7 @@ export function startFanScheduler(client: Client): () => void {
 
     let running = false;
     // The rank cutoff figures live in memory, so work them out now rather
-    // than at the next hourly run; /club info shows nothing until they exist.
+    // than at the next hourly run; /club reports shows nothing until they exist.
     void refreshCutoffs()
         .then((r) => r.failed.length > 0 && console.warn(`Rank cutoff figures failed: ${r.failed.join('; ')}`))
         .catch((e: unknown) => console.warn('Rank cutoff figures failed:', e instanceof Error ? e.message : e));

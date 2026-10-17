@@ -1,5 +1,5 @@
 /**
- * The T1000 figures shown under the competitive ranks in `/club info`:
+ * The T1000 figures shown under the competitive ranks in `/club reports`:
  * per-member daily fans, the uma.moe lookups behind them, and the text.
  * uma.moe is stubbed (global fetch), so no key or network is needed.
  *
