@@ -17,7 +17,8 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  *   2. For each tier with clubs, `tier:<tier>` ("Current G1 Clubs"), then one
  *      `club:<id>` card per club in it, by name. A card is the club's banner
  *      (if it has one) above an embed with its staff, requirements, expected
- *      rank, rules and bio.
+ *      rank, rules and bio. A rules file follows in `club:<id>:rules:<n>`
+ *      messages of its own, plain text split at line breaks.
  *   3. `index`: jump links to every card.
  *
  * Clubs without a tier are left out. `/club directory` posts it; after that
@@ -190,10 +191,39 @@ function bannerFileName(clubId: string, fileName: string): string {
 /** Longest card description Discord accepts. */
 const CARD_LIMIT = 4096;
 
-/** The attached rules file's name: the uploaded one, made safe for an attachment. */
-function rulesFileName(club: TrackedCircle): string {
-    const base = (club.rulesFileName ?? 'rules.md').replace(/[^\w.\- ]+/g, '').trim() || 'rules.md';
-    return /\.(md|markdown)$/i.test(base) ? base : `${base}.md`;
+/** Longest plain message Discord accepts. */
+const MESSAGE_LIMIT = 2000;
+
+/**
+ * Splits text into chunks of at most `room` characters at line breaks. A
+ * line is only broken when it alone is longer than `room`. `firstRoom` limits
+ * the first chunk; it may come out empty when not even one line fits.
+ */
+export function splitByLines(text: string, firstRoom: number, room = MESSAGE_LIMIT): string[] {
+    const lines = text.split('\n').flatMap((line) => {
+        if (line.length <= room) return [line];
+        const pieces: string[] = [];
+        for (let i = 0; i < line.length; i += room) pieces.push(line.slice(i, i + room));
+        return pieces;
+    });
+    const chunks: string[] = [];
+    let current: string[] = [];
+    let length = 0;
+    let limit = Math.max(0, firstRoom);
+    for (const line of lines) {
+        const added = current.length > 0 ? line.length + 1 : line.length;
+        if (length + added > limit) {
+            chunks.push(current.join('\n'));
+            current = [line];
+            length = line.length;
+            limit = room;
+            continue;
+        }
+        current.push(line);
+        length += added;
+    }
+    chunks.push(current.join('\n'));
+    return chunks;
 }
 
 /** A club's banner, as stored. */
@@ -207,7 +237,7 @@ export interface Banner {
  * embed above the card, so it reads as a header, then the card itself, with
  * the club's avatar (see `clubAvatar`) as its thumbnail.
  */
-export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Banner | null): Payload {
+export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Banner | null): Payload & { rulesMessages: string[] } {
     const color = club.tier ? TIERS[club.tier].color : COLORS.info;
     const embeds: EmbedBuilder[] = [];
     const files: AttachmentBuilder[] = [];
@@ -230,16 +260,13 @@ export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Bann
         lines.push('', isLink(club.rules) ? `[${club.name} goals and rules](${club.rules})` : `**Rules**\n${club.rules}`);
     }
     const bio = club.bio ? ['', club.bio.split('\n').map((l) => `> ${l}`).join('\n')] : [];
+    let rulesMessages: string[] = [];
     if (club.rulesFile) {
-        // Shown as Markdown when the card has room (Discord allows 4096
-        // characters), else attached as the uploaded .md file.
-        const inline = ['', `**Rules and goals**\n${club.rulesFile}`];
-        if ([...lines, ...inline, ...bio].join('\n').trim().length <= CARD_LIMIT) {
-            lines.push(...inline);
-        } else {
-            files.push(new AttachmentBuilder(Buffer.from(club.rulesFile, 'utf8'), { name: rulesFileName(club) }));
-            lines.push('', '**Rules and goals**: in the attached file.');
-        }
+        // A rules file gets its own messages after the card, as plain text so
+        // all of its Markdown renders, split at line breaks into Discord's
+        // 2000 characters per message.
+        lines.push('', '**Rules and goals**: in the messages below this card.');
+        rulesMessages = splitByLines(`## ${club.name}: rules and goals\n${club.rulesFile}`, MESSAGE_LIMIT);
     }
     lines.push(...bio);
 
@@ -253,7 +280,12 @@ export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Bann
     const description = lines.join('\n').trim();
     if (description) card.setDescription(description.slice(0, CARD_LIMIT));
     embeds.push(card);
-    return { embeds, files };
+    return { embeds, files, rulesMessages };
+}
+
+/** One message of a club's rules file, posted after its card. */
+export function rulesMessage(chunk: string): Payload {
+    return { content: chunk, embeds: [], files: [] };
 }
 
 /** The tier explainer: one embed per tier. */
@@ -305,7 +337,10 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
         for (const club of clubs) {
             const staff = await clubStaff(club, linkable, guild, membersLoaded);
             const key = `club:${club.id}`;
-            parts.push({ key, build: () => clubCard(club, staff, club.banner) });
+            const card = clubCard(club, staff, club.banner);
+            parts.push({ key, build: () => card });
+            // A rules file follows the card in messages of its own.
+            card.rulesMessages.forEach((chunk, i) => parts.push({ key: `${key}:rules:${i + 1}`, build: () => rulesMessage(chunk) }));
             section.clubs.push({ key, name: club.name });
             listed += 1;
         }

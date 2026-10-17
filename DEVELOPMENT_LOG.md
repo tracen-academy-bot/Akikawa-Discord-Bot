@@ -4,27 +4,37 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
-## 2026-10-17 — Rules and goals as a Markdown file
+## 2026-10-17 — Rules and goals as a Markdown or text file
 
 At the user's request, clubs can upload their rules and goals as a file in
 `/club profile`, so they are not held to the form's 1000-character Rules
-field. Only Markdown (`.md`, `.markdown`) is accepted: valid UTF-8 text, up
-to 64 KB, not empty. A leading byte-order mark is dropped. A file that
-fails these checks is refused, and the stored rules are kept.
+field. Accepted: `.md`, `.markdown` and `.txt`, all treated as Markdown.
+The file must be valid UTF-8 text, up to 64 KB, and not empty; a leading
+byte-order mark is dropped. Any other file type is refused, and so is a
+file that fails these checks; the stored rules are kept.
 
 The profile form was already at Discord's five-field limit for a Club
 Manager with a banner. So the Banner field became **"Banner and rules
-file"** (up to two files, told apart by type: an image is the banner, a
-`.md` is the rules). The "Remove banner" checkbox became a **Remove** list
-(banner and/or rules file), shown only when there is something to remove.
-The field count is unchanged.
+file"** (up to two files: an image is the banner, a .md/.txt is the
+rules). The "Remove banner" checkbox became a **Remove** list (banner
+and/or rules file), shown only when there is something to remove.
 
-The file is stored as text (`TrackedCircle.rulesFile`, `rulesFileName`;
-migration `20261017160000_add_club_rules_file`). On the directory card it
-shows under "Rules and goals", rendered as Markdown, when the whole card
-stays within Discord's 4096 characters. Otherwise the card says "in the
-attached file" and the `.md` is attached to that card's message. The Rules
-text field still works alongside it.
+**Where it shows.** The rules file never goes on the card. The card says
+"Rules and goals: in the messages below this card", and the file follows
+in messages of its own (`club:<id>:rules:<n>` in the directory layout).
+Those messages are plain text, not embeds, so all of the file's Markdown
+renders. The first message starts with a `## <Club>: rules and goals`
+heading. A long file becomes several messages of up to 2000 characters
+(Discord's limit), split only between lines; a line is broken only if it
+alone is over 2000. Mentions in the rules never ping (`NO_PINGS`). The
+user first asked for long rules to be cut and then clarified that they
+meant split into more messages; an attach-the-file version and a cut
+version were both replaced. The `/club profile` reply sends the card, then
+the rules messages (ephemeral). Changing how many messages a file needs
+changes the directory layout, so the directory is reposted.
+
+Stored as text: `TrackedCircle.rulesFile`, `rulesFileName` (migration
+`20261017160000_add_club_rules_file`).
 
 ---
 

@@ -591,6 +591,7 @@ async function main() {
             },
             editReply: async (p: Reply) =>
                 void out.push({ kind: 'edit', content: p.content, description: p.embeds?.at(-1)?.toJSON().description, embeds: p.embeds?.length, files: p.files?.length }),
+            followUp: async (p: Reply) => void out.push({ kind: 'followUp', content: p.content }),
         };
         await profile.handleProfileModal(interaction as never);
         return out;
@@ -623,9 +624,9 @@ async function main() {
     check('the card shows it above the details', [withBanner.at(-1)?.embeds, withBanner.at(-1)?.files], [2, 1]);
     check('a file that is neither an image nor Markdown is refused',
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, name: 'rules.pdf', contentType: 'application/pdf' } }))[0]?.description,
-        'Upload a banner image (PNG, JPEG, GIF or WebP) and/or a rules file in Markdown (.md). Other files are not accepted.');
-    check('a .txt rules file is refused: Markdown only',
-        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, name: 'rules.txt', contentType: 'text/plain' } }))[0]?.description?.startsWith('Upload a banner image'), true);
+        'Upload a banner image (PNG, JPEG, GIF or WebP) and/or a rules file (.md or .txt). Other files are not accepted.');
+    check('a .docx rules file is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, name: 'rules.docx', contentType: 'application/octet-stream' } }))[0]?.description?.startsWith('Upload a banner image'), true);
     check('two banners are refused',
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { uploads: [bannerUpload, bannerUpload] }))[0]?.description, 'Upload one banner image at most.');
     check('so is an oversized one',
@@ -647,23 +648,46 @@ async function main() {
     const withRules = await submitProfile(staffProfile, 'u-trainer', false, kept, { uploads: [mdUpload(SHORT_RULES), bannerUpload] });
     const afterRules = await reload();
     check('the rules file is stored as text, without the byte-order mark', [afterRules.rulesFile, afterRules.rulesFileName], [SHORT_RULES, 'Checkrose rules.md']);
-    check('short rules show on the card as Markdown', withRules.at(-1)?.description?.includes(`**Rules and goals**\n${SHORT_RULES}`), true);
-    check('a banner can come in the same upload', [withRules.at(-1)?.embeds, withRules.at(-1)?.files], [2, 1]);
+    const rulesEdit = withRules.find((o) => o.kind === 'edit');
+    check('the card points to the rules below it', rulesEdit?.description?.includes('**Rules and goals**: in the messages below this card.'), true);
+    check('the rules follow as their own message, as Markdown with a heading',
+        withRules.filter((o) => o.kind === 'followUp').map((o) => o.content), [`## Checkrose: rules and goals\n${SHORT_RULES}`]);
+    check('a banner can come in the same upload', [rulesEdit?.embeds, rulesEdit?.files], [2, 1]);
     const LONG_RULES = `# Rules\n${'- Earn your quota every week, and say so in chat if you cannot.\n'.repeat(80)}`;
     serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
     const withLong = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(LONG_RULES) });
-    check('long rules are attached instead', [withLong.at(-1)?.description?.includes('**Rules and goals**: in the attached file.'), withLong.at(-1)?.files], [true, 2]);
+    const longEdit = withLong.find((o) => o.kind === 'edit');
+    const longMore = withLong.filter((o) => o.kind === 'followUp').map((o) => o.content ?? '');
+    check('long rules take several messages', longMore.length > 1, true);
+    check('each fits a Discord message', longMore.every((m) => m.length <= 2000), true);
+    check('the reply says how many follow', longEdit?.content?.includes(`Its rules follow in ${longMore.length} messages after the card.`), true);
+    check('nothing is attached for the rules', longEdit?.files, 1);
+    check('every line shows once, in order, none broken', longMore.join('\n'), `## Checkrose: rules and goals\n${LONG_RULES.trim()}`);
     check('the long file is kept whole', (await reload()).rulesFile, LONG_RULES.trim());
+    const TXT = 'Be active\n**Bold** still renders';
+    serve({ [mdUpload(TXT, 'rules.txt').url]: TXT });
+    const withTxt = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(TXT, 'rules.txt') });
+    check('a .txt file is accepted and shown as Markdown',
+        [withTxt.filter((o) => o.kind === 'followUp').map((o) => o.content), (await reload()).rulesFileName], [[`## Checkrose: rules and goals\n${TXT}`], 'rules.txt']);
+    serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
+    await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(LONG_RULES) });
     serve({ [mdUpload('x').url]: Buffer.from([0xff, 0xfe, 0x00, 0x41]) });
     check('a file that is not UTF-8 text is refused',
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload('x') })).at(-1)?.description,
-        'The rules file is not text. Save it as a UTF-8 Markdown (.md) file and try again.');
+        'The rules file is not text. Save it as a UTF-8 .md or .txt file and try again.');
     check('an oversized rules file is refused',
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...mdUpload('x'), size: 65 * 1024 } }))[0]?.description, 'The rules file must be 64 KB or smaller.');
     check('refusals keep the rules file', (await reload()).rulesFile, LONG_RULES.trim());
     globalThis.fetch = realFetch;
     check('the Remove list offers both', profileForm(await reload(), false, true).components.at(-1)?.component.options?.map((o) => o.value), ['banner', 'rules-file']);
     await submitProfile(staffProfile, 'u-trainer', false, kept, { remove: ['rules-file'] });
+    // Splitting at line breaks.
+    check('text that fits is one chunk', directory.splitByLines('a\nb', 10), ['a\nb']);
+    check('chunks break between lines', directory.splitByLines('aaa\nbbb\nccc', 7, 7), ['aaa\nbbb', 'ccc']);
+    check('the first chunk can be smaller', directory.splitByLines('aaa\nbbb\nccc', 3, 7), ['aaa', 'bbb\nccc']);
+    check('a long file splits into messages of at most 2000', directory.splitByLines('x'.repeat(1500) + '\n' + 'y'.repeat(1500), 2000).map((c) => c.length), [1500, 1500]);
+    check('only a line longer than a chunk is broken', directory.splitByLines('abcdefghij', 4, 4), ['abcd', 'efgh', 'ij']);
+
     check('the rules file can be removed, keeping the banner',
         [(await reload()).rulesFile, await prisma.clubBanner.count({ where: { clubId: club.id } })], [null, 1]);
 
@@ -774,6 +798,16 @@ async function main() {
     check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, dirA.rec.live.size], [true, 6, 0]);
     check('/club directory with no channel refreshes it where it is',
         lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })).startsWith('Updated the directory in <#c-directory-2>'), true);
+
+    // A rules file posts after the club's card, in messages of its own.
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: LONG_RULES.trim(), rulesFileName: 'rules.md' } });
+    await directory.refreshDirectory(FAKE_GUILD);
+    const liveB = [...dirB.rec.live.values()];
+    const cardAt = liveB.findIndex((p) => p.embeds.some((e) => e.toJSON().title === 'Checkrose'));
+    const rulesAfter = liveB.slice(cardAt + 1).filter((p) => p.content?.startsWith('## Checkrose') || (p.embeds.length === 0 && p.content && !p.content.startsWith('## Current')));
+    check('the rules messages come right after the card', liveB[cardAt + 1]?.content?.startsWith('## Checkrose: rules and goals'), true);
+    check('all of the rules are posted', rulesAfter.map((p) => p.content).join('\n'), `## Checkrose: rules and goals\n${LONG_RULES.trim()}`);
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: null, rulesFileName: null } });
 
     await directory.refreshDirectory(FAKE_GUILD);
     await prisma.clubDirectory.deleteMany({ where: { guildId: GUILD } });

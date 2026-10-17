@@ -13,14 +13,14 @@ import { prisma } from '../db/prisma';
 import { canManageClubStats, isOfficer, type StaffCandidate } from '../lib/permissions';
 import { errorEmbed } from '../lib/embeds';
 import { guildClubs } from '../lib/clubLinks';
-import { TIERS, TIER_ORDER, clubCard, clubStaff, loadMembers, refreshDirectory, type DirectoryGuild } from '../lib/clubDirectory';
+import { TIERS, TIER_ORDER, clubCard, clubStaff, loadMembers, refreshDirectory, rulesMessage, type DirectoryGuild } from '../lib/clubDirectory';
 
 /**
  * `/club profile`: what a club's directory card says about it.
  *
  * The club's own staff (Trainers and Assistants) and Club Managers edit its
  * bio, rules and banner, and can upload longer rules and goals as a Markdown
- * (.md) file. Club Managers also set its tier, which places it in
+ * (.md) or text (.txt) file. Club Managers also set its tier, which places it in
  * the directory (G1 to Debut); a club with no tier is left out. One of three
  * forms, with `/club reports` and `/club admin` (see `club.ts`).
  *
@@ -84,11 +84,11 @@ export function buildProfileModal(club: TrackedCircle, full: boolean, hasBanner:
         new LabelBuilder().setLabel('Bio').setDescription('What the club is like. Markdown works; one line per point is fine.').setTextInputComponent(bio),
         new LabelBuilder()
             .setLabel('Rules')
-            .setDescription('The rules as text, or a link to your rules post. Longer? Upload a .md file below.')
+            .setDescription('The rules as text, or a link to your rules post. Longer? Upload a .md or .txt file below.')
             .setTextInputComponent(rules),
         new LabelBuilder()
             .setLabel('Banner and rules file')
-            .setDescription('A banner image and/or a Markdown (.md) rules file. A new one replaces the current one.')
+            .setDescription('A banner image and/or a rules file (.md or .txt). A new one replaces the current one.')
             .setFileUploadComponent(new FileUploadBuilder().setCustomId(FIELD.files).setRequired(false).setMaxValues(2)),
     );
     const removable = [
@@ -110,9 +110,9 @@ export function buildProfileModal(club: TrackedCircle, full: boolean, hasBanner:
         .addLabelComponents(...labels);
 }
 
-/** True for a Markdown file name. */
-function isMarkdownName(name: string): boolean {
-    return /\.(md|markdown)$/i.test(name);
+/** True for a rules file name: Markdown or plain text, shown as Markdown. */
+function isRulesFileName(name: string): boolean {
+    return /\.(md|markdown|txt)$/i.test(name);
 }
 
 /** Downloads an uploaded file. Separate so tests can stand in for Discord's CDN. */
@@ -142,9 +142,9 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
     // The one upload field takes a banner image and a Markdown rules file.
     const uploads = [...(interaction.fields.getUploadedFiles(FIELD.files, false)?.values() ?? [])];
     const images = uploads.filter((f) => f.contentType?.startsWith('image/'));
-    const markdown = uploads.filter((f) => !f.contentType?.startsWith('image/') && isMarkdownName(f.name));
+    const markdown = uploads.filter((f) => !f.contentType?.startsWith('image/') && isRulesFileName(f.name));
     if (images.length + markdown.length < uploads.length) {
-        return void (await refuse('Upload a banner image (PNG, JPEG, GIF or WebP) and/or a rules file in Markdown (.md). Other files are not accepted.'));
+        return void (await refuse('Upload a banner image (PNG, JPEG, GIF or WebP) and/or a rules file (.md or .txt). Other files are not accepted.'));
     }
     if (images.length > 1) return void (await refuse('Upload one banner image at most.'));
     if (markdown.length > 1) return void (await refuse('Upload one rules file at most.'));
@@ -180,7 +180,7 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
             // Markdown is text: anything that is not valid UTF-8 is refused.
             markdownText = new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/^\uFEFF/, '').trim();
         } catch {
-            return void (await refuse('The rules file is not text. Save it as a UTF-8 Markdown (.md) file and try again.'));
+            return void (await refuse('The rules file is not text. Save it as a UTF-8 .md or .txt file and try again.'));
         }
         if (!markdownText) return void (await refuse('The rules file is empty.'));
         data.rulesFile = markdownText;
@@ -210,7 +210,12 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
         : { trainers: [], assistants: [] };
     const card = clubCard(updated, staff, updated.banner);
     const listed = updated.tier ? `listed under **${TIERS[updated.tier].title}**` : 'not listed in the directory (a Club Manager sets its tier)';
-    await interaction.editReply({ content: `Saved. **${updated.name}** is ${listed}. Its card:`, embeds: card.embeds, files: card.files });
+    const more = card.rulesMessages.length;
+    const moreNote = more > 0 ? ` Its rules follow in ${more} message${more === 1 ? '' : 's'} after the card.` : '';
+    await interaction.editReply({ content: `Saved. **${updated.name}** is ${listed}.${moreNote} Its card:`, embeds: card.embeds, files: card.files });
+    for (const chunk of card.rulesMessages) {
+        await interaction.followUp({ ...rulesMessage(chunk), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+    }
 
     void refreshDirectory(guild);
 }
