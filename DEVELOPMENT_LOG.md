@@ -4,6 +4,39 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-17 — Default report time is the daily reset; reset reports show Day N
+
+At the user's request, the default report time is now **00:00 JST**, the
+game's daily reset (confirmed by the user as midnight JST, which matches the
+bot's day bucketing). It was FAN_SYNC_HOUR_UTC, 13:00 UTC, which is 22:00
+JST and mid-way through a game day. FAN_SYNC_HOUR_UTC now only times the
+daily upkeep sync.
+
+A report that posts at the reset shows **"Day N"**: the game day that just
+ended, complete. That covers default clubs, and any club whose chosen time
+is 00:00 JST in whatever zone (`isAtGameReset`). Reports at any other time
+keep "Last 24h". Every "Day N" column now shows the last *finished* day
+(`CircleProgress.finishedDay`, `MemberProgress.finishedDayGain`) rather
+than the day still in progress. This also fixes the half-finished "Day N"
+seen in reports posted mid-day.
+
+On the 2nd JST, the day that just ended was the old month's last
+(game day 1 is the 2nd). A reset report then shows **that month's final
+standings**, not the new month's nearly empty first day. With no current
+day, every checkpoint up to month end is judged, so the month-end alert
+goes out with it.
+
+On deploy, default clubs move from 13:00 UTC to 15:00 UTC. A club that got
+its 13:00 UTC report earlier that day also gets the 15:00 UTC one, because
+that is a new JST day.
+
+Caveat (unverified): uma.moe refreshes most circles hourly. A report at
+00:00 JST may be missing up to the final hour of the day it reports. If
+that shows up, a default of 01:00 JST would avoid it, at the cost of a
+column that is no longer exactly the reset.
+
+---
+
 ## 2026-10-17 — Reports show fans earned in the last 24 hours
 
 Now that each club picks its report time, the report's "Day N" column (fans

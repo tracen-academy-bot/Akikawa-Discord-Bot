@@ -405,7 +405,7 @@ async function main() {
     check('the old club fan count is cleared, not left as a second number', [afterReports.fanCountAmount, afterReports.fanCountPeriod], [null, null]);
     check('reports form confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M per week')], [false, true]);
     check('headcount comes from uma.moe, not the stored column', saved?.description?.includes('Headcount: **2/30** (from uma.moe)'), true);
-    check('the reply includes the report time', saved?.description?.includes('Fan report: daily at **13:00 UTC** (the server default)'), true);
+    check('the reply includes the report time', saved?.description?.includes('Fan report: daily at **00:00 Japan time (JST)** (the default: the daily reset)'), true);
 
     const adminSaved = await submitClub(adminForm.custom_id, 'u-officer', true, {}, { 'club:home': ['c-room', 'c-room-bot'], ...keepChannels });
     const afterAdmin = await reload();
@@ -462,7 +462,7 @@ async function main() {
         '**soon** is not a time. Try 21:00, 9pm or 9:30 pm.');
     check('a refused time leaves it alone', (await reload()).reportMinute, 21 * 60);
     await submitClub(reportsForm.custom_id, 'u-assistant', false, { 'club:rank': 'A', 'club:quota': '31M', 'club:period': 'MONTH' });
-    check('an empty time goes back to the server default', [(await reload()).reportMinute, (await reload()).reportTimeZone], [null, null]);
+    check('an empty time goes back to the default', [(await reload()).reportMinute, (await reload()).reportTimeZone], [null, null]);
 
     // /club fancount sets the same quota (in millions, as its option says).
     await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: '35', period: 'MONTH' } });

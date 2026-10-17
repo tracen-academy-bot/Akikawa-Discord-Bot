@@ -81,8 +81,10 @@ export interface MemberProgress {
      * is already met.
      */
     needPerDay: number | null;
-    /** Fans gained on the most recent day. */
+    /** Fans gained on the most recent day, which may still be in progress. */
     latestDayGain: number;
+    /** Fans gained on `CircleProgress.finishedDay`, the last complete game day. */
+    finishedDayGain: number;
     /** Days this month, through the latest day, that this member spent in the circle. */
     dataDays: number;
     /** Days counted toward `expected`. See `QuotaOptions.quotaDaysOffset`. */
@@ -126,6 +128,8 @@ export interface CircleProgress {
     windowLabel: string;
     /** Latest day of the game month that has data, 1-based. */
     daysElapsed: number;
+    /** The last complete game day: `daysElapsed`, or the day before today in the current month. 0 if none. */
+    finishedDay: number;
     daysInMonth: number;
     /**
      * Checkpoint periods: the last checkpoint that has passed (0 before the
@@ -451,6 +455,8 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
     // Game days elapsed: the latest day any member has a snapshot for. Zero on
     // the first day of the month, when only starting values exist.
     const daysElapsed = Math.min(daysInMonth, Math.max(0, ...[...month.values()].map((g) => g.lastDay)));
+    // The last complete game day: the day in progress is not, when known.
+    const finishedDay = options.currentDay === undefined ? daysElapsed : Math.max(0, Math.min(daysElapsed, options.currentDay - 1));
     const quotaPerDay = quotaPerDayFor(period, quota, daysInMonth);
 
     /**
@@ -557,6 +563,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
             avgPerDay,
             needPerDay,
             latestDayGain,
+            finishedDayGain: finishedDay === 0 ? 0 : Math.max(0, cumulativeAt(g, finishedDay) - cumulativeAt(g, finishedDay - 1)),
             recentGains,
             // MONTH keeps its reference-matching form; elsewhere a joiner is
             // projected over the days they will actually be in the circle.
@@ -598,6 +605,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         windowEnd: window.end,
         windowLabel: windowLabel(period, window, options.monthName),
         daysElapsed,
+        finishedDay,
         daysInMonth,
         checkpointDay,
         nextCheckpointDay,

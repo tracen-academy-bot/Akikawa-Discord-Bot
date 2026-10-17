@@ -51,8 +51,9 @@ export interface FanReportMeta {
     dateLabel: string;
     /**
      * Fans earned in the 24 hours before the report (see `lastDayGains`).
-     * When given, the "Day N" column becomes "Last 24h"; without it (no
-     * readings from a day ago yet), the column stays on the latest game day.
+     * When given, the column shows it as "Last 24h". Without it (a report at
+     * the daily reset, or no readings from a day ago yet) the column is the
+     * last complete game day, "Day N".
      */
     last24h?: LastDayGains | null;
 }
@@ -248,7 +249,9 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     drawLabel(ctx, 'Avg/day', COL.avgDay, hy, THEME.muted, 12, 'right');
     drawLabel(ctx, 'Need/day', COL.needDay, hy, THEME.muted, 12, 'right');
     const last24h = meta.last24h ?? null;
-    const recentLabel = last24h ? `Last 24h${last24h.overlapsFreeze ? '*' : ''}` : `Day ${progress.daysElapsed}`;
+    // A finished day when there is one; on a month's first day, the day so far.
+    const day = progress.finishedDay > 0 ? progress.finishedDay : progress.daysElapsed;
+    const recentLabel = last24h ? `Last 24h${last24h.overlapsFreeze ? '*' : ''}` : `Day ${day}`;
     drawLabel(ctx, recentLabel, COL.dayN, hy, THEME.muted, 12, 'right');
     drawLabel(ctx, 'Proj.', COL.projected, hy, THEME.muted, 12, 'right');
     drawRule(ctx, MARGIN, HEADER_HEIGHT + COLUMN_HEADER_HEIGHT - 6, WIDTH - MARGIN * 2, THEME.line);
@@ -262,7 +265,11 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
 
     // ── Rows ──────────────────────────────────────────────────────────────────
     for (const member of progress.members) {
-        const recent = last24h ? (last24h.gains.get(member.viewerId) ?? null) : member.latestDayGain;
+        const recent = last24h
+            ? (last24h.gains.get(member.viewerId) ?? null)
+            : progress.finishedDay > 0
+              ? member.finishedDayGain
+              : member.latestDayGain;
         drawRow(ctx, member, y, progress.effectiveQuota, recent);
         y += ROW_HEIGHT;
         drawRule(ctx, MARGIN, y - 1, WIDTH - MARGIN * 2, THEME.line);

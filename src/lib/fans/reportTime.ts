@@ -3,8 +3,12 @@
  *
  * A club sets a time of day and a time zone in `/club reports`. Japan time is
  * the usual choice because the game runs on it; the other zones let a club
- * use its staff's local time, and they follow daylight saving. With neither set, the
- * report goes out at FAN_SYNC_HOUR_UTC in UTC, as before.
+ * use its staff's local time, and they follow daylight saving. With neither
+ * set, the report goes out at the game's daily reset, 00:00 JST.
+ *
+ * A report at the reset shows the game day that just ended, complete ("Day
+ * N"); one at any other time shows the last 24 hours instead, since a game
+ * day would be cut in half. See `isAtGameReset`.
  *
  * A report is due once per local day, at or after its time. The scheduler
  * records when it last posted, so a restart never posts the same day twice;
@@ -14,8 +18,8 @@
 /** The game's time zone, offered first. */
 export const JAPAN_TIME_ZONE = 'Asia/Tokyo';
 
-/** UTC hour reports go out when a club has not set a time. */
-export const DEFAULT_REPORT_HOUR_UTC = Number(process.env.FAN_SYNC_HOUR_UTC ?? 13);
+/** When reports go out when a club has not set a time: the daily reset. */
+export const DEFAULT_REPORT_TIME: ReportTime = { minute: 0, zone: JAPAN_TIME_ZONE };
 
 /** A club's report time, in minutes after local midnight, in an IANA zone. */
 export interface ReportTime {
@@ -34,7 +38,12 @@ export function reportTimeOf(club: ReportTimeColumns): ReportTime {
     if (club.reportMinute !== null && club.reportTimeZone && isTimeZone(club.reportTimeZone)) {
         return { minute: club.reportMinute, zone: club.reportTimeZone };
     }
-    return { minute: DEFAULT_REPORT_HOUR_UTC * 60, zone: 'UTC' };
+    return DEFAULT_REPORT_TIME;
+}
+
+/** True when the report posts at the game's daily reset, 00:00 JST, in whatever zone it was set. */
+export function isAtGameReset(time: ReportTime, at = new Date()): boolean {
+    return localParts(JAPAN_TIME_ZONE, nextReportAt(time, at)).minute === 0;
 }
 
 /** True when a club has set its own time. */
