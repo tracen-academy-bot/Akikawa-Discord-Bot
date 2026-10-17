@@ -31,6 +31,19 @@ import { cutoffDetail, cutoffForRank, cutoffLine } from '../lib/fans/cutoff';
 import { publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
 import { buildProfileModal } from './clubProfile';
 import { parseQuota } from './fans';
+import {
+    COMMON_ZONES,
+    DEFAULT_REPORT_HOUR_UTC,
+    JAPAN_TIME_ZONE,
+    describeZone,
+    formatTimeOfDay,
+    hasOwnReportTime,
+    isTimeZone,
+    nextReportAt,
+    parseTimeOfDay,
+    reportTimeOf,
+    utcOffsetLabel,
+} from '../lib/fans/reportTime';
 
 /**
  * A club is a `TrackedCircle` row: clubs and tracked uma.moe circles were
@@ -106,7 +119,7 @@ export const data = new SlashCommandBuilder()
     )
     .addSubcommand((sub) =>
         sub
-            .setName('edit')
+            .setName('info')
             .setDescription("Edit a club's info in a form (Club Managers; the club's staff for its rank and quota).")
             .addStringOption((opt) => opt.setName('club').setDescription('Club to edit').setRequired(true).setAutocomplete(true))
     )
@@ -148,6 +161,12 @@ export const data = new SlashCommandBuilder()
             .addStringOption((opt) => opt.setName('club').setDescription('Club to update').setRequired(true).setAutocomplete(true))
             .addStringOption((opt) => opt.setName('amount').setDescription('Per member, in millions, e.g. 50M, 0.5M').setRequired(true))
             .addStringOption((opt) => opt.setName('period').setDescription('Per day, week, 2 weeks or month (default month)').setRequired(false).addChoices(...PERIOD_CHOICES))
+    )
+    .addSubcommand((sub) =>
+        sub
+            .setName('reports')
+            .setDescription("Set when a club's fan report posts (its staff); Club Managers also set its channels.")
+            .addStringOption((opt) => opt.setName('club').setDescription('Club').setRequired(true).setAutocomplete(true))
     )
     .addSubcommandGroup((group) =>
         group
@@ -210,7 +229,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         case 'create':
             await handleCreate(interaction, member);
             break;
-        case 'edit':
+        case 'info':
             await handleEdit(interaction, member);
             break;
         case 'delete':
@@ -233,6 +252,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             break;
         case 'fancount':
             await handleFancount(interaction, member);
+            break;
+        case 'reports':
+            await handleReports(interaction, member);
             break;
     }
     // A club's card shows its name, rank and quota; create and delete change the list.
@@ -301,7 +323,7 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
 // ─── Edit form ────────────────────────────────────────────────────────────────
 
 /**
- * `/club edit` opens a form pre-filled with the club's current info. Club
+ * `/club info` opens a form pre-filled with the club's current info. Club
  * Managers get the expected rank and the quota, plus the name for a club
  * without uma.moe tracking (a tracked club's name comes from uma.moe and is
  * refreshed on every sync) or its home channels for a tracked one, and its
@@ -322,6 +344,21 @@ const EDIT_FIELD = {
     home: 'club:home',
     roles: 'club:roles',
 } as const;
+const REPORTS_MODAL_PREFIX = 'club:reports:';
+const REPORT_FIELD = {
+    time: 'club:report-time',
+    zone: 'club:report-zone',
+    reportChannel: 'club:report-channel',
+    alertChannel: 'club:alert-channel',
+} as const;
+/** Where reports and alerts may go: channels and threads. */
+const REPORT_CHANNEL_TYPES = [
+    ChannelType.GuildText,
+    ChannelType.GuildAnnouncement,
+    ChannelType.PublicThread,
+    ChannelType.PrivateThread,
+    ChannelType.AnnouncementThread,
+] as const;
 /** Home channels a club may list. Threads inside them count without listing. */
 const MAX_HOME_CHANNELS = 10;
 /** Staff roles a club may list. */
@@ -348,7 +385,7 @@ async function formLinks(club: Club, guild: LinkableGuild | null): Promise<ClubF
 
 /** True for a modal this module owns. */
 export function isClubModal(customId: string): boolean {
-    return customId.startsWith(CLUB_MODAL_PREFIX);
+    return customId.startsWith(CLUB_MODAL_PREFIX) || customId.startsWith(REPORTS_MODAL_PREFIX);
 }
 
 /**
@@ -449,8 +486,9 @@ async function handleEdit(interaction: ChatInputCommandInteraction, member: Guil
     await interaction.showModal(buildClubEditModal(club, full, await formLinks(club, interaction.guild as LinkableGuild | null)));
 }
 
-/** Handles the submitted edit form. */
+/** Handles a submitted `/club info` or `/club reports` form. */
 export async function handleClubModal(interaction: ModalSubmitInteraction) {
+    if (interaction.customId.startsWith(REPORTS_MODAL_PREFIX)) return handleReportsModal(interaction);
     const [clubId, kind] = interaction.customId.slice(CLUB_MODAL_PREFIX.length).split(':');
     const refuse = (text: string) => interaction.reply({ embeds: [errorEmbed(text)], flags: MessageFlags.Ephemeral });
 
@@ -544,7 +582,7 @@ function linksText(links: Links, mention: (id: string) => string): string {
 /**
  * `/club links`: each club's staff roles, as the bot reads them from the
  * server, so a Club Manager can see which were matched by name and fix them
- * with `/club edit`. Role and channel mentions in an embed do not
+ * with `/club info`. Role and channel mentions in an embed do not
  * ping anyone.
  */
 async function handleLinks(interaction: ChatInputCommandInteraction) {
@@ -739,6 +777,124 @@ async function handleFancount(interaction: ChatInputCommandInteraction, member: 
         data: { quota: BigInt(Math.round(amount * 1_000_000)), quotaPeriod: (period ?? 'MONTH') as QuotaPeriod, fanCountAmount: null, fanCountPeriod: null },
     });
     await interaction.reply({ embeds: [successEmbed('Quota Updated', `**${updated.name}** quota is now **${clubQuotaText(updated)}** per member.`)] });
+}
+
+/**
+ * Builds the `/club reports` form: report time and time zone for the club's
+ * staff, and the report and alert channels too for Club Managers (`full`).
+ */
+export function buildReportsModal(club: Club, full: boolean, now = new Date()): ModalBuilder {
+    const own = hasOwnReportTime(club);
+    const time = new TextInputBuilder()
+        .setCustomId(REPORT_FIELD.time)
+        .setStyle(TextInputStyle.Short)
+        .setRequired(false)
+        .setMaxLength(10)
+        .setPlaceholder('21:00');
+    if (own) time.setValue(formatTimeOfDay(club.reportMinute!));
+
+    const current = own ? club.reportTimeZone! : JAPAN_TIME_ZONE;
+    const zones = COMMON_ZONES.some((z) => z.zone === current) ? COMMON_ZONES : [...COMMON_ZONES, { label: current, zone: current }];
+    const labels: LabelBuilder[] = [
+        new LabelBuilder()
+            .setLabel('Report time')
+            .setDescription(`e.g. 21:00 or 9pm. Empty for the server default, ${formatTimeOfDay(DEFAULT_REPORT_HOUR_UTC * 60)} UTC.`)
+            .setTextInputComponent(time),
+        new LabelBuilder().setLabel('Time zone').setStringSelectMenuComponent(
+            new StringSelectMenuBuilder()
+                .setCustomId(REPORT_FIELD.zone)
+                .addOptions(
+                    zones.map((z) => ({
+                        label: z.label.slice(0, 100),
+                        description: `${z.zone} · now ${utcOffsetLabel(z.zone, now)}`.slice(0, 100),
+                        value: z.zone,
+                        default: z.zone === current,
+                    })),
+                ),
+        ),
+    ];
+    if (full) {
+        for (const [id, label, description, value] of [
+            [REPORT_FIELD.reportChannel, 'Report channel', 'Where the daily report image posts. Empty: no report.', club.reportChannelId],
+            [REPORT_FIELD.alertChannel, 'Alert channel', 'Where trainers behind quota are pinged. Empty: no alerts.', club.alertChannelId],
+        ] as const) {
+            const select = new ChannelSelectMenuBuilder().setCustomId(id).setChannelTypes(...REPORT_CHANNEL_TYPES).setRequired(false).setMinValues(0).setMaxValues(1);
+            if (value) select.setDefaultChannels(value);
+            labels.push(new LabelBuilder().setLabel(label).setDescription(description).setChannelSelectMenuComponent(select));
+        }
+    }
+    return new ModalBuilder()
+        .setCustomId(`${REPORTS_MODAL_PREFIX}${club.id}:${full ? 'full' : 'stats'}`)
+        .setTitle(`${club.name} reports`.slice(0, 45))
+        .addLabelComponents(...labels);
+}
+
+/** `/club reports`: opens the report settings form. */
+async function handleReports(interaction: ChatInputCommandInteraction, member: GuildMember) {
+    const club = await findClubOrReply(interaction, interaction.options.getString('club', true));
+    if (!club) return;
+    if (club.circleId === null) {
+        await interaction.reply({ embeds: [errorEmbed(`**${club.name}**'s fans are not tracked, so it has no report. A Club Manager can add its uma.moe circle with \`/fans circle add\`.`)] });
+        return;
+    }
+    const full = isOfficer(member);
+    if (!full && !(await canManageClubStats(member, club))) {
+        await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)] });
+        return;
+    }
+    await interaction.showModal(buildReportsModal(club, full));
+}
+
+/** Handles a submitted `/club reports` form. */
+async function handleReportsModal(interaction: ModalSubmitInteraction) {
+    const [clubId, kind] = interaction.customId.slice(REPORTS_MODAL_PREFIX.length).split(':');
+    const refuse = (text: string) => interaction.reply({ embeds: [errorEmbed(text)], flags: MessageFlags.Ephemeral });
+
+    const club = clubId ? await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId ?? '' } }) : null;
+    if (!club) return void (await refuse('That club no longer exists.'));
+    const member = interaction.member as GuildMember;
+    const full = kind === 'full';
+    if (full ? !isOfficer(member) : !(await canManageClubStats(member, club))) {
+        return void (await refuse(full ? "Only Club Managers can change a club's report channels." : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
+    }
+
+    const data: { reportMinute: number | null; reportTimeZone: string | null; reportChannelId?: string | null; alertChannelId?: string | null } = {
+        reportMinute: null,
+        reportTimeZone: null,
+    };
+    const rawTime = interaction.fields.getTextInputValue(REPORT_FIELD.time).trim();
+    if (rawTime) {
+        const minute = parseTimeOfDay(rawTime);
+        if (minute === null) return void (await refuse(`**${rawTime}** is not a time. Try 21:00, 9pm or 9:30 pm.`));
+        const zone = interaction.fields.getStringSelectValues(REPORT_FIELD.zone)[0] ?? JAPAN_TIME_ZONE;
+        if (!isTimeZone(zone)) return void (await refuse('That time zone is not available. Pick another.'));
+        data.reportMinute = minute;
+        data.reportTimeZone = zone;
+    }
+    if (full) {
+        data.reportChannelId = interaction.fields.getSelectedChannels(REPORT_FIELD.reportChannel, false)?.first()?.id ?? null;
+        data.alertChannelId = interaction.fields.getSelectedChannels(REPORT_FIELD.alertChannel, false)?.first()?.id ?? null;
+    }
+
+    const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
+    await interaction.reply({ embeds: [successEmbed('Reports updated', reportSummary(updated))] });
+}
+
+/**
+ * A club's report settings as text. The next report is a Discord timestamp,
+ * which every reader sees in their own local time.
+ */
+export function reportSummary(club: Club, now = new Date()): string {
+    const time = reportTimeOf(club);
+    const next = Math.floor(nextReportAt(time, now).getTime() / 1000);
+    const lines = [
+        `**${club.name}** posts its fan report daily at **${formatTimeOfDay(time.minute)} ${describeZone(time.zone, now)}**${hasOwnReportTime(club) ? '' : ' (the server default)'}.`,
+        `Next: <t:${next}:F> (<t:${next}:R>), shown in your own time.`,
+        `Report channel: ${club.reportChannelId ? `<#${club.reportChannelId}>` : 'none, so no report posts'}`,
+        `Alert channel: ${club.alertChannelId ? `<#${club.alertChannelId}>` : 'none'}`,
+    ];
+    if (!club.active) lines.push('Syncing is paused, so nothing posts until it is resumed.');
+    return lines.join('\n');
 }
 
 async function handleMemberSubcommand(interaction: ChatInputCommandInteraction, member: GuildMember, sub: string) {

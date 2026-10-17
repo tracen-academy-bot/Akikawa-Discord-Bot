@@ -4,6 +4,57 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-17 — Each club sets its report time; `/club edit` is now `/club info`
+
+Every club's daily report used to post at one time for all clubs:
+FAN_SYNC_HOUR_UTC, 13:00 UTC by default. A club's staff (or a Club Manager)
+now set their own time in **`/club reports`**, a form with:
+
+- the report time ("21:00", "9pm"; empty means the server default), and
+- the time zone, from 23 common zones. Japan time is listed first and is
+  the default, since the game runs on it. The others cover staff local time
+  and follow daylight saving: "US Eastern" is New York's clock, not a fixed
+  UTC-5.
+
+For Club Managers only, the form also has the report and alert channels;
+`/fans circle config` still sets those too. The reply gives the next report
+as a Discord timestamp, so each reader sees it in their own local time.
+
+The form exists because `/club edit` already had Discord's five-field
+limit, the same reason `/club profile` was split out. At the user's
+suggestion, `/club edit` was renamed **`/club info`** so the commands pair
+up as info / profile / reports. Commands register at startup, so the rename
+takes effect on deploy; `/club edit` stops existing.
+
+**Scheduler.** The daily job keeps the sync, benchmark and cutoff upkeep at
+FAN_SYNC_HOUR_UTC but no longer posts. `postDueReports` runs on the
+existing 5-minute check. It posts each active club that has a report
+channel once per local day, at or after its time, so a report can be up to
+5 minutes late. A club synced in the last 10 minutes is not fetched again;
+otherwise it is synced first, and a failed sync still posts the last data.
+`TrackedCircle.lastReportAt` is written before the work, so a crash or
+restart cannot post twice.
+
+**Migration** `20261017120000_add_club_report_time` adds `reportMinute`,
+`reportTimeZone` and `lastReportAt`. It seeds `lastReportAt` from the old
+daily job's last run, so a deploy later the same day does not post every
+report a second time.
+
+**Known edge.** The behind-quota alert still posts only on the game day
+after a checkpoint closes. Each local day has exactly one report, so each
+game day normally gets one. Changing the time, or a daylight-saving shift
+for a time within an hour of Japan's midnight, can move a report across
+that boundary, so a checkpoint's alert could double or be skipped once.
+This was accepted rather than adding per-checkpoint alert tracking.
+
+Tests: `scripts/test-report-time.ts` (39 checks: parsing; Japan and New
+York times, including New York leaving daylight saving on 2026-11-01; the
+scheduler posting three clubs at three times over two days, never posting a
+club with no channel or a paused one). `scripts/test-commands.ts` covers
+the form for staff and Club Managers.
+
+---
+
 ## 2026-10-12 — Club avatars
 
 The 14 club pictures uploaded to `bleh bleh bleh/` are now in

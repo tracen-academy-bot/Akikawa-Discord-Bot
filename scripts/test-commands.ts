@@ -322,7 +322,7 @@ async function main() {
     const activeOnly = await run({ sub: 'all', userId: 'u-officer', officer: true });
     check('all skips paused circles', activeOnly.some((s) => s.kind === 'followUp'), false);
 
-    // ── /club edit form ───────────────────────────────────────────────────────
+    // ── /club info form ───────────────────────────────────────────────────────
     const clubCmd = await import('../src/commands/club');
     // Checkrose's real quota is 31M a month; the form must show that, not a separate fan count.
     const editable = await prisma.trackedCircle.update({ where: { id: club.id }, data: { rank: 'S', headcount: 99, fanCountAmount: 50, fanCountPeriod: 'MONTH' } });
@@ -425,6 +425,60 @@ async function main() {
     check('a bad quota is refused',
         (await submitClub(staffForm.custom_id, 'u-trainer', false, { 'club:quota': 'lots' }))?.description?.startsWith('Quota must be'), true);
     check('refusals leave the club unchanged', String((await reload()).quota), '31000000');
+
+    // ── /club reports form ────────────────────────────────────────────────────
+    const reportsFull = clubCmd.buildReportsModal(await reload(), true).toJSON() as unknown as ModalJson;
+    const reportsStaff = clubCmd.buildReportsModal(await reload(), false).toJSON() as unknown as ModalJson;
+    check('reports form for Club Managers: time, zone, both channels', reportsFull.components.map((c) => c.label), ['Report time', 'Time zone', 'Report channel', 'Alert channel']);
+    check('reports form for staff: time and zone only', reportsStaff.components.map((c) => c.label), ['Report time', 'Time zone']);
+    check('with no time set, the field is empty and Japan time is picked',
+        [pre(reportsStaff, 'Report time')?.value, pre(reportsStaff, 'Time zone')?.options?.find((o) => o.default)?.value], [undefined, 'Asia/Tokyo']);
+    check('Japan time is offered first', pre(reportsStaff, 'Time zone')?.options?.[0]?.value, 'Asia/Tokyo');
+    check('reports form is routed by its prefix', clubCmd.isClubModal(reportsFull.custom_id), true);
+
+    /** Submits the reports form; `channels` gives each channel field's pick. */
+    const submitReports = async (customId: string, userId: string, officer: boolean, values: Record<string, string>, channels: Record<string, string> = {}) => {
+        const out: { description?: string | undefined; ephemeral: boolean }[] = [];
+        await clubCmd.handleClubModal({
+            customId,
+            user: { id: userId },
+            member: { id: userId, roles: { cache: roleCache(officer, []) }, guild: FAKE_GUILD },
+            fields: {
+                getTextInputValue: (id: string) => values[id] ?? '',
+                getStringSelectValues: (id: string) => (values[id] ? [values[id]] : []),
+                getSelectedChannels: (id: string) => new Collection(channels[id] ? [[channels[id]!, { id: channels[id]! }]] : []),
+            },
+            guildId: GUILD,
+            guild: FAKE_GUILD,
+            reply: async (p: { embeds?: { toJSON(): { description?: string } }[]; flags?: unknown }) =>
+                void out.push({ description: p.embeds?.[0]?.toJSON().description, ephemeral: p.flags !== undefined }),
+        } as never);
+        return out[0];
+    };
+    const reportsSaved = await submitReports(reportsStaff.custom_id, 'u-assistant', false, { 'club:report-time': '9pm', 'club:report-zone': 'America/New_York' });
+    const afterReports = await reload();
+    check('staff set the report time and zone', [afterReports.reportMinute, afterReports.reportTimeZone], [21 * 60, 'America/New_York']);
+    check('the reply names the time and zone', reportsSaved?.description?.includes('daily at **21:00 US Eastern (New York), UTC-'), true);
+    check('the reply gives the next report in the reader\'s own time', /Next: <t:\d+:F>/.test(reportsSaved?.description ?? ''), true);
+    check('the staff form leaves the channels alone', afterReports.reportChannelId, 't-check');
+    check('the form shows the saved time and zone',
+        [pre(clubCmd.buildReportsModal(afterReports, false).toJSON() as unknown as ModalJson, 'Report time')?.value,
+            pre(clubCmd.buildReportsModal(afterReports, false).toJSON() as unknown as ModalJson, 'Time zone')?.options?.find((o) => o.default)?.value],
+        ['21:00', 'America/New_York']);
+    check('a bad time is refused',
+        (await submitReports(reportsStaff.custom_id, 'u-assistant', false, { 'club:report-time': 'soon', 'club:report-zone': 'Asia/Tokyo' }))?.description,
+        '**soon** is not a time. Try 21:00, 9pm or 9:30 pm.');
+    check('outsiders cannot set the report time',
+        (await submitReports(reportsStaff.custom_id, 'u-behind', false, { 'club:report-time': '10:00' }))?.description?.startsWith('You must be a trainer or assistant'), true);
+    check('staff cannot submit the Club Manager reports form',
+        (await submitReports(reportsFull.custom_id, 'u-assistant', false, { 'club:report-time': '10:00' }))?.description, "Only Club Managers can change a club's report channels.");
+    check('refused submits leave the time alone', (await reload()).reportMinute, 21 * 60);
+    await submitReports(reportsFull.custom_id, 'u-officer', true, { 'club:report-time': '', 'club:report-zone': 'Asia/Tokyo' },
+        { 'club:report-channel': 't-check', 'club:alert-channel': 'c-alerts-2' });
+    const afterManager = await reload();
+    check('an empty time goes back to the server default', [afterManager.reportMinute, afterManager.reportTimeZone], [null, null]);
+    check('Club Managers set the channels', [afterManager.reportChannelId, afterManager.alertChannelId], ['t-check', 'c-alerts-2']);
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { alertChannelId: afterReports.alertChannelId } });
 
     // /club fancount sets the same quota (in millions, as its option says).
     const runClubCmd = async (opts: FakeOptions) => {
