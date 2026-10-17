@@ -552,20 +552,25 @@ async function main() {
     const ck = await reload();
     const staffProfile = profileForm(ck, false, false).custom_id;
     const fullProfile = profileForm(ck, true, false).custom_id;
-    check('the staff profile form: bio, rules, banner', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner']);
-    check('Club Managers also set the tier', profileForm(ck, true, false).components.map((c) => c.label), ['Tier', 'Bio', 'Rules', 'Banner']);
+    check('the staff profile form: bio, rules, files', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner and rules file']);
+    check('Club Managers also set the tier', profileForm(ck, true, false).components.map((c) => c.label), ['Tier', 'Bio', 'Rules', 'Banner and rules file']);
     check('a club starts not listed', profileForm(ck, true, false).components[0]?.component.options?.find((o) => o.default)?.value, 'NONE');
-    check('a remove box only when there is a banner', profileForm(ck, false, true).components.map((c) => c.label).at(-1), 'Remove banner');
+    check('a Remove list only when there is something to remove',
+        [profileForm(ck, false, false).components.some((c) => c.label === 'Remove'), profileForm(ck, false, true).components.map((c) => c.label).at(-1)], [false, 'Remove']);
+    check('with a banner, the list offers it', profileForm(ck, false, true).components.at(-1)?.component.options?.map((o) => o.value), ['banner']);
+    check('the Club Manager form with a banner and a rules file has five fields',
+        profileForm({ ...ck, rulesFile: '# Rules', rulesFileName: 'rules.md' }, true, true).components.map((c) => c.label),
+        ['Tier', 'Bio', 'Rules', 'Banner and rules file', 'Remove']);
 
     type Upload = { url: string; name: string; contentType: string; size: number };
     /** Submits the profile form; returns what the bot replied, in order. */
     const submitProfile = async (
         customId: string, userId: string, officer: boolean, values: Record<string, string>,
-        opts: { upload?: Upload; remove?: boolean; held?: string[] } = {},
+        opts: { upload?: Upload; uploads?: Upload[]; remove?: string[]; held?: string[] } = {},
     ) => {
         const out: { kind: string; content?: string | undefined; description?: string | undefined; embeds?: number | undefined; files?: number | undefined }[] = [];
         const present = new Map<string, unknown>(Object.keys(values).map((k) => [k, {}]));
-        if (opts.remove !== undefined) present.set('club:profile:remove-banner', {});
+        if (opts.remove !== undefined) present.set('club:profile:remove', {});
         type Reply = { content?: string; embeds?: { toJSON(): { description?: string } }[]; files?: unknown[] };
         const interaction = {
             customId, guildId: GUILD, guild: FAKE_GUILD, user: { id: userId }, deferred: false,
@@ -573,9 +578,11 @@ async function main() {
             fields: {
                 fields: present,
                 getTextInputValue: (id: string) => values[id] ?? '',
-                getStringSelectValues: (id: string) => (values[id] ? [values[id]] : []),
-                getUploadedFiles: () => (opts.upload ? new Collection([['a1', opts.upload]]) : null),
-                getCheckbox: () => opts.remove ?? false,
+                getStringSelectValues: (id: string) => (id === 'club:profile:remove' ? (opts.remove ?? []) : values[id] ? [values[id]] : []),
+                getUploadedFiles: () => {
+                    const all = opts.uploads ?? (opts.upload ? [opts.upload] : []);
+                    return all.length > 0 ? new Collection(all.map((u, i) => [`a${i}`, u])) : null;
+                },
             },
             reply: async (p: Reply) => void out.push({ kind: 'reply', description: p.embeds?.[0]?.toJSON().description }),
             deferReply: async () => {
@@ -614,9 +621,13 @@ async function main() {
     const storedBanner = await prisma.clubBanner.findUnique({ where: { clubId: club.id } });
     check('the banner is stored', [storedBanner ? Buffer.from(storedBanner.data).equals(bannerPng) : false, storedBanner?.fileName], [true, 'Spica banner.png']);
     check('the card shows it above the details', [withBanner.at(-1)?.embeds, withBanner.at(-1)?.files], [2, 1]);
-    check('a non-image banner is refused',
-        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, contentType: 'application/pdf' } }))[0]?.description,
-        'The banner must be an image (PNG, JPEG, GIF or WebP).');
+    check('a file that is neither an image nor Markdown is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, name: 'rules.pdf', contentType: 'application/pdf' } }))[0]?.description,
+        'Upload a banner image (PNG, JPEG, GIF or WebP) and/or a rules file in Markdown (.md). Other files are not accepted.');
+    check('a .txt rules file is refused: Markdown only',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, name: 'rules.txt', contentType: 'text/plain' } }))[0]?.description?.startsWith('Upload a banner image'), true);
+    check('two banners are refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { uploads: [bannerUpload, bannerUpload] }))[0]?.description, 'Upload one banner image at most.');
     check('so is an oversized one',
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, size: 9 * 1024 * 1024 } }))[0]?.description,
         'The banner must be 8 MB or smaller.');
@@ -625,6 +636,36 @@ async function main() {
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: bannerUpload })).at(-1)?.description?.startsWith('Could not read the banner: Discord returned 404'), true);
     globalThis.fetch = realFetch;
     check('and keeps the old banner', await prisma.clubBanner.count({ where: { clubId: club.id } }), 1);
+
+    // A rules file: Markdown text, uploaded in the same field as the banner.
+    const SHORT_RULES = '# Goals\n- **50M** a month\n- Be kind';
+    const mdUpload = (text: string, name = 'Checkrose rules.md'): Upload => ({ url: `https://cdn.test/${encodeURIComponent(name)}`, name, contentType: 'text/markdown', size: Buffer.byteLength(text) });
+    const serve = (byUrl: Record<string, Buffer<ArrayBuffer> | string>) => {
+        globalThis.fetch = (async (url: string) => new Response(byUrl[url] ?? 'missing', { status: byUrl[url] === undefined ? 404 : 200 })) as typeof fetch;
+    };
+    serve({ [mdUpload(SHORT_RULES).url]: `\uFEFF${SHORT_RULES}\n`, [bannerUpload.url]: bannerPng });
+    const withRules = await submitProfile(staffProfile, 'u-trainer', false, kept, { uploads: [mdUpload(SHORT_RULES), bannerUpload] });
+    const afterRules = await reload();
+    check('the rules file is stored as text, without the byte-order mark', [afterRules.rulesFile, afterRules.rulesFileName], [SHORT_RULES, 'Checkrose rules.md']);
+    check('short rules show on the card as Markdown', withRules.at(-1)?.description?.includes(`**Rules and goals**\n${SHORT_RULES}`), true);
+    check('a banner can come in the same upload', [withRules.at(-1)?.embeds, withRules.at(-1)?.files], [2, 1]);
+    const LONG_RULES = `# Rules\n${'- Earn your quota every week, and say so in chat if you cannot.\n'.repeat(80)}`;
+    serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
+    const withLong = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(LONG_RULES) });
+    check('long rules are attached instead', [withLong.at(-1)?.description?.includes('**Rules and goals**: in the attached file.'), withLong.at(-1)?.files], [true, 2]);
+    check('the long file is kept whole', (await reload()).rulesFile, LONG_RULES.trim());
+    serve({ [mdUpload('x').url]: Buffer.from([0xff, 0xfe, 0x00, 0x41]) });
+    check('a file that is not UTF-8 text is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload('x') })).at(-1)?.description,
+        'The rules file is not text. Save it as a UTF-8 Markdown (.md) file and try again.');
+    check('an oversized rules file is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...mdUpload('x'), size: 65 * 1024 } }))[0]?.description, 'The rules file must be 64 KB or smaller.');
+    check('refusals keep the rules file', (await reload()).rulesFile, LONG_RULES.trim());
+    globalThis.fetch = realFetch;
+    check('the Remove list offers both', profileForm(await reload(), false, true).components.at(-1)?.component.options?.map((o) => o.value), ['banner', 'rules-file']);
+    await submitProfile(staffProfile, 'u-trainer', false, kept, { remove: ['rules-file'] });
+    check('the rules file can be removed, keeping the banner',
+        [(await reload()).rulesFile, await prisma.clubBanner.count({ where: { clubId: club.id } })], [null, 1]);
 
     // ── The card ──────────────────────────────────────────────────────────────
     const { guildClubs } = await import('../src/lib/clubLinks');

@@ -181,6 +181,11 @@ model TrackedCircle {
     bio             String?
     /// The club's rules: text, or a link to a rules post.
     rules           String?
+    /// Rules and goals from an uploaded Markdown (.md) file, for rules too long
+    /// for the form. Shown on the directory card when it fits, else attached.
+    rulesFile       String?
+    /// The uploaded file's name, kept for the attachment.
+    rulesFileName   String?
 
     members   ClubMember[]
     snapshots FanSnapshot[]

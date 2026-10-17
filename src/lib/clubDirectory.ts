@@ -187,6 +187,15 @@ function bannerFileName(clubId: string, fileName: string): string {
     return `banner-${clubId}.${ext}`;
 }
 
+/** Longest card description Discord accepts. */
+const CARD_LIMIT = 4096;
+
+/** The attached rules file's name: the uploaded one, made safe for an attachment. */
+function rulesFileName(club: TrackedCircle): string {
+    const base = (club.rulesFileName ?? 'rules.md').replace(/[^\w.\- ]+/g, '').trim() || 'rules.md';
+    return /\.(md|markdown)$/i.test(base) ? base : `${base}.md`;
+}
+
 /** A club's banner, as stored. */
 export interface Banner {
     data: Uint8Array;
@@ -220,7 +229,19 @@ export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Bann
     if (club.rules) {
         lines.push('', isLink(club.rules) ? `[${club.name} goals and rules](${club.rules})` : `**Rules**\n${club.rules}`);
     }
-    if (club.bio) lines.push('', club.bio.split('\n').map((l) => `> ${l}`).join('\n'));
+    const bio = club.bio ? ['', club.bio.split('\n').map((l) => `> ${l}`).join('\n')] : [];
+    if (club.rulesFile) {
+        // Shown as Markdown when the card has room (Discord allows 4096
+        // characters), else attached as the uploaded .md file.
+        const inline = ['', `**Rules and goals**\n${club.rulesFile}`];
+        if ([...lines, ...inline, ...bio].join('\n').trim().length <= CARD_LIMIT) {
+            lines.push(...inline);
+        } else {
+            files.push(new AttachmentBuilder(Buffer.from(club.rulesFile, 'utf8'), { name: rulesFileName(club) }));
+            lines.push('', '**Rules and goals**: in the attached file.');
+        }
+    }
+    lines.push(...bio);
 
     const card = new EmbedBuilder().setColor(color).setTitle(club.name);
     const avatar = clubAvatar(club.name);
@@ -230,7 +251,7 @@ export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Bann
         card.setThumbnail(`attachment://${name}`);
     }
     const description = lines.join('\n').trim();
-    if (description) card.setDescription(description.slice(0, 4096));
+    if (description) card.setDescription(description.slice(0, CARD_LIMIT));
     embeds.push(card);
     return { embeds, files };
 }

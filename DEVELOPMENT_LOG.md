@@ -4,6 +4,30 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-17 — Rules and goals as a Markdown file
+
+At the user's request, clubs can upload their rules and goals as a file in
+`/club profile`, so they are not held to the form's 1000-character Rules
+field. Only Markdown (`.md`, `.markdown`) is accepted: valid UTF-8 text, up
+to 64 KB, not empty. A leading byte-order mark is dropped. A file that
+fails these checks is refused, and the stored rules are kept.
+
+The profile form was already at Discord's five-field limit for a Club
+Manager with a banner. So the Banner field became **"Banner and rules
+file"** (up to two files, told apart by type: an image is the banner, a
+`.md` is the rules). The "Remove banner" checkbox became a **Remove** list
+(banner and/or rules file), shown only when there is something to remove.
+The field count is unchanged.
+
+The file is stored as text (`TrackedCircle.rulesFile`, `rulesFileName`;
+migration `20261017160000_add_club_rules_file`). On the directory card it
+shows under "Rules and goals", rendered as Markdown, when the whole card
+stays within Discord's 4096 characters. Otherwise the card says "in the
+attached file" and the `.md` is attached to that card's message. The Rules
+text field still works alongside it.
+
+---
+
 ## 2026-10-17 — Default report time is the daily reset; reset reports show Day N
 
 At the user's request, the default report time is now **00:00 JST**, the
