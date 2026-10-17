@@ -1,5 +1,6 @@
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
+import { recordReadings } from './readings';
 import { getCircle, getTopCircles, isConfigured } from '../umamoe/client';
 import type { UmaCircleMember } from '../umamoe/types';
 import {
@@ -176,6 +177,16 @@ export async function syncCircle(
             });
             daysWritten += 1;
         }
+    }
+
+    // Each member's newest lifetime total, for "last 24h" in reports. Only
+    // a sync of the current month sees today's numbers.
+    if (fallback.year === current.year && fallback.month === current.month) {
+        const totals = members.flatMap((m) => {
+            const latest = m.days.reduce<{ day: number; cumulativeFans: number } | null>((a, b) => (!a || b.day > a.day ? b : a), null);
+            return latest ? [{ viewerId: m.viewerId, total: latest.cumulativeFans }] : [];
+        });
+        await recordReadings(circle.id, totals);
     }
 
     const name = response.circle.name ?? circle.name;

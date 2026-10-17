@@ -16,6 +16,7 @@ import { guildClubs } from '../lib/clubLinks';
 import { errorEmbed, successEmbed, infoEmbed } from '../lib/embeds';
 import { autocompleteTrackedCircle } from '../lib/fans/circleAutocomplete';
 import { TRACKED, adoptUntrackedClub, backfillOnce, currentGameMonth, syncBenchmark, syncCircle } from '../lib/fans/ingest';
+import { lastDayGains } from '../lib/fans/readings';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
 import {
     describeQuota,
@@ -346,6 +347,7 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
         monthlyRank: circle.monthlyRank,
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, progress.daysElapsed),
+        last24h: await lastDayGains(circle.id),
     });
 
     await interaction.editReply({

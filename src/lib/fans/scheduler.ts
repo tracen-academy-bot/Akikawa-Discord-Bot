@@ -5,6 +5,7 @@ import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
 import { TRACKED, backfillOnce, currentGameMonth, syncAllCircles, syncBenchmark, syncCircle } from './ingest';
 import { DEFAULT_REPORT_HOUR_UTC, isReportDue, reportTimeOf } from './reportTime';
+import { lastDayGains } from './readings';
 import { currentCircleProgress, formatReportDate } from './reports';
 import { renderFanReport } from '../image/renderFanReport';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
@@ -101,6 +102,7 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
         monthlyRank: circle.monthlyRank,
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, progress.daysElapsed),
+        last24h: await lastDayGains(circle.id),
     });
     const image = new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` });
 

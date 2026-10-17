@@ -4,6 +4,45 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-17 — Reports show fans earned in the last 24 hours
+
+Now that each club picks its report time, the report's "Day N" column (fans
+on the latest game day) is replaced by **"Last 24h"**: fans earned in the 24
+hours before the report. Game-day buckets meant a report posted mid-day
+showed a half-finished day. Requested by the user, who scoped it to that one
+column. Total, Expected, Behind and the 7-day trend stay on game days.
+
+**Why new storage.** `FanSnapshot` holds one total per member per game day
+and is overwritten on every sync, so the bot had no record of what anyone
+had 24 hours earlier. New table `FanReading` (migration
+`20261017140000_add_fan_reading`): each sync of the current month records
+every member's lifetime total with its time, pruned after two days. Syncs
+run hourly, plus one just before each report.
+
+**The figure** (`src/lib/fans/readings.ts`): the newest batch of readings,
+minus the batch taken closest to 24 hours earlier. That batch must be
+within 90 minutes of the 24-hour mark; otherwise there is no figure. A
+total that went down counts as 0. Someone with no reading a day earlier
+(for example a new member) shows "—". Totals are lifetime counts, so
+windows across the month change work.
+
+**Month-end freeze.** In the game, fans earned on the 1st from 17:00 to
+24:00 JST (08:00–15:00 UTC) do not count. At the user's choice, a window
+that overlaps that stretch is shown as is. The column header becomes
+"Last 24h*" and the footer explains why.
+
+**Rollout.** For the first ~24 hours after deploy there are no readings
+from a day earlier, so the column stays "Day N" with the old figures. The
+scheduled report, `/fans report` and the dashboard's report image all use
+it; the dashboard image does only for the current month. The dashboard's
+HTML table still shows the latest game day.
+
+Tests: `scripts/test-report-time.ts` gains 14 checks covering freeze
+overlap at both edges, choosing the closest batch, clamping, members with
+no earlier reading, and pruning.
+
+---
+
 ## 2026-10-17 — Each club sets its report time; club forms split by who edits them
 
 Every club's daily report used to post at one time for all clubs:
