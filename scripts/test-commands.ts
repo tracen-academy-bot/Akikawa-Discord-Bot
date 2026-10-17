@@ -405,7 +405,7 @@ async function main() {
     check('the old club fan count is cleared, not left as a second number', [afterReports.fanCountAmount, afterReports.fanCountPeriod], [null, null]);
     check('reports form confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M per week')], [false, true]);
     check('headcount comes from uma.moe, not the stored column', saved?.description?.includes('Headcount: **2/30** (from uma.moe)'), true);
-    check('the reply includes the report time', saved?.description?.includes('Fan report: daily at **13:00 UTC** (the server default)'), true);
+    check('the reply includes the report time', saved?.description?.includes('Fan report: daily at **00:00 Japan time (JST)** (the default: the daily reset)'), true);
 
     const adminSaved = await submitClub(adminForm.custom_id, 'u-officer', true, {}, { 'club:home': ['c-room', 'c-room-bot'], ...keepChannels });
     const afterAdmin = await reload();
@@ -462,7 +462,7 @@ async function main() {
         '**soon** is not a time. Try 21:00, 9pm or 9:30 pm.');
     check('a refused time leaves it alone', (await reload()).reportMinute, 21 * 60);
     await submitClub(reportsForm.custom_id, 'u-assistant', false, { 'club:rank': 'A', 'club:quota': '31M', 'club:period': 'MONTH' });
-    check('an empty time goes back to the server default', [(await reload()).reportMinute, (await reload()).reportTimeZone], [null, null]);
+    check('an empty time goes back to the default', [(await reload()).reportMinute, (await reload()).reportTimeZone], [null, null]);
 
     // /club fancount sets the same quota (in millions, as its option says).
     await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: '35', period: 'MONTH' } });
@@ -552,20 +552,25 @@ async function main() {
     const ck = await reload();
     const staffProfile = profileForm(ck, false, false).custom_id;
     const fullProfile = profileForm(ck, true, false).custom_id;
-    check('the staff profile form: bio, rules, banner', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner']);
-    check('Club Managers also set the tier', profileForm(ck, true, false).components.map((c) => c.label), ['Tier', 'Bio', 'Rules', 'Banner']);
+    check('the staff profile form: bio, rules, files', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner and rules file']);
+    check('Club Managers also set the tier', profileForm(ck, true, false).components.map((c) => c.label), ['Tier', 'Bio', 'Rules', 'Banner and rules file']);
     check('a club starts not listed', profileForm(ck, true, false).components[0]?.component.options?.find((o) => o.default)?.value, 'NONE');
-    check('a remove box only when there is a banner', profileForm(ck, false, true).components.map((c) => c.label).at(-1), 'Remove banner');
+    check('a Remove list only when there is something to remove',
+        [profileForm(ck, false, false).components.some((c) => c.label === 'Remove'), profileForm(ck, false, true).components.map((c) => c.label).at(-1)], [false, 'Remove']);
+    check('with a banner, the list offers it', profileForm(ck, false, true).components.at(-1)?.component.options?.map((o) => o.value), ['banner']);
+    check('the Club Manager form with a banner and a rules file has five fields',
+        profileForm({ ...ck, rulesFile: '# Rules', rulesFileName: 'rules.md' }, true, true).components.map((c) => c.label),
+        ['Tier', 'Bio', 'Rules', 'Banner and rules file', 'Remove']);
 
     type Upload = { url: string; name: string; contentType: string; size: number };
     /** Submits the profile form; returns what the bot replied, in order. */
     const submitProfile = async (
         customId: string, userId: string, officer: boolean, values: Record<string, string>,
-        opts: { upload?: Upload; remove?: boolean; held?: string[] } = {},
+        opts: { upload?: Upload; uploads?: Upload[]; remove?: string[]; held?: string[] } = {},
     ) => {
         const out: { kind: string; content?: string | undefined; description?: string | undefined; embeds?: number | undefined; files?: number | undefined }[] = [];
         const present = new Map<string, unknown>(Object.keys(values).map((k) => [k, {}]));
-        if (opts.remove !== undefined) present.set('club:profile:remove-banner', {});
+        if (opts.remove !== undefined) present.set('club:profile:remove', {});
         type Reply = { content?: string; embeds?: { toJSON(): { description?: string } }[]; files?: unknown[] };
         const interaction = {
             customId, guildId: GUILD, guild: FAKE_GUILD, user: { id: userId }, deferred: false,
@@ -573,9 +578,11 @@ async function main() {
             fields: {
                 fields: present,
                 getTextInputValue: (id: string) => values[id] ?? '',
-                getStringSelectValues: (id: string) => (values[id] ? [values[id]] : []),
-                getUploadedFiles: () => (opts.upload ? new Collection([['a1', opts.upload]]) : null),
-                getCheckbox: () => opts.remove ?? false,
+                getStringSelectValues: (id: string) => (id === 'club:profile:remove' ? (opts.remove ?? []) : values[id] ? [values[id]] : []),
+                getUploadedFiles: () => {
+                    const all = opts.uploads ?? (opts.upload ? [opts.upload] : []);
+                    return all.length > 0 ? new Collection(all.map((u, i) => [`a${i}`, u])) : null;
+                },
             },
             reply: async (p: Reply) => void out.push({ kind: 'reply', description: p.embeds?.[0]?.toJSON().description }),
             deferReply: async () => {
@@ -584,6 +591,7 @@ async function main() {
             },
             editReply: async (p: Reply) =>
                 void out.push({ kind: 'edit', content: p.content, description: p.embeds?.at(-1)?.toJSON().description, embeds: p.embeds?.length, files: p.files?.length }),
+            followUp: async (p: Reply) => void out.push({ kind: 'followUp', content: p.content }),
         };
         await profile.handleProfileModal(interaction as never);
         return out;
@@ -614,9 +622,13 @@ async function main() {
     const storedBanner = await prisma.clubBanner.findUnique({ where: { clubId: club.id } });
     check('the banner is stored', [storedBanner ? Buffer.from(storedBanner.data).equals(bannerPng) : false, storedBanner?.fileName], [true, 'Spica banner.png']);
     check('the card shows it above the details', [withBanner.at(-1)?.embeds, withBanner.at(-1)?.files], [2, 1]);
-    check('a non-image banner is refused',
-        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, contentType: 'application/pdf' } }))[0]?.description,
-        'The banner must be an image (PNG, JPEG, GIF or WebP).');
+    check('a file that is neither an image nor Markdown is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, name: 'rules.pdf', contentType: 'application/pdf' } }))[0]?.description,
+        'Upload a banner image (PNG, JPEG, GIF or WebP) and/or a rules file (.md or .txt). Other files are not accepted.');
+    check('a .docx rules file is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, name: 'rules.docx', contentType: 'application/octet-stream' } }))[0]?.description?.startsWith('Upload a banner image'), true);
+    check('two banners are refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { uploads: [bannerUpload, bannerUpload] }))[0]?.description, 'Upload one banner image at most.');
     check('so is an oversized one',
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, size: 9 * 1024 * 1024 } }))[0]?.description,
         'The banner must be 8 MB or smaller.');
@@ -625,6 +637,59 @@ async function main() {
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: bannerUpload })).at(-1)?.description?.startsWith('Could not read the banner: Discord returned 404'), true);
     globalThis.fetch = realFetch;
     check('and keeps the old banner', await prisma.clubBanner.count({ where: { clubId: club.id } }), 1);
+
+    // A rules file: Markdown text, uploaded in the same field as the banner.
+    const SHORT_RULES = '# Goals\n- **50M** a month\n- Be kind';
+    const mdUpload = (text: string, name = 'Checkrose rules.md'): Upload => ({ url: `https://cdn.test/${encodeURIComponent(name)}`, name, contentType: 'text/markdown', size: Buffer.byteLength(text) });
+    const serve = (byUrl: Record<string, Buffer<ArrayBuffer> | string>) => {
+        globalThis.fetch = (async (url: string) => new Response(byUrl[url] ?? 'missing', { status: byUrl[url] === undefined ? 404 : 200 })) as typeof fetch;
+    };
+    serve({ [mdUpload(SHORT_RULES).url]: `\uFEFF${SHORT_RULES}\n`, [bannerUpload.url]: bannerPng });
+    const withRules = await submitProfile(staffProfile, 'u-trainer', false, kept, { uploads: [mdUpload(SHORT_RULES), bannerUpload] });
+    const afterRules = await reload();
+    check('the rules file is stored as text, without the byte-order mark', [afterRules.rulesFile, afterRules.rulesFileName], [SHORT_RULES, 'Checkrose rules.md']);
+    const rulesEdit = withRules.find((o) => o.kind === 'edit');
+    check('the card points to the rules below it', rulesEdit?.description?.includes('**Rules and goals**: in the messages below this card.'), true);
+    check('the rules follow as their own message, as Markdown with a heading',
+        withRules.filter((o) => o.kind === 'followUp').map((o) => o.content), [`## Checkrose: rules and goals\n${SHORT_RULES}`]);
+    check('a banner can come in the same upload', [rulesEdit?.embeds, rulesEdit?.files], [2, 1]);
+    const LONG_RULES = `# Rules\n${'- Earn your quota every week, and say so in chat if you cannot.\n'.repeat(80)}`;
+    serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
+    const withLong = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(LONG_RULES) });
+    const longEdit = withLong.find((o) => o.kind === 'edit');
+    const longMore = withLong.filter((o) => o.kind === 'followUp').map((o) => o.content ?? '');
+    check('long rules take several messages', longMore.length > 1, true);
+    check('each fits a Discord message', longMore.every((m) => m.length <= 2000), true);
+    check('the reply says how many follow', longEdit?.content?.includes(`Its rules follow in ${longMore.length} messages after the card.`), true);
+    check('nothing is attached for the rules', longEdit?.files, 1);
+    check('every line shows once, in order, none broken', longMore.join('\n'), `## Checkrose: rules and goals\n${LONG_RULES.trim()}`);
+    check('the long file is kept whole', (await reload()).rulesFile, LONG_RULES.trim());
+    const TXT = 'Be active\n**Bold** still renders';
+    serve({ [mdUpload(TXT, 'rules.txt').url]: TXT });
+    const withTxt = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(TXT, 'rules.txt') });
+    check('a .txt file is accepted and shown as Markdown',
+        [withTxt.filter((o) => o.kind === 'followUp').map((o) => o.content), (await reload()).rulesFileName], [[`## Checkrose: rules and goals\n${TXT}`], 'rules.txt']);
+    serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
+    await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(LONG_RULES) });
+    serve({ [mdUpload('x').url]: Buffer.from([0xff, 0xfe, 0x00, 0x41]) });
+    check('a file that is not UTF-8 text is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload('x') })).at(-1)?.description,
+        'The rules file is not text. Save it as a UTF-8 .md or .txt file and try again.');
+    check('an oversized rules file is refused',
+        (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...mdUpload('x'), size: 65 * 1024 } }))[0]?.description, 'The rules file must be 64 KB or smaller.');
+    check('refusals keep the rules file', (await reload()).rulesFile, LONG_RULES.trim());
+    globalThis.fetch = realFetch;
+    check('the Remove list offers both', profileForm(await reload(), false, true).components.at(-1)?.component.options?.map((o) => o.value), ['banner', 'rules-file']);
+    await submitProfile(staffProfile, 'u-trainer', false, kept, { remove: ['rules-file'] });
+    // Splitting at line breaks.
+    check('text that fits is one chunk', directory.splitByLines('a\nb', 10), ['a\nb']);
+    check('chunks break between lines', directory.splitByLines('aaa\nbbb\nccc', 7, 7), ['aaa\nbbb', 'ccc']);
+    check('the first chunk can be smaller', directory.splitByLines('aaa\nbbb\nccc', 3, 7), ['aaa', 'bbb\nccc']);
+    check('a long file splits into messages of at most 2000', directory.splitByLines('x'.repeat(1500) + '\n' + 'y'.repeat(1500), 2000).map((c) => c.length), [1500, 1500]);
+    check('only a line longer than a chunk is broken', directory.splitByLines('abcdefghij', 4, 4), ['abcd', 'efgh', 'ij']);
+
+    check('the rules file can be removed, keeping the banner',
+        [(await reload()).rulesFile, await prisma.clubBanner.count({ where: { clubId: club.id } })], [null, 1]);
 
     // ── The card ──────────────────────────────────────────────────────────────
     const { guildClubs } = await import('../src/lib/clubLinks');
@@ -733,6 +798,16 @@ async function main() {
     check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, dirA.rec.live.size], [true, 6, 0]);
     check('/club directory with no channel refreshes it where it is',
         lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })).startsWith('Updated the directory in <#c-directory-2>'), true);
+
+    // A rules file posts after the club's card, in messages of its own.
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: LONG_RULES.trim(), rulesFileName: 'rules.md' } });
+    await directory.refreshDirectory(FAKE_GUILD);
+    const liveB = [...dirB.rec.live.values()];
+    const cardAt = liveB.findIndex((p) => p.embeds.some((e) => e.toJSON().title === 'Checkrose'));
+    const rulesAfter = liveB.slice(cardAt + 1).filter((p) => p.content?.startsWith('## Checkrose') || (p.embeds.length === 0 && p.content && !p.content.startsWith('## Current')));
+    check('the rules messages come right after the card', liveB[cardAt + 1]?.content?.startsWith('## Checkrose: rules and goals'), true);
+    check('all of the rules are posted', rulesAfter.map((p) => p.content).join('\n'), `## Checkrose: rules and goals\n${LONG_RULES.trim()}`);
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: null, rulesFileName: null } });
 
     await directory.refreshDirectory(FAKE_GUILD);
     await prisma.clubDirectory.deleteMany({ where: { guildId: GUILD } });

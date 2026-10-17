@@ -3,8 +3,9 @@ import { refreshCutoffs, refreshCutoffsIfStale } from './cutoff';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
-import { TRACKED, backfillOnce, currentGameMonth, syncAllCircles, syncBenchmark, syncCircle } from './ingest';
-import { DEFAULT_REPORT_HOUR_UTC, isReportDue, reportTimeOf } from './reportTime';
+import { TRACKED, backfillOnce, currentGameMonth, loadCircleProgress, syncAllCircles, syncBenchmark, syncCircle } from './ingest';
+import { isAtGameReset, isReportDue, reportTimeOf } from './reportTime';
+import { lastDayGains } from './readings';
 import { currentCircleProgress, formatReportDate } from './reports';
 import { renderFanReport } from '../image/renderFanReport';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
@@ -18,7 +19,7 @@ import { formatCompactFans, formatFans, describeQuota } from './metrics';
  *   daily    syncs everything once more and refreshes the benchmark and rank
  *            cutoffs, at FAN_SYNC_HOUR_UTC.
  *   reports  each circle's report and alert, once a day at the time its staff
- *            set with `/club reports` (FAN_SYNC_HOUR_UTC in UTC when
+ *            set with `/club reports` (the daily reset, 00:00 JST, when
  *            unset). The circle is synced first unless its data is fresh.
  *
  * Idempotence matters more than precision here: the container can restart at
@@ -35,7 +36,7 @@ const HOURLY_JOB_NAME = 'hourly-fan-sync';
  * GMT refresh observed in uma.moe's own `last_updated` timestamps, which
  * leaves headroom for a late publish.
  */
-const SYNC_HOUR_UTC = DEFAULT_REPORT_HOUR_UTC;
+const SYNC_HOUR_UTC = Number(process.env.FAN_SYNC_HOUR_UTC ?? 13);
 
 /** Data synced this recently is reported as is, without another fetch. */
 const FRESH_SYNC_MS = 10 * 60_000;
@@ -92,15 +93,23 @@ export interface CircleReport {
  * @returns Null when nothing has been ingested for the current month.
  */
 export async function buildCircleReport(circle: TrackedCircle, { scheduled = false }: { scheduled?: boolean } = {}): Promise<CircleReport | null> {
-    const progress = await currentCircleProgress(circle);
+    // A scheduled report at the daily reset covers the game day that just
+    // ended, complete. On the 2nd JST that day was the old month's last, so
+    // the report is that month's final standings, not the new month's empty
+    // first day. Any other report shows the last 24 hours.
+    const atReset = scheduled && isAtGameReset(reportTimeOf(circle));
+    const game = currentGameMonth();
+    const previous = game.month === 1 ? { year: game.year - 1, month: 12 } : { year: game.year, month: game.month - 1 };
+    const { year, month } = atReset && game.day === 1 ? previous : game;
+    const progress = year === game.year && month === game.month ? await currentCircleProgress(circle) : await loadCircleProgress(circle, year, month);
     if (!progress) return null;
 
-    const { year, month } = currentGameMonth();
     const buffer = await renderFanReport(progress, {
         circleName: circle.name,
         monthlyRank: circle.monthlyRank,
         memberCount: progress.members.length,
-        dateLabel: formatReportDate(year, month, progress.daysElapsed),
+        dateLabel: formatReportDate(year, month, atReset ? progress.finishedDay : progress.daysElapsed),
+        last24h: atReset ? null : await lastDayGains(circle.id),
     });
     const image = new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` });
 

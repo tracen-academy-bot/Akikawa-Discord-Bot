@@ -149,6 +149,13 @@ function periodChecks() {
     check('day 8: week 1 judged', closed.checkpointDay, 7);
     check('day 8: the check has just closed', closed.checkpointJustClosed, true);
     check('day 8: behind on week 1', closed.members[0]!.behind, 7_000_000);
+    check('day 8 in progress: the last finished day is 7', closed.finishedDay, 7);
+    check('day 7 earned 1M', closed.members[0]!.finishedDayGain, 1_000_000);
+    const noToday = computeCircleProgress([steady(1, 1_000_000, 8)], weekOpts);
+    check('without a current day, the last day with data counts as finished', noToday.finishedDay, 8);
+    const firstDay = computeCircleProgress([steady(1, 1_000_000, 1)], { ...weekOpts, currentDay: 1 });
+    check('on day 1 nothing has finished', firstDay.finishedDay, 0);
+    check('so there is no finished-day gain', firstDay.members[0]!.finishedDayGain, 0);
     const later = computeCircleProgress([steady(1, 1_000_000, 9)], { ...weekOpts, currentDay: 9 });
     check('day 9: the check is no longer fresh', later.checkpointJustClosed, false);
 

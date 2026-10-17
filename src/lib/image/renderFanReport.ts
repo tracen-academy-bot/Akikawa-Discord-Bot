@@ -1,6 +1,7 @@
 import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
 import { THEME, dashNum, drawLabel, drawRule, drawText, placeColor } from './theme';
 import { font } from './fonts';
+import type { LastDayGains } from '../fans/readings';
 import { checkpointNote, describeQuota, formatCompactFans, formatMillionsFans, periodAdjective, type CircleProgress, type MemberProgress } from '../fans/metrics';
 
 /**
@@ -48,6 +49,13 @@ export interface FanReportMeta {
     memberCount: number;
     /** e.g. "September 14, 2026" */
     dateLabel: string;
+    /**
+     * Fans earned in the 24 hours before the report (see `lastDayGains`).
+     * When given, the column shows it as "Last 24h". Without it (a report at
+     * the daily reset, or no readings from a day ago yet) the column is the
+     * last complete game day, "Day N".
+     */
+    last24h?: LastDayGains | null;
 }
 
 /** Truncates with an ellipsis until the text fits the given width. */
@@ -133,8 +141,11 @@ function drawClubProgress(ctx: SKRSContext2D, progress: CircleProgress, y: numbe
     );
 }
 
-/** Draws one member row. `quota` is the month-end requirement the projection is judged against. */
-function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number) {
+/**
+ * Draws one member row. `quota` is the month-end requirement the projection
+ * is judged against; `recent` is the last-24h figure, or the latest game day's.
+ */
+function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number, recent: number | null) {
     const cy = y + ROW_HEIGHT / 2 + 6;
     const tint = placeColor(m.rank);
 
@@ -178,9 +189,9 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, quota: number
         align: 'right',
     });
 
-    drawText(ctx, dashNum(m.latestDayGain), COL.dayN, cy, {
+    drawText(ctx, dashNum(recent), COL.dayN, cy, {
         spec: '400 15px',
-        color: m.latestDayGain === 0 ? THEME.faint : THEME.muted,
+        color: !recent ? THEME.faint : THEME.muted,
         align: 'right',
     });
 
@@ -237,7 +248,11 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     drawLabel(ctx, 'Behind', COL.behind, hy, THEME.muted, 12, 'right');
     drawLabel(ctx, 'Avg/day', COL.avgDay, hy, THEME.muted, 12, 'right');
     drawLabel(ctx, 'Need/day', COL.needDay, hy, THEME.muted, 12, 'right');
-    drawLabel(ctx, `Day ${progress.daysElapsed}`, COL.dayN, hy, THEME.muted, 12, 'right');
+    const last24h = meta.last24h ?? null;
+    // A finished day when there is one; on a month's first day, the day so far.
+    const day = progress.finishedDay > 0 ? progress.finishedDay : progress.daysElapsed;
+    const recentLabel = last24h ? `Last 24h${last24h.overlapsFreeze ? '*' : ''}` : `Day ${day}`;
+    drawLabel(ctx, recentLabel, COL.dayN, hy, THEME.muted, 12, 'right');
     drawLabel(ctx, 'Proj.', COL.projected, hy, THEME.muted, 12, 'right');
     drawRule(ctx, MARGIN, HEADER_HEIGHT + COLUMN_HEADER_HEIGHT - 6, WIDTH - MARGIN * 2, THEME.line);
 
@@ -250,7 +265,12 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
 
     // ── Rows ──────────────────────────────────────────────────────────────────
     for (const member of progress.members) {
-        drawRow(ctx, member, y, progress.effectiveQuota);
+        const recent = last24h
+            ? (last24h.gains.get(member.viewerId) ?? null)
+            : progress.finishedDay > 0
+              ? member.finishedDayGain
+              : member.latestDayGain;
+        drawRow(ctx, member, y, progress.effectiveQuota, recent);
         y += ROW_HEIGHT;
         drawRule(ctx, MARGIN, y - 1, WIDTH - MARGIN * 2, THEME.line);
     }
@@ -268,6 +288,9 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     );
     drawText(ctx, formatMillionsFans(progress.totalFans), COL.total, y + 44, { spec: '700 19px', color: THEME.text, align: 'right' });
     drawLabel(ctx, `projected ${formatMillionsFans(progress.projectedTotalFans)} of ${formatMillionsFans(progress.quotaTarget)}`, COL.projected, y + 42, THEME.muted, 12, 'right');
+    if (last24h?.overlapsFreeze) {
+        drawText(ctx, '* Last 24h includes the 1st, 17:00–24:00 JST, when fans do not count.', MARGIN, y + 70, { spec: '400 13px', color: THEME.muted });
+    }
 
     return canvas.encode('png');
 }

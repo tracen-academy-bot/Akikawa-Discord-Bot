@@ -12,6 +12,7 @@ import {
     COMMON_ZONES,
     describeZone,
     formatTimeOfDay,
+    isAtGameReset,
     isReportDue,
     localDateKey,
     nextReportAt,
@@ -70,8 +71,13 @@ function clock() {
     check('09:00 New York after the change is 14:00 UTC', nextReportAt(ny9, utc('2026-10-31T20:00:00')).toISOString(), '2026-11-01T14:00:00.000Z');
     check('due by local time after the change', [isReportDue(ny9, utc('2026-11-01T13:30:00'), null), isReportDue(ny9, utc('2026-11-01T14:00:00'), null)], [false, true]);
 
-    check('no setting means the server default in UTC', reportTimeOf({ reportMinute: null, reportTimeZone: null }), { minute: 13 * 60, zone: 'UTC' });
-    check('an unknown stored zone falls back to the default', reportTimeOf({ reportMinute: 60, reportTimeZone: 'Mars/Olympus' }).zone, 'UTC');
+    check('no setting means the daily reset, 00:00 JST', reportTimeOf({ reportMinute: null, reportTimeZone: null }), { minute: 0, zone: 'Asia/Tokyo' });
+    check('an unknown stored zone falls back to the default', reportTimeOf({ reportMinute: 60, reportTimeZone: 'Mars/Olympus' }).zone, 'Asia/Tokyo');
+    check('the default is at the reset', isAtGameReset(reportTimeOf({ reportMinute: null, reportTimeZone: null })), true);
+    check('00:00 in another UTC+9 zone is the reset', isAtGameReset({ minute: 0, zone: 'Asia/Seoul' }), true);
+    check('15:00 UTC is the reset', isAtGameReset({ minute: 15 * 60, zone: 'UTC' }), true);
+    check('21:00 JST is not', isAtGameReset({ minute: 21 * 60, zone: 'Asia/Tokyo' }), false);
+    check('00:30 JST is not', isAtGameReset({ minute: 30, zone: 'Asia/Tokyo' }), false);
     check('Japan time reads as JST', describeZone('Asia/Tokyo', utc('2026-10-17T00:00:00')), 'Japan time (JST)');
     check('other zones show their offset', describeZone('America/New_York', utc('2026-10-17T00:00:00')), 'US Eastern (New York), UTC-4');
 }
@@ -103,17 +109,22 @@ async function scheduler() {
         });
     const jst = await make('JST', 9_100_001, { reportMinute: 21 * 60, reportTimeZone: 'Asia/Tokyo' }); // 12:00 UTC
     const ny = await make('NY', 9_100_002, { reportMinute: 6 * 60, reportTimeZone: 'America/New_York' }); // 10:00 UTC (EDT)
-    const def = await make('Default', 9_100_003, {}); // 13:00 UTC
+    // 00:00 JST, 15:00 UTC. It last posted at the reset that began 10-17 JST.
+    const def = await make('Default', 9_100_003, { lastReportAt: utc('2026-10-16T15:00:00') });
     await prisma.trackedCircle.create({ data: { guildId: GUILD, circleId: BigInt(9_100_004), name: 'NoChannel', lastSyncedAt: fresh } });
     await make('Paused', 9_100_005, { active: false });
 
-    // Each needs data this game month, or there is no report to post.
-    const { year, month } = currentGameMonth();
+    // Each needs data, or there is no report to post: this game month, and
+    // last month for a reset report run on the 2nd JST, which covers it.
+    const game = currentGameMonth();
+    const last = game.month === 1 ? { year: game.year - 1, month: 12 } : { year: game.year, month: game.month - 1 };
     for (const c of [jst, ny, def]) {
-        for (const day of [1, 2]) {
-            await prisma.fanSnapshot.create({
-                data: { trackedCircleId: c.id, viewerId: BigInt(1), trainerName: 'T', year, month, day, cumulativeFans: BigInt(1_000_000 * day) },
-            });
+        for (const { year, month } of [game, last]) {
+            for (const day of [1, 2]) {
+                await prisma.fanSnapshot.create({
+                    data: { trackedCircleId: c.id, viewerId: BigInt(1), trainerName: 'T', year, month, day, cumulativeFans: BigInt(1_000_000 * day) },
+                });
+            }
         }
     }
 
@@ -126,12 +137,49 @@ async function scheduler() {
     check('10:05 UTC: New York (06:00 EDT) posts', await step('2026-10-17T10:05:00'), ['r-NY']);
     check('10:10 UTC: not again', await step('2026-10-17T10:10:00'), []);
     check('12:00 UTC: Japan (21:00 JST) posts', await step('2026-10-17T12:00:00'), ['r-JST']);
-    check('13:00 UTC: the default posts; no channel and paused never do', await step('2026-10-17T13:00:00'), ['r-Default']);
-    check('15:30 UTC (00:30 JST): a new Japan day, but before 21:00', await step('2026-10-17T15:30:00'), []);
+    check('13:00 UTC: the old default time posts nothing', await step('2026-10-17T13:00:00'), []);
+    check('15:00 UTC (00:00 JST): the default posts; no channel and paused never do', await step('2026-10-17T15:00:00'), ['r-Default']);
+    check('15:30 UTC (00:30 JST): the Japan-time club waits for 21:00', await step('2026-10-17T15:30:00'), []);
     check('next day: each posts again at its own time',
-        [await step('2026-10-18T10:00:00'), await step('2026-10-18T12:00:00'), await step('2026-10-18T13:00:00')],
+        [await step('2026-10-18T10:00:00'), await step('2026-10-18T12:00:00'), await step('2026-10-18T15:00:00')],
         [['r-NY'], ['r-JST'], ['r-Default']]);
     check('the marker is stored', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: jst.id } })).lastReportAt?.toISOString(), '2026-10-18T12:00:00.000Z');
+
+    await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
+}
+
+async function readings() {
+    const { recordReadings, lastDayGains, overlapsFreeze } = await import('../src/lib/fans/readings');
+
+    // The freeze is the 1st, 17:00-24:00 JST: 08:00-15:00 UTC on 2026-11-01.
+    check('a window ending inside the freeze overlaps it', overlapsFreeze(utc('2026-10-31T10:00:00'), utc('2026-11-01T10:00:00')), true);
+    check('a window ending just before it does not', overlapsFreeze(utc('2026-10-31T07:00:00'), utc('2026-11-01T07:59:00')), false);
+    check('a window starting just after it does not', overlapsFreeze(utc('2026-11-01T15:00:00'), utc('2026-11-02T15:00:00')), false);
+    check('a window starting inside it overlaps', overlapsFreeze(utc('2026-11-01T14:00:00'), utc('2026-11-02T14:00:00')), true);
+    check('mid-month windows do not', overlapsFreeze(utc('2026-10-16T12:00:00'), utc('2026-10-17T12:00:00')), false);
+
+    const GUILD = 'test-guild-readings';
+    await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
+    const circle = await prisma.trackedCircle.create({ data: { guildId: GUILD, circleId: BigInt(9_200_001), name: 'Readings' } });
+    const at = (iso: string, totals: [number, number][]) =>
+        recordReadings(circle.id, totals.map(([viewerId, total]) => ({ viewerId: BigInt(viewerId), total })), utc(iso));
+
+    await at('2026-10-14T12:00:00', [[1, 1]]); // pruned later: over two days old
+    await at('2026-10-16T11:40:00', [[1, 100_000_000], [2, 50_000_000], [3, 9]]);
+    await at('2026-10-16T13:00:00', [[1, 100_500_000], [2, 50_100_000]]);
+    check('nothing from a day before yet', await lastDayGains(circle.id, utc('2026-10-17T09:00:00')), null);
+    await at('2026-10-17T12:00:00', [[1, 112_000_000], [2, 49_000_000], [4, 7]]);
+
+    const g = await lastDayGains(circle.id, utc('2026-10-17T12:30:00'));
+    check('the window ends at the newest reading', g?.to.toISOString(), '2026-10-17T12:00:00.000Z');
+    check('it starts at the reading closest to 24h earlier', g?.from.toISOString(), '2026-10-16T11:40:00.000Z');
+    check('fans earned in the window', g?.gains.get(1), 12_000_000);
+    check('a total that went down counts as zero', g?.gains.get(2), 0);
+    check('someone with no reading a day ago has no figure', [g?.gains.has(3), g?.gains.has(4)], [false, false]);
+    check('a mid-month window is not flagged', g?.overlapsFreeze, false);
+    check('readings over two days old are pruned',
+        await prisma.fanReading.count({ where: { trackedCircleId: circle.id, takenAt: { lt: utc('2026-10-15T00:00:00') } } }), 0);
+    check('a time before any reading has none', await lastDayGains(circle.id, utc('2026-10-10T00:00:00')), null);
 
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
 }
@@ -140,6 +188,7 @@ async function main() {
     parsing();
     clock();
     await scheduler();
+    await readings();
     console.log(`\n${pass} passed, ${fail} failed`);
     await prisma.$disconnect();
     if (fail > 0) process.exit(1);

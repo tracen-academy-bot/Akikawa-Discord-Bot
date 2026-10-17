@@ -18,6 +18,7 @@ import {
 } from './auth';
 import { csrfField, compact, dash, esc, layout, loginPage, monthPicker, num, tile } from './views';
 import { TRACKED, adoptUntrackedClub, currentGameMonth, loadCircleProgress, syncBenchmark, syncCircle, backfillOnce } from '../lib/fans/ingest';
+import { lastDayGains } from '../lib/fans/readings';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate, listCircleMonths } from '../lib/fans/reports';
 import { checkpointNote, describeQuota, toSafeNumber, type CircleProgress, type QuotaPeriod } from '../lib/fans/metrics';
 import { parsePeriod, parseQuota } from '../commands/fans';
@@ -436,6 +437,8 @@ export function startDashboard(client: () => Client): () => void {
                 monthlyRank: circle.monthlyRank,
                 memberCount: progress.members.length,
                 dateLabel: formatReportDate(year, month, progress.daysElapsed),
+                // Last 24h is only meaningful for the month in progress.
+                last24h: year === currentGameMonth().year && month === currentGameMonth().month ? await lastDayGains(circle.id) : null,
             }),
         );
     });

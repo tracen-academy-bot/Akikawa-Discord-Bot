@@ -4,6 +4,112 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-17 — Rules and goals as a Markdown or text file
+
+At the user's request, clubs can upload their rules and goals as a file in
+`/club profile`, so they are not held to the form's 1000-character Rules
+field. Accepted: `.md`, `.markdown` and `.txt`, all treated as Markdown.
+The file must be valid UTF-8 text, up to 64 KB, and not empty; a leading
+byte-order mark is dropped. Any other file type is refused, and so is a
+file that fails these checks; the stored rules are kept.
+
+The profile form was already at Discord's five-field limit for a Club
+Manager with a banner. So the Banner field became **"Banner and rules
+file"** (up to two files: an image is the banner, a .md/.txt is the
+rules). The "Remove banner" checkbox became a **Remove** list (banner
+and/or rules file), shown only when there is something to remove.
+
+**Where it shows.** The rules file never goes on the card. The card says
+"Rules and goals: in the messages below this card", and the file follows
+in messages of its own (`club:<id>:rules:<n>` in the directory layout).
+Those messages are plain text, not embeds, so all of the file's Markdown
+renders. The first message starts with a `## <Club>: rules and goals`
+heading. A long file becomes several messages of up to 2000 characters
+(Discord's limit), split only between lines; a line is broken only if it
+alone is over 2000. Mentions in the rules never ping (`NO_PINGS`). The
+user first asked for long rules to be cut and then clarified that they
+meant split into more messages; an attach-the-file version and a cut
+version were both replaced. The `/club profile` reply sends the card, then
+the rules messages (ephemeral). Changing how many messages a file needs
+changes the directory layout, so the directory is reposted.
+
+Stored as text: `TrackedCircle.rulesFile`, `rulesFileName` (migration
+`20261017160000_add_club_rules_file`).
+
+---
+
+## 2026-10-17 — Default report time is the daily reset; reset reports show Day N
+
+At the user's request, the default report time is now **00:00 JST**, the
+game's daily reset (confirmed by the user as midnight JST, which matches the
+bot's day bucketing). It was FAN_SYNC_HOUR_UTC, 13:00 UTC, which is 22:00
+JST and mid-way through a game day. FAN_SYNC_HOUR_UTC now only times the
+daily upkeep sync.
+
+A report that posts at the reset shows **"Day N"**: the game day that just
+ended, complete. That covers default clubs, and any club whose chosen time
+is 00:00 JST in whatever zone (`isAtGameReset`). Reports at any other time
+keep "Last 24h". Every "Day N" column now shows the last *finished* day
+(`CircleProgress.finishedDay`, `MemberProgress.finishedDayGain`) rather
+than the day still in progress. This also fixes the half-finished "Day N"
+seen in reports posted mid-day.
+
+On the 2nd JST, the day that just ended was the old month's last
+(game day 1 is the 2nd). A reset report then shows **that month's final
+standings**, not the new month's nearly empty first day. With no current
+day, every checkpoint up to month end is judged, so the month-end alert
+goes out with it.
+
+On deploy, default clubs move from 13:00 UTC to 15:00 UTC. A club that got
+its 13:00 UTC report earlier that day also gets the 15:00 UTC one, because
+that is a new JST day.
+
+Caveat (unverified): uma.moe refreshes most circles hourly. A report at
+00:00 JST may be missing up to the final hour of the day it reports. If
+that shows up, a default of 01:00 JST would avoid it, at the cost of a
+column that is no longer exactly the reset.
+
+---
+
+## 2026-10-17 — Reports show fans earned in the last 24 hours
+
+Now that each club picks its report time, the report's "Day N" column (fans
+on the latest game day) is replaced by **"Last 24h"**: fans earned in the 24
+hours before the report. Game-day buckets meant a report posted mid-day
+showed a half-finished day. Requested by the user, who scoped it to that one
+column. Total, Expected, Behind and the 7-day trend stay on game days.
+
+**Why new storage.** `FanSnapshot` holds one total per member per game day
+and is overwritten on every sync, so the bot had no record of what anyone
+had 24 hours earlier. New table `FanReading` (migration
+`20261017140000_add_fan_reading`): each sync of the current month records
+every member's lifetime total with its time, pruned after two days. Syncs
+run hourly, plus one just before each report.
+
+**The figure** (`src/lib/fans/readings.ts`): the newest batch of readings,
+minus the batch taken closest to 24 hours earlier. That batch must be
+within 90 minutes of the 24-hour mark; otherwise there is no figure. A
+total that went down counts as 0. Someone with no reading a day earlier
+(for example a new member) shows "—". Totals are lifetime counts, so
+windows across the month change work.
+
+**Month-end freeze.** In the game, fans earned on the 1st from 17:00 to
+24:00 JST (08:00–15:00 UTC) do not count. At the user's choice, a window
+that overlaps that stretch is shown as is. The column header becomes
+"Last 24h*" and the footer explains why.
+
+**Rollout.** For the first ~24 hours after deploy there are no readings
+from a day earlier, so the column stays "Day N" with the old figures. The
+scheduled report, `/fans report` and the dashboard's report image all use
+it; the dashboard image does only for the current month. The dashboard's
+HTML table still shows the latest game day.
+
+Tests: `scripts/test-report-time.ts` gains 14 checks covering freeze
+overlap at both edges, choosing the closest batch, clamping, members with
+no earlier reading, and pruning.
+
+---
+
 ## 2026-10-17 — Each club sets its report time; club forms split by who edits them
 
 Every club's daily report used to post at one time for all clubs:

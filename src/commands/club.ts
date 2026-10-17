@@ -33,7 +33,6 @@ import { buildProfileModal } from './clubProfile';
 import { parseQuota } from './fans';
 import {
     COMMON_ZONES,
-    DEFAULT_REPORT_HOUR_UTC,
     JAPAN_TIME_ZONE,
     describeZone,
     formatTimeOfDay,
@@ -454,7 +453,7 @@ export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
         labels.push(
             new LabelBuilder()
                 .setLabel('Report time')
-                .setDescription(`When the daily report posts, e.g. 21:00 or 9pm. Empty for the default, ${formatTimeOfDay(DEFAULT_REPORT_HOUR_UTC * 60)} UTC.`)
+                .setDescription('When the daily report posts, e.g. 21:00 or 9pm. Empty: the daily reset, 00:00 JST.')
                 .setTextInputComponent(time),
             new LabelBuilder().setLabel('Time zone').setStringSelectMenuComponent(
                 new StringSelectMenuBuilder()
@@ -557,7 +556,7 @@ export function reportSummary(club: Club, now = new Date()): string {
     const time = reportTimeOf(club);
     const next = Math.floor(nextReportAt(time, now).getTime() / 1000);
     const lines = [
-        `Fan report: daily at **${formatTimeOfDay(time.minute)} ${describeZone(time.zone, now)}**${hasOwnReportTime(club) ? '' : ' (the server default)'}`,
+        `Fan report: daily at **${formatTimeOfDay(time.minute)} ${describeZone(time.zone, now)}**${hasOwnReportTime(club) ? '' : ' (the default: the daily reset)'}`,
         `Next: <t:${next}:F> (<t:${next}:R>), shown in your own time.`,
     ];
     if (!club.reportChannelId) lines.push('No report channel yet, so nothing posts; a Club Manager sets one with `/club admin`.');
