@@ -390,6 +390,15 @@ async function main() {
             },
             guildId: GUILD,
             guild: FAKE_GUILD,
+            // Channels and threads the bot can see; 'c-elsewhere' is in another server.
+            client: {
+                channels: {
+                    fetch: async (id: string) =>
+                        ['t-check', 'c-alert', 'c-alerts-2', 'c-elsewhere'].includes(id)
+                            ? { id, guildId: id === 'c-elsewhere' ? 'other-guild' : GUILD, isTextBased: () => true }
+                            : null,
+                },
+            },
             reply: async (p: { embeds?: { toJSON(): { description?: string } }[]; flags?: unknown }) =>
                 void out.push({ description: p.embeds?.[0]?.toJSON().description, ephemeral: p.flags !== undefined }),
         } as never);
@@ -397,7 +406,7 @@ async function main() {
     };
     const reload = () => prisma.trackedCircle.findUniqueOrThrow({ where: { id: club.id } });
     /** Checkrose's report and alert channels, kept as they are by admin submits. */
-    const keepChannels = { 'club:report-channel': ['t-check'], 'club:alert-channel': ['c-alert'] };
+    const keepChannels = { 'club:report-channel': 't-check', 'club:alert-channel': 'c-alert' };
 
     const saved = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:rank': 'A_PLUS', 'club:quota': '14M', 'club:period': 'WEEK' });
     const afterReports = await reload();
@@ -407,12 +416,30 @@ async function main() {
     check('headcount comes from uma.moe, not the stored column', saved?.description?.includes('Headcount: **2/30** (from uma.moe)'), true);
     check('the reply includes the report time', saved?.description?.includes('Fan report: daily at **00:00 Japan time (JST)** (the default: the daily reset)'), true);
 
-    const adminSaved = await submitClub(adminForm.custom_id, 'u-officer', true, {}, { 'club:home': ['c-room', 'c-room-bot'], ...keepChannels });
+    const adminSaved = await submitClub(adminForm.custom_id, 'u-officer', true, keepChannels, { 'club:home': ['c-room', 'c-room-bot'] });
     const afterAdmin = await reload();
     check('admin form saves home channels', afterAdmin.homeChannelIds, ['c-room', 'c-room-bot']);
     check('admin form keeps the channels it was given', [afterAdmin.reportChannelId, afterAdmin.alertChannelId], ['t-check', 'c-alert']);
     check('admin form confirms the channels', adminSaved?.description?.includes('Report channel: <#t-check>\nAlert channel: <#c-alert>'), true);
     check('admin form leaves rank and quota alone', [afterAdmin.rank, String(afterAdmin.quota)], ['A_PLUS', '14000000']);
+    check('channel fields are text, pre-filled with the IDs',
+        [pre(clubCmd.buildAdminModal(afterAdmin).toJSON() as unknown as ModalJson, 'Report channel')?.value, pre(clubCmd.buildAdminModal(afterAdmin).toJSON() as unknown as ModalJson, 'Alert channel')?.value],
+        ['t-check', 'c-alert']);
+    check('an ID is read from a link, a thread link or a mention',
+        [clubCmd.parseChannelRef('https://discord.com/channels/111111111111111111/1543636447133958375'),
+            clubCmd.parseChannelRef('https://discord.com/channels/111111111111111111/1543636447133958375/222222222222222222'),
+            clubCmd.parseChannelRef('<#1543636447133958375>'), clubCmd.parseChannelRef(' 1543636447133958375 '), clubCmd.parseChannelRef('not a channel')],
+        ['1543636447133958375', '1543636447133958375', '1543636447133958375', '1543636447133958375', null]);
+    const viaLink = await submitClub(adminForm.custom_id, 'u-officer', true,
+        { 'club:report-channel': 'https://discord.com/channels/g/t-check', 'club:alert-channel': '<#c-alerts-2>' }, { 'club:home': ['c-room', 'c-room-bot'] });
+    check('a link and a mention are accepted', [(await reload()).reportChannelId, (await reload()).alertChannelId, viaLink?.ephemeral], ['t-check', 'c-alerts-2', false]);
+    check('a channel the bot cannot see is refused',
+        (await submitClub(adminForm.custom_id, 'u-officer', true, { 'club:report-channel': '999999999999999999' }, { 'club:home': ['c-room', 'c-room-bot'] }))?.description,
+        'Report channel: no channel or thread with ID 999999999999999999 in this server that I can see. Check the ID, and that I can view it.');
+    check("another server's channel is refused",
+        (await submitClub(adminForm.custom_id, 'u-officer', true, { 'club:report-channel': 't-check', 'club:alert-channel': 'c-elsewhere' }, { 'club:home': ['c-room', 'c-room-bot'] }))?.description?.startsWith('Alert channel: no channel or thread'), true);
+    check('refusals keep the channels', (await reload()).alertChannelId, 'c-alerts-2');
+    await submitClub(adminForm.custom_id, 'u-officer', true, keepChannels, { 'club:home': ['c-room', 'c-room-bot'] });
 
     // Home channels: the room itself, and any thread inside it, now resolve to the club.
     const inRoom = await run({ sub: 'me', userId: 'u-behind', channel: 'c-room', inThread: false });
@@ -515,13 +542,13 @@ async function main() {
     };
     const defaults = (label: string) => matchedForm.components.find((c) => c.label === label)?.component.default_values?.map((v) => v.id);
     check('the form pre-fills the matched roles', defaults('Staff roles'), ['r-ck-trainer', 'r-ck-assistant']);
-    const keep = await submitClub(matchedForm.custom_id, 'u-officer', true, {}, { 'club:home': ['c-ck-chat'], ...keepChannels }, ['r-ck-assistant', 'r-ck-trainer']);
+    const keep = await submitClub(matchedForm.custom_id, 'u-officer', true, keepChannels, { 'club:home': ['c-ck-chat'] }, ['r-ck-assistant', 'r-ck-trainer']);
     check('saving the matched roles unchanged keeps following the name', (await reload()).staffRoleIds, []);
     check('home channels are stored as picked', (await reload()).homeChannelIds, ['c-ck-chat']);
     check('the confirmation says the roles were matched by name',
         [keep?.description?.includes('Staff roles: <@&r-ck-trainer> <@&r-ck-assistant> (matched by name)'), keep?.description?.includes('Home channels: <#c-ck-chat>\n')], [true, true]);
 
-    await submitClub(matchedForm.custom_id, 'u-officer', true, {}, { 'club:home': ['c-ck-chat'], ...keepChannels }, ['r-ck-trainer']);
+    await submitClub(matchedForm.custom_id, 'u-officer', true, keepChannels, { 'club:home': ['c-ck-chat'] }, ['r-ck-trainer']);
     check('a changed list is stored', (await reload()).staffRoleIds, ['r-ck-trainer']);
     check('a stored list replaces the name matches',
         desc(await run({ sub: 'club', userId: 'u-role-asst', roles: ['r-ck-assistant'], channel: 't-check' }))?.startsWith('Only **Checkrose**'), true);

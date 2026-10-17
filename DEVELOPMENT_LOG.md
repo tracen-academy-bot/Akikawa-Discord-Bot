@@ -4,6 +4,21 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-17 — Report and alert channels are typed, so threads work
+
+Reported by the user with a screenshot: in `/club admin`, pasting a
+thread's ID into the Report channel picker found nothing. Discord's
+channel picker does not list threads, and reports often go to one. Both
+fields are now text inputs, pre-filled with the current ID. They accept a
+bare ID, a `<#id>` mention, or a channel, thread or message link (for a
+message link, the channel part is used). On submit, the ID must resolve to
+a channel or thread in this server that the bot can see and send to;
+otherwise the field is named and nothing is saved. Empty still means no
+report or no alerts. Home channels stay a picker, since they are
+channels, not threads.
+
+---
+
 ## 2026-10-17 — Rules and goals as a Markdown or text file
 
 At the user's request, clubs can upload their rules and goals as a file in
