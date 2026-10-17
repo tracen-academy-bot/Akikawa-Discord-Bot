@@ -4,6 +4,68 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-17 — Each club sets its report time; club forms split by who edits them
+
+Every club's daily report used to post at one time for all clubs:
+FAN_SYNC_HOUR_UTC, 13:00 UTC by default. A club's staff (or a Club Manager)
+now set their own report time and time zone.
+
+**Club forms.** `/club edit` is gone. A club's settings are now three forms,
+split by who may change them, within Discord's five-field limit. The user
+chose this layout and the name `admin`.
+
+| Form | Who | Fields |
+| --- | --- | --- |
+| `/club reports` | the club's staff and Club Managers | expected rank, quota, quota period; for a tracked club, report time and time zone |
+| `/club profile` | the club's staff; Club Managers also set the tier | bio, rules, banner, tier (unchanged) |
+| `/club admin` | Club Managers only | name (untracked club) or home channels (tracked), staff roles; for a tracked club, report and alert channels |
+
+Everything that decides *who* counts as staff, and *where* things post,
+is now Club Manager only, in one place. `/club member` was already Club
+Manager only. Staff roles matched by name ("Cosmos Trainer") still count
+when a club has no stored list. Whoever can assign server roles controls
+those; dropping that fallback is an open question for the user.
+
+**Report time** ("21:00", "9pm"; empty means the server default). The time
+zone comes from 23 common zones. Japan time is listed first and is the
+default, since the game runs on it. The others cover staff local time and
+follow daylight saving: "US Eastern" is New York's clock, not a fixed
+UTC-5. Replies give the next report as a Discord timestamp, so each reader
+sees it in their own local time. `/fans circle config` still sets the
+report and alert channels too.
+
+Commands register at startup, so `/club edit` disappears on deploy.
+
+**Scheduler.** The daily job keeps the sync, benchmark and cutoff upkeep at
+FAN_SYNC_HOUR_UTC but no longer posts. `postDueReports` runs on the
+existing 5-minute check. It posts each active club that has a report
+channel once per local day, at or after its time, so a report can be up to
+5 minutes late. A club synced in the last 10 minutes is not fetched again;
+otherwise it is synced first, and a failed sync still posts the last data.
+`TrackedCircle.lastReportAt` is written before the work, so a crash or
+restart cannot post twice.
+
+**Migration** `20261017120000_add_club_report_time` adds `reportMinute`,
+`reportTimeZone` and `lastReportAt`. It seeds `lastReportAt` from the old
+daily job's last run, so a deploy later the same day does not post every
+report a second time.
+
+**Known edge.** The behind-quota alert still posts only on the game day
+after a checkpoint closes. Each local day has exactly one report, so each
+game day normally gets one. Changing the time, or a daylight-saving shift
+for a time within an hour of Japan's midnight, can move a report across
+that boundary, so a checkpoint's alert could double or be skipped once.
+This was accepted rather than adding per-checkpoint alert tracking.
+
+Tests: `scripts/test-report-time.ts` (39 checks: parsing; Japan and New
+York times, including New York leaving daylight saving on 2026-11-01; the
+scheduler posting three clubs at three times over two days, never posting a
+club with no channel or a paused one). `scripts/test-commands.ts` covers
+both new forms: their fields for tracked and untracked clubs, pre-filled
+values, staff refused from `/club admin`, and the report time round trip.
+
+---
+
 ## 2026-10-12 — Club avatars
 
 The 14 club pictures uploaded to `bleh bleh bleh/` are now in

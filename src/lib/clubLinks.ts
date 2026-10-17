@@ -7,7 +7,7 @@ import { prisma } from '../db/prisma';
  * "Cosmos Assistant". Rather than make Club Managers add every Trainer and
  * Assistant with `/club member`, the bot reads the server's roles and matches
  * them to clubs by name. A Club Manager can override the list with
- * `/club edit`; a club with a stored list uses that list only, and a club
+ * `/club admin`; a club with a stored list uses that list only, and a club
  * with an empty one uses the name matches.
  *
  * Matching works on words: names are lower-cased, accents and emoji dropped,
@@ -23,7 +23,7 @@ import { prisma } from '../db/prisma';
  * A role must also have a staff word in it (Trainer or Assistant), so a
  * plain "Cosmos" member role does not make every member club staff.
  *
- * Home channels are not matched by name (yet); they are set with `/club edit`.
+ * Home channels are not matched by name (yet); they are set with `/club admin`.
  */
 
 /** The parts of a club this module reads. */

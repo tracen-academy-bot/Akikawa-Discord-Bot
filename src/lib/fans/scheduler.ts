@@ -3,22 +3,26 @@ import { refreshCutoffs, refreshCutoffsIfStale } from './cutoff';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
-import { TRACKED, backfillOnce, currentGameMonth, syncAllCircles, syncBenchmark } from './ingest';
+import { TRACKED, backfillOnce, currentGameMonth, syncAllCircles, syncBenchmark, syncCircle } from './ingest';
+import { DEFAULT_REPORT_HOUR_UTC, isReportDue, reportTimeOf } from './reportTime';
 import { currentCircleProgress, formatReportDate } from './reports';
 import { renderFanReport } from '../image/renderFanReport';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
 
 /**
- * Fan sync and report posting, as two jobs:
+ * Fan sync and report posting:
  *
- *   hourly  pulls every active circle (and the benchmark) from uma.moe, so the
- *           dashboard and commands stay current. uma.moe now refreshes live
- *           figures hourly for most circles (every 5 minutes for the top 100).
- *   daily   syncs once more and posts each circle's report and alerts, once a
- *           day at FAN_SYNC_HOUR_UTC, so channels are not spammed hourly.
+ *   hourly   pulls every active circle (and the benchmark) from uma.moe, so the
+ *            dashboard and commands stay current. uma.moe now refreshes live
+ *            figures hourly for most circles (every 5 minutes for the top 100).
+ *   daily    syncs everything once more and refreshes the benchmark and rank
+ *            cutoffs, at FAN_SYNC_HOUR_UTC.
+ *   reports  each circle's report and alert, once a day at the time its staff
+ *            set with `/club reports` (FAN_SYNC_HOUR_UTC in UTC when
+ *            unset). The circle is synced first unless its data is fresh.
  *
  * Idempotence matters more than precision here: the container can restart at
- * any moment, so the job records its last run in the database and checks that
+ * any moment, so each job records its last run in the database and checks that
  * marker before doing anything. A restart at 12:05 does not re-post the report
  * that already went out at 12:00.
  */
@@ -27,11 +31,14 @@ const JOB_NAME = 'daily-fan-sync';
 const HOURLY_JOB_NAME = 'hourly-fan-sync';
 
 /**
- * UTC hour to run at. Defaults to 13:00, an hour after the 12:00 GMT refresh
- * observed in uma.moe's own `last_updated` timestamps, which leaves headroom
- * for a late publish.
+ * UTC hour the daily job runs at. Defaults to 13:00, an hour after the 12:00
+ * GMT refresh observed in uma.moe's own `last_updated` timestamps, which
+ * leaves headroom for a late publish.
  */
-const SYNC_HOUR_UTC = Number(process.env.FAN_SYNC_HOUR_UTC ?? 13);
+const SYNC_HOUR_UTC = DEFAULT_REPORT_HOUR_UTC;
+
+/** Data synced this recently is reported as is, without another fetch. */
+const FRESH_SYNC_MS = 10 * 60_000;
 
 /** How often to check whether the daily run is due. */
 const CHECK_INTERVAL_MS = 5 * 60_000;
@@ -169,8 +176,8 @@ export async function postReport(
     return { behindCount: report.behindCount, alerted };
 }
 
-/** Runs the sync and posts reports. Exported so `/fans circle sync` can reuse it. */
-export async function runDailySync(client: Client): Promise<string> {
+/** Syncs every circle and refreshes the benchmark and rank cutoffs. Reports are posted separately. */
+export async function runDailySync(): Promise<string> {
     const { results, errors } = await syncAllCircles();
 
     let benchmarkNote = '';
@@ -184,17 +191,33 @@ export async function runDailySync(client: Client): Promise<string> {
         .then((r) => ` cutoffs:${r.done.length}${r.failed.length > 0 ? ` (${r.failed.join('; ')})` : ''}`)
         .catch((e: unknown) => ` cutoffs failed: ${e instanceof Error ? e.message : String(e)}`);
 
-    const circles = await prisma.trackedCircle.findMany({ where: { active: true, ...TRACKED } });
+    return `synced:${results.length} errors:${errors.length}${benchmarkNote}${cutoffNote}`;
+}
+
+/**
+ * Posts every report that is due: each active circle with a report channel,
+ * once per local day at or after its report time. The marker is written
+ * before the work, so a crash midway cannot re-post. Returns how many posted.
+ */
+export async function postDueReports(client: Client, now: Date): Promise<number> {
+    const circles = await prisma.trackedCircle.findMany({ where: { active: true, reportChannelId: { not: null }, ...TRACKED } });
+    let posted = 0;
     for (const circle of circles) {
+        if (!isReportDue(reportTimeOf(circle), now, circle.lastReportAt)) continue;
+        await prisma.trackedCircle.update({ where: { id: circle.id }, data: { lastReportAt: now } });
         try {
-            await postReport(client, circle.id, { scheduled: true });
+            if (!circle.lastSyncedAt || now.getTime() - circle.lastSyncedAt.getTime() > FRESH_SYNC_MS) {
+                await syncCircle(circle).catch((e: unknown) =>
+                    console.warn(`Sync before ${circle.name}'s report failed; posting the last data:`, e instanceof Error ? e.message : e),
+                );
+            }
+            if (await postReport(client, circle.id, { scheduled: true })) posted += 1;
         } catch (e) {
-            // A channel the bot can no longer post to must not abort the run.
+            // A channel the bot can no longer post to must not stop the others.
             console.error(`Failed to post fan report for ${circle.name}:`, e);
         }
     }
-
-    return `synced:${results.length} errors:${errors.length}${benchmarkNote}${cutoffNote}`;
+    return posted;
 }
 
 /**
@@ -232,8 +255,25 @@ async function runHourlySync(now: Date): Promise<void> {
     }
 }
 
+/** The daily job, behind its once-a-day marker. */
+async function runDaily(now: Date): Promise<void> {
+    // The marker is written before the work, not after. A crash midway
+    // through must not cause a retry loop; the next day's run picks things
+    // up, and snapshots are upserts anyway.
+    await prisma.jobRun.upsert({
+        where: { id: JOB_NAME },
+        create: { id: JOB_NAME, lastRunAt: now, note: 'started' },
+        update: { lastRunAt: now, note: 'started' },
+    });
+
+    console.log('Running daily fan sync...');
+    const note = await runDailySync();
+    await prisma.jobRun.update({ where: { id: JOB_NAME }, data: { note } });
+    console.log(`Daily fan sync finished: ${note}`);
+}
+
 /**
- * Starts the fan jobs: hourly data sync, daily reports.
+ * Starts the fan jobs: hourly data sync, the daily sync, and each circle's report.
  *
  * @returns A function that stops the loop.
  */
@@ -245,7 +285,7 @@ export function startFanScheduler(client: Client): () => void {
 
     let running = false;
     // The rank cutoff figures live in memory, so work them out now rather
-    // than at the next hourly run; /club edit shows nothing until they exist.
+    // than at the next hourly run; /club reports shows nothing until they exist.
     void refreshCutoffs()
         .then((r) => r.failed.length > 0 && console.warn(`Rank cutoff figures failed: ${r.failed.join('; ')}`))
         .catch((e: unknown) => console.warn('Rank cutoff figures failed:', e instanceof Error ? e.message : e));
@@ -255,27 +295,16 @@ export function startFanScheduler(client: Client): () => void {
         running = true;
         try {
             const now = new Date();
-            if (!(await isDue(now))) {
-                // Not report time: just keep the data fresh, once an hour.
-                if (await isHourlyDue(now)) await runHourlySync(now);
-                return;
-            }
-
-            // The marker is written before the work, not after. A crash midway
-            // through must not cause a retry loop that re-posts reports; the
-            // next day's run picks things up, and snapshots are upserts anyway.
-            await prisma.jobRun.upsert({
-                where: { id: JOB_NAME },
-                create: { id: JOB_NAME, lastRunAt: now, note: 'started' },
-                update: { lastRunAt: now, note: 'started' },
-            });
-
-            console.log('Running daily fan sync...');
-            const note = await runDailySync(client);
-            await prisma.jobRun.update({ where: { id: JOB_NAME }, data: { note } });
-            console.log(`Daily fan sync finished: ${note}`);
+            if (await isDue(now)) await runDaily(now);
+            else if (await isHourlyDue(now)) await runHourlySync(now);
         } catch (e) {
-            console.error('Daily fan sync failed:', e);
+            console.error('Fan sync failed:', e);
+        }
+        try {
+            const posted = await postDueReports(client, new Date());
+            if (posted > 0) console.log(`Posted ${posted} scheduled fan report(s).`);
+        } catch (e) {
+            console.error('Scheduled fan reports failed:', e);
         } finally {
             running = false;
         }

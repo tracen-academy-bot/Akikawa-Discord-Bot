@@ -492,7 +492,7 @@ async function circlesHere(interaction: ChatInputCommandInteraction): Promise<Tr
         interaction,
         errorEmbed(
             `Run this in one of your club's channels${staffChannel ? `, or in <#${staffChannel}>` : ''}. ` +
-                "A Club Manager can set a club's home channels with `/club edit`.",
+                "A Club Manager can set a club's home channels with `/club admin`.",
         ),
     );
     return null;

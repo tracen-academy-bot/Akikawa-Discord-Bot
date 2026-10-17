@@ -21,8 +21,8 @@ import { TIERS, TIER_ORDER, clubCard, clubStaff, loadMembers, refreshDirectory, 
  *
  * The club's own staff (Trainers and Assistants) and Club Managers edit its
  * bio, rules and banner. Club Managers also set its tier, which places it in
- * the directory (G1 to Debut); a club with no tier is left out. A separate
- * form from `/club edit`, which already has Discord's limit of five fields.
+ * the directory (G1 to Debut); a club with no tier is left out. One of three
+ * forms, with `/club reports` and `/club admin` (see `club.ts`).
  *
  * The submit replies with the card as the directory will show it, and
  * refreshes the directory.

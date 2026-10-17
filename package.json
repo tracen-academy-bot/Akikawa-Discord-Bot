@@ -13,7 +13,7 @@
     "postinstall": "prisma generate",
     "test:timer": "ts-node --project tsconfig.scripts.json scripts/test-timer.ts",
     "test:scheduler": "ts-node --project tsconfig.scripts.json scripts/test-scheduler.ts",
-    "test": "npm run test:metrics && npm run test:startup && npm run test:fans && npm run test:dashboard && npm run test:timer && npm run test:scheduler && npm run test:backfill && npm run test:commands && npm run test:post && npm run test:cutoff",
+    "test": "npm run test:metrics && npm run test:startup && npm run test:fans && npm run test:dashboard && npm run test:timer && npm run test:scheduler && npm run test:backfill && npm run test:commands && npm run test:post && npm run test:cutoff && npm run test:report-time",
     "test:metrics": "ts-node --project tsconfig.scripts.json scripts/test-metrics.ts",
     "test:fans": "ts-node --project tsconfig.scripts.json scripts/test-fans.ts",
     "test:dashboard": "ts-node --project tsconfig.scripts.json scripts/test-dashboard.ts",
@@ -21,7 +21,8 @@
     "test:backfill": "ts-node --project tsconfig.scripts.json scripts/test-backfill.ts",
     "test:commands": "ts-node --project tsconfig.scripts.json scripts/test-commands.ts",
     "test:post": "ts-node --project tsconfig.scripts.json scripts/test-post.ts",
-    "test:cutoff": "ts-node --project tsconfig.scripts.json scripts/test-cutoff.ts"
+    "test:cutoff": "ts-node --project tsconfig.scripts.json scripts/test-cutoff.ts",
+    "test:report-time": "ts-node --project tsconfig.scripts.json scripts/test-report-time.ts"
   },
   "keywords": [],
   "author": "",
