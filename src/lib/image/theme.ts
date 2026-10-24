@@ -123,6 +123,32 @@ export interface Palette {
     warn: string;
     behind: string;
     place: readonly [string, string, string, string];
+    /** The look beyond colour: shape, outline and backdrop. See `PaletteStyle`. */
+    style: PaletteStyle;
+}
+
+/**
+ * How a palette draws, beyond its colours, so palettes differ in feel and not
+ * only in hue.
+ */
+export interface PaletteStyle {
+    /** Card corner radius in pixels; 0 is square, like a terminal. */
+    radius: number;
+    /** Card outline colour, or null for none. */
+    border: string | null;
+    /** When true the outline glows (neon). Needs `border`. */
+    glow: boolean;
+    /** Column headings and small labels: as written, or tracked capitals. */
+    labels: 'plain' | 'upper';
+    /**
+     * The backdrop behind the cards, drawn from `frame` and `frameEnd`:
+     *   gradient  top to bottom
+     *   solid     `frame` only
+     *   lanes     diagonal bands, like a mown racecourse
+     *   stars     scattered points of `frameEnd` on `frame`
+     *   grid      a fine grid of `frameEnd` lines on `frame`
+     */
+    frameStyle: 'gradient' | 'solid' | 'lanes' | 'stars' | 'grid';
 }
 
 /**
@@ -151,14 +177,15 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#f5e0a4',
         behind: '#ff6b63',
         place: ['#ffd27a', '#e9e2e6', '#f0a774', '#ff9ccc'],
+        style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     classic: {
         id: 'classic',
         label: 'Classic',
-        origin: 'The current look: gold on warm black.',
+        origin: 'The original look: gold rules on warm black, square and outlined like a terminal.',
         light: false,
-        frame: '#2a2116',
-        frameEnd: '#4a3a1e',
+        frame: '#0c0b0b',
+        frameEnd: '#0c0b0b',
         bg: THEME.bg,
         panel: '#151312',
         stripe: '#121110',
@@ -172,6 +199,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#f0d48a',
         behind: '#e0665a',
         place: THEME.place,
+        style: { radius: 0, border: 'rgba(212, 165, 74, 0.45)', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     midnight: {
         id: 'midnight',
@@ -193,6 +221,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#f7e0a3',
         behind: '#ff7a7a',
         place: ['#f5c84c', '#d4dae8', '#e8a06a', '#b49cff'],
+        style: { radius: 14, border: '#2c3a66', glow: false, labels: 'plain', frameStyle: 'stars' },
     },
     jewel: {
         id: 'jewel',
@@ -214,6 +243,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#f7e08a',
         behind: '#ff6f61',
         place: ['#f1c40f', '#dfe4ea', '#f39c45', '#00bfff'],
+        style: { radius: 20, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     plum: {
         id: 'plum',
@@ -235,14 +265,15 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#ffe3a3',
         behind: '#ff7b7b',
         place: ['#ffd479', '#e6dcef', '#ffa978', '#ff8fc7'],
+        style: { radius: 22, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
-    forest: {
-        id: 'forest',
-        label: 'Forest',
-        origin: 'Dark green with mint and warm gold.',
+    turf: {
+        id: 'turf',
+        label: 'Turf',
+        origin: 'Race day: dark green cards on a mown-stripe racecourse, mint and warm gold.',
         light: false,
-        frame: '#1f5a45',
-        frameEnd: '#3f9a72',
+        frame: '#2f7a4f',
+        frameEnd: '#3b8f5d',
         bg: '#0d1d18',
         panel: '#152a23',
         stripe: '#11241e',
@@ -256,6 +287,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#efe0a0',
         behind: '#ff8a7a',
         place: ['#f0c75e', '#dbe6e0', '#e8a36c', '#8fc8ff'],
+        style: { radius: 10, border: null, glow: false, labels: 'upper', frameStyle: 'lanes' },
     },
     graphite: {
         id: 'graphite',
@@ -277,6 +309,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#f5e2a8',
         behind: '#ff8a8a',
         place: ['#ffcf5c', '#e3e5e8', '#f0a774', '#8ea1ff'],
+        style: { radius: 8, border: '#44474e', glow: false, labels: 'plain', frameStyle: 'solid' },
     },
     paper: {
         id: 'paper',
@@ -298,6 +331,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#7a5600',
         behind: '#b3261e',
         place: ['#8a5a00', '#4a5563', '#9a4a12', '#2c5aa0'],
+        style: { radius: 2, border: '#c9b88f', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     akikawa: {
         id: 'akikawa',
@@ -319,6 +353,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#7d5000',
         behind: '#c0262d',
         place: ['#b0306a', '#94490f', '#5b5f6b', '#2f58c4'],
+        style: { radius: 24, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     clear: {
         id: 'clear',
@@ -340,6 +375,51 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#f0e442',
         behind: '#e69f00',
         place: ['#f0e442', '#e2e2e2', '#cc79a7', '#009e73'],
+        style: { radius: 10, border: '#3a3a42', glow: false, labels: 'plain', frameStyle: 'solid' },
+    },
+    neon: {
+        id: 'neon',
+        label: 'Neon',
+        origin: 'Arcade: near-black cards with glowing magenta outlines on a cyan grid.',
+        light: false,
+        frame: '#07060f',
+        frameEnd: '#1d2a4a',
+        bg: '#0c0b18',
+        panel: '#17152c',
+        stripe: '#12101f',
+        line: '#2a2650',
+        text: '#f2f0ff',
+        muted: '#b6acdb',
+        faint: '#8279ab',
+        accent: '#2ef2ff',
+        target: '#fff35c',
+        good: '#39ff9c',
+        warn: '#ffe9a8',
+        behind: '#ff5c7a',
+        place: ['#fff35c', '#e6e6ff', '#ffad5c', '#ff6cf3'],
+        style: { radius: 6, border: '#ff3df2', glow: true, labels: 'upper', frameStyle: 'grid' },
+    },
+    sakura: {
+        id: 'sakura',
+        label: 'Sakura',
+        origin: 'Light and soft: white cards, very round, on a lavender-to-pink wash.',
+        light: true,
+        frame: '#c9b8ff',
+        frameEnd: '#ffc6e5',
+        bg: '#fffaff',
+        panel: '#f1e6ff',
+        stripe: '#f8f0ff',
+        line: '#e3d3f3',
+        text: '#2b2140',
+        muted: '#54476b',
+        faint: '#7e7196',
+        accent: '#7338c9',
+        target: '#855400',
+        good: '#1d7448',
+        warn: '#7a4f00',
+        behind: '#bf2440',
+        place: ['#a1307a', '#4f5868', '#9a4a12', '#7338c9'],
+        style: { radius: 26, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
 };
 

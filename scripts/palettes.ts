@@ -3,7 +3,8 @@
  *
  *   npx ts-node --project tsconfig.scripts.json scripts/palettes.ts [outDir]
  *
- * Writes `fan-report-<palette>.png` for each palette into `outDir` (default:
+ * Writes `fan-report-<palette>.png` (tall) and `fan-report-<palette>-wide.png`
+ * for each palette into `outDir` (default:
  * the current directory) from made-up sample data, and prints the WCAG
  * contrast ratio of every text colour against the palette's background,
  * header panel and row stripe, whichever is worst.
@@ -92,16 +93,17 @@ async function main() {
 
     let failures = 0;
     for (const palette of Object.values(PALETTES)) {
-        const png = await renderFanReport(progress, {
+        const meta = {
             // A real club, so the image and rank badge slots are filled.
             circleName: 'Cosmos',
-            clubRank: 'A_PLUS',
+            clubRank: 'A_PLUS' as const,
             monthlyRank: 194,
             memberCount: progress.members.length,
             dateLabel: 'October 24, 2026',
-        }, palette);
+        };
         const file = join(outDir, `fan-report-${palette.id}.png`);
-        writeFileSync(file, png);
+        writeFileSync(file, await renderFanReport(progress, meta, palette, 'tall'));
+        writeFileSync(join(outDir, `fan-report-${palette.id}-wide.png`), await renderFanReport(progress, meta, palette, 'wide'));
 
         console.log(`\n${palette.label} (${palette.id}) -> ${file}\n  ${palette.origin}`);
         for (const row of contrastRows(palette)) {

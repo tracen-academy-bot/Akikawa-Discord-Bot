@@ -4,6 +4,29 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Back to Plex Mono; palettes get styles; a wide layout
+
+- **Font.** The report is back in IBM Plex Mono, the bot's own face (asked
+  for "our old font"). `sansFont` is removed.
+- **Styles, not just colours.** `Palette.style` (`PaletteStyle`): corner
+  radius, card outline, glow, label style (plain or tracked capitals) and a
+  backdrop pattern (gradient, solid, lanes, stars, grid). Twelve palettes:
+  rose (default), classic (square, gold outline, capitals: the original
+  terminal look), midnight (stars), jewel, plum, turf (was forest; mown-
+  stripe racecourse), graphite, paper, akikawa, clear, and new neon
+  (glowing magenta outlines on a cyan grid) and sakura (light, very round).
+  All pass the contrast check.
+- **Wide layout** (`renderFanReport(..., layout: 'wide')`), 1700px, after
+  the ChronoGenesis landscape page: header as a left sidebar with the notes
+  at its foot, members down two table columns (first half left, rest
+  right; on pace first), behind members in their own card. Reports still
+  post the tall layout; nothing selects wide yet. Discord shrinks a 1700px
+  image to fit the chat, so it needs a tap to read, more than the tall one.
+- Header figures are stacked (label, value, note) so they fit in Mono.
+  Long dates and member counts wrap rather than truncate.
+
+---
+
 ## 2026-10-24 — Fan report redrawn as cards; Rose palette is the default
 
 Asked to rewrite the report's data for readability in the style of the
