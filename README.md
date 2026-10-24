@@ -72,6 +72,17 @@ Report and alert channels can be threads. The daily job pulls from uma.moe and
 posts reports automatically; see `docs/quota-math.md` for how every column is
 derived and verified.
 
+When anyone is behind, the alert lists them by name and pings the club's staff
+roles (its Trainer and Assistant roles, or the roles set in `/club admin`).
+Trainers themselves are not tagged. Club Managers pick how often in
+`/club admin`: daily, weekly, or never. For the ping to notify, each staff
+role must be mentionable, or the bot needs the "Mention @everyone, @here, and
+All Roles" permission.
+
+The report image can be drawn in several palettes (`PALETTES` in
+`src/lib/image/theme.ts`); `scripts/palettes.ts` renders a preview of each and
+checks contrast. Every club uses `classic` until a per-club choice is added.
+
 ## Dashboard
 
 Runs inside the bot process — no second container. Set `DISCORD_CLIENT_SECRET`,

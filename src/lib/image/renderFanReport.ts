@@ -13,12 +13,15 @@ import { checkpointNote, describeQuota, formatCompactFans, formatMillionsFans, p
  * four. Empty cells show an em dash rather than nothing, so a blank never
  * reads as a missing value.
  *
- * The seven-day trend and month-end projection were removed on 2026-10-24 at
- * the club's request: neither told anyone what to do, and the narrower image
- * is easier to read on a phone.
+ * The seven-day trend, month-end projection and Behind column were removed
+ * on 2026-10-24 at the club's request: the first two told nobody what to do,
+ * and Behind said the same as the daily target, which now takes the behind
+ * colour for anyone behind (and the alert pings staff about them). Fewer
+ * columns make a narrower image, easier to read on a phone. Every other row
+ * is striped so a row can be followed across.
  */
 
-const WIDTH = 1280;
+const WIDTH = 1200;
 const MARGIN = 40;
 const ROW_HEIGHT = 46;
 const HEADER_HEIGHT = 196;
@@ -29,11 +32,10 @@ const FOOTER_HEIGHT = 84;
 const COL = {
     rank: 70,
     trainer: 130,
-    total: 560,
-    expected: 715,
-    behind: 850,
-    avgDay: 985,
-    target: 1120,
+    total: 570,
+    expected: 720,
+    avgDay: 865,
+    target: 1025,
     dayN: WIDTH - MARGIN,
 } as const;
 
@@ -94,10 +96,18 @@ function drawClubProgress(ctx: SKRSContext2D, progress: CircleProgress, y: numbe
     });
 }
 
-/** Draws one member row. `recent` is the last-24h figure, or the latest game day's. */
-function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, recent: number | null, p: Palette) {
+/**
+ * Draws one member row. `recent` is the last-24h figure, or the latest game
+ * day's; `striped` shades the row.
+ */
+function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, recent: number | null, striped: boolean, p: Palette) {
     const cy = y + ROW_HEIGHT / 2 + 6;
     const tint = p.place[m.rank - 1] ?? null;
+
+    if (striped) {
+        ctx.fillStyle = p.stripe;
+        ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, ROW_HEIGHT - 1);
+    }
 
     // Left bar: placement for the top four, the behind colour for anyone behind.
     const bar = tint ?? (m.onPace ? null : p.behind);
@@ -111,7 +121,8 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, recent: numbe
         const arrow = m.rankChange > 0 ? '↑' : '↓';
         drawText(ctx, `${arrow}${Math.abs(m.rankChange)}`, COL.rank + 26, cy, {
             spec: '400 12px',
-            color: m.rankChange > 0 ? p.accent : p.behind,
+            // A slip is not "behind", so it does not borrow that colour.
+            color: m.rankChange > 0 ? p.accent : p.muted,
         });
     }
 
@@ -124,16 +135,13 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, recent: numbe
 
     drawText(ctx, dashNum(m.total), COL.total, cy, { spec: '700 19px', color: p.text, align: 'right' });
     drawText(ctx, dashNum(m.expected), COL.expected, cy, { spec: '400 15px', color: p.faint, align: 'right' });
-    drawText(ctx, dashNum(m.behind > 0 ? m.behind : null), COL.behind, cy, {
-        spec: '500 15px',
-        color: m.behind > 0 ? p.behind : p.faint,
-        align: 'right',
-    });
     drawText(ctx, dashNum(m.avgPerDay), COL.avgDay, cy, { spec: '400 15px', color: p.muted, align: 'right' });
 
+    // Behind: the behind colour, bolder, so who is behind still stands out
+    // without a Behind column.
     drawText(ctx, dashNum(m.needPerDay), COL.target, cy, {
-        spec: '500 15px',
-        color: m.needPerDay !== null ? p.target : p.faint,
+        spec: m.onPace ? '500 15px' : '700 16px',
+        color: m.needPerDay === null ? p.faint : m.onPace ? p.target : p.behind,
         align: 'right',
     });
 
@@ -148,15 +156,39 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, y: number, recent: numbe
  * Header line: report kind, period, configured quota, per-day rate and, for
  * checkpoint periods, when the next check is and what it will ask for.
  */
-function reportSubtitle(p: CircleProgress): string {
+function reportSubtitle(p: CircleProgress): string[] {
     const parts = [`${periodAdjective(p.period).toLowerCase()} report`];
     if (p.period !== 'DAY') parts.push(p.windowLabel.toLowerCase());
     parts.push(`day ${p.daysElapsed} of ${p.daysInMonth}`, `quota ${describeQuota(p.quota, p.period)} per member`);
     if (p.period !== 'DAY') parts.push(`${formatCompactFans(p.quotaPerDay)}/day`);
     const note = checkpointNote(p);
     if (note) parts.push(note);
-    return parts.join(' · ');
+    return parts;
 }
+
+/**
+ * Joins subtitle parts with " · " into at most two lines that fit `maxWidth`
+ * in the subtitle font. A biweekly subtitle with its checkpoint note runs
+ * past the image edge on one line.
+ */
+function wrapSubtitle(ctx: SKRSContext2D, parts: string[], maxWidth: number): string[] {
+    ctx.font = font(SUBTITLE_SPEC);
+    const lines: string[] = [];
+    let line = '';
+    for (const part of parts) {
+        const next = line ? `${line} · ${part}` : part;
+        if (line && ctx.measureText(next).width > maxWidth && lines.length === 0) {
+            lines.push(line);
+            line = part;
+        } else {
+            line = next;
+        }
+    }
+    if (line) lines.push(line);
+    return lines;
+}
+
+const SUBTITLE_SPEC = '400 14px';
 
 /**
  * Renders the report as a PNG.
@@ -173,6 +205,10 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
 
     ctx.fillStyle = p.bg;
     ctx.fillRect(0, 0, WIDTH, height);
+    // Header band and column-heading strip, so the table reads as its own area.
+    ctx.fillStyle = p.panel;
+    ctx.fillRect(0, 0, WIDTH, HEADER_HEIGHT - 4);
+    ctx.fillRect(MARGIN, HEADER_HEIGHT, WIDTH - MARGIN * 2, COLUMN_HEADER_HEIGHT - 6);
 
     // ── Header ────────────────────────────────────────────────────────────────
     drawText(ctx, meta.circleName.toUpperCase(), MARGIN, 62, { spec: '500 30px', color: p.accent, tracking: 5 });
@@ -180,9 +216,10 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     const rankLabel = meta.monthlyRank === null ? 'UNRANKED' : `RANK #${meta.monthlyRank}`;
     drawLabel(ctx, `${meta.dateLabel} · ${rankLabel} · ${meta.memberCount} MEMBERS`, WIDTH - MARGIN, 58, p.muted, 14, 'right');
 
-    drawText(ctx, reportSubtitle(progress), MARGIN, 90, { spec: '400 14px', color: p.accent });
+    const subtitle = wrapSubtitle(ctx, reportSubtitle(progress), WIDTH - MARGIN * 2);
+    subtitle.forEach((line, i) => drawText(ctx, line, MARGIN, 88 + i * 20, { spec: SUBTITLE_SPEC, color: p.accent }));
 
-    drawClubProgress(ctx, progress, 118, p);
+    drawClubProgress(ctx, progress, subtitle.length > 1 ? 130 : 118, p);
     drawRule(ctx, MARGIN, HEADER_HEIGHT - 4, WIDTH - MARGIN * 2, p.accent, 1.5);
 
     // ── Column headings ───────────────────────────────────────────────────────
@@ -191,7 +228,6 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     drawLabel(ctx, 'Trainer', COL.trainer, hy, p.muted);
     drawLabel(ctx, 'Total', COL.total, hy, p.muted, 12, 'right');
     drawLabel(ctx, 'Expected', COL.expected, hy, p.muted, 12, 'right');
-    drawLabel(ctx, 'Behind', COL.behind, hy, p.muted, 12, 'right');
     drawLabel(ctx, 'Avg/day', COL.avgDay, hy, p.muted, 12, 'right');
     // The whole daily amount from here on, not an extra on top of pace:
     // "Need/day" was read as the latter.
@@ -211,13 +247,13 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     }
 
     // ── Rows ──────────────────────────────────────────────────────────────────
-    for (const member of progress.members) {
+    for (const [index, member] of progress.members.entries()) {
         const recent = last24h
             ? (last24h.gains.get(member.viewerId) ?? null)
             : progress.finishedDay > 0
               ? member.finishedDayGain
               : member.latestDayGain;
-        drawRow(ctx, member, y, recent, p);
+        drawRow(ctx, member, y, recent, index % 2 === 1, p);
         y += ROW_HEIGHT;
         drawRule(ctx, MARGIN, y - 1, WIDTH - MARGIN * 2, p.line);
     }
@@ -225,7 +261,8 @@ export async function renderFanReport(progress: CircleProgress, meta: FanReportM
     // ── Footer ────────────────────────────────────────────────────────────────
     drawRule(ctx, MARGIN, y + 8, WIDTH - MARGIN * 2, p.accent, 1.5);
     const behind = progress.members.length - progress.onPaceCount;
-    drawLabel(ctx, `Σ  ${progress.members.length} members · ${behind} behind · ${progress.windowLabel}`, MARGIN, y + 42, p.accent, 13);
+    // The window is in the header; repeating it here ran into the total.
+    drawLabel(ctx, `Σ  ${progress.members.length} members · ${behind} behind`, MARGIN, y + 42, p.accent, 13);
     drawText(ctx, formatMillionsFans(progress.totalFans), COL.total, y + 44, { spec: '700 19px', color: p.text, align: 'right' });
     const target = progress.period === 'MONTH' ? 'until month end' : `until the day ${progress.nextCheckpointDay} check`;
     drawLabel(ctx, `daily target = fans a day ${target}`, COL.dayN, y + 42, p.muted, 12, 'right');

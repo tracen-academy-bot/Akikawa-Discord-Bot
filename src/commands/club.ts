@@ -22,7 +22,8 @@ import { autoCompleteClubName } from "../lib/clubAutocomplete";
 import { successEmbed, errorEmbed, infoEmbed } from "../lib/embeds";
 import { renderClubList, type ClubSummary } from "../lib/image/renderClubList";
 import { renderClubView } from "../lib/image/renderClubView";
-import type { TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
+import type { AlertFrequency, TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
+import { describeAlertFrequency } from '../lib/fans/scheduler';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
 import { toSafeNumber } from '../lib/fans/metrics';
@@ -352,7 +353,15 @@ const FIELD = {
     roles: 'club:roles',
     reportChannel: 'club:report-channel',
     alertChannel: 'club:alert-channel',
+    alertFrequency: 'club:alert-frequency',
 } as const;
+
+/** How often the staff roles are pinged about members behind quota. */
+const ALERT_FREQUENCY_CHOICES: { value: AlertFrequency; label: string; description: string }[] = [
+    { value: 'DAILY', label: 'Daily', description: 'Ping the staff roles with every report that has anyone behind.' },
+    { value: 'WEEKLY', label: 'Weekly', description: 'At most once a week, with the first report that has anyone behind.' },
+    { value: 'NONE', label: 'Never', description: 'No pings and no alert post. The report still shows who is behind.' },
+];
 /** Home channels a club may list. Threads inside them count without listing. */
 const MAX_HOME_CHANNELS = 10;
 /** Staff roles a club may list. */
@@ -641,6 +650,13 @@ export function buildAdminModal(club: Club, links: ClubFormLinks = { home: club.
                 .setLabel('Alert channel')
                 .setDescription('Channel or thread for behind-quota pings: ID, #mention or link. Empty: no alerts.')
                 .setTextInputComponent(reportChannelInput(FIELD.alertChannel, club.alertChannelId)),
+            new LabelBuilder()
+                .setLabel('Ping staff roles about members behind')
+                .setStringSelectMenuComponent(
+                    new StringSelectMenuBuilder()
+                        .setCustomId(FIELD.alertFrequency)
+                        .addOptions(ALERT_FREQUENCY_CHOICES.map((c) => ({ ...c, default: c.value === club.alertFrequency }))),
+                ),
         );
     }
     return new ModalBuilder()
@@ -670,7 +686,14 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
     if (!club) return void (await refuse('That club no longer exists.'));
     if (!isOfficer(interaction.member as GuildMember)) return void (await refuse("Only Club Managers can change a club's name, channels or staff roles."));
 
-    const data: { name?: string; homeChannelIds?: string[]; staffRoleIds: string[]; reportChannelId?: string | null; alertChannelId?: string | null } = { staffRoleIds: [] };
+    const data: {
+        name?: string;
+        homeChannelIds?: string[];
+        staffRoleIds: string[];
+        reportChannelId?: string | null;
+        alertChannelId?: string | null;
+        alertFrequency?: AlertFrequency;
+    } = { staffRoleIds: [] };
     if (club.circleId === null) {
         const name = interaction.fields.getTextInputValue(FIELD.name).trim();
         if (!name) return void (await refuse('The club needs a name.'));
@@ -688,6 +711,9 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
         if ('error' in alert) return void (await refuse(alert.error));
         data.reportChannelId = report.id;
         data.alertChannelId = alert.id;
+        const frequency = interaction.fields.getStringSelectValues(FIELD.alertFrequency)[0];
+        const choice = ALERT_FREQUENCY_CHOICES.find((c) => c.value === frequency);
+        if (choice) data.alertFrequency = choice.value;
     }
     // A role list equal to the name matches is stored empty, so the club keeps
     // following its name (a role made later is picked up).
@@ -709,6 +735,7 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
             ? [
                   `Report channel: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'none, so no report posts'}`,
                   `Alert channel: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'none'}`,
+                  `Staff pings about members behind: **${describeAlertFrequency(updated.alertFrequency)}**`,
               ]
             : []),
     ];

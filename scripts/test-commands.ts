@@ -67,14 +67,18 @@ interface Sent {
     embeds?: SentEmbed[] | undefined;
     files?: number | undefined;
     users?: string[] | undefined;
+    roles?: string[] | undefined;
 }
 
 /** A channel that records what is sent to it. */
 function fakeChannel(id: string, log: Sent[]) {
     return {
         isTextBased: () => true,
-        send: async (message: { content?: string; files?: unknown[]; allowedMentions?: { users?: string[] } }) => {
-            log.push({ kind: 'channel', channelId: id, content: message.content, files: message.files?.length ?? 0, users: message.allowedMentions?.users });
+        send: async (message: { content?: string; files?: unknown[]; allowedMentions?: { users?: string[]; roles?: string[] } }) => {
+            log.push({
+                kind: 'channel', channelId: id, content: message.content, files: message.files?.length ?? 0,
+                users: message.allowedMentions?.users, roles: message.allowedMentions?.roles,
+            });
         },
     };
 }
@@ -124,6 +128,7 @@ function fakeInteraction(opts: FakeOptions, log: Sent[]) {
         },
         client: {
             channels: { fetch: async (id: string) => FAKE_GUILD.channelsById.get(id) ?? fakeChannel(id, log) },
+            guilds: { cache: new Map([[GUILD, FAKE_GUILD]]) },
         },
         async reply(payload: { embeds?: { toJSON(): Record<string, unknown> }[]; flags?: unknown }) {
             interaction.replied = true;
@@ -296,7 +301,8 @@ async function main() {
     check("club lets the club's Trainer post", clubCheck[0]?.ephemeral, false);
     check('club attaches the report image', posted?.files, 1);
     check('club names who is behind', posted?.content?.includes('1 trainer behind quota'), true);
-    check('club tags the linked trainer', posted?.users, ['u-behind']);
+    check('club pings nobody: its own staff ran it', posted?.users, undefined);
+    check('club names the trainer behind instead', posted?.content?.includes('Behind — behind by'), true);
     check('club says it used stored data without a key', posted?.content?.includes('No uma.moe API key'), true);
     check('club does not list the leaver', posted?.content?.includes('Gone'), false);
     check('club posts in the thread, not to the channels', clubCheck.some((s) => s.kind === 'channel'), false);
@@ -315,7 +321,7 @@ async function main() {
             data: { quota: BigInt(14_000_000), quotaPeriod: 'BIWEEKLY', reportMinute: 21 * 60, reportTimeZone: 'Asia/Tokyo' },
         });
         const mid = await buildCircleReport((await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } })), { scheduled: true });
-        check('a scheduled biweekly report alerts before the check closes', mid?.alert?.users, ['u-behind']);
+        check('a scheduled biweekly report alerts before the check closes', mid?.alert !== null && mid?.alert !== undefined, true);
         check('the alert says the daily target is aimed at the check', mid?.alert?.content?.includes('a day until the day 14 check'), true);
         await prisma.trackedCircle.update({
             where: { id: circle.id },
@@ -327,7 +333,9 @@ async function main() {
     check('all is for Club Managers', desc(await run({ sub: 'all', userId: 'u-trainer' })), 'Only Club Managers can check every circle.');
 
     // Checkrose has channels; Otherrose has none, so its report comes here as
-    // a public follow-up.
+    // a public follow-up. Its staff roles are found by name.
+    FAKE_GUILD.roles.cache.set('r-ck-trainer', { id: 'r-ck-trainer', name: 'Checkrose Trainer' });
+    FAKE_GUILD.roles.cache.set('r-ck-assistant', { id: 'r-ck-assistant', name: 'Checkrose Assistant' });
     const all = await run({ sub: 'all', userId: 'u-officer', officer: true });
     const edits = all.filter((s) => s.kind === 'edit');
     const followUps = all.filter((s) => s.kind === 'followUp');
@@ -335,7 +343,39 @@ async function main() {
     check('all keeps the summary private', all[0]?.ephemeral, true);
     check('all fills the reply before any follow-up', all.findIndex((s) => s.kind === 'edit') < all.findIndex((s) => s.kind === 'followUp'), true);
     check('all posts Checkrose to its report thread', all.find((s) => s.kind === 'channel' && s.channelId === 't-check')?.files, 1);
-    check('all posts the alert to the alert channel', all.find((s) => s.kind === 'channel' && s.channelId === 'c-alert')?.users, ['u-behind']);
+    const allAlert = all.find((s) => s.kind === 'channel' && s.channelId === 'c-alert');
+    check('all posts the alert to the alert channel', allAlert?.files, 0);
+    check('the alert pings the staff roles, matched by name', [allAlert?.roles, allAlert?.content?.startsWith('<@&r-ck-trainer> <@&r-ck-assistant>\n')], [['r-ck-trainer', 'r-ck-assistant'], true]);
+    check('the alert does not tag the trainer', allAlert?.users, undefined);
+    check('the ping is recorded', (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } })).lastAlertAt !== null, true);
+
+    // Scheduled alerts follow the club's cadence.
+    {
+        const { postReport, isAlertDue } = await import('../src/lib/fans/scheduler');
+        const day = 24 * 60 * 60_000;
+        const now = new Date('2026-10-24T15:00:00Z');
+        check('daily is always due', isAlertDue('DAILY', new Date(now.getTime() - 60_000), now), true);
+        check('weekly is due with no ping yet', isAlertDue('WEEKLY', null, now), true);
+        check('weekly waits after a ping', isAlertDue('WEEKLY', new Date(now.getTime() - 6 * day), now), false);
+        check('weekly is due a week later, despite minutes of drift', isAlertDue('WEEKLY', new Date(now.getTime() - 7 * day + 5 * 60_000), now), true);
+        check('never is never due', isAlertDue('NONE', null, now), false);
+
+        const scheduledAlerts = async (data: { alertFrequency: 'DAILY' | 'WEEKLY' | 'NONE'; lastAlertAt: Date | null }) => {
+            await prisma.trackedCircle.update({ where: { id: circle.id }, data: { ...data, reportMinute: 21 * 60, reportTimeZone: 'Asia/Tokyo' } });
+            const log: Sent[] = [];
+            const client = { channels: { fetch: async (id: string) => fakeChannel(id, log) }, guilds: { cache: new Map([[GUILD, FAKE_GUILD]]) } };
+            const result = await postReport(client as never, circle.id, { scheduled: true });
+            return { alerted: result?.alerted, posts: log.filter((s) => s.channelId === 'c-alert').length };
+        };
+        check('weekly: pinged yesterday, no alert today', await scheduledAlerts({ alertFrequency: 'WEEKLY', lastAlertAt: new Date(Date.now() - day) }), { alerted: false, posts: 0 });
+        check('weekly: pinged 8 days ago, alerts', await scheduledAlerts({ alertFrequency: 'WEEKLY', lastAlertAt: new Date(Date.now() - 8 * day) }), { alerted: true, posts: 1 });
+        check('never: no alert', await scheduledAlerts({ alertFrequency: 'NONE', lastAlertAt: null }), { alerted: false, posts: 0 });
+        check('daily: alerts again right after a ping', await scheduledAlerts({ alertFrequency: 'DAILY', lastAlertAt: new Date() }), { alerted: true, posts: 1 });
+        await prisma.trackedCircle.update({
+            where: { id: circle.id },
+            data: { alertFrequency: 'DAILY', lastAlertAt: null, reportMinute: null, reportTimeZone: null },
+        });
+    }
     check('all posts Otherrose here, publicly', followUps.map((f) => [f.files, f.ephemeral]), [[1, false]]);
     check('all summarises both circles', summary?.title, 'Quota check · 2 circles');
     check('all names each circle', ['Checkrose', 'Otherrose'].every((n) => summary?.description?.includes(n)), true);
@@ -359,8 +399,8 @@ async function main() {
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
     check('reports form for a tracked club: rank, quota, period, report time, zone', reportsForm.components.map((c) => c.label),
         ['Expected rank', 'Quota per member', 'Quota period', 'Report time', 'Time zone']);
-    check('admin form for a tracked club: home channels, staff roles, both channels', adminForm.components.map((c) => c.label),
-        ['Home channels', 'Staff roles', 'Report channel', 'Alert channel']);
+    check('admin form for a tracked club: home channels, staff roles, both channels, staff pings', adminForm.components.map((c) => c.label),
+        ['Home channels', 'Staff roles', 'Report channel', 'Alert channel', 'Ping staff roles about members behind']);
     check('the reports form pre-selects the expected rank', pre(reportsForm, 'Expected rank')?.options?.find((o) => o.default)?.value, 'S');
     check('headcount is not a field', [...reportsForm.components, ...adminForm.components].some((c) => c.label.toLowerCase().includes('headcount')), false);
     check('the form shows the real quota, exactly', pre(reportsForm, 'Quota per member')?.value, '31M');
@@ -442,6 +482,11 @@ async function main() {
     const afterAdmin = await reload();
     check('admin form saves home channels', afterAdmin.homeChannelIds, ['c-room', 'c-room-bot']);
     check('admin form keeps the channels it was given', [afterAdmin.reportChannelId, afterAdmin.alertChannelId], ['t-check', 'c-alert']);
+    check('admin form leaves staff pings daily when not picked', afterAdmin.alertFrequency, 'DAILY');
+    const weekly = await submitClub(adminForm.custom_id, 'u-officer', true, { ...keepChannels, 'club:alert-frequency': 'WEEKLY' }, { 'club:home': ['c-room', 'c-room-bot'] });
+    check('admin form sets staff pings to weekly', (await reload()).alertFrequency, 'WEEKLY');
+    check('admin form confirms the cadence', weekly?.description?.includes('Staff pings about members behind: **weekly**'), true);
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { alertFrequency: 'DAILY' } });
     check('admin form confirms the channels', adminSaved?.description?.includes('Report channel: <#t-check>\nAlert channel: <#c-alert>'), true);
     check('admin form leaves rank and quota alone', [afterAdmin.rank, String(afterAdmin.quota)], ['A_PLUS', '14000000']);
     check('channel fields are text, pre-filled with the IDs',

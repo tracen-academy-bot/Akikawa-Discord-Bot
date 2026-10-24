@@ -4,6 +4,19 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-24 — Daily target kept; alerts go to staff roles on a cadence
+
+Fwoxie: keep Daily target ("daily target and ping when behind"); alerts
+should "ping all officer roles every given time frame (day/week/none)"
+instead of the normal alert; palettes should differ in background too, with
+clarity first. Taken as: Behind column dropped; alerts ping each club's
+staff roles (Trainer and Assistant), cadence chosen per club in
+`/club admin`; nine palettes with distinct backgrounds. Fwoxie is asking
+GimmeKiss what they meant about Expected. Still open: which palette, and
+whether clubs pick their own.
+
+---
+
 ## 2026-10-24 — Report feedback acted on; open questions
 
 GimmeKiss (2026-10-23) called the report ugly and listed: the 7-day trend is

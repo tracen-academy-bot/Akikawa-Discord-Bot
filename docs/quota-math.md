@@ -214,6 +214,8 @@ In checkpoint periods:
 - **`expected`** grows by $Q$ / period-length every day, through the last
   finished day (since 2026-10-12; before that it only rose at checkpoints).
 - **`behind`** is `expected` minus the fans earned through the same day.
+  It is no longer a column on the report (2026-10-24); it still decides who
+  is behind, and appears in the alert and `/fans me`.
 - **The day in progress is never judged.** `loadCircleProgress` passes the
   current game day as `currentDay`, and only days before it count as over.
   On day 7 of a weekly circle, week 1 has not been checked yet; on day 8 it
@@ -225,11 +227,12 @@ In checkpoint periods:
   for someone on pace, since that is the "increasing requirement".
 - **A joiner** owes the share of each period they were in the circle for: a
   day-10 joiner owes 5/7 of week 2.
-- **The daily alert** is posted with every report that has anyone behind,
-  in every period (since 2026-10-24). It used to wait for a checkpoint to
-  close, a rule left over from when `expected` only rose at checkpoints;
-  with daily growth it meant the report showed people behind for days with
-  no alert.
+- **The alert** no longer waits for a checkpoint to close (since
+  2026-10-24). That rule was left over from when `expected` only rose at
+  checkpoints; with daily growth, the report showed people behind for days
+  with no alert. How often it posts is now the club's `alertFrequency`
+  (daily, weekly or never), the same in every period, and it pings the
+  club's staff roles rather than the trainers behind.
 
 The projection (`projectedTotal`) is still computed but no longer shown
 anywhere (removed 2026-10-24 at the club's request).

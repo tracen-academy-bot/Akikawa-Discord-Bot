@@ -130,9 +130,8 @@ function memberRows(progress: CircleProgress, circleId: string): string {
         <td class="name"><a href="/circles/${esc(circleId)}/trainers/${m.viewerId}">${esc(m.trainerName)}</a></td>
         <td class="right"><strong>${num(m.total)}</strong></td>
         <td class="right faint">${num(m.expected)}</td>
-        <td class="right ${m.behind > 0 ? 'red' : 'faint'}">${dash(m.behind > 0 ? m.behind : null)}</td>
         <td class="right muted">${num(m.avgPerDay)}</td>
-        <td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>
+        <td class="right ${m.needPerDay === null ? 'faint' : m.onPace ? 'gold' : 'red'}">${dash(m.needPerDay)}</td>
         <td class="right muted">${num(m.latestDayGain)}</td>
       </tr>`;
         })
@@ -403,7 +402,7 @@ export function startDashboard(client: () => Client): () => void {
                    <table data-sortable>
                      <thead><tr>
                        <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Total</th><th class="right" data-sort>Expected</th>
-                       <th class="right" data-sort>Behind</th><th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Daily target</th>
+                       <th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Daily target</th>
                        <th class="right" data-sort>Day ${progress.daysElapsed}</th>
                      </tr></thead>
                      <tbody>${memberRows(progress, circle.id)}</tbody>

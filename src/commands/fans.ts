@@ -355,7 +355,7 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
 }
 
 /** A report as posted into the channel the command ran in. */
-type CheckPost = { content: string; files: AttachmentBuilder[]; allowedMentions: { users: string[] } };
+type CheckPost = { content: string; files: AttachmentBuilder[]; allowedMentions: { parse: [] } };
 
 /**
  * Refreshes one circle from uma.moe for a quota check.
@@ -397,7 +397,9 @@ async function checkCircle(
                 ? 'nobody is behind.'
                 : posted.alerted
                   ? `${posted.behindCount} behind, alerted in <#${fresh.alertChannelId}>.`
-                  : `${posted.behindCount} behind; no alert channel is set, so nobody was tagged.`;
+                  : fresh.alertFrequency === 'NONE'
+                    ? `${posted.behindCount} behind; alerts are off for this club.`
+                    : `${posted.behindCount} behind; no alert channel is set, so nobody was pinged.`;
         return withNote(`**${fresh.name}** — report posted in <#${fresh.reportChannelId}>; ${alertNote}`);
     }
 
@@ -406,7 +408,8 @@ async function checkCircle(
     await postHere({
         content: [report.alert?.content ?? `**${fresh.name}** — nobody is behind quota.`, syncNote].filter(Boolean).join('\n'),
         files: [report.image],
-        allowedMentions: { users: report.alert?.users ?? [] },
+        // Run by the club's own staff, so nobody is pinged.
+        allowedMentions: { parse: [] },
     });
     return `**${fresh.name}** — posted here; ${report.behindCount === 0 ? 'nobody is behind.' : `${report.behindCount} behind.`}`;
 }
@@ -565,7 +568,8 @@ async function handleCheckClub(interaction: ChatInputCommandInteraction) {
     await interaction.editReply({
         content: [report.alert?.content ?? `**${fresh.name}** — nobody is behind quota.`, syncNote].filter(Boolean).join('\n'),
         files: [report.image],
-        allowedMentions: { users: report.alert?.users ?? [] },
+        // Run by the club's own staff, so nobody is pinged.
+        allowedMentions: { parse: [] },
     });
 }
 

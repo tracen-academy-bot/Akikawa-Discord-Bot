@@ -81,15 +81,20 @@ export function dashNum(value: number | null | undefined): string {
  * A colour set for the fan report. Each key carries one meaning, so a palette
  * can change every colour without changing what any colour says:
  *
+ *   bg       the page
+ *   panel    the header band and column-heading strip
+ *   stripe   every other row, so a row can be followed across the table
+ *   line     hairlines and the empty part of the progress bar
  *   accent   structure: the club name, rules, the progress bar, rank-ups
- *   target   the figure a trainer has to hit (daily target)
+ *   target   the daily target of someone on pace
  *   good     on pace
- *   behind   behind, and nothing else
+ *   behind   behind, and nothing else (bars, and the daily target of anyone
+ *            behind)
  *   place    name tints and left bars for 1st through 4th
  *
  * `text`, `muted` and `faint` are a three-step grey scale for figures by
- * importance; `faint` is for de-emphasised values such as dashes and should
- * stay readable (contrast at least 3:1 on `bg`), see `scripts/palettes.ts`.
+ * importance. Every text colour must read on `bg`, `panel` and `stripe`:
+ * 4.5:1 for figures, 3:1 for `faint`. `scripts/palettes.ts` checks this.
  */
 export interface Palette {
     /** Identifier, as a club would pick it. */
@@ -98,7 +103,11 @@ export interface Palette {
     label: string;
     /** One line on where it comes from. */
     origin: string;
+    /** True for a light background, where Discord's dark theme frames it as a bright card. */
+    light: boolean;
     bg: string;
+    panel: string;
+    stripe: string;
     line: string;
     text: string;
     muted: string;
@@ -112,78 +121,166 @@ export interface Palette {
 
 /**
  * Palettes the fan report can render in. `classic` is the current look and
- * the default; the others are candidates for the club to choose from.
+ * the default; the others are candidates for clubs to choose from. Each has
+ * a different background, so a club's report is recognisable at a glance.
  */
 export const PALETTES: Record<string, Palette> = {
     classic: {
         id: 'classic',
         label: 'Classic',
         origin: 'The current look: gold on warm black.',
+        light: false,
         bg: THEME.bg,
-        line: THEME.line,
+        panel: '#151312',
+        stripe: '#121110',
+        line: '#24211e',
         text: THEME.text,
         muted: THEME.muted,
         faint: THEME.faint,
         accent: THEME.gold,
         target: THEME.gold,
         good: THEME.green,
-        behind: THEME.red,
+        behind: '#e0665a',
         place: THEME.place,
+    },
+    midnight: {
+        id: 'midnight',
+        label: 'Midnight',
+        origin: 'Navy, from the unmerged redesign branch (claude/redesign, 2026-10-01).',
+        light: false,
+        bg: '#0e1528',
+        panel: '#162040',
+        stripe: '#121a33',
+        line: '#26304f',
+        text: '#e8ecf6',
+        muted: '#a3adc6',
+        faint: '#7781a0',
+        accent: '#62adff',
+        target: '#f2b84b',
+        good: '#62adff',
+        behind: '#ff7a7a',
+        place: ['#f5c84c', '#d4dae8', '#e8a06a', '#b49cff'],
     },
     jewel: {
         id: 'jewel',
         label: 'Jewel',
-        origin: "viinus's jewel tones (#F1C40F, #16A085, #E74C3C, #00BFFF), 2026-10-21.",
-        bg: '#0b0d10',
-        line: '#1c2026',
+        origin: "viinus's jewel tones (#F1C40F, #16A085, #E74C3C, #00BFFF), 2026-10-21, on deep indigo.",
+        light: false,
+        bg: '#13132a',
+        panel: '#1d1d3d',
+        stripe: '#181834',
+        line: '#2a2a50',
         text: '#ecf0f1',
-        muted: '#95a5a6',
-        faint: '#66727a',
+        muted: '#a9b4c2',
+        faint: '#7e86a0',
         accent: '#00bfff',
         target: '#f1c40f',
-        good: '#16a085',
-        behind: '#e74c3c',
-        place: ['#f1c40f', '#d5dbdf', '#e67e22', '#00bfff'],
+        good: '#1abc9c',
+        behind: '#ff6f61',
+        place: ['#f1c40f', '#dfe4ea', '#f39c45', '#00bfff'],
     },
-    navy: {
-        id: 'navy',
-        label: 'Navy',
-        origin: 'The unmerged redesign branch (claude/redesign, 2026-10-01).',
-        bg: '#0f1422',
-        line: '#242d47',
-        text: '#e8ecf6',
-        muted: '#98a2bb',
-        faint: '#68728f',
-        accent: '#5aa9ff',
-        target: '#f2b84b',
-        good: '#5aa9ff',
-        behind: '#ff6b6b',
-        place: ['#f5c84c', '#cfd6e4', '#e0965f', '#a78bfa'],
+    plum: {
+        id: 'plum',
+        label: 'Plum',
+        origin: 'Deep purple with pink and mint.',
+        light: false,
+        bg: '#1c1026',
+        panel: '#2a1838',
+        stripe: '#231430',
+        line: '#3a2550',
+        text: '#f4ecf8',
+        muted: '#c0aecb',
+        faint: '#8f7ca0',
+        accent: '#ff8fc7',
+        target: '#ffd479',
+        good: '#7ee0c3',
+        behind: '#ff7b7b',
+        place: ['#ffd479', '#e6dcef', '#ffa978', '#ff8fc7'],
+    },
+    forest: {
+        id: 'forest',
+        label: 'Forest',
+        origin: 'Dark green with mint and warm gold.',
+        light: false,
+        bg: '#0d1d18',
+        panel: '#152a23',
+        stripe: '#11241e',
+        line: '#21392f',
+        text: '#eaf3ee',
+        muted: '#a6bdb2',
+        faint: '#76908a',
+        accent: '#6fd6a8',
+        target: '#f0c75e',
+        good: '#6fd6a8',
+        behind: '#ff8a7a',
+        place: ['#f0c75e', '#dbe6e0', '#e8a36c', '#8fc8ff'],
+    },
+    graphite: {
+        id: 'graphite',
+        label: 'Graphite',
+        origin: "Discord's own dark grey, so the image blends into the chat.",
+        light: false,
+        bg: '#2b2d31',
+        panel: '#36383e',
+        stripe: '#313338',
+        line: '#44474e',
+        text: '#f2f3f5',
+        muted: '#c4c9ce',
+        faint: '#9aa0a8',
+        accent: '#8ea1ff',
+        target: '#ffcf5c',
+        good: '#6fdc8c',
+        behind: '#ff8a8a',
+        place: ['#ffcf5c', '#e3e5e8', '#f0a774', '#8ea1ff'],
+    },
+    paper: {
+        id: 'paper',
+        label: 'Paper',
+        origin: 'Light: dark ink on cream, like a printed table.',
+        light: true,
+        bg: '#faf6ee',
+        panel: '#efe7d6',
+        stripe: '#f3eddf',
+        line: '#ddd2bb',
+        text: '#1d1a15',
+        muted: '#4f483d',
+        faint: '#7a7062',
+        accent: '#8a5a00',
+        target: '#8a5a00',
+        good: '#1f6e3a',
+        behind: '#b3261e',
+        place: ['#8a5a00', '#4a5563', '#9a4a12', '#2c5aa0'],
     },
     akikawa: {
         id: 'akikawa',
         label: 'Akikawa',
-        origin: "Hues sampled from the bot's avatar (honey hair, blue eyes, pink), saturated for legibility.",
-        bg: '#120d0c',
-        line: '#2a1f1c',
-        text: '#fbf3ea',
-        muted: '#b39c8c',
-        faint: '#7a675b',
-        accent: '#eaa868',
-        target: '#eaa868',
-        good: '#7fa6ff',
-        behind: '#ff6b6b',
-        place: ['#f6a5c0', '#eaa868', '#e6dfd8', '#7fa6ff'],
+        origin: "Light: hues sampled from the bot's avatar (honey hair, blue eyes, pink), darkened to read on peach.",
+        light: true,
+        bg: '#fff4ea',
+        panel: '#fbe3cf',
+        stripe: '#fdeadb',
+        line: '#efcfb4',
+        text: '#2e1d14',
+        muted: '#5e4536',
+        faint: '#876a58',
+        accent: '#94490f',
+        target: '#94490f',
+        good: '#2f58c4',
+        behind: '#c0262d',
+        place: ['#b0306a', '#94490f', '#5b5f6b', '#2f58c4'],
     },
     clear: {
         id: 'clear',
         label: 'Clear',
         origin: 'Okabe-Ito colours (Color Universal Design): behind and on pace stay distinct with red-green colour blindness.',
+        light: false,
         bg: '#0c0c0e',
-        line: '#202024',
+        panel: '#18181c',
+        stripe: '#131316',
+        line: '#26262b',
         text: '#f2f2f2',
-        muted: '#a3a3a8',
-        faint: '#74747a',
+        muted: '#b0b0b6',
+        faint: '#7c7c83',
         accent: '#56b4e9',
         target: '#f0e442',
         good: '#56b4e9',

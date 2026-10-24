@@ -4,6 +4,51 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Alerts ping staff roles on a cadence; Behind column dropped; nine palettes
+
+The club's answers to the earlier entry: keep Daily target over Behind, and
+"instead of normal alert, ping all officer roles every given time frame
+(day/week/none)".
+
+**Alerts.** The alert no longer tags trainers. It lists who is behind by
+name (top ten, then "…and N more") and pings the club's staff roles:
+`staffRoleIds`, or else the Trainer and Assistant roles matched by name
+(`staffRolesOf`, read from `client.guilds.cache`). "Officer roles" was read
+as the club's own staff roles, not the server-wide Club Manager roles
+(`OFFICER_ROLE_IDS`), because each alert is about one club. New columns:
+`alertFrequency` (DAILY default, WEEKLY, NONE) and `lastAlertAt`, set by
+Club Managers in `/club admin` (the `/club reports` form is at Discord's
+five-field limit). `isAlertDue`: DAILY every scheduled report; WEEKLY once a
+week has passed since the last ping, less 12 hours so minutes of drift do
+not push it a day; NONE never. A week with nobody behind sends nothing and
+leaves `lastAlertAt` alone, so the next behind day pings at once. `/fans all`
+posts the alert whenever the club has not chosen NONE; `/fans club` and the
+no-channel path of `/fans all` ping nobody, since staff ran them.
+
+Caveat: Discord only notifies a role mention if the role is mentionable or
+the bot has "Mention @everyone, @here, and All Roles". Not checked on the
+live server.
+
+**Report.** The Behind column is gone from the image and the dashboard.
+Daily target turns the behind colour, and bolder, for anyone behind, so the
+column's information stays on the row. Rank slips use `muted` rather than
+the behind colour, which means only "behind". The image is 1200px wide; the
+subtitle wraps to two lines when it does not fit (the biweekly note was cut
+off at the image edge, also at 1600px). The footer no longer repeats the
+window label, which ran into the total.
+
+**Palettes.** Nine, each on a different background: classic (warm black),
+midnight (navy), jewel (viinus's colours on indigo), plum, forest, graphite
+(Discord's grey), paper (light, cream), akikawa (light, peach, avatar hues)
+and clear (Okabe-Ito, colour-blind safe). Each palette also has a header
+`panel` and a row `stripe` (zebra rows) to help follow a row across.
+`scripts/palettes.ts` checks every text colour against all three of `bg`,
+`panel` and `stripe`; all pass. Known weak spot: in clear, the behind orange
+and target yellow are close on behind rows. Nothing selects a palette per
+club yet.
+
+---
+
 ## 2026-10-24 — Need/day fixed at the reset; alerts every day; report trimmed; palettes
 
 **Need/day asked for less than pace (MONTH).** Reported from First on
