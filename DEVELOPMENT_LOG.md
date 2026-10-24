@@ -4,6 +4,26 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Header and notes cut down
+
+Feedback: turning the pink lines white did not fix them ("scattering pink
+to scattering white"), and the notes at the bottom left were useless.
+
+The problem was repetition: the report line under the club name
+("biweekly report / second half · days 15–31 / day 23 of 31", wrapped over
+three lines in the sidebar) said what the figures below already say. It is
+gone; the identity is the name and "Oct 24, 2026 · 29 members", and
+Expected's note reads "by day 23 of 31".
+
+The notes are gone too. Headings carry the meaning ("Target/day",
+"Days in"), and the behind card's key ("cream <1 day · red more") now fits
+beside its title in both layouts. Only the freeze warning remains, when it
+applies, so the tall layout has no footer card otherwise. In the wide
+sidebar the freed space is one "Day 23" section: club gain, per member, how
+many hit the daily quota, then the best gains filling the rest.
+
+---
+
 ## 2026-10-24 — Many behind; less pink text
 
 - **More than five behind** (`FULL_BEHIND`): entries go compact, two lines

@@ -12,13 +12,19 @@ import { describeQuota, formatMillionsFans, periodAdjective, type CircleProgress
  * Two layouts share every piece:
  *
  *   tall   900px wide, for phones. A header card (club image, name, date
- *          and members, report line; monthly rank and rank badge at the
- *          right; quota, expected and next-due figures; progress bar), then
- *          the on-pace table, the behind card and a footer card.
+ *          and members; monthly rank and rank badge at the right; quota,
+ *          expected and next-due figures; progress bar), then the on-pace
+ *          table and the behind card.
  *   wide   1700px wide, three panels of equal height: a sidebar (club,
- *          rank, figures, progress, the day's top gains, notes at its
- *          foot), the on-pace table, and the behind card above the members
- *          closest to the line.
+ *          rank, figures, progress, then the day: club gain, per member,
+ *          how many hit the daily quota, and the best gains), the on-pace
+ *          table, and the behind card, with the members closest to the
+ *          line under the shorter of the last two.
+ *
+ * Nothing is said twice and nothing needs a footnote: the period and day
+ * live in the figures, the headings say what columns hold ("Target/day",
+ * "Days in"), and the behind card keys its own colours. The only note left
+ * is the freeze warning, shown when it applies.
  *
  * Behind members are not table rows but entries of their own: how far short
  * in fans and in days of quota, a bar of fans earned against fans expected,
@@ -297,14 +303,6 @@ function commonValue(values: number[]): number {
     return best;
 }
 
-/** Parts of the report line under the club's name. */
-function reportLine(p: CircleProgress): string[] {
-    const parts = [`${periodAdjective(p.period).toLowerCase()} report`];
-    if (p.period !== 'DAY') parts.push(p.windowLabel.toLowerCase());
-    parts.push(`day ${p.daysElapsed} of ${p.daysInMonth}`);
-    return parts;
-}
-
 /** One header figure: a label, the value, and a note under it. */
 interface Stat {
     label: string;
@@ -324,7 +322,7 @@ function headerStats(progress: CircleProgress): Stat[] {
               : { label: 'Next check', value: shortFans(progress.nextCheckpointTarget), note: `end of day ${progress.nextCheckpointDay}` };
     return [
         { label: 'Quota', value: `${shortFans(progress.quotaPerDay)}/day`, note: describeQuota(progress.quota, progress.period) },
-        { label: 'Expected now', value: shortFans(expected), note: `by day ${judged}` },
+        { label: 'Expected now', value: shortFans(expected), note: `by day ${judged} of ${progress.daysInMonth}` },
         next,
     ];
 }
@@ -358,15 +356,12 @@ function drawProgress(ctx: SKRSContext2D, progress: CircleProgress, x: number, y
     text(ctx, `${progress.onPaceCount} of ${progress.members.length} on pace`, x + w, y + 32, { spec: '400 14px', color: p.muted, align: 'right' });
 }
 
-/** Footer notes: what the target and days mean. The behind card keys its own colours. */
-function footerNotes(progress: CircleProgress, last24h: LastDayGains | null): string[] {
-    const until = progress.period === 'MONTH' ? 'until month end' : `until the day ${progress.nextCheckpointDay} check`;
-    const notes = [
-        `Target and needs: fans a day ${until}, the whole amount, not extra on top of pace.`,
-        'Days: days in the circle this month.',
-    ];
-    if (last24h?.overlapsFreeze) notes.push('* Last 24h includes the 1st, 17:00-24:00 JST, when fans do not count.');
-    return notes;
+/**
+ * Notes under the report: only the freeze warning now. The column headings
+ * ("Target/day", "Days in") and the behind card's key explain the rest.
+ */
+function footerNotes(last24h: LastDayGains | null): string[] {
+    return last24h?.overlapsFreeze ? ['* Last 24h includes the 1st, 17:00-24:00 JST, when fans do not count.'] : [];
 }
 
 // ─── Table ──────────────────────────────────────────────────────────────────
@@ -392,7 +387,7 @@ interface Columns {
 function columns(x: number, w: number, compact: boolean): Columns {
     const right = x + w - (compact ? 18 : PAD);
     // Distances between right edges: days to target, to recent, to total, to avg.
-    const [d, t, r, a] = compact ? [50, 84, 90, 94] : [62, 100, 112, 110];
+    const [d, t, r, a] = compact ? [66, 84, 90, 94] : [78, 96, 108, 108];
     const days = right;
     const target = days - d;
     const recent = target - t;
@@ -428,8 +423,8 @@ function drawHeadings(ctx: SKRSContext2D, x: number, w: number, y: number, c: Co
     label(ctx, 'Avg/day', c.avg, by, size, p.muted, p, 'right');
     label(ctx, 'Total', c.total, by, size, p.muted, p, 'right');
     label(ctx, recentLabel, c.recent, by, size, p.muted, p, 'right');
-    label(ctx, 'Target', c.target, by, size, p.muted, p, 'right');
-    label(ctx, 'Days', c.days, by, size, p.muted, p, 'right');
+    label(ctx, 'Target/day', c.target, by, size, p.muted, p, 'right');
+    label(ctx, 'Days in', c.days, by, size, p.muted, p, 'right');
 }
 
 /**
@@ -601,11 +596,11 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
         return;
     }
     const titleWidth = text(ctx, `Behind pace · ${members.length}`, x + pad, y + 34, { spec: '700 17px', color: p.behind });
-    // The colour key, where it fits beside the title.
-    const key = 'cream: under a day · red: more';
-    ctx.font = font('400 13px');
-    if (ctx.measureText(key).width < w - pad * 2 - titleWidth - 20) {
-        text(ctx, key, x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
+    // The colour key beside the title, where it fits (it does in both layouts).
+    const key = 'cream <1 day · red more';
+    ctx.font = font('400 12px');
+    if (ctx.measureText(key).width < w - pad * 2 - titleWidth - 16) {
+        text(ctx, key, x + w - pad, y + 34, { spec: '400 12px', color: p.muted, align: 'right' });
     }
     const grid = behindGrid(members.length, maxColumns);
     const columnW = (w - 16 - (grid.columns - 1) * 8) / grid.columns;
@@ -624,8 +619,8 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
 const CLOSE_ROW = 34;
 /** Height of one row in the wide sidebar's top gains. */
 const TOP_ROW = 26;
-/** The behind card's colour key, as a sentence. */
-const BEHIND_KEY = 'Behind: cream is under one day of quota short, red is more.';
+/** Height of one figure row in the wide sidebar's day summary. */
+const SUMMARY_ROW = 24;
 
 /**
  * Draws the members on pace with the least to spare, fewest first: how far
@@ -674,42 +669,29 @@ interface Prepared {
     notes: string[];
 }
 
-/** Lines of muted and accent text under the club's name. */
-interface IdentityLines {
-    /** Date and member count, wrapped. */
-    meta: string[];
-    /** The report line, wrapped. */
-    report: string[];
-}
-
-/** Wraps the date, member count and report line to `width`. */
-function identityLines(ctx: SKRSContext2D, d: Pick<Prepared, 'meta' | 'progress'>, width: number): IdentityLines {
-    return {
-        meta: wrap(ctx, [d.meta.dateLabel, `${d.meta.memberCount} members`], width, '400 14px'),
-        report: wrap(ctx, reportLine(d.progress), width, '400 14px'),
-    };
+/**
+ * Wraps the date and member count under the club's name. The period and day
+ * are not repeated here: the figures below already say them.
+ */
+function identityLines(ctx: SKRSContext2D, d: Pick<Prepared, 'meta'>, width: number): string[] {
+    return wrap(ctx, [d.meta.dateLabel, `${d.meta.memberCount} members`], width, '400 14px');
 }
 
 /** Height of the identity block: the image, or the name and lines beside it. */
-function identityHeight(size: number, nameSize: number, lines: IdentityLines): number {
-    return Math.max(size, nameSize + 6 + (lines.meta.length + lines.report.length) * 19);
+function identityHeight(size: number, nameSize: number, lines: string[]): number {
+    return Math.max(size, nameSize + 6 + lines.length * 19);
 }
 
-/** Draws the club image, name, date and members, and report lines. */
-function drawIdentity(ctx: SKRSContext2D, d: Prepared, x: number, y: number, size: number, textWidth: number, lines: IdentityLines, nameSize: number): void {
+/** Draws the club image, then its name with the date and member count under it. */
+function drawIdentity(ctx: SKRSContext2D, d: Prepared, x: number, y: number, size: number, textWidth: number, lines: string[], nameSize: number): void {
     const { p, meta } = d;
     drawSlot(ctx, d.avatar, x, y, size, p, meta.circleName.slice(0, 1).toUpperCase(), true);
     const tx = x + size + 16;
-    text(ctx, fit(ctx, meta.circleName, textWidth, `700 ${nameSize}px`), tx, y + nameSize, { spec: `700 ${nameSize}px`, color: p.text });
-    let ly = y + nameSize + 22;
-    for (const line of lines.meta) {
-        text(ctx, line, tx, ly, { spec: '400 14px', color: p.muted });
-        ly += 19;
-    }
-    for (const line of lines.report) {
-        text(ctx, line, tx, ly, { spec: '400 14px', color: p.text });
-        ly += 19;
-    }
+    // Centred on the image when it is the taller of the two.
+    const blockH = nameSize + 6 + lines.length * 19;
+    const ty = y + Math.max(0, (size - blockH) / 2);
+    text(ctx, fit(ctx, meta.circleName, textWidth, `700 ${nameSize}px`), tx, ty + nameSize, { spec: `700 ${nameSize}px`, color: p.text });
+    lines.forEach((line, i) => text(ctx, line, tx, ty + nameSize + 22 + i * 19, { spec: '400 14px', color: p.muted }));
 }
 
 /** The monthly rank, right-aligned at `right`, with its caption. */
@@ -737,8 +719,8 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     const tableH = tableHeight(d.onPace.length, c);
     const behindH = d.behind.length > 0 ? behindHeight(d.behind.length, 2) : 0;
     const notes = wrapWords(measure, d.notes, cardW - PAD * 2, '400 13px');
-    const footerH = 16 + notes.length * 19 + 14;
-    const height = FRAME + headerH + GAP + tableH + GAP + (behindH > 0 ? behindH + GAP : 0) + footerH + FRAME;
+    const footerH = notes.length > 0 ? 16 + notes.length * 19 + 14 + GAP : 0;
+    const height = FRAME + headerH + GAP + tableH + (behindH > 0 ? GAP + behindH : 0) + footerH + FRAME;
 
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
@@ -764,15 +746,17 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
         y += behindH + GAP;
     }
 
-    card(ctx, cardX, y, cardW, footerH, p);
-    notes.forEach((line, i) => text(ctx, line, cardX + PAD, y + 28 + i * 19, { spec: '400 13px', color: p.muted }));
+    if (footerH > 0) {
+        card(ctx, cardX, y, cardW, footerH - GAP, p);
+        notes.forEach((line, i) => text(ctx, line, cardX + PAD, y + 28 + i * 19, { spec: '400 13px', color: p.muted }));
+    }
 
     return canvas.encode('png');
 }
 
 /**
  * The landscape layout, three panels of equal height: a sidebar (club,
- * rank, figures, progress, the day's top gains, notes at its foot), the
+ * rank, figures, progress, the day's summary and best gains), the
  * on-pace table, and the behind card. The members closest to the line fill
  * the height left under whichever of the table and behind card is shorter.
  */
@@ -792,15 +776,17 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     const measure = createCanvas(1, 1).getContext('2d');
     const textWidth = inner - slot - 16;
     const lines = identityLines(measure, d, textWidth);
-    // The behind card is too narrow here for its colour key, so it joins the notes.
-    const notes = wrapWords(measure, d.behind.length > 0 ? [...d.notes, BEHIND_KEY] : d.notes, inner, '400 12px');
+    const notes = wrapWords(measure, d.notes, inner, '400 12px');
 
     const c = { ...columns(tableX, tableW, false), rowHeight: 36 };
     const tableH = tableHeight(d.onPace.length, c);
 
-    // Sidebar contents: identity, rule, rank, rule, 2×2 figures, progress, notes.
+    // Sidebar contents: identity, rule, rank, rule, 2×2 figures, progress,
+    // rule, the day's summary and at least three of its best, any notes.
     const identityH = identityHeight(slot, 22, lines);
-    const sideMin = sidePad + identityH + 18 + 1 + 18 + slot + 18 + 1 + 18 + 2 * 64 + 14 + 18 + 44 + 24 + notes.length * 17 + sidePad;
+    const sideMin =
+        sidePad + identityH + 19 + 18 + slot + 19 + 18 + 2 * 64 + 14 + 44 + 19 + 18 + 30 + 3 * SUMMARY_ROW + 14 + 3 * TOP_ROW +
+        (notes.length > 0 ? 18 + notes.length * 17 : 0) + sidePad;
 
     // The closest to the line go under whichever is shorter: the behind card
     // (few behind) or the table (many behind), so neither column ends early.
@@ -838,33 +824,38 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     stats.forEach((s, i) => drawStat(ctx, s, x + (i % 2) * (half + 16), y + Math.floor(i / 2) * 64, half, p, true));
     y += 2 * 64 + 14;
     drawProgress(ctx, progress, x, y, inner, p, null);
-    y += 44 + 18;
-    // The notes sit at the foot of the sidebar, whatever its height.
+    y += 44;
+    rule();
+
+    // The day: club gain, per member, how many hit the daily quota, then the
+    // best gains in whatever height is left above any notes.
     const notesTop = FRAME + contentH - sidePad - notes.length * 17;
-
-    // Between them, the day's best gains, as many as fit.
-    const room = Math.floor((notesTop - 34 - (y + 1 + 18 + 30)) / TOP_ROW);
-    const top = progress.members
-        .map((m) => ({ m, gain: d.recentOf(m) ?? 0 }))
-        .filter((t) => t.gain > 0)
-        .sort((a, b) => b.gain - a.gain)
-        .slice(0, Math.max(0, Math.min(room, 8)));
-    if (top.length > 0) {
-        rule();
-        label(ctx, `Top ${d.recentLabel}`, x, y + 12, 13, p.muted, p);
-        y += 30;
-        for (const t of top) {
-            const by = y + 18;
-            const gainWidth = text(ctx, `+${shortFans(t.gain)}`, x + inner, by, { spec: '700 15px', color: p.good, align: 'right' });
-            const rankWidth = text(ctx, `#${t.m.rank}`, x, by, { spec: '400 13px', color: p.muted });
-            const nameX = x + rankWidth + 8;
-            text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '400 15px'), nameX, by, { spec: '400 15px', color: p.text });
-            y += TOP_ROW;
-        }
+    const gains = progress.members.map((m) => ({ m, gain: d.recentOf(m) ?? 0 }));
+    const clubGain = gains.reduce((sum, g) => sum + g.gain, 0);
+    const hit = gains.filter((g) => g.gain >= progress.quotaPerDay).length;
+    label(ctx, d.recentLabel, x, y + 12, 13, p.muted, p);
+    y += 30;
+    const summary: [string, string][] = [
+        ['Club gain', `+${shortFans(clubGain)}`],
+        ['Per member', `+${shortFans(gains.length > 0 ? Math.round(clubGain / gains.length) : 0)}`],
+        [`Hit ${shortFans(progress.quotaPerDay)}`, `${hit}/${gains.length}`],
+    ];
+    for (const [name, value] of summary) {
+        text(ctx, name, x, y + 16, { spec: '400 14px', color: p.muted });
+        text(ctx, value, x + inner, y + 16, { spec: '700 15px', color: p.text, align: 'right' });
+        y += SUMMARY_ROW;
     }
-
-    ctx.fillStyle = p.line;
-    ctx.fillRect(x, notesTop - 16, inner, 1);
+    y += 14;
+    const room = Math.floor((notesTop - (notes.length > 0 ? 18 : 0) - y) / TOP_ROW);
+    const best = gains.filter((g) => g.gain > 0).sort((a, b) => b.gain - a.gain).slice(0, Math.max(0, Math.min(room, 10)));
+    for (const t of best) {
+        const by = y + 18;
+        const gainWidth = text(ctx, `+${shortFans(t.gain)}`, x + inner, by, { spec: '700 15px', color: p.good, align: 'right' });
+        const rankWidth = text(ctx, `#${t.m.rank}`, x, by, { spec: '400 13px', color: p.muted });
+        const nameX = x + rankWidth + 8;
+        text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '400 15px'), nameX, by, { spec: '400 15px', color: p.text });
+        y += TOP_ROW;
+    }
     notes.forEach((line, i) => text(ctx, line, x, notesTop + 12 + i * 17, { spec: '400 12px', color: p.muted }));
 
     // On-pace table and behind card, with the closest to the line under the
@@ -918,7 +909,7 @@ export async function renderFanReport(
         recentLabel: last24h ? `Last 24h${last24h.overlapsFreeze ? '*' : ''}` : `Day ${day}`,
         recentOf: (m) => (last24h ? (last24h.gains.get(m.viewerId) ?? null) : progress.finishedDay > 0 ? m.finishedDayGain : m.latestDayGain),
         empty: progress.members.length === 0 ? 'No fan data ingested for this month yet.' : 'Nobody is on pace yet.',
-        notes: footerNotes(progress, last24h),
+        notes: footerNotes(last24h),
     };
     return layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
 }
