@@ -4,6 +4,45 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Need/day fixed at the reset; alerts every day; report trimmed; palettes
+
+**Need/day asked for less than pace (MONTH).** Reported from First on
+2026-10-21: Brandee, 619 fans behind, was told to earn 7,303,814 a day, below
+the 7,967,741 pace. `daysRemaining` was always $D - e + 1$, "today
+included". That was right for the reference bot, which posted mid-day. Since
+reports moved to the 00:00 JST reset (2026-10-17), day $e$ is finished when
+the report posts. It was counted twice: once as owed in Expected, and once as
+a day still to play. Now $r = D - \text{finishedDay}$: a mid-day report still
+gets $D - e + 1$, a reset report gets $D - e$. Brandee's figure becomes
+7,967,797 (pace plus 619 / 11). The reference replay now passes
+`currentDay: 14` explicitly, since its day 14 was in progress; all 24 rows
+still match. Checkpoint periods already worked this way.
+
+**Alerts post daily in every period.** Cosmos, 2026-10-24: a biweekly report
+on day 23 showed Fuzzlekins 12.4M behind, with no alert. Scheduled alerts in
+checkpoint periods waited for a checkpoint to close. That rule dates from
+when Expected only rose at checkpoints; since 2026-10-12 it grows daily, so
+the report flagged people for days without an alert. The gate is gone; every
+period alerts like MONTH. Alert lines now say what the daily figure aims at
+("needs X a day until month end" / "until the day 31 check").
+
+**Report trimmed (GimmeKiss's feedback, 2026-10-23).** Removed the 7-day
+trend and Projected from the image, and Projected from the dashboard and
+`/fans me`. "Need/day" is now "Daily target" everywhere, because it was read
+as an extra on top of pace; it is the whole daily amount. The image is
+1280px wide instead of 1600, so text is larger on phones. Behind and Expected
+stay until the club answers (see `COMMUNICATIONS_LOG.md`).
+
+**Palettes.** `theme.ts` gains `Palette` and `PALETTES` (classic, jewel, navy,
+akikawa, clear). Each key carries one meaning (accent, target, good, behind,
+place). Only the fan report takes a palette for now; nothing selects one per
+club yet. `scripts/palettes.ts` renders the report in each palette and
+checks WCAG contrast (4.5:1 for figures, 3:1 for `faint`). Classic's `faint`
+failed at 2.91:1, which is why Expected was hard to read on phones; it is now
+`#6e6a63` (3.66:1), in the images and the dashboard CSS.
+
+---
+
 ## 2026-10-17 — Report and alert channels are typed, so threads work
 
 Reported by the user with a screenshot: in `/club admin`, pasting a

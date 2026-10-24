@@ -612,8 +612,12 @@ function progressCard(circle: TrackedCircle, progress: CircleProgress, member: M
         fields.push({ name: `Due by end of day ${progress.nextCheckpointDay}`, value: formatFans(member.target), inline: true });
     }
     fields.push(
-        { name: 'Need per day', value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay), inline: true },
-        { name: 'Projected', value: `${formatCompactFans(member.projectedTotal)} of ${formatCompactFans(progress.effectiveQuota)}`, inline: true },
+        {
+            // The whole daily amount from here on, not an extra on top of pace.
+            name: checkpoints ? `Daily target until day ${progress.nextCheckpointDay}` : 'Daily target until month end',
+            value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay),
+            inline: true,
+        },
     );
     return infoEmbed(
         `${member.trainerName} · ${circle.name}`,

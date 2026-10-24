@@ -4,6 +4,23 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-24 — Report feedback acted on; open questions
+
+GimmeKiss (2026-10-23) called the report ugly and listed: the 7-day trend is
+not useful; Projected is useless "because people aren't robots"; Behind and
+Need/day fill the same role, keep one; Expected "is not useful stated that
+way". They also asked why #24 was 619 behind but needed 7M+ a day, which
+was a real bug. Fixed: the bug, trend and Projected removed, Need/day renamed
+"Daily target". Cosmos (2026-10-24) expected an alert for a member the report
+showed behind; Astaria confirmed it should alert, so alerts now post daily in
+every period.
+
+Open: which of Behind and Daily target to keep; what GimmeKiss meant by
+Expected "like the one we have"; which palette to use (viinus's jewel tones
+are one of five candidates), and whether clubs should each pick their own.
+
+---
+
 ## 2026-10-05 — Rank cutoffs set; B removed
 
 The club set each expected rank's cutoff: "S+ is top 30, S is top 100, A+ is

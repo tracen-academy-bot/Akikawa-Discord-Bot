@@ -51,7 +51,7 @@ const STYLES = `
 :root {
   --bg: #0c0b0b; --raised: #121010; --line: #1e1b19;
   --gold: #d4a54a; --gold-dim: rgba(212,165,74,.55);
-  --text: #e9e6df; --muted: #8b877f; --faint: #5e5b55;
+  --text: #e9e6df; --muted: #8b877f; --faint: #6e6a63;
   --red: #d0584c; --green: #8fbf6a;
   --p1: #e9c8f2; --p2: #d4a54a; --p3: #d5d6dc; --p4: #c97c4c;
 }

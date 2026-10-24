@@ -85,10 +85,9 @@ export interface CircleReport {
  * trainers who are behind, and tag them where a Discord link exists, so the
  * message is actionable rather than just informative.
  *
- * In checkpoint periods (daily, weekly, biweekly) `scheduled` reports leave
- * the alert out unless a checkpoint has just closed, so a missed week is
- * announced once, the day after it ends, not every day of the next week. A
- * manual check always includes it.
+ * Every period alerts on every report, scheduled or not, whenever anyone is
+ * behind. Expected grows daily in every period, so someone the report marks
+ * behind is behind now, and the alert says so the same day.
  *
  * @returns Null when nothing has been ingested for the current month.
  */
@@ -116,17 +115,19 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
     const allBehind = progress.members.filter((m) => !m.onPace);
     const behind = allBehind.slice(0, ALERT_LIMIT);
     if (behind.length === 0) return { image, alert: null, behindCount: 0 };
-    if (scheduled && !progress.checkpointJustClosed) return { image, alert: null, behindCount: allBehind.length };
 
     const links = await prisma.trainerLink.findMany({
         where: { guildId: circle.guildId, viewerId: { in: behind.map((m) => BigInt(m.viewerId)) } },
     });
     const mentionByViewer = new Map(links.map((l) => [l.viewerId.toString(), l.discordUserId]));
 
+    // Need/day is the whole daily amount from here on, not an extra on top of
+    // pace; say what it is aimed at so it cannot be read as one.
+    const until = progress.period === 'MONTH' ? 'until month end' : `until the day ${progress.nextCheckpointDay} check`;
     const lines = behind.map((m) => {
         const mention = mentionByViewer.get(String(m.viewerId));
         const who = mention ? `<@${mention}>` : m.trainerName;
-        return `${who} — behind by **${formatFans(m.behind)}**, needs **${formatFans(m.needPerDay ?? 0)}**/day`;
+        return `${who} — behind by **${formatFans(m.behind)}**, needs **${formatFans(m.needPerDay ?? 0)}** a day ${until}`;
     });
 
     return {
@@ -136,7 +137,7 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
             content:
                 `**${circle.name}** — ${allBehind.length} trainer${allBehind.length === 1 ? '' : 's'} behind quota ` +
                 `(${describeQuota(progress.quota, progress.period)} · ` +
-                `${progress.period === 'MONTH' ? progress.windowLabel : `checked at end of day ${progress.checkpointDay}`})\n` +
+                `${progress.period === 'MONTH' ? progress.windowLabel : `through day ${progress.finishedDay}`})\n` +
                 lines.join('\n'),
             users: [...mentionByViewer.values()],
         },

@@ -301,6 +301,28 @@ async function main() {
     check('club does not list the leaver', posted?.content?.includes('Gone'), false);
     check('club posts in the thread, not to the channels', clubCheck.some((s) => s.kind === 'channel'), false);
 
+    // A scheduled report alerts mid-period too. Cosmos, 2026-10-24: a biweekly
+    // report on day 24 showed someone behind and posted no alert, because the
+    // alert waited for the day-31 check.
+    {
+        const { buildCircleReport } = await import('../src/lib/fans/scheduler');
+        // 14M every two weeks owes 1M a day, so 'Behind' (100K a day) is
+        // behind, and no checkpoint has closed by day 3. A 21:00 JST report
+        // time keeps the test off the reset, which reports the old month on
+        // the 1st.
+        await prisma.trackedCircle.update({
+            where: { id: circle.id },
+            data: { quota: BigInt(14_000_000), quotaPeriod: 'BIWEEKLY', reportMinute: 21 * 60, reportTimeZone: 'Asia/Tokyo' },
+        });
+        const mid = await buildCircleReport((await prisma.trackedCircle.findUniqueOrThrow({ where: { id: circle.id } })), { scheduled: true });
+        check('a scheduled biweekly report alerts before the check closes', mid?.alert?.users, ['u-behind']);
+        check('the alert says the daily target is aimed at the check', mid?.alert?.content?.includes('a day until the day 14 check'), true);
+        await prisma.trackedCircle.update({
+            where: { id: circle.id },
+            data: { quota: BigInt(31_000_000), quotaPeriod: 'MONTH', reportMinute: null, reportTimeZone: null },
+        });
+    }
+
     // ── /fans all ─────────────────────────────────────────────────────────────
     check('all is for Club Managers', desc(await run({ sub: 'all', userId: 'u-trainer' })), 'Only Club Managers can check every circle.');
 

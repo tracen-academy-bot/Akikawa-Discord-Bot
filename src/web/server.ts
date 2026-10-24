@@ -124,7 +124,6 @@ function memberRows(progress: CircleProgress, circleId: string): string {
             // Row class drives the left bar: placement tint for the top four,
             // red for anyone behind, nothing otherwise.
             const cls = m.rank <= 4 ? `p${m.rank}` : m.onPace ? '' : 'behind';
-            const projTone = m.projectedTotal >= progress.effectiveQuota ? 'green' : m.onPace ? 'muted' : 'red';
 
             return `<tr class="${cls}">
         <td class="faint" data-value="${m.rank}">${m.rank}${movement}</td>
@@ -135,7 +134,6 @@ function memberRows(progress: CircleProgress, circleId: string): string {
         <td class="right muted">${num(m.avgPerDay)}</td>
         <td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>
         <td class="right muted">${num(m.latestDayGain)}</td>
-        <td class="right ${projTone}">${compact(m.projectedTotal)}</td>
       </tr>`;
         })
         .join('');
@@ -405,8 +403,8 @@ export function startDashboard(client: () => Client): () => void {
                    <table data-sortable>
                      <thead><tr>
                        <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Total</th><th class="right" data-sort>Expected</th>
-                       <th class="right" data-sort>Behind</th><th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Need/Day</th>
-                       <th class="right" data-sort>Day ${progress.daysElapsed}</th><th class="right" data-sort>Proj.</th>
+                       <th class="right" data-sort>Behind</th><th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Daily target</th>
+                       <th class="right" data-sort>Day ${progress.daysElapsed}</th>
                      </tr></thead>
                      <tbody>${memberRows(progress, circle.id)}</tbody>
                    </table>

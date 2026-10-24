@@ -325,6 +325,22 @@ function lifetimeChecks() {
     check('mid-month joiner first owing day', join.firstDay, 3);
     check('mid-month joiner earned through day 4', join.gains[3], 2_000);
 
+    // A report at the reset: day 20 of 31 has finished and day 21 has begun.
+    // Reported from First, 2026-10-21: Brandee was 619 fans behind and told to
+    // earn 7,303,814 a day, below the 7,967,741 pace, because day 20 was
+    // counted both as owed and as still to play.
+    const brandee = [1_000_000_000];
+    for (let d = 1; d <= 20; d += 1) brandee.push(1_000_000_000 + Math.round((159_354_201 * d) / 20));
+    const reset = computeCircleProgress([member(1, brandee)], { quota: 247_000_000, daysInMonth: 31, currentDay: 21 });
+    const bm = reset.members[0]!;
+    check('reset report: days 21-31 remain', reset.daysRemaining, 11);
+    check('reset report: 619 behind', bm.behind, 619);
+    check('reset report: need/day is pace plus the shortfall', bm.needPerDay, 7_967_797);
+    check('need/day is never below pace for someone behind', bm.needPerDay! >= reset.quotaPerDay, true);
+    const midDay = computeCircleProgress([member(1, brandee)], { quota: 247_000_000, daysInMonth: 31, currentDay: 20 });
+    check('mid-day report: day 20 still counts as left to play', midDay.daysRemaining, 12);
+    check('past month: nothing left after the last day', computeCircleProgress([member(1, brandee)], { quota: 247_000_000, daysInMonth: 20 }).daysRemaining, 0);
+
     // A missed sync carries forward instead of dropping to zero.
     const gap = monthGains(raw([100, 200, 0, 400]));
     check('missed sync is a zero-gain day', gap.gains.join(','), '100,100,300');
@@ -333,13 +349,16 @@ function lifetimeChecks() {
 function main() {
     const series = ROWS.map(([name, total, , , , , gain], i) => buildSeries(name, i, total, gain));
 
+    // The reference bot posted mid-day: day 14 was still in progress, so it
+    // still counts toward the days left.
     const progress = computeCircleProgress(series, {
         quota: MONTHLY_QUOTA,
         daysInMonth: DAYS_IN_MONTH,
+        currentDay: DAYS_ELAPSED,
     });
 
     check('days elapsed derived from data', progress.daysElapsed, DAYS_ELAPSED);
-    check('days remaining includes today', progress.daysRemaining, 17);
+    check('days remaining includes today while it is in progress', progress.daysRemaining, 17);
     check('quota per day is floored', progress.quotaPerDay, 2_666_666);
     check('effective quota re-multiplies the floor', progress.effectiveQuota, 79_999_980);
 
