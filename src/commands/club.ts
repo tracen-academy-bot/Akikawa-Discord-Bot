@@ -23,7 +23,8 @@ import { successEmbed, errorEmbed, infoEmbed } from "../lib/embeds";
 import { renderClubList, type ClubSummary } from "../lib/image/renderClubList";
 import { renderClubView } from "../lib/image/renderClubView";
 import type { AlertFrequency, TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
-import { describeAlertFrequency } from '../lib/fans/scheduler';
+import { buildCircleReport, describeAlertFrequency } from '../lib/fans/scheduler';
+import { DEFAULT_PALETTE, PALETTES, paletteOf } from '../lib/image/theme';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
 import { toSafeNumber } from '../lib/fans/metrics';
@@ -106,6 +107,15 @@ async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId:
 
 // ================================================================================
 
+/** The `theme` choice that clears a club's theme back to the default. */
+const DEFAULT_THEME_CHOICE = 'default';
+
+/** `/club reports` theme choices: the default, then every palette. Discord allows 25. */
+const THEME_CHOICES = [
+    { name: `Default (${PALETTES[DEFAULT_PALETTE]!.label})`, value: DEFAULT_THEME_CHOICE },
+    ...Object.values(PALETTES).map((p) => ({ name: `${p.label}${p.light ? ' (light)' : ''}`, value: p.id })),
+].slice(0, 25);
+
 export const data = new SlashCommandBuilder()
     .setName('club')
     .setDescription('Manage clubs.')
@@ -165,8 +175,14 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('reports')
-            .setDescription("Set a club's expected rank, quota and report time (its staff or Club Managers).")
+            .setDescription("Set a club's expected rank, quota, report time or report theme (its staff or Club Managers).")
             .addStringOption((opt) => opt.setName('club').setDescription('Club').setRequired(true).setAutocomplete(true))
+            .addStringOption((opt) =>
+                opt
+                    .setName('theme')
+                    .setDescription('Pick a theme for the fan report image. Leave out to open the settings form instead.')
+                    .addChoices(...THEME_CHOICES),
+            )
     )
     .addSubcommandGroup((group) =>
         group
@@ -513,7 +529,12 @@ export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
         .addLabelComponents(...labels);
 }
 
-/** `/club reports`: opens the form for the club's staff or a Club Manager. */
+/**
+ * `/club reports`: for the club's staff or a Club Manager. With a theme,
+ * saves it and shows the current report in it; without, opens the form. The
+ * theme is an option rather than a form field because the form already has
+ * Discord's maximum of five.
+ */
 async function handleReports(interaction: ChatInputCommandInteraction, member: GuildMember) {
     const club = await findClubOrReply(interaction, interaction.options.getString('club', true));
     if (!club) return;
@@ -521,7 +542,39 @@ async function handleReports(interaction: ChatInputCommandInteraction, member: G
         await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)] });
         return;
     }
+    const theme = interaction.options.getString('theme');
+    if (theme !== null) {
+        await setReportTheme(interaction, club, theme);
+        return;
+    }
     await interaction.showModal(buildReportsModal(club));
+}
+
+/** Saves a club's report theme and replies with its current report drawn in it. */
+async function setReportTheme(interaction: ChatInputCommandInteraction, club: Club, theme: string) {
+    if (club.circleId === null) {
+        await interaction.reply({ embeds: [errorEmbed(`**${club.name}** has no uma.moe circle, so it has no fan report to theme.`)] });
+        return;
+    }
+    if (theme !== DEFAULT_THEME_CHOICE && !PALETTES[theme]) {
+        await interaction.reply({ embeds: [errorEmbed('That theme is not available. Pick one from the list.')] });
+        return;
+    }
+    // Rendering the preview can take a moment.
+    await interaction.deferReply();
+    const updated = await prisma.trackedCircle.update({
+        where: { id: club.id },
+        data: { reportTheme: theme === DEFAULT_THEME_CHOICE ? null : theme },
+    });
+    const report = await buildCircleReport(updated);
+    const palette = paletteOf(updated.reportTheme);
+    const lines = [
+        `**${updated.name}**'s fan report now uses **${palette.label}**${updated.reportTheme === null ? ' (the default)' : ''}.`,
+        palette.origin,
+        '',
+        report ? "Here is today's report in it." : 'There is no fan data this month yet, so there is no preview.',
+    ];
+    await interaction.editReply({ embeds: [successEmbed('Report theme', lines.join('\n'))], files: report ? [report.image] : [] });
 }
 
 /** Handles a submitted `/club reports` form. */
@@ -593,8 +646,10 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
 export function reportSummary(club: Club, now = new Date()): string {
     const time = reportTimeOf(club);
     const next = Math.floor(nextReportAt(time, now).getTime() / 1000);
+    const theme = paletteOf(club.reportTheme);
     const lines = [
         `Fan report: daily at **${formatTimeOfDay(time.minute)} ${describeZone(time.zone, now)}**${hasOwnReportTime(club) ? '' : ' (the default: the daily reset)'}`,
+        `Theme: **${theme.label}**${club.reportTheme && PALETTES[club.reportTheme] ? '' : ' (the default)'}; change it with the \`theme\` option of \`/club reports\`.`,
         `Next: <t:${next}:F> (<t:${next}:R>), shown in your own time.`,
     ];
     if (!club.reportChannelId) lines.push('No report channel yet, so nothing posts; a Club Manager sets one with `/club admin`.');

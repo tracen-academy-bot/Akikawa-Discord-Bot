@@ -175,6 +175,9 @@ model TrackedCircle {
     reportTimeZone  String?
     /// When the last scheduled report was posted; one per local day.
     lastReportAt    DateTime?
+    /// Palette the fan report is drawn in: an id from `PALETTES` in
+    /// src/lib/image/theme.ts. Null, or an id no longer known, is the default.
+    reportTheme     String?
 
     // Club info, from the former `Club` model.
     /// Intended tier (B to S+). Null when never set.

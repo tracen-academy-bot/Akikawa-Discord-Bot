@@ -23,6 +23,7 @@ import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleP
 import { checkpointNote, describeQuota, toSafeNumber, type CircleProgress, type QuotaPeriod } from '../lib/fans/metrics';
 import { parsePeriod, parseQuota } from '../commands/fans';
 import { renderFanReport } from '../lib/image/renderFanReport';
+import { paletteOf } from '../lib/image/theme';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
 import { renderTimerLeaderboard } from '../lib/image/renderTimerLeaderboard';
@@ -432,12 +433,12 @@ export function startDashboard(client: () => Client): () => void {
             await renderFanReport(progress, {
                 circleName: circle.name,
                 monthlyRank: circle.monthlyRank,
-        clubRank: circle.rank,
+                clubRank: circle.rank,
                 memberCount: progress.members.length,
                 dateLabel: formatReportDate(year, month, progress.daysElapsed),
                 // Last 24h is only meaningful for the month in progress.
                 last24h: year === currentGameMonth().year && month === currentGameMonth().month ? await lastDayGains(circle.id) : null,
-            }),
+            }, paletteOf(circle.reportTheme)),
         );
     });
 

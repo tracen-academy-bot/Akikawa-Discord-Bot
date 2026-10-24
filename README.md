@@ -79,9 +79,11 @@ Trainers themselves are not tagged. Club Managers pick how often in
 role must be mentionable, or the bot needs the "Mention @everyone, @here, and
 All Roles" permission.
 
-The report image can be drawn in several palettes (`PALETTES` in
-`src/lib/image/theme.ts`); `scripts/palettes.ts` renders a preview of each and
-checks contrast. Every club uses `classic` until a per-club choice is added.
+The report image comes in several themes (`PALETTES` in
+`src/lib/image/theme.ts`). A club's staff pick one with
+`/club reports club:<club> theme:<theme>`, which saves it and replies with the
+current report drawn in it; `Default` goes back to Rose.
+`scripts/palettes.ts` renders a preview of every theme and checks contrast.
 
 ## Dashboard
 

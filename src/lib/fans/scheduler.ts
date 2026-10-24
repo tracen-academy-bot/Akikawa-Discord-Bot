@@ -8,6 +8,7 @@ import { isAtGameReset, isReportDue, reportTimeOf } from './reportTime';
 import { lastDayGains } from './readings';
 import { currentCircleProgress, formatReportDate } from './reports';
 import { renderFanReport } from '../image/renderFanReport';
+import { paletteOf } from '../image/theme';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
 import { guildClubs, staffRolesOf, type LinkableGuild } from '../clubLinks';
 
@@ -112,7 +113,7 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, atReset ? progress.finishedDay : progress.daysElapsed),
         last24h: atReset ? null : await lastDayGains(circle.id),
-    });
+    }, paletteOf(circle.reportTheme));
     const image = new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` });
 
     const allBehind = progress.members.filter((m) => !m.onPace);

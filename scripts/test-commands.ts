@@ -391,6 +391,7 @@ async function main() {
 
     // ── /club reports and /club admin forms ───────────────────────────────────
     const clubCmd = await import('../src/commands/club');
+    const { paletteOf } = await import('../src/lib/image/theme');
     const runClubCmd = async (opts: FakeOptions) => {
         const log: Sent[] = [];
         await clubCmd.execute(fakeInteraction(opts, log) as never);
@@ -566,6 +567,20 @@ async function main() {
     // /club fancount sets the same quota (in millions, as its option says).
     await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: '35', period: 'MONTH' } });
     check('/club fancount sets the quota', String((await reload()).quota), '35000000');
+
+    // /club reports with a theme saves it and shows the report in it, without the form.
+    const themed = await runClubCmd({ sub: 'reports', userId: 'u-trainer', strings: { club: club.id, theme: 'neon' } });
+    const themedEdit = themed.find((s) => s.kind === 'edit');
+    check('/club reports theme saves the theme', (await reload()).reportTheme, 'neon');
+    check('/club reports theme confirms it', themedEdit?.embeds?.[0]?.description?.includes('now uses **Neon**'), true);
+    check('/club reports theme shows a preview', themedEdit?.files, 1);
+    const reset = await runClubCmd({ sub: 'reports', userId: 'u-trainer', strings: { club: club.id, theme: 'default' } });
+    check('default clears the theme', (await reload()).reportTheme, null);
+    check('default says so', reset.find((s) => s.kind === 'edit')?.embeds?.[0]?.description?.includes('(the default)'), true);
+    const refused = await runClubCmd({ sub: 'reports', userId: 'u-behind', strings: { club: club.id, theme: 'neon' } });
+    check('only staff can theme a club', [refused[0]?.embeds?.[0]?.description?.startsWith('You must be a trainer or assistant'), (await reload()).reportTheme], [true, null]);
+    check('an unknown stored theme draws in the default', paletteOf('gone').id, 'rose');
+    check('the settings summary names the theme', clubCmd.reportSummary(await reload()).includes('Theme: **Rose** (the default)'), true);
 
     // ── Staff roles matched by name ───────────────────────────────────────────
     const links = await import('../src/lib/clubLinks');

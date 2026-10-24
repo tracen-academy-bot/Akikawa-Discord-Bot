@@ -29,6 +29,7 @@ import {
 import { buildCircleReport, postReport } from '../lib/fans/scheduler';
 import { isConfigured, searchCircles } from '../lib/umamoe/client';
 import { renderFanReport } from '../lib/image/renderFanReport';
+import { paletteOf } from '../lib/image/theme';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
 
@@ -348,7 +349,7 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, progress.daysElapsed),
         last24h: await lastDayGains(circle.id),
-    });
+    }, paletteOf(circle.reportTheme));
 
     await interaction.editReply({
         files: [new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` })],

@@ -4,6 +4,26 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Clubs pick their own report theme
+
+New `reportTheme` column (text, null = default) and a `theme` choice on
+`/club reports`: Default plus every palette (13 of Discord's 25). Picking
+one saves it and replies with the club's current report drawn in it; with
+no theme the command opens the form as before. It is an option, not a form
+field, because the form is already at Discord's five-field limit. Stored as
+text rather than an enum so a new palette needs no migration; an id that no
+longer exists draws in the default (`paletteOf`). The scheduled report,
+`/fans` checks and the dashboard image all use the club's theme. The
+settings summary names it.
+
+`THEME_CHOICES` sits above the command builder: a `const` declared below it
+would throw at module load, which the type checker does not catch.
+
+The slash command changed, so `npm run deploy-commands` is needed for the
+option to appear.
+
+---
+
 ## 2026-10-24 — Back to Plex Mono; palettes get styles; a wide layout
 
 - **Font.** The report is back in IBM Plex Mono, the bot's own face (asked
