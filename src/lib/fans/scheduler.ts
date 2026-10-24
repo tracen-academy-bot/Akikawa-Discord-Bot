@@ -108,6 +108,7 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
     const buffer = await renderFanReport(progress, {
         circleName: circle.name,
         monthlyRank: circle.monthlyRank,
+        clubRank: circle.rank,
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, atReset ? progress.finishedDay : progress.daysElapsed),
         last24h: atReset ? null : await lastDayGains(circle.id),

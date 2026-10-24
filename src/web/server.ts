@@ -432,6 +432,7 @@ export function startDashboard(client: () => Client): () => void {
             await renderFanReport(progress, {
                 circleName: circle.name,
                 monthlyRank: circle.monthlyRank,
+        clubRank: circle.rank,
                 memberCount: progress.members.length,
                 dateLabel: formatReportDate(year, month, progress.daysElapsed),
                 // Last 24h is only meaningful for the month in progress.

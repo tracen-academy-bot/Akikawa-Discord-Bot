@@ -344,6 +344,7 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
     const buffer = await renderFanReport(progress, {
         circleName: circle.name,
         monthlyRank: circle.monthlyRank,
+        clubRank: circle.rank,
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, progress.daysElapsed),
         last24h: await lastDayGains(circle.id),

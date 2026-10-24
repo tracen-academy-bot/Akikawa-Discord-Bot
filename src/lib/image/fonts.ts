@@ -64,3 +64,15 @@ registerBundledFonts();
 export function font(spec: string): string {
     return `${spec} ${FONT_STACK}`;
 }
+
+/**
+ * Proportional stack for the fan report: IBM Plex Sans JP first. Its digits
+ * are tabular (each 12.60px at 20px, regular and bold, checked 2026-10-24),
+ * so numeric columns still line up.
+ */
+export const SANS_STACK = '"IBM Plex Sans JP", "IBM Plex Mono", "DejaVu Sans", "WenQuanYi Zen Hei", sans-serif';
+
+/** Builds a canvas font string with the sans stack, e.g. `sansFont('700 20px')`. */
+export function sansFont(spec: string): string {
+    return `${spec} ${SANS_STACK}`;
+}

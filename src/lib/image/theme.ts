@@ -81,15 +81,18 @@ export function dashNum(value: number | null | undefined): string {
  * A colour set for the fan report. Each key carries one meaning, so a palette
  * can change every colour without changing what any colour says:
  *
- *   bg       the page
- *   panel    the header band and column-heading strip
+ *   frame    the backdrop the cards sit on, a vertical gradient from
+ *            `frame` to `frameEnd`
+ *   bg       each card
+ *   panel    the column-heading strip
  *   stripe   every other row, so a row can be followed across the table
  *   line     hairlines and the empty part of the progress bar
  *   accent   structure: the club name, rules, the progress bar, rank-ups
  *   target   the daily target of someone on pace
  *   good     on pace
- *   behind   behind, and nothing else (bars, and the daily target of anyone
- *            behind)
+ *   warn     behind by less than one day's quota (names)
+ *   behind   behind by more, and nothing else (names, bars, and the daily
+ *            target of anyone behind)
  *   place    name tints and left bars for 1st through 4th
  *
  * `text`, `muted` and `faint` are a three-step grey scale for figures by
@@ -105,6 +108,8 @@ export interface Palette {
     origin: string;
     /** True for a light background, where Discord's dark theme frames it as a bright card. */
     light: boolean;
+    frame: string;
+    frameEnd: string;
     bg: string;
     panel: string;
     stripe: string;
@@ -115,21 +120,45 @@ export interface Palette {
     accent: string;
     target: string;
     good: string;
+    warn: string;
     behind: string;
     place: readonly [string, string, string, string];
 }
 
 /**
- * Palettes the fan report can render in. `classic` is the current look and
- * the default; the others are candidates for clubs to choose from. Each has
+ * Palettes the fan report can render in. `rose` is the default; the others
+ * are candidates for clubs to choose from. Each has
  * a different background, so a club's report is recognisable at a glance.
  */
 export const PALETTES: Record<string, Palette> = {
+    rose: {
+        id: 'rose',
+        label: 'Rose',
+        origin: 'Dark plum cards on a pink frame, after the ChronoGenesis club page the club pointed to (2026-10-24). The default.',
+        light: false,
+        frame: '#e0336f',
+        frameEnd: '#ff8fc2',
+        bg: '#2a1820',
+        panel: '#36212b',
+        stripe: '#311d26',
+        line: '#4a2f3b',
+        text: '#f8eff3',
+        muted: '#c7b3bd',
+        faint: '#9a848f',
+        accent: '#ff7fb2',
+        target: '#ffd27a',
+        good: '#7be0a0',
+        warn: '#f5e0a4',
+        behind: '#ff6b63',
+        place: ['#ffd27a', '#e9e2e6', '#f0a774', '#ff9ccc'],
+    },
     classic: {
         id: 'classic',
         label: 'Classic',
         origin: 'The current look: gold on warm black.',
         light: false,
+        frame: '#2a2116',
+        frameEnd: '#4a3a1e',
         bg: THEME.bg,
         panel: '#151312',
         stripe: '#121110',
@@ -140,6 +169,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: THEME.gold,
         target: THEME.gold,
         good: THEME.green,
+        warn: '#f0d48a',
         behind: '#e0665a',
         place: THEME.place,
     },
@@ -148,6 +178,8 @@ export const PALETTES: Record<string, Palette> = {
         label: 'Midnight',
         origin: 'Navy, from the unmerged redesign branch (claude/redesign, 2026-10-01).',
         light: false,
+        frame: '#1c3a7a',
+        frameEnd: '#3f6fd1',
         bg: '#0e1528',
         panel: '#162040',
         stripe: '#121a33',
@@ -158,6 +190,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#62adff',
         target: '#f2b84b',
         good: '#62adff',
+        warn: '#f7e0a3',
         behind: '#ff7a7a',
         place: ['#f5c84c', '#d4dae8', '#e8a06a', '#b49cff'],
     },
@@ -166,6 +199,8 @@ export const PALETTES: Record<string, Palette> = {
         label: 'Jewel',
         origin: "viinus's jewel tones (#F1C40F, #16A085, #E74C3C, #00BFFF), 2026-10-21, on deep indigo.",
         light: false,
+        frame: '#0b6e8a',
+        frameEnd: '#14a3c7',
         bg: '#13132a',
         panel: '#1d1d3d',
         stripe: '#181834',
@@ -176,6 +211,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#00bfff',
         target: '#f1c40f',
         good: '#1abc9c',
+        warn: '#f7e08a',
         behind: '#ff6f61',
         place: ['#f1c40f', '#dfe4ea', '#f39c45', '#00bfff'],
     },
@@ -184,6 +220,8 @@ export const PALETTES: Record<string, Palette> = {
         label: 'Plum',
         origin: 'Deep purple with pink and mint.',
         light: false,
+        frame: '#6a2a8c',
+        frameEnd: '#a855c9',
         bg: '#1c1026',
         panel: '#2a1838',
         stripe: '#231430',
@@ -194,6 +232,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#ff8fc7',
         target: '#ffd479',
         good: '#7ee0c3',
+        warn: '#ffe3a3',
         behind: '#ff7b7b',
         place: ['#ffd479', '#e6dcef', '#ffa978', '#ff8fc7'],
     },
@@ -202,6 +241,8 @@ export const PALETTES: Record<string, Palette> = {
         label: 'Forest',
         origin: 'Dark green with mint and warm gold.',
         light: false,
+        frame: '#1f5a45',
+        frameEnd: '#3f9a72',
         bg: '#0d1d18',
         panel: '#152a23',
         stripe: '#11241e',
@@ -212,6 +253,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#6fd6a8',
         target: '#f0c75e',
         good: '#6fd6a8',
+        warn: '#efe0a0',
         behind: '#ff8a7a',
         place: ['#f0c75e', '#dbe6e0', '#e8a36c', '#8fc8ff'],
     },
@@ -220,6 +262,8 @@ export const PALETTES: Record<string, Palette> = {
         label: 'Graphite',
         origin: "Discord's own dark grey, so the image blends into the chat.",
         light: false,
+        frame: '#1e1f22',
+        frameEnd: '#26282c',
         bg: '#2b2d31',
         panel: '#36383e',
         stripe: '#313338',
@@ -230,6 +274,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#8ea1ff',
         target: '#ffcf5c',
         good: '#6fdc8c',
+        warn: '#f5e2a8',
         behind: '#ff8a8a',
         place: ['#ffcf5c', '#e3e5e8', '#f0a774', '#8ea1ff'],
     },
@@ -238,6 +283,8 @@ export const PALETTES: Record<string, Palette> = {
         label: 'Paper',
         origin: 'Light: dark ink on cream, like a printed table.',
         light: true,
+        frame: '#d8c7a3',
+        frameEnd: '#e9dcc0',
         bg: '#faf6ee',
         panel: '#efe7d6',
         stripe: '#f3eddf',
@@ -248,6 +295,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#8a5a00',
         target: '#8a5a00',
         good: '#1f6e3a',
+        warn: '#7a5600',
         behind: '#b3261e',
         place: ['#8a5a00', '#4a5563', '#9a4a12', '#2c5aa0'],
     },
@@ -256,6 +304,8 @@ export const PALETTES: Record<string, Palette> = {
         label: 'Akikawa',
         origin: "Light: hues sampled from the bot's avatar (honey hair, blue eyes, pink), darkened to read on peach.",
         light: true,
+        frame: '#f2a87a',
+        frameEnd: '#f8cfb0',
         bg: '#fff4ea',
         panel: '#fbe3cf',
         stripe: '#fdeadb',
@@ -266,6 +316,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#94490f',
         target: '#94490f',
         good: '#2f58c4',
+        warn: '#7d5000',
         behind: '#c0262d',
         place: ['#b0306a', '#94490f', '#5b5f6b', '#2f58c4'],
     },
@@ -274,6 +325,8 @@ export const PALETTES: Record<string, Palette> = {
         label: 'Clear',
         origin: 'Okabe-Ito colours (Color Universal Design): behind and on pace stay distinct with red-green colour blindness.',
         light: false,
+        frame: '#26262b',
+        frameEnd: '#33333a',
         bg: '#0c0c0e',
         panel: '#18181c',
         stripe: '#131316',
@@ -284,12 +337,16 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#56b4e9',
         target: '#f0e442',
         good: '#56b4e9',
+        warn: '#f0e442',
         behind: '#e69f00',
         place: ['#f0e442', '#e2e2e2', '#cc79a7', '#009e73'],
     },
 };
 
-/** The palette for an id, falling back to `classic` for an unknown one. */
+/** The default palette. */
+export const DEFAULT_PALETTE = 'rose';
+
+/** The palette for an id, falling back to the default for an unknown one. */
 export function paletteOf(id: string | null | undefined): Palette {
-    return (id && PALETTES[id]) || PALETTES.classic!;
+    return (id && PALETTES[id]) || PALETTES[DEFAULT_PALETTE]!;
 }

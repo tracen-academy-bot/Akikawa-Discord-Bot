@@ -10,7 +10,9 @@
  * Exits non-zero when a colour misses its floor: 4.5:1 for colours that carry
  * figures, 3:1 for `faint`, which is only for de-emphasised values.
  *
- * Needs no database or API key.
+ * Needs no API key, and connects to no database, but `DATABASE_URL` must be
+ * set (any value): the club-image loader imports the Prisma module, which
+ * checks for it.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -43,6 +45,7 @@ function contrastRows(p: Palette): { key: string; color: string; ratio: number; 
         ['accent', p.accent, 4.5],
         ['target', p.target, 4.5],
         ['good', p.good, 4.5],
+        ['warn', p.warn, 4.5],
         ['behind', p.behind, 4.5],
         ...p.place.map((c, i): [string, string, number] => [`place ${i + 1}`, c, 4.5]),
     ];
@@ -90,7 +93,9 @@ async function main() {
     let failures = 0;
     for (const palette of Object.values(PALETTES)) {
         const png = await renderFanReport(progress, {
-            circleName: palette.label,
+            // A real club, so the image and rank badge slots are filled.
+            circleName: 'Cosmos',
+            clubRank: 'A_PLUS',
             monthlyRank: 194,
             memberCount: progress.members.length,
             dateLabel: 'October 24, 2026',

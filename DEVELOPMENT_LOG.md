@@ -4,6 +4,38 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Fan report redrawn as cards; Rose palette is the default
+
+Asked to rewrite the report's data for readability in the style of the
+ChronoGenesis club page (dark cards on a pink frame), keeping this report's
+header placement, with a place for the club's rank badge and its image.
+
+- **Layout.** 900px wide, rounded cards on a gradient frame: header, on
+  pace, behind, footer. The header keeps name top-left and rank top-right,
+  adds the club image (`assets/clubs`, via `loadClubIcon`) left of the name
+  and the expected-rank badge (`assets/ranks`) in the top-right corner.
+  Either slot shows an empty circle when there is no picture.
+- **Figures.** Compact, two decimals ("107.93M", "+7.08M") in IBM Plex Sans
+  JP, whose digits are tabular (checked: 12.60px each at 20px, both
+  weights). Targets round up (`shortFans(..., true)`), so the figure shown
+  is never a few fans short. Column headings are plain case.
+- **Expected** left the table: it is the same for everyone present all
+  period, so it is one header figure ("Expected now", the most common
+  value). A new **Days** column (`dataDays`) shows who joined late and so
+  owes less. The header's other figures: Quota (per day and as set) and
+  "Next check" or "Due by month end".
+- **Behind** members get their own card. Names are cream (`warn`) when less
+  than one day of quota short, red when more, as on the reference page.
+- **Palettes** gain `frame`, `frameEnd` and `warn`. New `rose` palette
+  (default, `DEFAULT_PALETTE`); the other nine keep their cards and get
+  frames. All pass the contrast check.
+- The renderer now imports `canvasUtils`, which pulls in the Prisma module,
+  so `scripts/palettes.ts` needs `DATABASE_URL` set (no connection is made).
+
+Not done: a wide two-column layout like the reference's landscape version.
+
+---
+
 ## 2026-10-24 — Every-3-days staff pings
 
 Asked for "day/3d/wk/none". `AlertFrequency` gains `EVERY_3_DAYS` (its own
