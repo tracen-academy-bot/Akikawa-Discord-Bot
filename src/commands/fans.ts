@@ -20,7 +20,6 @@ import { lastDayGains } from '../lib/fans/readings';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
 import {
     describeQuota,
-    formatCompactFans,
     formatFans,
     toSafeNumber,
     type CircleProgress,
