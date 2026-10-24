@@ -231,7 +231,7 @@ In checkpoint periods:
   2026-10-24). That rule was left over from when `expected` only rose at
   checkpoints; with daily growth, the report showed people behind for days
   with no alert. How often it posts is now the club's `alertFrequency`
-  (daily, weekly or never), the same in every period, and it pings the
+  (daily, every 3 days, weekly or never), the same in every period, and it pings the
   club's staff roles rather than the trainers behind.
 
 The projection (`projectedTotal`) is still computed but no longer shown

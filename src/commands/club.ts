@@ -359,6 +359,7 @@ const FIELD = {
 /** How often the staff roles are pinged about members behind quota. */
 const ALERT_FREQUENCY_CHOICES: { value: AlertFrequency; label: string; description: string }[] = [
     { value: 'DAILY', label: 'Daily', description: 'Ping the staff roles with every report that has anyone behind.' },
+    { value: 'EVERY_3_DAYS', label: 'Every 3 days', description: 'At most once every 3 days, with the first report that has anyone behind.' },
     { value: 'WEEKLY', label: 'Weekly', description: 'At most once a week, with the first report that has anyone behind.' },
     { value: 'NONE', label: 'Never', description: 'No pings and no alert post. The report still shows who is behind.' },
 ];

@@ -4,6 +4,18 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Every-3-days staff pings
+
+Asked for "day/3d/wk/none". `AlertFrequency` gains `EVERY_3_DAYS` (its own
+migration, `ALTER TYPE ... ADD VALUE`, in case the first one is already
+applied). `isAlertDue` is now one rule for all three: due once 1, 3 or 7
+days, less 12 hours of slack, have passed since the last ping. That changes
+DAILY slightly: it used to ping with every scheduled report, and now skips
+one that comes within 12 hours of a ping, such as a `/fans all` earlier the
+same day. Reports are a day apart, so otherwise nothing changes.
+
+---
+
 ## 2026-10-24 — Alerts ping staff roles on a cadence; Behind column dropped; nine palettes
 
 The club's answers to the earlier entry: keep Daily target over Behind, and

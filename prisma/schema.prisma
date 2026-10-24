@@ -36,6 +36,7 @@ enum ClubTier {
 /// How often a club's staff roles are pinged about members behind quota.
 enum AlertFrequency {
     DAILY
+    EVERY_3_DAYS
     WEEKLY
     NONE
 }
@@ -152,9 +153,9 @@ model TrackedCircle {
     /// Where behind-quota alerts are posted. May be a thread.
     alertChannelId  String?
     /// How often scheduled reports ping the club's staff roles when anyone
-    /// is behind. WEEKLY waits at least a week after the last ping.
+    /// is behind. EVERY_3_DAYS and WEEKLY wait that long after the last ping.
     alertFrequency  AlertFrequency @default(DAILY)
-    /// When the staff roles were last pinged; drives WEEKLY.
+    /// When the staff roles were last pinged; drives EVERY_3_DAYS and WEEKLY.
     lastAlertAt     DateTime?
     /// uma.moe monthly rank at the last sync. Shown in report headers.
     monthlyRank     Int?

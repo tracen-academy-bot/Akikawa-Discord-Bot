@@ -137,25 +137,32 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
     };
 }
 
-/** Slack under a week, so a weekly ping is not pushed back a day by a few minutes of drift. */
-const WEEKLY_SLACK_MS = 12 * 60 * 60_000;
+/** Days between pings for each cadence; null for never. */
+const ALERT_INTERVAL_DAYS: Record<AlertFrequency, number | null> = { DAILY: 1, EVERY_3_DAYS: 3, WEEKLY: 7, NONE: null };
 
 /**
- * True when a club's staff roles should be pinged now about members behind.
- * DAILY: every report. WEEKLY: once at least a week (less 12 hours of slack)
- * has passed since the last ping, or there has never been one. NONE: never.
- * A week with nobody behind sends nothing, so the next behind day pings at
- * once.
+ * Slack under the interval, so a ping is not pushed back a day by a few
+ * minutes of drift in when the report posts.
+ */
+const ALERT_SLACK_MS = 12 * 60 * 60_000;
+
+/**
+ * True when a club's staff roles should be pinged now about members behind:
+ * once the cadence's interval (less 12 hours of slack) has passed since the
+ * last ping, or there has never been one. DAILY is then every report, since
+ * reports are a day apart. NONE: never. A stretch with nobody behind sends
+ * nothing, so the next behind day pings at once.
  */
 export function isAlertDue(frequency: AlertFrequency, lastAlertAt: Date | null, now = new Date()): boolean {
-    if (frequency === 'NONE') return false;
-    if (frequency === 'DAILY' || lastAlertAt === null) return true;
-    return now.getTime() - lastAlertAt.getTime() >= 7 * 24 * 60 * 60_000 - WEEKLY_SLACK_MS;
+    const days = ALERT_INTERVAL_DAYS[frequency];
+    if (days === null) return false;
+    if (lastAlertAt === null) return true;
+    return now.getTime() - lastAlertAt.getTime() >= days * 24 * 60 * 60_000 - ALERT_SLACK_MS;
 }
 
-/** "daily", "weekly" or "off", for confirmations. */
+/** "daily", "every 3 days", "weekly" or "off", for confirmations. */
 export function describeAlertFrequency(frequency: AlertFrequency): string {
-    return { DAILY: 'daily', WEEKLY: 'weekly', NONE: 'off' }[frequency];
+    return { DAILY: 'daily', EVERY_3_DAYS: 'every 3 days', WEEKLY: 'weekly', NONE: 'off' }[frequency];
 }
 
 /**

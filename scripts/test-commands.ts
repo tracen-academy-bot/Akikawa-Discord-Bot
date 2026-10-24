@@ -354,13 +354,16 @@ async function main() {
         const { postReport, isAlertDue } = await import('../src/lib/fans/scheduler');
         const day = 24 * 60 * 60_000;
         const now = new Date('2026-10-24T15:00:00Z');
-        check('daily is always due', isAlertDue('DAILY', new Date(now.getTime() - 60_000), now), true);
+        check('daily skips a report within 12 hours of a ping', isAlertDue('DAILY', new Date(now.getTime() - 60_000), now), false);
         check('weekly is due with no ping yet', isAlertDue('WEEKLY', null, now), true);
         check('weekly waits after a ping', isAlertDue('WEEKLY', new Date(now.getTime() - 6 * day), now), false);
         check('weekly is due a week later, despite minutes of drift', isAlertDue('WEEKLY', new Date(now.getTime() - 7 * day + 5 * 60_000), now), true);
         check('never is never due', isAlertDue('NONE', null, now), false);
+        check('daily is due the next day, a few minutes early', isAlertDue('DAILY', new Date(now.getTime() - day + 5 * 60_000), now), true);
+        check('every 3 days waits after a ping', isAlertDue('EVERY_3_DAYS', new Date(now.getTime() - 2 * day), now), false);
+        check('every 3 days is due 3 days later, despite drift', isAlertDue('EVERY_3_DAYS', new Date(now.getTime() - 3 * day + 5 * 60_000), now), true);
 
-        const scheduledAlerts = async (data: { alertFrequency: 'DAILY' | 'WEEKLY' | 'NONE'; lastAlertAt: Date | null }) => {
+        const scheduledAlerts = async (data: { alertFrequency: 'DAILY' | 'EVERY_3_DAYS' | 'WEEKLY' | 'NONE'; lastAlertAt: Date | null }) => {
             await prisma.trackedCircle.update({ where: { id: circle.id }, data: { ...data, reportMinute: 21 * 60, reportTimeZone: 'Asia/Tokyo' } });
             const log: Sent[] = [];
             const client = { channels: { fetch: async (id: string) => fakeChannel(id, log) }, guilds: { cache: new Map([[GUILD, FAKE_GUILD]]) } };
@@ -369,8 +372,10 @@ async function main() {
         };
         check('weekly: pinged yesterday, no alert today', await scheduledAlerts({ alertFrequency: 'WEEKLY', lastAlertAt: new Date(Date.now() - day) }), { alerted: false, posts: 0 });
         check('weekly: pinged 8 days ago, alerts', await scheduledAlerts({ alertFrequency: 'WEEKLY', lastAlertAt: new Date(Date.now() - 8 * day) }), { alerted: true, posts: 1 });
+        check('every 3 days: pinged 2 days ago, no alert', await scheduledAlerts({ alertFrequency: 'EVERY_3_DAYS', lastAlertAt: new Date(Date.now() - 2 * day) }), { alerted: false, posts: 0 });
+        check('every 3 days: pinged 3 days ago, alerts', await scheduledAlerts({ alertFrequency: 'EVERY_3_DAYS', lastAlertAt: new Date(Date.now() - 3 * day) }), { alerted: true, posts: 1 });
         check('never: no alert', await scheduledAlerts({ alertFrequency: 'NONE', lastAlertAt: null }), { alerted: false, posts: 0 });
-        check('daily: alerts again right after a ping', await scheduledAlerts({ alertFrequency: 'DAILY', lastAlertAt: new Date() }), { alerted: true, posts: 1 });
+        check('daily: alerts a day after a ping', await scheduledAlerts({ alertFrequency: 'DAILY', lastAlertAt: new Date(Date.now() - day) }), { alerted: true, posts: 1 });
         await prisma.trackedCircle.update({
             where: { id: circle.id },
             data: { alertFrequency: 'DAILY', lastAlertAt: null, reportMinute: null, reportTimeZone: null },
