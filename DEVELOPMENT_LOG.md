@@ -4,6 +4,22 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Many behind; less pink text
+
+- **More than five behind** (`FULL_BEHIND`): entries go compact, two lines
+  of 50px (name and shortfall; a bar with days behind and the daily need),
+  in two columns in the tall layout. Fifteen behind is now 8 rows, not 15
+  full entries.
+- **Wide, many behind**: when the behind card is taller than the table,
+  "Closest to the line" moves under the table instead, so both columns
+  reach the bottom.
+- **Text colour**: placement no longer tints names (the left bar carries
+  it), and the report line under the club name is plain text, not the
+  accent. A coloured name now only ever means behind; the accent stays on
+  bars and structure.
+
+---
+
 ## 2026-10-24 — Behind made clearer; wide layout rebuilt as three panels
 
 Feedback: make "behind" clearer; the wide layout "looks really bad" (text

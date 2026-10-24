@@ -451,7 +451,8 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, x: number, w: number, y:
     text(ctx, String(m.rank), c.rank, by, { spec: `400 ${c.numSize}px`, color: p.muted, align: 'right' });
 
     const nameSpec = `400 ${c.nameSize}px`;
-    const nameColor = m.onPace ? (tint ?? p.text) : m.behind < dayQuota ? p.warn : p.behind;
+    // Placement shows in the left bar only; a coloured name means behind.
+    const nameColor = m.onPace ? p.text : m.behind < dayQuota ? p.warn : p.behind;
     const nameWidth = text(ctx, fit(ctx, m.trainerName, c.nameMax, nameSpec), c.trainer, by, { spec: nameSpec, color: nameColor });
     if (m.rankChange !== null && m.rankChange !== 0) {
         text(ctx, `${m.rankChange > 0 ? '▲' : '▼'}${Math.abs(m.rankChange)}`, c.trainer + nameWidth + 6, by - 1, {
@@ -506,9 +507,49 @@ function inDays(fans: number, perDay: number): string {
     return `${days} ${days === '1.0' ? 'day' : 'days'}`;
 }
 
+/** Height of a compact behind entry, used once more than `FULL_BEHIND` are behind. */
+const BEHIND_COMPACT = 50;
+/** Most members behind that still get full entries. */
+const FULL_BEHIND = 5;
+
+/** Entry height and columns for `count` members behind in a card that allows `maxColumns`. */
+function behindGrid(count: number, maxColumns: number): { entry: number; columns: number; rows: number } {
+    const compact = count > FULL_BEHIND;
+    const columns = compact ? maxColumns : 1;
+    return { entry: compact ? BEHIND_COMPACT : BEHIND_ENTRY, columns, rows: Math.ceil(count / columns) };
+}
+
 /** Height of the behind card for `count` members. */
-function behindHeight(count: number): number {
-    return CARD_TITLE + count * BEHIND_ENTRY + 10;
+function behindHeight(count: number, maxColumns: number): number {
+    const grid = behindGrid(count, maxColumns);
+    return CARD_TITLE + grid.rows * grid.entry + 10;
+}
+
+/**
+ * Draws one compact behind entry: rank, name and shortfall, then a short bar
+ * with the shortfall in days and the daily need beside it.
+ */
+function drawBehindCompact(ctx: SKRSContext2D, m: MemberProgress, x: number, y: number, w: number, striped: boolean, d: Prepared) {
+    const { p, progress } = d;
+    if (striped) fillRound(ctx, x, y, w, BEHIND_COMPACT - 4, innerRadius(p), p.stripe);
+    const color = m.behind < progress.quotaPerDay ? p.warn : p.behind;
+    const left = x + 12;
+    const right = x + w - 12;
+
+    const short = `−${shortFans(m.behind)}`;
+    const shortWidth = text(ctx, short, right, y + 22, { spec: '700 16px', color, align: 'right' });
+    const rankWidth = text(ctx, `#${m.rank}`, left, y + 22, { spec: '400 13px', color: p.muted });
+    const nameX = left + rankWidth + 8;
+    text(ctx, fit(ctx, m.trainerName, right - shortWidth - 12 - nameX, '400 16px'), nameX, y + 22, { spec: '400 16px', color });
+
+    const need = m.needPerDay === null ? '—' : `${shortFans(m.needPerDay, true)}/day`;
+    const needWidth = text(ctx, need, right, y + 41, { spec: '700 13px', color: p.text, align: 'right' });
+    const lead = `${inDays(m.behind, progress.quotaPerDay)} · needs `;
+    const leadWidth = text(ctx, lead, right - needWidth, y + 41, { spec: '400 13px', color: p.muted, align: 'right' });
+    const barWidth = right - needWidth - leadWidth - 12 - left;
+    const ratio = m.expected > 0 ? Math.min(1, m.total / m.expected) : 0;
+    fillRound(ctx, left, y + 34, barWidth, 5, 2.5, p.line);
+    if (ratio > 0) fillRound(ctx, left, y + 34, Math.max(5, barWidth * ratio), 5, 2.5, color);
 }
 
 /**
@@ -545,8 +586,12 @@ function drawBehindEntry(ctx: SKRSContext2D, m: MemberProgress, x: number, y: nu
     text(ctx, 'needs ', right - needWidth, y + 61, { spec: '400 14px', color: p.muted, align: 'right' });
 }
 
-/** Draws the behind card, `h` tall; with nobody behind, says so instead. */
-function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number, y: number, w: number, h: number, d: Prepared) {
+/**
+ * Draws the behind card, `h` tall, in up to `maxColumns` columns; with
+ * nobody behind, says so instead. Past `FULL_BEHIND` members the entries go
+ * compact, so a long list stays readable.
+ */
+function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number, y: number, w: number, h: number, maxColumns: number, d: Prepared) {
     const { p } = d;
     card(ctx, x, y, w, h, p);
     const pad = 22;
@@ -562,7 +607,17 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
     if (ctx.measureText(key).width < w - pad * 2 - titleWidth - 20) {
         text(ctx, key, x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
     }
-    members.forEach((m, i) => drawBehindEntry(ctx, m, x + 8, y + CARD_TITLE + i * BEHIND_ENTRY, w - 16, i % 2 === 1, d));
+    const grid = behindGrid(members.length, maxColumns);
+    const columnW = (w - 16 - (grid.columns - 1) * 8) / grid.columns;
+    members.forEach((m, i) => {
+        // Down the first column, then the next, so rank order reads downwards.
+        const column = Math.floor(i / grid.rows);
+        const row = i % grid.rows;
+        const ex = x + 8 + column * (columnW + 8);
+        const ey = y + CARD_TITLE + row * grid.entry;
+        if (grid.entry === BEHIND_COMPACT) drawBehindCompact(ctx, m, ex, ey, columnW, row % 2 === 1, d);
+        else drawBehindEntry(ctx, m, ex, ey, columnW, row % 2 === 1, d);
+    });
 }
 
 /** Height of one row in the closest-to-the-line card. */
@@ -652,7 +707,7 @@ function drawIdentity(ctx: SKRSContext2D, d: Prepared, x: number, y: number, siz
         ly += 19;
     }
     for (const line of lines.report) {
-        text(ctx, line, tx, ly, { spec: '400 14px', color: p.accent });
+        text(ctx, line, tx, ly, { spec: '400 14px', color: p.text });
         ly += 19;
     }
 }
@@ -680,7 +735,7 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
 
     const c = columns(cardX, cardW, false);
     const tableH = tableHeight(d.onPace.length, c);
-    const behindH = d.behind.length > 0 ? behindHeight(d.behind.length) : 0;
+    const behindH = d.behind.length > 0 ? behindHeight(d.behind.length, 2) : 0;
     const notes = wrapWords(measure, d.notes, cardW - PAD * 2, '400 13px');
     const footerH = 16 + notes.length * 19 + 14;
     const height = FRAME + headerH + GAP + tableH + GAP + (behindH > 0 ? behindH + GAP : 0) + footerH + FRAME;
@@ -705,7 +760,7 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     drawTable(ctx, d.onPace, cardX, cardW, y, tableH, c, d);
     y += tableH + GAP;
     if (behindH > 0) {
-        drawBehindCard(ctx, d.behind, cardX, y, cardW, behindH, d);
+        drawBehindCard(ctx, d.behind, cardX, y, cardW, behindH, 2, d);
         y += behindH + GAP;
     }
 
@@ -717,9 +772,9 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
 
 /**
  * The landscape layout, three panels of equal height: a sidebar (club,
- * rank, figures, progress, notes at its foot), the on-pace table, and on the
- * right the behind card above the members closest to the line, which fill
- * whatever height is left.
+ * rank, figures, progress, the day's top gains, notes at its foot), the
+ * on-pace table, and the behind card. The members closest to the line fill
+ * the height left under whichever of the table and behind card is shorter.
  */
 function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     const { p, progress } = d;
@@ -747,12 +802,13 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     const identityH = identityHeight(slot, 22, lines);
     const sideMin = sidePad + identityH + 18 + 1 + 18 + slot + 18 + 1 + 18 + 2 * 64 + 14 + 18 + 44 + 24 + notes.length * 17 + sidePad;
 
-    // Right panel: the behind card, then the closest to the line under it.
-    const behindH = d.behind.length > 0 ? behindHeight(d.behind.length) : 76;
+    // The closest to the line go under whichever is shorter: the behind card
+    // (few behind) or the table (many behind), so neither column ends early.
+    const behindH = d.behind.length > 0 ? behindHeight(d.behind.length, 1) : 76;
     const closestMin = d.onPace.length > 0 ? CARD_TITLE + Math.min(3, d.onPace.length) * CLOSE_ROW + 12 : 0;
-    const rightMin = behindH + (closestMin > 0 ? GAP + closestMin : 0);
-
-    const contentH = Math.max(tableH, sideMin, rightMin);
+    const closestUnderTable = behindH > tableH;
+    const stacked = (closestUnderTable ? tableH : behindH) + (closestMin > 0 ? GAP + closestMin : 0);
+    const contentH = Math.max(sideMin, stacked, closestUnderTable ? behindH : tableH);
     const height = FRAME * 2 + contentH;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
@@ -811,17 +867,23 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     ctx.fillRect(x, notesTop - 16, inner, 1);
     notes.forEach((line, i) => text(ctx, line, x, notesTop + 12 + i * 17, { spec: '400 12px', color: p.muted }));
 
-    // On-pace table, as tall as the panels beside it.
-    drawTable(ctx, d.onPace, tableX, tableW, FRAME, contentH, c, d);
-
-    // Behind, then the closest to the line in the height left over.
-    const rows = Math.min(d.onPace.length, Math.floor((contentH - behindH - GAP - CARD_TITLE - 12) / CLOSE_ROW));
-    if (rows > 0) {
-        drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, behindH, d);
+    // On-pace table and behind card, with the closest to the line under the
+    // shorter of the two, filling it to the full height.
+    const closestFor = (top: number, x: number, w: number) => {
+        const rows = Math.min(d.onPace.length, Math.floor((FRAME + contentH - top - CARD_TITLE - 12) / CLOSE_ROW));
+        if (rows <= 0) return false;
         const closest = [...d.onPace].sort((a, b) => a.total - a.expected - (b.total - b.expected)).slice(0, rows);
-        drawClosestCard(ctx, closest, rightX, FRAME + behindH + GAP, rightW, contentH - behindH - GAP, d);
+        drawClosestCard(ctx, closest, x, top, w, FRAME + contentH - top, d);
+        return true;
+    };
+    if (closestUnderTable) {
+        drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, contentH, 1, d);
+        const shown = closestFor(FRAME + tableH + GAP, tableX, tableW);
+        drawTable(ctx, d.onPace, tableX, tableW, FRAME, shown ? tableH : contentH, c, d);
     } else {
-        drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, contentH, d);
+        drawTable(ctx, d.onPace, tableX, tableW, FRAME, contentH, c, d);
+        const shown = closestFor(FRAME + behindH + GAP, rightX, rightW);
+        drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, shown ? behindH : contentH, 1, d);
     }
 
     return canvas.encode('png');
