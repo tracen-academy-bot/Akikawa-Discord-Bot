@@ -4,6 +4,27 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Behind made clearer; wide layout rebuilt as three panels
+
+Feedback: make "behind" clearer; the wide layout "looks really bad" (text
+off, "October" should be "Oct", empty space at the end, the behind rows at
+the bottom).
+
+- **Behind entries** (both layouts) replace behind table rows: rank and
+  name, the shortfall in fans ("−8.61M") and in days of quota ("2.8 days
+  behind"), a bar of fans earned against expected by now, and "needs
+  4.12M/day". Cream under one day short, red over; the card keys the
+  colours where it fits, the wide sidebar notes otherwise.
+- **Wide layout**: three panels stretched to the same height, so no frame
+  shows below any of them. Sidebar: club, rank, a 2×2 of figures (quota,
+  expected, next due, on pace), progress, the day's top gains filling the
+  middle, notes at the foot. Middle: the on-pace table, one column
+  (circles hold at most 30). Right: the behind card, then "Closest to the
+  line", on-pace members by smallest cushion, filling the rest.
+- Dates use short month names in both layouts.
+
+---
+
 ## 2026-10-24 — Rank moves to /club admin; theme into the reports form; one channel field
 
 Asked to "move rank to admin" so the theme fits in the `/club reports`

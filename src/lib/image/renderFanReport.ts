@@ -14,13 +14,16 @@ import { describeQuota, formatMillionsFans, periodAdjective, type CircleProgress
  *   tall   900px wide, for phones. A header card (club image, name, date
  *          and members, report line; monthly rank and rank badge at the
  *          right; quota, expected and next-due figures; progress bar), then
- *          an on-pace card, a behind card and a footer card.
- *   wide   1700px wide, like the ChronoGenesis landscape page. The header
- *          becomes a sidebar on the left with the footer notes at its foot,
- *          and the members run down two table columns, on pace first.
+ *          the on-pace table, the behind card and a footer card.
+ *   wide   1700px wide, three panels of equal height: a sidebar (club,
+ *          rank, figures, progress, the day's top gains, notes at its
+ *          foot), the on-pace table, and the behind card above the members
+ *          closest to the line.
  *
- * Behind members get their own card, names cream when less than one day's
- * quota short and red when more. Figures are compact ("107.93M", "+7.08M")
+ * Behind members are not table rows but entries of their own: how far short
+ * in fans and in days of quota, a bar of fans earned against fans expected,
+ * and what they need a day from here. Cream when less than one day's quota
+ * short, red when more. Dates use short month names ("Oct 24, 2026"). Figures are compact ("107.93M", "+7.08M")
  * in IBM Plex Mono, the bot's own face, whose digits are tabular. Expected
  * is the same for everyone present all period, so it is one header figure;
  * the Days column shows who joined late and so owes less.
@@ -43,6 +46,8 @@ const SLOT = 72;
 const TALL_WIDTH = 900;
 const WIDE_WIDTH = 1700;
 const SIDEBAR_WIDTH = 340;
+/** The wide layout's right panel: behind, then closest to the line. */
+const RIGHT_PANEL_WIDTH = 420;
 
 export interface FanReportMeta {
     circleName: string;
@@ -324,16 +329,20 @@ function headerStats(progress: CircleProgress): Stat[] {
     ];
 }
 
-/** Draws one header figure with its top at `y`; returns the height used. */
-function drawStat(ctx: SKRSContext2D, s: Stat, x: number, y: number, maxWidth: number, p: Palette): number {
-    label(ctx, s.label, x, y + 14, 14, p.muted, p);
-    text(ctx, s.value, x, y + 42, { spec: '700 22px', color: p.text });
-    text(ctx, fit(ctx, s.note, maxWidth, '400 14px'), x, y + 62, { spec: '400 14px', color: p.muted });
-    return 70;
+/** Draws one header figure with its top at `y`, smaller when `compact` (the wide sidebar). */
+function drawStat(ctx: SKRSContext2D, s: Stat, x: number, y: number, maxWidth: number, p: Palette, compact: boolean) {
+    const [labelSize, valueSize, noteSize, valueY, noteY] = compact ? [13, 20, 12, 38, 56] : [14, 22, 14, 42, 62];
+    label(ctx, s.label, x, y + 14, labelSize, p.muted, p);
+    text(ctx, fit(ctx, s.value, maxWidth, `700 ${valueSize}px`), x, y + valueY, { spec: `700 ${valueSize}px`, color: p.text });
+    text(ctx, fit(ctx, s.note, maxWidth, `400 ${noteSize}px`), x, y + noteY, { spec: `400 ${noteSize}px`, color: p.muted });
 }
 
-/** The club progress bar with its two labels, top at `y`; returns the height used. */
-function drawProgress(ctx: SKRSContext2D, progress: CircleProgress, x: number, y: number, w: number, p: Palette, stacked: boolean): number {
+/**
+ * The club progress bar, top at `y`, with the club total under it and the
+ * on-pace count to the right. `pace: null` leaves the count out (the wide
+ * sidebar shows it as a figure).
+ */
+function drawProgress(ctx: SKRSContext2D, progress: CircleProgress, x: number, y: number, w: number, p: Palette, pace: false | null) {
     const ratio = progress.quotaTarget > 0 ? Math.min(1, progress.totalFans / progress.quotaTarget) : 0;
     const due = progress.members.reduce((sum, m) => sum + m.expected, 0);
     const dueRatio = progress.quotaTarget > 0 ? Math.min(1, due / progress.quotaTarget) : 0;
@@ -344,23 +353,17 @@ function drawProgress(ctx: SKRSContext2D, progress: CircleProgress, x: number, y
     ctx.fillRect(x + w * dueRatio - 1, y - 5, 2, 18);
     const pct = progress.quotaTarget > 0 ? ((progress.totalFans / progress.quotaTarget) * 100).toFixed(1) : '0.0';
     const total = `${formatMillionsFans(progress.totalFans)} of ${formatMillionsFans(progress.quotaTarget)} · ${pct}%`;
-    const pace = `${progress.onPaceCount} of ${progress.members.length} on pace`;
     text(ctx, total, x, y + 32, { spec: '400 14px', color: p.muted });
-    if (stacked) {
-        text(ctx, pace, x, y + 52, { spec: '400 14px', color: p.muted });
-        return 60;
-    }
-    text(ctx, pace, x + w, y + 32, { spec: '400 14px', color: p.muted, align: 'right' });
-    return 40;
+    if (pace === null) return;
+    text(ctx, `${progress.onPaceCount} of ${progress.members.length} on pace`, x + w, y + 32, { spec: '400 14px', color: p.muted, align: 'right' });
 }
 
-/** Footer notes: what the target, days and colours mean. */
+/** Footer notes: what the target and days mean. The behind card keys its own colours. */
 function footerNotes(progress: CircleProgress, last24h: LastDayGains | null): string[] {
     const until = progress.period === 'MONTH' ? 'until month end' : `until the day ${progress.nextCheckpointDay} check`;
     const notes = [
-        `Target: fans a day ${until}, the whole amount, not extra on top of pace.`,
+        `Target and needs: fans a day ${until}, the whole amount, not extra on top of pace.`,
         'Days: days in the circle this month.',
-        'Behind: cream is under one day of quota short, red is more.',
     ];
     if (last24h?.overlapsFreeze) notes.push('* Last 24h includes the 1st, 17:00-24:00 JST, when fans do not count.');
     return notes;
@@ -471,78 +474,130 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, x: number, w: number, y:
     text(ctx, dashNum(m.dataDays), c.days, by, { spec: small, color: p.muted, align: 'right' });
 }
 
-/** A run of rows drawn as one card. */
-interface Block {
-    members: MemberProgress[];
-    /** Column headings at the top: the first card of each column. */
-    headings: boolean;
-    /** Title above the rows, e.g. "Behind pace · 5". */
-    title: string | null;
+/** Height of the on-pace table card for `count` rows. */
+function tableHeight(count: number, c: Columns): number {
+    return HEADING_HEIGHT + 12 + Math.max(count, 1) * c.rowHeight + 12;
 }
 
-/** Height of a card holding `block`. */
-function blockHeight(block: Block, c: Columns): number {
-    const top = block.headings ? HEADING_HEIGHT + 12 : 0;
-    const title = block.title ? 40 : 0;
-    const pad = block.headings || block.title ? 0 : 12;
-    return top + title + pad + Math.max(block.members.length, 1) * c.rowHeight + 12;
-}
-
-/** Draws `block` as a card at `y`; returns its height. */
-function drawBlock(
-    ctx: SKRSContext2D,
-    block: Block,
-    x: number,
-    w: number,
-    y: number,
-    c: Columns,
-    recentLabel: string,
-    recentOf: (m: MemberProgress) => number | null,
-    progress: CircleProgress,
-    empty: string,
-    p: Palette,
-): number {
-    const h = blockHeight(block, c);
+/** Draws the on-pace table as one card `h` tall: headings, then a row per member. */
+function drawTable(ctx: SKRSContext2D, members: MemberProgress[], x: number, w: number, y: number, h: number, c: Columns, d: Prepared) {
+    const { p, progress } = d;
     card(ctx, x, y, w, h, p);
-    let rowY = y + (block.headings || block.title ? 0 : 12);
-    if (block.headings) {
-        drawHeadings(ctx, x, w, y, c, recentLabel, p);
-        rowY += HEADING_HEIGHT + 12;
-    }
-    if (block.title) {
-        text(ctx, block.title, c.rank - 20, rowY + 28, { spec: '700 15px', color: p.behind });
-        rowY += 40;
-    }
-    if (block.members.length === 0) text(ctx, empty, c.trainer, rowY + 26, { spec: '400 16px', color: p.faint });
-    block.members.forEach((m, i) => {
-        drawRow(ctx, m, x, w, rowY, c, recentOf(m), i % 2 === 1, progress.quotaPerDay, p);
+    drawHeadings(ctx, x, w, y, c, d.recentLabel, p);
+    let rowY = y + HEADING_HEIGHT + 12;
+    if (members.length === 0) text(ctx, d.empty, c.trainer, rowY + 26, { spec: '400 16px', color: p.faint });
+    members.forEach((m, i) => {
+        drawRow(ctx, m, x, w, rowY, c, d.recentOf(m), i % 2 === 1, progress.quotaPerDay, p);
         rowY += c.rowHeight;
     });
-    return h;
+}
+
+// ─── Behind ─────────────────────────────────────────────────────────────────
+
+/** Height of one behind entry: name and shortfall, a bar, then days and need. */
+const BEHIND_ENTRY = 74;
+/** Height of a side card's title row. */
+const CARD_TITLE = 54;
+
+/** A number of fans as days of quota: "2.8 days", "1.0 day". */
+function inDays(fans: number, perDay: number): string {
+    if (perDay <= 0) return '—';
+    const days = (fans / perDay).toFixed(1);
+    return `${days} ${days === '1.0' ? 'day' : 'days'}`;
+}
+
+/** Height of the behind card for `count` members. */
+function behindHeight(count: number): number {
+    return CARD_TITLE + count * BEHIND_ENTRY + 10;
 }
 
 /**
- * Splits rows into cards: a new card wherever on pace turns to behind. The
- * first card gets the headings; the first behind card gets the title.
+ * Draws one behind member: rank and name, then how far short in fans, a bar
+ * of fans earned against fans expected by now, then how far short in days
+ * and what they need a day from here. Cream when less than one day of quota
+ * short, red when more. `w` above 600 also shows the two totals.
  */
-function blocksOf(members: MemberProgress[], behindCount: number, behindTitled: boolean): Block[] {
-    const blocks: Block[] = [];
-    for (const m of members) {
-        const last = blocks[blocks.length - 1];
-        if (last && last.members[0]!.onPace === m.onPace) {
-            last.members.push(m);
-            continue;
-        }
-        const titled = !m.onPace && !behindTitled;
-        if (titled) behindTitled = true;
-        blocks.push({
-            members: [m],
-            headings: blocks.length === 0,
-            title: m.onPace ? null : titled ? `Behind pace · ${behindCount}` : 'Behind pace, continued',
-        });
+function drawBehindEntry(ctx: SKRSContext2D, m: MemberProgress, x: number, y: number, w: number, striped: boolean, d: Prepared) {
+    const { p, progress } = d;
+    if (striped) fillRound(ctx, x, y, w, BEHIND_ENTRY - 4, innerRadius(p), p.stripe);
+    const color = m.behind < progress.quotaPerDay ? p.warn : p.behind;
+    const left = x + 14;
+    const right = x + w - 14;
+
+    const short = `−${shortFans(m.behind)}`;
+    ctx.font = font('700 20px');
+    const shortWidth = ctx.measureText(short).width;
+    const rankWidth = text(ctx, `#${m.rank}`, left, y + 25, { spec: '400 15px', color: p.muted });
+    const nameX = left + rankWidth + 10;
+    text(ctx, fit(ctx, m.trainerName, right - shortWidth - 16 - nameX, '400 18px'), nameX, y + 25, { spec: '400 18px', color });
+    text(ctx, short, right, y + 26, { spec: '700 20px', color, align: 'right' });
+
+    const barY = y + 35;
+    const ratio = m.expected > 0 ? Math.min(1, m.total / m.expected) : 0;
+    fillRound(ctx, left, barY, right - left, 6, 3, p.line);
+    if (ratio > 0) fillRound(ctx, left, barY, Math.max(6, (right - left) * ratio), 6, 3, color);
+
+    const days = `${inDays(m.behind, progress.quotaPerDay)} behind`;
+    const detail = w > 600 ? `${days} · ${shortFans(m.total)} of ${shortFans(m.expected)} expected` : days;
+    text(ctx, detail, left, y + 61, { spec: '400 14px', color: p.muted });
+    const need = m.needPerDay === null ? '—' : `${shortFans(m.needPerDay, true)}/day`;
+    const needWidth = text(ctx, need, right, y + 61, { spec: '700 14px', color: p.text, align: 'right' });
+    text(ctx, 'needs ', right - needWidth, y + 61, { spec: '400 14px', color: p.muted, align: 'right' });
+}
+
+/** Draws the behind card, `h` tall; with nobody behind, says so instead. */
+function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number, y: number, w: number, h: number, d: Prepared) {
+    const { p } = d;
+    card(ctx, x, y, w, h, p);
+    const pad = 22;
+    if (members.length === 0) {
+        text(ctx, 'Everyone is on pace', x + pad, y + 34, { spec: '700 17px', color: p.good });
+        text(ctx, 'Nobody is behind what is expected by now.', x + pad, y + 58, { spec: '400 14px', color: p.muted });
+        return;
     }
-    if (blocks.length === 0) blocks.push({ members: [], headings: true, title: null });
-    return blocks;
+    const titleWidth = text(ctx, `Behind pace · ${members.length}`, x + pad, y + 34, { spec: '700 17px', color: p.behind });
+    // The colour key, where it fits beside the title.
+    const key = 'cream: under a day · red: more';
+    ctx.font = font('400 13px');
+    if (ctx.measureText(key).width < w - pad * 2 - titleWidth - 20) {
+        text(ctx, key, x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
+    }
+    members.forEach((m, i) => drawBehindEntry(ctx, m, x + 8, y + CARD_TITLE + i * BEHIND_ENTRY, w - 16, i % 2 === 1, d));
+}
+
+/** Height of one row in the closest-to-the-line card. */
+const CLOSE_ROW = 34;
+/** Height of one row in the wide sidebar's top gains. */
+const TOP_ROW = 26;
+/** The behind card's colour key, as a sentence. */
+const BEHIND_KEY = 'Behind: cream is under one day of quota short, red is more.';
+
+/**
+ * Draws the members on pace with the least to spare, fewest first: how far
+ * ahead of what is expected by now, in fans and in days of quota.
+ */
+function drawClosestCard(ctx: SKRSContext2D, members: MemberProgress[], x: number, y: number, w: number, h: number, d: Prepared) {
+    const { p, progress } = d;
+    card(ctx, x, y, w, h, p);
+    const pad = 22;
+    text(ctx, 'Closest to the line', x + pad, y + 34, { spec: '700 17px', color: p.text });
+    text(ctx, 'ahead of expected', x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
+    members.forEach((m, i) => {
+        const rowY = y + CARD_TITLE + i * CLOSE_ROW;
+        if (i % 2 === 1) fillRound(ctx, x + 8, rowY, w - 16, CLOSE_ROW, innerRadius(p), p.stripe);
+        const by = rowY + CLOSE_ROW / 2 + 6;
+        const cushion = Math.max(0, m.total - m.expected);
+        const ahead = `+${shortFans(cushion)}`;
+        const aheadWidth = text(ctx, ahead, x + w - pad, by, { spec: '700 15px', color: p.good, align: 'right' });
+        const days = inDays(cushion, progress.quotaPerDay);
+        ctx.font = font('400 13px');
+        const daysWidth = ctx.measureText(days).width;
+        text(ctx, days, x + w - pad - aheadWidth - 12, by, { spec: '400 13px', color: p.muted, align: 'right' });
+        const rankWidth = text(ctx, `#${m.rank}`, x + pad, by, { spec: '400 14px', color: p.muted });
+        const nameX = x + pad + rankWidth + 10;
+        const nameMax = x + w - pad - aheadWidth - 12 - daysWidth - 14 - nameX;
+        text(ctx, fit(ctx, m.trainerName, nameMax, '400 16px'), nameX, by, { spec: '400 16px', color: p.text });
+    });
 }
 
 // ─── Layouts ────────────────────────────────────────────────────────────────
@@ -554,9 +609,10 @@ interface Prepared {
     p: Palette;
     avatar: Image | null;
     badge: Image | null;
-    /** Members on pace first, then behind, each in rank order. */
-    ordered: MemberProgress[];
-    behindCount: number;
+    /** Members on pace, in rank order. */
+    onPace: MemberProgress[];
+    /** Members behind, in rank order. */
+    behind: MemberProgress[];
     recentLabel: string;
     recentOf: (m: MemberProgress) => number | null;
     empty: string;
@@ -608,7 +664,7 @@ function drawRank(ctx: SKRSContext2D, d: Prepared, right: number, y: number, ali
     label(ctx, 'monthly rank', right, y + 54, 14, d.p.muted, d.p, align);
 }
 
-/** The phone layout: header, on-pace and behind cards, footer, top to bottom. */
+/** The phone layout: header, on-pace table, behind card, footer, top to bottom. */
 function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     const { p, progress } = d;
     const width = TALL_WIDTH;
@@ -623,11 +679,11 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     const headerH = PAD + identityH + 22 + 70 + 22 + 40 + PAD - 8;
 
     const c = columns(cardX, cardW, false);
-    const blocks = blocksOf(d.ordered, d.behindCount, false);
+    const tableH = tableHeight(d.onPace.length, c);
+    const behindH = d.behind.length > 0 ? behindHeight(d.behind.length) : 0;
     const notes = wrapWords(measure, d.notes, cardW - PAD * 2, '400 13px');
     const footerH = 16 + notes.length * 19 + 14;
-    const tableH = blocks.reduce((sum, b) => sum + blockHeight(b, c) + GAP, 0);
-    const height = FRAME + headerH + GAP + tableH + footerH + FRAME;
+    const height = FRAME + headerH + GAP + tableH + GAP + (behindH > 0 ? behindH + GAP : 0) + footerH + FRAME;
 
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
@@ -642,11 +698,16 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     drawRank(ctx, d, right - SLOT - 16, top, 'right');
     const statsY = top + identityH + 22;
     const third = (cardW - PAD * 2) / 3;
-    headerStats(progress).forEach((s, i) => drawStat(ctx, s, cardX + PAD + third * i, statsY, third - 16, p));
+    headerStats(progress).forEach((s, i) => drawStat(ctx, s, cardX + PAD + third * i, statsY, third - 16, p, false));
     drawProgress(ctx, progress, cardX + PAD, statsY + 70 + 22, cardW - PAD * 2, p, false);
     y += headerH + GAP;
 
-    for (const block of blocks) y += drawBlock(ctx, block, cardX, cardW, y, c, d.recentLabel, d.recentOf, progress, d.empty, p) + GAP;
+    drawTable(ctx, d.onPace, cardX, cardW, y, tableH, c, d);
+    y += tableH + GAP;
+    if (behindH > 0) {
+        drawBehindCard(ctx, d.behind, cardX, y, cardW, behindH, d);
+        y += behindH + GAP;
+    }
 
     card(ctx, cardX, y, cardW, footerH, p);
     notes.forEach((line, i) => text(ctx, line, cardX + PAD, y + 28 + i * 19, { spec: '400 13px', color: p.muted }));
@@ -654,7 +715,12 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     return canvas.encode('png');
 }
 
-/** The landscape layout: a sidebar on the left and two table columns. */
+/**
+ * The landscape layout, three panels of equal height: a sidebar (club,
+ * rank, figures, progress, notes at its foot), the on-pace table, and on the
+ * right the behind card above the members closest to the line, which fill
+ * whatever height is left.
+ */
 function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     const { p, progress } = d;
     const width = WIDE_WIDTH;
@@ -662,67 +728,107 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     const sideW = SIDEBAR_WIDTH;
     const sidePad = 22;
     const inner = sideW - sidePad * 2;
-    const colW = (width - FRAME * 2 - sideW - GAP * 2) / 2;
-    const colX = [sideX + sideW + GAP, sideX + sideW + GAP + colW + GAP];
-    const slot = 60;
+    const rightW = RIGHT_PANEL_WIDTH;
+    const tableX = sideX + sideW + GAP;
+    const tableW = width - FRAME * 2 - sideW - rightW - GAP * 2;
+    const rightX = tableX + tableW + GAP;
+    const slot = 56;
 
     const measure = createCanvas(1, 1).getContext('2d');
     const textWidth = inner - slot - 16;
     const lines = identityLines(measure, d, textWidth);
-    const notes = wrapWords(measure, d.notes, inner, '400 12px');
+    // The behind card is too narrow here for its colour key, so it joins the notes.
+    const notes = wrapWords(measure, d.behind.length > 0 ? [...d.notes, BEHIND_KEY] : d.notes, inner, '400 12px');
 
-    // Rows: the first half down the left column, the rest down the right.
-    const split = Math.ceil(d.ordered.length / 2);
-    const halves = [d.ordered.slice(0, split), d.ordered.slice(split)];
-    const left = blocksOf(halves[0]!, d.behindCount, false);
-    const right = halves[1]!.length > 0 ? blocksOf(halves[1]!, d.behindCount, halves[0]!.some((m) => !m.onPace)) : [];
-    // The right column repeats the headings so it reads on its own.
-    if (right[0]) right[0].headings = true;
-    const c = [columns(colX[0]!, colW, true), columns(colX[1]!, colW, true)];
-    const columnH = [left, right].map((blocks, i) => blocks.reduce((sum, b) => sum + blockHeight(b, c[i]!) + GAP, 0) - GAP);
+    const c = { ...columns(tableX, tableW, false), rowHeight: 36 };
+    const tableH = tableHeight(d.onPace.length, c);
 
-    // Sidebar contents, top to bottom.
+    // Sidebar contents: identity, rule, rank, rule, 2×2 figures, progress, notes.
     const identityH = identityHeight(slot, 22, lines);
-    const sideContent = sidePad + identityH + 20 + 1 + 20 + Math.max(slot, 60) + 20 + 1 + 18 + 3 * 74 + 10 + 60 + 20 + 1 + 16 + notes.length * 17 + sidePad;
-    const contentH = Math.max(sideContent, ...columnH);
-    const height = FRAME * 2 + contentH;
+    const sideMin = sidePad + identityH + 18 + 1 + 18 + slot + 18 + 1 + 18 + 2 * 64 + 14 + 18 + 44 + 24 + notes.length * 17 + sidePad;
 
+    // Right panel: the behind card, then the closest to the line under it.
+    const behindH = d.behind.length > 0 ? behindHeight(d.behind.length) : 76;
+    const closestMin = d.onPace.length > 0 ? CARD_TITLE + Math.min(3, d.onPace.length) * CLOSE_ROW + 12 : 0;
+    const rightMin = behindH + (closestMin > 0 ? GAP + closestMin : 0);
+
+    const contentH = Math.max(tableH, sideMin, rightMin);
+    const height = FRAME * 2 + contentH;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
     drawFrame(ctx, width, height, p);
 
-    // Sidebar: identity, rank and badge, figures, progress, notes.
+    // Sidebar.
     card(ctx, sideX, FRAME, sideW, contentH, p);
     const x = sideX + sidePad;
     let y = FRAME + sidePad;
     drawIdentity(ctx, d, x, y, slot, textWidth, lines, 22);
-    y += identityH + 20;
+    y += identityH + 18;
     const rule = () => {
         ctx.fillStyle = p.line;
         ctx.fillRect(x, y, inner, 1);
-        y += 1 + 20;
+        y += 1 + 18;
     };
     rule();
     drawSlot(ctx, d.badge, x, y, slot, p, '?', false);
-    drawRank(ctx, d, x + slot + 16, y + 2, 'left');
-    y += Math.max(slot, 60) + 20;
+    drawRank(ctx, d, x + slot + 16, y, 'left');
+    y += slot + 18;
     rule();
-    y -= 2;
-    for (const s of headerStats(progress)) y += drawStat(ctx, s, x, y, inner, p) + 4;
-    y += 10;
-    y += drawProgress(ctx, progress, x, y, inner, p, true) + 20;
-    rule();
-    y -= 4;
-    notes.forEach((line, i) => text(ctx, line, x, y + 12 + i * 17, { spec: '400 12px', color: p.muted }));
+    const half = (inner - 16) / 2;
+    const stats = [
+        ...headerStats(progress),
+        { label: 'On pace', value: `${progress.onPaceCount}/${progress.members.length}`, note: 'members' },
+    ];
+    stats.forEach((s, i) => drawStat(ctx, s, x + (i % 2) * (half + 16), y + Math.floor(i / 2) * 64, half, p, true));
+    y += 2 * 64 + 14;
+    drawProgress(ctx, progress, x, y, inner, p, null);
+    y += 44 + 18;
+    // The notes sit at the foot of the sidebar, whatever its height.
+    const notesTop = FRAME + contentH - sidePad - notes.length * 17;
 
-    // Table columns.
-    [left, right].forEach((blocks, i) => {
-        let by = FRAME;
-        for (const block of blocks) by += drawBlock(ctx, block, colX[i]!, colW, by, c[i]!, d.recentLabel, d.recentOf, progress, d.empty, p) + GAP;
-    });
+    // Between them, the day's best gains, as many as fit.
+    const room = Math.floor((notesTop - 34 - (y + 1 + 18 + 30)) / TOP_ROW);
+    const top = progress.members
+        .map((m) => ({ m, gain: d.recentOf(m) ?? 0 }))
+        .filter((t) => t.gain > 0)
+        .sort((a, b) => b.gain - a.gain)
+        .slice(0, Math.max(0, Math.min(room, 8)));
+    if (top.length > 0) {
+        rule();
+        label(ctx, `Top ${d.recentLabel}`, x, y + 12, 13, p.muted, p);
+        y += 30;
+        for (const t of top) {
+            const by = y + 18;
+            const gainWidth = text(ctx, `+${shortFans(t.gain)}`, x + inner, by, { spec: '700 15px', color: p.good, align: 'right' });
+            const rankWidth = text(ctx, `#${t.m.rank}`, x, by, { spec: '400 13px', color: p.muted });
+            const nameX = x + rankWidth + 8;
+            text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '400 15px'), nameX, by, { spec: '400 15px', color: p.text });
+            y += TOP_ROW;
+        }
+    }
+
+    ctx.fillStyle = p.line;
+    ctx.fillRect(x, notesTop - 16, inner, 1);
+    notes.forEach((line, i) => text(ctx, line, x, notesTop + 12 + i * 17, { spec: '400 12px', color: p.muted }));
+
+    // On-pace table, as tall as the panels beside it.
+    drawTable(ctx, d.onPace, tableX, tableW, FRAME, contentH, c, d);
+
+    // Behind, then the closest to the line in the height left over.
+    const rows = Math.min(d.onPace.length, Math.floor((contentH - behindH - GAP - CARD_TITLE - 12) / CLOSE_ROW));
+    if (rows > 0) {
+        drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, behindH, d);
+        const closest = [...d.onPace].sort((a, b) => a.total - a.expected - (b.total - b.expected)).slice(0, rows);
+        drawClosestCard(ctx, closest, rightX, FRAME + behindH + GAP, rightW, contentH - behindH - GAP, d);
+    } else {
+        drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, contentH, d);
+    }
 
     return canvas.encode('png');
 }
+
+/** Full month names, shortened to three letters in the report's date: "Oct 24, 2026". */
+const MONTH_NAMES = /\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/;
 
 /**
  * Renders the report as a PNG.
@@ -741,12 +847,12 @@ export async function renderFanReport(
     const day = progress.finishedDay > 0 ? progress.finishedDay : progress.daysElapsed;
     const prepared: Prepared = {
         progress,
-        meta,
+        meta: { ...meta, dateLabel: meta.dateLabel.replace(MONTH_NAMES, (name) => name.slice(0, 3)) },
         p: palette,
         avatar: await loadClubIcon(meta.circleName),
         badge: meta.clubRank ? await loadRankIcon(meta.clubRank) : null,
-        ordered: [...progress.members.filter((m) => m.onPace), ...progress.members.filter((m) => !m.onPace)],
-        behindCount: progress.members.length - progress.onPaceCount,
+        onPace: progress.members.filter((m) => m.onPace),
+        behind: progress.members.filter((m) => !m.onPace),
         recentLabel: last24h ? `Last 24h${last24h.overlapsFreeze ? '*' : ''}` : `Day ${day}`,
         recentOf: (m) => (last24h ? (last24h.gains.get(m.viewerId) ?? null) : progress.finishedDay > 0 ? m.finishedDayGain : m.latestDayGain),
         empty: progress.members.length === 0 ? 'No fan data ingested for this month yet.' : 'Nobody is on pace yet.',
