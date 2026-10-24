@@ -4,6 +4,30 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-24 — Rank moves to /club admin; theme into the reports form; one channel field
+
+Asked to "move rank to admin" so the theme fits in the `/club reports`
+form, then to merge the report and alert channel fields so rank fits in the
+`/club admin` form (both forms are at Discord's five-field limit).
+
+- **`/club reports`** (club staff): quota, period, report time, time zone,
+  report theme. Saving a new theme replies with the current report drawn in
+  it (the submit defers first). The `theme:` command option is gone.
+- **`/club admin`** (Club Managers): expected rank (with each rank's cutoff
+  figures under it, as before), home channels, staff roles, report channel,
+  staff pings. Untracked clubs: name, rank, staff roles. Club staff can no
+  longer set their own expected rank.
+- **One channel field.** An empty `alertChannelId` now means "the report
+  channel" (`alertChannelOf`). The admin form sets the report channel; an
+  alert channel that matched the old report channel is cleared so it keeps
+  following, and a separately set one (`/fans circle config alert_channel:`
+  or the dashboard) is kept.
+- **Behaviour change:** a club with a report channel and no alert channel
+  used to get no alerts. It now gets them in the report channel, unless its
+  staff pings are set to Never.
+
+---
+
 ## 2026-10-24 — Clubs pick their own report theme
 
 New `reportTheme` column (text, null = default) and a `theme` choice on

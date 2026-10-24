@@ -26,7 +26,7 @@ import {
     type MemberProgress,
     type QuotaPeriod,
 } from '../lib/fans/metrics';
-import { buildCircleReport, postReport } from '../lib/fans/scheduler';
+import { alertChannelOf, buildCircleReport, postReport } from '../lib/fans/scheduler';
 import { isConfigured, searchCircles } from '../lib/umamoe/client';
 import { renderFanReport } from '../lib/image/renderFanReport';
 import { paletteOf } from '../lib/image/theme';
@@ -149,7 +149,7 @@ export const data = new SlashCommandBuilder()
                     .addChannelOption((opt) =>
                         opt
                             .setName('alert_channel')
-                            .setDescription('Where behind-quota alerts go. A thread works.')
+                            .setDescription('Where behind-quota alerts go, if not the report channel. A thread works.')
                             .addChannelTypes(...REPORT_CHANNEL_TYPES),
                     )
                     .addBooleanOption((opt) => opt.setName('active').setDescription('Pause or resume syncing')),
@@ -398,10 +398,10 @@ async function checkCircle(
             posted.behindCount === 0
                 ? 'nobody is behind.'
                 : posted.alerted
-                  ? `${posted.behindCount} behind, alerted in <#${fresh.alertChannelId}>.`
+                  ? `${posted.behindCount} behind, alerted in <#${alertChannelOf(fresh)}>.`
                   : fresh.alertFrequency === 'NONE'
                     ? `${posted.behindCount} behind; alerts are off for this club.`
-                    : `${posted.behindCount} behind; no alert channel is set, so nobody was pinged.`;
+                    : `${posted.behindCount} behind; the alert could not be posted in <#${alertChannelOf(fresh)}>.`;
         return withNote(`**${fresh.name}** — report posted in <#${fresh.reportChannelId}>; ${alertNote}`);
     }
 
@@ -987,7 +987,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
     const lines = [
         `Quota: **${describeQuota(toSafeNumber(updated.quota), updated.quotaPeriod)}** per member`,
         `Reports: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'not set'}`,
-        `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'not set'}`,
+        `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : updated.reportChannelId ? 'in the report channel' : 'not set'}`,
         `Syncing: ${updated.active ? 'active' : 'paused'}`,
     ];
 

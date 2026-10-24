@@ -4,6 +4,15 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-24 — Expected rank is a Club Manager setting
+
+Fwoxie: "move rank to admin", then chose to merge the report and alert
+channel fields to make room. Club staff now set quota, report time and
+theme; Club Managers set the expected rank and channels. Alerts default to
+the report channel.
+
+---
+
 ## 2026-10-24 — Daily target kept; alerts go to staff roles on a cadence
 
 Fwoxie: keep Daily target ("daily target and ping when behind"); alerts

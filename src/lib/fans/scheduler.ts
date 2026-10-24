@@ -139,6 +139,11 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
     };
 }
 
+/** Where a club's alerts post: its alert channel, or else its report channel. */
+export function alertChannelOf(circle: Pick<TrackedCircle, 'alertChannelId' | 'reportChannelId'>): string | null {
+    return circle.alertChannelId ?? circle.reportChannelId;
+}
+
 /** Days between pings for each cadence; null for never. */
 const ALERT_INTERVAL_DAYS: Record<AlertFrequency, number | null> = { DAILY: 1, EVERY_3_DAYS: 3, WEEKLY: 7, NONE: null };
 
@@ -216,10 +221,12 @@ export async function postReport(
     // always alerts unless the club turned alerts off.
     let alerted = false;
     const due = scheduled ? isAlertDue(circle.alertFrequency, circle.lastAlertAt) : circle.alertFrequency !== 'NONE';
-    if (circle.alertChannelId && report.alert && due) {
+    // Alerts post in the report channel unless a separate one is set.
+    const alertChannel = alertChannelOf(circle);
+    if (alertChannel && report.alert && due) {
         const roles = await staffRoleIdsFor(client, circle);
         const ping = roles.map((id) => `<@&${id}>`).join(' ');
-        alerted = await sendTo(client, circle.alertChannelId, {
+        alerted = await sendTo(client, alertChannel, {
             content: ping ? `${ping}\n${report.alert.content}` : report.alert.content,
             allowedMentions: { roles },
         });
