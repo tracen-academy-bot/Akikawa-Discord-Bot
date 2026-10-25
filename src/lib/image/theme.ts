@@ -90,7 +90,9 @@ export function dashNum(value: number | null | undefined): string {
  *   accent   structure: the club name, rules, the progress bar, rank-ups
  *   target   the daily target of someone on pace
  *   good     on pace
- *   warn     behind by less than one day's quota (names)
+ *   warn     behind by less than one day's quota (names and bars). A
+ *            saturated yellow (amber on light palettes), so it never reads
+ *            as plain text; `scripts/palettes.ts` checks this.
  *   behind   behind by more, and nothing else (names, bars, and the daily
  *            target of anyone behind)
  *   place    name tints and left bars for 1st through 4th
@@ -174,7 +176,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#ff7fb2',
         target: '#ffd27a',
         good: '#7be0a0',
-        warn: '#f5e0a4',
+        warn: '#ffd23f',
         behind: '#ff6b63',
         place: ['#ffd27a', '#e9e2e6', '#f0a774', '#ff9ccc'],
         style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
@@ -196,7 +198,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: THEME.gold,
         target: THEME.gold,
         good: THEME.green,
-        warn: '#f0d48a',
+        warn: '#ffe14d',
         behind: '#e0665a',
         place: THEME.place,
         style: { radius: 0, border: 'rgba(212, 165, 74, 0.45)', glow: false, labels: 'upper', frameStyle: 'solid' },
@@ -218,7 +220,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#62adff',
         target: '#f2b84b',
         good: '#62adff',
-        warn: '#f7e0a3',
+        warn: '#ffd84d',
         behind: '#ff7a7a',
         place: ['#f5c84c', '#d4dae8', '#e8a06a', '#b49cff'],
         style: { radius: 14, border: '#2c3a66', glow: false, labels: 'plain', frameStyle: 'stars' },
@@ -240,7 +242,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#00bfff',
         target: '#f1c40f',
         good: '#1abc9c',
-        warn: '#f7e08a',
+        warn: '#ffe14d',
         behind: '#ff6f61',
         place: ['#f1c40f', '#dfe4ea', '#f39c45', '#00bfff'],
         style: { radius: 20, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
@@ -262,7 +264,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#ff8fc7',
         target: '#ffd479',
         good: '#7ee0c3',
-        warn: '#ffe3a3',
+        warn: '#ffd84d',
         behind: '#ff7b7b',
         place: ['#ffd479', '#e6dcef', '#ffa978', '#ff8fc7'],
         style: { radius: 22, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
@@ -284,7 +286,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#6fd6a8',
         target: '#f0c75e',
         good: '#6fd6a8',
-        warn: '#efe0a0',
+        warn: '#ffe14d',
         behind: '#ff8a7a',
         place: ['#f0c75e', '#dbe6e0', '#e8a36c', '#8fc8ff'],
         style: { radius: 10, border: null, glow: false, labels: 'upper', frameStyle: 'lanes' },
@@ -306,7 +308,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#8ea1ff',
         target: '#ffcf5c',
         good: '#6fdc8c',
-        warn: '#f5e2a8',
+        warn: '#ffd84d',
         behind: '#ff8a8a',
         place: ['#ffcf5c', '#e3e5e8', '#f0a774', '#8ea1ff'],
         style: { radius: 8, border: '#44474e', glow: false, labels: 'plain', frameStyle: 'solid' },
@@ -328,7 +330,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#8a5a00',
         target: '#8a5a00',
         good: '#1f6e3a',
-        warn: '#7a5600',
+        warn: '#945200',
         behind: '#b3261e',
         place: ['#8a5a00', '#4a5563', '#9a4a12', '#2c5aa0'],
         style: { radius: 2, border: '#c9b88f', glow: false, labels: 'upper', frameStyle: 'solid' },
@@ -350,7 +352,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#94490f',
         target: '#94490f',
         good: '#2f58c4',
-        warn: '#7d5000',
+        warn: '#924f00',
         behind: '#c0262d',
         place: ['#b0306a', '#94490f', '#5b5f6b', '#2f58c4'],
         style: { radius: 24, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
@@ -358,7 +360,7 @@ export const PALETTES: Record<string, Palette> = {
     clear: {
         id: 'clear',
         label: 'Clear',
-        origin: 'Okabe-Ito colours (Color Universal Design): behind and on pace stay distinct with red-green colour blindness.',
+        origin: 'Okabe-Ito colours (Color Universal Design): behind (vermillion), close (yellow) and on pace (sky blue) stay distinct with red-green colour blindness.',
         light: false,
         frame: '#26262b',
         frameEnd: '#33333a',
@@ -373,7 +375,7 @@ export const PALETTES: Record<string, Palette> = {
         target: '#f0e442',
         good: '#56b4e9',
         warn: '#f0e442',
-        behind: '#e69f00',
+        behind: '#e2661a',
         place: ['#f0e442', '#e2e2e2', '#cc79a7', '#009e73'],
         style: { radius: 10, border: '#3a3a42', glow: false, labels: 'plain', frameStyle: 'solid' },
     },
@@ -394,7 +396,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#2ef2ff',
         target: '#fff35c',
         good: '#39ff9c',
-        warn: '#ffe9a8',
+        warn: '#fff35c',
         behind: '#ff5c7a',
         place: ['#fff35c', '#e6e6ff', '#ffad5c', '#ff6cf3'],
         style: { radius: 6, border: '#ff3df2', glow: true, labels: 'upper', frameStyle: 'grid' },
@@ -416,7 +418,7 @@ export const PALETTES: Record<string, Palette> = {
         accent: '#7338c9',
         target: '#855400',
         good: '#1d7448',
-        warn: '#7a4f00',
+        warn: '#995400',
         behind: '#bf2440',
         place: ['#a1307a', '#4f5868', '#9a4a12', '#7338c9'],
         style: { radius: 26, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },

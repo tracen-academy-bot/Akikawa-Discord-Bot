@@ -4,6 +4,38 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-25 — Brighter "close" names; wide layout stress-tested
+
+viinus (2026-10-24): the names "on the edge" (behind by under a day) were
+hard to tell from normal names except on Graphite. Every palette's `warn`
+was a pale cream (HSV saturation about 0.3), close to white text. It is now
+a saturated yellow on dark palettes and a deep amber on light ones.
+`scripts/palettes.ts` now also fails a palette whose `warn` is paler than
+saturation 0.6 or within 25 degrees of hue of `behind`; that caught Clear,
+whose behind is now vermillion (still Okabe-Ito, still colour-blind safe).
+
+Wide layout, rendered across: 5 members; 30 with nobody behind (Paper);
+13, 24 and 30 behind; Last 24h with the freeze note and long names; no
+data. Found and fixed:
+
+- **All behind**: the table was empty and 30 entries stacked in the right
+  column (1600px tall). The behind card now spans the middle and right in
+  three columns.
+- **Many behind** (24): the table and the closest to the line now sit side
+  by side on top, with the behind card in three columns under both. The
+  layout picks whichever arrangement is shortest.
+- **Capital labels** (Paper, Classic, Turf, Neon): "DAY 23" ran into
+  "TARGET/DAY"; columns are spaced wider.
+- **Long club names** shrink (to 70%) before they are cut short.
+- **No data**: the behind card said "Everyone is on pace"; it now says there
+  is no data yet.
+
+Not fixed: a small club (about 10 members or fewer) leaves the wide
+layout's cards mostly empty, because the sidebar sets a minimum height.
+The tall layout suits them better.
+
+---
+
 ## 2026-10-24 — Header and notes cut down
 
 Feedback: turning the pink lines white did not fix them ("scattering pink

@@ -54,6 +54,36 @@ function contrastRows(p: Palette): { key: string; color: string; ratio: number; 
     return keys.map(([key, color, floor]) => ({ key, color, ratio: Math.min(...grounds.map((g) => contrast(color, g))), floor }));
 }
 
+/** Hue in degrees (0-360) and saturation (0-1) of a `#rrggbb` colour, as HSV. */
+function hueSaturation(hex: string): { hue: number; saturation: number } {
+    const n = parseInt(hex.slice(1), 16);
+    const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => c / 255) as [number, number, number];
+    const max = Math.max(r, g, b);
+    const delta = max - Math.min(r, g, b);
+    let hue = 0;
+    if (delta > 0) {
+        if (max === r) hue = 60 * (((g - b) / delta) % 6);
+        else if (max === g) hue = 60 * ((b - r) / delta + 2);
+        else hue = 60 * ((r - g) / delta + 4);
+    }
+    return { hue: (hue + 360) % 360, saturation: max === 0 ? 0 : delta / max };
+}
+
+/**
+ * Problems telling the behind colours apart. A pale `warn` reads as plain
+ * text (viinus, 2026-10-24: "a bit hard to differentiate"), so it must be
+ * saturated, and its hue must sit clearly apart from `behind`.
+ */
+function distinctness(p: Palette): string[] {
+    const warn = hueSaturation(p.warn);
+    const behind = hueSaturation(p.behind);
+    const gap = Math.min(Math.abs(warn.hue - behind.hue), 360 - Math.abs(warn.hue - behind.hue));
+    const problems: string[] = [];
+    if (warn.saturation < 0.6) problems.push(`warn ${p.warn} is pale (saturation ${warn.saturation.toFixed(2)} < 0.60), so it reads as text`);
+    if (gap < 25) problems.push(`warn ${p.warn} and behind ${p.behind} are only ${gap.toFixed(0)} degrees of hue apart`);
+    return problems;
+}
+
 /**
  * A 29-member circle like Cosmos on 2026-10-24: a biweekly 42.5M quota, day
  * 23 finished, the second half (days 15-31) in progress. A spread of totals,
@@ -111,8 +141,12 @@ async function main() {
             if (!ok) failures += 1;
             console.log(`  ${ok ? 'ok  ' : 'LOW '} ${row.key.padEnd(8)} ${row.color}  ${row.ratio.toFixed(2)}:1 (floor ${row.floor}:1)`);
         }
+        for (const problem of distinctness(palette)) {
+            failures += 1;
+            console.log(`  SAME ${problem}`);
+        }
     }
-    console.log(failures === 0 ? '\nEvery colour meets its floor.' : `\n${failures} colour(s) below their floor.`);
+    console.log(failures === 0 ? '\nEvery colour meets its floor and the behind colours are distinct.' : `\n${failures} problem(s).`);
     process.exitCode = failures === 0 ? 0 : 1;
 }
 

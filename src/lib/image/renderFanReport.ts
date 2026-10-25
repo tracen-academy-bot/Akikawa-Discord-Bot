@@ -387,7 +387,7 @@ interface Columns {
 function columns(x: number, w: number, compact: boolean): Columns {
     const right = x + w - (compact ? 18 : PAD);
     // Distances between right edges: days to target, to recent, to total, to avg.
-    const [d, t, r, a] = compact ? [66, 84, 90, 94] : [78, 96, 108, 108];
+    const [d, t, r, a] = compact ? [66, 96, 90, 94] : [80, 112, 108, 104];
     const days = right;
     const target = days - d;
     const recent = target - t;
@@ -590,6 +590,11 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
     const { p } = d;
     card(ctx, x, y, w, h, p);
     const pad = 22;
+    if (members.length === 0 && d.progress.members.length === 0) {
+        text(ctx, 'No data yet', x + pad, y + 34, { spec: '700 17px', color: p.muted });
+        text(ctx, 'Nothing to judge until the first day is in.', x + pad, y + 58, { spec: '400 14px', color: p.muted });
+        return;
+    }
     if (members.length === 0) {
         text(ctx, 'Everyone is on pace', x + pad, y + 34, { spec: '700 17px', color: p.good });
         text(ctx, 'Nobody is behind what is expected by now.', x + pad, y + 58, { spec: '400 14px', color: p.muted });
@@ -690,7 +695,14 @@ function drawIdentity(ctx: SKRSContext2D, d: Prepared, x: number, y: number, siz
     // Centred on the image when it is the taller of the two.
     const blockH = nameSize + 6 + lines.length * 19;
     const ty = y + Math.max(0, (size - blockH) / 2);
-    text(ctx, fit(ctx, meta.circleName, textWidth, `700 ${nameSize}px`), tx, ty + nameSize, { spec: `700 ${nameSize}px`, color: p.text });
+    // A long name steps down in size before it is cut short.
+    let fitted = nameSize;
+    ctx.font = font(`700 ${fitted}px`);
+    while (fitted > Math.round(nameSize * 0.7) && ctx.measureText(meta.circleName).width > textWidth) {
+        fitted -= 1;
+        ctx.font = font(`700 ${fitted}px`);
+    }
+    text(ctx, fit(ctx, meta.circleName, textWidth, `700 ${fitted}px`), tx, ty + nameSize, { spec: `700 ${fitted}px`, color: p.text });
     lines.forEach((line, i) => text(ctx, line, tx, ty + nameSize + 22 + i * 19, { spec: '400 14px', color: p.muted }));
 }
 
@@ -788,13 +800,27 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
         sidePad + identityH + 19 + 18 + slot + 19 + 18 + 2 * 64 + 14 + 44 + 19 + 18 + 30 + 3 * SUMMARY_ROW + 14 + 3 * TOP_ROW +
         (notes.length > 0 ? 18 + notes.length * 17 : 0) + sidePad;
 
-    // The closest to the line go under whichever is shorter: the behind card
-    // (few behind) or the table (many behind), so neither column ends early.
-    const behindH = d.behind.length > 0 ? behindHeight(d.behind.length, 1) : 76;
+    // Where the behind card goes, whichever arrangement is shortest:
+    //   right   beside the table, with the closest to the line under the
+    //           shorter of the two (few or some behind)
+    //   under   across the middle and right in three columns, under the
+    //           table and the closest to the line side by side (more behind
+    //           than the right column can hold)
+    //   span    the same with nothing above it (nobody on pace, so there is
+    //           no table and no one close to the line)
+    const n = d.behind.length;
+    const behindRight = n > 0 ? behindHeight(n, 1) : 76;
     const closestMin = d.onPace.length > 0 ? CARD_TITLE + Math.min(3, d.onPace.length) * CLOSE_ROW + 12 : 0;
-    const closestUnderTable = behindH > tableH;
-    const stacked = (closestUnderTable ? tableH : behindH) + (closestMin > 0 ? GAP + closestMin : 0);
-    const contentH = Math.max(sideMin, stacked, closestUnderTable ? behindH : tableH);
+    const closestUnderTable = behindRight > tableH;
+    const rightH = Math.max(
+        sideMin,
+        (closestUnderTable ? tableH : behindRight) + (closestMin > 0 ? GAP + closestMin : 0),
+        closestUnderTable ? behindRight : tableH,
+    );
+    const topH = Math.max(tableH, closestMin);
+    const underH = n > FULL_BEHIND ? Math.max(sideMin, topH + GAP + behindHeight(n, 3)) : Infinity;
+    const mode: 'right' | 'under' | 'span' = n > 0 && d.onPace.length === 0 ? 'span' : underH < rightH ? 'under' : 'right';
+    const contentH = mode === 'span' ? Math.max(sideMin, behindHeight(n, 3)) : mode === 'under' ? underH : rightH;
     const height = FRAME * 2 + contentH;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
@@ -860,21 +886,27 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
 
     // On-pace table and behind card, with the closest to the line under the
     // shorter of the two, filling it to the full height.
-    const closestFor = (top: number, x: number, w: number) => {
-        const rows = Math.min(d.onPace.length, Math.floor((FRAME + contentH - top - CARD_TITLE - 12) / CLOSE_ROW));
+    const closestFor = (top: number, x: number, w: number, bottom = FRAME + contentH) => {
+        const rows = Math.min(d.onPace.length, Math.floor((bottom - top - CARD_TITLE - 12) / CLOSE_ROW));
         if (rows <= 0) return false;
         const closest = [...d.onPace].sort((a, b) => a.total - a.expected - (b.total - b.expected)).slice(0, rows);
-        drawClosestCard(ctx, closest, x, top, w, FRAME + contentH - top, d);
+        drawClosestCard(ctx, closest, x, top, w, bottom - top, d);
         return true;
     };
-    if (closestUnderTable) {
+    if (mode === 'span') {
+        drawBehindCard(ctx, d.behind, tableX, FRAME, tableW + GAP + rightW, contentH, 3, d);
+    } else if (mode === 'under') {
+        drawTable(ctx, d.onPace, tableX, tableW, FRAME, topH, c, d);
+        closestFor(FRAME, rightX, rightW, FRAME + topH);
+        drawBehindCard(ctx, d.behind, tableX, FRAME + topH + GAP, tableW + GAP + rightW, contentH - topH - GAP, 3, d);
+    } else if (closestUnderTable) {
         drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, contentH, 1, d);
         const shown = closestFor(FRAME + tableH + GAP, tableX, tableW);
         drawTable(ctx, d.onPace, tableX, tableW, FRAME, shown ? tableH : contentH, c, d);
     } else {
         drawTable(ctx, d.onPace, tableX, tableW, FRAME, contentH, c, d);
-        const shown = closestFor(FRAME + behindH + GAP, rightX, rightW);
-        drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, shown ? behindH : contentH, 1, d);
+        const shown = closestFor(FRAME + behindRight + GAP, rightX, rightW);
+        drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, shown ? behindRight : contentH, 1, d);
     }
 
     return canvas.encode('png');
