@@ -159,6 +159,8 @@ model TrackedCircle {
     lastAlertAt     DateTime?
     /// uma.moe monthly rank at the last sync. Shown in report headers.
     monthlyRank     Int?
+    /// uma.moe monthly points at the last sync, for the report's rank band.
+    monthlyPoints   BigInt?
     /// Paused circles are kept but skipped by the sync job.
     active          Boolean   @default(true)
     lastSyncedAt    DateTime?

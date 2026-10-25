@@ -1,5 +1,5 @@
 import { AttachmentBuilder, type Client } from 'discord.js';
-import { refreshCutoffs, refreshCutoffsIfStale } from './cutoff';
+import { refreshCutoffs, refreshCutoffsIfStale, rankBand } from './cutoff';
 import type { AlertFrequency, TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
@@ -110,6 +110,7 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
         circleName: circle.name,
         monthlyRank: circle.monthlyRank,
         clubRank: circle.rank,
+        rankBand: rankBand(circle.monthlyRank, circle.monthlyPoints === null ? null : Number(circle.monthlyPoints)),
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, atReset ? progress.finishedDay : progress.daysElapsed),
         last24h: atReset ? null : await lastDayGains(circle.id),

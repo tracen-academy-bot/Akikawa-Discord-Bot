@@ -32,6 +32,7 @@ import { renderFanReport } from '../lib/image/renderFanReport';
 import { paletteOf } from '../lib/image/theme';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
+import { rankBand } from '../lib/fans/cutoff';
 
 /** Quota period choices for `/fans circle add` and `config`. Weeks restart on the 1st. */
 const QUOTA_PERIOD_CHOICES = [
@@ -346,6 +347,7 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
         circleName: circle.name,
         monthlyRank: circle.monthlyRank,
         clubRank: circle.rank,
+        rankBand: rankBand(circle.monthlyRank, circle.monthlyPoints === null ? null : Number(circle.monthlyPoints)),
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, progress.daysElapsed),
         last24h: await lastDayGains(circle.id),

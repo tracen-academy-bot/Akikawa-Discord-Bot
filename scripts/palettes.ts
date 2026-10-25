@@ -130,6 +130,14 @@ async function main() {
             monthlyRank: 194,
             memberCount: progress.members.length,
             dateLabel: 'October 24, 2026',
+            // #194 sits in the A+ band (101-500); made-up points at its edges.
+            rankBand: {
+                rank: 194,
+                points: progress.totalFans,
+                tier: 'A+',
+                above: { rank: 100, tier: 'S', points: Math.round(progress.totalFans * 1.12) },
+                below: { rank: 500, tier: 'A+', points: Math.round(progress.totalFans * 0.71) },
+            },
         };
         const file = join(outDir, `fan-report-${palette.id}.png`);
         writeFileSync(file, await renderFanReport(progress, meta, palette, 'tall'));

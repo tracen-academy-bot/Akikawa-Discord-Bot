@@ -4,6 +4,29 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-25 — Rank band; top 3 of the day; lists stretch to fill
+
+- **Rank band** (both layouts): where the club's monthly points sit between
+  the cutoffs around its monthly rank. #194 is in the A+ band (#101–500): a
+  bar from #500 to #100 with the club marked, "To #100 (S) +579M" and
+  "Over #500 (A+) +1.40B". The club's `monthly_point` is now stored on sync
+  (`monthlyPoints`, new column), and `refreshCutoff` keeps the points of the
+  circle exactly on each cutoff place (`CutoffSeries.points`), which it
+  already fetched, so the band costs no extra uma.moe requests.
+  `rankBand()` works out the band; the top band has no place above and past
+  #3000 there is none below. Both figures come from uma.moe's points, so they
+  compare like with like; the edges are up to six hours old (the cutoff
+  refresh), the club's own up to an hour.
+- **Top 3 of the day** replaces the open-ended best-gains list in the wide
+  sidebar, titled "Top 3 · Day 23" and numbered, so it reads as the day's
+  best rather than a second copy of the table's leaders.
+- **Flex**: table rows, behind entries and closest-to-the-line rows grow to
+  fill spare card height, by at most 1.35× (1.25× for behind entries), and
+  the sidebar's summary and top-3 rows likewise. A small club still leaves
+  some space rather than a few huge rows.
+
+---
+
 ## 2026-10-25 — Brighter "close" names; wide layout stress-tested
 
 viinus (2026-10-24): the names "on the edge" (behind by under a day) were

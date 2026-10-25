@@ -66,7 +66,8 @@ async function main() {
             const page = Number(url.searchParams.get('page'));
             // The ranking ends at 1030th: T1000's top end is missing, and T3000's band is empty.
             const size = Math.max(0, Math.min(100, 1030 - page * 100));
-            body = { circles: Array.from({ length: size }, (_, i) => ({ circle_id: page * 100 + i + 1, name: `Circle ${page * 100 + i + 1}` })) };
+            // Points fall 1M a place from 10B, so the circle at a place has 10B - place × 1M.
+            body = { circles: Array.from({ length: size }, (_, i) => ({ circle_id: page * 100 + i + 1, name: `Circle ${page * 100 + i + 1}`, monthly_point: 10_000_000_000 - (page * 100 + i + 1) * 1_000_000 })) };
         } else {
             const id = Number(url.searchParams.get('circle_id'));
             body = { members: membersOf(id, url.searchParams.get('month') === '10' ? 3 : 30) };
@@ -75,6 +76,7 @@ async function main() {
     }) as typeof fetch;
 
     const series = await cutoff.refreshCutoff(1000, now);
+    check('the points of the circle exactly at the cutoff are kept', series.points, 9_000_000_000);
     const lists = requests.filter((r) => r.startsWith('/api/v4/circles/list'));
     check('each page of the band is fetched once', lists.map((r) => /page=(\d+)/.exec(r)?.[1]), ['9', '10']);
     check('places past the end of the ranking are skipped', [series.circles, series.from, series.to], [9, 950, 1050]);
@@ -103,6 +105,20 @@ async function main() {
     check('even T3000 with big numbers fits an option description', (widest?.length ?? 0) <= 100, true);
     check('the dated detail', cutoff.cutoffDetail(series)?.startsWith('T1000 (9 circles ranked 950–1050), fans per member per day: 9/27: **1.79M** · '), true);
     check('nothing to show before the first run', [cutoff.cutoffLine(null), cutoff.cutoffDetail(null)], [null, null]);
+
+    // ── The rank band ─────────────────────────────────────────────────────────
+    const at = (rank: number, points: number | null) => ({ rank, from: rank, to: rank, circles: 1, days: [], points, computedAt: now });
+    cutoff.setCutoffsForTest([at(30, 9_000_000_000), at(100, 6_000_000_000), at(500, 3_500_000_000), at(1000, 2_000_000_000)]);
+    const a194 = cutoff.rankBand(194, 5_000_000_000);
+    check('#194 is in the A+ band, between #100 and #500',
+        [a194?.tier, a194?.above?.rank, a194?.above?.tier, a194?.below?.rank, a194?.below?.tier], ['A+', 100, 'S', 500, 'A+']);
+    check('with the points on each edge', [a194?.above?.points, a194?.below?.points], [6_000_000_000, 3_500_000_000]);
+    check('a place on a cutoff is in the band it closes: #100 is S', cutoff.rankBand(100, 6_000_000_000)?.tier, 'S');
+    const top = cutoff.rankBand(5, 12_000_000_000);
+    check('the top band has nothing above', [top?.tier, top?.above, top?.below?.rank], ['S+', null, 30]);
+    const past = cutoff.rankBand(4200, 1_000_000_000);
+    check('past the last cutoff there is nothing below', [past?.tier, past?.above?.rank, past?.below, past?.above?.points], ['below B+', 3000, null, null]);
+    check('no rank or points, no band', [cutoff.rankBand(null, 1), cutoff.rankBand(5, null)], [null, null]);
 
     console.log(`\n${pass} passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);

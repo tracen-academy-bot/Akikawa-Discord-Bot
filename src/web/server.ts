@@ -28,6 +28,7 @@ import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
 import { renderTimerLeaderboard } from '../lib/image/renderTimerLeaderboard';
 import { getLeaderboard, getPanelContext, type LeaderboardPeriod } from '../lib/timer/service';
+import { rankBand } from '../lib/fans/cutoff';
 
 /**
  * The self-hosted dashboard.
@@ -434,6 +435,7 @@ export function startDashboard(client: () => Client): () => void {
                 circleName: circle.name,
                 monthlyRank: circle.monthlyRank,
                 clubRank: circle.rank,
+                rankBand: rankBand(circle.monthlyRank, circle.monthlyPoints === null ? null : Number(circle.monthlyPoints)),
                 memberCount: progress.members.length,
                 dateLabel: formatReportDate(year, month, progress.daysElapsed),
                 // Last 24h is only meaningful for the month in progress.

@@ -4,6 +4,7 @@ import { PALETTES, DEFAULT_PALETTE, dashNum, type Palette } from './theme';
 import { font } from './fonts';
 import { loadClubIcon, loadRankIcon } from './canvasUtils';
 import type { LastDayGains } from '../fans/readings';
+import type { RankBand } from '../fans/cutoff';
 import { describeQuota, formatMillionsFans, periodAdjective, type CircleProgress, type MemberProgress } from '../fans/metrics';
 
 /**
@@ -13,13 +14,18 @@ import { describeQuota, formatMillionsFans, periodAdjective, type CircleProgress
  *
  *   tall   900px wide, for phones. A header card (club image, name, date
  *          and members; monthly rank and rank badge at the right; quota,
- *          expected and next-due figures; progress bar), then the on-pace
- *          table and the behind card.
+ *          expected and next-due figures; progress bar; rank band), then
+ *          the on-pace table and the behind card.
  *   wide   1700px wide, three panels of equal height: a sidebar (club,
- *          rank, figures, progress, then the day: club gain, per member,
- *          how many hit the daily quota, and the best gains), the on-pace
- *          table, and the behind card, with the members closest to the
- *          line under the shorter of the last two.
+ *          rank and its band, figures, progress, then the day: club gain,
+ *          per member, how many hit the daily quota, and its top 3), the
+ *          on-pace table, and the behind card, with the members closest to
+ *          the line under the shorter of the last two.
+ *
+ * The rank band shows where the club's monthly points sit between the rank
+ * cutoffs around it (#194 between #100 and #500): fans to the place above,
+ * cushion over the place below. Lists stretch to fill spare card height, up
+ * to a limit (`flexRow`).
  *
  * Nothing is said twice and nothing needs a footnote: the period and day
  * live in the figures, the headings say what columns hold ("Target/day",
@@ -63,6 +69,8 @@ export interface FanReportMeta {
     dateLabel: string;
     /** The club's expected rank, for the badge. Null or omitted: an empty slot. */
     clubRank?: ClubRank | null;
+    /** Where the club sits between the rank cutoffs around it (`rankBand`). Omitted: not shown. */
+    rankBand?: RankBand | null;
     /**
      * Fans earned in the 24 hours before the report (see `lastDayGains`).
      * When given, the column shows it as "Last 24h". Without it (a report at
@@ -482,10 +490,22 @@ function drawTable(ctx: SKRSContext2D, members: MemberProgress[], x: number, w: 
     drawHeadings(ctx, x, w, y, c, d.recentLabel, p);
     let rowY = y + HEADING_HEIGHT + 12;
     if (members.length === 0) text(ctx, d.empty, c.trainer, rowY + 26, { spec: '400 16px', color: p.faint });
+    // A card taller than its rows spreads them out, within limits.
+    const rows = { ...c, rowHeight: flexRow(c.rowHeight, members.length, y + h - 12 - rowY) };
     members.forEach((m, i) => {
-        drawRow(ctx, m, x, w, rowY, c, d.recentOf(m), i % 2 === 1, progress.quotaPerDay, p);
-        rowY += c.rowHeight;
+        drawRow(ctx, m, x, w, rowY, rows, d.recentOf(m), i % 2 === 1, progress.quotaPerDay, p);
+        rowY += rows.rowHeight;
     });
+}
+
+/**
+ * A list row's height when its card has `available` pixels for `count` rows:
+ * the natural `base`, stretched to fill, but never past `max` times `base`,
+ * so a short list breathes without turning into a few huge rows.
+ */
+function flexRow(base: number, count: number, available: number, max = 1.35): number {
+    if (count <= 0) return base;
+    return Math.max(base, Math.min(base * max, available / count));
 }
 
 // ─── Behind ─────────────────────────────────────────────────────────────────
@@ -524,9 +544,11 @@ function behindHeight(count: number, maxColumns: number): number {
  * Draws one compact behind entry: rank, name and shortfall, then a short bar
  * with the shortfall in days and the daily need beside it.
  */
-function drawBehindCompact(ctx: SKRSContext2D, m: MemberProgress, x: number, y: number, w: number, striped: boolean, d: Prepared) {
+function drawBehindCompact(ctx: SKRSContext2D, m: MemberProgress, x: number, top: number, w: number, h: number, striped: boolean, d: Prepared) {
     const { p, progress } = d;
-    if (striped) fillRound(ctx, x, y, w, BEHIND_COMPACT - 4, innerRadius(p), p.stripe);
+    if (striped) fillRound(ctx, x, top, w, h - 4, innerRadius(p), p.stripe);
+    // Centred in a stretched entry.
+    const y = top + (h - BEHIND_COMPACT) / 2;
     const color = m.behind < progress.quotaPerDay ? p.warn : p.behind;
     const left = x + 12;
     const right = x + w - 12;
@@ -553,9 +575,11 @@ function drawBehindCompact(ctx: SKRSContext2D, m: MemberProgress, x: number, y: 
  * and what they need a day from here. Cream when less than one day of quota
  * short, red when more. `w` above 600 also shows the two totals.
  */
-function drawBehindEntry(ctx: SKRSContext2D, m: MemberProgress, x: number, y: number, w: number, striped: boolean, d: Prepared) {
+function drawBehindEntry(ctx: SKRSContext2D, m: MemberProgress, x: number, top: number, w: number, h: number, striped: boolean, d: Prepared) {
     const { p, progress } = d;
-    if (striped) fillRound(ctx, x, y, w, BEHIND_ENTRY - 4, innerRadius(p), p.stripe);
+    if (striped) fillRound(ctx, x, top, w, h - 4, innerRadius(p), p.stripe);
+    // Centred in a stretched entry.
+    const y = top + (h - BEHIND_ENTRY) / 2;
     const color = m.behind < progress.quotaPerDay ? p.warn : p.behind;
     const left = x + 14;
     const right = x + w - 14;
@@ -609,14 +633,15 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
     }
     const grid = behindGrid(members.length, maxColumns);
     const columnW = (w - 16 - (grid.columns - 1) * 8) / grid.columns;
+    const entry = flexRow(grid.entry, grid.rows, h - CARD_TITLE - 10, 1.25);
     members.forEach((m, i) => {
         // Down the first column, then the next, so rank order reads downwards.
         const column = Math.floor(i / grid.rows);
         const row = i % grid.rows;
         const ex = x + 8 + column * (columnW + 8);
-        const ey = y + CARD_TITLE + row * grid.entry;
-        if (grid.entry === BEHIND_COMPACT) drawBehindCompact(ctx, m, ex, ey, columnW, row % 2 === 1, d);
-        else drawBehindEntry(ctx, m, ex, ey, columnW, row % 2 === 1, d);
+        const ey = y + CARD_TITLE + row * entry;
+        if (grid.entry === BEHIND_COMPACT) drawBehindCompact(ctx, m, ex, ey, columnW, entry, row % 2 === 1, d);
+        else drawBehindEntry(ctx, m, ex, ey, columnW, entry, row % 2 === 1, d);
     });
 }
 
@@ -637,10 +662,11 @@ function drawClosestCard(ctx: SKRSContext2D, members: MemberProgress[], x: numbe
     const pad = 22;
     text(ctx, 'Closest to the line', x + pad, y + 34, { spec: '700 17px', color: p.text });
     text(ctx, 'ahead of expected', x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
+    const rowH = flexRow(CLOSE_ROW, members.length, h - CARD_TITLE - 12);
     members.forEach((m, i) => {
-        const rowY = y + CARD_TITLE + i * CLOSE_ROW;
-        if (i % 2 === 1) fillRound(ctx, x + 8, rowY, w - 16, CLOSE_ROW, innerRadius(p), p.stripe);
-        const by = rowY + CLOSE_ROW / 2 + 6;
+        const rowY = y + CARD_TITLE + i * rowH;
+        if (i % 2 === 1) fillRound(ctx, x + 8, rowY, w - 16, rowH, innerRadius(p), p.stripe);
+        const by = rowY + rowH / 2 + 6;
         const cushion = Math.max(0, m.total - m.expected);
         const ahead = `+${shortFans(cushion)}`;
         const aheadWidth = text(ctx, ahead, x + w - pad, by, { spec: '700 15px', color: p.good, align: 'right' });
@@ -653,6 +679,87 @@ function drawClosestCard(ctx: SKRSContext2D, members: MemberProgress[], x: numbe
         const nameMax = x + w - pad - aheadWidth - 12 - daysWidth - 14 - nameX;
         text(ctx, fit(ctx, m.trainerName, nameMax, '400 16px'), nameX, by, { spec: '400 16px', color: p.text });
     });
+}
+
+// ─── Rank band ──────────────────────────────────────────────────────────────
+
+/** Height of the rank band block: stacked in the sidebar, or one row wide in the tall header. */
+function rankBandHeight(band: RankBand, inline: boolean): number {
+    const bar = bandEnds(band) !== null;
+    if (inline) return bar ? 66 : 40;
+    return bar ? 104 : 22 + (band.above ? 22 : 0) + (band.below ? 22 : 0);
+}
+
+/** Both edges' points, when the bar can be drawn between them. */
+function bandEnds(band: RankBand): { low: number; high: number } | null {
+    const low = band.below?.points ?? null;
+    const high = band.above?.points ?? null;
+    return low !== null && high !== null && high > low ? { low, high } : null;
+}
+
+/**
+ * Draws where the club sits in its rank band: a bar from the band's bottom
+ * place (left) to its top (right) with the club marked on it, then the fans
+ * still needed to reach the place above and the cushion over the place
+ * below. `inline` lays it out as one wide row, for the tall header.
+ */
+function drawRankBand(ctx: SKRSContext2D, band: RankBand, x: number, y: number, w: number, p: Palette, inline: boolean) {
+    const from = band.above ? band.above.rank + 1 : 1;
+    const title = band.below ? `${band.tier} band · #${from}–${band.below.rank}` : `Past #${band.above?.rank ?? ''} · ${band.tier}`;
+    label(ctx, title, x, y + 12, 13, p.muted, p);
+
+    const toAbove = band.above && band.above.points !== null ? band.above.points - band.points : null;
+    const overBelow = band.below && band.below.points !== null ? band.points - band.below.points : null;
+    const up = band.above
+        ? {
+              name: `To #${band.above.rank} (${band.above.tier})`,
+              value: toAbove === null ? '—' : toAbove > 0 ? `+${shortFans(toAbove)}` : 'reached',
+              color: toAbove === null ? p.faint : toAbove > 0 ? p.target : p.good,
+          }
+        : null;
+    const down = band.below
+        ? {
+              name: `Over #${band.below.rank} (${band.below.tier})`,
+              value: overBelow === null ? '—' : overBelow >= 0 ? `+${shortFans(overBelow)}` : `−${shortFans(-overBelow)}`,
+              color: overBelow === null ? p.faint : overBelow >= 0 ? p.good : p.behind,
+          }
+        : null;
+
+    let rowY = y + 22;
+    const ends = bandEnds(band);
+    if (ends) {
+        const barY = y + 24;
+        const ratio = Math.max(0, Math.min(1, (band.points - ends.low) / (ends.high - ends.low)));
+        fillRound(ctx, x, barY, w, 6, 3, p.line);
+        fillRound(ctx, x, barY, Math.max(6, w * ratio), 6, 3, p.accent);
+        ctx.beginPath();
+        ctx.arc(x + w * ratio, barY + 3, 6, 0, Math.PI * 2);
+        ctx.fillStyle = p.text;
+        ctx.fill();
+        text(ctx, `#${band.below!.rank}`, x, barY + 24, { spec: '400 12px', color: p.muted });
+        text(ctx, `#${band.above!.rank}`, x + w, barY + 24, { spec: '400 12px', color: p.muted, align: 'right' });
+        rowY = barY + 34;
+    }
+
+    if (inline) {
+        // One row: the cushion below on the left, the gap above on the right.
+        const by = rowY + 16;
+        if (down) {
+            const nw = text(ctx, `${down.name} `, x, by, { spec: '400 14px', color: p.muted });
+            text(ctx, down.value, x + nw, by, { spec: '700 15px', color: down.color });
+        }
+        if (up) {
+            const vw = text(ctx, up.value, x + w, by, { spec: '700 15px', color: up.color, align: 'right' });
+            text(ctx, `${up.name} `, x + w - vw, by, { spec: '400 14px', color: p.muted, align: 'right' });
+        }
+        return;
+    }
+    for (const row of [up, down]) {
+        if (!row) continue;
+        text(ctx, row.name, x, rowY + 16, { spec: '400 14px', color: p.muted });
+        text(ctx, row.value, x + w, rowY + 16, { spec: '700 15px', color: row.color, align: 'right' });
+        rowY += 22;
+    }
 }
 
 // ─── Layouts ────────────────────────────────────────────────────────────────
@@ -725,7 +832,9 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     const measure = createCanvas(1, 1).getContext('2d');
     const lines = identityLines(measure, d, textWidth);
     const identityH = identityHeight(SLOT, 26, lines);
-    const headerH = PAD + identityH + 22 + 70 + 22 + 40 + PAD - 8;
+    const band = d.meta.rankBand ?? null;
+    const bandH = band ? rankBandHeight(band, true) + 12 : 0;
+    const headerH = PAD + identityH + 22 + 70 + 22 + 40 + bandH + PAD - 8;
 
     const c = columns(cardX, cardW, false);
     const tableH = tableHeight(d.onPace.length, c);
@@ -749,6 +858,7 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     const third = (cardW - PAD * 2) / 3;
     headerStats(progress).forEach((s, i) => drawStat(ctx, s, cardX + PAD + third * i, statsY, third - 16, p, false));
     drawProgress(ctx, progress, cardX + PAD, statsY + 70 + 22, cardW - PAD * 2, p, false);
+    if (band) drawRankBand(ctx, band, cardX + PAD, statsY + 70 + 22 + 40 + 12, cardW - PAD * 2, p, true);
     y += headerH + GAP;
 
     drawTable(ctx, d.onPace, cardX, cardW, y, tableH, c, d);
@@ -793,11 +903,14 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     const c = { ...columns(tableX, tableW, false), rowHeight: 36 };
     const tableH = tableHeight(d.onPace.length, c);
 
-    // Sidebar contents: identity, rule, rank, rule, 2×2 figures, progress,
-    // rule, the day's summary and at least three of its best, any notes.
+    // Sidebar contents: identity, rule, rank and its band, rule, 2×2
+    // figures, progress, rule, the day's summary and its top 3, any notes.
     const identityH = identityHeight(slot, 22, lines);
+    const band = d.meta.rankBand ?? null;
+    const bandH = band ? rankBandHeight(band, false) + 12 : 0;
+    const listsH = 30 + 3 * SUMMARY_ROW + 12 + 26 + 3 * TOP_ROW;
     const sideMin =
-        sidePad + identityH + 19 + 18 + slot + 19 + 18 + 2 * 64 + 14 + 44 + 19 + 18 + 30 + 3 * SUMMARY_ROW + 14 + 3 * TOP_ROW +
+        sidePad + identityH + 19 + 18 + slot + 18 + bandH + 19 + 2 * 64 + 14 + 44 + 19 + listsH +
         (notes.length > 0 ? 18 + notes.length * 17 : 0) + sidePad;
 
     // Where the behind card goes, whichever arrangement is shortest:
@@ -841,6 +954,10 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     drawSlot(ctx, d.badge, x, y, slot, p, '?', false);
     drawRank(ctx, d, x + slot + 16, y, 'left');
     y += slot + 18;
+    if (band) {
+        drawRankBand(ctx, band, x, y, inner, p, false);
+        y += bandH;
+    }
     rule();
     const half = (inner - 16) / 2;
     const stats = [
@@ -853,9 +970,11 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     y += 44;
     rule();
 
-    // The day: club gain, per member, how many hit the daily quota, then the
-    // best gains in whatever height is left above any notes.
+    // The day: club gain, per member, how many hit the daily quota, then its
+    // top 3. Spare height spreads the rows out a little (see `flexRow`).
     const notesTop = FRAME + contentH - sidePad - notes.length * 17;
+    const spare = notesTop - (notes.length > 0 ? 18 : 0) - y - listsH;
+    const stretch = Math.max(1, Math.min(1.35, 1 + spare / (3 * SUMMARY_ROW + 3 * TOP_ROW)));
     const gains = progress.members.map((m) => ({ m, gain: d.recentOf(m) ?? 0 }));
     const clubGain = gains.reduce((sum, g) => sum + g.gain, 0);
     const hit = gains.filter((g) => g.gain >= progress.quotaPerDay).length;
@@ -867,21 +986,25 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
         [`Hit ${shortFans(progress.quotaPerDay)}`, `${hit}/${gains.length}`],
     ];
     for (const [name, value] of summary) {
-        text(ctx, name, x, y + 16, { spec: '400 14px', color: p.muted });
-        text(ctx, value, x + inner, y + 16, { spec: '700 15px', color: p.text, align: 'right' });
-        y += SUMMARY_ROW;
+        const by = y + (SUMMARY_ROW * stretch) / 2 + 5;
+        text(ctx, name, x, by, { spec: '400 14px', color: p.muted });
+        text(ctx, value, x + inner, by, { spec: '700 15px', color: p.text, align: 'right' });
+        y += SUMMARY_ROW * stretch;
     }
-    y += 14;
-    const room = Math.floor((notesTop - (notes.length > 0 ? 18 : 0) - y) / TOP_ROW);
-    const best = gains.filter((g) => g.gain > 0).sort((a, b) => b.gain - a.gain).slice(0, Math.max(0, Math.min(room, 10)));
-    for (const t of best) {
-        const by = y + 18;
+    y += 12;
+    // The day's top 3, not the month's: those lead the table already.
+    label(ctx, `Top 3 · ${d.recentLabel}`, x, y + 14, 13, p.muted, p);
+    y += 26;
+    const best = gains.filter((g) => g.gain > 0).sort((a, b) => b.gain - a.gain).slice(0, 3);
+    best.forEach((t, i) => {
+        const by = y + (TOP_ROW * stretch) / 2 + 5;
         const gainWidth = text(ctx, `+${shortFans(t.gain)}`, x + inner, by, { spec: '700 15px', color: p.good, align: 'right' });
-        const rankWidth = text(ctx, `#${t.m.rank}`, x, by, { spec: '400 13px', color: p.muted });
-        const nameX = x + rankWidth + 8;
+        const placeWidth = text(ctx, `${i + 1}.`, x, by, { spec: '700 14px', color: p.muted });
+        const rankWidth = text(ctx, `#${t.m.rank}`, x + placeWidth + 8, by, { spec: '400 12px', color: p.faint });
+        const nameX = x + placeWidth + 8 + rankWidth + 8;
         text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '400 15px'), nameX, by, { spec: '400 15px', color: p.text });
-        y += TOP_ROW;
-    }
+        y += TOP_ROW * stretch;
+    });
     notes.forEach((line, i) => text(ctx, line, x, notesTop + 12 + i * 17, { spec: '400 12px', color: p.muted }));
 
     // On-pace table and behind card, with the closest to the line under the
