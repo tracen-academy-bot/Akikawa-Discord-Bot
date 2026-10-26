@@ -360,6 +360,11 @@ function streakChecks() {
     // Joined with a starting snapshot at day 3: days 4 to 6 in the circle.
     check('a joiner counts only days in the circle', computeCircleProgress([member([0, 0, 0, 100, 105, 110, 115])], opts).members[0]!.streak, 3);
     check('no quota, no streak', computeCircleProgress([member(run)], { quota: 0, daysInMonth: 31 }).members[0]!.streak, 0);
+    // Other periods use their own daily rate: 14 a week is 2 a day, 42 every two weeks 3, 4 a day 4.
+    const steady2 = [100, 102, 104, 106];
+    check('weekly: 14 a week, so 2 a day keeps a streak', computeCircleProgress([member(steady2)], { quota: 14, period: 'WEEK', daysInMonth: 31 }).members[0]!.streak, 3);
+    check('biweekly: 42 every two weeks needs 3 a day', computeCircleProgress([member(steady2)], { quota: 42, period: 'BIWEEKLY', daysInMonth: 31 }).members[0]!.streak, 0);
+    check('daily: the quota itself', computeCircleProgress([member([100, 104, 108, 111])], { quota: 4, period: 'DAY', daysInMonth: 31 }).members[0]!.streak, 0);
 }
 
 function main() {
