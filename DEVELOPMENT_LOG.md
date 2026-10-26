@@ -10,16 +10,15 @@ Newest first. Each entry records what changed and, more importantly, why.
   the finish. It is `src/assets/scenes/oguri-run.png` and is used on the
   race track. The standing `oguri.png` stays for clubs with no race.
   `sceneArt` now loads any scene picture by name.
-- The run pose already leans, so the scene's extra 0.12 rad tilt applies
-  only to the standing picture.
+- The run pose already leans a little too far ("her tilt is a bit *too*
+  big"), so it is turned back 0.1 rad and drawn 25% smaller. The standing
+  picture keeps its 0.12 rad forward tilt.
 - Fwoxie: "please use real dirt and flow". The pale puffs and flat lines
   are replaced:
   - `drawDirt`: a tan dust haze along the ground fading behind her, then
     46 seeded clods of soil and torn turf. Each is an irregular lump thrown
     low and back off her heels; small bits fly furthest.
-  - `drawFlow`: tapered wind streaks (filled brush shapes, thick at her
-    back, a point at the tail, fading white) starting along her outline,
-    and two sweeping back over her head.
+  - Tapered wind streaks were tried and removed ("remove the flow thing").
 
 ---
 

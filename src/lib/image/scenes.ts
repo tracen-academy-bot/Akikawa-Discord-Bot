@@ -706,8 +706,9 @@ function drawOguri(
 
     const ground = hero - 6;
     if ((runArt ?? art) && race) {
-        // A picture posed running needs no extra lean; the standing one is tipped forward.
-        drawRace(ctx, w, ground, (runArt ?? art)!, runArt ? 0 : 0.12, race, food);
+        // The running pose leans a little too far, so it is turned back a
+        // touch; the standing picture is tipped forward instead.
+        drawRace(ctx, w, ground, (runArt ?? art)!, runArt ? -0.1 : 0.12, runArt ? 0.75 : 1, race, food);
     } else if (art) {
         // No rank to race for: she stands on the right with food piled round
         // her feet and an onigiri balanced on her head.
@@ -882,7 +883,7 @@ function startingGate(ctx: SKRSContext2D, x: number, ground: number, stalls: num
  * at `race.progress` along it, leaning forward, a little off the ground,
  * with speed lines and dust behind her.
  */
-function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, lean: number, race: SceneRace, food: FoodArt | null) {
+function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, lean: number, size: number, race: SceneRace, food: FoodArt | null) {
     // The rail's posts end 18px above the ground line; the signposts match.
     const postBottom = ground - 18;
     const gateRight = startingGate(ctx, SIDE + 4, ground, 3);
@@ -893,7 +894,7 @@ function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, lea
     else drawFoodPile(ctx, w - SIDE - 70, ground, 100, false);
 
     // Short enough to run under the hanging food.
-    const artH = Math.min(130, ground - 68);
+    const artH = Math.min(130, ground - 68) * size;
     const artW = (art.width / art.height) * artH;
     const progress = Math.max(0, Math.min(1, race.progress));
     // Her centre runs from just past the start post to the finish post.
@@ -901,8 +902,7 @@ function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, lea
     const hop = 8;
     const feetY = ground - hop;
 
-    // Air flowing past her, then the dirt her feet throw up, then her shadow.
-    drawFlow(ctx, cx, feetY, artW, artH);
+    // The dirt her feet throw up, then her shadow.
     drawDirt(ctx, cx - artW * 0.12, ground, artW);
     groundShadow(ctx, cx, ground, artW * 0.32);
 
@@ -1063,76 +1063,6 @@ function bun(ctx: SKRSContext2D, x: number, y: number, r: number) {
         ctx.stroke();
     }
     ctx.restore();
-}
-
-/**
- * A tapered streak along a quadratic curve from `from` (thick, `width`) to
- * `to` (a point), bending through `bend`: filled, not stroked, so it thins
- * like a brush mark. White, fading out towards the tail.
- */
-function taperedStreak(
-    ctx: SKRSContext2D,
-    from: readonly [number, number],
-    bend: readonly [number, number],
-    to: readonly [number, number],
-    width: number,
-    alpha: number,
-) {
-    const at = (t: number) => {
-        const u = 1 - t;
-        return [u * u * from[0] + 2 * u * t * bend[0] + t * t * to[0], u * u * from[1] + 2 * u * t * bend[1] + t * t * to[1]] as const;
-    };
-    const steps = 24;
-    const left: [number, number][] = [];
-    const right: [number, number][] = [];
-    for (let i = 0; i <= steps; i += 1) {
-        const t = i / steps;
-        const [x, y] = at(t);
-        const [nx0, ny0] = at(Math.min(1, t + 0.01));
-        const [px0, py0] = at(Math.max(0, t - 0.01));
-        const dx = nx0 - px0;
-        const dy = ny0 - py0;
-        const len = Math.hypot(dx, dy) || 1;
-        // Thick at the start, a point at the tail.
-        const half = (width / 2) * Math.pow(1 - t, 0.8);
-        left.push([x - (dy / len) * half, y + (dx / len) * half]);
-        right.push([x + (dy / len) * half, y - (dx / len) * half]);
-    }
-    const g = ctx.createLinearGradient(from[0], from[1], to[0], to[1]);
-    g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
-    g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    left.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
-    for (let i = right.length - 1; i >= 0; i -= 1) ctx.lineTo(right[i]![0], right[i]![1]);
-    ctx.closePath();
-    ctx.fill();
-}
-
-/**
- * Air flowing past a runner centred on `cx` with feet at `feetY`: tapered
- * streaks that start at her back and thin out behind her, curving the way
- * the air bends round her, and two sweeping over her head.
- */
-function drawFlow(ctx: SKRSContext2D, cx: number, feetY: number, artW: number, artH: number) {
-    const back = cx - artW * 0.32;
-    // [height up her body (0 feet, 1 head), length, curve, width, alpha]
-    const streaks = [
-        [0.82, 90, -10, 3.2, 0.85],
-        [0.66, 128, -5, 4, 0.9],
-        [0.5, 104, 4, 3.4, 0.8],
-        [0.34, 140, 8, 4.2, 0.85],
-        [0.2, 84, 6, 2.8, 0.7],
-    ] as const;
-    for (const [up, length, curve, width, alpha] of streaks) {
-        const y = feetY - artH * up;
-        const startX = back + artW * 0.08 * Math.sin(up * Math.PI);
-        taperedStreak(ctx, [startX, y], [startX - length * 0.5, y + curve], [startX - length, y + curve * 0.4], width, alpha);
-    }
-    // Over the top of her head, sweeping back and down.
-    const top = feetY - artH * 0.98;
-    taperedStreak(ctx, [cx + artW * 0.05, top - 4], [cx - artW * 0.35, top - 16], [cx - artW * 0.95, top + 6], 3, 0.75);
-    taperedStreak(ctx, [cx - artW * 0.1, top + 6], [cx - artW * 0.5, top - 2], [cx - artW * 1.1, top + 22], 2.4, 0.6);
 }
 
 /**
