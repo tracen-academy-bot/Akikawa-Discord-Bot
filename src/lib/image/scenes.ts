@@ -1821,8 +1821,24 @@ function watchingEyes(ctx: SKRSContext2D, cx: number, cy: number, s: number, moo
     }
 }
 
-/** Bobbin lace along `y`: scallops with picot holes, `colour` turning red with mood. */
-function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string) {
+/**
+ * Where the club stands between the two rank windows, shown on the lace:
+ * `from` and `to` are the windows' centres, `at` the progress from 0 to 1.
+ */
+interface LaceTrack {
+    from: number;
+    to: number;
+    at: number;
+}
+
+/**
+ * Bobbin lace along `y`: scallops with picot holes, `colour` turning red
+ * with mood, and gold heart charms. With a `track`, the holes between the
+ * two windows become a strip of lights: lit gold from the bottom cutoff up
+ * to the club, the club's own hole in her blue with her blue diamond
+ * hanging from it, and dark beyond.
+ */
+function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, track: LaceTrack | null) {
     const r = 9;
     ctx.fillStyle = colour;
     ctx.fillRect(0, y - 6, w, 6);
@@ -1841,21 +1857,65 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string) {
         ctx.fill();
     }
     ctx.globalCompositeOperation = 'source-over';
-    // Gold heart charms hanging from every eighth scallop, and her blue
-    // diamond at the centre, from the hearts and diamond on her dress.
+    // The scallop whose hole marks the club, if there is a track.
+    const step = r * 2;
+    const snap = (x: number) => Math.round(x / step) * step;
+    const marker = track ? snap(track.from + Math.max(0, Math.min(1, track.at)) * (track.to - track.from)) : null;
+    // Gold heart charms hanging from every eighth scallop, from the hearts
+    // on her dress; none right by the marker, which has its own charm.
     ctx.fillStyle = '#e2b24a';
-    const centre = Math.round(w / 2 / (r * 2)) * r * 2;
-    for (let x = centre % (r * 16); x < w; x += r * 16) {
-        if (Math.abs(x - centre) < r) continue;
+    for (let x = 0; x < w; x += r * 16) {
+        if (marker !== null && Math.abs(x - marker) < step * 2) continue;
         ctx.fillRect(x - 0.5, y + r - 1, 1, 3);
         heart(ctx, x, y + r + 5, 7);
     }
+    if (!track || marker === null) return;
+    const hole = r * 0.35;
+    const first = snap(track.from);
+    const last = snap(track.to);
+    for (let x = first; x <= last; x += step) {
+        if (x === marker) continue;
+        if (x < marker) {
+            // Lit: a warm gold light with a little glow, like a light strip.
+            const glow = ctx.createRadialGradient(x, y + 2, 0, x, y + 2, hole * 2.6);
+            glow.addColorStop(0, 'rgba(255, 214, 120, 0.55)');
+            glow.addColorStop(1, 'rgba(255, 214, 120, 0)');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(x, y + 2, hole * 2.6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffd98a';
+        } else {
+            // Still to come: dark.
+            ctx.fillStyle = 'rgba(30, 12, 18, 0.85)';
+        }
+        ctx.beginPath();
+        ctx.arc(x, y + 2, hole, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // The club: her blue, bigger, glowing, with her blue diamond below.
+    const halo = ctx.createRadialGradient(marker, y + 2, 0, marker, y + 2, hole * 6);
+    halo.addColorStop(0, 'rgba(111, 187, 241, 0.8)');
+    halo.addColorStop(1, 'rgba(111, 187, 241, 0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(marker, y + 2, hole * 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#6fbbf1';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(marker, y + 2, hole * 1.7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#e2b24a';
+    ctx.fillRect(marker - 0.5, y + r - 1, 1, 3);
     ctx.fillStyle = '#6fbbf1';
     ctx.beginPath();
-    ctx.moveTo(centre, y + r);
-    ctx.lineTo(centre + 4, y + r + 5);
-    ctx.lineTo(centre, y + r + 11);
-    ctx.lineTo(centre - 4, y + r + 5);
+    ctx.moveTo(marker, y + r + 1);
+    ctx.lineTo(marker + 4.5, y + r + 6.5);
+    ctx.lineTo(marker, y + r + 13);
+    ctx.lineTo(marker - 4.5, y + r + 6.5);
     ctx.closePath();
     ctx.fill();
 }
@@ -2111,7 +2171,8 @@ function drawStillInLove(
     ctx.globalAlpha = 1;
 
     // Lace along the bottom of the band, white to red, dripping when she turns.
-    laceTrim(ctx, w, floor, mix('#f3e6ec', '#c8202e', mood));
+    const track = race ? { from: leftX + winW / 2, to: rightX + winW / 2, at: race.progress } : null;
+    laceTrim(ctx, w, floor, mix('#f3e6ec', '#c8202e', mood), track);
     laceDrips(ctx, w, floor, mood, blood);
 
     // The moonlight over everything in the room, softened.

@@ -86,6 +86,13 @@ screen red. Food is no longer central.
   - Then, at Fwoxie's ask, the light fades much faster: down to 45% a
     quarter of the way and 12% by 60%, and gone just past the top of the
     cards (`reach` hero + 40, was hero + 120).
+- The lace shows the distance between the two ranks (Fwoxie: "something
+  to show the proper distance … like how rgb thingies work"). Between the
+  two windows' centres its holes are a light strip: lit gold from the
+  bottom cutoff up to the club, the club's own hole bigger and glowing in
+  her blue with her blue diamond hanging from it, and dark beyond. It uses
+  the same `race.progress` as Oguri's runner. The fixed centre diamond is
+  gone; the diamond now marks the club.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
