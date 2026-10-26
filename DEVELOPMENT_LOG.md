@@ -26,6 +26,18 @@ screen red. Food is no longer central.
   half the club): the walls, window sky, moon, lace, petals, candle and
   eyes all turn from calm to red, and a red vignette closes in. The line
   goes from "I still love you." to "…why are you leaving me behind?".
+- Fwoxie's second pass:
+  - Two windows only, standing for the rank band. The bottom cutoff is
+    under a pale crescent (left) and the next rank up under a full blood
+    moon (right), each named on a brass plaque. The window gallery is gone.
+  - The moons are drawn, not tinted: the crescent has its own layer and
+    shading; the blood moon has maria, rimmed craters, a halo and a cloud
+    wisp. They no longer change colour with mood.
+  - Her line is in a game-style speech bubble pointing at her.
+  - Blood, scaled by mood: splats with drips on the window glass, drops
+    hanging from the lace, the bubble bleeding at its worst, and spray on
+    the report's outer corners and edges. That spray is drawn after the
+    report, kept to the margins and corners so no figure is covered.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---

@@ -172,9 +172,11 @@ export async function withScene(
     ctx.scale(RENDER_SCALE, RENDER_SCALE);
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
-    else if (scene === 'stillinlove') drawStillInLove(ctx, w, h, hero, await sceneArt(scene), mood);
+    else if (scene === 'stillinlove') drawStillInLove(ctx, w, h, hero, await sceneArt(scene), mood, race);
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
+    // Still in Love's blood reaches past the scene onto the cards' edges.
+    if (scene === 'stillinlove') bloodOnTheCards(ctx, w, h, hero, mood);
     return canvas;
 }
 
@@ -1160,26 +1162,90 @@ function mix(a: string, b: string, t: number): string {
     return `#${[16, 8, 0].map((sh) => ch(sh).toString(16).padStart(2, '0')).join('')}`;
 }
 
-/** A crescent moon: a disc with a darker disc cut from it. */
-function crescent(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, glow: string) {
-    const g = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 3);
-    g.addColorStop(0, glow);
-    g.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = g;
+/** A pale crescent moon with a faint glow and soft shading: the calm moon. */
+function crescentMoon(ctx: SKRSContext2D, x: number, y: number, r: number) {
+    const halo = ctx.createRadialGradient(x, y, r * 0.6, x, y, r * 2.6);
+    halo.addColorStop(0, 'rgba(240, 230, 210, 0.28)');
+    halo.addColorStop(1, 'rgba(240, 230, 210, 0)');
+    ctx.fillStyle = halo;
     ctx.beginPath();
-    ctx.arc(x, y, r * 3, 0, Math.PI * 2);
+    ctx.arc(x, y, r * 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    // Draw the crescent on its own layer so the cut does not reach the sky.
+    const size = Math.ceil(r * 2 + 4);
+    const layer = createCanvas(size * RENDER_SCALE, size * RENDER_SCALE);
+    const l = layer.getContext('2d');
+    l.scale(RENDER_SCALE, RENDER_SCALE);
+    const c = size / 2;
+    const body = l.createRadialGradient(c - r * 0.4, c - r * 0.3, r * 0.2, c, c, r);
+    body.addColorStop(0, '#fbf5e6');
+    body.addColorStop(1, '#d9ccb2');
+    l.fillStyle = body;
+    l.beginPath();
+    l.arc(c, c, r, 0, Math.PI * 2);
+    l.fill();
+    l.globalCompositeOperation = 'destination-out';
+    l.beginPath();
+    l.arc(c + r * 0.5, c - r * 0.22, r * 0.9, 0, Math.PI * 2);
+    l.fill();
+    ctx.drawImage(layer, x - c, y - c, size, size);
+}
+
+/**
+ * A full blood moon: deep red, darker at the limb, mottled with maria and a
+ * few craters, a wide red halo, and a wisp of cloud across it. The full
+ * moon she cannot stand.
+ */
+function bloodMoon(ctx: SKRSContext2D, x: number, y: number, r: number) {
+    const halo = ctx.createRadialGradient(x, y, r * 0.8, x, y, r * 3.2);
+    halo.addColorStop(0, 'rgba(200, 30, 40, 0.3)');
+    halo.addColorStop(0.5, 'rgba(160, 10, 25, 0.08)');
+    halo.addColorStop(1, 'rgba(160, 10, 25, 0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 3.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.save();
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.clip();
-    ctx.fillStyle = colour;
+    const body = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
+    body.addColorStop(0, '#e2453c');
+    body.addColorStop(0.6, '#a8171f');
+    body.addColorStop(1, '#5a0710');
+    ctx.fillStyle = body;
     ctx.fillRect(x - r, y - r, r * 2, r * 2);
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(x + r * 0.45, y - r * 0.2, r * 0.92, 0, Math.PI * 2);
-    ctx.fill();
+    // Maria: darker blotches.
+    const rand = seeded(77);
+    for (let i = 0; i < 7; i += 1) {
+        ctx.fillStyle = `rgba(70, 4, 10, ${0.18 + rand() * 0.2})`;
+        ctx.beginPath();
+        ctx.ellipse(x + (rand() - 0.5) * r * 1.2, y + (rand() - 0.5) * r * 1.2, r * (0.15 + rand() * 0.25), r * (0.1 + rand() * 0.18), rand() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // Craters: a dark bowl with a lit rim.
+    for (let i = 0; i < 5; i += 1) {
+        const cx = x + (rand() - 0.5) * r * 1.3;
+        const cy = y + (rand() - 0.5) * r * 1.3;
+        const cr = r * (0.05 + rand() * 0.08);
+        ctx.fillStyle = 'rgba(60, 3, 8, 0.45)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 140, 120, 0.35)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, cr, Math.PI * 0.9, Math.PI * 1.7);
+        ctx.stroke();
+    }
     ctx.restore();
+    // A thin cloud drifting across.
+    ctx.fillStyle = 'rgba(30, 6, 14, 0.55)';
+    for (const [dx, dy, rx, ry] of [[-0.6, 0.35, 0.9, 0.12], [0.3, 0.45, 0.7, 0.1], [-0.1, 0.55, 0.5, 0.08]] as const) {
+        ctx.beginPath();
+        ctx.ellipse(x + dx * r, y + dy * r, rx * r, ry * r, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 /** A small bat silhouette, wings spread. */
@@ -1199,10 +1265,11 @@ function bat(ctx: SKRSContext2D, x: number, y: number, s: number, colour: string
 }
 
 /**
- * A gothic arched window from (x, top) to the sill at `bottom`: night sky
- * with a crescent moon and bats, dark mullions, a stone frame.
+ * A gothic arched window from (x, top) to the sill at `bottom`: night sky,
+ * its moon (a pale crescent or a full blood moon), bats, dark mullions and
+ * a stone frame, with blood on the glass as `mood` rises.
  */
-function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bottom: number, mood: number) {
+function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bottom: number, moon: 'crescent' | 'blood', mood: number, seed: number) {
     const arch = () => {
         ctx.beginPath();
         ctx.moveTo(x, bottom);
@@ -1212,26 +1279,32 @@ function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bot
         ctx.lineTo(x + w, bottom);
         ctx.closePath();
     };
-    // The sky through the glass.
     ctx.save();
     arch();
     ctx.clip();
     const sky = ctx.createLinearGradient(0, top, 0, bottom);
-    sky.addColorStop(0, mix('#0d1430', '#2a0610', mood));
-    sky.addColorStop(1, mix('#28304f', '#5a0d1a', mood));
+    sky.addColorStop(0, moon === 'blood' ? '#140610' : '#0b1128');
+    sky.addColorStop(1, moon === 'blood' ? '#2a0a18' : '#232b48');
     ctx.fillStyle = sky;
     ctx.fillRect(x, top - w, w, bottom - top + w);
-    const rand = seeded(1031);
+    const rand = seeded(seed);
     for (let i = 0; i < 18; i += 1) {
         ctx.fillStyle = `rgba(255, 240, 240, ${0.3 + rand() * 0.5})`;
         ctx.fillRect(x + rand() * w, top + rand() * (bottom - top), 1.2, 1.2);
     }
-    // Never a full moon: she hates them.
-    crescent(ctx, x + w * 0.62, top + (bottom - top) * 0.3, w * 0.16, mix('#f3ead6', '#ff4a55', mood), `rgba(${Math.round(240 + mood * 15)}, ${Math.round(220 - mood * 170)}, ${Math.round(200 - mood * 150)}, 0.35)`);
-    bat(ctx, x + w * 0.3, top + (bottom - top) * 0.45, w * 0.07, 'rgba(10, 4, 8, 0.9)');
-    bat(ctx, x + w * 0.42, top + (bottom - top) * 0.58, w * 0.05, 'rgba(10, 4, 8, 0.85)');
+    const mx = x + w * 0.58;
+    const my = top + (bottom - top) * 0.32;
+    if (moon === 'blood') bloodMoon(ctx, mx, my, w * 0.2);
+    else crescentMoon(ctx, mx, my, w * 0.17);
+    bat(ctx, x + w * 0.28, top + (bottom - top) * 0.5, w * 0.07, 'rgba(10, 4, 8, 0.9)');
+    bat(ctx, x + w * 0.4, top + (bottom - top) * 0.62, w * 0.05, 'rgba(10, 4, 8, 0.85)');
+    // Blood on the glass, more as she turns.
+    if (mood > 0.15) {
+        const r2 = seeded(seed + 9);
+        const n = Math.round(mood * 3);
+        for (let i = 0; i < n; i += 1) bloodSplat(ctx, x + w * (0.2 + r2() * 0.6), top + (bottom - top) * (0.2 + r2() * 0.45), 6 + mood * 8, mood, r2);
+    }
     ctx.restore();
-    // Frame and mullions.
     ctx.strokeStyle = '#3a2630';
     ctx.lineWidth = 5;
     arch();
@@ -1245,6 +1318,62 @@ function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bot
     ctx.stroke();
     ctx.fillStyle = '#3a2630';
     ctx.fillRect(x - 6, bottom, w + 12, 5);
+}
+
+/**
+ * A splat of blood at (x, y): an irregular blob, droplets flung round it,
+ * and drips running down, darkening as they dry, with a wet highlight.
+ */
+function bloodSplat(ctx: SKRSContext2D, x: number, y: number, size: number, mood: number, rand: () => number) {
+    const wet = '#a3101c';
+    const dark = '#5e0710';
+    ctx.save();
+    // The blob.
+    ctx.fillStyle = wet;
+    ctx.beginPath();
+    const lobes = 9;
+    for (let k = 0; k <= lobes; k += 1) {
+        const a = (k / lobes) * Math.PI * 2;
+        const r = size * (0.6 + rand() * 0.55);
+        const px = x + Math.cos(a) * r;
+        const py = y + Math.sin(a) * r * 0.85;
+        if (k === 0) ctx.moveTo(px, py);
+        else ctx.quadraticCurveTo(x + Math.cos(a - 0.35) * r * 1.25, y + Math.sin(a - 0.35) * r * 1.05, px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = dark;
+    ctx.globalAlpha = 0.35;
+    ctx.beginPath();
+    ctx.arc(x + size * 0.15, y + size * 0.2, size * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    // Droplets flung outwards.
+    for (let i = 0; i < 6 + Math.round(mood * 8); i += 1) {
+        const a = rand() * Math.PI * 2;
+        const d = size * (1.2 + rand() * 1.6);
+        ctx.fillStyle = rand() < 0.5 ? wet : dark;
+        ctx.beginPath();
+        ctx.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, 0.8 + rand() * size * 0.14, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // Drips running down.
+    for (let i = 0; i < 1 + Math.round(mood * 2); i += 1) {
+        const dx = x + (rand() - 0.5) * size;
+        const len = size * (1.2 + rand() * 2.4) * (0.6 + mood);
+        const width = 1.4 + rand() * 1.6;
+        ctx.fillStyle = wet;
+        ctx.fillRect(dx - width / 2, y, width, len);
+        ctx.beginPath();
+        ctx.arc(dx, y + len, width * 0.9, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // A wet highlight.
+    ctx.fillStyle = 'rgba(255, 190, 190, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(x - size * 0.25, y - size * 0.3, size * 0.18, size * 0.08, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
 }
 
 /** A jar of red fruit jam with a gingham lid and a label. */
@@ -1385,41 +1514,157 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string) {
 }
 
 /**
- * Still in Love watching from her room (see `SceneId`). `mood` 0 is calm:
- * a quiet night, white lace, a soft gaze. 1 is yandere: the room washed
- * red, the moon and lace red, her eyes burning, and a changed line.
+ * Her words in a speech bubble, as the game shows them: a white rounded
+ * bubble with a tail pointing at her (to `tailX`, `tailY`). Its edge and
+ * text turn red as she turns.
  */
-function drawStillInLove(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number) {
-    // The room: dark wine walls with faint damask stripes.
+function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, tailX: number, tailY: number, mood: number) {
+    ctx.font = font('700 15px');
+    const pad = 14;
+    const w = ctx.measureText(text).width + pad * 2;
+    const h = 36;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+    ctx.fillStyle = mix('#fffafc', '#ffe3e6', mood);
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 16);
+    ctx.fill();
+    // The tail, from the bubble's lower left towards her.
+    ctx.beginPath();
+    ctx.moveTo(x + 18, y + h - 2);
+    ctx.lineTo(tailX, tailY);
+    ctx.lineTo(x + 36, y + h - 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = mix('#d8b9c4', '#c0101e', mood);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 16);
+    ctx.stroke();
+    ctx.fillStyle = mix('#3a2430', '#b0101c', mood);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + pad, y + h / 2 + 1);
+    ctx.textBaseline = 'alphabetic';
+    // At her worst, the bubble itself bleeds.
+    if (mood > 0.6) {
+        const rand = seeded(5);
+        for (let i = 0; i < 3; i += 1) {
+            const dx = x + w * (0.3 + rand() * 0.6);
+            const len = 6 + rand() * 12 * mood;
+            ctx.fillStyle = '#a3101c';
+            ctx.fillRect(dx - 1.2, y + h - 1, 2.4, len);
+            ctx.beginPath();
+            ctx.arc(dx, y + h - 1 + len, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
+/** A small brass plaque under a window naming the rank it stands for. */
+function rankPlaque(ctx: SKRSContext2D, cx: number, y: number, text: string) {
+    ctx.font = font('700 12px');
+    const w = ctx.measureText(text).width + 16;
+    const plate = ctx.createLinearGradient(0, y, 0, y + 18);
+    plate.addColorStop(0, '#d9b46a');
+    plate.addColorStop(1, '#9c7a3c');
+    ctx.fillStyle = plate;
+    ctx.beginPath();
+    ctx.roundRect(cx - w / 2, y, w, 18, 3);
+    ctx.fill();
+    ctx.fillStyle = '#2a1a10';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, cx, y + 10);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** Drops of blood hanging from the lace's scallops, more as she turns. */
+function laceDrips(ctx: SKRSContext2D, w: number, y: number, mood: number) {
+    if (mood < 0.3) return;
+    const rand = seeded(88);
+    const count = Math.round((w / 60) * mood);
+    for (let i = 0; i < count; i += 1) {
+        const x = Math.round((rand() * w) / 18) * 18;
+        const len = 4 + rand() * 14 * mood;
+        ctx.fillStyle = '#a3101c';
+        ctx.fillRect(x - 1.3, y + 6, 2.6, len);
+        ctx.beginPath();
+        ctx.arc(x, y + 6 + len, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+/**
+ * Blood sprayed onto the report's outer edges and card corners, drawn over
+ * the finished report: none when calm, spreading as she turns. It keeps to
+ * the margins and corners so no figure is covered.
+ */
+function bloodOnTheCards(ctx: SKRSContext2D, w: number, h: number, hero: number, mood: number) {
+    if (mood < 0.2) return;
+    const rand = seeded(616);
+    const spots: [number, number][] = [
+        [SIDE + 4, hero + 6],
+        [w - SIDE - 4, hero + 10],
+        [SIDE + 2, h - SIDE - 6],
+        [w - SIDE - 6, h - SIDE - 4],
+        [w * 0.5, h - SIDE + 4],
+        [SIDE - 6, hero + (h - hero) * 0.45],
+        [w - SIDE + 6, hero + (h - hero) * 0.6],
+    ];
+    const n = Math.max(1, Math.round(spots.length * mood));
+    for (const [x, y] of spots.slice(0, n)) bloodSplat(ctx, x, y, 7 + mood * 9, mood, rand);
+}
+
+/**
+ * Still in Love watching from her room (see `SceneId`). Two windows stand
+ * for her rank band: the bottom cutoff under a pale crescent on the left,
+ * the next rank up under the full blood moon on the right, each named on a
+ * brass plaque. She sits between them with her words in a bubble. `mood` 0
+ * is calm; towards 1 the room reddens, her eyes burn, and blood spreads
+ * over the glass, the lace and the cards' edges.
+ */
+function drawStillInLove(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null) {
+    // The room: dark wine walls with faint damask stripes, warming to red.
     const wall = ctx.createLinearGradient(0, 0, 0, h);
-    wall.addColorStop(0, mix('#1b0f17', '#3a0610', mood));
-    wall.addColorStop(Math.min(0.99, hero / h), mix('#22121b', '#4a0812', mood));
-    wall.addColorStop(1, mix('#140b10', '#2a050b', mood));
+    wall.addColorStop(0, mix('#1b0f17', '#2e0810', mood * 0.8));
+    wall.addColorStop(Math.min(0.99, hero / h), mix('#22121b', '#3a0a12', mood * 0.8));
+    wall.addColorStop(1, mix('#140b10', '#22060b', mood * 0.8));
     ctx.fillStyle = wall;
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.025)';
     for (let x = 0; x < w; x += 26) ctx.fillRect(x, 0, 10, h);
 
     const floor = hero - 14;
-    // A gallery of arched windows along the wall, either side of her, with
-    // the side table at the far end. A tall image has room for one.
-    const tableX = w - SIDE - 160;
-    const winW = 100;
-    const clear = 150;
-    const spots: number[] = [];
-    for (let x = SIDE + 10; x + winW < w / 2 - clear; x += 200) spots.push(x);
-    for (let x = w / 2 + clear; x + winW < tableX - 20; x += 200) spots.push(x);
-    for (const x of spots) gothicWindow(ctx, x, 22, winW, floor - 8, mood);
-    sideTable(ctx, tableX, floor, mood);
+    const winW = w > 1200 ? 140 : 110;
+    const top = 20;
+    const leftX = SIDE + 24;
+    const rightX = w - SIDE - 24 - winW;
+    // The windows stop short of the lace, leaving room for each plaque.
+    const sill = floor - 40;
+    gothicWindow(ctx, leftX, top, winW, sill, 'crescent', mood, 11);
+    gothicWindow(ctx, rightX, top, winW, sill, 'blood', mood, 23);
+    if (race) {
+        rankPlaque(ctx, leftX + winW / 2, sill + 10, race.start);
+        rankPlaque(ctx, rightX + winW / 2, sill + 10, race.finish);
+    }
+    sideTable(ctx, rightX - 175, floor, mood);
 
-    // Her, centre stage, staring out; until her picture exists, her eyes.
+    // Her, between the windows, staring out; until her picture exists, her eyes.
+    const herX = w * 0.45;
+    const eyeY = hero * 0.5;
     if (art) {
         const artH = hero - 24;
         const artW = (art.width / art.height) * artH;
-        ctx.drawImage(art, w / 2 - artW / 2, floor - artH + 6, artW, artH);
+        ctx.drawImage(art, herX - artW / 2, floor - artH + 6, artW, artH);
     } else {
-        watchingEyes(ctx, w / 2, hero * 0.46, 15, mood);
+        watchingEyes(ctx, herX, eyeY, 15, mood);
     }
+    const line = mood < 0.34 ? 'I still love you.' : mood < 0.67 ? 'I still love you…' : '…why are you leaving me behind?';
+    speechBubble(ctx, herX + 52, 18, line, herX + 30, eyeY - 14, mood);
 
     // Petals drifting down, more as she turns.
     const rand = seeded(214);
@@ -1430,7 +1675,7 @@ function drawStillInLove(ctx: SKRSContext2D, w: number, h: number, hero: number,
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(rand() * Math.PI);
-        ctx.fillStyle = mix('#c8505e', '#ff2a3c', mood);
+        ctx.fillStyle = mix('#c8505e', '#e0283a', mood);
         ctx.globalAlpha = 0.5 + rand() * 0.4;
         ctx.beginPath();
         ctx.ellipse(0, 0, 4, 2.4, 0, 0, Math.PI * 2);
@@ -1439,22 +1684,15 @@ function drawStillInLove(ctx: SKRSContext2D, w: number, h: number, hero: number,
     }
     ctx.globalAlpha = 1;
 
-    // The line, faint, under her gaze.
-    const line = mood < 0.34 ? 'I still love you.' : mood < 0.67 ? 'I still love you…' : '…why are you leaving me behind?';
-    ctx.font = font('400 14px');
-    ctx.textAlign = 'center';
-    ctx.fillStyle = `rgba(255, ${Math.round(220 - mood * 170)}, ${Math.round(225 - mood * 175)}, ${0.4 + mood * 0.4})`;
-    ctx.fillText(line, w / 2, floor - 22);
-    ctx.textAlign = 'left';
-
-    // Lace along the bottom of the band, white to red.
-    laceTrim(ctx, w, floor, mix('#f3e6ec', '#d0202f', mood));
+    // Lace along the bottom of the band, white to red, dripping when she turns.
+    laceTrim(ctx, w, floor, mix('#f3e6ec', '#c8202e', mood));
+    laceDrips(ctx, w, floor, mood);
 
     // The red closing in from the edges.
     if (mood > 0) {
         const v = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
         v.addColorStop(0, 'rgba(160, 0, 20, 0)');
-        v.addColorStop(1, `rgba(160, 0, 20, ${0.55 * mood})`);
+        v.addColorStop(1, `rgba(140, 0, 18, ${0.5 * mood})`);
         ctx.fillStyle = v;
         ctx.fillRect(0, 0, w, h);
     }
