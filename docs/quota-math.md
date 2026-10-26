@@ -54,9 +54,19 @@ reference report by about $2$; using $Q_{\text{eff}}$ matches it exactly.
 
 $$E_i = q \cdot d_i \qquad B_i = \max(0,\ E_i - T_i) \qquad A_i = \left\lfloor \frac{T_i}{d_i} \right\rfloor$$
 
-**Days remaining** includes today:
+**Days remaining** counts every day not yet finished. Let $c$ be the game
+day in progress, when the report is for the current month. The last
+finished day is $f = \min(e, c - 1)$, or $f = e$ for a past month, and
 
-$$r = D - e + 1$$
+$$r = D - f$$
+
+The reference report was posted mid-day, with day $e$ in progress, so for it
+$f = e - 1$ and $r = D - e + 1$: today counts. A report at the 00:00 JST
+reset shows day $e$ finished, so $f = e$ and $r = D - e$. Until 2026-10-24
+the code always used $D - e + 1$. At the reset that counted the finished day
+twice, once as owed in $E_i$ and once as still to play. That spread the gap
+over one day too many, so a member 619 fans behind was asked for less than
+the pace rate $q$ (see `DEVELOPMENT_LOG.md`, 2026-10-24).
 
 **Need per day**, shown only when the member is behind:
 
@@ -201,25 +211,28 @@ weekly weeks they cover ("Weeks 3–4 · days 15–28", "Week 5 · days 29–31"
 
 In checkpoint periods:
 
-- **`expected`** is what was due at the last checkpoint that has passed, zero
-  before the first. It only rises when a checkpoint passes.
-- **`behind`** is `expected` minus the month-to-date total, so nobody is
-  behind mid-period unless they missed an earlier checkpoint and have not
-  caught up.
+- **`expected`** grows by $Q$ / period-length every day, through the last
+  finished day (since 2026-10-12; before that it only rose at checkpoints).
+- **`behind`** is `expected` minus the fans earned through the same day.
+  It is no longer a column on the report (2026-10-24); it still decides who
+  is behind, and appears in the alert and `/fans me`.
 - **The day in progress is never judged.** `loadCircleProgress` passes the
   current game day as `currentDay`, and only days before it count as over.
   On day 7 of a weekly circle, week 1 has not been checked yet; on day 8 it
   has.
 - **`target`** is what will be due at the next checkpoint, and `needPerDay`
-  spreads the gap to it over the days left, today included. It is shown even
+  spreads the gap to it over the days left, every day after the last
+  finished one. It is the whole daily amount, not an extra on top of pace,
+  and it is shown even
   for someone on pace, since that is the "increasing requirement".
 - **A joiner** owes the share of each period they were in the circle for: a
   day-10 joiner owes 5/7 of week 2.
-- **The daily alert** is posted only when a checkpoint has just closed (the
-  latest finished day is a checkpoint), so a missed week is announced once,
-  the day after it ends. `/fans check` always includes it. Known gap: a
-  month's final checkpoint closes as the next game month starts, so its alert
-  is never posted automatically; `/fans check` on the last day covers it.
+- **The alert** no longer waits for a checkpoint to close (since
+  2026-10-24). That rule was left over from when `expected` only rose at
+  checkpoints; with daily growth, the report showed people behind for days
+  with no alert. How often it posts is now the club's `alertFrequency`
+  (daily, every 3 days, weekly or never), the same in every period, and it pings the
+  club's staff roles rather than the trainers behind.
 
-The projection runs to month end: total plus the member's average for each
-remaining day.
+The projection (`projectedTotal`) is still computed but no longer shown
+anywhere (removed 2026-10-24 at the club's request).

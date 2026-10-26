@@ -20,18 +20,19 @@ import { lastDayGains } from '../lib/fans/readings';
 import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleProgress, formatReportDate } from '../lib/fans/reports';
 import {
     describeQuota,
-    formatCompactFans,
     formatFans,
     toSafeNumber,
     type CircleProgress,
     type MemberProgress,
     type QuotaPeriod,
 } from '../lib/fans/metrics';
-import { buildCircleReport, postReport } from '../lib/fans/scheduler';
+import { alertChannelOf, buildCircleReport, postReport } from '../lib/fans/scheduler';
 import { isConfigured, searchCircles } from '../lib/umamoe/client';
 import { renderFanReport } from '../lib/image/renderFanReport';
+import { paletteOf } from '../lib/image/theme';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
+import { rankBand } from '../lib/fans/cutoff';
 
 /** Quota period choices for `/fans circle add` and `config`. Weeks restart on the 1st. */
 const QUOTA_PERIOD_CHOICES = [
@@ -149,7 +150,7 @@ export const data = new SlashCommandBuilder()
                     .addChannelOption((opt) =>
                         opt
                             .setName('alert_channel')
-                            .setDescription('Where behind-quota alerts go. A thread works.')
+                            .setDescription('Where behind-quota alerts go, if not the report channel. A thread works.')
                             .addChannelTypes(...REPORT_CHANNEL_TYPES),
                     )
                     .addBooleanOption((opt) => opt.setName('active').setDescription('Pause or resume syncing')),
@@ -345,10 +346,12 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
     const buffer = await renderFanReport(progress, {
         circleName: circle.name,
         monthlyRank: circle.monthlyRank,
+        clubRank: circle.rank,
+        rankBand: rankBand(circle.monthlyRank, circle.monthlyPoints === null ? null : Number(circle.monthlyPoints)),
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, progress.daysElapsed),
         last24h: await lastDayGains(circle.id),
-    });
+    }, paletteOf(circle.reportTheme));
 
     await interaction.editReply({
         files: [new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` })],
@@ -356,7 +359,7 @@ async function handleReport(interaction: ChatInputCommandInteraction) {
 }
 
 /** A report as posted into the channel the command ran in. */
-type CheckPost = { content: string; files: AttachmentBuilder[]; allowedMentions: { users: string[] } };
+type CheckPost = { content: string; files: AttachmentBuilder[]; allowedMentions: { parse: [] } };
 
 /**
  * Refreshes one circle from uma.moe for a quota check.
@@ -397,8 +400,10 @@ async function checkCircle(
             posted.behindCount === 0
                 ? 'nobody is behind.'
                 : posted.alerted
-                  ? `${posted.behindCount} behind, alerted in <#${fresh.alertChannelId}>.`
-                  : `${posted.behindCount} behind; no alert channel is set, so nobody was tagged.`;
+                  ? `${posted.behindCount} behind, alerted in <#${alertChannelOf(fresh)}>.`
+                  : fresh.alertFrequency === 'NONE'
+                    ? `${posted.behindCount} behind; alerts are off for this club.`
+                    : `${posted.behindCount} behind; the alert could not be posted in <#${alertChannelOf(fresh)}>.`;
         return withNote(`**${fresh.name}** — report posted in <#${fresh.reportChannelId}>; ${alertNote}`);
     }
 
@@ -407,7 +412,8 @@ async function checkCircle(
     await postHere({
         content: [report.alert?.content ?? `**${fresh.name}** — nobody is behind quota.`, syncNote].filter(Boolean).join('\n'),
         files: [report.image],
-        allowedMentions: { users: report.alert?.users ?? [] },
+        // Run by the club's own staff, so nobody is pinged.
+        allowedMentions: { parse: [] },
     });
     return `**${fresh.name}** — posted here; ${report.behindCount === 0 ? 'nobody is behind.' : `${report.behindCount} behind.`}`;
 }
@@ -566,7 +572,8 @@ async function handleCheckClub(interaction: ChatInputCommandInteraction) {
     await interaction.editReply({
         content: [report.alert?.content ?? `**${fresh.name}** — nobody is behind quota.`, syncNote].filter(Boolean).join('\n'),
         files: [report.image],
-        allowedMentions: { users: report.alert?.users ?? [] },
+        // Run by the club's own staff, so nobody is pinged.
+        allowedMentions: { parse: [] },
     });
 }
 
@@ -612,8 +619,12 @@ function progressCard(circle: TrackedCircle, progress: CircleProgress, member: M
         fields.push({ name: `Due by end of day ${progress.nextCheckpointDay}`, value: formatFans(member.target), inline: true });
     }
     fields.push(
-        { name: 'Need per day', value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay), inline: true },
-        { name: 'Projected', value: `${formatCompactFans(member.projectedTotal)} of ${formatCompactFans(progress.effectiveQuota)}`, inline: true },
+        {
+            // The whole daily amount from here on, not an extra on top of pace.
+            name: checkpoints ? `Daily target until day ${progress.nextCheckpointDay}` : 'Daily target until month end',
+            value: member.needPerDay === null ? 'Nothing more needed' : formatFans(member.needPerDay),
+            inline: true,
+        },
     );
     return infoEmbed(
         `${member.trainerName} · ${circle.name}`,
@@ -978,7 +989,7 @@ async function handleCircleConfig(interaction: ChatInputCommandInteraction) {
     const lines = [
         `Quota: **${describeQuota(toSafeNumber(updated.quota), updated.quotaPeriod)}** per member`,
         `Reports: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'not set'}`,
-        `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'not set'}`,
+        `Alerts: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : updated.reportChannelId ? 'in the report channel' : 'not set'}`,
         `Syncing: ${updated.active ? 'active' : 'paused'}`,
     ];
 

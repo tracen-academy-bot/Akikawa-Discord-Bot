@@ -23,10 +23,12 @@ import { TRAINER_WINDOW_DAYS, buildBenchmark, buildTrainerReport, currentCircleP
 import { checkpointNote, describeQuota, toSafeNumber, type CircleProgress, type QuotaPeriod } from '../lib/fans/metrics';
 import { parsePeriod, parseQuota } from '../commands/fans';
 import { renderFanReport } from '../lib/image/renderFanReport';
+import { paletteOf } from '../lib/image/theme';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
 import { renderTimerLeaderboard } from '../lib/image/renderTimerLeaderboard';
 import { getLeaderboard, getPanelContext, type LeaderboardPeriod } from '../lib/timer/service';
+import { rankBand } from '../lib/fans/cutoff';
 
 /**
  * The self-hosted dashboard.
@@ -124,18 +126,15 @@ function memberRows(progress: CircleProgress, circleId: string): string {
             // Row class drives the left bar: placement tint for the top four,
             // red for anyone behind, nothing otherwise.
             const cls = m.rank <= 4 ? `p${m.rank}` : m.onPace ? '' : 'behind';
-            const projTone = m.projectedTotal >= progress.effectiveQuota ? 'green' : m.onPace ? 'muted' : 'red';
 
             return `<tr class="${cls}">
         <td class="faint" data-value="${m.rank}">${m.rank}${movement}</td>
         <td class="name"><a href="/circles/${esc(circleId)}/trainers/${m.viewerId}">${esc(m.trainerName)}</a></td>
         <td class="right"><strong>${num(m.total)}</strong></td>
         <td class="right faint">${num(m.expected)}</td>
-        <td class="right ${m.behind > 0 ? 'red' : 'faint'}">${dash(m.behind > 0 ? m.behind : null)}</td>
         <td class="right muted">${num(m.avgPerDay)}</td>
-        <td class="right ${m.needPerDay !== null ? 'gold' : 'faint'}">${dash(m.needPerDay)}</td>
+        <td class="right ${m.needPerDay === null ? 'faint' : m.onPace ? 'gold' : 'red'}">${dash(m.needPerDay)}</td>
         <td class="right muted">${num(m.latestDayGain)}</td>
-        <td class="right ${projTone}">${compact(m.projectedTotal)}</td>
       </tr>`;
         })
         .join('');
@@ -405,8 +404,8 @@ export function startDashboard(client: () => Client): () => void {
                    <table data-sortable>
                      <thead><tr>
                        <th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Total</th><th class="right" data-sort>Expected</th>
-                       <th class="right" data-sort>Behind</th><th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Need/Day</th>
-                       <th class="right" data-sort>Day ${progress.daysElapsed}</th><th class="right" data-sort>Proj.</th>
+                       <th class="right" data-sort>Avg/Day</th><th class="right" data-sort>Daily target</th>
+                       <th class="right" data-sort>Day ${progress.daysElapsed}</th>
                      </tr></thead>
                      <tbody>${memberRows(progress, circle.id)}</tbody>
                    </table>
@@ -435,11 +434,13 @@ export function startDashboard(client: () => Client): () => void {
             await renderFanReport(progress, {
                 circleName: circle.name,
                 monthlyRank: circle.monthlyRank,
+                clubRank: circle.rank,
+                rankBand: rankBand(circle.monthlyRank, circle.monthlyPoints === null ? null : Number(circle.monthlyPoints)),
                 memberCount: progress.members.length,
                 dateLabel: formatReportDate(year, month, progress.daysElapsed),
                 // Last 24h is only meaningful for the month in progress.
                 last24h: year === currentGameMonth().year && month === currentGameMonth().month ? await lastDayGains(circle.id) : null,
-            }),
+            }, paletteOf(circle.reportTheme)),
         );
     });
 

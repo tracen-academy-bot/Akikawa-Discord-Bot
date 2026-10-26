@@ -22,7 +22,9 @@ import { autoCompleteClubName } from "../lib/clubAutocomplete";
 import { successEmbed, errorEmbed, infoEmbed } from "../lib/embeds";
 import { renderClubList, type ClubSummary } from "../lib/image/renderClubList";
 import { renderClubView } from "../lib/image/renderClubView";
-import type { TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
+import type { AlertFrequency, TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
+import { buildCircleReport, describeAlertFrequency } from '../lib/fans/scheduler';
+import { DEFAULT_PALETTE, PALETTES, paletteOf } from '../lib/image/theme';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
 import { toSafeNumber } from '../lib/fans/metrics';
@@ -105,6 +107,15 @@ async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId:
 
 // ================================================================================
 
+/** The `theme` choice that clears a club's theme back to the default. */
+const DEFAULT_THEME_CHOICE = 'default';
+
+/** Report theme choices in the `/club reports` form: the default, then every palette. Discord allows 25. */
+const THEME_CHOICES = [
+    { name: `Default (${PALETTES[DEFAULT_PALETTE]!.label})`, value: DEFAULT_THEME_CHOICE },
+    ...Object.values(PALETTES).map((p) => ({ name: `${p.label}${p.light ? ' (light)' : ''}`, value: p.id })),
+].slice(0, 25);
+
 export const data = new SlashCommandBuilder()
     .setName('club')
     .setDescription('Manage clubs.')
@@ -164,7 +175,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('reports')
-            .setDescription("Set a club's expected rank, quota and report time (its staff or Club Managers).")
+            .setDescription("Set a club's quota, report time and report theme (its staff or Club Managers).")
             .addStringOption((opt) => opt.setName('club').setDescription('Club').setRequired(true).setAutocomplete(true))
     )
     .addSubcommandGroup((group) =>
@@ -351,8 +362,17 @@ const FIELD = {
     home: 'club:home',
     roles: 'club:roles',
     reportChannel: 'club:report-channel',
-    alertChannel: 'club:alert-channel',
+    alertFrequency: 'club:alert-frequency',
+    theme: 'club:theme',
 } as const;
+
+/** How often the staff roles are pinged about members behind quota. */
+const ALERT_FREQUENCY_CHOICES: { value: AlertFrequency; label: string; description: string }[] = [
+    { value: 'DAILY', label: 'Daily', description: 'Ping the staff roles with every report that has anyone behind.' },
+    { value: 'EVERY_3_DAYS', label: 'Every 3 days', description: 'At most once every 3 days, with the first report that has anyone behind.' },
+    { value: 'WEEKLY', label: 'Weekly', description: 'At most once a week, with the first report that has anyone behind.' },
+    { value: 'NONE', label: 'Never', description: 'No pings and no alert post. The report still shows who is behind.' },
+];
 /** Home channels a club may list. Threads inside them count without listing. */
 const MAX_HOME_CHANNELS = 10;
 /** Staff roles a club may list. */
@@ -434,28 +454,33 @@ async function resolveReportChannel(interaction: ModalSubmitInteraction, field: 
 // ─── /club reports ────────────────────────────────────────────────────────────
 
 /**
- * Builds the `/club reports` form: expected rank, quota and period, and for a
- * tracked club its report time and time zone. The same form for the club's
- * staff and Club Managers.
+ * The expected-rank picker, in the `/club admin` form. Each rank carries its
+ * cutoff's figures beneath it, because a form cannot change as it is filled
+ * in.
+ */
+function rankField(club: Club): LabelBuilder {
+    return new LabelBuilder().setLabel('Expected rank').setStringSelectMenuComponent(
+        new StringSelectMenuBuilder()
+            .setCustomId(FIELD.rank)
+            .setPlaceholder('Not set')
+            .addOptions(
+                RANK_CHOICES.map((r) => ({
+                    label: r.name,
+                    value: r.value,
+                    default: r.value === club.rank,
+                    ...(cutoffLine(cutoffForRank(r.value)) ? { description: cutoffLine(cutoffForRank(r.value))! } : {}),
+                })),
+            ),
+    );
+}
+
+/**
+ * Builds the `/club reports` form: quota and period, and for a tracked club
+ * its report time, time zone and report theme. The same form for the club's
+ * staff and Club Managers. The expected rank is in `/club admin`.
  */
 export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
-    const labels: LabelBuilder[] = [
-        new LabelBuilder().setLabel('Expected rank').setStringSelectMenuComponent(
-            new StringSelectMenuBuilder()
-                .setCustomId(FIELD.rank)
-                .setPlaceholder('Not set')
-                .addOptions(
-                    RANK_CHOICES.map((r) => ({
-                        label: r.name,
-                        value: r.value,
-                        default: r.value === club.rank,
-                        // A form cannot change as it is filled in, so each
-                        // rank carries its own cutoff's figures beneath it.
-                        ...(cutoffLine(cutoffForRank(r.value)) ? { description: cutoffLine(cutoffForRank(r.value))! } : {}),
-                    })),
-                ),
-        ),
-    ];
+    const labels: LabelBuilder[] = [];
     const quotaValue = quotaInputValue(club);
     const quota = new TextInputBuilder().setCustomId(FIELD.quota).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(20);
     if (quotaValue) quota.setValue(quotaValue);
@@ -495,6 +520,18 @@ export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
                         })),
                     ),
             ),
+            new LabelBuilder()
+                .setLabel('Report theme')
+                .setDescription('Colours and style of the report image. Saving a new one shows a preview.')
+                .setStringSelectMenuComponent(
+                    new StringSelectMenuBuilder().setCustomId(FIELD.theme).addOptions(
+                        THEME_CHOICES.map((t) => ({
+                            label: t.name,
+                            value: t.value,
+                            default: t.value === (club.reportTheme && PALETTES[club.reportTheme] ? club.reportTheme : DEFAULT_THEME_CHOICE),
+                        })),
+                    ),
+                ),
         );
     }
     return new ModalBuilder()
@@ -528,17 +565,15 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
     // The quota replaces the old club fan count, which is cleared so it
     // never shows as a second, stale number.
     const data: {
-        rank?: ClubRank;
         quota: bigint;
         quotaPeriod: QuotaPeriod;
         fanCountAmount: null;
         fanCountPeriod: null;
         reportMinute?: number | null;
         reportTimeZone?: string | null;
+        reportTheme?: string | null;
     } = { quota: BigInt(0), quotaPeriod: club.quotaPeriod, fanCountAmount: null, fanCountPeriod: null };
 
-    const rank = interaction.fields.getStringSelectValues(FIELD.rank)[0] as ClubRank | undefined;
-    if (rank && RANK_CHOICES.some((r) => r.value === rank)) data.rank = rank;
     const rawQuota = interaction.fields.getTextInputValue(FIELD.quota).trim();
     if (rawQuota) {
         const quota = parseQuota(rawQuota);
@@ -560,7 +595,14 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
             data.reportMinute = minute;
             data.reportTimeZone = zone;
         }
+        // Not picking leaves the theme as it was.
+        const theme = interaction.fields.getStringSelectValues(FIELD.theme)[0];
+        if (theme === DEFAULT_THEME_CHOICE) data.reportTheme = null;
+        else if (theme && PALETTES[theme]) data.reportTheme = theme;
     }
+    // A new theme gets a preview; rendering it can take a moment.
+    const themeChanged = data.reportTheme !== undefined && data.reportTheme !== club.reportTheme;
+    if (themeChanged) await interaction.deferReply();
 
     const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
     const headcount = await clubHeadcount(updated);
@@ -572,7 +614,13 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
         ...(cutoffDetail(cutoffForRank(updated.rank)) ? [cutoffDetail(cutoffForRank(updated.rank))!] : []),
         ...(updated.circleId !== null ? ['', reportSummary(updated)] : []),
     ];
-    await interaction.reply({ embeds: [successEmbed('Club updated', lines.join('\n'))] });
+    if (themeChanged) {
+        const report = await buildCircleReport(updated);
+        lines.push('', report ? "Here is today's report in the new theme." : 'There is no fan data this month yet, so there is no preview.');
+        await interaction.editReply({ embeds: [successEmbed('Club updated', lines.join('\n'))], files: report ? [report.image] : [] });
+    } else {
+        await interaction.reply({ embeds: [successEmbed('Club updated', lines.join('\n'))] });
+    }
     void refreshDirectory(interaction.guild as unknown as DirectoryGuild | null);
 }
 
@@ -583,8 +631,10 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
 export function reportSummary(club: Club, now = new Date()): string {
     const time = reportTimeOf(club);
     const next = Math.floor(nextReportAt(time, now).getTime() / 1000);
+    const theme = paletteOf(club.reportTheme);
     const lines = [
         `Fan report: daily at **${formatTimeOfDay(time.minute)} ${describeZone(time.zone, now)}**${hasOwnReportTime(club) ? '' : ' (the default: the daily reset)'}`,
+        `Report theme: **${theme.label}**${club.reportTheme && PALETTES[club.reportTheme] ? '' : ' (the default)'}`,
         `Next: <t:${next}:F> (<t:${next}:R>), shown in your own time.`,
     ];
     if (!club.reportChannelId) lines.push('No report channel yet, so nothing posts; a Club Manager sets one with `/club admin`.');
@@ -607,8 +657,10 @@ export function buildAdminModal(club: Club, links: ClubFormLinks = { home: club.
             new LabelBuilder()
                 .setLabel('Name')
                 .setTextInputComponent(new TextInputBuilder().setCustomId(FIELD.name).setStyle(TextInputStyle.Short).setValue(club.name).setMaxLength(100)),
+            rankField(club),
         );
     } else {
+        labels.push(rankField(club));
         const home = new ChannelSelectMenuBuilder()
             .setCustomId(FIELD.home)
             .setChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildForum)
@@ -635,12 +687,15 @@ export function buildAdminModal(club: Club, links: ClubFormLinks = { home: club.
         labels.push(
             new LabelBuilder()
                 .setLabel('Report channel')
-                .setDescription('Channel or thread for the daily report: ID, #mention or link. Empty: no report.')
+                .setDescription('Daily report and behind-quota pings post here: ID, #mention or link. Empty: none.')
                 .setTextInputComponent(reportChannelInput(FIELD.reportChannel, club.reportChannelId)),
             new LabelBuilder()
-                .setLabel('Alert channel')
-                .setDescription('Channel or thread for behind-quota pings: ID, #mention or link. Empty: no alerts.')
-                .setTextInputComponent(reportChannelInput(FIELD.alertChannel, club.alertChannelId)),
+                .setLabel('Ping staff roles about members behind')
+                .setStringSelectMenuComponent(
+                    new StringSelectMenuBuilder()
+                        .setCustomId(FIELD.alertFrequency)
+                        .addOptions(ALERT_FREQUENCY_CHOICES.map((c) => ({ ...c, default: c.value === club.alertFrequency }))),
+                ),
         );
     }
     return new ModalBuilder()
@@ -652,7 +707,7 @@ export function buildAdminModal(club: Club, links: ClubFormLinks = { home: club.
 /** `/club admin`: opens the Club Manager form. */
 async function handleAdmin(interaction: ChatInputCommandInteraction, member: GuildMember) {
     if (!isOfficer(member)) {
-        await interaction.reply({ embeds: [errorEmbed("Only Club Managers can change a club's name, channels or staff roles.")] });
+        await interaction.reply({ embeds: [errorEmbed("Only Club Managers can change a club's expected rank, name, channels or staff roles.")] });
         return;
     }
     const club = await findClubOrReply(interaction, interaction.options.getString('club', true));
@@ -668,9 +723,20 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
 
     const club = clubId ? await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId ?? '' } }) : null;
     if (!club) return void (await refuse('That club no longer exists.'));
-    if (!isOfficer(interaction.member as GuildMember)) return void (await refuse("Only Club Managers can change a club's name, channels or staff roles."));
+    if (!isOfficer(interaction.member as GuildMember)) return void (await refuse("Only Club Managers can change a club's expected rank, name, channels or staff roles."));
 
-    const data: { name?: string; homeChannelIds?: string[]; staffRoleIds: string[]; reportChannelId?: string | null; alertChannelId?: string | null } = { staffRoleIds: [] };
+    const data: {
+        name?: string;
+        homeChannelIds?: string[];
+        staffRoleIds: string[];
+        reportChannelId?: string | null;
+        alertChannelId?: string | null;
+        alertFrequency?: AlertFrequency;
+        rank?: ClubRank | null;
+    } = { staffRoleIds: [] };
+    const rank = interaction.fields.getStringSelectValues(FIELD.rank)[0];
+    const rankChoice = RANK_CHOICES.find((r) => r.value === rank);
+    if (rankChoice) data.rank = rankChoice.value as ClubRank;
     if (club.circleId === null) {
         const name = interaction.fields.getTextInputValue(FIELD.name).trim();
         if (!name) return void (await refuse('The club needs a name.'));
@@ -684,10 +750,13 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
         data.homeChannelIds = picked ? [...picked.keys()] : [];
         const report = await resolveReportChannel(interaction, FIELD.reportChannel, 'Report channel');
         if ('error' in report) return void (await refuse(report.error));
-        const alert = await resolveReportChannel(interaction, FIELD.alertChannel, 'Alert channel');
-        if ('error' in alert) return void (await refuse(alert.error));
         data.reportChannelId = report.id;
-        data.alertChannelId = alert.id;
+        // Alerts follow the report channel (stored as no alert channel). A
+        // separate one set with `/fans circle config` or the dashboard stays.
+        if (club.alertChannelId === null || club.alertChannelId === club.reportChannelId) data.alertChannelId = null;
+        const frequency = interaction.fields.getStringSelectValues(FIELD.alertFrequency)[0];
+        const choice = ALERT_FREQUENCY_CHOICES.find((c) => c.value === frequency);
+        if (choice) data.alertFrequency = choice.value;
     }
     // A role list equal to the name matches is stored empty, so the club keeps
     // following its name (a role made later is picked up).
@@ -702,13 +771,15 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
     const home: Links = { ids: updated.homeChannelIds, matched: false };
     const roles: Links = guild ? staffRolesOf(updated, after, guild) : { ids: updated.staffRoleIds, matched: false };
     const lines = [
-        `**${updated.name}**`,
+        `**${updated.name}** · expected rank **${formatRank(updated.rank)}**`,
+        ...(cutoffDetail(cutoffForRank(updated.rank)) ? [cutoffDetail(cutoffForRank(updated.rank))!] : []),
         ...(updated.circleId !== null ? [`Home channels: ${linksText(home, (id) => `<#${id}>`)}`] : []),
         `Staff roles: ${linksText(roles, (id) => `<@&${id}>`)}`,
         ...(updated.circleId !== null
             ? [
-                  `Report channel: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'none, so no report posts'}`,
-                  `Alert channel: ${updated.alertChannelId ? `<#${updated.alertChannelId}>` : 'none'}`,
+                  `Report channel: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'none, so no report or alert posts'}`,
+                  ...(updated.alertChannelId ? [`Alerts: <#${updated.alertChannelId}> (set separately)`] : []),
+                  `Staff pings about members behind: **${describeAlertFrequency(updated.alertFrequency)}**`,
               ]
             : []),
     ];

@@ -193,7 +193,12 @@ export async function syncCircle(
     if (updateCircle) {
         await prisma.trackedCircle.update({
             where: { id: circle.id },
-            data: { name, monthlyRank: response.circle.monthly_rank ?? null, lastSyncedAt: new Date() },
+            data: {
+                name,
+                monthlyRank: response.circle.monthly_rank ?? null,
+                monthlyPoints: response.circle.monthly_point == null ? null : BigInt(response.circle.monthly_point),
+                lastSyncedAt: new Date(),
+            },
         });
     }
 
@@ -233,6 +238,7 @@ export async function adoptUntrackedClub(circle: TrackedCircle): Promise<Tracked
                 quota: fresh.quota,
                 quotaPeriod: fresh.quotaPeriod,
                 monthlyRank: fresh.monthlyRank,
+                monthlyPoints: fresh.monthlyPoints,
                 lastSyncedAt: fresh.lastSyncedAt,
                 active: true,
             },

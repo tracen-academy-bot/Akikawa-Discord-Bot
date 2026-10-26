@@ -77,6 +77,12 @@ export interface CutoffSeries {
     circles: number;
     /** Oldest first, at most `CUTOFF_DAYS`. */
     days: CutoffDay[];
+    /**
+     * Monthly points of the circle exactly at the cutoff place, for the rank
+     * band on reports. Null when that place was missing; absent in figures
+     * made before this was kept.
+     */
+    points?: number | null;
     computedAt: Date;
 }
 
@@ -159,7 +165,8 @@ function raws(members: UmaCircleMember[] | undefined): number[][] {
  */
 export async function refreshCutoff(cutoff: number, now = new Date()): Promise<CutoffSeries> {
     const places = bandRanks(cutoff);
-    const circles = [...(await getCirclesAtRanks(places)).values()].filter((c) => c.circle_id);
+    const ranked = await getCirclesAtRanks(places);
+    const circles = [...ranked.values()].filter((c) => c.circle_id);
     if (circles.length === 0) throw new Error(`uma.moe has no circles ranked ${places[0]} to ${places.at(-1)}`);
 
     const { year, month } = currentGameMonth(now);
@@ -195,6 +202,7 @@ export async function refreshCutoff(cutoff: number, now = new Date()): Promise<C
         to: places.at(-1)!,
         circles: contributed,
         days: days.slice(-CUTOFF_DAYS),
+        points: ranked.get(cutoff)?.monthly_point ?? null,
         computedAt: now,
     };
     latest.set(cutoff, series);
@@ -229,6 +237,47 @@ export async function refreshCutoffs(now = new Date()): Promise<{ done: number[]
 export async function refreshCutoffsIfStale(now = new Date()): Promise<{ done: number[]; failed: string[] } | null> {
     if (lastRefreshAt && now.getTime() - lastRefreshAt.getTime() < CUTOFF_MAX_AGE_MS) return null;
     return refreshCutoffs(now);
+}
+
+/** Expected-rank names for each cutoff, as shown on reports. */
+const CUTOFF_TIER: Record<number, string> = { 30: 'S+', 100: 'S', 500: 'A+', 1000: 'A', 3000: 'B+' };
+
+/** One edge of a rank band: a cutoff place and the points sitting on it. */
+export interface BandEdge {
+    rank: number;
+    /** The expected rank that cutoff stands for, e.g. "S" for #100. */
+    tier: string;
+    /** Monthly points of the circle on that place; null until known. */
+    points: number | null;
+}
+
+/**
+ * Where a circle sits between the cutoffs around its monthly rank: #194 is in
+ * the A+ band (101 to 500), between #100 (S) above and #500 (A+) below.
+ */
+export interface RankBand {
+    rank: number;
+    points: number;
+    /** The band's expected rank: the cutoff below, e.g. "A+"; "below B+" past the last. */
+    tier: string;
+    /** The next cutoff up; null in the top band. */
+    above: BandEdge | null;
+    /** The cutoff this circle must stay within; null below the last one. */
+    below: BandEdge | null;
+}
+
+/**
+ * The rank band for a circle's monthly rank and points, using the points
+ * kept at each cutoff by `refreshCutoff`. Null without a rank or points.
+ */
+export function rankBand(rank: number | null, points: number | null): RankBand | null {
+    if (rank === null || points === null || rank < 1) return null;
+    const cutoffs = [...new Set(Object.values(CUTOFF_BY_RANK))].sort((a, b) => a - b);
+    const edge = (c: number | undefined): BandEdge | null =>
+        c === undefined ? null : { rank: c, tier: CUTOFF_TIER[c] ?? `T${c}`, points: currentCutoff(c)?.points ?? null };
+    const above = edge([...cutoffs].reverse().find((c) => c < rank));
+    const below = edge(cutoffs.find((c) => c >= rank));
+    return { rank, points, tier: below ? below.tier : `below ${above?.tier ?? ''}`.trim(), above, below };
 }
 
 /** A per-member figure as millions with two decimals: 1234567 is "1.23M". */

@@ -72,6 +72,24 @@ Report and alert channels can be threads. The daily job pulls from uma.moe and
 posts reports automatically; see `docs/quota-math.md` for how every column is
 derived and verified.
 
+When anyone is behind, the alert lists them by name and pings the club's staff
+roles (its Trainer and Assistant roles, or the roles set in `/club admin`).
+Trainers themselves are not tagged. Club Managers pick how often in
+`/club admin`: daily, every 3 days, weekly, or never. For the ping to notify, each staff
+role must be mentionable, or the bot needs the "Mention @everyone, @here, and
+All Roles" permission.
+
+The report image comes in several themes (`PALETTES` in
+`src/lib/image/theme.ts`). A club's staff pick one in the `/club reports`
+form; saving a new one replies with the current report drawn in it, and
+`Default` goes back to Rose. The expected rank is set by Club Managers in
+`/club admin`.
+
+Behind-quota alerts post in the club's report channel. A separate alert
+channel can still be set with `/fans circle config alert_channel:` or on the
+dashboard.
+`scripts/palettes.ts` renders a preview of every theme and checks contrast.
+
 ## Dashboard
 
 Runs inside the bot process — no second container. Set `DISCORD_CLIENT_SECRET`,

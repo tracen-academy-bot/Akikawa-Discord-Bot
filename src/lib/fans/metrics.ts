@@ -139,11 +139,13 @@ export interface CircleProgress {
     nextCheckpointDay: number;
     /**
      * True when the latest finished day was a checkpoint, so `behind` has just
-     * been judged. The daily alert waits for this in checkpoint periods.
-     * Always true in MONTH mode, which judges every day.
+     * been judged at it. Always true in MONTH mode, which judges every day.
      */
     checkpointJustClosed: boolean;
-    /** Days left before `nextCheckpointDay` is due, including today. */
+    /**
+     * Days left before `nextCheckpointDay` is due: every day after the last
+     * finished one, so today counts only while it is still in progress.
+     */
     daysRemaining: number;
     /** Per-day rate: quota / days in month, quota / 14, quota / 7, or quota, floored. */
     quotaPerDay: number;
@@ -490,8 +492,11 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         checkpointDay = daysElapsed;
         nextCheckpointDay = daysInMonth;
         checkpointJustClosed = true;
-        // Before the first day has any data, today is still day 1.
-        daysRemaining = Math.max(0, daysInMonth - Math.max(1, daysElapsed) + 1);
+        // Every day not yet finished can still earn: today too when it is in
+        // progress, but not a day that has already ended (a report at the
+        // reset shows the day that just closed, so counting it again would
+        // spread the gap over one day too many and ask for less than pace).
+        daysRemaining = Math.max(0, daysInMonth - finishedDay);
         judgedDay = daysElapsed;
         effectiveQuota = quotaPerDay * daysInMonth;
         nextCheckpointTarget = effectiveQuota;

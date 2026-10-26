@@ -4,6 +4,313 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-25 — Rank band; top 3 of the day; lists stretch to fill
+
+- **Rank band** (both layouts): where the club's monthly points sit between
+  the cutoffs around its monthly rank. #194 is in the A+ band (#101–500): a
+  bar from #500 to #100 with the club marked, "To #100 (S) +579M" and
+  "Over #500 (A+) +1.40B". The club's `monthly_point` is now stored on sync
+  (`monthlyPoints`, new column), and `refreshCutoff` keeps the points of the
+  circle exactly on each cutoff place (`CutoffSeries.points`), which it
+  already fetched, so the band costs no extra uma.moe requests.
+  `rankBand()` works out the band; the top band has no place above and past
+  #3000 there is none below. Both figures come from uma.moe's points, so they
+  compare like with like; the edges are up to six hours old (the cutoff
+  refresh), the club's own up to an hour.
+- **Top 3 of the day** replaces the open-ended best-gains list in the wide
+  sidebar, titled "Top 3 · Day 23" and numbered, so it reads as the day's
+  best rather than a second copy of the table's leaders.
+- **Flex**: table rows, behind entries and closest-to-the-line rows grow to
+  fill spare card height, by at most 1.35× (1.25× for behind entries), and
+  the sidebar's summary and top-3 rows likewise. A small club still leaves
+  some space rather than a few huge rows.
+
+---
+
+## 2026-10-25 — Brighter "close" names; wide layout stress-tested
+
+viinus (2026-10-24): the names "on the edge" (behind by under a day) were
+hard to tell from normal names except on Graphite. Every palette's `warn`
+was a pale cream (HSV saturation about 0.3), close to white text. It is now
+a saturated yellow on dark palettes and a deep amber on light ones.
+`scripts/palettes.ts` now also fails a palette whose `warn` is paler than
+saturation 0.6 or within 25 degrees of hue of `behind`; that caught Clear,
+whose behind is now vermillion (still Okabe-Ito, still colour-blind safe).
+
+Wide layout, rendered across: 5 members; 30 with nobody behind (Paper);
+13, 24 and 30 behind; Last 24h with the freeze note and long names; no
+data. Found and fixed:
+
+- **All behind**: the table was empty and 30 entries stacked in the right
+  column (1600px tall). The behind card now spans the middle and right in
+  three columns.
+- **Many behind** (24): the table and the closest to the line now sit side
+  by side on top, with the behind card in three columns under both. The
+  layout picks whichever arrangement is shortest.
+- **Capital labels** (Paper, Classic, Turf, Neon): "DAY 23" ran into
+  "TARGET/DAY"; columns are spaced wider.
+- **Long club names** shrink (to 70%) before they are cut short.
+- **No data**: the behind card said "Everyone is on pace"; it now says there
+  is no data yet.
+
+Not fixed: a small club (about 10 members or fewer) leaves the wide
+layout's cards mostly empty, because the sidebar sets a minimum height.
+The tall layout suits them better.
+
+---
+
+## 2026-10-24 — Header and notes cut down
+
+Feedback: turning the pink lines white did not fix them ("scattering pink
+to scattering white"), and the notes at the bottom left were useless.
+
+The problem was repetition: the report line under the club name
+("biweekly report / second half · days 15–31 / day 23 of 31", wrapped over
+three lines in the sidebar) said what the figures below already say. It is
+gone; the identity is the name and "Oct 24, 2026 · 29 members", and
+Expected's note reads "by day 23 of 31".
+
+The notes are gone too. Headings carry the meaning ("Target/day",
+"Days in"), and the behind card's key ("cream <1 day · red more") now fits
+beside its title in both layouts. Only the freeze warning remains, when it
+applies, so the tall layout has no footer card otherwise. In the wide
+sidebar the freed space is one "Day 23" section: club gain, per member, how
+many hit the daily quota, then the best gains filling the rest.
+
+---
+
+## 2026-10-24 — Many behind; less pink text
+
+- **More than five behind** (`FULL_BEHIND`): entries go compact, two lines
+  of 50px (name and shortfall; a bar with days behind and the daily need),
+  in two columns in the tall layout. Fifteen behind is now 8 rows, not 15
+  full entries.
+- **Wide, many behind**: when the behind card is taller than the table,
+  "Closest to the line" moves under the table instead, so both columns
+  reach the bottom.
+- **Text colour**: placement no longer tints names (the left bar carries
+  it), and the report line under the club name is plain text, not the
+  accent. A coloured name now only ever means behind; the accent stays on
+  bars and structure.
+
+---
+
+## 2026-10-24 — Behind made clearer; wide layout rebuilt as three panels
+
+Feedback: make "behind" clearer; the wide layout "looks really bad" (text
+off, "October" should be "Oct", empty space at the end, the behind rows at
+the bottom).
+
+- **Behind entries** (both layouts) replace behind table rows: rank and
+  name, the shortfall in fans ("−8.61M") and in days of quota ("2.8 days
+  behind"), a bar of fans earned against expected by now, and "needs
+  4.12M/day". Cream under one day short, red over; the card keys the
+  colours where it fits, the wide sidebar notes otherwise.
+- **Wide layout**: three panels stretched to the same height, so no frame
+  shows below any of them. Sidebar: club, rank, a 2×2 of figures (quota,
+  expected, next due, on pace), progress, the day's top gains filling the
+  middle, notes at the foot. Middle: the on-pace table, one column
+  (circles hold at most 30). Right: the behind card, then "Closest to the
+  line", on-pace members by smallest cushion, filling the rest.
+- Dates use short month names in both layouts.
+
+---
+
+## 2026-10-24 — Rank moves to /club admin; theme into the reports form; one channel field
+
+Asked to "move rank to admin" so the theme fits in the `/club reports`
+form, then to merge the report and alert channel fields so rank fits in the
+`/club admin` form (both forms are at Discord's five-field limit).
+
+- **`/club reports`** (club staff): quota, period, report time, time zone,
+  report theme. Saving a new theme replies with the current report drawn in
+  it (the submit defers first). The `theme:` command option is gone.
+- **`/club admin`** (Club Managers): expected rank (with each rank's cutoff
+  figures under it, as before), home channels, staff roles, report channel,
+  staff pings. Untracked clubs: name, rank, staff roles. Club staff can no
+  longer set their own expected rank.
+- **One channel field.** An empty `alertChannelId` now means "the report
+  channel" (`alertChannelOf`). The admin form sets the report channel; an
+  alert channel that matched the old report channel is cleared so it keeps
+  following, and a separately set one (`/fans circle config alert_channel:`
+  or the dashboard) is kept.
+- **Behaviour change:** a club with a report channel and no alert channel
+  used to get no alerts. It now gets them in the report channel, unless its
+  staff pings are set to Never.
+
+---
+
+## 2026-10-24 — Clubs pick their own report theme
+
+New `reportTheme` column (text, null = default) and a `theme` choice on
+`/club reports`: Default plus every palette (13 of Discord's 25). Picking
+one saves it and replies with the club's current report drawn in it; with
+no theme the command opens the form as before. It is an option, not a form
+field, because the form is already at Discord's five-field limit. Stored as
+text rather than an enum so a new palette needs no migration; an id that no
+longer exists draws in the default (`paletteOf`). The scheduled report,
+`/fans` checks and the dashboard image all use the club's theme. The
+settings summary names it.
+
+`THEME_CHOICES` sits above the command builder: a `const` declared below it
+would throw at module load, which the type checker does not catch.
+
+The slash command changed, so `npm run deploy-commands` is needed for the
+option to appear.
+
+---
+
+## 2026-10-24 — Back to Plex Mono; palettes get styles; a wide layout
+
+- **Font.** The report is back in IBM Plex Mono, the bot's own face (asked
+  for "our old font"). `sansFont` is removed.
+- **Styles, not just colours.** `Palette.style` (`PaletteStyle`): corner
+  radius, card outline, glow, label style (plain or tracked capitals) and a
+  backdrop pattern (gradient, solid, lanes, stars, grid). Twelve palettes:
+  rose (default), classic (square, gold outline, capitals: the original
+  terminal look), midnight (stars), jewel, plum, turf (was forest; mown-
+  stripe racecourse), graphite, paper, akikawa, clear, and new neon
+  (glowing magenta outlines on a cyan grid) and sakura (light, very round).
+  All pass the contrast check.
+- **Wide layout** (`renderFanReport(..., layout: 'wide')`), 1700px, after
+  the ChronoGenesis landscape page: header as a left sidebar with the notes
+  at its foot, members down two table columns (first half left, rest
+  right; on pace first), behind members in their own card. Reports still
+  post the tall layout; nothing selects wide yet. Discord shrinks a 1700px
+  image to fit the chat, so it needs a tap to read, more than the tall one.
+- Header figures are stacked (label, value, note) so they fit in Mono.
+  Long dates and member counts wrap rather than truncate.
+
+---
+
+## 2026-10-24 — Fan report redrawn as cards; Rose palette is the default
+
+Asked to rewrite the report's data for readability in the style of the
+ChronoGenesis club page (dark cards on a pink frame), keeping this report's
+header placement, with a place for the club's rank badge and its image.
+
+- **Layout.** 900px wide, rounded cards on a gradient frame: header, on
+  pace, behind, footer. The header keeps name top-left and rank top-right,
+  adds the club image (`assets/clubs`, via `loadClubIcon`) left of the name
+  and the expected-rank badge (`assets/ranks`) in the top-right corner.
+  Either slot shows an empty circle when there is no picture.
+- **Figures.** Compact, two decimals ("107.93M", "+7.08M") in IBM Plex Sans
+  JP, whose digits are tabular (checked: 12.60px each at 20px, both
+  weights). Targets round up (`shortFans(..., true)`), so the figure shown
+  is never a few fans short. Column headings are plain case.
+- **Expected** left the table: it is the same for everyone present all
+  period, so it is one header figure ("Expected now", the most common
+  value). A new **Days** column (`dataDays`) shows who joined late and so
+  owes less. The header's other figures: Quota (per day and as set) and
+  "Next check" or "Due by month end".
+- **Behind** members get their own card. Names are cream (`warn`) when less
+  than one day of quota short, red when more, as on the reference page.
+- **Palettes** gain `frame`, `frameEnd` and `warn`. New `rose` palette
+  (default, `DEFAULT_PALETTE`); the other nine keep their cards and get
+  frames. All pass the contrast check.
+- The renderer now imports `canvasUtils`, which pulls in the Prisma module,
+  so `scripts/palettes.ts` needs `DATABASE_URL` set (no connection is made).
+
+Not done: a wide two-column layout like the reference's landscape version.
+
+---
+
+## 2026-10-24 — Every-3-days staff pings
+
+Asked for "day/3d/wk/none". `AlertFrequency` gains `EVERY_3_DAYS` (its own
+migration, `ALTER TYPE ... ADD VALUE`, in case the first one is already
+applied). `isAlertDue` is now one rule for all three: due once 1, 3 or 7
+days, less 12 hours of slack, have passed since the last ping. That changes
+DAILY slightly: it used to ping with every scheduled report, and now skips
+one that comes within 12 hours of a ping, such as a `/fans all` earlier the
+same day. Reports are a day apart, so otherwise nothing changes.
+
+---
+
+## 2026-10-24 — Alerts ping staff roles on a cadence; Behind column dropped; nine palettes
+
+The club's answers to the earlier entry: keep Daily target over Behind, and
+"instead of normal alert, ping all officer roles every given time frame
+(day/week/none)".
+
+**Alerts.** The alert no longer tags trainers. It lists who is behind by
+name (top ten, then "…and N more") and pings the club's staff roles:
+`staffRoleIds`, or else the Trainer and Assistant roles matched by name
+(`staffRolesOf`, read from `client.guilds.cache`). "Officer roles" was read
+as the club's own staff roles, not the server-wide Club Manager roles
+(`OFFICER_ROLE_IDS`), because each alert is about one club. New columns:
+`alertFrequency` (DAILY default, WEEKLY, NONE) and `lastAlertAt`, set by
+Club Managers in `/club admin` (the `/club reports` form is at Discord's
+five-field limit). `isAlertDue`: DAILY every scheduled report; WEEKLY once a
+week has passed since the last ping, less 12 hours so minutes of drift do
+not push it a day; NONE never. A week with nobody behind sends nothing and
+leaves `lastAlertAt` alone, so the next behind day pings at once. `/fans all`
+posts the alert whenever the club has not chosen NONE; `/fans club` and the
+no-channel path of `/fans all` ping nobody, since staff ran them.
+
+Caveat: Discord only notifies a role mention if the role is mentionable or
+the bot has "Mention @everyone, @here, and All Roles". Not checked on the
+live server.
+
+**Report.** The Behind column is gone from the image and the dashboard.
+Daily target turns the behind colour, and bolder, for anyone behind, so the
+column's information stays on the row. Rank slips use `muted` rather than
+the behind colour, which means only "behind". The image is 1200px wide; the
+subtitle wraps to two lines when it does not fit (the biweekly note was cut
+off at the image edge, also at 1600px). The footer no longer repeats the
+window label, which ran into the total.
+
+**Palettes.** Nine, each on a different background: classic (warm black),
+midnight (navy), jewel (viinus's colours on indigo), plum, forest, graphite
+(Discord's grey), paper (light, cream), akikawa (light, peach, avatar hues)
+and clear (Okabe-Ito, colour-blind safe). Each palette also has a header
+`panel` and a row `stripe` (zebra rows) to help follow a row across.
+`scripts/palettes.ts` checks every text colour against all three of `bg`,
+`panel` and `stripe`; all pass. Known weak spot: in clear, the behind orange
+and target yellow are close on behind rows. Nothing selects a palette per
+club yet.
+
+---
+
+## 2026-10-24 — Need/day fixed at the reset; alerts every day; report trimmed; palettes
+
+**Need/day asked for less than pace (MONTH).** Reported from First on
+2026-10-21: Brandee, 619 fans behind, was told to earn 7,303,814 a day, below
+the 7,967,741 pace. `daysRemaining` was always $D - e + 1$, "today
+included". That was right for the reference bot, which posted mid-day. Since
+reports moved to the 00:00 JST reset (2026-10-17), day $e$ is finished when
+the report posts. It was counted twice: once as owed in Expected, and once as
+a day still to play. Now $r = D - \text{finishedDay}$: a mid-day report still
+gets $D - e + 1$, a reset report gets $D - e$. Brandee's figure becomes
+7,967,797 (pace plus 619 / 11). The reference replay now passes
+`currentDay: 14` explicitly, since its day 14 was in progress; all 24 rows
+still match. Checkpoint periods already worked this way.
+
+**Alerts post daily in every period.** Cosmos, 2026-10-24: a biweekly report
+on day 23 showed Fuzzlekins 12.4M behind, with no alert. Scheduled alerts in
+checkpoint periods waited for a checkpoint to close. That rule dates from
+when Expected only rose at checkpoints; since 2026-10-12 it grows daily, so
+the report flagged people for days without an alert. The gate is gone; every
+period alerts like MONTH. Alert lines now say what the daily figure aims at
+("needs X a day until month end" / "until the day 31 check").
+
+**Report trimmed (GimmeKiss's feedback, 2026-10-23).** Removed the 7-day
+trend and Projected from the image, and Projected from the dashboard and
+`/fans me`. "Need/day" is now "Daily target" everywhere, because it was read
+as an extra on top of pace; it is the whole daily amount. The image is
+1280px wide instead of 1600, so text is larger on phones. Behind and Expected
+stay until the club answers (see `COMMUNICATIONS_LOG.md`).
+
+**Palettes.** `theme.ts` gains `Palette` and `PALETTES` (classic, jewel, navy,
+akikawa, clear). Each key carries one meaning (accent, target, good, behind,
+place). Only the fan report takes a palette for now; nothing selects one per
+club yet. `scripts/palettes.ts` renders the report in each palette and
+checks WCAG contrast (4.5:1 for figures, 3:1 for `faint`). Classic's `faint`
+failed at 2.91:1, which is why Expected was hard to read on phones; it is now
+`#6e6a63` (3.66:1), in the images and the dashboard CSS.
+
+---
+
 ## 2026-10-17 — Report and alert channels are typed, so threads work
 
 Reported by the user with a screenshot: in `/club admin`, pasting a

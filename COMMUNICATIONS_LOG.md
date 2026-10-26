@@ -4,6 +4,45 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-24 — Expected rank is a Club Manager setting
+
+Fwoxie: "move rank to admin", then chose to merge the report and alert
+channel fields to make room. Club staff now set quota, report time and
+theme; Club Managers set the expected rank and channels. Alerts default to
+the report channel.
+
+---
+
+## 2026-10-24 — Daily target kept; alerts go to staff roles on a cadence
+
+Fwoxie: keep Daily target ("daily target and ping when behind"); alerts
+should "ping all officer roles every given time frame (day/week/none)"
+instead of the normal alert; palettes should differ in background too, with
+clarity first. Taken as: Behind column dropped; alerts ping each club's
+staff roles (Trainer and Assistant), cadence chosen per club in
+`/club admin`; nine palettes with distinct backgrounds. Fwoxie is asking
+GimmeKiss what they meant about Expected. Still open: which palette, and
+whether clubs pick their own.
+
+---
+
+## 2026-10-24 — Report feedback acted on; open questions
+
+GimmeKiss (2026-10-23) called the report ugly and listed: the 7-day trend is
+not useful; Projected is useless "because people aren't robots"; Behind and
+Need/day fill the same role, keep one; Expected "is not useful stated that
+way". They also asked why #24 was 619 behind but needed 7M+ a day, which
+was a real bug. Fixed: the bug, trend and Projected removed, Need/day renamed
+"Daily target". Cosmos (2026-10-24) expected an alert for a member the report
+showed behind; Astaria confirmed it should alert, so alerts now post daily in
+every period.
+
+Open: which of Behind and Daily target to keep; what GimmeKiss meant by
+Expected "like the one we have"; which palette to use (viinus's jewel tones
+are one of five candidates), and whether clubs should each pick their own.
+
+---
+
 ## 2026-10-05 — Rank cutoffs set; B removed
 
 The club set each expected rank's cutoff: "S+ is top 30, S is top 100, A+ is

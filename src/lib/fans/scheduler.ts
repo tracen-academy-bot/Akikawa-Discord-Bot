@@ -1,6 +1,6 @@
 import { AttachmentBuilder, type Client } from 'discord.js';
-import { refreshCutoffs, refreshCutoffsIfStale } from './cutoff';
-import type { TrackedCircle } from '@prisma/client';
+import { refreshCutoffs, refreshCutoffsIfStale, rankBand } from './cutoff';
+import type { AlertFrequency, TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
 import { TRACKED, backfillOnce, currentGameMonth, loadCircleProgress, syncAllCircles, syncBenchmark, syncCircle } from './ingest';
@@ -8,7 +8,9 @@ import { isAtGameReset, isReportDue, reportTimeOf } from './reportTime';
 import { lastDayGains } from './readings';
 import { currentCircleProgress, formatReportDate } from './reports';
 import { renderFanReport } from '../image/renderFanReport';
+import { paletteOf } from '../image/theme';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
+import { guildClubs, staffRolesOf, type LinkableGuild } from '../clubLinks';
 
 /**
  * Fan sync and report posting:
@@ -75,20 +77,20 @@ async function isDue(now: Date): Promise<boolean> {
 /** A rendered report and its behind-quota alert, ready to send anywhere. */
 export interface CircleReport {
     image: AttachmentBuilder;
-    /** Null when nobody is behind. */
-    alert: { content: string; users: string[] } | null;
+    /**
+     * Who is behind, by trainer name, without any mention. Null when nobody
+     * is. `postReport` adds the staff-role pings when an alert is due.
+     */
+    alert: { content: string } | null;
     behindCount: number;
 }
 
 /**
- * Renders a circle's report image and builds its alert. Alerts name the
- * trainers who are behind, and tag them where a Discord link exists, so the
- * message is actionable rather than just informative.
- *
- * In checkpoint periods (daily, weekly, biweekly) `scheduled` reports leave
- * the alert out unless a checkpoint has just closed, so a missed week is
- * announced once, the day after it ends, not every day of the next week. A
- * manual check always includes it.
+ * Renders a circle's report image and builds its alert: the trainers who are
+ * behind, by name, and what each needs a day. Trainers are not tagged; the
+ * club's staff roles are, by `postReport`, as often as the club chose
+ * (`alertFrequency`). Expected grows daily in every period, so anyone the
+ * report marks behind is behind now.
  *
  * @returns Null when nothing has been ingested for the current month.
  */
@@ -107,27 +109,23 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
     const buffer = await renderFanReport(progress, {
         circleName: circle.name,
         monthlyRank: circle.monthlyRank,
+        clubRank: circle.rank,
+        rankBand: rankBand(circle.monthlyRank, circle.monthlyPoints === null ? null : Number(circle.monthlyPoints)),
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, atReset ? progress.finishedDay : progress.daysElapsed),
         last24h: atReset ? null : await lastDayGains(circle.id),
-    });
+    }, paletteOf(circle.reportTheme));
     const image = new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` });
 
     const allBehind = progress.members.filter((m) => !m.onPace);
     const behind = allBehind.slice(0, ALERT_LIMIT);
     if (behind.length === 0) return { image, alert: null, behindCount: 0 };
-    if (scheduled && !progress.checkpointJustClosed) return { image, alert: null, behindCount: allBehind.length };
 
-    const links = await prisma.trainerLink.findMany({
-        where: { guildId: circle.guildId, viewerId: { in: behind.map((m) => BigInt(m.viewerId)) } },
-    });
-    const mentionByViewer = new Map(links.map((l) => [l.viewerId.toString(), l.discordUserId]));
-
-    const lines = behind.map((m) => {
-        const mention = mentionByViewer.get(String(m.viewerId));
-        const who = mention ? `<@${mention}>` : m.trainerName;
-        return `${who} — behind by **${formatFans(m.behind)}**, needs **${formatFans(m.needPerDay ?? 0)}**/day`;
-    });
+    // Need/day is the whole daily amount from here on, not an extra on top of
+    // pace; say what it is aimed at so it cannot be read as one.
+    const until = progress.period === 'MONTH' ? 'until month end' : `until the day ${progress.nextCheckpointDay} check`;
+    const lines = behind.map((m) => `${m.trainerName} — behind by **${formatFans(m.behind)}**, needs **${formatFans(m.needPerDay ?? 0)}** a day ${until}`);
+    if (allBehind.length > behind.length) lines.push(`…and ${allBehind.length - behind.length} more; see the report.`);
 
     return {
         image,
@@ -136,11 +134,56 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
             content:
                 `**${circle.name}** — ${allBehind.length} trainer${allBehind.length === 1 ? '' : 's'} behind quota ` +
                 `(${describeQuota(progress.quota, progress.period)} · ` +
-                `${progress.period === 'MONTH' ? progress.windowLabel : `checked at end of day ${progress.checkpointDay}`})\n` +
+                `${progress.period === 'MONTH' ? progress.windowLabel : `through day ${progress.finishedDay}`})\n` +
                 lines.join('\n'),
-            users: [...mentionByViewer.values()],
         },
     };
+}
+
+/** Where a club's alerts post: its alert channel, or else its report channel. */
+export function alertChannelOf(circle: Pick<TrackedCircle, 'alertChannelId' | 'reportChannelId'>): string | null {
+    return circle.alertChannelId ?? circle.reportChannelId;
+}
+
+/** Days between pings for each cadence; null for never. */
+const ALERT_INTERVAL_DAYS: Record<AlertFrequency, number | null> = { DAILY: 1, EVERY_3_DAYS: 3, WEEKLY: 7, NONE: null };
+
+/**
+ * Slack under the interval, so a ping is not pushed back a day by a few
+ * minutes of drift in when the report posts.
+ */
+const ALERT_SLACK_MS = 12 * 60 * 60_000;
+
+/**
+ * True when a club's staff roles should be pinged now about members behind:
+ * once the cadence's interval (less 12 hours of slack) has passed since the
+ * last ping, or there has never been one. DAILY is then every report, since
+ * reports are a day apart. NONE: never. A stretch with nobody behind sends
+ * nothing, so the next behind day pings at once.
+ */
+export function isAlertDue(frequency: AlertFrequency, lastAlertAt: Date | null, now = new Date()): boolean {
+    const days = ALERT_INTERVAL_DAYS[frequency];
+    if (days === null) return false;
+    if (lastAlertAt === null) return true;
+    return now.getTime() - lastAlertAt.getTime() >= days * 24 * 60 * 60_000 - ALERT_SLACK_MS;
+}
+
+/** "daily", "every 3 days", "weekly" or "off", for confirmations. */
+export function describeAlertFrequency(frequency: AlertFrequency): string {
+    return { DAILY: 'daily', EVERY_3_DAYS: 'every 3 days', WEEKLY: 'weekly', NONE: 'off' }[frequency];
+}
+
+/**
+ * Role IDs to ping for a club: its staff roles as `/club admin` set them, or
+ * else its Trainer and Assistant roles matched by name. Name matching needs
+ * the guild's roles, read from the client's cache; without it only roles set
+ * by hand are found.
+ */
+async function staffRoleIdsFor(client: Client, circle: TrackedCircle): Promise<string[]> {
+    if (circle.staffRoleIds.length > 0) return circle.staffRoleIds;
+    const guild = client.guilds?.cache.get(circle.guildId) as unknown as LinkableGuild | undefined;
+    if (!guild) return [];
+    return staffRolesOf(circle, await guildClubs(circle.guildId), guild).ids;
 }
 
 /** Sends a message to a channel or thread by ID; false when it cannot be posted to. */
@@ -175,12 +218,20 @@ export async function postReport(
 
     if (!(await sendTo(client, circle.reportChannelId, { files: [report.image] }))) return null;
 
+    // Scheduled reports follow the club's cadence; a manual post (`/fans all`)
+    // always alerts unless the club turned alerts off.
     let alerted = false;
-    if (circle.alertChannelId && report.alert) {
-        alerted = await sendTo(client, circle.alertChannelId, {
-            content: report.alert.content,
-            allowedMentions: { users: report.alert.users },
+    const due = scheduled ? isAlertDue(circle.alertFrequency, circle.lastAlertAt) : circle.alertFrequency !== 'NONE';
+    // Alerts post in the report channel unless a separate one is set.
+    const alertChannel = alertChannelOf(circle);
+    if (alertChannel && report.alert && due) {
+        const roles = await staffRoleIdsFor(client, circle);
+        const ping = roles.map((id) => `<@&${id}>`).join(' ');
+        alerted = await sendTo(client, alertChannel, {
+            content: ping ? `${ping}\n${report.alert.content}` : report.alert.content,
+            allowedMentions: { roles },
         });
+        if (alerted) await prisma.trackedCircle.update({ where: { id: circle.id }, data: { lastAlertAt: new Date() } });
     }
     return { behindCount: report.behindCount, alerted };
 }

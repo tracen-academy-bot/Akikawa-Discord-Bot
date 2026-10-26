@@ -33,6 +33,14 @@ enum ClubTier {
     DEBUT
 }
 
+/// How often a club's staff roles are pinged about members behind quota.
+enum AlertFrequency {
+    DAILY
+    EVERY_3_DAYS
+    WEEKLY
+    NONE
+}
+
 enum ClubMemberRole {
     TRAINER
     ASSISTANT
@@ -144,8 +152,15 @@ model TrackedCircle {
     reportChannelId String?
     /// Where behind-quota alerts are posted. May be a thread.
     alertChannelId  String?
+    /// How often scheduled reports ping the club's staff roles when anyone
+    /// is behind. EVERY_3_DAYS and WEEKLY wait that long after the last ping.
+    alertFrequency  AlertFrequency @default(DAILY)
+    /// When the staff roles were last pinged; drives EVERY_3_DAYS and WEEKLY.
+    lastAlertAt     DateTime?
     /// uma.moe monthly rank at the last sync. Shown in report headers.
     monthlyRank     Int?
+    /// uma.moe monthly points at the last sync, for the report's rank band.
+    monthlyPoints   BigInt?
     /// Paused circles are kept but skipped by the sync job.
     active          Boolean   @default(true)
     lastSyncedAt    DateTime?
@@ -162,6 +177,9 @@ model TrackedCircle {
     reportTimeZone  String?
     /// When the last scheduled report was posted; one per local day.
     lastReportAt    DateTime?
+    /// Palette the fan report is drawn in: an id from `PALETTES` in
+    /// src/lib/image/theme.ts. Null, or an id no longer known, is the default.
+    reportTheme     String?
 
     // Club info, from the former `Club` model.
     /// Intended tier (B to S+). Null when never set.
