@@ -106,7 +106,7 @@ async function foodArt(): Promise<FoodArt | null> {
 }
 
 /** Still in Love's blood, knives and roses (`src/assets/scenes/stillinlove`, public domain). */
-const SIL_NAMES = ['splat', 'drips', 'drips-thin', 'smear', 'smear-short', 'spray', 'knife', 'cleaver', 'hand', 'hand-smear', 'rose', 'lilies'] as const;
+const SIL_NAMES = ['splat', 'drips', 'drips-thin', 'smear', 'smear-short', 'spray', 'knife', 'cleaver', 'hand', 'hand-smear', 'rose', 'lilies', 'lily'] as const;
 type SilArt = Record<(typeof SIL_NAMES)[number], Image>;
 let silCache: SilArt | null | undefined;
 
@@ -1831,15 +1831,24 @@ interface LaceTrack {
     at: number;
 }
 
+/** Lace scallops are this far apart; the track snaps to them. */
+const LACE_STEP = 18;
+
+/** The x of the lace hole marking the club on `track`. */
+function trackMarker(track: LaceTrack): number {
+    const x = track.from + Math.max(0, Math.min(1, track.at)) * (track.to - track.from);
+    return Math.round(x / LACE_STEP) * LACE_STEP;
+}
+
 /**
  * Bobbin lace along `y`: scallops with picot holes, `colour` turning red
  * with mood, and gold heart charms. With a `track`, the holes between the
  * two windows become a strip of lights: lit gold from the bottom cutoff up
- * to the club, the club's own hole in her blue with her blue diamond
- * hanging from it, and dark beyond.
+ * to the club, the club's own hole glowing with a heart charm hanging from
+ * it, and dark beyond.
  */
 function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, track: LaceTrack | null) {
-    const r = 9;
+    const r = LACE_STEP / 2;
     ctx.fillStyle = colour;
     ctx.fillRect(0, y - 6, w, 6);
     for (let x = 0; x < w + r * 2; x += r * 2) {
@@ -1858,9 +1867,9 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, trac
     }
     ctx.globalCompositeOperation = 'source-over';
     // The scallop whose hole marks the club, if there is a track.
-    const step = r * 2;
+    const step = LACE_STEP;
     const snap = (x: number) => Math.round(x / step) * step;
-    const marker = track ? snap(track.from + Math.max(0, Math.min(1, track.at)) * (track.to - track.from)) : null;
+    const marker = track ? trackMarker(track) : null;
     // Gold heart charms hanging from every eighth scallop, from the hearts
     // on her dress; none right by the marker, which has its own charm.
     ctx.fillStyle = '#e2b24a';
@@ -1893,31 +1902,43 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, trac
         ctx.arc(x, y + 2, hole, 0, Math.PI * 2);
         ctx.fill();
     }
-    // The club: her blue, bigger, glowing, with her blue diamond below.
-    const halo = ctx.createRadialGradient(marker, y + 2, 0, marker, y + 2, hole * 6);
-    halo.addColorStop(0, 'rgba(111, 187, 241, 0.8)');
-    halo.addColorStop(1, 'rgba(111, 187, 241, 0)');
+    // The club: a heart, her emoji, ruby set in gold, glowing in place of
+    // the hole (anything hung lower would sit behind the cards).
+    const halo = ctx.createRadialGradient(marker, y + 1, 0, marker, y + 1, hole * 7);
+    halo.addColorStop(0, 'rgba(255, 170, 185, 0.8)');
+    halo.addColorStop(1, 'rgba(255, 170, 185, 0)');
     ctx.fillStyle = halo;
     ctx.beginPath();
-    ctx.arc(marker, y + 2, hole * 6, 0, Math.PI * 2);
+    ctx.arc(marker, y + 1, hole * 7, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#6fbbf1';
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1;
+    ctx.fillStyle = '#f2c560';
+    heart(ctx, marker, y + 1, 19);
+    ctx.fillStyle = '#d0142c';
+    heart(ctx, marker, y + 0.6, 14);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
     ctx.beginPath();
-    ctx.arc(marker, y + 2, hole * 1.7, 0, Math.PI * 2);
+    ctx.arc(marker - 2.8, y - 2, 1.5, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#e2b24a';
-    ctx.fillRect(marker - 0.5, y + r - 1, 1, 3);
-    ctx.fillStyle = '#6fbbf1';
-    ctx.beginPath();
-    ctx.moveTo(marker, y + r + 1);
-    ctx.lineTo(marker + 4.5, y + r + 6.5);
-    ctx.lineTo(marker, y + r + 13);
-    ctx.lineTo(marker - 4.5, y + r + 6.5);
-    ctx.closePath();
-    ctx.fill();
+}
+
+/** How wide `speechBubble` draws `text`; leaves the bubble's font set. */
+function bubbleWidth(ctx: SKRSContext2D, text: string): number {
+    ctx.font = font('700 15px');
+    return ctx.measureText(text).width + 28;
+}
+
+/**
+ * Spider lilies grown along the lace from `from` up to `to` (the club's
+ * place), rooted at `y`: a sparse field she has walked through, none
+ * where the club has yet to reach.
+ */
+function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y: number) {
+    const rand = seeded(1229);
+    for (let x = from + 10 + rand() * 30; x < to - 22; x += 55 + rand() * 60) {
+        roseStem(ctx, lily, x, y, 22 + rand() * 12, (rand() - 0.5) * 0.3);
+        // Now and then a second one beside it.
+        if (rand() < 0.35) roseStem(ctx, lily, x + 9, y, 16 + rand() * 8, 0.12 + rand() * 0.15);
+    }
 }
 
 /**
@@ -1926,9 +1947,10 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, trac
  * text turn red as she turns.
  */
 function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, tailX: number, tailY: number, mood: number) {
-    ctx.font = font('700 15px');
+    const w = bubbleWidth(ctx, text);
     const pad = 14;
-    const w = ctx.measureText(text).width + pad * 2;
+    // The tail leaves from whichever lower corner is nearer her.
+    const tail = tailX < x + w / 2 ? 18 : w - 36;
     const h = 36;
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
@@ -1940,9 +1962,9 @@ function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, ta
     ctx.fill();
     // The tail, from the bubble's lower left towards her.
     ctx.beginPath();
-    ctx.moveTo(x + 18, y + h - 2);
+    ctx.moveTo(x + tail, y + h - 2);
     ctx.lineTo(tailX, tailY);
-    ctx.lineTo(x + 36, y + h - 2);
+    ctx.lineTo(x + tail + 18, y + h - 2);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -2132,8 +2154,14 @@ function drawStillInLove(
         0.85,
     );
 
-    // Her, between the windows, staring out; until her picture exists, her eyes.
-    const herX = w * 0.45;
+    // The club's place between the ranks, marked on the lace.
+    const track = race ? { from: leftX + winW / 2, to: rightX + winW / 2, at: race.progress } : null;
+    const marker = track ? trackMarker(track) : null;
+    // A field of spider lilies up to it.
+    if (blood && marker !== null) lilyField(ctx, blood.lily, leftX + winW + 16, marker, floor - 4);
+
+    // Her, standing over the club's place; until her picture exists, her eyes.
+    const herX = marker ?? w * 0.45;
     const eyeY = hero * 0.5;
     if (art) {
         const artH = hero - 24;
@@ -2143,13 +2171,20 @@ function drawStillInLove(
         watchingEyes(ctx, herX, eyeY, 15, mood);
     }
     const line = mood < 0.34 ? 'I still love you.' : mood < 0.67 ? 'I still love you…' : '…why are you leaving me behind?';
-    speechBubble(ctx, herX + 52, 18, line, herX + 30, eyeY - 14, mood);
+    // Her bubble to her right, or her left when it would run off the edge.
+    const bw = bubbleWidth(ctx, line);
+    const bubbleX = herX + 52 + bw > w - SIDE ? herX - 52 - bw : herX + 52;
+    speechBubble(ctx, bubbleX, 18, line, herX + (bubbleX > herX ? 30 : -30), eyeY - 14, mood);
 
     // Bloody handprints on the wall once she has turned.
     if (blood && mood >= 0.4) {
-        const gap = herX - (leftX + winW);
-        placed(ctx, blood['hand-smear'], leftX + winW + gap * 0.45, hero * 0.5, 52, -0.25, 0.55 + mood * 0.35);
-        if (w > 1200 && mood >= 0.67) placed(ctx, blood.hand, rightX - 250, hero * 0.42, 40, 0.2, 0.85);
+        // On the wall past the left window, unless she is standing there.
+        const smearX = leftX + winW + 70;
+        if (Math.abs(smearX - herX) > 80) placed(ctx, blood['hand-smear'], smearX, hero * 0.5, 52, -0.25, 0.55 + mood * 0.35);
+        // And one more in the wide image, clear of her and her bubble.
+        const handX = rightX - 250;
+        const clear = Math.abs(handX - herX) > 90 && (handX < bubbleX - 30 || handX > bubbleX + bw + 30);
+        if (w > 1200 && mood >= 0.67 && clear) placed(ctx, blood.hand, handX, hero * 0.42, 40, 0.2, 0.85);
     }
 
     // Petals drifting down, more as she turns.
@@ -2171,7 +2206,6 @@ function drawStillInLove(
     ctx.globalAlpha = 1;
 
     // Lace along the bottom of the band, white to red, dripping when she turns.
-    const track = race ? { from: leftX + winW / 2, to: rightX + winW / 2, at: race.progress } : null;
     laceTrim(ctx, w, floor, mix('#f3e6ec', '#c8202e', mood), track);
     laceDrips(ctx, w, floor, mood, blood);
 
