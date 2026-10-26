@@ -19,8 +19,8 @@ import { describeQuota, formatMillionsFans, periodAdjective, type CircleProgress
  *   wide   1700px wide, three panels of equal height: a sidebar (club,
  *          rank and its band, figures, progress, then the day: club gain,
  *          per member, how many hit the daily quota, and its top 3), the
- *          on-pace table, and the behind card, with the members closest to
- *          the line under the shorter of the last two.
+ *          on-pace table, and the behind card, with the hot streaks under
+ *          the shorter of the last two.
  *
  * The rank band shows where the club's monthly points sit between the rank
  * cutoffs around it (#194 between #100 and #500): fans to the place above,
@@ -58,7 +58,7 @@ const SLOT = 72;
 const TALL_WIDTH = 900;
 const WIDE_WIDTH = 1700;
 const SIDEBAR_WIDTH = 340;
-/** The wide layout's right panel: behind, then closest to the line. */
+/** The wide layout's right panel: behind, then the hot streaks. */
 const RIGHT_PANEL_WIDTH = 420;
 
 export interface FanReportMeta {
@@ -645,39 +645,59 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
     });
 }
 
-/** Height of one row in the closest-to-the-line card. */
-const CLOSE_ROW = 34;
+/** Height of one row in the streak card. */
+const STREAK_ROW = 34;
 /** Height of one row in the wide sidebar's top gains. */
 const TOP_ROW = 26;
 /** Height of one figure row in the wide sidebar's day summary. */
 const SUMMARY_ROW = 24;
 
 /**
- * Draws the members on pace with the least to spare, fewest first: how far
- * ahead of what is expected by now, in fans and in days of quota.
+ * Members with a streak, longest first, then by month-to-date total. Anyone
+ * can have one, behind or not: it counts days at the daily rate, not totals.
  */
-function drawClosestCard(ctx: SKRSContext2D, members: MemberProgress[], x: number, y: number, w: number, h: number, d: Prepared) {
+function streakers(progress: CircleProgress): MemberProgress[] {
+    return progress.members.filter((m) => m.streak > 0).sort((a, b) => b.streak - a.streak || b.total - a.total);
+}
+
+/** Height of the streak card showing `rows` members (at least one row, for its empty line). */
+function streakHeight(rows: number): number {
+    return CARD_TITLE + Math.max(1, rows) * STREAK_ROW + 12;
+}
+
+/**
+ * Draws the hot streaks: who has hit the daily rate the most finished days in
+ * a row, with a short bar against the longest. It replaced "Closest to the
+ * line" on 2026-10-26, which singled out people meeting the requirement.
+ */
+function drawStreakCard(ctx: SKRSContext2D, members: MemberProgress[], x: number, y: number, w: number, h: number, d: Prepared) {
     const { p, progress } = d;
     card(ctx, x, y, w, h, p);
     const pad = 22;
-    text(ctx, 'Closest to the line', x + pad, y + 34, { spec: '700 17px', color: p.text });
-    text(ctx, 'ahead of expected', x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
-    const rowH = flexRow(CLOSE_ROW, members.length, h - CARD_TITLE - 12);
+    text(ctx, 'Hot streaks', x + pad, y + 34, { spec: '700 17px', color: p.text });
+    text(ctx, `days in a row at ${shortFans(progress.quotaPerDay)}+`, x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
+    if (members.length === 0) {
+        text(ctx, 'No streaks yet.', x + pad, y + CARD_TITLE + 24, { spec: '400 15px', color: p.faint });
+        return;
+    }
+    const longest = Math.max(...members.map((m) => m.streak));
+    const rowH = flexRow(STREAK_ROW, members.length, h - CARD_TITLE - 12);
+    const barW = 64;
+    // A fixed column for the count, so the bars line up whatever its width.
+    ctx.font = font('700 15px');
+    const daysColumn = ctx.measureText('00 days').width;
+    const barX = x + w - pad - daysColumn - 12 - barW;
     members.forEach((m, i) => {
         const rowY = y + CARD_TITLE + i * rowH;
         if (i % 2 === 1) fillRound(ctx, x + 8, rowY, w - 16, rowH, innerRadius(p), p.stripe);
         const by = rowY + rowH / 2 + 6;
-        const cushion = Math.max(0, m.total - m.expected);
-        const ahead = `+${shortFans(cushion)}`;
-        const aheadWidth = text(ctx, ahead, x + w - pad, by, { spec: '700 15px', color: p.good, align: 'right' });
-        const days = inDays(cushion, progress.quotaPerDay);
-        ctx.font = font('400 13px');
-        const daysWidth = ctx.measureText(days).width;
-        text(ctx, days, x + w - pad - aheadWidth - 12, by, { spec: '400 13px', color: p.muted, align: 'right' });
+        const days = `${m.streak} ${m.streak === 1 ? 'day' : 'days'}`;
+        text(ctx, days, x + w - pad, by, { spec: '700 15px', color: p.good, align: 'right' });
+        fillRound(ctx, barX, by - 8, barW, 5, 2.5, p.line);
+        fillRound(ctx, barX, by - 8, Math.max(5, (barW * m.streak) / longest), 5, 2.5, p.good);
         const rankWidth = text(ctx, `#${m.rank}`, x + pad, by, { spec: '400 14px', color: p.muted });
         const nameX = x + pad + rankWidth + 10;
-        const nameMax = x + w - pad - aheadWidth - 12 - daysWidth - 14 - nameX;
-        text(ctx, fit(ctx, m.trainerName, nameMax, '400 16px'), nameX, by, { spec: '400 16px', color: p.text });
+        text(ctx, fit(ctx, m.trainerName, barX - 14 - nameX, '400 16px'), nameX, by, { spec: '400 16px', color: p.text });
     });
 }
 
@@ -839,9 +859,13 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     const c = columns(cardX, cardW, false);
     const tableH = tableHeight(d.onPace.length, c);
     const behindH = d.behind.length > 0 ? behindHeight(d.behind.length, 2) : 0;
+    // The five longest streaks close the report, when anyone has one.
+    const streaks = streakers(progress).slice(0, 5);
+    const streakH = streaks.length > 0 ? streakHeight(streaks.length) : 0;
     const notes = wrapWords(measure, d.notes, cardW - PAD * 2, '400 13px');
     const footerH = notes.length > 0 ? 16 + notes.length * 19 + 14 + GAP : 0;
-    const height = FRAME + headerH + GAP + tableH + (behindH > 0 ? GAP + behindH : 0) + footerH + FRAME;
+    const height =
+        FRAME + headerH + GAP + tableH + (behindH > 0 ? GAP + behindH : 0) + (streakH > 0 ? GAP + streakH : 0) + footerH + FRAME;
 
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
@@ -867,6 +891,10 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
         drawBehindCard(ctx, d.behind, cardX, y, cardW, behindH, 2, d);
         y += behindH + GAP;
     }
+    if (streakH > 0) {
+        drawStreakCard(ctx, streaks, cardX, y, cardW, streakH, d);
+        y += streakH + GAP;
+    }
 
     if (footerH > 0) {
         card(ctx, cardX, y, cardW, footerH - GAP, p);
@@ -879,8 +907,8 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
 /**
  * The landscape layout, three panels of equal height: a sidebar (club,
  * rank, figures, progress, the day's summary and best gains), the
- * on-pace table, and the behind card. The members closest to the line fill
- * the height left under whichever of the table and behind card is shorter.
+ * on-pace table, and the behind card. The hot streaks fill the height left
+ * under whichever of the table and behind card is shorter.
  */
 function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     const { p, progress } = d;
@@ -914,23 +942,24 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
         (notes.length > 0 ? 18 + notes.length * 17 : 0) + sidePad;
 
     // Where the behind card goes, whichever arrangement is shortest:
-    //   right   beside the table, with the closest to the line under the
+    //   right   beside the table, with the hot streaks under the
     //           shorter of the two (few or some behind)
     //   under   across the middle and right in three columns, under the
-    //           table and the closest to the line side by side (more behind
+    //           table and the hot streaks side by side (more behind
     //           than the right column can hold)
     //   span    the same with nothing above it (nobody on pace, so there is
     //           no table and no one close to the line)
     const n = d.behind.length;
     const behindRight = n > 0 ? behindHeight(n, 1) : 76;
-    const closestMin = d.onPace.length > 0 ? CARD_TITLE + Math.min(3, d.onPace.length) * CLOSE_ROW + 12 : 0;
-    const closestUnderTable = behindRight > tableH;
+    const streaks = streakers(progress);
+    const streakMin = streakHeight(Math.min(3, streaks.length));
+    const streaksUnderTable = behindRight > tableH;
     const rightH = Math.max(
         sideMin,
-        (closestUnderTable ? tableH : behindRight) + (closestMin > 0 ? GAP + closestMin : 0),
-        closestUnderTable ? behindRight : tableH,
+        (streaksUnderTable ? tableH : behindRight) + (streakMin > 0 ? GAP + streakMin : 0),
+        streaksUnderTable ? behindRight : tableH,
     );
-    const topH = Math.max(tableH, closestMin);
+    const topH = Math.max(tableH, streakMin);
     const underH = n > FULL_BEHIND ? Math.max(sideMin, topH + GAP + behindHeight(n, 3)) : Infinity;
     const mode: 'right' | 'under' | 'span' = n > 0 && d.onPace.length === 0 ? 'span' : underH < rightH ? 'under' : 'right';
     const contentH = mode === 'span' ? Math.max(sideMin, behindHeight(n, 3)) : mode === 'under' ? underH : rightH;
@@ -1007,28 +1036,27 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     });
     notes.forEach((line, i) => text(ctx, line, x, notesTop + 12 + i * 17, { spec: '400 12px', color: p.muted }));
 
-    // On-pace table and behind card, with the closest to the line under the
+    // On-pace table and behind card, with the hot streaks under the
     // shorter of the two, filling it to the full height.
-    const closestFor = (top: number, x: number, w: number, bottom = FRAME + contentH) => {
-        const rows = Math.min(d.onPace.length, Math.floor((bottom - top - CARD_TITLE - 12) / CLOSE_ROW));
+    const streaksAt = (top: number, x: number, w: number, bottom = FRAME + contentH) => {
+        const rows = Math.floor((bottom - top - CARD_TITLE - 12) / STREAK_ROW);
         if (rows <= 0) return false;
-        const closest = [...d.onPace].sort((a, b) => a.total - a.expected - (b.total - b.expected)).slice(0, rows);
-        drawClosestCard(ctx, closest, x, top, w, bottom - top, d);
+        drawStreakCard(ctx, streaks.slice(0, rows), x, top, w, bottom - top, d);
         return true;
     };
     if (mode === 'span') {
         drawBehindCard(ctx, d.behind, tableX, FRAME, tableW + GAP + rightW, contentH, 3, d);
     } else if (mode === 'under') {
         drawTable(ctx, d.onPace, tableX, tableW, FRAME, topH, c, d);
-        closestFor(FRAME, rightX, rightW, FRAME + topH);
+        streaksAt(FRAME, rightX, rightW, FRAME + topH);
         drawBehindCard(ctx, d.behind, tableX, FRAME + topH + GAP, tableW + GAP + rightW, contentH - topH - GAP, 3, d);
-    } else if (closestUnderTable) {
+    } else if (streaksUnderTable) {
         drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, contentH, 1, d);
-        const shown = closestFor(FRAME + tableH + GAP, tableX, tableW);
+        const shown = streaksAt(FRAME + tableH + GAP, tableX, tableW);
         drawTable(ctx, d.onPace, tableX, tableW, FRAME, shown ? tableH : contentH, c, d);
     } else {
         drawTable(ctx, d.onPace, tableX, tableW, FRAME, contentH, c, d);
-        const shown = closestFor(FRAME + behindRight + GAP, rightX, rightW);
+        const shown = streaksAt(FRAME + behindRight + GAP, rightX, rightW);
         drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, shown ? behindRight : contentH, 1, d);
     }
 

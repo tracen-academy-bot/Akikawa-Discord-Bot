@@ -4,6 +4,24 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Hot streaks replace "Closest to the line"
+
+GimmeKiss (2026-10-25): "Closest to the line" listed people 50M ahead as
+"close" (it filled the card with whoever came next), and it read as a
+shame list for people meeting the requirement. Replaced with **Hot
+streaks**: finished days in a row, ending on the last finished day, on
+which a member earned at least the daily rate (`quotaPerDay`) while in the
+circle (`MemberProgress.streak`). Anyone can have one, behind or not, and
+it rewards consistency rather than size. Longest first, then by total; a
+short bar against the longest. This month only; no streak without a quota.
+
+Wide layout: the card takes the old card's place (under the shorter of the
+table and the behind card, or beside the table when many are behind),
+filling its height. Tall layout: the five longest close the report, when
+anyone has one.
+
+---
+
 ## 2026-10-25 — Rank band; top 3 of the day; lists stretch to fill
 
 - **Rank band** (both layouts): where the club's monthly points sit between

@@ -4,6 +4,15 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-26 — No "closest to the line"; hot streaks instead
+
+GimmeKiss: the closest-to-the-line card felt like a shame list for people
+already meeting the requirement. Fwoxie agreed and picked the proposed
+replacement, a positive card: who has hit the daily rate the most days in
+a row.
+
+---
+
 ## 2026-10-24 — Expected rank is a Club Manager setting
 
 Fwoxie: "move rank to admin", then chose to merge the report and alert
