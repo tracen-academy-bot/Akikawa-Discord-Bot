@@ -48,11 +48,7 @@ function contrastRows(p: Palette): { key: string; color: string; ratio: number; 
         ['good', p.good, 4.5],
         ['warn', p.warn, 4.5],
         ['behind', p.behind, 4.5],
-        // Place colours are only bold top 3 names and the 4th-place bar, so
-        // they take the 3:1 floor for large bold text and graphics. A gold
-        // that reaches 4.5:1 on a light card is olive-brown (Fwoxie,
-        // 2026-10-26: "looks annoying"); a real gold sits near 3.2:1.
-        ...p.place.map((c, i): [string, string, number] => [`place ${i + 1}`, c, 3]),
+        ...p.place.map((c, i): [string, string, number] => [`place ${i + 1}`, c, 4.5]),
     ];
     const grounds = [p.bg, p.panel, p.stripe];
     return keys.map(([key, color, floor]) => ({ key, color, ratio: Math.min(...grounds.map((g) => contrast(color, g))), floor }));

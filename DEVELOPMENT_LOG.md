@@ -34,8 +34,21 @@ looks like Oguri, maybe with a free chibi of her.
     cards, and a brown bronze, `#7f3f1a`, kept away from the behind red.
   - Place colours are only bold top 3 names and the 4th-place bar, so
     `scripts/palettes.ts` now holds them to the 3:1 floor for large bold
-    text and graphics. That is a deliberate trade-off. Our names are bold
-    but 15 to 18px, a little under WCAG's large-text size of 18.66px.
+    text and graphics. (Superseded the same day; see below.)
+  - Fwoxie: "you can use diff colors". So light palettes drop the medal
+    colours for raspberry `#c2185b`, teal `#0b7285` and violet `#7048b8`.
+    Each reads at 4.5:1 or more on every card, the three are at least ΔE
+    46 apart, and they are clear of the behind red and the on-pace colour.
+    The 3:1 exception is gone, and place colours are back to the 4.5:1
+    floor.
+- **Oguri plush**: Fwoxie supplied a photo of an Oguri Cap plush. It looks
+  like official merchandise, which was flagged to Fwoxie. It is cut out of
+  its warm grey backdrop by a flood fill from the edges. The backdrop is
+  told apart from her cool white hair by warmth, and from her lighter, pinker
+  face by brightness and green against blue. The fringe is trimmed and
+  softened. It is `src/assets/scenes/oguri.png`, and stands on the turf with
+  a shadow and an onigiri balanced on her head. A food pile sits at her
+  feet: a rice bowl in her blue, stacked onigiri, carrots and dango.
 - **Oguri scene** (`scenes.ts`): her blue sky with clouds, a garland of
   pennants in her blue, white and gold, her gold star glowing, and a white
   rail on mown turf. A stack of onigiri stands for her appetite. It

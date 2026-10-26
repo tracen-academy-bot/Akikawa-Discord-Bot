@@ -339,7 +339,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1f6e3a',
         warn: '#945200',
         behind: '#b3261e',
-        place: ['#a87800', '#4a6898', '#7f3f1a', '#2c5aa0'],
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2c5aa0'],
         style: { radius: 2, border: '#c9b88f', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     akikawa: {
@@ -361,7 +361,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#2f58c4',
         warn: '#924f00',
         behind: '#c0262d',
-        place: ['#b0306a', '#4a6898', '#94490f', '#2f58c4'],
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2f58c4'],
         style: { radius: 24, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     clear: {
@@ -427,7 +427,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1d7448',
         warn: '#995400',
         behind: '#bf2440',
-        place: ['#a1307a', '#4a6898', '#9a4a12', '#7338c9'],
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2f58c4'],
         style: { radius: 26, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     oguri: {
@@ -449,7 +449,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#2a63b5',
         warn: '#945200',
         behind: '#b8241c',
-        place: ['#a87800', '#4a6898', '#7f3f1a', '#2a63b5'],
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2a63b5'],
         style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'oguri' },
     },
     firework: {
@@ -493,7 +493,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1b6e45',
         warn: '#945200',
         behind: '#b3261e',
-        place: ['#a87800', '#4a6898', '#7f3f1a', '#c2185b'],
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2f58c4'],
         style: { radius: 18, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'confetti' },
     },
     finish: {

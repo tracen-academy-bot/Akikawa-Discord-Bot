@@ -642,19 +642,144 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         ctx.fillRect(x + 3, railY + 2, 1, turfTop - railY + 4);
     }
 
-    // The picture, when there is one, standing on the right; the onigiri
-    // pile sits beside it, or at the right edge without it.
-    let pileX = w - SIDE - 70;
+    // The picture, when there is one, stands on the right with food piled
+    // round her feet and an onigiri balanced on her head. Without it, the
+    // pile sits on its own at the right.
+    const ground = hero - 6;
     if (art) {
-        const artH = hero - 16;
+        const artH = hero - 30;
         const artW = (art.width / art.height) * artH;
-        const artX = w - SIDE - artW;
-        ctx.drawImage(art, artX, hero - artH - 2, artW, artH);
-        pileX = artX - 46;
+        const artX = w - SIDE - artW - 80;
+        const artY = ground - artH;
+        // A soft shadow on the grass under her.
+        ctx.fillStyle = 'rgba(20, 60, 30, 0.3)';
+        ctx.beginPath();
+        ctx.ellipse(artX + artW / 2, ground - 2, artW * 0.42, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.drawImage(art, artX, artY, artW, artH);
+        onigiri(ctx, artX + artW * 0.5, artY + 10, 30, 0.18);
+        drawFoodPile(ctx, artX + artW / 2, ground, artW, true);
+    } else {
+        drawFoodPile(ctx, w - SIDE - 90, ground, 120, false);
     }
-    const size = 38;
-    const ground = hero - 8;
-    onigiri(ctx, pileX - size * 0.55, ground - size / 2, size, -0.08);
-    onigiri(ctx, pileX + size * 0.55, ground - size / 2, size, 0.1);
-    onigiri(ctx, pileX, ground - size * 1.35, size, 0.02);
+}
+
+/** A carrot lying at `angle`, its leaves at the thick end. */
+function carrot(ctx: SKRSContext2D, x: number, y: number, length: number, angle: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.shadowColor = 'rgba(30, 60, 30, 0.25)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetY = 2;
+    const body = ctx.createLinearGradient(0, -length * 0.12, 0, length * 0.12);
+    body.addColorStop(0, '#ffa040');
+    body.addColorStop(1, '#e8620c');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(-length / 2, -length * 0.12);
+    ctx.quadraticCurveTo(length * 0.1, -length * 0.1, length / 2, 0);
+    ctx.quadraticCurveTo(length * 0.1, length * 0.1, -length / 2, length * 0.12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = 'rgba(160, 60, 0, 0.5)';
+    ctx.lineWidth = 1;
+    for (const t of [-0.25, 0, 0.22]) {
+        ctx.beginPath();
+        ctx.moveTo(length * t, -length * 0.08);
+        ctx.lineTo(length * t + 3, -length * 0.02);
+        ctx.stroke();
+    }
+    ctx.fillStyle = '#3fae4a';
+    for (const a of [-0.5, 0, 0.5]) {
+        ctx.save();
+        ctx.translate(-length / 2, 0);
+        ctx.rotate(Math.PI + a);
+        ctx.beginPath();
+        ctx.ellipse(length * 0.14, 0, length * 0.16, length * 0.05, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+    ctx.restore();
+}
+
+/** A rice bowl in Oguri blue, heaped with rice. */
+function riceBowl(ctx: SKRSContext2D, x: number, y: number, r: number) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(30, 60, 30, 0.3)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 2;
+    // The heap of rice, bumpy on top.
+    ctx.fillStyle = '#fffdf7';
+    for (let i = -3; i <= 3; i += 1) {
+        ctx.beginPath();
+        ctx.arc(x + i * r * 0.26, y - r * 0.15 - (3 - Math.abs(i)) * r * 0.14, r * 0.34, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.shadowColor = 'transparent';
+    // The bowl.
+    const bowl = ctx.createLinearGradient(x - r, 0, x + r, 0);
+    bowl.addColorStop(0, '#2c62b3');
+    bowl.addColorStop(0.5, OGURI_BLUE);
+    bowl.addColorStop(1, '#244f92');
+    ctx.fillStyle = bowl;
+    ctx.beginPath();
+    ctx.moveTo(x - r, y - r * 0.12);
+    ctx.lineTo(x + r, y - r * 0.12);
+    ctx.quadraticCurveTo(x + r * 0.9, y + r * 0.75, x, y + r * 0.78);
+    ctx.quadraticCurveTo(x - r * 0.9, y + r * 0.75, x - r, y - r * 0.12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x - r, y - r * 0.16, r * 2, r * 0.1);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    for (const dx of [-0.45, 0, 0.45]) {
+        ctx.beginPath();
+        ctx.arc(x + dx * r, y + r * 0.3, r * 0.08, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+/** A skewer of three dango: pink, white and green. */
+function dango(ctx: SKRSContext2D, x: number, y: number, size: number, angle: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.strokeStyle = '#c8a46a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-size * 2, 0);
+    ctx.lineTo(size * 1.7, 0);
+    ctx.stroke();
+    ctx.shadowColor = 'rgba(30, 60, 30, 0.25)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetY = 1;
+    for (const [i, colour] of [[-1, '#f7a8c4'], [0, '#fffaf2'], [1, '#9fd38a']] as const) {
+        ctx.fillStyle = colour;
+        ctx.beginPath();
+        ctx.arc(i * size * 1.05, 0, size * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+/**
+ * Oguri's food, piled up: rice bowl and onigiri at the back, carrots and
+ * dango in front. Centred on `cx`, resting on `ground`, about `width` wide.
+ * `split` leaves the middle clear so a figure standing there shows.
+ */
+function drawFoodPile(ctx: SKRSContext2D, cx: number, ground: number, width: number, split: boolean) {
+    const half = width / 2;
+    const left = split ? cx - half - 30 : cx - half * 0.5;
+    const right = split ? cx + half + 26 : cx + half * 0.5;
+    riceBowl(ctx, left - 6, ground - 20, 20);
+    onigiri(ctx, right, ground - 18, 34, 0.12);
+    onigiri(ctx, right + 26, ground - 14, 28, -0.2);
+    onigiri(ctx, right + 13, ground - 42, 28, 0.05);
+    onigiri(ctx, left - 32, ground - 14, 28, -0.1);
+    carrot(ctx, left + 12, ground - 6, 44, -0.25);
+    carrot(ctx, right - 6, ground - 4, 40, 0.35);
+    dango(ctx, cx + (split ? half * 0.55 : 0), ground - 6, 7, -0.2);
 }
