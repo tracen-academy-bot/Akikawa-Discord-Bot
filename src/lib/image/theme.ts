@@ -518,6 +518,29 @@ export const PALETTES: Record<string, Palette> = {
         place: ['#ffcc33', '#9fb8e6', '#e39a5c', '#5ab4ff'],
         style: { radius: 4, border: '#3a3c44', glow: false, labels: 'upper', frameStyle: 'checker' },
     },
+    stillinlove: {
+        id: 'stillinlove',
+        label: 'Still in Love',
+        origin: "Still in Love (umamusu.wiki, 2026-10-26): her red #D83A43 and blue #6FBBF1 on dark wine. Her room at night watches the club and turns red as more of it falls behind.",
+        light: false,
+        frame: '#1b0f17',
+        frameEnd: '#22121b',
+        bg: '#1d1117',
+        panel: '#29171f',
+        stripe: '#23141b',
+        line: '#3d2530',
+        text: '#f7ebef',
+        muted: '#c9adb8',
+        faint: '#97798a',
+        // Red means only one thing here: behind, which is what turns her.
+        accent: '#6fbbf1',
+        target: '#ffcf6a',
+        good: '#7ee0b4',
+        warn: '#ffd23f',
+        behind: '#ff5a66',
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#c9adb8'],
+        style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'stillinlove' },
+    },
 };
 
 /** The default palette. */

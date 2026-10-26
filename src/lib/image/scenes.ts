@@ -18,6 +18,11 @@ import type { Palette } from './theme';
  *              city skyline; the cards stand where the street would be
  *   confetti   a warm wash with tumbling, shaded confetti, sequins and
  *              curled streamers, densest at the top and thinning downwards
+ *   stillinlove  Still in Love in her room at night, watching you: a gothic
+ *              window with a crescent moon, her eyes in the dark, a side
+ *              table of jam, a draped mirror, and lace along the bottom.
+ *              It turns red with `mood`: calm when everyone is on pace,
+ *              yandere when much of the club is behind.
  *   oguri      Oguri Cap: a blue sky with clouds and a garland of her food
  *              (onigiri, carrots, dango, buns), and a white rail on mown
  *              turf with food piled up (she is famously hungry)
@@ -32,7 +37,7 @@ import type { Palette } from './theme';
  */
 
 /** The scenes a palette can carry. */
-export type SceneId = 'fireworks' | 'confetti' | 'oguri';
+export type SceneId = 'fireworks' | 'confetti' | 'oguri' | 'stillinlove';
 
 /**
  * Where the club stands in its rank band, for a scene that races it along a
@@ -144,7 +149,14 @@ function drawMealPile(ctx: SKRSContext2D, food: FoodArt, cx: number, ground: num
  * Places a report, drawn on a transparent background, on its palette's
  * scene. Returns the report unchanged for a palette without one.
  */
-export async function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wide', race: SceneRace | null = null): Promise<Canvas> {
+export async function withScene(
+    report: Canvas,
+    p: Palette,
+    layout: 'tall' | 'wide',
+    race: SceneRace | null = null,
+    /** 0 to 1: how far a scene with a mood has turned (Still in Love: the share of the club behind). */
+    mood = 0,
+): Promise<Canvas> {
     const scene = p.style.scene;
     if (!scene) return report;
     const hero = HERO[layout];
@@ -160,6 +172,7 @@ export async function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wi
     ctx.scale(RENDER_SCALE, RENDER_SCALE);
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
+    else if (scene === 'stillinlove') drawStillInLove(ctx, w, h, hero, await sceneArt(scene), mood);
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     return canvas;
@@ -1132,4 +1145,317 @@ function drawDirt(ctx: SKRSContext2D, footX: number, ground: number, artW: numbe
         ctx.restore();
     }
     ctx.globalAlpha = 1;
+}
+
+// ─── Still in Love ────────────────────────────────────────────────────────────
+
+/** Her image colours (umamusu.wiki): red #D83A43 and blue #6FBBF1. */
+const SIL_RED = '#d83a43';
+
+/** Mixes `#rrggbb` colours `a` to `b` by `t`. */
+function mix(a: string, b: string, t: number): string {
+    const pa = parseInt(a.slice(1), 16);
+    const pb = parseInt(b.slice(1), 16);
+    const ch = (shift: number) => Math.round(((pa >> shift) & 255) * (1 - t) + ((pb >> shift) & 255) * t);
+    return `#${[16, 8, 0].map((sh) => ch(sh).toString(16).padStart(2, '0')).join('')}`;
+}
+
+/** A crescent moon: a disc with a darker disc cut from it. */
+function crescent(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, glow: string) {
+    const g = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 3);
+    g.addColorStop(0, glow);
+    g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.fillStyle = colour;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x + r * 0.45, y - r * 0.2, r * 0.92, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/** A small bat silhouette, wings spread. */
+function bat(ctx: SKRSContext2D, x: number, y: number, s: number, colour: string) {
+    ctx.fillStyle = colour;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x - s * 0.5, y - s * 0.6, x - s * 1.2, y - s * 0.3);
+    ctx.quadraticCurveTo(x - s * 0.9, y, x - s * 1.0, y + s * 0.25);
+    ctx.quadraticCurveTo(x - s * 0.6, y + s * 0.05, x - s * 0.4, y + s * 0.35);
+    ctx.quadraticCurveTo(x - s * 0.2, y + s * 0.15, x, y + s * 0.3);
+    ctx.quadraticCurveTo(x + s * 0.2, y + s * 0.15, x + s * 0.4, y + s * 0.35);
+    ctx.quadraticCurveTo(x + s * 0.6, y + s * 0.05, x + s * 1.0, y + s * 0.25);
+    ctx.quadraticCurveTo(x + s * 0.9, y, x + s * 1.2, y - s * 0.3);
+    ctx.quadraticCurveTo(x + s * 0.5, y - s * 0.6, x, y);
+    ctx.fill();
+}
+
+/**
+ * A gothic arched window from (x, top) to the sill at `bottom`: night sky
+ * with a crescent moon and bats, dark mullions, a stone frame.
+ */
+function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bottom: number, mood: number) {
+    const arch = () => {
+        ctx.beginPath();
+        ctx.moveTo(x, bottom);
+        ctx.lineTo(x, top + w * 0.6);
+        ctx.quadraticCurveTo(x, top, x + w / 2, top - w * 0.05);
+        ctx.quadraticCurveTo(x + w, top, x + w, top + w * 0.6);
+        ctx.lineTo(x + w, bottom);
+        ctx.closePath();
+    };
+    // The sky through the glass.
+    ctx.save();
+    arch();
+    ctx.clip();
+    const sky = ctx.createLinearGradient(0, top, 0, bottom);
+    sky.addColorStop(0, mix('#0d1430', '#2a0610', mood));
+    sky.addColorStop(1, mix('#28304f', '#5a0d1a', mood));
+    ctx.fillStyle = sky;
+    ctx.fillRect(x, top - w, w, bottom - top + w);
+    const rand = seeded(1031);
+    for (let i = 0; i < 18; i += 1) {
+        ctx.fillStyle = `rgba(255, 240, 240, ${0.3 + rand() * 0.5})`;
+        ctx.fillRect(x + rand() * w, top + rand() * (bottom - top), 1.2, 1.2);
+    }
+    // Never a full moon: she hates them.
+    crescent(ctx, x + w * 0.62, top + (bottom - top) * 0.3, w * 0.16, mix('#f3ead6', '#ff4a55', mood), `rgba(${Math.round(240 + mood * 15)}, ${Math.round(220 - mood * 170)}, ${Math.round(200 - mood * 150)}, 0.35)`);
+    bat(ctx, x + w * 0.3, top + (bottom - top) * 0.45, w * 0.07, 'rgba(10, 4, 8, 0.9)');
+    bat(ctx, x + w * 0.42, top + (bottom - top) * 0.58, w * 0.05, 'rgba(10, 4, 8, 0.85)');
+    ctx.restore();
+    // Frame and mullions.
+    ctx.strokeStyle = '#3a2630';
+    ctx.lineWidth = 5;
+    arch();
+    ctx.stroke();
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, top);
+    ctx.lineTo(x + w / 2, bottom);
+    ctx.moveTo(x, top + (bottom - top) * 0.62);
+    ctx.lineTo(x + w, top + (bottom - top) * 0.62);
+    ctx.stroke();
+    ctx.fillStyle = '#3a2630';
+    ctx.fillRect(x - 6, bottom, w + 12, 5);
+}
+
+/** A jar of red fruit jam with a gingham lid and a label. */
+function jamJar(ctx: SKRSContext2D, cx: number, bottom: number, s: number) {
+    const w = s;
+    const h = s * 1.15;
+    const glass = ctx.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0);
+    glass.addColorStop(0, '#7a0f1c');
+    glass.addColorStop(0.4, SIL_RED);
+    glass.addColorStop(1, '#5c0a14');
+    ctx.fillStyle = glass;
+    ctx.beginPath();
+    ctx.roundRect(cx - w / 2, bottom - h, w, h, s * 0.18);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.fillRect(cx - w * 0.32, bottom - h * 0.85, w * 0.08, h * 0.6);
+    // Lid: a gingham cloth tied over the top.
+    ctx.fillStyle = '#f4e9ee';
+    ctx.beginPath();
+    ctx.roundRect(cx - w * 0.6, bottom - h - s * 0.22, w * 1.2, s * 0.3, s * 0.08);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(216, 58, 67, 0.55)';
+    for (let i = -2; i <= 2; i += 2) ctx.fillRect(cx + i * w * 0.2 - 1, bottom - h - s * 0.22, 2, s * 0.3);
+    ctx.fillStyle = '#f7efe6';
+    ctx.fillRect(cx - w * 0.3, bottom - h * 0.55, w * 0.6, h * 0.28);
+}
+
+/**
+ * The side table: two jars of jam, a candle, and a mirror draped with
+ * cloth, because she does not like large mirrors.
+ */
+function sideTable(ctx: SKRSContext2D, x: number, floor: number, mood: number) {
+    // The draped mirror behind.
+    ctx.fillStyle = '#2a1a22';
+    ctx.beginPath();
+    ctx.roundRect(x + 52, floor - 118, 62, 84, 30);
+    ctx.fill();
+    const cloth = ctx.createLinearGradient(x + 50, 0, x + 116, 0);
+    cloth.addColorStop(0, '#4a2a38');
+    cloth.addColorStop(0.5, '#6a3a4c');
+    cloth.addColorStop(1, '#3f2330');
+    ctx.fillStyle = cloth;
+    ctx.beginPath();
+    ctx.moveTo(x + 50, floor - 104);
+    ctx.quadraticCurveTo(x + 83, floor - 128, x + 116, floor - 104);
+    ctx.lineTo(x + 120, floor - 30);
+    ctx.quadraticCurveTo(x + 104, floor - 38, x + 92, floor - 30);
+    ctx.quadraticCurveTo(x + 76, floor - 40, x + 62, floor - 30);
+    ctx.quadraticCurveTo(x + 54, floor - 36, x + 46, floor - 30);
+    ctx.closePath();
+    ctx.fill();
+    // The table top.
+    ctx.fillStyle = '#3a2028';
+    ctx.fillRect(x, floor - 30, 150, 6);
+    ctx.fillStyle = '#2a161c';
+    ctx.fillRect(x + 10, floor - 24, 6, 24);
+    ctx.fillRect(x + 134, floor - 24, 6, 24);
+    jamJar(ctx, x + 32, floor - 30, 24);
+    jamJar(ctx, x + 56, floor - 30, 18);
+    // A candle, its flame brighter as she turns.
+    ctx.fillStyle = '#efe4dc';
+    ctx.fillRect(x + 122, floor - 58, 8, 28);
+    const flame = ctx.createRadialGradient(x + 126, floor - 64, 0, x + 126, floor - 64, 18 + mood * 10);
+    flame.addColorStop(0, `rgba(255, ${Math.round(210 - mood * 120)}, ${Math.round(140 - mood * 90)}, 0.9)`);
+    flame.addColorStop(1, 'rgba(255, 120, 80, 0)');
+    ctx.fillStyle = flame;
+    ctx.beginPath();
+    ctx.arc(x + 126, floor - 64, 18 + mood * 10, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/**
+ * Her eyes in the dark, half-lidded: red with a dark ring round the pupil.
+ * They glow brighter and redder with `mood`.
+ */
+function watchingEyes(ctx: SKRSContext2D, cx: number, cy: number, s: number, mood: number) {
+    for (const side of [-1, 1]) {
+        const ex = cx + side * s * 1.25;
+        const glow = ctx.createRadialGradient(ex, cy, 0, ex, cy, s * (1.6 + mood * 1.4));
+        glow.addColorStop(0, `rgba(255, 40, 60, ${0.25 + mood * 0.55})`);
+        glow.addColorStop(1, 'rgba(255, 40, 60, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(ex, cy, s * (1.6 + mood * 1.4), 0, Math.PI * 2);
+        ctx.fill();
+        // The eye, cut flat on top by a heavy lid.
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(ex, cy, s, s * 0.55, 0, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.fillStyle = mix('#b8323c', '#ff2a3c', mood);
+        ctx.fillRect(ex - s, cy - s, s * 2, s * 2);
+        ctx.fillStyle = '#4a0610';
+        ctx.beginPath();
+        ctx.arc(ex + side * s * 0.05, cy + s * 0.08, s * 0.38, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#12020a';
+        ctx.beginPath();
+        ctx.arc(ex + side * s * 0.05, cy + s * 0.08, s * 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 230, 230, 0.85)';
+        ctx.beginPath();
+        ctx.arc(ex - s * 0.25, cy - s * 0.05, s * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+        // The lid: half-lidded, lower as she turns.
+        ctx.fillStyle = '#0c0509';
+        ctx.fillRect(ex - s, cy - s, s * 2, s * (0.62 + mood * 0.18));
+        ctx.restore();
+        ctx.strokeStyle = '#0c0509';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(ex - s * 1.05, cy - s * (0.38 - mood * 0.18));
+        ctx.quadraticCurveTo(ex, cy - s * (0.5 - mood * 0.18), ex + s * 1.05, cy - s * (0.38 - mood * 0.18));
+        ctx.stroke();
+    }
+}
+
+/** Bobbin lace along `y`: scallops with picot holes, `colour` turning red with mood. */
+function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string) {
+    const r = 9;
+    ctx.fillStyle = colour;
+    ctx.fillRect(0, y - 6, w, 6);
+    for (let x = 0; x < w + r * 2; x += r * 2) {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI);
+        ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'destination-out';
+    for (let x = 0; x < w + r * 2; x += r * 2) {
+        ctx.beginPath();
+        ctx.arc(x, y + 2, r * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + r, y - 3, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+}
+
+/**
+ * Still in Love watching from her room (see `SceneId`). `mood` 0 is calm:
+ * a quiet night, white lace, a soft gaze. 1 is yandere: the room washed
+ * red, the moon and lace red, her eyes burning, and a changed line.
+ */
+function drawStillInLove(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number) {
+    // The room: dark wine walls with faint damask stripes.
+    const wall = ctx.createLinearGradient(0, 0, 0, h);
+    wall.addColorStop(0, mix('#1b0f17', '#3a0610', mood));
+    wall.addColorStop(Math.min(0.99, hero / h), mix('#22121b', '#4a0812', mood));
+    wall.addColorStop(1, mix('#140b10', '#2a050b', mood));
+    ctx.fillStyle = wall;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.025)';
+    for (let x = 0; x < w; x += 26) ctx.fillRect(x, 0, 10, h);
+
+    const floor = hero - 14;
+    // A gallery of arched windows along the wall, either side of her, with
+    // the side table at the far end. A tall image has room for one.
+    const tableX = w - SIDE - 160;
+    const winW = 100;
+    const clear = 150;
+    const spots: number[] = [];
+    for (let x = SIDE + 10; x + winW < w / 2 - clear; x += 200) spots.push(x);
+    for (let x = w / 2 + clear; x + winW < tableX - 20; x += 200) spots.push(x);
+    for (const x of spots) gothicWindow(ctx, x, 22, winW, floor - 8, mood);
+    sideTable(ctx, tableX, floor, mood);
+
+    // Her, centre stage, staring out; until her picture exists, her eyes.
+    if (art) {
+        const artH = hero - 24;
+        const artW = (art.width / art.height) * artH;
+        ctx.drawImage(art, w / 2 - artW / 2, floor - artH + 6, artW, artH);
+    } else {
+        watchingEyes(ctx, w / 2, hero * 0.46, 15, mood);
+    }
+
+    // Petals drifting down, more as she turns.
+    const rand = seeded(214);
+    const petals = Math.round(6 + mood * 18);
+    for (let i = 0; i < petals; i += 1) {
+        const x = rand() * w;
+        const y = rand() * (hero - 10);
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rand() * Math.PI);
+        ctx.fillStyle = mix('#c8505e', '#ff2a3c', mood);
+        ctx.globalAlpha = 0.5 + rand() * 0.4;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 4, 2.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+
+    // The line, faint, under her gaze.
+    const line = mood < 0.34 ? 'I still love you.' : mood < 0.67 ? 'I still love you…' : '…why are you leaving me behind?';
+    ctx.font = font('400 14px');
+    ctx.textAlign = 'center';
+    ctx.fillStyle = `rgba(255, ${Math.round(220 - mood * 170)}, ${Math.round(225 - mood * 175)}, ${0.4 + mood * 0.4})`;
+    ctx.fillText(line, w / 2, floor - 22);
+    ctx.textAlign = 'left';
+
+    // Lace along the bottom of the band, white to red.
+    laceTrim(ctx, w, floor, mix('#f3e6ec', '#d0202f', mood));
+
+    // The red closing in from the edges.
+    if (mood > 0) {
+        const v = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+        v.addColorStop(0, 'rgba(160, 0, 20, 0)');
+        v.addColorStop(1, `rgba(160, 0, 20, ${0.55 * mood})`);
+        ctx.fillStyle = v;
+        ctx.fillRect(0, 0, w, h);
+    }
 }

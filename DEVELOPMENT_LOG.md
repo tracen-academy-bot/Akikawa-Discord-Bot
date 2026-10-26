@@ -4,6 +4,32 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Still in Love theme (preview, not merged)
+
+Fwoxie asked for a Still in Love theme: no race, her "staring at you with
+evil eyes", and her yandere side shown the way her scenario turns the
+screen red. Food is no longer central.
+
+- **Palette `stillinlove`**: dark wine cards. Her blue `#6FBBF1` is the
+  accent and mint means on pace. Red appears only for behind (and her
+  mood), so the only red in her report is whoever is behind.
+- **Scene** (`drawStillInLove`): her room at night.
+  - A gallery of gothic arched windows with a crescent moon (never full;
+    she dislikes full moons) and bats.
+  - Her, centre stage, staring out. Until her chibi exists, her
+    half-lidded red eyes in the dark.
+  - A side table of red jam jars, a candle, and a mirror draped with cloth
+    (she dislikes large mirrors).
+  - Bobbin lace along the bottom of the band.
+  - Her line, faint, under her gaze.
+- **Mood** (`sceneMood`, smoothstep of the share behind: 0 under 5%, 1 at
+  half the club): the walls, window sky, moon, lace, petals, candle and
+  eyes all turn from calm to red, and a red vignette closes in. The line
+  goes from "I still love you." to "…why are you leaving me behind?".
+- Tested in `test-cutoff`. `scripts/palettes.ts` passes.
+
+---
+
 ## 2026-10-26 — Live timer leaderboard; panel kept at the bottom
 
 Asked for: "design a current lb one too", "repost panel", "show live daily

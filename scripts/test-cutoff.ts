@@ -127,6 +127,15 @@ async function main() {
     check('she stands 60% along', Math.round((race?.progress ?? 0) * 100), 60);
     check('no race in the top band or without points', [sceneRace(top), sceneRace(past), sceneRace(null)], [null, null, null]);
 
+    // Still in Love's mood: calm under 5% behind, fully turned at half the club.
+    const { sceneMood } = await import('../src/lib/image/renderFanReport');
+    const club = (behind: number, of = 20) => ({ members: Array.from({ length: of }, (_, i) => ({ onPace: i >= behind })) }) as never;
+    check('everyone on pace: calm', sceneMood(club(0)), 0);
+    check('one in twenty behind: still calm', sceneMood(club(1)), 0);
+    check('half the club behind: fully turned', sceneMood(club(10)), 1);
+    check('a quarter behind: on the way', [sceneMood(club(5)) > 0.3, sceneMood(club(5)) < 0.7], [true, true]);
+    check('no members: calm', sceneMood(club(0, 0)), 0);
+
     console.log(`\n${pass} passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);
 }
