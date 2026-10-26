@@ -124,6 +124,10 @@ screen red. Food is no longer central.
     (light pooling from the upper left through ice blue into sapphire,
     facets only hinted at, a bright rim, a soft highlight, one fine glint),
     13 px, sitting in the dot's place.
+  - Then 10 px, with a five-stop sapphire gradient and light coming back
+    out low on the right. The gold beads now change with mood: deep amber
+    on the white lace (pale gold washed out there), bright yellow gold on
+    the red lace, so they read on both.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---

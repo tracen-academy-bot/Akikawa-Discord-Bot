@@ -1871,14 +1871,21 @@ function blueHeartGem(ctx: SKRSContext2D, cx: number, cy: number, s: number) {
 
     ctx.save();
     gemHeartPath(ctx, cx, cy, s);
-    const body = ctx.createRadialGradient(cx - s * 0.2, cy - s * 0.22, s * 0.04, cx + s * 0.05, cy + s * 0.08, s * 0.62);
-    body.addColorStop(0, '#f2fbff');
-    body.addColorStop(0.3, '#9fd8ff');
-    body.addColorStop(0.65, '#3a8fe0');
-    body.addColorStop(1, '#123a7a');
+    const body = ctx.createRadialGradient(cx - s * 0.18, cy - s * 0.2, 0, cx + s * 0.04, cy + s * 0.06, s * 0.64);
+    body.addColorStop(0, '#dff3ff');
+    body.addColorStop(0.22, '#8fd0ff');
+    body.addColorStop(0.5, '#3f9cf0');
+    body.addColorStop(0.78, '#1f5fc0');
+    body.addColorStop(1, '#0f2f6e');
     ctx.fillStyle = body;
     ctx.fill();
     ctx.clip();
+    // Light coming back out low on the right, as it does through a cut stone.
+    const bounce = ctx.createRadialGradient(cx + s * 0.18, cy + s * 0.2, 0, cx + s * 0.18, cy + s * 0.2, s * 0.26);
+    bounce.addColorStop(0, 'rgba(150, 220, 255, 0.6)');
+    bounce.addColorStop(1, 'rgba(150, 220, 255, 0)');
+    ctx.fillStyle = bounce;
+    ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
     // Depth: the lower right falls into shadow.
     const shade = ctx.createLinearGradient(cx - s * 0.3, cy - s * 0.3, cx + s * 0.4, cy + s * 0.5);
     shade.addColorStop(0, 'rgba(8, 24, 70, 0)');
@@ -1901,7 +1908,7 @@ function blueHeartGem(ctx: SKRSContext2D, cx: number, cy: number, s: number) {
     gemHeartPath(ctx, cx, cy + s * 0.02, s * 0.5);
     ctx.stroke();
     // A soft highlight on the left lobe.
-    const shine = ctx.createRadialGradient(cx - s * 0.28, cy - s * 0.24, 0, cx - s * 0.28, cy - s * 0.24, s * 0.22);
+    const shine = ctx.createRadialGradient(cx - s * 0.28, cy - s * 0.24, 0, cx - s * 0.28, cy - s * 0.24, s * 0.17);
     shine.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
     shine.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = shine;
@@ -1937,7 +1944,7 @@ function trackMarker(track: LaceTrack): number {
  * up to the club, the club's place marked with a blue heart-cut diamond,
  * and dark beyond.
  */
-function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, track: LaceTrack | null) {
+function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, track: LaceTrack | null, mood: number) {
     const r = LACE_STEP / 2;
     ctx.fillStyle = colour;
     ctx.fillRect(0, y - 6, w, 6);
@@ -1975,18 +1982,20 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, trac
     for (let x = first; x <= last; x += step) {
         if (x === marker) continue;
         if (x < marker) {
-            // Lit: a rich gold bead with a warm glow, like a light strip.
+            // Lit: a gold bead with a warm glow, like a light strip. On the
+            // white lace a deep amber gold, so it does not wash out; on the
+            // red lace a bright yellow gold, so it does not sink into it.
             const glow = ctx.createRadialGradient(x, y + 2, 0, x, y + 2, hole * 2.8);
-            glow.addColorStop(0, 'rgba(255, 176, 0, 0.6)');
-            glow.addColorStop(1, 'rgba(255, 176, 0, 0)');
+            glow.addColorStop(0, rgba(mix('#e08a00', '#ffd23a', mood), 0.35 + mood * 0.3));
+            glow.addColorStop(1, rgba(mix('#e08a00', '#ffd23a', mood), 0));
             ctx.fillStyle = glow;
             ctx.beginPath();
             ctx.arc(x, y + 2, hole * 2.8, 0, Math.PI * 2);
             ctx.fill();
             const bead = ctx.createRadialGradient(x - hole * 0.35, y + 2 - hole * 0.35, 0, x, y + 2, hole * 1.15);
-            bead.addColorStop(0, '#fff0a8');
-            bead.addColorStop(0.45, '#ffc21a');
-            bead.addColorStop(1, '#c47a00');
+            bead.addColorStop(0, mix('#ffe08a', '#fffbe0', mood));
+            bead.addColorStop(0.45, mix('#f0a400', '#ffd83a', mood));
+            bead.addColorStop(1, mix('#9a5600', '#e8a400', mood));
             ctx.fillStyle = bead;
         } else {
             // Still to come: dark.
@@ -1996,7 +2005,7 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, trac
         ctx.arc(x, y + 2, x < marker ? hole * 1.15 : hole, 0, Math.PI * 2);
         ctx.fill();
     }
-    blueHeartGem(ctx, marker, y + 2, 13);
+    blueHeartGem(ctx, marker, y + 2, 10);
 }
 
 /** How wide `speechBubble` draws `text`; leaves the bubble's font set. */
@@ -2324,7 +2333,7 @@ function drawStillInLove(
     ctx.globalAlpha = 1;
 
     // Lace along the bottom of the band, white to red, dripping when she turns.
-    laceTrim(ctx, w, floor, mix('#f3e6ec', '#c8202e', mood), track);
+    laceTrim(ctx, w, floor, mix('#f3e6ec', '#c8202e', mood), track, mood);
     laceDrips(ctx, w, floor, mood, blood);
 
     // The moonlight over everything in the room, softened.
