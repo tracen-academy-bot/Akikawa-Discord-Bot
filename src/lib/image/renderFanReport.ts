@@ -2,7 +2,7 @@ import { createCanvas, type Canvas, type Image, type SKRSContext2D } from '@napi
 import type { ClubRank } from '@prisma/client';
 import { PALETTES, DEFAULT_PALETTE, dashNum, type Palette } from './theme';
 import { font } from './fonts';
-import { withScene } from './scenes';
+import { withScene, type SceneRace } from './scenes';
 import { card, drawFrame, fillRound, fit, innerRadius, label, text, wrap, wrapWords } from './cards';
 import { loadClubIcon, loadRankIcon } from './canvasUtils';
 import type { LastDayGains } from '../fans/readings';
@@ -564,6 +564,21 @@ function bandEnds(band: RankBand): { low: number; high: number } | null {
 }
 
 /**
+ * The club's place in its band for a scene's race track: how far it is
+ * from the bottom cutoff to the next one up, by points. Null without both
+ * cutoffs' points.
+ */
+export function sceneRace(band: RankBand | null): SceneRace | null {
+    const ends = band ? bandEnds(band) : null;
+    if (!band || !ends) return null;
+    return {
+        progress: (band.points - ends.low) / (ends.high - ends.low),
+        start: `#${band.below!.rank} ${band.below!.tier}`,
+        finish: `#${band.above!.rank} ${band.above!.tier}`,
+    };
+}
+
+/**
  * Draws where the club sits in its rank band: a bar from the band's bottom
  * place (left) to its top (right) with the club marked on it, then the fans
  * still needed to reach the place above and the cushion over the place
@@ -943,5 +958,5 @@ export async function renderFanReport(
     };
     const report = layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
     // A palette with a scene draws on a transparent background; set it in the scene.
-    return (await withScene(report, palette, layout)).encode('png');
+    return (await withScene(report, palette, layout, sceneRace(meta.rankBand ?? null))).encode('png');
 }

@@ -250,6 +250,8 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
         }
     }
     const changed = off || role !== null || channel !== null;
+    // The first setup awards last week at the next minute's check.
+    const firstSetup = changed && !off && (await getTimerSettings(guild.id)) === null;
     const settings = off
         ? await saveTimerSettings(guild.id, { topRoleId: null, announceChannelId: null })
         : changed
@@ -263,6 +265,13 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
         `Weekly top ${TOP_PLACES} role: ${settings?.topRoleId ? `<@&${settings.topRoleId}>` : 'not set'}`,
         `End-of-week board: ${settings?.announceChannelId ? `<#${settings.announceChannelId}>` : 'not posted'}`,
         `This week ends <t:${ends}:F> (<t:${ends}:R>); it is awarded about 15 minutes later.`,
+        ...(firstSetup
+            ? [
+                  settings?.announceChannelId
+                      ? 'Last week is awarded within a minute, and its final board posts in that channel.'
+                      : 'Last week is awarded within a minute. Set a channel in the same command next time to have its board posted.',
+              ]
+            : []),
         '',
         `Live top ${TOP_PLACES}: ${live.length > 0 ? live.map((r, i) => `${i + 1}. <@${r.discordUserId}> (${r.runs})`).join(' · ') : 'no runs yet this week'}`,
         '',

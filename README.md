@@ -60,7 +60,8 @@ Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
   runs get the role about 15 minutes after the week ends, and last week's
   holders lose it. The week's final leaderboard posts in the channel, pinging
   the winners. With no options it shows the setup and the live top 3;
-  `off:true` stops it. Turning it on mid-week awards from the next week.
+  `off:true` stops it. The first setup awards last week straight away and
+  posts its board, so set the role and the channel in the same command.
 - `/timer milestone add runs:<n> role:<role>`: a role kept for good at `n`
   completed runs, given the moment someone reaches it (and straight away to
   everyone already past it). `/timer milestone remove runs:<n>` stops it.

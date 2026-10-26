@@ -4,6 +4,41 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Oguri race track; last week's timer results on setup
+
+**Race track** (Verillia's idea: "could we have the mascot run across, with
+their progress depending on their position in the rank bracket?"). Fwoxie
+supplied a clean, transparent chibi of Oguri in her holiday outfit, which
+replaces the plush.
+- When a club has rank-band points, the Oguri scene's rail becomes a track.
+  - A simple starting gate (three numbered stalls) sits at the left.
+  - The start sign names the band's bottom cutoff ("#500 A+") and points
+    left.
+  - The finish sign names the next cutoff ("#100 S"), points right, and
+    sits under a chequered banner.
+  - The sign posts copy the rail's dividing posts exactly.
+  - Her food is piled past the finish.
+- She stands at `sceneRace().progress` along it: (points − bottom
+  cutoff) / (next cutoff − bottom cutoff), by points, as in the rank band
+  bar. She leans forward, a little off the ground, with speed lines and dust
+  behind her, and is short enough to run under the hanging food.
+- Without band points (the top band, or no data), she stands by her food as
+  before.
+- Tested in `test-cutoff` (labels, 60% along, no race without data).
+
+**Timer**
+- Weeks already end on Sunday 24:00 Japan time (`TIMER_STREAK_TIMEZONE`,
+  default `Asia/Tokyo`), unless that variable is set otherwise on the host.
+- Fwoxie: "probably post last week's results too". A new `TimerSettings`
+  row now starts at the week before last. The first setup is therefore
+  awarded last week at the next minute's check, and posts its final board.
+  - Only the latest ended week is ever awarded, so nothing older is.
+  - The `/timer rewards` reply says so on first setup, and asks for the
+    channel in the same command.
+  - Tested in `test-timer`.
+
+---
+
 ## 2026-10-26 — Distinct top 3 colours; an Oguri Cap scene
 
 Asked for: "top 3 should have different colors", and an Oguri theme that
