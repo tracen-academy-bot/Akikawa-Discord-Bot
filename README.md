@@ -47,9 +47,25 @@ npm run dev                  # slash commands register themselves on start
 | **Start** | Begins a 50-minute run, or resets the one you have |
 | **Stop** | Cancels your run; it does not count |
 | **My Stats** | Your statistics card |
-| **Leaderboard** | Top trainers this week |
+| **Leaderboard** | This week's standings, live |
 
-Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`.
+Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
+(this week live, last week final, last 30 days, all time).
+
+### Rewards
+
+Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
+
+- `/timer rewards top_role:<role> channel:<channel>`: the week's top 3 by
+  runs get the role about 15 minutes after the week ends, and last week's
+  holders lose it. The week's final leaderboard posts in the channel, pinging
+  the winners. With no options it shows the setup and the live top 3;
+  `off:true` stops it. Turning it on mid-week awards from the next week.
+- `/timer milestone add runs:<n> role:<role>`: a role kept for good at `n`
+  completed runs, given the moment someone reaches it (and straight away to
+  everyone already past it). `/timer milestone remove runs:<n>` stops it.
+
+The bot can only give roles below its own highest role.
 
 Timers are stored in Postgres, so a run that ends while the bot is offline
 still pings you when it comes back, and still counts toward your streak.
@@ -80,10 +96,14 @@ role must be mentionable, or the bot needs the "Mention @everyone, @here, and
 All Roles" permission.
 
 The report image comes in several themes (`PALETTES` in
-`src/lib/image/theme.ts`). A club's staff pick one in the `/club reports`
-form; saving a new one replies with the current report drawn in it, and
-`Default` goes back to Rose. The expected rank is set by Club Managers in
-`/club admin`.
+`src/lib/image/theme.ts`) and two layouts: tall (one column, for phones)
+and wide (three panels, for computers). A club's staff pick both in the
+`/club reports` form, with the report time and time zone. At least one
+layout must be ticked; ticking both posts a tall and a wide image with every
+report. Changing the look replies with the current report in it, and
+`Default` goes back to Rose. The quota is set in the `/club fancount` form
+(a bare number is millions; empty clears it), and the expected rank by Club
+Managers in `/club admin`.
 
 Behind-quota alerts post in the club's report channel. A separate alert
 channel can still be set with `/fans circle config alert_channel:` or on the

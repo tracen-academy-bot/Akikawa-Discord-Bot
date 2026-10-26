@@ -4,6 +4,210 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Distinct top 3 colours; an Oguri Cap scene
+
+Asked for: "top 3 should have different colors", and an Oguri theme that
+looks like Oguri, maybe with a free chibi of her.
+
+- **Top 3**: gold and bronze drifted together, most of all once darkened
+  for light palettes. 1st vs 3rd measured only 17 to 34 (CIE76 ΔE) in 10
+  of 16 palettes. `scripts/palettes.ts` now requires ΔE ≥ 35 between each
+  pair of the top 3.
+  - Dark palettes use a clear gold (`#ffd23a`) and an orange bronze
+    (`#ff8f3f`). The bronze is kept orange, not red, so a top-3 name never
+    reads as behind.
+  - Light palettes use olive gold `#6f5f00` and copper `#9c4600`.
+  - The wide sidebar's "Top 3" list now numbers each place in its colour.
+  - Fwoxie then clarified they meant the names. The top 3 names in the
+    on-pace table, and in the sidebar's Top 3, are now bold in their place
+    colour. This drops the old rule that "a coloured name means behind".
+    That rule is safe to drop: the table lists only members on pace, and
+    behind names sit in their own card.
+  - Silver read as plain text: near-white on dark palettes, dark grey on
+    light ones. It is now a steel blue, `#9fb8e6` on dark palettes and
+    `#4a6898` on light ones. The check also requires ΔE ≥ 25 between each
+    top 3 colour and `text`. Akikawa and Sakura swap their grey for it.
+  - Fwoxie: gold "looks annoying" on light palettes; "cream looks not like
+    gold". A gold dark enough to pass 4.5:1 on a light card is olive-brown.
+    Medal chips were tried and rejected ("just the text color").
+  - Light palettes now use a real gold, `#a87800`, about 3.2:1 on the
+    cards, and a brown bronze, `#7f3f1a`, kept away from the behind red.
+  - Place colours are only bold top 3 names and the 4th-place bar, so
+    `scripts/palettes.ts` now holds them to the 3:1 floor for large bold
+    text and graphics. (Superseded the same day; see below.)
+  - Fwoxie: "you can use diff colors". So light palettes drop the medal
+    colours for raspberry `#c2185b`, teal `#0b7285` and violet `#7048b8`.
+    Each reads at 4.5:1 or more on every card, the three are at least ΔE
+    46 apart, and they are clear of the behind red and the on-pace colour.
+    The 3:1 exception is gone, and place colours are back to the 4.5:1
+    floor.
+- **Oguri plush**: Fwoxie supplied a photo of an Oguri Cap plush. It looks
+  like official merchandise, which was flagged to Fwoxie. It is cut out of
+  its warm grey backdrop by a flood fill from the edges. The backdrop is
+  told apart from her cool white hair by warmth, and from her lighter, pinker
+  face by brightness and green against blue. Fwoxie: "the crop is off".
+  The photo's drop shadow and the shadowed hair strands are mauve-grey and
+  stayed stuck to her side. GrabCut came next. Fwoxie: "that's even worse".
+  It lost her left side hair and left a grey lump on the right.
+  - The final cut is traced by hand: an outline of her ears, ahoge, head,
+    cheeks, body and feet, in photo pixels, filled at 4x.
+  - Only a thin band along that outline is cleaned of backdrop-tinted
+    pixels. Her cheek rows are left alone, since their shading has nearly
+    the backdrop's tint.
+  - The mask is then tidied: the largest piece kept, gaps closed, edge
+    softened.
+  - The thin side-hair strands are left out. In a 217px JPEG they are
+    barely apart from the backdrop and read as noise.
+  - OpenCV was used once to make the asset; it is not a dependency.
+  - The garland: pennants first. Their mid blue vanished against the sky,
+    so they went navy with white edges. Then Fwoxie asked for food instead.
+    Onigiri, carrots, dango and steamed buns now hang from the string on
+    threads of different lengths, each swayed a little. Fwoxie will supply a
+    proper chibi later; it drops in at `src/assets/scenes/oguri.png`.
+  - The gold star is gone. It came from her outfit's chest star, but alone
+    in the sky it read as a random sticker. The clouds now spread across
+    the sky, smaller and lower, so they sit under the hanging food rather
+    than behind it. The white onigiri and buns get a firm beige edge.
+  - The plush stands on the turf with a shadow and an onigiri balanced on
+    her head. A food pile sits at her feet: a rice bowl in her blue,
+    stacked onigiri, carrots and dango.
+- **Oguri scene** (`scenes.ts`): her blue sky with clouds, a garland of
+  pennants in her blue, white and gold, her gold star glowing, and a white
+  rail on mown turf. A stack of onigiri stands for her appetite. It
+  replaces the starfield backdrop, which only showed as specks.
+- **No chibi shipped**: no Oguri chibi with a clear free-use licence turned
+  up. Cygames' fan-work guidelines govern what fans may make; they do not
+  license other people's art. So a scene takes an optional picture from
+  `src/assets/scenes/<scene>.png`, which a club adds only with permission.
+  `withScene` is async to load it, and it is cached.
+
+---
+
+## 2026-10-26 — /club fancount is a form; Firework, Confetti, Finish Line themes
+
+Asked for: "just do a form if you do fancount", and more designs.
+
+- **`/club fancount`** opens a form: the quota (pre-filled exactly, e.g.
+  "31M") and the period select. The old `amount` and `period` options are
+  gone. A bare number still means millions (`parseClubFanAmount`), as the
+  command always read it. An odd quota is pre-filled in M, so saving the
+  form unchanged keeps it. Empty clears the quota. Saving refreshes the club
+  directory, which shows the quota.
+- **Scenes** (`scenes.ts`, `PaletteStyle.scene`): the first try drew
+  fireworks and confetti as backdrop patterns. Fwoxie: "ew". The backdrop
+  only shows in the 16px gaps around the cards, so a picture there reads
+  as noise. A palette with a scene now renders the report on a transparent
+  background (`drawFrame` skips it). `withScene` then places it on a larger
+  canvas with a 170 to 190px band above the cards and 30px margins, and
+  paints the scene there.
+  - **fireworks:** a night-sky gradient, with stars. It has three kinds of
+    burst: small distant ones, older ones that fade and droop, and big
+    fresh ones. Each spark trail thins and droops under gravity, drawn with
+    additive light. Rockets still climb, and a two-row city skyline sits
+    where the cards begin.
+  - **confetti:** a warm wash with out-of-focus lights and two twisting
+    streamers. The pieces are strips, sequins, triangles and curls. Each
+    narrows with its tilt and shows a darker back, near pieces cast a soft
+    shadow, and they thin out down the margins.
+  - Both come from fixed seeds, so the same report always looks the same.
+- **`checker`** backdrop style (`cards.ts`): a chequered flag.
+- **Themes**: Firework (dark navy, orange accent, fireworks scene),
+  Confetti (light cream, magenta accent, confetti scene) and Finish Line
+  (charcoal, square and outlined, racing blue, `checker`). All pass
+  `scripts/palettes.ts`. 16 theme choices of Discord's 25.
+
+---
+
+## 2026-10-26 — Oguri theme; report layout ticks; quota moves to /club fancount
+
+Asked for: a palette from Oguri Cap's two main colours (from the
+Umamusume wiki), and a tick for tall/wide next to the palette choice, with
+both allowed and at least one required.
+
+- **Oguri palette** (`theme.ts`): umamusu.wiki lists her image colours as
+  `#3A7AD2` (blue) and `#ECE7E7` (off-white). Light palette: off-white
+  cards on a blue frame with off-white stars. The accent is a darker blue
+  (`#2a63b5`), because `#3A7AD2` itself is under 4.5:1 on the cards. The
+  target is gold (her star), and behind is red (her neckerchief). All
+  colours pass `scripts/palettes.ts`.
+- **Layouts** (`TrackedCircle.reportLayouts`, default `["tall"]`, additive
+  migration `20261026150000_add_report_layouts`): `buildCircleReport`
+  renders one image per ticked layout, tall first. Tall keeps its old file
+  name. `CircleReport.image` became `images`, and every sender attaches
+  all of them.
+- **Forms**: Discord allows 5 fields per form, and `/club reports` already
+  used all five. A separate `/club look` form went in first. Fwoxie then
+  asked to spread the fields across the existing commands instead:
+  - `/club reports` (tracked clubs only) now holds report time, time zone,
+    theme, and a checkbox group for the layouts (required, 1 to 2 ticks).
+    A new theme or layout is answered with a preview.
+  - The quota and its period are set only with `/club fancount`. Leaving
+    out the period now keeps the current one; before, it reset to month.
+    Its reply carries the rank cutoff line that the form used to show.
+  - Untracked clubs have no report, so `/club reports` points them to
+    `/club fancount`. The form-only helpers (`quotaInputValue`, the quota
+    fields) are gone.
+- **Fix**: the behind card's key said "cream <1 day", left over from before
+  `warn` became yellow. It now says "yellow" on dark palettes and "amber"
+  on light ones.
+
+---
+
+## 2026-10-26 — Timer rewards: weekly top 3 role, milestones, live and final boards
+
+Asked for: "collect id when people click the start autorun thing" so top
+runners can get roles and there is a leaderboard. The timer already stored
+who pressed Start and every completed run; what was missing was rewards.
+
+- **Weeks** run Monday 00:00 to Sunday 24:00 in the timer's day time zone
+  (JST, `TIMER_STREAK_TIMEZONE`), the same day keys as streaks. A run counts
+  in the week its 50 minutes ended in.
+- **Weekly top 3** (`rewards.ts`, `runWeeklyAwards`): 15 minutes into a new
+  week the timer loop (checked once a minute) claims the old week in
+  `TimerSettings.lastAwardedWeek`, so it is awarded once even across
+  restarts, then takes the role off last week's holders (from
+  `TimerWeeklyAward`, so only people the bot gave it to) and gives it to the
+  new top 3. Ties go to whoever reached their count first. The final board
+  posts in the chosen channel, pinging the winners. A new settings row starts
+  at last week, so turning it on mid-week does not award an earlier week.
+- **Milestones** (`TimerMilestoneRole`): kept for good; given when a run
+  makes the total exactly the milestone (runs rise by one, so each is met
+  once) and mentioned in the expiry ping without pinging the role; given to
+  everyone already past it when added.
+- **Commands**: `/timer rewards [top_role] [channel] [off]`, `/timer
+  milestone add|remove`, Club Managers only. Roles the bot cannot give
+  (above its own, integration roles, @everyone) are refused up front.
+- **Leaderboards**: this week (live, the default for the command and panel
+  button), last week (final), last 30 days, all time; the dashboard's
+  training page uses the same four. The image is redrawn in the report's
+  card style: a podium for the top 3 with a line on the role, then bars.
+  Header totals cover everyone, not only the rows shown.
+- Shared drawing pieces moved from `renderFanReport.ts` to
+  `src/lib/image/cards.ts`.
+
+Migration `20261026120000_add_timer_rewards` (three new tables). The
+streak leaderboard is deferred.
+
+---
+
+## 2026-10-26 — Hot streaks replace "Closest to the line"
+
+GimmeKiss (2026-10-25): "Closest to the line" listed people 50M ahead as
+"close" (it filled the card with whoever came next), and it read as a
+shame list for people meeting the requirement. Replaced with **Hot
+streaks**: finished days in a row, ending on the last finished day, on
+which a member earned at least the daily rate (`quotaPerDay`) while in the
+circle (`MemberProgress.streak`). Anyone can have one, behind or not, and
+it rewards consistency rather than size. Longest first, then by total; a
+short bar against the longest. This month only; no streak without a quota.
+
+Wide layout: the card takes the old card's place (under the shorter of the
+table and the behind card, or beside the table when many are behind),
+filling its height. Tall layout: the five longest close the report, when
+anyone has one.
+
+---
+
 ## 2026-10-25 — Rank band; top 3 of the day; lists stretch to fill
 
 - **Rank band** (both layouts): where the club's monthly points sit between

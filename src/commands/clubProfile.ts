@@ -22,7 +22,8 @@ import { TIERS, TIER_ORDER, clubCard, clubStaff, loadMembers, refreshDirectory, 
  * bio, rules and banner, and can upload longer rules and goals as a Markdown
  * (.md) or text (.txt) file. Club Managers also set its tier, which places it in
  * the directory (G1 to Debut); a club with no tier is left out. One of three
- * forms, with `/club reports` and `/club admin` (see `club.ts`).
+ * forms, with `/club reports` and `/club admin` (see `club.ts`); the quota is
+ * `/club fancount`.
  *
  * The submit replies with the card as the directory will show it, and
  * refreshes the directory.

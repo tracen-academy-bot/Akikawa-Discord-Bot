@@ -40,7 +40,8 @@ const channelStub = {
     },
 };
 
-const clientStub = { channels: { fetch: async () => channelStub } } as never;
+// No guilds cached or fetchable: milestone roles are skipped, as for a guild the bot left.
+const clientStub = { channels: { fetch: async () => channelStub }, guilds: { cache: new Map(), fetch: async () => null } } as never;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

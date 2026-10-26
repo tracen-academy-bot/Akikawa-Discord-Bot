@@ -346,6 +346,27 @@ function lifetimeChecks() {
     check('missed sync is a zero-gain day', gap.gains.join(','), '100,100,300');
 }
 
+/** Streaks: finished days in a row at or above the daily rate, in the circle. */
+function streakChecks() {
+    const raw = (values: number[]) => [...values, ...new Array<number>(32 - values.length).fill(0)];
+    const member = (values: number[]): MemberSeries => ({ viewerId: 1, trainerName: 's', dailyFans: raw(values), shameScore: null });
+    // 93 a month over 31 days is 3 a day. Gains: 5, 5, 1, 5, 5, 5.
+    const run = [100, 105, 110, 111, 116, 121, 126];
+    const opts = { quota: 93, daysInMonth: 31 };
+    check('three days in a row since the short day', computeCircleProgress([member(run)], opts).members[0]!.streak, 3);
+    check('the day in progress does not count', computeCircleProgress([member(run)], { ...opts, currentDay: 6 }).members[0]!.streak, 2);
+    check('a short last day ends the streak', computeCircleProgress([member([100, 105, 110, 111])], opts).members[0]!.streak, 0);
+    check('exactly the daily rate counts', computeCircleProgress([member([100, 103, 106])], opts).members[0]!.streak, 2);
+    // Joined with a starting snapshot at day 3: days 4 to 6 in the circle.
+    check('a joiner counts only days in the circle', computeCircleProgress([member([0, 0, 0, 100, 105, 110, 115])], opts).members[0]!.streak, 3);
+    check('no quota, no streak', computeCircleProgress([member(run)], { quota: 0, daysInMonth: 31 }).members[0]!.streak, 0);
+    // Other periods use their own daily rate: 14 a week is 2 a day, 42 every two weeks 3, 4 a day 4.
+    const steady2 = [100, 102, 104, 106];
+    check('weekly: 14 a week, so 2 a day keeps a streak', computeCircleProgress([member(steady2)], { quota: 14, period: 'WEEK', daysInMonth: 31 }).members[0]!.streak, 3);
+    check('biweekly: 42 every two weeks needs 3 a day', computeCircleProgress([member(steady2)], { quota: 42, period: 'BIWEEKLY', daysInMonth: 31 }).members[0]!.streak, 0);
+    check('daily: the quota itself', computeCircleProgress([member([100, 104, 108, 111])], { quota: 4, period: 'DAY', daysInMonth: 31 }).members[0]!.streak, 0);
+}
+
 function main() {
     const series = ROWS.map(([name, total, , , , , gain], i) => buildSeries(name, i, total, gain));
 
@@ -388,6 +409,7 @@ function main() {
     biweeklyChecks();
     membershipChecks();
     lifetimeChecks();
+    streakChecks();
     console.log(`${pass} assertions passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);
 }

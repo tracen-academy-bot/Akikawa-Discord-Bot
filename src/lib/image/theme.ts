@@ -1,5 +1,6 @@
 import type { SKRSContext2D } from '@napi-rs/canvas';
 import { font } from './fonts';
+import type { SceneId } from './scenes';
 
 /**
  * Visual system shared by every rendered image.
@@ -149,8 +150,14 @@ export interface PaletteStyle {
      *   lanes     diagonal bands, like a mown racecourse
      *   stars     scattered points of `frameEnd` on `frame`
      *   grid      a fine grid of `frameEnd` lines on `frame`
+     *   checker   a chequered flag of `frameEnd` squares on `frame`
      */
-    frameStyle: 'gradient' | 'solid' | 'lanes' | 'stars' | 'grid';
+    frameStyle: 'gradient' | 'solid' | 'lanes' | 'stars' | 'grid' | 'checker';
+    /**
+     * An illustrated scene (`scenes.ts`) in a wider margin and a band above
+     * the cards, in place of `frameStyle`. Fan report only.
+     */
+    scene?: SceneId;
 }
 
 /**
@@ -178,7 +185,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#7be0a0',
         warn: '#ffd23f',
         behind: '#ff6b63',
-        place: ['#ffd27a', '#e9e2e6', '#f0a774', '#ff9ccc'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#ff9ccc'],
         style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     classic: {
@@ -200,7 +207,7 @@ export const PALETTES: Record<string, Palette> = {
         good: THEME.green,
         warn: '#ffe14d',
         behind: '#e0665a',
-        place: THEME.place,
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#e9c8f2'],
         style: { radius: 0, border: 'rgba(212, 165, 74, 0.45)', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     midnight: {
@@ -222,7 +229,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#62adff',
         warn: '#ffd84d',
         behind: '#ff7a7a',
-        place: ['#f5c84c', '#d4dae8', '#e8a06a', '#b49cff'],
+        place: ['#f5c84c', '#9fb8e6', '#ff8a45', '#b49cff'],
         style: { radius: 14, border: '#2c3a66', glow: false, labels: 'plain', frameStyle: 'stars' },
     },
     jewel: {
@@ -244,7 +251,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1abc9c',
         warn: '#ffe14d',
         behind: '#ff6f61',
-        place: ['#f1c40f', '#dfe4ea', '#f39c45', '#00bfff'],
+        place: ['#f1c40f', '#9fb8e6', '#ff8a3a', '#00bfff'],
         style: { radius: 20, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     plum: {
@@ -266,7 +273,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#7ee0c3',
         warn: '#ffd84d',
         behind: '#ff7b7b',
-        place: ['#ffd479', '#e6dcef', '#ffa978', '#ff8fc7'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#ff8fc7'],
         style: { radius: 22, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     turf: {
@@ -288,7 +295,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#6fd6a8',
         warn: '#ffe14d',
         behind: '#ff8a7a',
-        place: ['#f0c75e', '#dbe6e0', '#e8a36c', '#8fc8ff'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#8fc8ff'],
         style: { radius: 10, border: null, glow: false, labels: 'upper', frameStyle: 'lanes' },
     },
     graphite: {
@@ -310,7 +317,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#6fdc8c',
         warn: '#ffd84d',
         behind: '#ff8a8a',
-        place: ['#ffcf5c', '#e3e5e8', '#f0a774', '#8ea1ff'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#8ea1ff'],
         style: { radius: 8, border: '#44474e', glow: false, labels: 'plain', frameStyle: 'solid' },
     },
     paper: {
@@ -332,7 +339,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1f6e3a',
         warn: '#945200',
         behind: '#b3261e',
-        place: ['#8a5a00', '#4a5563', '#9a4a12', '#2c5aa0'],
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2c5aa0'],
         style: { radius: 2, border: '#c9b88f', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     akikawa: {
@@ -354,7 +361,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#2f58c4',
         warn: '#924f00',
         behind: '#c0262d',
-        place: ['#b0306a', '#94490f', '#5b5f6b', '#2f58c4'],
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2f58c4'],
         style: { radius: 24, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     clear: {
@@ -376,7 +383,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#56b4e9',
         warn: '#f0e442',
         behind: '#e2661a',
-        place: ['#f0e442', '#e2e2e2', '#cc79a7', '#009e73'],
+        place: ['#f0e442', '#9fb8e6', '#cc79a7', '#009e73'],
         style: { radius: 10, border: '#3a3a42', glow: false, labels: 'plain', frameStyle: 'solid' },
     },
     neon: {
@@ -398,7 +405,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#39ff9c',
         warn: '#fff35c',
         behind: '#ff5c7a',
-        place: ['#fff35c', '#e6e6ff', '#ffad5c', '#ff6cf3'],
+        place: ['#fff35c', '#9fb8e6', '#ffad5c', '#ff6cf3'],
         style: { radius: 6, border: '#ff3df2', glow: true, labels: 'upper', frameStyle: 'grid' },
     },
     sakura: {
@@ -420,8 +427,96 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1d7448',
         warn: '#995400',
         behind: '#bf2440',
-        place: ['#a1307a', '#4f5868', '#9a4a12', '#7338c9'],
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2f58c4'],
         style: { radius: 26, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
+    },
+    oguri: {
+        id: 'oguri',
+        label: 'Oguri',
+        origin: "Oguri Cap's image colours on the Umamusume wiki (umamusu.wiki, 2026-10-26), blue #3A7AD2 and white #ECE7E7, in a scene of her: blue sky, a garland of her food, a white rail and a food pile. Red for behind is her neckerchief.",
+        light: true,
+        frame: '#3a7ad2',
+        frameEnd: '#ece7e7',
+        bg: '#f8f6f6',
+        panel: '#ece7e7',
+        stripe: '#f1eeee',
+        line: '#d9d3d3',
+        text: '#16233a',
+        muted: '#3f4c63',
+        faint: '#66708a',
+        accent: '#2a63b5',
+        target: '#835400',
+        good: '#2a63b5',
+        warn: '#945200',
+        behind: '#b8241c',
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2a63b5'],
+        style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'oguri' },
+    },
+    firework: {
+        id: 'firework',
+        label: 'Firework',
+        origin: 'Night sky: navy cards under a band of fireworks over a city skyline, orange sparks for structure.',
+        light: false,
+        frame: '#090b1c',
+        frameEnd: '#1a1f45',
+        bg: '#11142b',
+        panel: '#1a1e3d',
+        stripe: '#151834',
+        line: '#2a2f57',
+        text: '#f3f1ff',
+        muted: '#b9b6d6',
+        faint: '#8a87ad',
+        accent: '#ff8a3d',
+        target: '#ffd75e',
+        good: '#5ee6b0',
+        warn: '#ffe14d',
+        behind: '#ff5f7a',
+        place: ['#ffd75e', '#9fb8e6', '#ff9f5e', '#7fb8ff'],
+        style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'fireworks' },
+    },
+    confetti: {
+        id: 'confetti',
+        label: 'Confetti',
+        origin: 'Light and festive: cream cards under falling confetti, sequins and streamers.',
+        light: true,
+        frame: '#fff1d6',
+        frameEnd: '#ffe2b0',
+        bg: '#fffdf8',
+        panel: '#fbf0dc',
+        stripe: '#fdf6ea',
+        line: '#efdcbc',
+        text: '#2a1f14',
+        muted: '#5a4a38',
+        faint: '#85735e',
+        accent: '#c2185b',
+        target: '#8a5a00',
+        good: '#1b6e45',
+        warn: '#945200',
+        behind: '#b3261e',
+        place: ['#c2185b', '#0b7285', '#7048b8', '#2f58c4'],
+        style: { radius: 18, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'confetti' },
+    },
+    finish: {
+        id: 'finish',
+        label: 'Finish Line',
+        origin: 'The chequered flag: charcoal cards, square and outlined, on a dark chequer, racing blue for structure.',
+        light: false,
+        frame: '#141519',
+        frameEnd: '#26282e',
+        bg: '#1b1c21',
+        panel: '#26282f',
+        stripe: '#212328',
+        line: '#34363e',
+        text: '#f4f4f6',
+        muted: '#c2c4cc',
+        faint: '#9295a0',
+        accent: '#5ab4ff',
+        target: '#ffcc33',
+        good: '#57d68d',
+        warn: '#ffe14d',
+        behind: '#ff5a4f',
+        place: ['#ffcc33', '#9fb8e6', '#e39a5c', '#5ab4ff'],
+        style: { radius: 4, border: '#3a3c44', glow: false, labels: 'upper', frameStyle: 'checker' },
     },
 };
 

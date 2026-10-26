@@ -7,7 +7,7 @@ import { TRACKED, backfillOnce, currentGameMonth, loadCircleProgress, syncAllCir
 import { isAtGameReset, isReportDue, reportTimeOf } from './reportTime';
 import { lastDayGains } from './readings';
 import { currentCircleProgress, formatReportDate } from './reports';
-import { renderFanReport } from '../image/renderFanReport';
+import { layoutsOf, renderFanReport, type FanReportMeta } from '../image/renderFanReport';
 import { paletteOf } from '../image/theme';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
 import { guildClubs, staffRolesOf, type LinkableGuild } from '../clubLinks';
@@ -76,7 +76,8 @@ async function isDue(now: Date): Promise<boolean> {
 
 /** A rendered report and its behind-quota alert, ready to send anywhere. */
 export interface CircleReport {
-    image: AttachmentBuilder;
+    /** One image per layout the club picked (`reportLayouts`), tall first. */
+    images: AttachmentBuilder[];
     /**
      * Who is behind, by trainer name, without any mention. Null when nobody
      * is. `postReport` adds the staff-role pings when an alert is due.
@@ -106,7 +107,7 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
     const progress = year === game.year && month === game.month ? await currentCircleProgress(circle) : await loadCircleProgress(circle, year, month);
     if (!progress) return null;
 
-    const buffer = await renderFanReport(progress, {
+    const meta: FanReportMeta = {
         circleName: circle.name,
         monthlyRank: circle.monthlyRank,
         clubRank: circle.rank,
@@ -114,12 +115,18 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
         memberCount: progress.members.length,
         dateLabel: formatReportDate(year, month, atReset ? progress.finishedDay : progress.daysElapsed),
         last24h: atReset ? null : await lastDayGains(circle.id),
-    }, paletteOf(circle.reportTheme));
-    const image = new AttachmentBuilder(buffer, { name: `fan-report-${circle.circleId}.png` });
+    };
+    const palette = paletteOf(circle.reportTheme);
+    // Tall keeps its old file name, so a club with one image sees no change.
+    const images: AttachmentBuilder[] = [];
+    for (const layout of layoutsOf(circle.reportLayouts)) {
+        const name = layout === 'tall' ? `fan-report-${circle.circleId}.png` : `fan-report-${circle.circleId}-${layout}.png`;
+        images.push(new AttachmentBuilder(await renderFanReport(progress, meta, palette, layout), { name }));
+    }
 
     const allBehind = progress.members.filter((m) => !m.onPace);
     const behind = allBehind.slice(0, ALERT_LIMIT);
-    if (behind.length === 0) return { image, alert: null, behindCount: 0 };
+    if (behind.length === 0) return { images, alert: null, behindCount: 0 };
 
     // Need/day is the whole daily amount from here on, not an extra on top of
     // pace; say what it is aimed at so it cannot be read as one.
@@ -128,7 +135,7 @@ export async function buildCircleReport(circle: TrackedCircle, { scheduled = fal
     if (allBehind.length > behind.length) lines.push(`…and ${allBehind.length - behind.length} more; see the report.`);
 
     return {
-        image,
+        images,
         behindCount: allBehind.length,
         alert: {
             content:
@@ -216,7 +223,7 @@ export async function postReport(
     const report = await buildCircleReport(circle, { scheduled });
     if (!report) return null;
 
-    if (!(await sendTo(client, circle.reportChannelId, { files: [report.image] }))) return null;
+    if (!(await sendTo(client, circle.reportChannelId, { files: report.images }))) return null;
 
     // Scheduled reports follow the club's cadence; a manual post (`/fans all`)
     // always alerts unless the club turned alerts off.
@@ -345,7 +352,7 @@ export function startFanScheduler(client: Client): () => void {
 
     let running = false;
     // The rank cutoff figures live in memory, so work them out now rather
-    // than at the next hourly run; /club reports shows nothing until they exist.
+    // than at the next hourly run; /club admin shows nothing until they exist.
     void refreshCutoffs()
         .then((r) => r.failed.length > 0 && console.warn(`Rank cutoff figures failed: ${r.failed.join('; ')}`))
         .catch((e: unknown) => console.warn('Rank cutoff figures failed:', e instanceof Error ? e.message : e));

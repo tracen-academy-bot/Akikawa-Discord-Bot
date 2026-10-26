@@ -402,16 +402,22 @@ async function main() {
     type ModalJson = { custom_id: string; components: { label: string; component: { custom_id: string; value?: string; options?: { value: string; default?: boolean }[] } }[] };
     const reportsForm = clubCmd.buildReportsModal(editable).toJSON() as unknown as ModalJson;
     const adminForm = clubCmd.buildAdminModal(editable).toJSON() as unknown as ModalJson;
+    const fancountForm = clubCmd.buildFancountModal(editable).toJSON() as unknown as ModalJson;
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
-    check('reports form for a tracked club: quota, period, report time, zone, theme', reportsForm.components.map((c) => c.label),
-        ['Quota per member', 'Quota period', 'Report time', 'Time zone', 'Report theme']);
+    check('reports form: report time, zone, theme, layout', reportsForm.components.map((c) => c.label),
+        ['Report time', 'Time zone', 'Report theme', 'Layout']);
+    type LayoutJson = { min_values?: number; max_values?: number; required?: boolean; options?: { value: string; default?: boolean }[] };
+    const lookPart = (label: string) => reportsForm.components.find((c) => c.label === label)?.component as LayoutJson | undefined;
     check('admin form for a tracked club: rank, home channels, staff roles, report channel, staff pings', adminForm.components.map((c) => c.label),
         ['Expected rank', 'Home channels', 'Staff roles', 'Report channel', 'Ping staff roles about members behind']);
     check('the admin form pre-selects the expected rank', pre(adminForm, 'Expected rank')?.options?.find((o) => o.default)?.value, 'S');
-    check('the reports form pre-selects the default theme', pre(reportsForm, 'Report theme')?.options?.find((o) => o.default)?.value, 'default');
+    check('the reports form pre-selects the default theme', lookPart('Report theme')?.options?.find((o) => o.default)?.value, 'default');
+    check('the reports form offers tall and wide, tall ticked by default',
+        lookPart('Layout')?.options?.map((o) => [o.value, o.default ?? false]), [['tall', true], ['wide', false]]);
+    check('at least one layout must be ticked, both may be',
+        [lookPart('Layout')?.required, lookPart('Layout')?.min_values, lookPart('Layout')?.max_values], [true, 1, 2]);
+    check('the Oguri theme is offered', lookPart('Report theme')?.options?.some((o) => o.value === 'oguri'), true);
     check('headcount is not a field', [...reportsForm.components, ...adminForm.components].some((c) => c.label.toLowerCase().includes('headcount')), false);
-    check('the form shows the real quota, exactly', pre(reportsForm, 'Quota per member')?.value, '31M');
-    check('the form pre-selects the quota period', pre(reportsForm, 'Quota period')?.options?.find((o) => o.default)?.value, 'MONTH');
     check('with no time set, the time is empty and Japan time is picked',
         [pre(reportsForm, 'Report time')?.value, pre(reportsForm, 'Time zone')?.options?.find((o) => o.default)?.value], [undefined, 'Asia/Tokyo']);
     check('Japan time is offered first', pre(reportsForm, 'Time zone')?.options?.[0]?.value, 'Asia/Tokyo');
@@ -433,13 +439,18 @@ async function main() {
     check('B is gone', ranked?.map((o) => o.value), ['CASUAL', 'B_PLUS', 'A', 'A_PLUS', 'S', 'S_PLUS']);
     check('Casual does not', ranked?.find((o) => o.value === 'CASUAL')?.description, undefined);
     const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B_PLUS', fanCountAmount: 0.25 } });
-    const looseReports = clubCmd.buildReportsModal(loose).toJSON() as unknown as ModalJson;
     const looseAdmin = clubCmd.buildAdminModal(loose).toJSON() as unknown as ModalJson;
-    check('an untracked club has no report time or theme', looseReports.components.map((c) => c.label), ['Quota per member', 'Quota period']);
+    check('an untracked club has no reports form, and is pointed at /club fancount',
+        desc(await runClubCmd({ sub: 'reports', userId: 'u-officer', officer: true, strings: { club: loose.id } }))?.includes('Set its quota with `/club fancount`'), true);
     check('an untracked club admin form: the name, rank and staff roles', looseAdmin.components.map((c) => c.label), ['Name', 'Expected rank', 'Staff roles']);
     check('an untracked club form pre-fills the name', pre(looseAdmin, 'Name')?.value, 'Loose Club');
-    check('with no quota yet, an old club fan count pre-fills it', pre(looseReports, 'Quota per member')?.value, '0.25M');
-    check('both forms are routed by their prefix', [clubCmd.isClubModal(reportsForm.custom_id), clubCmd.isClubModal(adminForm.custom_id)], [true, true]);
+    check('all three forms are routed by their prefix',
+        [reportsForm.custom_id, adminForm.custom_id, fancountForm.custom_id].map((id) => clubCmd.isClubModal(id)), [true, true, true]);
+    check('quota form: quota and period', fancountForm.components.map((c) => c.label), ['Quota per member', 'Quota period']);
+    check('the quota form shows the real quota, exactly', pre(fancountForm, 'Quota per member')?.value, '31M');
+    check('the quota form pre-selects the period', pre(fancountForm, 'Quota period')?.options?.find((o) => o.default)?.value, 'MONTH');
+    check('with no quota yet, an old club fan count pre-fills it',
+        pre(clubCmd.buildFancountModal(loose).toJSON() as unknown as ModalJson, 'Quota per member')?.value, '0.25M');
 
     /** Submits a club form; `channels` gives each channel field's picks. */
     const submitClub = async (
@@ -454,6 +465,8 @@ async function main() {
             fields: {
                 getTextInputValue: (id: string) => values[id] ?? '',
                 getStringSelectValues: (id: string) => (values[id] ? [values[id]] : []),
+                // A checkbox group's ticks, comma-separated.
+                getCheckboxGroup: (id: string) => (values[id] ? values[id].split(',') : []),
                 getSelectedChannels: (id: string) => new Collection((channels[id] ?? []).map((c) => [c, { id: c }])),
                 getSelectedRoles: () => new Collection(roles.map((id) => [id, { id }])),
             },
@@ -480,13 +493,17 @@ async function main() {
     /** Checkrose's report channel, kept as it is by admin submits. Its alert channel, c-alert, is set separately. */
     const keepChannels = { 'club:report-channel': 't-check' };
 
-    const saved = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:rank': 'A_PLUS', 'club:quota': '14M', 'club:period': 'WEEK' });
-    const afterReports = await reload();
-    check('reports form saves the real quota, and no longer the rank', [afterReports.rank, String(afterReports.quota), afterReports.quotaPeriod], ['S', '14000000', 'WEEK']);
-    check('the old club fan count is cleared, not left as a second number', [afterReports.fanCountAmount, afterReports.fanCountPeriod], [null, null]);
-    check('reports form confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M per week')], [false, true]);
-    check('headcount comes from uma.moe, not the stored column', saved?.description?.includes('Headcount: **2/30** (from uma.moe)'), true);
-    check('the reply includes the report time', saved?.description?.includes('Fan report: daily at **00:00 Japan time (JST)** (the default: the daily reset)'), true);
+    const saved = await submitClub(fancountForm.custom_id, 'u-officer', true, { 'club:quota': '14M', 'club:period': 'WEEK' });
+    const afterQuota = await reload();
+    check('/club fancount saves the quota, and not the rank', [afterQuota.rank, String(afterQuota.quota), afterQuota.quotaPeriod], ['S', '14000000', 'WEEK']);
+    check('the old club fan count is cleared, not left as a second number', [afterQuota.fanCountAmount, afterQuota.fanCountPeriod], [null, null]);
+    check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M per week')], [false, true]);
+    await submitClub(fancountForm.custom_id, 'u-officer', true, { 'club:quota': '15M' });
+    check('not picking a period keeps the current one', [String((await reload()).quota), (await reload()).quotaPeriod], ['15000000', 'WEEK']);
+    const plain = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall' });
+    check('the reports form confirms publicly with the report time',
+        [plain?.ephemeral, plain?.description?.includes('Fan report: daily at **00:00 Japan time (JST)** (the default: the daily reset)')], [false, true]);
+    check('an unchanged look gets no preview', plain?.files, undefined);
 
     const adminSaved = await submitClub(adminForm.custom_id, 'u-officer', true, { ...keepChannels, 'club:rank': 'A_PLUS' }, { 'club:home': ['c-room', 'c-room-bot'] });
     const afterAdmin = await reload();
@@ -499,7 +516,7 @@ async function main() {
     check('admin form confirms the cadence', weekly?.description?.includes('Staff pings about members behind: **weekly**'), true);
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { alertFrequency: 'DAILY' } });
     check('admin form confirms the channels', adminSaved?.description?.includes('Report channel: <#t-check>\nAlerts: <#c-alert> (set separately)'), true);
-    check('admin form leaves the quota alone', String(afterAdmin.quota), '14000000');
+    check('admin form leaves the quota alone', String(afterAdmin.quota), '15000000');
     check('admin form leaves the rank alone when not picked',
         [(await submitClub(adminForm.custom_id, 'u-officer', true, keepChannels, { 'club:home': ['c-room', 'c-room-bot'] })) !== undefined, (await reload()).rank], [true, 'A_PLUS']);
     check('the channel field is text, pre-filled with the ID',
@@ -542,7 +559,7 @@ async function main() {
         (await submitClub(looseAdmin.custom_id, 'u-officer', true, { 'club:name': 'checkrose' }))?.description,
         'A club named **checkrose** already exists.');
 
-    await submitClub(reportsForm.custom_id, 'u-assistant', false, { 'club:rank': 'B_PLUS', 'club:quota': '31M', 'club:period': 'MONTH' });
+    await submitClub(fancountForm.custom_id, 'u-assistant', false, { 'club:quota': '31M', 'club:period': 'MONTH' });
     check('club staff can change the quota', [String((await reload()).quota), (await reload()).quotaPeriod], ['31000000', 'MONTH']);
     check('club staff cannot change the expected rank', (await reload()).rank, 'A_PLUS');
     const competitive = await submitClub(adminForm.custom_id, 'u-officer', true, { ...keepChannels, 'club:rank': 'A' }, { 'club:home': ['c-room', 'c-room-bot'] });
@@ -558,14 +575,16 @@ async function main() {
         ["Only Club Managers can change a club's expected rank, name, channels or staff roles.", "Only Club Managers can change a club's expected rank, name, channels or staff roles."]);
     check('staff did not change the home channels', (await reload()).homeChannelIds, ['c-room', 'c-room-bot']);
     check('outsiders cannot submit the reports form',
-        (await submitClub(reportsForm.custom_id, 'u-behind', false, { 'club:quota': '1M' }))?.description?.startsWith('You must be a trainer or assistant'), true);
+        (await submitClub(reportsForm.custom_id, 'u-behind', false, { 'club:report-time': '1am' }))?.description?.startsWith('You must be a trainer or assistant'), true);
+    check('outsiders cannot set the quota',
+        (await submitClub(fancountForm.custom_id, 'u-behind', false, { 'club:quota': '1M' }))?.description?.startsWith('You must be a trainer or assistant'), true);
     check('a bad quota is refused',
-        (await submitClub(reportsForm.custom_id, 'u-trainer', false, { 'club:quota': 'lots' }))?.description?.startsWith('Quota must be'), true);
-    check('refusals leave the club unchanged', String((await reload()).quota), '31000000');
+        (await submitClub(fancountForm.custom_id, 'u-trainer', false, { 'club:quota': 'lots' }))?.description?.startsWith('Quota must be'), true);
+    check('refusals leave the club unchanged', [String((await reload()).quota), (await reload()).reportMinute], ['31000000', null]);
 
     // Report time, on the same form.
     const timed = await submitClub(reportsForm.custom_id, 'u-assistant', false,
-        { 'club:rank': 'A', 'club:quota': '31M', 'club:period': 'MONTH', 'club:report-time': '9pm', 'club:report-zone': 'America/New_York' });
+        { 'club:report-time': '9pm', 'club:report-zone': 'America/New_York' });
     const afterTime = await reload();
     check('staff set the report time and zone', [afterTime.reportMinute, afterTime.reportTimeZone], [21 * 60, 'America/New_York']);
     check('the reply names the time and zone', timed?.description?.includes('daily at **21:00 US Eastern (New York), UTC-'), true);
@@ -574,29 +593,46 @@ async function main() {
     check('the form shows the saved time and zone',
         [pre(timedForm, 'Report time')?.value, pre(timedForm, 'Time zone')?.options?.find((o) => o.default)?.value], ['21:00', 'America/New_York']);
     check('a bad time is refused',
-        (await submitClub(reportsForm.custom_id, 'u-assistant', false, { 'club:quota': '31M', 'club:report-time': 'soon' }))?.description,
+        (await submitClub(reportsForm.custom_id, 'u-assistant', false, { 'club:report-time': 'soon' }))?.description,
         '**soon** is not a time. Try 21:00, 9pm or 9:30 pm.');
     check('a refused time leaves it alone', (await reload()).reportMinute, 21 * 60);
-    await submitClub(reportsForm.custom_id, 'u-assistant', false, { 'club:rank': 'A', 'club:quota': '31M', 'club:period': 'MONTH' });
+    await submitClub(reportsForm.custom_id, 'u-assistant', false, {});
     check('an empty time goes back to the default', [(await reload()).reportMinute, (await reload()).reportTimeZone], [null, null]);
 
-    // /club fancount sets the same quota (in millions, as its option says).
-    await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: '35', period: 'MONTH' } });
+    // A bare number in the quota form is millions, as /club fancount always read it.
+    await submitClub(fancountForm.custom_id, 'u-trainer', false, { 'club:quota': '35', 'club:period': 'MONTH' });
     check('/club fancount sets the quota', String((await reload()).quota), '35000000');
+    await submitClub(fancountForm.custom_id, 'u-trainer', false, { 'club:quota': '' });
+    check('an empty quota clears it', String((await reload()).quota), '0');
+    await submitClub(fancountForm.custom_id, 'u-trainer', false, { 'club:quota': '35M' });
 
-    // The report theme, in the reports form. A new theme gets a preview.
-    const themeForm = { 'club:quota': '35M', 'club:period': 'MONTH' };
-    const themed = await submitClub(reportsForm.custom_id, 'u-trainer', false, { ...themeForm, 'club:theme': 'neon' });
+    // The report theme and layouts, in the same form. A new look gets a preview.
+    const themed = await submitClub(reportsForm.custom_id, 'u-trainer', false, { 'club:theme': 'neon', 'club:layouts': 'tall' });
     check('staff set the report theme', (await reload()).reportTheme, 'neon');
-    check('a new theme is confirmed with a preview', [themed?.description?.includes('Report theme: **Neon**'), themed?.files], [true, 1]);
-    const same = await submitClub(reportsForm.custom_id, 'u-trainer', false, { ...themeForm, 'club:theme': 'neon' });
-    check('the same theme again: no preview', same?.files, undefined);
-    check('the form pre-selects the saved theme',
-        pre(clubCmd.buildReportsModal(await reload()).toJSON() as unknown as ModalJson, 'Report theme')?.options?.find((o) => o.default)?.value, 'neon');
-    await submitClub(reportsForm.custom_id, 'u-trainer', false, themeForm);
+    check('the look is confirmed with a preview', [themed?.description?.includes('Report theme: **Neon**'), themed?.files], [true, 1]);
+    const lookOf = async () => clubCmd.buildReportsModal(await reload()).toJSON() as unknown as ModalJson;
+    check('the form pre-selects the saved theme', pre(await lookOf(), 'Report theme')?.options?.find((o) => o.default)?.value, 'neon');
+    const again = await submitClub(reportsForm.custom_id, 'u-trainer', false, { 'club:theme': 'neon', 'club:layouts': 'tall' });
+    check('the same look again: no preview', again?.files, undefined);
+    const both = await submitClub(reportsForm.custom_id, 'u-trainer', false, { 'club:layouts': 'tall,wide' });
     check('not picking leaves the theme', (await reload()).reportTheme, 'neon');
-    const reset = await submitClub(reportsForm.custom_id, 'u-trainer', false, { ...themeForm, 'club:theme': 'default' });
+    check('both layouts are saved, tall first', (await reload()).reportLayouts, ['tall', 'wide']);
+    check('both layouts: the preview has two images, and the summary says so',
+        [both?.files, both?.description?.includes('layout: **Tall and Wide**')], [2, true]);
+    check('the form ticks both saved layouts',
+        pre(await lookOf(), 'Layout')?.options?.filter((o) => o.default).map((o) => o.value), ['tall', 'wide']);
+    await submitClub(reportsForm.custom_id, 'u-trainer', false, { 'club:layouts': 'wide' });
+    check('wide alone', (await reload()).reportLayouts, ['wide']);
+    const posted2 = await (await import('../src/lib/fans/scheduler')).buildCircleReport(await reload());
+    check('a wide-only report renders one wide image', posted2?.images.map((a) => a.name), [`fan-report-${club.circleId}-wide.png`]);
+    await submitClub(reportsForm.custom_id, 'u-trainer', false, { 'club:layouts': 'sideways' });
+    check('an unknown layout keeps the saved ones', (await reload()).reportLayouts, ['wide']);
+    const reset = await submitClub(reportsForm.custom_id, 'u-trainer', false, { 'club:theme': 'default', 'club:layouts': 'tall' });
     check('default clears the theme', [(await reload()).reportTheme, reset?.description?.includes('Report theme: **Rose** (the default)')], [null, true]);
+    const outsider = await submitClub(reportsForm.custom_id, 'u-nobody', false, { 'club:theme': 'neon', 'club:layouts': 'tall' });
+    check('someone outside the club cannot change the look', [outsider?.ephemeral, (await reload()).reportTheme], [true, null]);
+    const { layoutsOf } = await import('../src/lib/image/renderFanReport');
+    check('stored layouts: empty or unknown is tall; order is fixed', [layoutsOf([]), layoutsOf(['x']), layoutsOf(['wide', 'tall'])], [['tall'], ['tall'], ['tall', 'wide']]);
     check('an unknown stored theme draws in the default', paletteOf('gone').id, 'rose');
 
     // ── Staff roles matched by name ───────────────────────────────────────────
@@ -656,8 +692,10 @@ async function main() {
     check('a changed list is stored', (await reload()).staffRoleIds, ['r-ck-trainer']);
     check('a stored list replaces the name matches',
         desc(await run({ sub: 'club', userId: 'u-role-asst', roles: ['r-ck-assistant'], channel: 't-check' }))?.startsWith('Only **Checkrose**'), true);
-    check('a role holder on the stored list may use the reports form', (await submitClub(reportsForm.custom_id, 'u-role-trainer', false, { 'club:quota': '36M' }, {}, [], ['r-ck-trainer']))?.ephemeral, false);
-    check('and it saved', String((await reload()).quota), '36000000');
+    check('a role holder on the stored list may use the reports form',
+        (await submitClub(reportsForm.custom_id, 'u-role-trainer', false, { 'club:report-time': '8pm' }, {}, [], ['r-ck-trainer']))?.ephemeral, false);
+    check('and it saved', (await reload()).reportMinute, 20 * 60);
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { reportMinute: null, reportTimeZone: null } });
 
     const linkList = await runClubCmd({ sub: 'links', userId: 'u-officer', officer: true });
     const linkText = linkList[0]?.embeds?.map((e) => e.description).join('\n') ?? '';

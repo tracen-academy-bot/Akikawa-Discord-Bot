@@ -8,7 +8,7 @@ import { currentGameMonth, monthsBefore } from './ingest';
  * What each expected rank is up against: fans per member per day over the
  * last 7 completed game days, for the circles ranked around that rank's
  * cutoff by monthly points on uma.moe. Shown under each expected rank in
- * `/club reports`, next to the quota it informs.
+ * `/club admin`, and with the quota `/club fancount` sets.
  *
  * The cutoffs, as the club set them on 2026-10-05: S+ is top 30, S top 100,
  * A+ top 500, A top 1000, B+ top 3000. Casual has none.

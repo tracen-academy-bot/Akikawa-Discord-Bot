@@ -85,6 +85,12 @@ export interface MemberProgress {
     latestDayGain: number;
     /** Fans gained on `CircleProgress.finishedDay`, the last complete game day. */
     finishedDayGain: number;
+    /**
+     * Finished days in a row, ending on `CircleProgress.finishedDay`, on which
+     * the member earned at least `quotaPerDay` while in the circle. Zero if
+     * the last finished day fell short. This month only.
+     */
+    streak: number;
     /** Days this month, through the latest day, that this member spent in the circle. */
     dataDays: number;
     /** Days counted toward `expected`. See `QuotaOptions.quotaDaysOffset`. */
@@ -546,6 +552,14 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
             needPerDay = daysRemaining === 0 || total >= target ? null : Math.floor((target - total) / daysRemaining);
         }
 
+        // Days in a row at or above the daily rate, back from the last finished day.
+        // Without a quota every day would count, so there is no streak.
+        let streak = 0;
+        for (let day = finishedDay; quotaPerDay > 0 && day >= 1 && g.inCircle[day - 1]; day -= 1) {
+            if (cumulativeAt(g, day) - cumulativeAt(g, day - 1) < quotaPerDay) break;
+            streak += 1;
+        }
+
         const previous = cumulativeAt(g, daysElapsed - 1);
         // A cumulative series should never decrease; clamp in case it does.
         const latestDayGain = Math.max(0, cumulativeAt(g, daysElapsed) - previous);
@@ -569,6 +583,7 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
             needPerDay,
             latestDayGain,
             finishedDayGain: finishedDay === 0 ? 0 : Math.max(0, cumulativeAt(g, finishedDay) - cumulativeAt(g, finishedDay - 1)),
+            streak,
             recentGains,
             // MONTH keeps its reference-matching form; elsewhere a joiner is
             // projected over the days they will actually be in the circle.

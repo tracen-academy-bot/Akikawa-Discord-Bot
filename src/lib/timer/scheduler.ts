@@ -1,4 +1,4 @@
-import { type Client } from 'discord.js';
+import { AttachmentBuilder, type Client, type Guild } from 'discord.js';
 import {
     claimExpiredNotifications,
     claimExpiredTimers,
@@ -9,6 +9,8 @@ import {
     type CompletionSummary,
 } from './service';
 import { refreshPanel } from './panel';
+import { TOP_PLACES, awardMilestone, boardForWeek, getTimerSettings, runWeeklyAwards, weekLabel, type WeeklyAward } from './rewards';
+import { renderBoardFor } from './boardImage';
 
 /**
  * Drives timer expiry and notification cleanup.
@@ -32,8 +34,15 @@ const TICK_INTERVAL_MS = 10_000;
  */
 const LATE_DELIVERY_THRESHOLD_S = 120;
 
-/** Builds the message body for an expiry ping. */
-function buildPingContent(discordUserId: string, summary: CompletionSummary, lagSeconds: number): string {
+/** How often to check whether a week needs awarding. */
+const AWARD_CHECK_MS = 60_000;
+
+/**
+ * Builds the message body for an expiry ping. `milestoneRoleId` is a role the
+ * run just earned; it is mentioned but, with only the user allowed to be
+ * pinged, does not notify the role.
+ */
+function buildPingContent(discordUserId: string, summary: CompletionSummary, lagSeconds: number, milestoneRoleId: string | null = null): string {
     const lines = [`<@${discordUserId}> Your trainer timer has reached 0.`];
 
     if (lagSeconds > LATE_DELIVERY_THRESHOLD_S) {
@@ -54,9 +63,53 @@ function buildPingContent(discordUserId: string, summary: CompletionSummary, lag
     } else if (summary.firstOfDay && summary.currentStreakDays > 1) {
         rewards.push(`**${summary.currentStreakDays} day** streak.`);
     }
+    if (milestoneRoleId) rewards.push(`You reached **${summary.totalRuns} runs** and earned <@&${milestoneRoleId}>.`);
     if (rewards.length > 0) lines.push(rewards.join(' '));
 
     return lines.join('\n');
+}
+
+/** A guild the bot is in, from the cache or Discord; null when it is not. */
+async function guildOf(client: Client, guildId: string): Promise<Guild | null> {
+    return client.guilds.cache.get(guildId) ?? (await client.guilds.fetch(guildId).catch(() => null));
+}
+
+/**
+ * Posts a week's final board where the guild asked for it, naming and
+ * pinging the winners and saying which role they now hold.
+ */
+async function announceAward(client: Client, award: WeeklyAward): Promise<void> {
+    const settings = await getTimerSettings(award.guildId);
+    if (!settings?.announceChannelId) return;
+    const guild = await guildOf(client, award.guildId);
+    const channel = await client.channels.fetch(settings.announceChannelId).catch(() => null);
+    if (!guild || !channel?.isTextBased() || !('send' in channel)) return;
+
+    const board = await boardForWeek(award.guildId, award.week, 'lastweek');
+    const image = await renderBoardFor(guild, 'lastweek', board);
+    const lines = [`**Top runners for ${weekLabel(award.week)}**`];
+    if (award.winners.length === 0) lines.push('No runs were recorded that week.');
+    award.winners.forEach((w, i) => lines.push(`${i + 1}. <@${w.discordUserId}> · ${w.runs} run${w.runs === 1 ? '' : 's'}`));
+    if (settings.topRoleId && award.winners.length > 0) {
+        lines.push(`${award.winners.length === 1 ? 'They hold' : `The top ${Math.min(TOP_PLACES, award.winners.length)} hold`} <@&${settings.topRoleId}> until next week's results.`);
+    }
+    await channel.send({
+        content: lines.join('\n'),
+        files: [new AttachmentBuilder(image, { name: `training-week-${award.week}.png` })],
+        allowedMentions: { users: award.winners.map((w) => w.discordUserId) },
+    });
+}
+
+/** Awards any week that has ended and announces it. */
+async function processWeeklyAwards(client: Client): Promise<void> {
+    const awards = await runWeeklyAwards((guildId) => guildOf(client, guildId));
+    for (const award of awards) {
+        try {
+            await announceAward(client, award);
+        } catch (e) {
+            console.error(`Timer weekly award post failed for guild ${award.guildId}:`, e);
+        }
+    }
 }
 
 /** Delivers every timer that has reached zero. */
@@ -74,11 +127,19 @@ async function processExpiredTimers(client: Client): Promise<void> {
         try {
             const lagSeconds = Math.max(0, Math.round((now.getTime() - timer.expiresAt.getTime()) / 1000));
             const summary = await recordRun(timer, now);
+            // A milestone that cannot be given must not cost the trainer their ping.
+            let milestoneRoleId: string | null = null;
+            try {
+                const guild = await guildOf(client, timer.guildId);
+                if (guild) milestoneRoleId = await awardMilestone(guild, timer.discordUserId, summary.totalRuns);
+            } catch (e) {
+                console.error(`Timer milestone check failed for user ${timer.discordUserId}:`, e);
+            }
 
             const channel = await client.channels.fetch(timer.channelId);
             if (channel?.isTextBased() && 'send' in channel) {
                 const message = await channel.send({
-                    content: buildPingContent(timer.discordUserId, summary, lagSeconds),
+                    content: buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId),
                     allowedMentions: { users: [timer.discordUserId] },
                 });
                 await scheduleNotificationDeletion(timer.channelId, message.id);
@@ -133,6 +194,7 @@ async function processExpiredNotifications(client: Client): Promise<void> {
  */
 export function startScheduler(client: Client): () => void {
     let running = false;
+    let lastAwardCheck = 0;
 
     const tick = async () => {
         // Skip if the previous tick is still working. Without this a slow batch
@@ -143,6 +205,10 @@ export function startScheduler(client: Client): () => void {
         try {
             await processExpiredTimers(client);
             await processExpiredNotifications(client);
+            if (Date.now() - lastAwardCheck >= AWARD_CHECK_MS) {
+                lastAwardCheck = Date.now();
+                await processWeeklyAwards(client);
+            }
         } catch (e) {
             console.error('Timer scheduler tick failed:', e);
         } finally {

@@ -411,7 +411,7 @@ async function checkCircle(
     if (!report) return withNote(`**${fresh.name}** — no fan data this month yet.`);
     await postHere({
         content: [report.alert?.content ?? `**${fresh.name}** — nobody is behind quota.`, syncNote].filter(Boolean).join('\n'),
-        files: [report.image],
+        files: report.images,
         // Run by the club's own staff, so nobody is pinged.
         allowedMentions: { parse: [] },
     });
@@ -571,7 +571,7 @@ async function handleCheckClub(interaction: ChatInputCommandInteraction) {
     }
     await interaction.editReply({
         content: [report.alert?.content ?? `**${fresh.name}** — nobody is behind quota.`, syncNote].filter(Boolean).join('\n'),
-        files: [report.image],
+        files: report.images,
         // Run by the club's own staff, so nobody is pinged.
         allowedMentions: { parse: [] },
     });

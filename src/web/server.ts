@@ -27,7 +27,8 @@ import { paletteOf } from '../lib/image/theme';
 import { renderTrainerReport } from '../lib/image/renderTrainerReport';
 import { renderBenchmark } from '../lib/image/renderBenchmark';
 import { renderTimerLeaderboard } from '../lib/image/renderTimerLeaderboard';
-import { getLeaderboard, getPanelContext, type LeaderboardPeriod } from '../lib/timer/service';
+import { getPanelContext } from '../lib/timer/service';
+import { getBoard, type BoardPeriod } from '../lib/timer/rewards';
 import { rankBand } from '../lib/fans/cutoff';
 
 /**
@@ -534,11 +535,13 @@ export function startDashboard(client: () => Client): () => void {
 
     // ── Training ──────────────────────────────────────────────────────────────
     app.get('/timer', requireLogin, async (req, res) => {
-        const period = (typeof req.query.period === 'string' ? req.query.period : 'week') as LeaderboardPeriod;
-        const valid: LeaderboardPeriod[] = ['week', 'month', 'all'];
-        const selected = valid.includes(period) ? period : 'week';
+        const period = (typeof req.query.period === 'string' ? req.query.period : 'thisweek') as BoardPeriod;
+        const valid: BoardPeriod[] = ['thisweek', 'lastweek', 'month', 'all'];
+        const labels: Record<BoardPeriod, string> = { thisweek: 'This week (live)', lastweek: 'Last week (final)', month: 'Last 30 days', all: 'All time' };
+        const selected = valid.includes(period) ? period : 'thisweek';
 
-        const rows = await getLeaderboard(guildId, selected, 50);
+        const board = await getBoard(guildId, selected, 50);
+        const rows = board.rows;
         const context = await getPanelContext(guildId);
         const active = await prisma.trainingTimer.findMany({ where: { guildId }, orderBy: { expiresAt: 'asc' } });
 
@@ -566,11 +569,11 @@ export function startDashboard(client: () => Client): () => void {
           <div class="tiles">
             ${tile('Training now', String(active.length))}
             ${tile('Runs today', String(context.runsToday))}
-            ${tile('Trainers ranked', String(rows.length))}
+            ${tile('Trainers ranked', String(board.trainers))}
           </div>
           <h2>Leaderboard</h2>
           <p class="sub">
-            ${valid.map((p) => `<a href="/timer?period=${p}" ${p === selected ? 'style="color:var(--text)"' : ''}>${p === 'all' ? 'All time' : p === 'week' ? 'Last 7 days' : 'Last 30 days'}</a>`).join(' · ')}
+            ${valid.map((p) => `<a href="/timer?period=${p}" ${p === selected ? 'style="color:var(--text)"' : ''}>${labels[p]}</a>`).join(' · ')}
           </p>
           <div class="panel">
             ${rows.length === 0 ? '<div class="empty">No runs recorded in this period.</div>' : `<table data-sortable><thead><tr><th data-sort>#</th><th data-sort>Trainer</th><th class="right" data-sort>Runs</th><th class="right" data-sort>Time</th></tr></thead><tbody>${body}</tbody></table>`}
@@ -580,16 +583,16 @@ export function startDashboard(client: () => Client): () => void {
     });
 
     app.get('/timer/leaderboard.png', requireLogin, async (req, res) => {
-        const rows = await getLeaderboard(guildId, 'week', 20);
+        const board = await getBoard(guildId, 'thisweek', 20);
         const names = new Map<string, string>();
 
         // Resolve display names through the bot's cache; the dashboard has no
         // Discord token of its own.
         const guild = client().guilds.cache.get(guildId);
-        for (const row of rows) {
+        for (const row of board.rows) {
             names.set(row.discordUserId, guild?.members.cache.get(row.discordUserId)?.displayName ?? row.discordUserId);
         }
-        return sendPng(res, await renderTimerLeaderboard(rows, names, 'week'));
+        return sendPng(res, await renderTimerLeaderboard(board, names));
     });
 
     // ── Mutations ─────────────────────────────────────────────────────────────

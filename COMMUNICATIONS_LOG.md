@@ -4,6 +4,27 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-26 — Quota to /club fancount; /club reports is the report's form
+
+Fwoxie asked for a tall/wide tick beside the palette choice, with at least
+one required. "Both allowed" was left to Claude, and both are allowed.
+Discord caps a form at 5 fields, so the first version put the theme and
+layout in a new `/club look`. Fwoxie: "spread the 4 commands normally
+then". So `/club reports` now holds time, zone, theme and layout, and the
+quota is set with `/club fancount`. `/club admin` and `/club profile` are
+unchanged. No `/club look`.
+
+---
+
+## 2026-10-26 — No "closest to the line"; hot streaks instead
+
+GimmeKiss: the closest-to-the-line card felt like a shame list for people
+already meeting the requirement. Fwoxie agreed and picked the proposed
+replacement, a positive card: who has hit the daily rate the most days in
+a row.
+
+---
+
 ## 2026-10-24 — Expected rank is a Club Manager setting
 
 Fwoxie: "move rank to admin", then chose to merge the report and alert

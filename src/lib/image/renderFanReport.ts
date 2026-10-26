@@ -1,11 +1,13 @@
-import { createCanvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
+import { createCanvas, type Canvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import type { ClubRank } from '@prisma/client';
 import { PALETTES, DEFAULT_PALETTE, dashNum, type Palette } from './theme';
 import { font } from './fonts';
+import { withScene } from './scenes';
+import { card, drawFrame, fillRound, fit, innerRadius, label, text, wrap, wrapWords } from './cards';
 import { loadClubIcon, loadRankIcon } from './canvasUtils';
 import type { LastDayGains } from '../fans/readings';
 import type { RankBand } from '../fans/cutoff';
-import { describeQuota, formatMillionsFans, periodAdjective, type CircleProgress, type MemberProgress } from '../fans/metrics';
+import { describeQuota, formatMillionsFans, type CircleProgress, type MemberProgress } from '../fans/metrics';
 
 /**
  * The club fan-quota leaderboard, as cards on a backdrop.
@@ -19,8 +21,8 @@ import { describeQuota, formatMillionsFans, periodAdjective, type CircleProgress
  *   wide   1700px wide, three panels of equal height: a sidebar (club,
  *          rank and its band, figures, progress, then the day: club gain,
  *          per member, how many hit the daily quota, and its top 3), the
- *          on-pace table, and the behind card, with the members closest to
- *          the line under the shorter of the last two.
+ *          on-pace table, and the behind card, with the hot streaks under
+ *          the shorter of the last two.
  *
  * The rank band shows where the club's monthly points sit between the rank
  * cutoffs around it (#194 between #100 and #500): fans to the place above,
@@ -46,6 +48,18 @@ import { describeQuota, formatMillionsFans, periodAdjective, type CircleProgress
 
 export type FanReportLayout = 'tall' | 'wide';
 
+/** Every layout, in the order a club with both gets them. */
+export const FAN_REPORT_LAYOUTS: readonly FanReportLayout[] = ['tall', 'wide'];
+
+/**
+ * The layouts a club's report posts in, from its stored list: the known
+ * ones, in `FAN_REPORT_LAYOUTS` order. An empty or unknown list is `tall`.
+ */
+export function layoutsOf(stored: readonly string[] | null | undefined): FanReportLayout[] {
+    const known = FAN_REPORT_LAYOUTS.filter((l) => stored?.includes(l));
+    return known.length > 0 ? known : ['tall'];
+}
+
 /** Frame visible around and between the cards. */
 const FRAME = 16;
 const GAP = 12;
@@ -58,7 +72,7 @@ const SLOT = 72;
 const TALL_WIDTH = 900;
 const WIDE_WIDTH = 1700;
 const SIDEBAR_WIDTH = 340;
-/** The wide layout's right panel: behind, then closest to the line. */
+/** The wide layout's right panel: behind, then the hot streaks. */
 const RIGHT_PANEL_WIDTH = 420;
 
 export interface FanReportMeta {
@@ -78,178 +92,6 @@ export interface FanReportMeta {
      * last complete game day, "Day N".
      */
     last24h?: LastDayGains | null;
-}
-
-// ─── Drawing primitives ─────────────────────────────────────────────────────
-
-/** Text drawing options. */
-interface Ink {
-    spec: string;
-    color: string;
-    align?: 'left' | 'right' | 'center';
-    /** Extra letter spacing in pixels. */
-    tracking?: number;
-}
-
-/** Draws text in the bot's face and returns its width. */
-function text(ctx: SKRSContext2D, value: string, x: number, y: number, ink: Ink): number {
-    ctx.font = font(ink.spec);
-    ctx.fillStyle = ink.color;
-    ctx.textAlign = ink.align ?? 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.letterSpacing = `${ink.tracking ?? 0}px`;
-    ctx.fillText(value, x, y);
-    const width = ctx.measureText(value).width;
-    ctx.letterSpacing = '0px';
-    return width;
-}
-
-/** A small label in the palette's label style: as written, or tracked capitals. */
-function label(ctx: SKRSContext2D, value: string, x: number, y: number, size: number, color: string, p: Palette, align: Ink['align'] = 'left') {
-    const upper = p.style.labels === 'upper';
-    return text(ctx, upper ? value.toUpperCase() : value, x, y, {
-        spec: `400 ${upper ? size - 1 : size}px`,
-        color,
-        align,
-        tracking: upper ? 1.5 : 0,
-    });
-}
-
-/** Truncates with an ellipsis until the text fits, measured in `spec`. */
-function fit(ctx: SKRSContext2D, value: string, maxWidth: number, spec: string): string {
-    ctx.font = font(spec);
-    let out = value;
-    while (ctx.measureText(out).width > maxWidth && out.length > 1) out = `${out.slice(0, -2)}…`;
-    return out;
-}
-
-/** Joins parts with `joiner` into lines that fit `maxWidth` in `spec`. */
-function wrap(ctx: SKRSContext2D, parts: string[], maxWidth: number, spec: string, joiner = ' · '): string[] {
-    ctx.font = font(spec);
-    const lines: string[] = [];
-    let line = '';
-    for (const part of parts) {
-        const next = line ? `${line}${joiner}${part}` : part;
-        if (line && ctx.measureText(next).width > maxWidth) {
-            lines.push(line);
-            line = part;
-        } else {
-            line = next;
-        }
-    }
-    if (line) lines.push(line);
-    return lines;
-}
-
-/** Wraps sentences word by word. */
-function wrapWords(ctx: SKRSContext2D, sentences: string[], maxWidth: number, spec: string): string[] {
-    return sentences.flatMap((s) => wrap(ctx, s.split(' '), maxWidth, spec, ' '));
-}
-
-/** Traces a rounded rectangle path. */
-function roundPath(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number) {
-    const radius = Math.max(0, Math.min(r, w / 2, h / 2));
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.arcTo(x + w, y, x + w, y + h, radius);
-    ctx.arcTo(x + w, y + h, x, y + h, radius);
-    ctx.arcTo(x, y + h, x, y, radius);
-    ctx.arcTo(x, y, x + w, y, radius);
-    ctx.closePath();
-}
-
-/** Fills a rounded rectangle in one colour. */
-function fillRound(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number, color: string) {
-    roundPath(ctx, x, y, w, h, r);
-    ctx.fillStyle = color;
-    ctx.fill();
-}
-
-/** Draws a card in the palette's style: fill, then outline and glow if any. */
-function card(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, p: Palette) {
-    fillRound(ctx, x, y, w, h, p.style.radius, p.bg);
-    if (!p.style.border) return;
-    ctx.save();
-    if (p.style.glow) {
-        ctx.shadowColor = p.style.border;
-        ctx.shadowBlur = 14;
-    }
-    roundPath(ctx, x + 0.75, y + 0.75, w - 1.5, h - 1.5, p.style.radius);
-    ctx.strokeStyle = p.style.border;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.restore();
-}
-
-/** Inner radius for strips and stripes inside a card. */
-function innerRadius(p: Palette): number {
-    return Math.max(0, Math.min(10, p.style.radius - 6));
-}
-
-/** Small deterministic generator, so a starry backdrop is the same every time. */
-function seeded(seed: number): () => number {
-    let s = seed >>> 0;
-    return () => {
-        s = (s * 1664525 + 1013904223) >>> 0;
-        return s / 2 ** 32;
-    };
-}
-
-/** Paints the backdrop behind the cards in the palette's frame style. */
-function drawFrame(ctx: SKRSContext2D, w: number, h: number, p: Palette) {
-    const style = p.style.frameStyle;
-    if (style === 'gradient') {
-        const g = ctx.createLinearGradient(0, 0, 0, h);
-        g.addColorStop(0, p.frame);
-        g.addColorStop(1, p.frameEnd);
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
-        return;
-    }
-    ctx.fillStyle = p.frame;
-    ctx.fillRect(0, 0, w, h);
-    if (style === 'lanes') {
-        // Diagonal bands of the two greens, like a mown course.
-        const band = 56;
-        ctx.save();
-        ctx.fillStyle = p.frameEnd;
-        for (let x = -h; x < w + h; x += band * 2) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x + band, 0);
-            ctx.lineTo(x + band + h, h);
-            ctx.lineTo(x + h, h);
-            ctx.closePath();
-            ctx.fill();
-        }
-        ctx.restore();
-    } else if (style === 'stars') {
-        const rand = seeded(194);
-        const count = Math.round((w * h) / 2600);
-        ctx.fillStyle = p.frameEnd;
-        for (let i = 0; i < count; i += 1) {
-            ctx.globalAlpha = 0.25 + rand() * 0.75;
-            ctx.beginPath();
-            ctx.arc(rand() * w, rand() * h, rand() < 0.08 ? 1.6 : 0.8, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-    } else if (style === 'grid') {
-        ctx.strokeStyle = p.frameEnd;
-        ctx.lineWidth = 1;
-        for (let x = 0.5; x < w; x += 28) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, h);
-            ctx.stroke();
-        }
-        for (let y = 0.5; y < h; y += 28) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(w, y);
-            ctx.stroke();
-        }
-    }
 }
 
 /**
@@ -438,7 +280,7 @@ function drawHeadings(ctx: SKRSContext2D, x: number, w: number, y: number, c: Co
 /**
  * Draws one member row. `recent` is the last-24h figure, or the latest game
  * day's; `striped` shades the row; `dayQuota` is one day's quota, the line
- * between a cream and a red name.
+ * between a `warn` (yellow or amber) and a `behind` (red) name.
  */
 function drawRow(ctx: SKRSContext2D, m: MemberProgress, x: number, w: number, y: number, c: Columns, recent: number | null, striped: boolean, dayQuota: number, p: Palette) {
     if (striped) fillRound(ctx, x + 8, y, w - 16, c.rowHeight, innerRadius(p), p.stripe);
@@ -453,9 +295,12 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, x: number, w: number, y:
 
     text(ctx, String(m.rank), c.rank, by, { spec: `400 ${c.numSize}px`, color: p.muted, align: 'right' });
 
-    const nameSpec = `400 ${c.nameSize}px`;
-    // Placement shows in the left bar only; a coloured name means behind.
-    const nameColor = m.onPace ? p.text : m.behind < dayQuota ? p.warn : p.behind;
+    // The top 3 names are bold in their place colour (Fwoxie, 2026-10-26).
+    // This table lists only members on pace, so a coloured name here never
+    // means behind; behind names are in their own card.
+    const podium = m.onPace && m.rank <= 3 && tint !== null;
+    const nameSpec = `${podium ? 700 : 400} ${c.nameSize}px`;
+    const nameColor = podium ? tint : m.onPace ? p.text : m.behind < dayQuota ? p.warn : p.behind;
     const nameWidth = text(ctx, fit(ctx, m.trainerName, c.nameMax, nameSpec), c.trainer, by, { spec: nameSpec, color: nameColor });
     if (m.rankChange !== null && m.rankChange !== 0) {
         text(ctx, `${m.rankChange > 0 ? '▲' : '▼'}${Math.abs(m.rankChange)}`, c.trainer + nameWidth + 6, by - 1, {
@@ -626,7 +471,8 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
     }
     const titleWidth = text(ctx, `Behind pace · ${members.length}`, x + pad, y + 34, { spec: '700 17px', color: p.behind });
     // The colour key beside the title, where it fits (it does in both layouts).
-    const key = 'cream <1 day · red more';
+    // `warn` is a saturated yellow on dark palettes and amber on light ones.
+    const key = `${p.light ? 'amber' : 'yellow'} <1 day · red more`;
     ctx.font = font('400 12px');
     if (ctx.measureText(key).width < w - pad * 2 - titleWidth - 16) {
         text(ctx, key, x + w - pad, y + 34, { spec: '400 12px', color: p.muted, align: 'right' });
@@ -645,39 +491,59 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
     });
 }
 
-/** Height of one row in the closest-to-the-line card. */
-const CLOSE_ROW = 34;
+/** Height of one row in the streak card. */
+const STREAK_ROW = 34;
 /** Height of one row in the wide sidebar's top gains. */
 const TOP_ROW = 26;
 /** Height of one figure row in the wide sidebar's day summary. */
 const SUMMARY_ROW = 24;
 
 /**
- * Draws the members on pace with the least to spare, fewest first: how far
- * ahead of what is expected by now, in fans and in days of quota.
+ * Members with a streak, longest first, then by month-to-date total. Anyone
+ * can have one, behind or not: it counts days at the daily rate, not totals.
  */
-function drawClosestCard(ctx: SKRSContext2D, members: MemberProgress[], x: number, y: number, w: number, h: number, d: Prepared) {
+function streakers(progress: CircleProgress): MemberProgress[] {
+    return progress.members.filter((m) => m.streak > 0).sort((a, b) => b.streak - a.streak || b.total - a.total);
+}
+
+/** Height of the streak card showing `rows` members (at least one row, for its empty line). */
+function streakHeight(rows: number): number {
+    return CARD_TITLE + Math.max(1, rows) * STREAK_ROW + 12;
+}
+
+/**
+ * Draws the hot streaks: who has hit the daily rate the most finished days in
+ * a row, with a short bar against the longest. It replaced "Closest to the
+ * line" on 2026-10-26, which singled out people meeting the requirement.
+ */
+function drawStreakCard(ctx: SKRSContext2D, members: MemberProgress[], x: number, y: number, w: number, h: number, d: Prepared) {
     const { p, progress } = d;
     card(ctx, x, y, w, h, p);
     const pad = 22;
-    text(ctx, 'Closest to the line', x + pad, y + 34, { spec: '700 17px', color: p.text });
-    text(ctx, 'ahead of expected', x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
-    const rowH = flexRow(CLOSE_ROW, members.length, h - CARD_TITLE - 12);
+    text(ctx, 'Hot streaks', x + pad, y + 34, { spec: '700 17px', color: p.text });
+    text(ctx, `days in a row at ${shortFans(progress.quotaPerDay)}+`, x + w - pad, y + 34, { spec: '400 13px', color: p.muted, align: 'right' });
+    if (members.length === 0) {
+        text(ctx, 'No streaks yet.', x + pad, y + CARD_TITLE + 24, { spec: '400 15px', color: p.faint });
+        return;
+    }
+    const longest = Math.max(...members.map((m) => m.streak));
+    const rowH = flexRow(STREAK_ROW, members.length, h - CARD_TITLE - 12);
+    const barW = 64;
+    // A fixed column for the count, so the bars line up whatever its width.
+    ctx.font = font('700 15px');
+    const daysColumn = ctx.measureText('00 days').width;
+    const barX = x + w - pad - daysColumn - 12 - barW;
     members.forEach((m, i) => {
         const rowY = y + CARD_TITLE + i * rowH;
         if (i % 2 === 1) fillRound(ctx, x + 8, rowY, w - 16, rowH, innerRadius(p), p.stripe);
         const by = rowY + rowH / 2 + 6;
-        const cushion = Math.max(0, m.total - m.expected);
-        const ahead = `+${shortFans(cushion)}`;
-        const aheadWidth = text(ctx, ahead, x + w - pad, by, { spec: '700 15px', color: p.good, align: 'right' });
-        const days = inDays(cushion, progress.quotaPerDay);
-        ctx.font = font('400 13px');
-        const daysWidth = ctx.measureText(days).width;
-        text(ctx, days, x + w - pad - aheadWidth - 12, by, { spec: '400 13px', color: p.muted, align: 'right' });
+        const days = `${m.streak} ${m.streak === 1 ? 'day' : 'days'}`;
+        text(ctx, days, x + w - pad, by, { spec: '700 15px', color: p.good, align: 'right' });
+        fillRound(ctx, barX, by - 8, barW, 5, 2.5, p.line);
+        fillRound(ctx, barX, by - 8, Math.max(5, (barW * m.streak) / longest), 5, 2.5, p.good);
         const rankWidth = text(ctx, `#${m.rank}`, x + pad, by, { spec: '400 14px', color: p.muted });
         const nameX = x + pad + rankWidth + 10;
-        const nameMax = x + w - pad - aheadWidth - 12 - daysWidth - 14 - nameX;
-        text(ctx, fit(ctx, m.trainerName, nameMax, '400 16px'), nameX, by, { spec: '400 16px', color: p.text });
+        text(ctx, fit(ctx, m.trainerName, barX - 14 - nameX, '400 16px'), nameX, by, { spec: '400 16px', color: p.text });
     });
 }
 
@@ -821,7 +687,7 @@ function drawRank(ctx: SKRSContext2D, d: Prepared, right: number, y: number, ali
 }
 
 /** The phone layout: header, on-pace table, behind card, footer, top to bottom. */
-function renderTall(d: Prepared): Buffer | Promise<Buffer> {
+function renderTall(d: Prepared): Canvas {
     const { p, progress } = d;
     const width = TALL_WIDTH;
     const cardX = FRAME;
@@ -839,9 +705,13 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
     const c = columns(cardX, cardW, false);
     const tableH = tableHeight(d.onPace.length, c);
     const behindH = d.behind.length > 0 ? behindHeight(d.behind.length, 2) : 0;
+    // The five longest streaks close the report, when anyone has one.
+    const streaks = streakers(progress).slice(0, 5);
+    const streakH = streaks.length > 0 ? streakHeight(streaks.length) : 0;
     const notes = wrapWords(measure, d.notes, cardW - PAD * 2, '400 13px');
     const footerH = notes.length > 0 ? 16 + notes.length * 19 + 14 + GAP : 0;
-    const height = FRAME + headerH + GAP + tableH + (behindH > 0 ? GAP + behindH : 0) + footerH + FRAME;
+    const height =
+        FRAME + headerH + GAP + tableH + (behindH > 0 ? GAP + behindH : 0) + (streakH > 0 ? GAP + streakH : 0) + footerH + FRAME;
 
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
@@ -867,22 +737,26 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
         drawBehindCard(ctx, d.behind, cardX, y, cardW, behindH, 2, d);
         y += behindH + GAP;
     }
+    if (streakH > 0) {
+        drawStreakCard(ctx, streaks, cardX, y, cardW, streakH, d);
+        y += streakH + GAP;
+    }
 
     if (footerH > 0) {
         card(ctx, cardX, y, cardW, footerH - GAP, p);
         notes.forEach((line, i) => text(ctx, line, cardX + PAD, y + 28 + i * 19, { spec: '400 13px', color: p.muted }));
     }
 
-    return canvas.encode('png');
+    return canvas;
 }
 
 /**
  * The landscape layout, three panels of equal height: a sidebar (club,
  * rank, figures, progress, the day's summary and best gains), the
- * on-pace table, and the behind card. The members closest to the line fill
- * the height left under whichever of the table and behind card is shorter.
+ * on-pace table, and the behind card. The hot streaks fill the height left
+ * under whichever of the table and behind card is shorter.
  */
-function renderWide(d: Prepared): Buffer | Promise<Buffer> {
+function renderWide(d: Prepared): Canvas {
     const { p, progress } = d;
     const width = WIDE_WIDTH;
     const sideX = FRAME;
@@ -914,23 +788,24 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
         (notes.length > 0 ? 18 + notes.length * 17 : 0) + sidePad;
 
     // Where the behind card goes, whichever arrangement is shortest:
-    //   right   beside the table, with the closest to the line under the
+    //   right   beside the table, with the hot streaks under the
     //           shorter of the two (few or some behind)
     //   under   across the middle and right in three columns, under the
-    //           table and the closest to the line side by side (more behind
+    //           table and the hot streaks side by side (more behind
     //           than the right column can hold)
     //   span    the same with nothing above it (nobody on pace, so there is
     //           no table and no one close to the line)
     const n = d.behind.length;
     const behindRight = n > 0 ? behindHeight(n, 1) : 76;
-    const closestMin = d.onPace.length > 0 ? CARD_TITLE + Math.min(3, d.onPace.length) * CLOSE_ROW + 12 : 0;
-    const closestUnderTable = behindRight > tableH;
+    const streaks = streakers(progress);
+    const streakMin = streakHeight(Math.min(3, streaks.length));
+    const streaksUnderTable = behindRight > tableH;
     const rightH = Math.max(
         sideMin,
-        (closestUnderTable ? tableH : behindRight) + (closestMin > 0 ? GAP + closestMin : 0),
-        closestUnderTable ? behindRight : tableH,
+        (streaksUnderTable ? tableH : behindRight) + (streakMin > 0 ? GAP + streakMin : 0),
+        streaksUnderTable ? behindRight : tableH,
     );
-    const topH = Math.max(tableH, closestMin);
+    const topH = Math.max(tableH, streakMin);
     const underH = n > FULL_BEHIND ? Math.max(sideMin, topH + GAP + behindHeight(n, 3)) : Infinity;
     const mode: 'right' | 'under' | 'span' = n > 0 && d.onPace.length === 0 ? 'span' : underH < rightH ? 'under' : 'right';
     const contentH = mode === 'span' ? Math.max(sideMin, behindHeight(n, 3)) : mode === 'under' ? underH : rightH;
@@ -999,40 +874,40 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
     best.forEach((t, i) => {
         const by = y + (TOP_ROW * stretch) / 2 + 5;
         const gainWidth = text(ctx, `+${shortFans(t.gain)}`, x + inner, by, { spec: '700 15px', color: p.good, align: 'right' });
-        const placeWidth = text(ctx, `${i + 1}.`, x, by, { spec: '700 14px', color: p.muted });
+        // Each place in its own colour, as in the table.
+        const placeWidth = text(ctx, `${i + 1}.`, x, by, { spec: '700 14px', color: p.place[i] ?? p.muted });
         const rankWidth = text(ctx, `#${t.m.rank}`, x + placeWidth + 8, by, { spec: '400 12px', color: p.faint });
         const nameX = x + placeWidth + 8 + rankWidth + 8;
-        text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '400 15px'), nameX, by, { spec: '400 15px', color: p.text });
+        text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '700 15px'), nameX, by, { spec: '700 15px', color: p.place[i] ?? p.text });
         y += TOP_ROW * stretch;
     });
     notes.forEach((line, i) => text(ctx, line, x, notesTop + 12 + i * 17, { spec: '400 12px', color: p.muted }));
 
-    // On-pace table and behind card, with the closest to the line under the
+    // On-pace table and behind card, with the hot streaks under the
     // shorter of the two, filling it to the full height.
-    const closestFor = (top: number, x: number, w: number, bottom = FRAME + contentH) => {
-        const rows = Math.min(d.onPace.length, Math.floor((bottom - top - CARD_TITLE - 12) / CLOSE_ROW));
+    const streaksAt = (top: number, x: number, w: number, bottom = FRAME + contentH) => {
+        const rows = Math.floor((bottom - top - CARD_TITLE - 12) / STREAK_ROW);
         if (rows <= 0) return false;
-        const closest = [...d.onPace].sort((a, b) => a.total - a.expected - (b.total - b.expected)).slice(0, rows);
-        drawClosestCard(ctx, closest, x, top, w, bottom - top, d);
+        drawStreakCard(ctx, streaks.slice(0, rows), x, top, w, bottom - top, d);
         return true;
     };
     if (mode === 'span') {
         drawBehindCard(ctx, d.behind, tableX, FRAME, tableW + GAP + rightW, contentH, 3, d);
     } else if (mode === 'under') {
         drawTable(ctx, d.onPace, tableX, tableW, FRAME, topH, c, d);
-        closestFor(FRAME, rightX, rightW, FRAME + topH);
+        streaksAt(FRAME, rightX, rightW, FRAME + topH);
         drawBehindCard(ctx, d.behind, tableX, FRAME + topH + GAP, tableW + GAP + rightW, contentH - topH - GAP, 3, d);
-    } else if (closestUnderTable) {
+    } else if (streaksUnderTable) {
         drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, contentH, 1, d);
-        const shown = closestFor(FRAME + tableH + GAP, tableX, tableW);
+        const shown = streaksAt(FRAME + tableH + GAP, tableX, tableW);
         drawTable(ctx, d.onPace, tableX, tableW, FRAME, shown ? tableH : contentH, c, d);
     } else {
         drawTable(ctx, d.onPace, tableX, tableW, FRAME, contentH, c, d);
-        const shown = closestFor(FRAME + behindRight + GAP, rightX, rightW);
+        const shown = streaksAt(FRAME + behindRight + GAP, rightX, rightW);
         drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, shown ? behindRight : contentH, 1, d);
     }
 
-    return canvas.encode('png');
+    return canvas;
 }
 
 /** Full month names, shortened to three letters in the report's date: "Oct 24, 2026". */
@@ -1066,5 +941,7 @@ export async function renderFanReport(
         empty: progress.members.length === 0 ? 'No fan data ingested for this month yet.' : 'Nobody is on pace yet.',
         notes: footerNotes(last24h),
     };
-    return layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
+    const report = layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
+    // A palette with a scene draws on a transparent background; set it in the scene.
+    return (await withScene(report, palette, layout)).encode('png');
 }

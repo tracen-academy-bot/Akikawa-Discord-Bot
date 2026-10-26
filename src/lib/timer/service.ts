@@ -64,7 +64,7 @@ export type LeaderboardPeriod = 'week' | 'month' | 'all';
  * Streaks are counted in the player's game day, not UTC. Using `en-CA` yields
  * ISO-ordered output, so the keys sort and compare as plain strings.
  */
-function dayKey(date: Date): string {
+export function dayKey(date: Date): string {
     return new Intl.DateTimeFormat('en-CA', {
         timeZone: STREAK_TIMEZONE,
         year: 'numeric',

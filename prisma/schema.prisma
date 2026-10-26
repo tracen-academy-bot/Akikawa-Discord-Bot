@@ -111,6 +111,46 @@ model TrainingRun {
     @@index([guildId, completedAt])
 }
 
+/// A guild's timer rewards: the weekly top-runner role and where the
+/// end-of-week leaderboard posts. One row per guild, made by `/timer rewards`.
+model TimerSettings {
+    guildId           String   @id
+    /// Role held by the week's top 3 runners until the next week is awarded.
+    topRoleId         String?
+    /// Channel or thread for the end-of-week leaderboard. Null: not posted.
+    announceChannelId String?
+    /// The last week awarded, as its Monday's `YYYY-MM-DD` (JST). Set when the
+    /// row is made, so turning rewards on mid-week awards nothing retroactively.
+    lastAwardedWeek   String?
+    updatedAt         DateTime @updatedAt
+}
+
+/// A role given for good once a trainer's completed runs reach `runs`.
+model TimerMilestoneRole {
+    id      String @id @default(cuid())
+    guildId String
+    runs    Int
+    roleId  String
+
+    @@unique([guildId, runs])
+}
+
+/// Who placed 1st to 3rd in a week, so the role comes off exactly the people
+/// it was given to when the next week is awarded.
+model TimerWeeklyAward {
+    id            String   @id @default(cuid())
+    guildId       String
+    /// The week's Monday, `YYYY-MM-DD` (JST).
+    week          String
+    place         Int
+    discordUserId String
+    runs          Int
+    awardedAt     DateTime @default(now())
+
+    @@unique([guildId, week, place])
+    @@index([guildId, week])
+}
+
 /// An expiry ping awaiting automatic deletion.
 ///
 /// Held separately from TrainingTimer so a trainer can start their next run the
@@ -180,6 +220,9 @@ model TrackedCircle {
     /// Palette the fan report is drawn in: an id from `PALETTES` in
     /// src/lib/image/theme.ts. Null, or an id no longer known, is the default.
     reportTheme     String?
+    /// Layouts the fan report posts in, one image each: "tall" (phones) and/or
+    /// "wide". Empty, or only unknown values, is tall alone.
+    reportLayouts   String[]  @default(["tall"])
 
     // Club info, from the former `Club` model.
     /// Intended tier (B to S+). Null when never set.

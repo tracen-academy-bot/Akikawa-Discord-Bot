@@ -4,10 +4,11 @@ import {
     ButtonInteraction,
     MessageFlags,
     AttachmentBuilder,
+    ChannelType,
     GuildMember,
 } from 'discord.js';
 import { isOfficer } from '../lib/permissions';
-import { errorEmbed, successEmbed } from '../lib/embeds';
+import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
 import {
     BUTTON_LEADERBOARD,
     BUTTON_START,
@@ -20,16 +21,26 @@ import {
     TRAINING_MINUTES,
     getDailyRunCounts,
     getHourlyHeatmap,
-    getLeaderboard,
     getPanelContext,
     getTrainerStats,
     listActiveTimers,
     startTimer,
     stopTimer,
-    type LeaderboardPeriod,
 } from '../lib/timer/service';
+import {
+    TOP_PLACES,
+    backfillMilestone,
+    getBoard,
+    getMilestoneRoles,
+    getTimerSettings,
+    nextWeekStart,
+    roleProblem,
+    saveTimerSettings,
+    type BoardPeriod,
+} from '../lib/timer/rewards';
+import { displayName, renderBoardFor } from '../lib/timer/boardImage';
+import { prisma } from '../db/prisma';
 import { renderTimerStats } from '../lib/image/renderTimerStats';
-import { renderTimerLeaderboard } from '../lib/image/renderTimerLeaderboard';
 
 /**
  * Independent Training timer commands and panel buttons.
@@ -38,11 +49,21 @@ import { renderTimerLeaderboard } from '../lib/image/renderTimerLeaderboard';
  * to pull up statistics without touching the panel message.
  */
 
-const PERIOD_CHOICES: { name: string; value: LeaderboardPeriod }[] = [
-    { name: 'Last 7 days', value: 'week' },
+const PERIOD_CHOICES: { name: string; value: BoardPeriod }[] = [
+    { name: 'This week (live)', value: 'thisweek' },
+    { name: 'Last week (final)', value: 'lastweek' },
     { name: 'Last 30 days', value: 'month' },
     { name: 'All time', value: 'all' },
 ];
+
+/** Channels the end-of-week leaderboard may post in. Threads work. */
+const ANNOUNCE_CHANNEL_TYPES = [
+    ChannelType.GuildText,
+    ChannelType.GuildAnnouncement,
+    ChannelType.PublicThread,
+    ChannelType.PrivateThread,
+    ChannelType.AnnouncementThread,
+] as const;
 
 export const data = new SlashCommandBuilder()
     .setName('timer')
@@ -67,16 +88,57 @@ export const data = new SlashCommandBuilder()
             .addStringOption((opt) =>
                 opt
                     .setName('period')
-                    .setDescription('Time window (defaults to last 7 days)')
+                    .setDescription('Time window (defaults to this week, live)')
                     .setRequired(false)
                     .addChoices(...PERIOD_CHOICES),
+            ),
+    )
+    .addSubcommand((sub) =>
+        sub
+            .setName('rewards')
+            .setDescription("Set the weekly top-runner role and where the week's final board posts. Club Managers only.")
+            .addRoleOption((opt) => opt.setName('top_role').setDescription(`Role for the week's top ${TOP_PLACES} by runs`).setRequired(false))
+            .addChannelOption((opt) =>
+                opt
+                    .setName('channel')
+                    .setDescription("Where the week's final leaderboard posts. A thread works.")
+                    .setRequired(false)
+                    .addChannelTypes(...ANNOUNCE_CHANNEL_TYPES),
+            )
+            .addBooleanOption((opt) =>
+                opt.setName('off').setDescription('Stop the weekly role and post. Milestone roles stay.').setRequired(false),
+            ),
+    )
+    .addSubcommandGroup((group) =>
+        group
+            .setName('milestone')
+            .setDescription('Roles kept for good once a trainer reaches a number of runs. Club Managers only.')
+            .addSubcommand((sub) =>
+                sub
+                    .setName('add')
+                    .setDescription('Give a role at a number of runs, including to everyone already past it.')
+                    .addIntegerOption((opt) => opt.setName('runs').setDescription('Completed runs, e.g. 100').setRequired(true).setMinValue(1))
+                    .addRoleOption((opt) => opt.setName('role').setDescription('Role to give').setRequired(true)),
+            )
+            .addSubcommand((sub) =>
+                sub
+                    .setName('remove')
+                    .setDescription('Stop giving a milestone role. Trainers who have it keep it.')
+                    .addIntegerOption((opt) => opt.setName('runs').setDescription('The milestone, e.g. 100').setRequired(true).setMinValue(1)),
             ),
     );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     if (!interaction.inGuild()) return;
 
+    if (interaction.options.getSubcommandGroup(false) === 'milestone') {
+        await handleMilestone(interaction);
+        return;
+    }
     switch (interaction.options.getSubcommand()) {
+        case 'rewards':
+            await handleRewards(interaction);
+            break;
         case 'panel':
             await handlePanel(interaction);
             break;
@@ -148,33 +210,109 @@ async function handleStats(interaction: ChatInputCommandInteraction) {
 async function handleLeaderboard(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
 
-    const guildId = interaction.guildId!;
-    const period = (interaction.options.getString('period') as LeaderboardPeriod | null) ?? 'week';
-    const rows = await getLeaderboard(guildId, period);
-
-    const names = new Map<string, string>();
-    for (const row of rows) {
-        names.set(row.discordUserId, await resolveDisplayName(interaction, row.discordUserId, 'Unknown Trainer'));
-    }
-
-    const buffer = await renderTimerLeaderboard(rows, names, period);
+    const period = (interaction.options.getString('period') as BoardPeriod | null) ?? 'thisweek';
+    const buffer = await renderBoardFor(interaction.guild!, period);
     await interaction.editReply({
         files: [new AttachmentBuilder(buffer, { name: `training-leaderboard-${period}.png` })],
     });
 }
 
 /** Resolves a guild display name, falling back when the member has left. */
-async function resolveDisplayName(
-    interaction: ChatInputCommandInteraction | ButtonInteraction,
-    userId: string,
-    fallback: string,
-): Promise<string> {
-    try {
-        const member = await interaction.guild!.members.fetch(userId);
-        return member.displayName;
-    } catch {
-        return fallback;
+function resolveDisplayName(interaction: ChatInputCommandInteraction | ButtonInteraction, userId: string, fallback: string): Promise<string> {
+    return displayName(interaction.guild!, userId, fallback);
+}
+
+// ─── Rewards ──────────────────────────────────────────────────────────────────
+
+/** Refuses anyone but a Club Manager; true when the caller may change rewards. */
+async function requireManager(interaction: ChatInputCommandInteraction): Promise<boolean> {
+    if (isOfficer(interaction.member as GuildMember)) return true;
+    await interaction.reply({ embeds: [errorEmbed('Only Club Managers can change timer rewards.')], flags: MessageFlags.Ephemeral });
+    return false;
+}
+
+/**
+ * `/timer rewards`: sets the weekly role and the board's channel, or with no
+ * options shows the setup, when the week ends, and the live top 3.
+ */
+async function handleRewards(interaction: ChatInputCommandInteraction) {
+    if (!(await requireManager(interaction))) return;
+    const guild = interaction.guild!;
+    const role = interaction.options.getRole('top_role');
+    const channel = interaction.options.getChannel('channel');
+    const off = interaction.options.getBoolean('off') ?? false;
+
+    if (role) {
+        const problem = await roleProblem(guild, role.id);
+        if (problem) {
+            await interaction.reply({ embeds: [errorEmbed(problem)], flags: MessageFlags.Ephemeral });
+            return;
+        }
     }
+    const changed = off || role !== null || channel !== null;
+    const settings = off
+        ? await saveTimerSettings(guild.id, { topRoleId: null, announceChannelId: null })
+        : changed
+          ? await saveTimerSettings(guild.id, { ...(role ? { topRoleId: role.id } : {}), ...(channel ? { announceChannelId: channel.id } : {}) })
+          : await getTimerSettings(guild.id);
+
+    const milestones = await getMilestoneRoles(guild.id);
+    const live = (await getBoard(guild.id, 'thisweek', TOP_PLACES)).rows;
+    const ends = Math.floor(nextWeekStart().getTime() / 1000);
+    const lines = [
+        `Weekly top ${TOP_PLACES} role: ${settings?.topRoleId ? `<@&${settings.topRoleId}>` : 'not set'}`,
+        `End-of-week board: ${settings?.announceChannelId ? `<#${settings.announceChannelId}>` : 'not posted'}`,
+        `This week ends <t:${ends}:F> (<t:${ends}:R>); it is awarded about 15 minutes later.`,
+        '',
+        `Live top ${TOP_PLACES}: ${live.length > 0 ? live.map((r, i) => `${i + 1}. <@${r.discordUserId}> (${r.runs})`).join(' · ') : 'no runs yet this week'}`,
+        '',
+        `Milestones: ${milestones.length > 0 ? milestones.map((m) => `${m.runs} runs → <@&${m.roleId}>`).join(' · ') : 'none yet (`/timer milestone add`)'}`,
+    ];
+    // Mentions inside an embed never ping.
+    await interaction.reply({ embeds: [(changed ? successEmbed : infoEmbed)('Timer rewards', lines.join('\n'))], flags: MessageFlags.Ephemeral });
+}
+
+/** `/timer milestone add|remove`. */
+async function handleMilestone(interaction: ChatInputCommandInteraction) {
+    if (!(await requireManager(interaction))) return;
+    const guild = interaction.guild!;
+    const runs = interaction.options.getInteger('runs', true);
+
+    if (interaction.options.getSubcommand() === 'remove') {
+        const removed = await prisma.timerMilestoneRole.deleteMany({ where: { guildId: guild.id, runs } });
+        await interaction.reply({
+            embeds: [
+                removed.count > 0
+                    ? successEmbed('Milestone removed', `No role is given at ${runs} runs any more. Trainers who have it keep it.`)
+                    : errorEmbed(`There is no milestone at ${runs} runs.`),
+            ],
+            flags: MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
+    const role = interaction.options.getRole('role', true);
+    const problem = await roleProblem(guild, role.id);
+    if (problem) {
+        await interaction.reply({ embeds: [errorEmbed(problem)], flags: MessageFlags.Ephemeral });
+        return;
+    }
+    // Giving it to everyone already past it can take a moment.
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await prisma.timerMilestoneRole.upsert({
+        where: { guildId_runs: { guildId: guild.id, runs } },
+        create: { guildId: guild.id, runs, roleId: role.id },
+        update: { roleId: role.id },
+    });
+    const given = await backfillMilestone(guild, runs, role.id);
+    await interaction.editReply({
+        embeds: [
+            successEmbed(
+                'Milestone added',
+                `<@&${role.id}> at **${runs}** runs. Given to ${given} trainer${given === 1 ? '' : 's'} already there; others get it the moment they reach it.`,
+            ),
+        ],
+    });
 }
 
 // ─── Panel buttons ────────────────────────────────────────────────────────────
@@ -246,12 +384,7 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
 
         case BUTTON_LEADERBOARD: {
             await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-            const rows = await getLeaderboard(guildId, 'week');
-            const names = new Map<string, string>();
-            for (const row of rows) {
-                names.set(row.discordUserId, await resolveDisplayName(interaction, row.discordUserId, 'Unknown Trainer'));
-            }
-            const buffer = await renderTimerLeaderboard(rows, names, 'week');
+            const buffer = await renderBoardFor(interaction.guild!, 'thisweek');
             await interaction.editReply({
                 files: [new AttachmentBuilder(buffer, { name: 'training-leaderboard.png' })],
             });
