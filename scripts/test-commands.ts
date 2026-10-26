@@ -402,6 +402,7 @@ async function main() {
     type ModalJson = { custom_id: string; components: { label: string; component: { custom_id: string; value?: string; options?: { value: string; default?: boolean }[] } }[] };
     const reportsForm = clubCmd.buildReportsModal(editable).toJSON() as unknown as ModalJson;
     const adminForm = clubCmd.buildAdminModal(editable).toJSON() as unknown as ModalJson;
+    const fancountForm = clubCmd.buildFancountModal(editable).toJSON() as unknown as ModalJson;
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
     check('reports form: report time, zone, theme, layout', reportsForm.components.map((c) => c.label),
         ['Report time', 'Time zone', 'Report theme', 'Layout']);
@@ -443,7 +444,13 @@ async function main() {
         desc(await runClubCmd({ sub: 'reports', userId: 'u-officer', officer: true, strings: { club: loose.id } }))?.includes('Set its quota with `/club fancount`'), true);
     check('an untracked club admin form: the name, rank and staff roles', looseAdmin.components.map((c) => c.label), ['Name', 'Expected rank', 'Staff roles']);
     check('an untracked club form pre-fills the name', pre(looseAdmin, 'Name')?.value, 'Loose Club');
-    check('both forms are routed by their prefix', [clubCmd.isClubModal(reportsForm.custom_id), clubCmd.isClubModal(adminForm.custom_id)], [true, true]);
+    check('all three forms are routed by their prefix',
+        [reportsForm.custom_id, adminForm.custom_id, fancountForm.custom_id].map((id) => clubCmd.isClubModal(id)), [true, true, true]);
+    check('quota form: quota and period', fancountForm.components.map((c) => c.label), ['Quota per member', 'Quota period']);
+    check('the quota form shows the real quota, exactly', pre(fancountForm, 'Quota per member')?.value, '31M');
+    check('the quota form pre-selects the period', pre(fancountForm, 'Quota period')?.options?.find((o) => o.default)?.value, 'MONTH');
+    check('with no quota yet, an old club fan count pre-fills it',
+        pre(clubCmd.buildFancountModal(loose).toJSON() as unknown as ModalJson, 'Quota per member')?.value, '0.25M');
 
     /** Submits a club form; `channels` gives each channel field's picks. */
     const submitClub = async (
@@ -486,13 +493,13 @@ async function main() {
     /** Checkrose's report channel, kept as it is by admin submits. Its alert channel, c-alert, is set separately. */
     const keepChannels = { 'club:report-channel': 't-check' };
 
-    const saved = await runClubCmd({ sub: 'fancount', userId: 'u-officer', officer: true, strings: { club: club.id, amount: '14M', period: 'WEEK' } });
+    const saved = await submitClub(fancountForm.custom_id, 'u-officer', true, { 'club:quota': '14M', 'club:period': 'WEEK' });
     const afterQuota = await reload();
     check('/club fancount saves the quota, and not the rank', [afterQuota.rank, String(afterQuota.quota), afterQuota.quotaPeriod], ['S', '14000000', 'WEEK']);
     check('the old club fan count is cleared, not left as a second number', [afterQuota.fanCountAmount, afterQuota.fanCountPeriod], [null, null]);
-    check('/club fancount confirms publicly with the quota', [saved[0]?.ephemeral ?? false, desc(saved)?.includes('14.0M per week')], [false, true]);
-    await runClubCmd({ sub: 'fancount', userId: 'u-officer', officer: true, strings: { club: club.id, amount: '15M' } });
-    check('/club fancount without a period keeps the current one', [String((await reload()).quota), (await reload()).quotaPeriod], ['15000000', 'WEEK']);
+    check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M per week')], [false, true]);
+    await submitClub(fancountForm.custom_id, 'u-officer', true, { 'club:quota': '15M' });
+    check('not picking a period keeps the current one', [String((await reload()).quota), (await reload()).quotaPeriod], ['15000000', 'WEEK']);
     const plain = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall' });
     check('the reports form confirms publicly with the report time',
         [plain?.ephemeral, plain?.description?.includes('Fan report: daily at **00:00 Japan time (JST)** (the default: the daily reset)')], [false, true]);
@@ -552,7 +559,7 @@ async function main() {
         (await submitClub(looseAdmin.custom_id, 'u-officer', true, { 'club:name': 'checkrose' }))?.description,
         'A club named **checkrose** already exists.');
 
-    await runClubCmd({ sub: 'fancount', userId: 'u-assistant', strings: { club: club.id, amount: '31M', period: 'MONTH' } });
+    await submitClub(fancountForm.custom_id, 'u-assistant', false, { 'club:quota': '31M', 'club:period': 'MONTH' });
     check('club staff can change the quota', [String((await reload()).quota), (await reload()).quotaPeriod], ['31000000', 'MONTH']);
     check('club staff cannot change the expected rank', (await reload()).rank, 'A_PLUS');
     const competitive = await submitClub(adminForm.custom_id, 'u-officer', true, { ...keepChannels, 'club:rank': 'A' }, { 'club:home': ['c-room', 'c-room-bot'] });
@@ -570,9 +577,9 @@ async function main() {
     check('outsiders cannot submit the reports form',
         (await submitClub(reportsForm.custom_id, 'u-behind', false, { 'club:report-time': '1am' }))?.description?.startsWith('You must be a trainer or assistant'), true);
     check('outsiders cannot set the quota',
-        desc(await runClubCmd({ sub: 'fancount', userId: 'u-behind', strings: { club: club.id, amount: '1M' } }))?.startsWith('You must be a trainer or assistant'), true);
+        (await submitClub(fancountForm.custom_id, 'u-behind', false, { 'club:quota': '1M' }))?.description?.startsWith('You must be a trainer or assistant'), true);
     check('a bad quota is refused',
-        desc(await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: 'lots' } }))?.startsWith('Amount must be'), true);
+        (await submitClub(fancountForm.custom_id, 'u-trainer', false, { 'club:quota': 'lots' }))?.description?.startsWith('Quota must be'), true);
     check('refusals leave the club unchanged', [String((await reload()).quota), (await reload()).reportMinute], ['31000000', null]);
 
     // Report time, on the same form.
@@ -592,9 +599,12 @@ async function main() {
     await submitClub(reportsForm.custom_id, 'u-assistant', false, {});
     check('an empty time goes back to the default', [(await reload()).reportMinute, (await reload()).reportTimeZone], [null, null]);
 
-    // /club fancount sets the same quota (in millions, as its option says).
-    await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: '35', period: 'MONTH' } });
+    // A bare number in the quota form is millions, as /club fancount always read it.
+    await submitClub(fancountForm.custom_id, 'u-trainer', false, { 'club:quota': '35', 'club:period': 'MONTH' });
     check('/club fancount sets the quota', String((await reload()).quota), '35000000');
+    await submitClub(fancountForm.custom_id, 'u-trainer', false, { 'club:quota': '' });
+    check('an empty quota clears it', String((await reload()).quota), '0');
+    await submitClub(fancountForm.custom_id, 'u-trainer', false, { 'club:quota': '35M' });
 
     // The report theme and layouts, in the same form. A new look gets a preview.
     const themed = await submitClub(reportsForm.custom_id, 'u-trainer', false, { 'club:theme': 'neon', 'club:layouts': 'tall' });

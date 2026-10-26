@@ -149,8 +149,11 @@ export interface PaletteStyle {
      *   lanes     diagonal bands, like a mown racecourse
      *   stars     scattered points of `frameEnd` on `frame`
      *   grid      a fine grid of `frameEnd` lines on `frame`
+     *   bursts    firework bursts in the palette's bright colours on `frame`
+     *   confetti  scattered paper strips in the bright colours on `frame`
+     *   checker   a chequered flag of `frameEnd` squares on `frame`
      */
-    frameStyle: 'gradient' | 'solid' | 'lanes' | 'stars' | 'grid';
+    frameStyle: 'gradient' | 'solid' | 'lanes' | 'stars' | 'grid' | 'bursts' | 'confetti' | 'checker';
 }
 
 /**
@@ -444,6 +447,72 @@ export const PALETTES: Record<string, Palette> = {
         behind: '#b8241c',
         place: ['#835400', '#4e5866', '#9a4a12', '#2a63b5'],
         style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'stars' },
+    },
+    firework: {
+        id: 'firework',
+        label: 'Firework',
+        origin: 'Night sky: navy cards with firework bursts going off in the gaps, orange sparks for structure.',
+        light: false,
+        frame: '#090b1c',
+        frameEnd: '#1a1f45',
+        bg: '#11142b',
+        panel: '#1a1e3d',
+        stripe: '#151834',
+        line: '#2a2f57',
+        text: '#f3f1ff',
+        muted: '#b9b6d6',
+        faint: '#8a87ad',
+        accent: '#ff8a3d',
+        target: '#ffd75e',
+        good: '#5ee6b0',
+        warn: '#ffe14d',
+        behind: '#ff5f7a',
+        place: ['#ffd75e', '#e4e2f2', '#ff9f5e', '#7fb8ff'],
+        style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'bursts' },
+    },
+    confetti: {
+        id: 'confetti',
+        label: 'Confetti',
+        origin: 'Light and festive: cream cards with confetti scattered around them.',
+        light: true,
+        frame: '#fff1d6',
+        frameEnd: '#ffe2b0',
+        bg: '#fffdf8',
+        panel: '#fbf0dc',
+        stripe: '#fdf6ea',
+        line: '#efdcbc',
+        text: '#2a1f14',
+        muted: '#5a4a38',
+        faint: '#85735e',
+        accent: '#c2185b',
+        target: '#8a5a00',
+        good: '#1b6e45',
+        warn: '#945200',
+        behind: '#b3261e',
+        place: ['#8a5a00', '#4f5868', '#9a4a12', '#c2185b'],
+        style: { radius: 18, border: null, glow: false, labels: 'plain', frameStyle: 'confetti' },
+    },
+    finish: {
+        id: 'finish',
+        label: 'Finish Line',
+        origin: 'The chequered flag: charcoal cards, square and outlined, on a dark chequer, racing blue for structure.',
+        light: false,
+        frame: '#141519',
+        frameEnd: '#26282e',
+        bg: '#1b1c21',
+        panel: '#26282f',
+        stripe: '#212328',
+        line: '#34363e',
+        text: '#f4f4f6',
+        muted: '#c2c4cc',
+        faint: '#9295a0',
+        accent: '#5ab4ff',
+        target: '#ffcc33',
+        good: '#57d68d',
+        warn: '#ffe14d',
+        behind: '#ff5a4f',
+        place: ['#ffcc33', '#dcdde3', '#e39a5c', '#5ab4ff'],
+        style: { radius: 4, border: '#3a3c44', glow: false, labels: 'upper', frameStyle: 'checker' },
     },
 };
 

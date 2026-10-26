@@ -101,8 +101,8 @@ and wide (three panels, for computers). A club's staff pick both in the
 `/club reports` form, with the report time and time zone. At least one
 layout must be ticked; ticking both posts a tall and a wide image with every
 report. Changing the look replies with the current report in it, and
-`Default` goes back to Rose. The quota is set with `/club fancount` (leaving
-out the period keeps the current one), and the expected rank by Club
+`Default` goes back to Rose. The quota is set in the `/club fancount` form
+(a bare number is millions; empty clears it), and the expected rank by Club
 Managers in `/club admin`.
 
 Behind-quota alerts post in the club's report channel. A separate alert

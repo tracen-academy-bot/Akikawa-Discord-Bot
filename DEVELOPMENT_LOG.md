@@ -4,6 +4,27 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — /club fancount is a form; Firework, Confetti, Finish Line themes
+
+Asked for: "just do a form if you do fancount", and more designs.
+
+- **`/club fancount`** opens a form: the quota (pre-filled exactly, e.g.
+  "31M") and the period select. The old `amount` and `period` options are
+  gone. A bare number still means millions (`parseClubFanAmount`), as the
+  command always read it. An odd quota is pre-filled in M, so saving the
+  form unchanged keeps it. Empty clears the quota. Saving refreshes the club
+  directory, which shows the quota.
+- **Three backdrop styles** (`cards.ts`): `bursts` (fireworks in the
+  palette's bright colours), `confetti` (small turned strips) and `checker`
+  (a chequered flag). The backdrop shows only in the gaps around the cards,
+  so the bursts are dense enough that their edges read there.
+- **Themes**: Firework (dark navy, orange accent, `bursts`), Confetti
+  (light cream, magenta accent, `confetti`) and Finish Line (charcoal,
+  square and outlined, racing blue, `checker`). All pass
+  `scripts/palettes.ts`. 16 theme choices of Discord's 25.
+
+---
+
 ## 2026-10-26 — Oguri theme; report layout ticks; quota moves to /club fancount
 
 Asked for: a palette from Oguri Cap's two main colours (from the

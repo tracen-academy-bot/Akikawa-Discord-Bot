@@ -161,6 +161,60 @@ export function drawFrame(ctx: SKRSContext2D, w: number, h: number, p: Palette) 
             ctx.fill();
         }
         ctx.globalAlpha = 1;
+    } else if (style === 'bursts') {
+        // Fireworks: rays from a centre, faint sparks between them. Most fall
+        // behind the cards; the gaps show their edges.
+        const rand = seeded(731);
+        const colours = [p.accent, p.target, p.good, ...p.place];
+        const count = Math.max(12, Math.round((w * h) / 9000));
+        ctx.lineCap = 'round';
+        for (let i = 0; i < count; i += 1) {
+            const cx = rand() * w;
+            const cy = rand() * h;
+            const r = 16 + rand() * 26;
+            const rays = 10 + Math.floor(rand() * 6);
+            const turn = rand() * Math.PI;
+            ctx.strokeStyle = colours[Math.floor(rand() * colours.length)]!;
+            ctx.globalAlpha = 0.45 + rand() * 0.45;
+            ctx.lineWidth = 1.6;
+            for (let k = 0; k < rays; k += 1) {
+                const a = turn + (k / rays) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(cx + Math.cos(a) * r * 0.35, cy + Math.sin(a) * r * 0.35);
+                ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+                ctx.stroke();
+            }
+        }
+        ctx.fillStyle = p.frameEnd;
+        for (let i = 0; i < Math.round((w * h) / 3000); i += 1) {
+            ctx.globalAlpha = 0.4 + rand() * 0.6;
+            ctx.beginPath();
+            ctx.arc(rand() * w, rand() * h, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.lineCap = 'butt';
+    } else if (style === 'confetti') {
+        // Small strips in the bright colours, each turned its own way.
+        const rand = seeded(415);
+        const colours = [p.accent, p.target, p.good, ...p.place];
+        const count = Math.round((w * h) / 1400);
+        for (let i = 0; i < count; i += 1) {
+            ctx.save();
+            ctx.translate(rand() * w, rand() * h);
+            ctx.rotate(rand() * Math.PI);
+            ctx.fillStyle = colours[Math.floor(rand() * colours.length)]!;
+            ctx.globalAlpha = 0.55 + rand() * 0.35;
+            ctx.fillRect(-4, -1.5, 8, 3);
+            ctx.restore();
+        }
+    } else if (style === 'checker') {
+        // A chequered flag of `frameEnd` squares.
+        const size = 14;
+        ctx.fillStyle = p.frameEnd;
+        for (let y = 0; y < h; y += size) {
+            for (let x = (y / size) % 2 === 0 ? 0 : size; x < w; x += size * 2) ctx.fillRect(x, y, size, size);
+        }
     } else if (style === 'grid') {
         ctx.strokeStyle = p.frameEnd;
         ctx.lineWidth = 1;
