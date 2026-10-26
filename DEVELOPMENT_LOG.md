@@ -25,6 +25,14 @@ replaces the plush.
 - Without band points (the top band, or no data), she stands by her food as
   before.
 - Tested in `test-cutoff` (labels, 60% along, no race without data).
+- Fwoxie supplied the game's food from UmaViewer as transparent pictures:
+  burger, rice mountain, and ramen, burger and hamburg-steak meal trays.
+  They are cropped into `src/assets/scenes/food/`.
+  - The finish-line pile is now a stack of three meal trays, the rice
+    mountain beside it, and a loose burger in front.
+  - Real burgers and rice mountains hang in the garland between the drawn
+    onigiri and carrots.
+  - If any picture is missing, the scene draws its own food as before.
 
 **Timer**
 - Weeks already end on Sunday 24:00 Japan time (`TIMER_STREAK_TIMEZONE`,

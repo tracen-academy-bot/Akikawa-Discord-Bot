@@ -76,6 +76,55 @@ async function sceneArt(scene: SceneId): Promise<Image | null> {
     return art;
 }
 
+/** Oguri's food from the game (`src/assets/scenes/food`), cut out by Fwoxie. */
+const FOOD_NAMES = ['burger', 'rice_mountain', 'ramen_tray', 'burger_tray', 'hamburg_tray'] as const;
+type FoodArt = Record<(typeof FOOD_NAMES)[number], Image>;
+let foodCache: FoodArt | null | undefined;
+
+/** The food pictures, or null when any is missing (the scene then draws its own food). */
+async function foodArt(): Promise<FoodArt | null> {
+    if (foodCache !== undefined) return foodCache;
+    const loaded: Partial<FoodArt> = {};
+    for (const name of FOOD_NAMES) {
+        const file = path.join(ART_DIR, 'food', `${name}.png`);
+        if (!existsSync(file)) return (foodCache = null);
+        try {
+            loaded[name] = await loadImage(file);
+        } catch {
+            return (foodCache = null);
+        }
+    }
+    return (foodCache = loaded as FoodArt);
+}
+
+/** Draws a picture scaled by `scale`, centred on `cx`, standing on `bottom`. */
+function standing(ctx: SKRSContext2D, image: Image, cx: number, bottom: number, scale: number): number {
+    const w = image.width * scale;
+    const h = image.height * scale;
+    ctx.drawImage(image, cx - w / 2, bottom - h, w, h);
+    return h;
+}
+
+/**
+ * The game's food piled up, centred on `cx` and standing on `ground`: a
+ * stack of three meal trays, the rice mountain beside it, and a loose
+ * burger in front. About 150px wide.
+ */
+function drawMealPile(ctx: SKRSContext2D, food: FoodArt, cx: number, ground: number) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(20, 60, 30, 0.3)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetY = 2;
+    const s = 0.42;
+    standing(ctx, food.rice_mountain, cx - 52, ground, 0.55);
+    let top = ground;
+    top -= standing(ctx, food.burger_tray, cx + 10, top, s) - 6;
+    top -= standing(ctx, food.hamburg_tray, cx + 4, top, s) - 8;
+    standing(ctx, food.ramen_tray, cx + 14, top, s);
+    standing(ctx, food.burger, cx + 58, ground + 2, 0.6);
+    ctx.restore();
+}
+
 /**
  * Places a report, drawn on a transparent background, on its palette's
  * scene. Returns the report unchanged for a palette without one.
@@ -92,7 +141,7 @@ export async function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wi
     const ctx = canvas.getContext('2d');
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
-    else drawOguri(ctx, w, h, hero, await sceneArt(scene), race);
+    else drawOguri(ctx, w, h, hero, await sceneArt(scene), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY);
     return canvas;
 }
@@ -538,7 +587,7 @@ function onigiri(ctx: SKRSContext2D, x: number, y: number, size: number, tilt: n
  * white rail on mown turf just above the cards, with food piled on the
  * grass. `art`, when given, stands on the right among it.
  */
-function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, race: SceneRace | null) {
+function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, race: SceneRace | null, food: FoodArt | null) {
     const rand = seeded(1987);
 
     const sky = ctx.createLinearGradient(0, 0, 0, h);
@@ -573,7 +622,9 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         else ctx.lineTo(x, along(x));
     }
     ctx.stroke();
-    const hanging = ['onigiri', 'carrot', 'dango', 'bun'] as const;
+    // The game's burger and rice mountain hang between the drawn onigiri and
+    // carrots when their pictures are there; otherwise dango and buns do.
+    const hanging = food ? (['onigiri', 'burger', 'carrot', 'rice'] as const) : (['onigiri', 'carrot', 'dango', 'bun'] as const);
     for (let i = 0, x = 24; x < w - 16; i += 1, x += 52) {
         const top = along(x);
         const thread = 6 + ((i * 7) % 4) * 4;
@@ -589,7 +640,16 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         if (kind === 'onigiri') onigiri(ctx, x, y + 13, 26, sway);
         else if (kind === 'carrot') carrot(ctx, x, y + 16, 34, Math.PI / 2 + sway);
         else if (kind === 'dango') dango(ctx, x, y + 15, 7.5, Math.PI / 2 + sway);
-        else bun(ctx, x, y + 11, 13);
+        else if (kind === 'bun') bun(ctx, x, y + 11, 13);
+        else if (food) {
+            const image = kind === 'burger' ? food.burger : food.rice_mountain;
+            const scale = kind === 'burger' ? 0.5 : 0.3;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(sway);
+            ctx.drawImage(image, (-image.width * scale) / 2, 0, image.width * scale, image.height * scale);
+            ctx.restore();
+        }
     }
 
     // Turf, mown in stripes, running into the cards.
@@ -626,7 +686,7 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
 
     const ground = hero - 6;
     if (art && race) {
-        drawRace(ctx, w, ground, art, race);
+        drawRace(ctx, w, ground, art, race, food);
     } else if (art) {
         // No rank to race for: she stands on the right with food piled round
         // her feet and an onigiri balanced on her head.
@@ -637,7 +697,10 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         groundShadow(ctx, artX + artW / 2, ground, artW * 0.42);
         ctx.drawImage(art, artX, artY, artW, artH);
         onigiri(ctx, artX + artW * 0.5, artY + 10, 30, 0.18);
-        drawFoodPile(ctx, artX + artW / 2, ground, artW, true);
+        if (food) drawMealPile(ctx, food, artX - 70, ground);
+        else drawFoodPile(ctx, artX + artW / 2, ground, artW, true);
+    } else if (food) {
+        drawMealPile(ctx, food, w - SIDE - 90, ground);
     } else {
         drawFoodPile(ctx, w - SIDE - 90, ground, 120, false);
     }
@@ -764,14 +827,15 @@ function startingGate(ctx: SKRSContext2D, x: number, ground: number, stalls: num
  * at `race.progress` along it, leaning forward, a little off the ground,
  * with speed lines and dust behind her.
  */
-function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, race: SceneRace) {
+function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, race: SceneRace, food: FoodArt | null) {
     // The rail's posts end 18px above the ground line; the signposts match.
     const postBottom = ground - 18;
     const gateRight = startingGate(ctx, SIDE + 4, ground, 3);
     const startX = gateRight + 14;
-    const finishX = w - SIDE - 150;
+    const finishX = w - SIDE - (food ? 175 : 150);
     trackPost(ctx, startX, postBottom, race.start, false);
-    drawFoodPile(ctx, w - SIDE - 70, ground, 100, false);
+    if (food) drawMealPile(ctx, food, w - SIDE - 85, ground);
+    else drawFoodPile(ctx, w - SIDE - 70, ground, 100, false);
 
     // Short enough to run under the hanging food.
     const artH = Math.min(130, ground - 68);
