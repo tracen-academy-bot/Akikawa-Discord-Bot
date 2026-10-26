@@ -120,6 +120,13 @@ async function main() {
     check('past the last cutoff there is nothing below', [past?.tier, past?.above?.rank, past?.below, past?.above?.points], ['below B+', 3000, null, null]);
     check('no rank or points, no band', [cutoff.rankBand(null, 1), cutoff.rankBand(5, null)], [null, null]);
 
+    // The Oguri scene's race track: 5.0B between 3.5B (#500) and 6.0B (#100) is 60% along.
+    const { sceneRace } = await import('../src/lib/image/renderFanReport');
+    const race = sceneRace(a194);
+    check('the race runs from the band bottom to the next cutoff', [race?.start, race?.finish], ['#500 A+', '#100 S']);
+    check('she stands 60% along', Math.round((race?.progress ?? 0) * 100), 60);
+    check('no race in the top band or without points', [sceneRace(top), sceneRace(past), sceneRace(null)], [null, null, null]);
+
     console.log(`\n${pass} passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);
 }

@@ -4,6 +4,16 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-26 — The mascot races the rank band
+
+Verillia proposed the mascot running along the top, placed by the club's
+position in its rank bracket, and Tylina liked it. Fwoxie rejected the first
+cut ("that ain't it"), then came back ("i don't hate the idea"). They asked
+for arrow signs, posts matching the rail, and a starting gate, and supplied a
+clean chibi. Fwoxie may still redesign the band by hand.
+
+---
+
 ## 2026-10-26 — Quota to /club fancount; /club reports is the report's form
 
 Fwoxie asked for a tall/wide tick beside the palette choice, with at least

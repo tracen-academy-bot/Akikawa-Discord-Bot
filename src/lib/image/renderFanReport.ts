@@ -2,8 +2,8 @@ import { createCanvas, type Canvas, type Image, type SKRSContext2D } from '@napi
 import type { ClubRank } from '@prisma/client';
 import { PALETTES, DEFAULT_PALETTE, dashNum, type Palette } from './theme';
 import { font } from './fonts';
-import { withScene } from './scenes';
-import { card, drawFrame, fillRound, fit, innerRadius, label, text, wrap, wrapWords } from './cards';
+import { withScene, type SceneRace } from './scenes';
+import { RENDER_SCALE, card, drawFrame, fillRound, fit, innerRadius, label, text, wrap, wrapWords } from './cards';
 import { loadClubIcon, loadRankIcon } from './canvasUtils';
 import type { LastDayGains } from '../fans/readings';
 import type { RankBand } from '../fans/cutoff';
@@ -564,6 +564,21 @@ function bandEnds(band: RankBand): { low: number; high: number } | null {
 }
 
 /**
+ * The club's place in its band for a scene's race track: how far it is
+ * from the bottom cutoff to the next one up, by points. Null without both
+ * cutoffs' points.
+ */
+export function sceneRace(band: RankBand | null): SceneRace | null {
+    const ends = band ? bandEnds(band) : null;
+    if (!band || !ends) return null;
+    return {
+        progress: (band.points - ends.low) / (ends.high - ends.low),
+        start: `#${band.below!.rank} ${band.below!.tier}`,
+        finish: `#${band.above!.rank} ${band.above!.tier}`,
+    };
+}
+
+/**
  * Draws where the club sits in its rank band: a bar from the band's bottom
  * place (left) to its top (right) with the club marked on it, then the fans
  * still needed to reach the place above and the cushion over the place
@@ -713,8 +728,9 @@ function renderTall(d: Prepared): Canvas {
     const height =
         FRAME + headerH + GAP + tableH + (behindH > 0 ? GAP + behindH : 0) + (streakH > 0 ? GAP + streakH : 0) + footerH + FRAME;
 
-    const canvas = createCanvas(width, height);
+    const canvas = createCanvas(width * RENDER_SCALE, height * RENDER_SCALE);
     const ctx = canvas.getContext('2d');
+    ctx.scale(RENDER_SCALE, RENDER_SCALE);
     drawFrame(ctx, width, height, p);
 
     // Header: identity left, rank and badge right, figures, progress.
@@ -810,8 +826,9 @@ function renderWide(d: Prepared): Canvas {
     const mode: 'right' | 'under' | 'span' = n > 0 && d.onPace.length === 0 ? 'span' : underH < rightH ? 'under' : 'right';
     const contentH = mode === 'span' ? Math.max(sideMin, behindHeight(n, 3)) : mode === 'under' ? underH : rightH;
     const height = FRAME * 2 + contentH;
-    const canvas = createCanvas(width, height);
+    const canvas = createCanvas(width * RENDER_SCALE, height * RENDER_SCALE);
     const ctx = canvas.getContext('2d');
+    ctx.scale(RENDER_SCALE, RENDER_SCALE);
     drawFrame(ctx, width, height, p);
 
     // Sidebar.
@@ -943,5 +960,5 @@ export async function renderFanReport(
     };
     const report = layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
     // A palette with a scene draws on a transparent background; set it in the scene.
-    return (await withScene(report, palette, layout)).encode('png');
+    return (await withScene(report, palette, layout, sceneRace(meta.rankBand ?? null))).encode('png');
 }

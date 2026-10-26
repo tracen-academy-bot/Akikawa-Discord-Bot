@@ -36,9 +36,12 @@ import {
     nextWeekStart,
     roleProblem,
     saveTimerSettings,
+    shiftKey,
+    weekKey,
+    weekLabel,
     type BoardPeriod,
 } from '../lib/timer/rewards';
-import { displayName, renderBoardFor } from '../lib/timer/boardImage';
+import { displayName, renderBoardFor, weekResultsPost } from '../lib/timer/boardImage';
 import { prisma } from '../db/prisma';
 import { renderTimerStats } from '../lib/image/renderTimerStats';
 
@@ -109,6 +112,19 @@ export const data = new SlashCommandBuilder()
                 opt.setName('off').setDescription('Stop the weekly role and post. Milestone roles stay.').setRequired(false),
             ),
     )
+    .addSubcommand((sub) =>
+        sub
+            .setName('publish')
+            .setDescription("Post last week's final leaderboard now, once. Roles are not changed. Club Managers only.")
+            .addChannelOption((opt) =>
+                opt
+                    .setName('channel')
+                    .setDescription('Where to post it (defaults to the rewards channel, else here)')
+                    .setRequired(false)
+                    .addChannelTypes(...ANNOUNCE_CHANNEL_TYPES),
+            )
+            .addBooleanOption((opt) => opt.setName('ping').setDescription('Ping the top 3 (default yes)').setRequired(false)),
+    )
     .addSubcommandGroup((group) =>
         group
             .setName('milestone')
@@ -138,6 +154,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     switch (interaction.options.getSubcommand()) {
         case 'rewards':
             await handleRewards(interaction);
+            break;
+        case 'publish':
+            await handlePublish(interaction);
             break;
         case 'panel':
             await handlePanel(interaction);
@@ -250,6 +269,8 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
         }
     }
     const changed = off || role !== null || channel !== null;
+    // The first setup awards last week at the next minute's check.
+    const firstSetup = changed && !off && (await getTimerSettings(guild.id)) === null;
     const settings = off
         ? await saveTimerSettings(guild.id, { topRoleId: null, announceChannelId: null })
         : changed
@@ -263,6 +284,13 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
         `Weekly top ${TOP_PLACES} role: ${settings?.topRoleId ? `<@&${settings.topRoleId}>` : 'not set'}`,
         `End-of-week board: ${settings?.announceChannelId ? `<#${settings.announceChannelId}>` : 'not posted'}`,
         `This week ends <t:${ends}:F> (<t:${ends}:R>); it is awarded about 15 minutes later.`,
+        ...(firstSetup
+            ? [
+                  settings?.announceChannelId
+                      ? 'Last week is awarded within a minute, and its final board posts in that channel.'
+                      : 'Last week is awarded within a minute. Set a channel in the same command next time to have its board posted.',
+              ]
+            : []),
         '',
         `Live top ${TOP_PLACES}: ${live.length > 0 ? live.map((r, i) => `${i + 1}. <@${r.discordUserId}> (${r.runs})`).join(' · ') : 'no runs yet this week'}`,
         '',
@@ -270,6 +298,36 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
     ];
     // Mentions inside an embed never ping.
     await interaction.reply({ embeds: [(changed ? successEmbed : infoEmbed)('Timer rewards', lines.join('\n'))], flags: MessageFlags.Ephemeral });
+}
+
+/**
+ * `/timer publish`: posts last week's final board once, on demand, in the
+ * chosen channel, else the rewards channel, else here. It only posts: the
+ * weekly role is given by the Monday award, not by this.
+ */
+async function handlePublish(interaction: ChatInputCommandInteraction) {
+    if (!(await requireManager(interaction))) return;
+    const guild = interaction.guild!;
+    const picked = interaction.options.getChannel('channel');
+    const ping = interaction.options.getBoolean('ping') ?? true;
+    const settings = await getTimerSettings(guild.id);
+    const channelId = picked?.id ?? settings?.announceChannelId ?? interaction.channelId;
+    const channel = await interaction.client.channels.fetch(channelId).catch(() => null);
+    if (!channel?.isTextBased() || !('send' in channel)) {
+        await interaction.reply({ embeds: [errorEmbed(`I cannot post in <#${channelId}>. Check that I can see it and send messages there.`)], flags: MessageFlags.Ephemeral });
+        return;
+    }
+    // Rendering the board can take a moment.
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    const week = shiftKey(weekKey(new Date()), -7);
+    try {
+        await channel.send(await weekResultsPost(guild, week, ping));
+    } catch (e) {
+        console.error('Timer publish failed:', e);
+        await interaction.editReply({ embeds: [errorEmbed(`Posting in <#${channelId}> failed. Check that I can send messages and attach files there.`)] });
+        return;
+    }
+    await interaction.editReply({ embeds: [successEmbed('Published', `Posted the final board for ${weekLabel(week)} in <#${channelId}>${ping ? ', pinging the top 3' : ''}.`)] });
 }
 
 /** `/timer milestone add|remove`. */

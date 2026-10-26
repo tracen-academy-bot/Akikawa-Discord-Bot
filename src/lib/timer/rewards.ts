@@ -147,9 +147,11 @@ export function getTimerSettings(guildId: string): Promise<TimerSettings | null>
 }
 
 /**
- * Saves reward settings. A new row starts as already awarded up to last week,
- * so turning rewards on awards the first week that ends after it, not one
- * that ended before.
+ * Saves reward settings. A new row starts as awarded up to the week before
+ * last, so the next tick awards last week straight away and posts its
+ * results (Fwoxie, 2026-10-26: "probably post last week's results too").
+ * Older weeks are never awarded: the award always covers the latest week
+ * that has ended.
  */
 export function saveTimerSettings(
     guildId: string,
@@ -158,7 +160,7 @@ export function saveTimerSettings(
 ): Promise<TimerSettings> {
     return prisma.timerSettings.upsert({
         where: { guildId },
-        create: { guildId, ...change, lastAwardedWeek: shiftKey(weekKey(now), -7) },
+        create: { guildId, ...change, lastAwardedWeek: shiftKey(weekKey(now), -14) },
         update: change,
     });
 }

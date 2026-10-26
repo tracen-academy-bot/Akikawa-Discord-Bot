@@ -8,3 +8,7 @@ stands on the right of that scene's sky band, scaled to the band's height
 None are shipped. A picture of a character belongs to its artist (or to
 Cygames, for official art), so only add one you have permission to use.
 Without a picture, the scene is complete as drawn.
+
+`food/` holds the Oguri scene's food, cut from UmaViewer screenshots
+(burger, rice mountain, and the ramen and hamburg-steak trays). If any of them is missing,
+the scene draws its own food instead.

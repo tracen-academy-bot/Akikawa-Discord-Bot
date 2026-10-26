@@ -209,15 +209,21 @@ async function rewardChecks() {
         },
     } as never;
     const created = await rewards.saveTimerSettings(G2, { topRoleId: 'r-top' }, new Date('2026-10-20T00:00:00Z'));
-    check('turning rewards on mid-week skips weeks already over', created.lastAwardedWeek, '2026-10-12');
-    // Last week's holders: zed loses the role, alice keeps it.
+    check('turning rewards on leaves last week to award', created.lastAwardedWeek, '2026-10-05');
+    const guildOf = async () => guild;
+    const first = await rewards.runWeeklyAwards(guildOf, new Date('2026-10-20T00:01:00Z'));
+    check('so last week is awarded and posted at once', first.map((a) => a.week), ['2026-10-12']);
+    check('and only once', (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-20T01:00:00Z'))).length, 0);
+    log.length = 0;
+    // Stand-in holders for that week, to check the hand-off next Monday:
+    // zed loses the role, alice keeps it.
+    await prisma.timerWeeklyAward.deleteMany({ where: { guildId: G2, week: '2026-10-12' } });
     await prisma.timerWeeklyAward.createMany({
         data: [
             { guildId: G2, week: '2026-10-12', place: 1, discordUserId: 'zed', runs: 9 },
             { guildId: G2, week: '2026-10-12', place: 2, discordUserId: 'alice', runs: 8 },
         ],
     });
-    const guildOf = async () => guild;
     check('not awarded in the first quarter hour of the new week',
         (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T15:10:00Z'))).length, 0);
     const [award] = await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T15:20:00Z'));
@@ -229,6 +235,14 @@ async function rewardChecks() {
         ['alice', 'bob', 'carol']);
     check('a week is awarded once', (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T16:00:00Z'))).length, 0);
     check('the week is marked done', (await rewards.getTimerSettings(G2))?.lastAwardedWeek, '2026-10-19');
+
+    // ── The week's results post (Monday award and /timer publish) ─────────────
+    const { weekResultsPost } = await import('../src/lib/timer/boardImage');
+    const post = await weekResultsPost(guild, '2026-10-19', true);
+    check('the post names the week and its top 3', [post.content.split('\n')[0], post.content.includes('1. <@alice> · 3 runs')], ['**Top runners for Oct 19 – Oct 25**', true]);
+    check('it pings the top 3 when asked', post.allowedMentions.users, ['alice', 'bob', 'carol']);
+    check('and attaches the final board', post.files.length, 1);
+    check('a quiet publish pings nobody', (await weekResultsPost(guild, '2026-10-19', false)).allowedMentions.users, []);
 
     // ── Milestones ────────────────────────────────────────────────────────────
     await prisma.timerMilestoneRole.create({ data: { guildId: G2, runs: 3, roleId: 'r-3' } });

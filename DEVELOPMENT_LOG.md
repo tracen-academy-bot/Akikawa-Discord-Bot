@@ -4,6 +4,78 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Oguri race track; last week's timer results on setup
+
+**Race track** (Verillia's idea: "could we have the mascot run across, with
+their progress depending on their position in the rank bracket?"). Fwoxie
+supplied a clean, transparent chibi of Oguri in her holiday outfit, which
+replaces the plush.
+- When a club has rank-band points, the Oguri scene's rail becomes a track.
+  - A simple starting gate (three numbered stalls) sits at the left.
+  - The start sign names the band's bottom cutoff ("#500 A+") and points
+    left.
+  - The finish sign names the next cutoff ("#100 S"), points right, and
+    sits under a chequered banner.
+  - The sign posts copy the rail's dividing posts exactly.
+  - Her food is piled past the finish.
+- She stands at `sceneRace().progress` along it: (points − bottom
+  cutoff) / (next cutoff − bottom cutoff), by points, as in the rank band
+  bar. She leans forward, a little off the ground, with speed lines and dust
+  behind her, and is short enough to run under the hanging food.
+- Without band points (the top band, or no data), she stands by her food as
+  before.
+- Tested in `test-cutoff` (labels, 60% along, no race without data).
+- Fwoxie supplied the game's food from UmaViewer as transparent pictures:
+  burger, rice mountain, and ramen and hamburg-steak meal trays. They are
+  cropped into `src/assets/scenes/food/`.
+  - Past the finish, laid side by side at one scale: the ramen tray, with
+    the lone burger on its left and the tall rice bowl on its right, then
+    the hamburg-steak tray.
+  - A first cut stacked the trays. Fwoxie: "who stacks multiple plates on
+    top of each other". The burger tray was dropped.
+  - The burger leans inwards against the ramen bowl (0.22 rad): bottom on
+    the tray, top on the bowl's upper side.
+  - The rice bowl sits a little further out, so the ramen's seaweed shows.
+
+**Image quality.** Fwoxie: "can the pic be higher quality?". The fan report
+now renders at `RENDER_SCALE` = 2 (`cards.ts`).
+- Layout stays in plain pixels; each canvas is twice the size and its
+  context scaled. `withScene` lays out at plain size and draws the report
+  into its own 2x canvas.
+- Tall is now 1800px wide and wide 3400px. Files are about 0.7-1 MB, well
+  under Discord's upload limit.
+- The chibi and the food pictures are large enough for 2x at the sizes
+  drawn.
+  - The signposts snap onto the nearest rail post (`onRailPost`). Before,
+    one landed 2px beside a rail post and read as a doubled post.
+  - The rail is drawn posts first, then the bars, so the bars cross in
+    front, at the signposts too. Fwoxie had said the posts "feel above the
+    horizontal bar". The dark shadow band under the top bar and the blue
+    shade on the posts read as odd colouring. Both are now a light grey
+    edge (`RAIL_SHADE`).
+  - Real burgers and rice mountains hang in the garland between the drawn
+    onigiri and carrots.
+  - If any picture is missing, the scene draws its own food as before.
+
+**Timer**
+- Weeks already end on Sunday 24:00 Japan time (`TIMER_STREAK_TIMEZONE`,
+  default `Asia/Tokyo`), unless that variable is set otherwise on the host.
+- Fwoxie: "probably post last week's results too". A new `TimerSettings`
+  row now starts at the week before last. The first setup is therefore
+  awarded last week at the next minute's check, and posts its final board.
+  - Only the latest ended week is ever awarded, so nothing older is.
+  - The `/timer rewards` reply says so on first setup, and asks for the
+    channel in the same command.
+  - Tested in `test-timer`.
+- Fwoxie: "do a one time leaderboard publish thingy". `/timer publish
+  [channel] [ping]` posts last week's final board on demand: in the given
+  channel, else the rewards channel, else where it is used. It pings the top
+  3 unless `ping:false`, and never changes roles. The Monday award and this
+  build the same post (`weekResultsPost` in `boardImage.ts`), tested in
+  `test-timer`.
+
+---
+
 ## 2026-10-26 — Distinct top 3 colours; an Oguri Cap scene
 
 Asked for: "top 3 should have different colors", and an Oguri theme that

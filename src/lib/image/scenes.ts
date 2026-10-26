@@ -1,7 +1,8 @@
 import { existsSync } from 'node:fs';
 import * as path from 'node:path';
 import { createCanvas, loadImage, type Canvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
-import { seeded } from './cards';
+import { RENDER_SCALE, seeded } from './cards';
+import { font } from './fonts';
 import type { Palette } from './theme';
 
 /**
@@ -32,6 +33,17 @@ import type { Palette } from './theme';
 
 /** The scenes a palette can carry. */
 export type SceneId = 'fireworks' | 'confetti' | 'oguri';
+
+/**
+ * Where the club stands in its rank band, for a scene that races it along a
+ * track: `progress` from 0 (the band's bottom cutoff, `start`) to 1 (the
+ * next cutoff up, `finish`). Labels like "#500 A+" and "#100 S".
+ */
+export interface SceneRace {
+    progress: number;
+    start: string;
+    finish: string;
+}
 
 /** Height of the open band above the cards, by layout. */
 const HERO = { tall: 190, wide: 170 } as const;
@@ -64,24 +76,89 @@ async function sceneArt(scene: SceneId): Promise<Image | null> {
     return art;
 }
 
+/** Oguri's food from the game (`src/assets/scenes/food`), cut out by Fwoxie. */
+const FOOD_NAMES = ['burger', 'rice_mountain', 'ramen_tray', 'hamburg_tray'] as const;
+type FoodArt = Record<(typeof FOOD_NAMES)[number], Image>;
+let foodCache: FoodArt | null | undefined;
+
+/** The food pictures, or null when any is missing (the scene then draws its own food). */
+async function foodArt(): Promise<FoodArt | null> {
+    if (foodCache !== undefined) return foodCache;
+    const loaded: Partial<FoodArt> = {};
+    for (const name of FOOD_NAMES) {
+        const file = path.join(ART_DIR, 'food', `${name}.png`);
+        if (!existsSync(file)) return (foodCache = null);
+        try {
+            loaded[name] = await loadImage(file);
+        } catch {
+            return (foodCache = null);
+        }
+    }
+    return (foodCache = loaded as FoodArt);
+}
+
+/** Draws a picture scaled by `scale`, centred on `cx`, standing on `bottom`. */
+function standing(ctx: SKRSContext2D, image: Image, cx: number, bottom: number, scale: number): number {
+    const w = image.width * scale;
+    const h = image.height * scale;
+    ctx.drawImage(image, cx - w / 2, bottom - h, w, h);
+    return h;
+}
+
+/**
+ * The game's food laid out side by side on the grass, centred on `cx`: the
+ * ramen tray with the lone burger on its left and the tall rice bowl on its
+ * right, then the hamburg-steak tray. One scale for all, nothing stacked
+ * (Fwoxie, 2026-10-26: "who stacks multiple plates on top of each other").
+ * About 190px wide.
+ */
+function drawMealPile(ctx: SKRSContext2D, food: FoodArt, cx: number, ground: number) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(20, 60, 30, 0.3)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetY = 2;
+    const s = 0.42;
+    const trayW = food.ramen_tray.width * s;
+    const ramenX = cx - trayW / 2 - 2;
+    const hamburgX = cx + trayW / 2 + 2;
+    standing(ctx, food.hamburg_tray, hamburgX, ground, s);
+    standing(ctx, food.ramen_tray, ramenX, ground, s);
+    // On the ramen tray's surface, about 20 tray pixels above its bottom edge.
+    const onTray = ground - 20 * s;
+    // The burger leans inwards against the ramen bowl: bottom edge on the
+    // tray, top resting on the bowl's upper side.
+    const burgerX = ramenX - trayW * 0.34;
+    ctx.save();
+    ctx.translate(burgerX, onTray);
+    ctx.rotate(0.22);
+    standing(ctx, food.burger, 0, 0, s);
+    ctx.restore();
+    standing(ctx, food.rice_mountain, ramenX + trayW * 0.41, onTray, s);
+    ctx.restore();
+}
+
 /**
  * Places a report, drawn on a transparent background, on its palette's
  * scene. Returns the report unchanged for a palette without one.
  */
-export async function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wide'): Promise<Canvas> {
+export async function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wide', race: SceneRace | null = null): Promise<Canvas> {
     const scene = p.style.scene;
     if (!scene) return report;
     const hero = HERO[layout];
     const offsetX = SIDE - INNER;
     const offsetY = hero - INNER;
-    const w = report.width + offsetX * 2;
-    const h = report.height + offsetY + offsetX;
-    const canvas = createCanvas(w, h);
+    // The report is already at RENDER_SCALE; lay out in plain pixels.
+    const reportW = report.width / RENDER_SCALE;
+    const reportH = report.height / RENDER_SCALE;
+    const w = reportW + offsetX * 2;
+    const h = reportH + offsetY + offsetX;
+    const canvas = createCanvas(w * RENDER_SCALE, h * RENDER_SCALE);
     const ctx = canvas.getContext('2d');
+    ctx.scale(RENDER_SCALE, RENDER_SCALE);
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
-    else drawOguri(ctx, w, h, hero, await sceneArt(scene));
-    ctx.drawImage(report, offsetX, offsetY);
+    else drawOguri(ctx, w, h, hero, await sceneArt(scene), race, await foodArt());
+    ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     return canvas;
 }
 
@@ -526,7 +603,7 @@ function onigiri(ctx: SKRSContext2D, x: number, y: number, size: number, tilt: n
  * white rail on mown turf just above the cards, with food piled on the
  * grass. `art`, when given, stands on the right among it.
  */
-function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null) {
+function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, race: SceneRace | null, food: FoodArt | null) {
     const rand = seeded(1987);
 
     const sky = ctx.createLinearGradient(0, 0, 0, h);
@@ -561,7 +638,9 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         else ctx.lineTo(x, along(x));
     }
     ctx.stroke();
-    const hanging = ['onigiri', 'carrot', 'dango', 'bun'] as const;
+    // The game's burger and rice mountain hang between the drawn onigiri and
+    // carrots when their pictures are there; otherwise dango and buns do.
+    const hanging = food ? (['onigiri', 'burger', 'carrot', 'rice'] as const) : (['onigiri', 'carrot', 'dango', 'bun'] as const);
     for (let i = 0, x = 24; x < w - 16; i += 1, x += 52) {
         const top = along(x);
         const thread = 6 + ((i * 7) % 4) * 4;
@@ -577,7 +656,16 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         if (kind === 'onigiri') onigiri(ctx, x, y + 13, 26, sway);
         else if (kind === 'carrot') carrot(ctx, x, y + 16, 34, Math.PI / 2 + sway);
         else if (kind === 'dango') dango(ctx, x, y + 15, 7.5, Math.PI / 2 + sway);
-        else bun(ctx, x, y + 11, 13);
+        else if (kind === 'bun') bun(ctx, x, y + 11, 13);
+        else if (food) {
+            const image = kind === 'burger' ? food.burger : food.rice_mountain;
+            const scale = kind === 'burger' ? 0.5 : 0.3;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(sway);
+            ctx.drawImage(image, (-image.width * scale) / 2, 0, image.width * scale, image.height * scale);
+            ctx.restore();
+        }
     }
 
     // Turf, mown in stripes, running into the cards.
@@ -598,40 +686,241 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         ctx.fill();
     }
 
-    // The white rail along the turf.
+    // The white rail along the turf: posts first, then the bars across them,
+    // so the bars sit in front.
     const railY = turfTop - 18;
-    ctx.fillStyle = 'rgba(20, 60, 30, 0.25)';
-    ctx.fillRect(0, railY + 3, w, 4);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, railY, w, 5);
-    ctx.fillRect(0, railY + 11, w, 3);
-    for (let x = 6; x < w; x += 30) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(x, railY, 4, turfTop - railY + 6);
-        ctx.fillStyle = 'rgba(40, 90, 140, 0.25)';
-        ctx.fillRect(x + 3, railY + 2, 1, turfTop - railY + 4);
-    }
+    for (let x = RAIL_FIRST_POST; x < w; x += RAIL_POST_GAP) railPost(ctx, x, railY, turfTop + 6);
+    railBars(ctx, 0, w, railY);
 
-    // The picture, when there is one, stands on the right with food piled
-    // round her feet and an onigiri balanced on her head. Without it, the
-    // pile sits on its own at the right.
     const ground = hero - 6;
-    if (art) {
+    if (art && race) {
+        drawRace(ctx, w, ground, art, race, food);
+    } else if (art) {
+        // No rank to race for: she stands on the right with food piled round
+        // her feet and an onigiri balanced on her head.
         const artH = hero - 30;
         const artW = (art.width / art.height) * artH;
         const artX = w - SIDE - artW - 80;
         const artY = ground - artH;
-        // A soft shadow on the grass under her.
-        ctx.fillStyle = 'rgba(20, 60, 30, 0.3)';
-        ctx.beginPath();
-        ctx.ellipse(artX + artW / 2, ground - 2, artW * 0.42, 6, 0, 0, Math.PI * 2);
-        ctx.fill();
+        groundShadow(ctx, artX + artW / 2, ground, artW * 0.42);
         ctx.drawImage(art, artX, artY, artW, artH);
         onigiri(ctx, artX + artW * 0.5, artY + 10, 30, 0.18);
-        drawFoodPile(ctx, artX + artW / 2, ground, artW, true);
+        if (food) drawMealPile(ctx, food, artX - 110, ground);
+        else drawFoodPile(ctx, artX + artW / 2, ground, artW, true);
+    } else if (food) {
+        drawMealPile(ctx, food, w - SIDE - 100, ground);
     } else {
         drawFoodPile(ctx, w - SIDE - 90, ground, 120, false);
     }
+}
+
+/** Where the rail's dividing posts stand: every `RAIL_POST_GAP` from `RAIL_FIRST_POST`. */
+const RAIL_FIRST_POST = 6;
+const RAIL_POST_GAP = 30;
+
+/** The rail post nearest `x`, so a signpost is one of them run taller rather than a second post beside it. */
+function onRailPost(x: number): number {
+    return RAIL_FIRST_POST + Math.round((x - RAIL_FIRST_POST) / RAIL_POST_GAP) * RAIL_POST_GAP;
+}
+
+/** A rail post from `top` to `bottom`: white, with a light grey shaded side. */
+function railPost(ctx: SKRSContext2D, x: number, top: number, bottom: number) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, top, 4, bottom - top);
+    ctx.fillStyle = RAIL_SHADE;
+    ctx.fillRect(x + 3, top, 1, bottom - top);
+}
+
+/**
+ * The rail's two bars from `x0` to `x1`, the top one at `railY`: white,
+ * each with a light grey underside. Drawn after the posts so they cross in
+ * front of them.
+ */
+function railBars(ctx: SKRSContext2D, x0: number, x1: number, railY: number) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x0, railY, x1 - x0, 5);
+    ctx.fillRect(x0, railY + 11, x1 - x0, 3);
+    ctx.fillStyle = RAIL_SHADE;
+    ctx.fillRect(x0, railY + 4, x1 - x0, 1);
+    ctx.fillRect(x0, railY + 13, x1 - x0, 1);
+}
+
+/** The rail's shading: a light cool grey, not a dark band. */
+const RAIL_SHADE = '#d3dbe6';
+
+/** A soft shadow on the grass. */
+function groundShadow(ctx: SKRSContext2D, x: number, ground: number, rx: number) {
+    ctx.fillStyle = 'rgba(20, 60, 30, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(x, ground - 2, rx, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/**
+ * A signpost: a post exactly like the rail's dividing posts (white, 4px,
+ * with the same thin shade line), carrying an arrow-shaped sign. The start
+ * sign points left, back down the band; the finish sign points right, to
+ * the next rank, under a chequered banner. `bottom` is where the rail posts
+ * end.
+ */
+function trackPost(ctx: SKRSContext2D, x: number, bottom: number, label: string, finish: boolean) {
+    const top = bottom - 78;
+    railPost(ctx, x, top, bottom);
+    // The rail's bars cross in front of this post too (the top bar is 24px
+    // above the posts' feet).
+    railBars(ctx, x - 1, x + 5, bottom - 24);
+
+    ctx.font = font('700 13px');
+    const body = ctx.measureText(label).width + 16;
+    const tip = 10;
+    const h = 22;
+    const signY = top + 4;
+    // The sign hangs off the post on the side it points to.
+    const left = finish ? x - 4 : x + 8 - body - tip;
+    const right = left + body + tip;
+    ctx.beginPath();
+    if (finish) {
+        ctx.moveTo(left, signY);
+        ctx.lineTo(right - tip, signY);
+        ctx.lineTo(right, signY + h / 2);
+        ctx.lineTo(right - tip, signY + h);
+        ctx.lineTo(left, signY + h);
+    } else {
+        ctx.moveTo(right, signY);
+        ctx.lineTo(left + tip, signY);
+        ctx.lineTo(left, signY + h / 2);
+        ctx.lineTo(left + tip, signY + h);
+        ctx.lineTo(right, signY + h);
+    }
+    ctx.closePath();
+    ctx.fillStyle = finish ? '#1b3f86' : '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = finish ? '#ffffff' : '#1b3f86';
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    if (finish) {
+        // A chequered banner on top of the finish sign.
+        const cell = 5;
+        for (let cx = 0; cx < body; cx += cell) {
+            for (let cy = 0; cy < 10; cy += cell) {
+                ctx.fillStyle = (cx / cell + cy / cell) % 2 === 0 ? '#1d2230' : '#ffffff';
+                ctx.fillRect(left + cx, signY - 10 + cy, Math.min(cell, body - cx), cell);
+            }
+        }
+    }
+    ctx.fillStyle = finish ? '#ffffff' : '#1b3f86';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, finish ? left + body / 2 : left + tip + body / 2, signY + h / 2 + 1);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/**
+ * A simple starting gate standing on the turf: a white frame over `stalls`
+ * stalls, each with a pair of closed front doors and a number. `x` is its
+ * left edge; returns its right edge.
+ */
+function startingGate(ctx: SKRSContext2D, x: number, ground: number, stalls: number): number {
+    const stall = 24;
+    const height = 66;
+    const top = ground - height;
+    const width = stalls * stall + 4;
+    ctx.fillStyle = 'rgba(20, 60, 30, 0.25)';
+    ctx.fillRect(x + 3, ground - 4, width, 5);
+    // The number board across the top.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, top, width, 18);
+    for (let i = 0; i < stalls; i += 1) {
+        const sx = x + 2 + i * stall;
+        // Two closed doors, meeting in the middle.
+        const door = ctx.createLinearGradient(0, top + 16, 0, ground);
+        door.addColorStop(0, '#dfe7f2');
+        door.addColorStop(1, '#b9c8dc');
+        ctx.fillStyle = door;
+        ctx.fillRect(sx + 2, top + 18, stall - 4, height - 20);
+        ctx.fillStyle = 'rgba(27, 63, 134, 0.35)';
+        ctx.fillRect(sx + stall / 2 - 0.5, top + 18, 1, height - 20);
+        ctx.fillRect(sx + 2, top + 18 + (height - 20) / 2, stall - 4, 1);
+        // The stall's number on the beam.
+        ctx.fillStyle = '#1b3f86';
+        ctx.font = font('700 11px');
+        ctx.textAlign = 'center';
+        ctx.fillText(String(i + 1), sx + stall / 2, top + 13);
+        ctx.textAlign = 'left';
+    }
+    // The frame: a beam across the top and a pillar between every stall.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, top, width, 4);
+    ctx.fillRect(x, top + 16, width, 3);
+    for (let i = 0; i <= stalls; i += 1) ctx.fillRect(x + i * stall, top, 4, height);
+    ctx.strokeStyle = 'rgba(40, 90, 140, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, top + 0.5, width - 1, height - 1);
+    return x + width;
+}
+
+/**
+ * The race (Verillia, 2026-10-26: "could we have the mascot run across, with
+ * their progress depending on their position in the rank bracket?"). The
+ * track runs from the start post (the band's bottom cutoff) to the finish
+ * post (the next cutoff up), with her food piled past the finish. She runs
+ * at `race.progress` along it, leaning forward, a little off the ground,
+ * with speed lines and dust behind her.
+ */
+function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, race: SceneRace, food: FoodArt | null) {
+    // The rail's posts end 18px above the ground line; the signposts match.
+    const postBottom = ground - 18;
+    const gateRight = startingGate(ctx, SIDE + 4, ground, 3);
+    const startX = onRailPost(gateRight + 14);
+    const finishX = onRailPost(w - SIDE - (food ? 215 : 150));
+    trackPost(ctx, startX, postBottom, race.start, false);
+    if (food) drawMealPile(ctx, food, w - SIDE - 100, ground);
+    else drawFoodPile(ctx, w - SIDE - 70, ground, 100, false);
+
+    // Short enough to run under the hanging food.
+    const artH = Math.min(130, ground - 68);
+    const artW = (art.width / art.height) * artH;
+    const progress = Math.max(0, Math.min(1, race.progress));
+    // Her centre runs from just past the start post to the finish post.
+    const cx = startX + artW / 2 + 10 + progress * (finishX - startX - artW / 2 - 10);
+    const hop = 8;
+    const feetY = ground - hop;
+
+    // Speed lines and dust behind her.
+    ctx.lineCap = 'round';
+    for (const [dy, len, alpha] of [[0.3, 46, 0.85], [0.48, 64, 0.7], [0.66, 40, 0.8]] as const) {
+        const y = feetY - artH * (1 - dy);
+        const from = cx - artW * 0.55;
+        const g = ctx.createLinearGradient(from - len, 0, from, 0);
+        g.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        g.addColorStop(1, `rgba(255, 255, 255, ${alpha})`);
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(from - len, y);
+        ctx.lineTo(from, y);
+        ctx.stroke();
+    }
+    ctx.lineCap = 'butt';
+    for (const [dx, r, alpha] of [[-0.45, 7, 0.55], [-0.75, 5, 0.4], [-1.0, 3.5, 0.3]] as const) {
+        ctx.fillStyle = `rgba(235, 225, 200, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(cx + artW * dx, ground - 4 - r * 0.6, r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    groundShadow(ctx, cx, ground, artW * 0.32);
+
+    // Lean forward about the feet.
+    ctx.save();
+    ctx.translate(cx, feetY);
+    ctx.rotate(0.12);
+    ctx.drawImage(art, -artW / 2, -artH, artW, artH);
+    ctx.restore();
+
+    // The finish post goes over her, so she runs behind it, not through it.
+    trackPost(ctx, finishX, postBottom, race.finish, true);
 }
 
 /** A carrot lying at `angle`, its leaves at the thick end. */
