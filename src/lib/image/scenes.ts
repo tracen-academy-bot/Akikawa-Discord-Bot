@@ -18,8 +18,8 @@ import type { Palette } from './theme';
  *   confetti   a warm wash with tumbling, shaded confetti, sequins and
  *              curled streamers, densest at the top and thinning downwards
  *   oguri      Oguri Cap: a blue sky with clouds and a garland of her food
- *              (onigiri, carrots, dango, buns), her gold star, and a white
- *              rail on mown turf with food piled up (she is famously hungry)
+ *              (onigiri, carrots, dango, buns), and a white rail on mown
+ *              turf with food piled up (she is famously hungry)
  *
  * A scene may also show a picture from `src/assets/scenes/<scene>.png`,
  * standing on the right of the band, when one is there. None is shipped: a
@@ -446,21 +446,8 @@ function drawStreamer(
 
 // ─── Oguri ────────────────────────────────────────────────────────────────────
 
-/** Oguri Cap's blue (umamusu.wiki), and the gold of her star. */
+/** Oguri Cap's blue (umamusu.wiki). */
 const OGURI_BLUE = '#3a7ad2';
-const OGURI_GOLD = '#ffcc33';
-
-/** A five-pointed star path centred on (cx, cy). */
-function starPath(ctx: SKRSContext2D, cx: number, cy: number, outer: number, inner: number, turn: number) {
-    ctx.beginPath();
-    for (let i = 0; i < 10; i += 1) {
-        const r = i % 2 === 0 ? outer : inner;
-        const a = turn - Math.PI / 2 + (i * Math.PI) / 5;
-        if (i === 0) ctx.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-        else ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-    }
-    ctx.closePath();
-}
 
 /** A four-pointed twinkle. */
 function twinkle(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string) {
@@ -508,8 +495,9 @@ function onigiri(ctx: SKRSContext2D, x: number, y: number, size: number, tilt: n
     ctx.shadowBlur = 4;
     ctx.shadowOffsetY = 2;
     ctx.fillStyle = '#fffdf7';
-    ctx.strokeStyle = '#e4ddcf';
-    ctx.lineWidth = 1.5;
+    // A firm beige edge, so white rice holds its shape against white cloud.
+    ctx.strokeStyle = '#b3a487';
+    ctx.lineWidth = Math.max(1.5, size / 16);
     ctx.lineJoin = 'round';
     ctx.beginPath();
     ctx.moveTo(0, -half);
@@ -534,9 +522,9 @@ function onigiri(ctx: SKRSContext2D, x: number, y: number, size: number, tilt: n
 }
 
 /**
- * Oguri Cap: her blue sky, clouds, a garland of pennants in her colours,
- * her gold star, and a white rail on mown turf just above the cards, with a
- * stack of onigiri on the grass. `art`, when given, stands on the right.
+ * Oguri Cap: her blue sky, clouds, a garland hung with her food, and a
+ * white rail on mown turf just above the cards, with food piled on the
+ * grass. `art`, when given, stands on the right among it.
  */
 function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null) {
     const rand = seeded(1987);
@@ -549,36 +537,14 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, w, h);
 
-    // Clouds, away from the star on the left.
-    for (let i = 0; i < Math.max(3, Math.round(w / 260)); i += 1) {
-        const x = w * 0.25 + rand() * w * 0.75;
-        cloud(ctx, x, hero * (0.3 + rand() * 0.28), 26 + rand() * 22, rand);
+    // Clouds across the whole sky, small and low enough to sit under the
+    // hanging food rather than behind it, where white food on white cloud
+    // would vanish.
+    const clouds = Math.max(3, Math.round(w / 240));
+    for (let i = 0; i < clouds; i += 1) {
+        const x = (w / clouds) * (i + 0.2 + rand() * 0.6);
+        cloud(ctx, x, hero * (0.6 + rand() * 0.12), 20 + rand() * 12, rand);
     }
-
-    // Her star, glowing.
-    const sx = Math.min(w * 0.14, 130);
-    const sy = hero * 0.42;
-    const sr = hero * 0.27;
-    const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 2.2);
-    glow.addColorStop(0, 'rgba(255, 236, 150, 0.75)');
-    glow.addColorStop(1, 'rgba(255, 236, 150, 0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(sx, sy, sr * 2.2, 0, Math.PI * 2);
-    ctx.fill();
-    starPath(ctx, sx, sy, sr, sr * 0.45, -0.2);
-    const gold = ctx.createLinearGradient(sx - sr, sy - sr, sx + sr, sy + sr);
-    gold.addColorStop(0, '#fff0a0');
-    gold.addColorStop(0.45, OGURI_GOLD);
-    gold.addColorStop(1, '#e09a00');
-    ctx.fillStyle = gold;
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#ffffff';
-    ctx.stroke();
-    starPath(ctx, sx - sr * 0.12, sy - sr * 0.12, sr * 0.38, sr * 0.17, -0.2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-    ctx.fill();
     for (let i = 0; i < Math.round(w / 90); i += 1) {
         twinkle(ctx, rand() * w, rand() * hero * 0.75, 3 + rand() * 5, rand() < 0.5 ? '#ffffff' : '#fff2b0');
     }
@@ -802,7 +768,10 @@ function bun(ctx: SKRSContext2D, x: number, y: number, r: number) {
     ctx.ellipse(x, y + r * 0.15, r, r * 0.8, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = 'rgba(170, 150, 120, 0.7)';
+    ctx.strokeStyle = '#b3a487';
+    ctx.lineWidth = Math.max(1.5, r / 8);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(150, 128, 95, 0.8)';
     ctx.lineWidth = 1;
     for (const a of [-0.7, -0.35, 0, 0.35, 0.7]) {
         ctx.beginPath();

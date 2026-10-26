@@ -433,7 +433,7 @@ export const PALETTES: Record<string, Palette> = {
     oguri: {
         id: 'oguri',
         label: 'Oguri',
-        origin: "Oguri Cap's image colours on the Umamusume wiki (umamusu.wiki, 2026-10-26), blue #3A7AD2 and white #ECE7E7, in a scene of her: blue sky, her gold star, pennants, a white rail and onigiri. Red for behind is her neckerchief.",
+        origin: "Oguri Cap's image colours on the Umamusume wiki (umamusu.wiki, 2026-10-26), blue #3A7AD2 and white #ECE7E7, in a scene of her: blue sky, a garland of her food, a white rail and a food pile. Red for behind is her neckerchief.",
         light: true,
         frame: '#3a7ad2',
         frameEnd: '#ece7e7',
