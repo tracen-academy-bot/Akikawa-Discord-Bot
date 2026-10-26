@@ -27,14 +27,15 @@ looks like Oguri, maybe with a free chibi of her.
     light ones. It is now a steel blue, `#9fb8e6` on dark palettes and
     `#4a6898` on light ones. The check also requires ΔE ≥ 25 between each
     top 3 colour and `text`. Akikawa and Sakura swap their grey for it.
-  - Fwoxie: gold "looks annoying" on light palettes. A gold dark enough to
-    pass 4.5:1 as text on a light card is olive-brown. So light palettes
-    get `medals`: the top 3 names stay in `text`, bold, on a gold, silver
-    or bronze pill (`#ffd23f`, `#cfd9e8`, `#f2a46c`) with a faint
-    hairline. The same applies in the sidebar's Top 3, and those rows drop
-    the left bar. The check requires text on each medal at 4.5:1 or more
-    (it is 7:1 or more) and the medals at ΔE ≥ 35 from each other. Dark
-    palettes keep coloured names.
+  - Fwoxie: gold "looks annoying" on light palettes; "cream looks not like
+    gold". A gold dark enough to pass 4.5:1 on a light card is olive-brown.
+    Medal chips were tried and rejected ("just the text color").
+  - Light palettes now use a real gold, `#a87800`, about 3.2:1 on the
+    cards, and a brown bronze, `#7f3f1a`, kept away from the behind red.
+  - Place colours are only bold top 3 names and the 4th-place bar, so
+    `scripts/palettes.ts` now holds them to the 3:1 floor for large bold
+    text and graphics. That is a deliberate trade-off. Our names are bold
+    but 15 to 18px, a little under WCAG's large-text size of 18.66px.
 - **Oguri scene** (`scenes.ts`): her blue sky with clouds, a garland of
   pennants in her blue, white and gold, her gold star glowing, and a white
   rail on mown turf. A stack of onigiri stands for her appetite. It

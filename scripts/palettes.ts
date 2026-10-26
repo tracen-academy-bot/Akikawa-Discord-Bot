@@ -48,7 +48,11 @@ function contrastRows(p: Palette): { key: string; color: string; ratio: number; 
         ['good', p.good, 4.5],
         ['warn', p.warn, 4.5],
         ['behind', p.behind, 4.5],
-        ...p.place.map((c, i): [string, string, number] => [`place ${i + 1}`, c, 4.5]),
+        // Place colours are only bold top 3 names and the 4th-place bar, so
+        // they take the 3:1 floor for large bold text and graphics. A gold
+        // that reaches 4.5:1 on a light card is olive-brown (Fwoxie,
+        // 2026-10-26: "looks annoying"); a real gold sits near 3.2:1.
+        ...p.place.map((c, i): [string, string, number] => [`place ${i + 1}`, c, 3]),
     ];
     const grounds = [p.bg, p.panel, p.stripe];
     return keys.map(([key, color, floor]) => ({ key, color, ratio: Math.min(...grounds.map((g) => contrast(color, g))), floor }));
@@ -123,18 +127,6 @@ function placeDistinctness(p: Palette): string[] {
         for (let j = i + 1; j < 3; j += 1) {
             const d = deltaE(p.place[i]!, p.place[j]!);
             if (d < PLACE_DELTA_E) problems.push(`place ${i + 1} ${p.place[i]} and place ${j + 1} ${p.place[j]} differ by only ${d.toFixed(0)} (need ${PLACE_DELTA_E})`);
-        }
-    }
-    // Medal chips (light palettes): distinct from each other, and the name
-    // on each must read.
-    if (p.medals) {
-        for (let i = 0; i < 3; i += 1) {
-            const ratio = contrast(p.text, p.medals[i]!);
-            if (ratio < 4.5) problems.push(`text ${p.text} on medal ${i + 1} ${p.medals[i]} is only ${ratio.toFixed(2)}:1`);
-            for (let j = i + 1; j < 3; j += 1) {
-                const d = deltaE(p.medals[i]!, p.medals[j]!);
-                if (d < PLACE_DELTA_E) problems.push(`medals ${i + 1} and ${j + 1} differ by only ${d.toFixed(0)} (need ${PLACE_DELTA_E})`);
-            }
         }
     }
     // Each must also stand out from an ordinary name, or it reads as plain text.
