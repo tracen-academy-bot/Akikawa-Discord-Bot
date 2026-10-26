@@ -36,6 +36,16 @@ replaces the plush.
   - The burger leans inwards against the ramen bowl (0.22 rad): bottom on
     the tray, top on the bowl's upper side.
   - The rice bowl sits a little further out, so the ramen's seaweed shows.
+
+**Image quality.** Fwoxie: "can the pic be higher quality?". The fan report
+now renders at `RENDER_SCALE` = 2 (`cards.ts`).
+- Layout stays in plain pixels; each canvas is twice the size and its
+  context scaled. `withScene` lays out at plain size and draws the report
+  into its own 2x canvas.
+- Tall is now 1800px wide and wide 3400px. Files are about 0.7-1 MB, well
+  under Discord's upload limit.
+- The chibi and the food pictures are large enough for 2x at the sizes
+  drawn.
   - The signposts snap onto the nearest rail post (`onRailPost`). Before,
     one landed 2px beside a rail post and read as a doubled post.
   - The rail is drawn posts first, then the bars, so the bars cross in

@@ -122,6 +122,14 @@ export function seeded(seed: number): () => number {
     };
 }
 
+/**
+ * Pixels per layout pixel in the fan report. Layout is in plain pixels; the
+ * canvas is this many times larger, so text and edges stay sharp when the
+ * image is opened full size or zoomed (Fwoxie, 2026-10-26: "can the pic be
+ * higher quality?").
+ */
+export const RENDER_SCALE = 2;
+
 /** Paints the backdrop behind the cards in the palette's frame style. */
 export function drawFrame(ctx: SKRSContext2D, w: number, h: number, p: Palette) {
     // A scene is painted round the finished report (`withScene`), so the

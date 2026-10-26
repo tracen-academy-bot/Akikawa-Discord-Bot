@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import * as path from 'node:path';
 import { createCanvas, loadImage, type Canvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
-import { seeded } from './cards';
+import { RENDER_SCALE, seeded } from './cards';
 import { font } from './fonts';
 import type { Palette } from './theme';
 
@@ -147,14 +147,18 @@ export async function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wi
     const hero = HERO[layout];
     const offsetX = SIDE - INNER;
     const offsetY = hero - INNER;
-    const w = report.width + offsetX * 2;
-    const h = report.height + offsetY + offsetX;
-    const canvas = createCanvas(w, h);
+    // The report is already at RENDER_SCALE; lay out in plain pixels.
+    const reportW = report.width / RENDER_SCALE;
+    const reportH = report.height / RENDER_SCALE;
+    const w = reportW + offsetX * 2;
+    const h = reportH + offsetY + offsetX;
+    const canvas = createCanvas(w * RENDER_SCALE, h * RENDER_SCALE);
     const ctx = canvas.getContext('2d');
+    ctx.scale(RENDER_SCALE, RENDER_SCALE);
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), race, await foodArt());
-    ctx.drawImage(report, offsetX, offsetY);
+    ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     return canvas;
 }
 

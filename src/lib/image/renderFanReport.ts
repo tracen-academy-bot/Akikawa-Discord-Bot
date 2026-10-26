@@ -3,7 +3,7 @@ import type { ClubRank } from '@prisma/client';
 import { PALETTES, DEFAULT_PALETTE, dashNum, type Palette } from './theme';
 import { font } from './fonts';
 import { withScene, type SceneRace } from './scenes';
-import { card, drawFrame, fillRound, fit, innerRadius, label, text, wrap, wrapWords } from './cards';
+import { RENDER_SCALE, card, drawFrame, fillRound, fit, innerRadius, label, text, wrap, wrapWords } from './cards';
 import { loadClubIcon, loadRankIcon } from './canvasUtils';
 import type { LastDayGains } from '../fans/readings';
 import type { RankBand } from '../fans/cutoff';
@@ -728,8 +728,9 @@ function renderTall(d: Prepared): Canvas {
     const height =
         FRAME + headerH + GAP + tableH + (behindH > 0 ? GAP + behindH : 0) + (streakH > 0 ? GAP + streakH : 0) + footerH + FRAME;
 
-    const canvas = createCanvas(width, height);
+    const canvas = createCanvas(width * RENDER_SCALE, height * RENDER_SCALE);
     const ctx = canvas.getContext('2d');
+    ctx.scale(RENDER_SCALE, RENDER_SCALE);
     drawFrame(ctx, width, height, p);
 
     // Header: identity left, rank and badge right, figures, progress.
@@ -825,8 +826,9 @@ function renderWide(d: Prepared): Canvas {
     const mode: 'right' | 'under' | 'span' = n > 0 && d.onPace.length === 0 ? 'span' : underH < rightH ? 'under' : 'right';
     const contentH = mode === 'span' ? Math.max(sideMin, behindHeight(n, 3)) : mode === 'under' ? underH : rightH;
     const height = FRAME * 2 + contentH;
-    const canvas = createCanvas(width, height);
+    const canvas = createCanvas(width * RENDER_SCALE, height * RENDER_SCALE);
     const ctx = canvas.getContext('2d');
+    ctx.scale(RENDER_SCALE, RENDER_SCALE);
     drawFrame(ctx, width, height, p);
 
     // Sidebar.
