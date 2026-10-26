@@ -4,7 +4,7 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
-## 2026-10-26 — Oguri theme; report layout ticks in a new /club look form
+## 2026-10-26 — Oguri theme; report layout ticks; quota moves to /club fancount
 
 Asked for: a palette from Oguri Cap's two main colours (from the
 Umamusume wiki), and a tick for tall/wide next to the palette choice, with
@@ -21,12 +21,18 @@ both allowed and at least one required.
   renders one image per ticked layout, tall first. Tall keeps its old file
   name. `CircleReport.image` became `images`, and every sender attaches
   all of them.
-- **`/club look`**: Discord allows 5 fields per form, and `/club reports`
-  already used all five. So the theme moved out of `/club reports` into a
-  new form, with a checkbox group for the layouts (required, 1 to 2
-  ticks). Every save replies with a preview in the saved look. An empty or
-  unknown layout answer keeps the stored layouts. Untracked clubs are
-  refused, since they have no report.
+- **Forms**: Discord allows 5 fields per form, and `/club reports` already
+  used all five. A separate `/club look` form went in first. Fwoxie then
+  asked to spread the fields across the existing commands instead:
+  - `/club reports` (tracked clubs only) now holds report time, time zone,
+    theme, and a checkbox group for the layouts (required, 1 to 2 ticks).
+    A new theme or layout is answered with a preview.
+  - The quota and its period are set only with `/club fancount`. Leaving
+    out the period now keeps the current one; before, it reset to month.
+    Its reply carries the rank cutoff line that the form used to show.
+  - Untracked clubs have no report, so `/club reports` points them to
+    `/club fancount`. The form-only helpers (`quotaInputValue`, the quota
+    fields) are gone.
 - **Fix**: the behind card's key said "cream <1 day", left over from before
   `warn` became yellow. It now says "yellow" on dark palettes and "amber"
   on light ones.

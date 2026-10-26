@@ -29,12 +29,10 @@ import { DEFAULT_PALETTE, PALETTES, paletteOf } from '../lib/image/theme';
 import { FAN_REPORT_LAYOUTS, layoutsOf, type FanReportLayout } from '../lib/image/renderFanReport';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
-import { toSafeNumber } from '../lib/fans/metrics';
 import { PERIOD_CHOICES, RANK_CHOICES, clubQuotaText, formatRank } from '../lib/clubFormat';
 import { cutoffDetail, cutoffForRank, cutoffLine } from '../lib/fans/cutoff';
 import { publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
 import { buildProfileModal } from './clubProfile';
-import { parseQuota } from './fans';
 import {
     COMMON_ZONES,
     JAPAN_TIME_ZONE,
@@ -84,20 +82,6 @@ async function clubSummary(club: Club): Promise<ClubSummary> {
     return { id: club.id, name: club.name, rank: club.rank, headcount: await clubHeadcount(club), quotaText: clubQuotaText(club) };
 }
 
-/**
- * The quota as the form's text field shows it, exactly, so saving the form
- * unchanged keeps the same number: 90000000 is "90M", 2500000 is "2500K".
- * An old club fan count (in millions) stands in when no quota was set.
- */
-function quotaInputValue(club: Club): string {
-    const quota = toSafeNumber(club.quota);
-    if (quota === 0) return club.fanCountAmount === null ? '' : `${club.fanCountAmount}M`;
-    if (quota % 1_000_000_000 === 0) return `${quota / 1_000_000_000}B`;
-    if (quota % 1_000_000 === 0) return `${quota / 1_000_000}M`;
-    if (quota % 1_000 === 0) return `${quota / 1_000}K`;
-    return String(quota);
-}
-
 async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId: string): Promise<Club | null> {
     const club = await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId! } });
     if (!club) {
@@ -112,13 +96,13 @@ async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId:
 /** The `theme` choice that clears a club's theme back to the default. */
 const DEFAULT_THEME_CHOICE = 'default';
 
-/** Report theme choices in the `/club look` form: the default, then every palette. Discord allows 25. */
+/** Report theme choices in the `/club reports` form: the default, then every palette. Discord allows 25. */
 const THEME_CHOICES = [
     { name: `Default (${PALETTES[DEFAULT_PALETTE]!.label})`, value: DEFAULT_THEME_CHOICE },
     ...Object.values(PALETTES).map((p) => ({ name: `${p.label}${p.light ? ' (light)' : ''}`, value: p.id })),
 ].slice(0, 25);
 
-/** Report layout choices in the `/club look` form; at least one is ticked. */
+/** Report layout choices in the `/club reports` form; at least one is ticked. */
 const LAYOUT_CHOICES: Record<FanReportLayout, { label: string; description: string }> = {
     tall: { label: 'Tall', description: 'One column. Reads best on a phone.' },
     wide: { label: 'Wide', description: 'Three panels side by side. Reads best on a computer.' },
@@ -178,20 +162,15 @@ export const data = new SlashCommandBuilder()
             .setDescription("Set a club's quota per member. Club trainers/assistants or Club Managers only.")
             .addStringOption((opt) => opt.setName('club').setDescription('Club to update').setRequired(true).setAutocomplete(true))
             .addStringOption((opt) => opt.setName('amount').setDescription('Per member, in millions, e.g. 50M, 0.5M').setRequired(true))
-            .addStringOption((opt) => opt.setName('period').setDescription('Per day, week, 2 weeks or month (default month)').setRequired(false).addChoices(...PERIOD_CHOICES))
+            .addStringOption((opt) => opt.setName('period').setDescription('Per day, week, 2 weeks or month (default: keep the current one)').setRequired(false).addChoices(...PERIOD_CHOICES))
     )
     .addSubcommand((sub) =>
         sub
             .setName('reports')
-            .setDescription("Set a club's quota and report time (its staff or Club Managers).")
+            .setDescription("Set a club's report time, theme and layout (its staff or Club Managers).")
             .addStringOption((opt) => opt.setName('club').setDescription('Club').setRequired(true).setAutocomplete(true))
     )
-    .addSubcommand((sub) =>
-        sub
-            .setName('look')
-            .setDescription("Pick a club's report theme and layout, with a preview (its staff or Club Managers).")
-            .addStringOption((opt) => opt.setName('club').setDescription('Club').setRequired(true).setAutocomplete(true))
-    )
+
     .addSubcommandGroup((group) =>
         group
             .setName('member')
@@ -279,9 +258,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             break;
         case 'reports':
             await handleReports(interaction, member);
-            break;
-        case 'look':
-            await handleLook(interaction, member);
+
             break;
     }
     // A club's card shows its name, rank and quota; create and delete change the list.
@@ -350,13 +327,14 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
 // ─── Forms ────────────────────────────────────────────────────────────────────
 
 /**
- * A club's settings live in four forms, split by who may change them and by
- * Discord's limit of five fields per form:
+ * A club's settings live in three forms and one command, split by who may
+ * change them and by Discord's limit of five fields per form:
  *
- *   /club reports  the club's staff and Club Managers: quota, quota period,
- *                  and for a tracked club its report time and time zone.
- *   /club look     the same people, tracked clubs only: the report theme and
- *                  layouts (tall, wide or both), answered with a preview.
+ *   /club fancount the club's staff and Club Managers: the quota and its
+ *                  period, as command options.
+ *   /club reports  the same people, tracked clubs only: report time, time
+ *                  zone, theme and layouts (tall, wide or both). A new look
+ *                  is answered with a preview.
  *   /club profile  the club's staff (Club Managers also set the tier): bio,
  *                  rules, banner. See `clubProfile.ts`.
  *   /club admin    Club Managers only: who and where. The name (a club
@@ -370,12 +348,9 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
  */
 const REPORTS_MODAL_PREFIX = 'club:reports:';
 const ADMIN_MODAL_PREFIX = 'club:admin:';
-const LOOK_MODAL_PREFIX = 'club:look:';
 const FIELD = {
     name: 'club:name',
     rank: 'club:rank',
-    quota: 'club:quota',
-    period: 'club:period',
     time: 'club:report-time',
     zone: 'club:report-zone',
     home: 'club:home',
@@ -419,13 +394,12 @@ async function formLinks(club: Club, guild: LinkableGuild | null): Promise<ClubF
 
 /** True for a modal this module owns. */
 export function isClubModal(customId: string): boolean {
-    return [REPORTS_MODAL_PREFIX, ADMIN_MODAL_PREFIX, LOOK_MODAL_PREFIX].some((prefix) => customId.startsWith(prefix));
+    return customId.startsWith(REPORTS_MODAL_PREFIX) || customId.startsWith(ADMIN_MODAL_PREFIX);
 }
 
-/** Handles a submitted `/club reports`, `/club look` or `/club admin` form. */
+/** Handles a submitted `/club reports` or `/club admin` form. */
 export async function handleClubModal(interaction: ModalSubmitInteraction) {
     if (interaction.customId.startsWith(ADMIN_MODAL_PREFIX)) return handleAdminModal(interaction);
-    if (interaction.customId.startsWith(LOOK_MODAL_PREFIX)) return handleLookModal(interaction);
     return handleReportsModal(interaction);
 }
 
@@ -496,36 +470,22 @@ function rankField(club: Club): LabelBuilder {
 }
 
 /**
- * Builds the `/club reports` form: quota and period, and for a tracked club
- * its report time and time zone. The same form for the club's staff and Club
- * Managers. The expected rank is in `/club admin`; the theme and layout in
- * `/club look`, since a form holds at most five fields.
+ * Builds the `/club reports` form for a tracked club: when the daily report
+ * posts (time and time zone) and how it looks (theme and layouts). The same
+ * form for the club's staff and Club Managers. The quota is set with
+ * `/club fancount`, the expected rank in `/club admin`.
  */
 export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
-    const labels: LabelBuilder[] = [];
-    const quotaValue = quotaInputValue(club);
-    const quota = new TextInputBuilder().setCustomId(FIELD.quota).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(20);
-    if (quotaValue) quota.setValue(quotaValue);
-    labels.push(
-        new LabelBuilder()
-            .setLabel('Quota per member')
-            .setDescription('Fans each member owes per period, e.g. 90M, 500K or 1.2B. Empty to clear.')
-            .setTextInputComponent(quota),
-        new LabelBuilder().setLabel('Quota period').setStringSelectMenuComponent(
-            new StringSelectMenuBuilder()
-                .setCustomId(FIELD.period)
-                .addOptions(PERIOD_CHOICES.map((p) => ({ label: p.name, value: p.value, default: p.value === club.quotaPeriod }))),
-        ),
-    );
-
-    // A club without uma.moe tracking has no report to time.
-    if (club.circleId !== null) {
-        const own = hasOwnReportTime(club);
-        const time = new TextInputBuilder().setCustomId(FIELD.time).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(10).setPlaceholder('21:00');
-        if (own) time.setValue(formatTimeOfDay(club.reportMinute!));
-        const current = own ? club.reportTimeZone! : JAPAN_TIME_ZONE;
-        const zones = COMMON_ZONES.some((z) => z.zone === current) ? COMMON_ZONES : [...COMMON_ZONES, { label: current, zone: current }];
-        labels.push(
+    const own = hasOwnReportTime(club);
+    const time = new TextInputBuilder().setCustomId(FIELD.time).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(10).setPlaceholder('21:00');
+    if (own) time.setValue(formatTimeOfDay(club.reportMinute!));
+    const current = own ? club.reportTimeZone! : JAPAN_TIME_ZONE;
+    const zones = COMMON_ZONES.some((z) => z.zone === current) ? COMMON_ZONES : [...COMMON_ZONES, { label: current, zone: current }];
+    const layouts = layoutsOf(club.reportLayouts);
+    return new ModalBuilder()
+        .setCustomId(`${REPORTS_MODAL_PREFIX}${club.id}`)
+        .setTitle(`${club.name} reports`.slice(0, 45))
+        .addLabelComponents(
             new LabelBuilder()
                 .setLabel('Report time')
                 .setDescription('When the daily report posts, e.g. 21:00 or 9pm. Empty: the daily reset, 00:00 JST.')
@@ -542,99 +502,9 @@ export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
                         })),
                     ),
             ),
-        );
-    }
-    return new ModalBuilder()
-        .setCustomId(`${REPORTS_MODAL_PREFIX}${club.id}`)
-        .setTitle(`${club.name} reports`.slice(0, 45))
-        .addLabelComponents(...labels);
-}
-
-/** `/club reports`: opens the form for the club's staff or a Club Manager. */
-async function handleReports(interaction: ChatInputCommandInteraction, member: GuildMember) {
-    const club = await findClubOrReply(interaction, interaction.options.getString('club', true));
-    if (!club) return;
-    if (!(await canManageClubStats(member, club))) {
-        await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)] });
-        return;
-    }
-    await interaction.showModal(buildReportsModal(club));
-}
-
-/** Handles a submitted `/club reports` form. */
-async function handleReportsModal(interaction: ModalSubmitInteraction) {
-    const clubId = interaction.customId.slice(REPORTS_MODAL_PREFIX.length);
-    const refuse = (text: string) => interaction.reply({ embeds: [errorEmbed(text)], flags: MessageFlags.Ephemeral });
-
-    const club = clubId ? await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId ?? '' } }) : null;
-    if (!club) return void (await refuse('That club no longer exists.'));
-    if (!(await canManageClubStats(interaction.member as GuildMember, club))) {
-        return void (await refuse(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
-    }
-
-    // The quota replaces the old club fan count, which is cleared so it
-    // never shows as a second, stale number.
-    const data: {
-        quota: bigint;
-        quotaPeriod: QuotaPeriod;
-        fanCountAmount: null;
-        fanCountPeriod: null;
-        reportMinute?: number | null;
-        reportTimeZone?: string | null;
-    } = { quota: BigInt(0), quotaPeriod: club.quotaPeriod, fanCountAmount: null, fanCountPeriod: null };
-
-    const rawQuota = interaction.fields.getTextInputValue(FIELD.quota).trim();
-    if (rawQuota) {
-        const quota = parseQuota(rawQuota);
-        if (quota === null || quota <= 0) return void (await refuse('Quota must be an amount like 90M, 500K, 1.2B or 80,000,000, or empty.'));
-        data.quota = BigInt(quota);
-    }
-    const period = interaction.fields.getStringSelectValues(FIELD.period)[0];
-    if (period && PERIOD_CHOICES.some((p) => p.value === period)) data.quotaPeriod = period as QuotaPeriod;
-
-    if (club.circleId !== null) {
-        const rawTime = interaction.fields.getTextInputValue(FIELD.time).trim();
-        data.reportMinute = null;
-        data.reportTimeZone = null;
-        if (rawTime) {
-            const minute = parseTimeOfDay(rawTime);
-            if (minute === null) return void (await refuse(`**${rawTime}** is not a time. Try 21:00, 9pm or 9:30 pm.`));
-            const zone = interaction.fields.getStringSelectValues(FIELD.zone)[0] ?? JAPAN_TIME_ZONE;
-            if (!isTimeZone(zone)) return void (await refuse('That time zone is not available. Pick another.'));
-            data.reportMinute = minute;
-            data.reportTimeZone = zone;
-        }
-    }
-
-    const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
-    const headcount = await clubHeadcount(updated);
-    const lines = [
-        `**${updated.name}** · expected rank **${formatRank(updated.rank)}**`,
-        `Headcount: **${headcount === null ? '—' : `${headcount}/${MAX_HEADCOUNT}`}** (from uma.moe)`,
-        `Quota: **${clubQuotaText(updated)}** per member`,
-        // What the expected rank is up against, next to the quota it informs.
-        ...(cutoffDetail(cutoffForRank(updated.rank)) ? [cutoffDetail(cutoffForRank(updated.rank))!] : []),
-        ...(updated.circleId !== null ? ['', reportSummary(updated)] : []),
-    ];
-    await interaction.reply({ embeds: [successEmbed('Club updated', lines.join('\n'))] });
-    void refreshDirectory(interaction.guild as unknown as DirectoryGuild | null);
-}
-
-// ─── /club look ───────────────────────────────────────────────────────────────
-
-/**
- * Builds the `/club look` form: the report theme, and which layouts the
- * report posts in. Ticking both posts a tall and a wide image together.
- */
-export function buildLookModal(club: Club): ModalBuilder {
-    const layouts = layoutsOf(club.reportLayouts);
-    return new ModalBuilder()
-        .setCustomId(`${LOOK_MODAL_PREFIX}${club.id}`)
-        .setTitle(`${club.name} report look`.slice(0, 45))
-        .addLabelComponents(
             new LabelBuilder()
                 .setLabel('Report theme')
-                .setDescription('Colours and style of the report image.')
+                .setDescription('Colours and style of the report image. Changing the look shows a preview.')
                 .setStringSelectMenuComponent(
                     new StringSelectMenuBuilder().setCustomId(FIELD.theme).addOptions(
                         THEME_CHOICES.map((t) => ({
@@ -658,8 +528,8 @@ export function buildLookModal(club: Club): ModalBuilder {
         );
 }
 
-/** `/club look`: opens the theme and layout form for a tracked club. */
-async function handleLook(interaction: ChatInputCommandInteraction, member: GuildMember) {
+/** `/club reports`: opens the form for the club's staff or a Club Manager. */
+async function handleReports(interaction: ChatInputCommandInteraction, member: GuildMember) {
     const club = await findClubOrReply(interaction, interaction.options.getString('club', true));
     if (!club) return;
     if (!(await canManageClubStats(member, club))) {
@@ -667,18 +537,20 @@ async function handleLook(interaction: ChatInputCommandInteraction, member: Guil
         return;
     }
     if (club.circleId === null) {
-        await interaction.reply({ embeds: [errorEmbed(`**${club.name}** is not tracked on uma.moe, so it has no fan report to style.`)] });
+        await interaction.reply({
+            embeds: [errorEmbed(`**${club.name}** is not tracked on uma.moe, so it has no fan report. Set its quota with \`/club fancount\`.`)],
+        });
         return;
     }
-    await interaction.showModal(buildLookModal(club));
+    await interaction.showModal(buildReportsModal(club));
 }
 
 /**
- * Handles a submitted `/club look` form and answers with today's report in
- * the saved look, so the club sees what it picked.
+ * Handles a submitted `/club reports` form. A new theme or layout is
+ * answered with today's report in it, so the club sees what it picked.
  */
-async function handleLookModal(interaction: ModalSubmitInteraction) {
-    const clubId = interaction.customId.slice(LOOK_MODAL_PREFIX.length);
+async function handleReportsModal(interaction: ModalSubmitInteraction) {
+    const clubId = interaction.customId.slice(REPORTS_MODAL_PREFIX.length);
     const refuse = (text: string) => interaction.reply({ embeds: [errorEmbed(text)], flags: MessageFlags.Ephemeral });
 
     const club = clubId ? await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId ?? '' } }) : null;
@@ -687,27 +559,46 @@ async function handleLookModal(interaction: ModalSubmitInteraction) {
         return void (await refuse(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
     }
 
-    const data: { reportTheme?: string | null; reportLayouts?: FanReportLayout[] } = {};
+    const data: {
+        reportMinute: number | null;
+        reportTimeZone: string | null;
+        reportTheme?: string | null;
+        reportLayouts?: FanReportLayout[];
+    } = { reportMinute: null, reportTimeZone: null };
+
+    const rawTime = interaction.fields.getTextInputValue(FIELD.time).trim();
+    if (rawTime) {
+        const minute = parseTimeOfDay(rawTime);
+        if (minute === null) return void (await refuse(`**${rawTime}** is not a time. Try 21:00, 9pm or 9:30 pm.`));
+        const zone = interaction.fields.getStringSelectValues(FIELD.zone)[0] ?? JAPAN_TIME_ZONE;
+        if (!isTimeZone(zone)) return void (await refuse('That time zone is not available. Pick another.'));
+        data.reportMinute = minute;
+        data.reportTimeZone = zone;
+    }
     // Not picking leaves the theme as it was.
     const theme = interaction.fields.getStringSelectValues(FIELD.theme)[0];
     if (theme === DEFAULT_THEME_CHOICE) data.reportTheme = null;
     else if (theme && PALETTES[theme]) data.reportTheme = theme;
-    // Discord requires a tick; an empty answer keeps the stored layouts.
+    // Discord requires a tick; an empty or unknown answer keeps the stored layouts.
     const ticked = FAN_REPORT_LAYOUTS.filter((l) => interaction.fields.getCheckboxGroup(FIELD.layouts).includes(l));
     if (ticked.length > 0) data.reportLayouts = ticked;
 
+    const before = layoutsOf(club.reportLayouts).join(',');
+    const lookChanged =
+        (data.reportTheme !== undefined && data.reportTheme !== club.reportTheme) ||
+        (data.reportLayouts !== undefined && data.reportLayouts.join(',') !== before);
     // Rendering the preview can take a moment.
-    await interaction.deferReply();
+    if (lookChanged) await interaction.deferReply();
+
     const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
-    const report = await buildCircleReport(updated);
-    const lines = [
-        `**${updated.name}**`,
-        '',
-        reportSummary(updated),
-        '',
-        report ? "Here is today's report in this look." : 'There is no fan data this month yet, so there is no preview.',
-    ];
-    await interaction.editReply({ embeds: [successEmbed('Report look updated', lines.join('\n'))], files: report ? report.images : [] });
+    const lines = [`**${updated.name}**`, '', reportSummary(updated)];
+    if (lookChanged) {
+        const report = await buildCircleReport(updated);
+        lines.push('', report ? "Here is today's report in the new look." : 'There is no fan data this month yet, so there is no preview.');
+        await interaction.editReply({ embeds: [successEmbed('Reports updated', lines.join('\n'))], files: report ? report.images : [] });
+    } else {
+        await interaction.reply({ embeds: [successEmbed('Reports updated', lines.join('\n'))] });
+    }
 }
 
 /**
@@ -1071,12 +962,16 @@ async function handleFancount(interaction: ChatInputCommandInteraction, member: 
         return;
     }
 
-    // The club fan count is the quota now; amounts here are in millions.
+    // The club fan count is the quota now; amounts here are in millions. The
+    // old fan count is cleared so it never shows as a second, stale number.
     const updated = await prisma.trackedCircle.update({
         where: { id: club.id },
-        data: { quota: BigInt(Math.round(amount * 1_000_000)), quotaPeriod: (period ?? 'MONTH') as QuotaPeriod, fanCountAmount: null, fanCountPeriod: null },
+        data: { quota: BigInt(Math.round(amount * 1_000_000)), quotaPeriod: (period ?? club.quotaPeriod) as QuotaPeriod, fanCountAmount: null, fanCountPeriod: null },
     });
-    await interaction.reply({ embeds: [successEmbed('Quota Updated', `**${updated.name}** quota is now **${clubQuotaText(updated)}** per member.`)] });
+    // What the expected rank is up against, next to the quota it informs.
+    const detail = cutoffDetail(cutoffForRank(updated.rank));
+    const lines = [`**${updated.name}** quota is now **${clubQuotaText(updated)}** per member.`, ...(detail ? [detail] : [])];
+    await interaction.reply({ embeds: [successEmbed('Quota Updated', lines.join('\n'))] });
 }
 
 async function handleMemberSubcommand(interaction: ChatInputCommandInteraction, member: GuildMember, sub: string) {
