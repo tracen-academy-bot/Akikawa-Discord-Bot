@@ -52,7 +52,7 @@ all read on 2026-10-26. Anything not from there is marked.
 | Her blue | the curtains are blue velvet while she is calm, turning red |
 | "Unquenched thirst", vampire | a glass of red wine on the table, spilling over at her worst |
 | Ribbons, gold hearts | white ribbon tie-backs with gold hearts on the curtains; gold heart charms on the lace |
-| Blue diamond (her halter) | a faceted blue gem on the lace marking the club's place between the two ranks; she stands over it |
+| Blue diamond (her halter), heart emoji | a blue heart-cut diamond on the lace marking the club's place between the two ranks; she stands over it |
 | Roses | not canon (only the Rose Stakes); one lies on the calm window's ledge |
 
 **Not used yet:** the veil and heart ring, her diary, coffee or tea, the red thread, and the skill names (possible speech-bubble lines). A red thread from her to the cards needs her chibi to start from; on bare eyes it looked like a tail.

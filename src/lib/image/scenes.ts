@@ -1842,57 +1842,83 @@ function glint(ctx: SKRSContext2D, x: number, y: number, s: number, alpha: numbe
     ctx.fill();
 }
 
-/**
- * The blue diamond from her dress, as a brilliant-cut gem seen from the
- * side, centred on (cx, cy), `r` from girdle to tip: a crown of light and
- * mid-blue facets over a pavilion of deeper ones, a glow, and glints.
- */
-function blueDiamond(ctx: SKRSContext2D, cx: number, cy: number, r: number) {
-    const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 2.6);
-    halo.addColorStop(0, 'rgba(120, 200, 255, 0.7)');
-    halo.addColorStop(1, 'rgba(120, 200, 255, 0)');
-    ctx.fillStyle = halo;
+/** A full, rounded heart outline (point down) centred on (x, y), `s` tall; path only. */
+function gemHeartPath(ctx: SKRSContext2D, x: number, y: number, s: number) {
     ctx.beginPath();
-    ctx.arc(cx, cy, r * 2.6, 0, Math.PI * 2);
-    ctx.fill();
-    const girdle = cy - r * 0.2;
-    const table = cy - r * 0.75;
-    const wide = r;
-    const tableW = r * 0.5;
-    const tip = cy + r;
-    const fill = (colour: string, pts: [number, number][]) => {
-        ctx.fillStyle = colour;
-        ctx.beginPath();
-        ctx.moveTo(pts[0]![0], pts[0]![1]);
-        for (const [px, py] of pts.slice(1)) ctx.lineTo(px, py);
-        ctx.closePath();
-        ctx.fill();
-    };
-    // Crown: the table on top and the facets down to the girdle.
-    fill('#d8f1ff', [[cx - tableW, table], [cx + tableW, table], [cx, girdle]]);
-    fill('#9ed6ff', [[cx - wide, girdle], [cx - tableW, table], [cx, girdle]]);
-    fill('#6fbbf1', [[cx + wide, girdle], [cx + tableW, table], [cx, girdle]]);
-    // Pavilion: down to the tip, light catching the left.
-    fill('#7cc6f7', [[cx - wide, girdle], [cx - wide * 0.35, girdle], [cx, tip]]);
-    fill('#3d8fd6', [[cx - wide * 0.35, girdle], [cx + wide * 0.35, girdle], [cx, tip]]);
-    fill('#225f9e', [[cx + wide * 0.35, girdle], [cx + wide, girdle], [cx, tip]]);
-    ctx.strokeStyle = '#163f6b';
-    ctx.lineWidth = 0.9;
-    ctx.lineJoin = 'round';
-    ctx.beginPath();
-    ctx.moveTo(cx - tableW, table);
-    ctx.lineTo(cx + tableW, table);
-    ctx.lineTo(cx + wide, girdle);
-    ctx.lineTo(cx, tip);
-    ctx.lineTo(cx - wide, girdle);
+    ctx.moveTo(x, y + s * 0.5);
+    ctx.bezierCurveTo(x - s * 0.15, y + s * 0.32, x - s * 0.56, y + s * 0.1, x - s * 0.56, y - s * 0.15);
+    ctx.bezierCurveTo(x - s * 0.56, y - s * 0.43, x - s * 0.2, y - s * 0.53, x, y - s * 0.27);
+    ctx.bezierCurveTo(x + s * 0.2, y - s * 0.53, x + s * 0.56, y - s * 0.43, x + s * 0.56, y - s * 0.15);
+    ctx.bezierCurveTo(x + s * 0.56, y + s * 0.1, x + s * 0.15, y + s * 0.32, x, y + s * 0.5);
     ctx.closePath();
-    ctx.moveTo(cx - wide, girdle);
-    ctx.lineTo(cx + wide, girdle);
+}
+
+/**
+ * A heart-cut blue diamond, her halter's blue diamond, centred on (cx, cy)
+ * and `s` tall. Drawn as a polished stone rather than a diagram: light
+ * pooling in from the upper left through ice blue into a deep sapphire
+ * edge, facets only hinted at by faint lines, a bright rim, a soft
+ * highlight and a single fine glint.
+ */
+function blueHeartGem(ctx: SKRSContext2D, cx: number, cy: number, s: number) {
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, s * 1.5);
+    glow.addColorStop(0, 'rgba(130, 200, 255, 0.55)');
+    glow.addColorStop(1, 'rgba(130, 200, 255, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, s * 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+    gemHeartPath(ctx, cx, cy, s);
+    const body = ctx.createRadialGradient(cx - s * 0.2, cy - s * 0.22, s * 0.04, cx + s * 0.05, cy + s * 0.08, s * 0.62);
+    body.addColorStop(0, '#f2fbff');
+    body.addColorStop(0.3, '#9fd8ff');
+    body.addColorStop(0.65, '#3a8fe0');
+    body.addColorStop(1, '#123a7a');
+    ctx.fillStyle = body;
+    ctx.fill();
+    ctx.clip();
+    // Depth: the lower right falls into shadow.
+    const shade = ctx.createLinearGradient(cx - s * 0.3, cy - s * 0.3, cx + s * 0.4, cy + s * 0.5);
+    shade.addColorStop(0, 'rgba(8, 24, 70, 0)');
+    shade.addColorStop(1, 'rgba(8, 24, 70, 0.45)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+    // Facets, barely there: lines from the culet out to the edge, and the table.
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+    ctx.lineWidth = 0.45;
+    const fx = cx;
+    const fy = cy + s * 0.05;
+    for (let i = 0; i < 10; i += 1) {
+        const a = (i / 10) * Math.PI * 2 + 0.3;
+        ctx.beginPath();
+        ctx.moveTo(fx, fy);
+        ctx.lineTo(fx + Math.cos(a) * s, fy + Math.sin(a) * s);
+        ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+    gemHeartPath(ctx, cx, cy + s * 0.02, s * 0.5);
     ctx.stroke();
-    // The glisten.
-    glint(ctx, cx - r * 0.35, table + r * 0.2, r * 1.3, 0.95);
-    glint(ctx, cx + r * 0.95, cy - r * 0.95, r * 0.8, 0.85);
-    glint(ctx, cx - r * 1.2, cy + r * 0.55, r * 0.55, 0.7);
+    // A soft highlight on the left lobe.
+    const shine = ctx.createRadialGradient(cx - s * 0.28, cy - s * 0.24, 0, cx - s * 0.28, cy - s * 0.24, s * 0.22);
+    shine.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+    shine.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = shine;
+    ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+    ctx.restore();
+
+    // The rim: bright where the light comes from.
+    const rim = ctx.createLinearGradient(cx - s * 0.5, cy - s * 0.5, cx + s * 0.5, cy + s * 0.5);
+    rim.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+    rim.addColorStop(0.5, 'rgba(170, 220, 255, 0.7)');
+    rim.addColorStop(1, 'rgba(40, 90, 170, 0.9)');
+    ctx.strokeStyle = rim;
+    ctx.lineWidth = 0.8;
+    gemHeartPath(ctx, cx, cy, s);
+    ctx.stroke();
+    // One fine glint off the right lobe.
+    glint(ctx, cx + s * 0.36, cy - s * 0.34, s * 0.55, 0.85);
 }
 
 /** Lace scallops are this far apart; the track snaps to them. */
@@ -1908,8 +1934,8 @@ function trackMarker(track: LaceTrack): number {
  * Bobbin lace along `y`: scallops with picot holes, `colour` turning red
  * with mood, and gold heart charms. With a `track`, the holes between the
  * two windows become a strip of lights: gold beads from the bottom cutoff
- * up to the club, the club's place marked with her blue diamond, and dark
- * beyond.
+ * up to the club, the club's place marked with a blue heart-cut diamond,
+ * and dark beyond.
  */
 function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, track: LaceTrack | null) {
     const r = LACE_STEP / 2;
@@ -1970,7 +1996,7 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, trac
         ctx.arc(x, y + 2, x < marker ? hole * 1.15 : hole, 0, Math.PI * 2);
         ctx.fill();
     }
-    blueDiamond(ctx, marker, y + 1, 11);
+    blueHeartGem(ctx, marker, y + 2, 13);
 }
 
 /** How wide `speechBubble` draws `text`; leaves the bubble's font set. */

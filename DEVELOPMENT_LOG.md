@@ -119,6 +119,11 @@ screen red. Food is no longer central.
     ground recedes. In bloom up to the marker; past it, bare stalks with
     closed buds (spider lilies flower before their leaves). Under the side
     table only a short front row grows, so its things stay visible.
+  - The faceted diamond read as "too specific". The marker is now
+    `blueHeartGem`: a heart-cut blue diamond drawn as one polished stone
+    (light pooling from the upper left through ice blue into sapphire,
+    facets only hinted at, a bright rim, a soft highlight, one fine glint),
+    13 px, sitting in the dot's place.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
