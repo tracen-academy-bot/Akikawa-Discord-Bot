@@ -14,13 +14,27 @@ Asked for: "just do a form if you do fancount", and more designs.
   command always read it. An odd quota is pre-filled in M, so saving the
   form unchanged keeps it. Empty clears the quota. Saving refreshes the club
   directory, which shows the quota.
-- **Three backdrop styles** (`cards.ts`): `bursts` (fireworks in the
-  palette's bright colours), `confetti` (small turned strips) and `checker`
-  (a chequered flag). The backdrop shows only in the gaps around the cards,
-  so the bursts are dense enough that their edges read there.
-- **Themes**: Firework (dark navy, orange accent, `bursts`), Confetti
-  (light cream, magenta accent, `confetti`) and Finish Line (charcoal,
-  square and outlined, racing blue, `checker`). All pass
+- **Scenes** (`scenes.ts`, `PaletteStyle.scene`): the first try drew
+  fireworks and confetti as backdrop patterns. Fwoxie: "ew". The backdrop
+  only shows in the 16px gaps around the cards, so a picture there reads
+  as noise. A palette with a scene now renders the report on a transparent
+  background (`drawFrame` skips it). `withScene` then places it on a larger
+  canvas with a 170 to 190px band above the cards and 30px margins, and
+  paints the scene there.
+  - **fireworks:** a night-sky gradient, with stars. It has three kinds of
+    burst: small distant ones, older ones that fade and droop, and big
+    fresh ones. Each spark trail thins and droops under gravity, drawn with
+    additive light. Rockets still climb, and a two-row city skyline sits
+    where the cards begin.
+  - **confetti:** a warm wash with out-of-focus lights and two twisting
+    streamers. The pieces are strips, sequins, triangles and curls. Each
+    narrows with its tilt and shows a darker back, near pieces cast a soft
+    shadow, and they thin out down the margins.
+  - Both come from fixed seeds, so the same report always looks the same.
+- **`checker`** backdrop style (`cards.ts`): a chequered flag.
+- **Themes**: Firework (dark navy, orange accent, fireworks scene),
+  Confetti (light cream, magenta accent, confetti scene) and Finish Line
+  (charcoal, square and outlined, racing blue, `checker`). All pass
   `scripts/palettes.ts`. 16 theme choices of Discord's 25.
 
 ---

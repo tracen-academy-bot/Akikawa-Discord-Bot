@@ -1,7 +1,8 @@
-import { createCanvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
+import { createCanvas, type Canvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import type { ClubRank } from '@prisma/client';
 import { PALETTES, DEFAULT_PALETTE, dashNum, type Palette } from './theme';
 import { font } from './fonts';
+import { withScene } from './scenes';
 import { card, drawFrame, fillRound, fit, innerRadius, label, text, wrap, wrapWords } from './cards';
 import { loadClubIcon, loadRankIcon } from './canvasUtils';
 import type { LastDayGains } from '../fans/readings';
@@ -683,7 +684,7 @@ function drawRank(ctx: SKRSContext2D, d: Prepared, right: number, y: number, ali
 }
 
 /** The phone layout: header, on-pace table, behind card, footer, top to bottom. */
-function renderTall(d: Prepared): Buffer | Promise<Buffer> {
+function renderTall(d: Prepared): Canvas {
     const { p, progress } = d;
     const width = TALL_WIDTH;
     const cardX = FRAME;
@@ -743,7 +744,7 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
         notes.forEach((line, i) => text(ctx, line, cardX + PAD, y + 28 + i * 19, { spec: '400 13px', color: p.muted }));
     }
 
-    return canvas.encode('png');
+    return canvas;
 }
 
 /**
@@ -752,7 +753,7 @@ function renderTall(d: Prepared): Buffer | Promise<Buffer> {
  * on-pace table, and the behind card. The hot streaks fill the height left
  * under whichever of the table and behind card is shorter.
  */
-function renderWide(d: Prepared): Buffer | Promise<Buffer> {
+function renderWide(d: Prepared): Canvas {
     const { p, progress } = d;
     const width = WIDE_WIDTH;
     const sideX = FRAME;
@@ -902,7 +903,7 @@ function renderWide(d: Prepared): Buffer | Promise<Buffer> {
         drawBehindCard(ctx, d.behind, rightX, FRAME, rightW, shown ? behindRight : contentH, 1, d);
     }
 
-    return canvas.encode('png');
+    return canvas;
 }
 
 /** Full month names, shortened to three letters in the report's date: "Oct 24, 2026". */
@@ -936,5 +937,7 @@ export async function renderFanReport(
         empty: progress.members.length === 0 ? 'No fan data ingested for this month yet.' : 'Nobody is on pace yet.',
         notes: footerNotes(last24h),
     };
-    return layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
+    const report = layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
+    // A palette with a scene draws on a transparent background; set it in the scene.
+    return withScene(report, palette, layout).encode('png');
 }

@@ -1,5 +1,6 @@
 import type { SKRSContext2D } from '@napi-rs/canvas';
 import { font } from './fonts';
+import type { SceneId } from './scenes';
 
 /**
  * Visual system shared by every rendered image.
@@ -149,11 +150,14 @@ export interface PaletteStyle {
      *   lanes     diagonal bands, like a mown racecourse
      *   stars     scattered points of `frameEnd` on `frame`
      *   grid      a fine grid of `frameEnd` lines on `frame`
-     *   bursts    firework bursts in the palette's bright colours on `frame`
-     *   confetti  scattered paper strips in the bright colours on `frame`
      *   checker   a chequered flag of `frameEnd` squares on `frame`
      */
-    frameStyle: 'gradient' | 'solid' | 'lanes' | 'stars' | 'grid' | 'bursts' | 'confetti' | 'checker';
+    frameStyle: 'gradient' | 'solid' | 'lanes' | 'stars' | 'grid' | 'checker';
+    /**
+     * An illustrated scene (`scenes.ts`) in a wider margin and a band above
+     * the cards, in place of `frameStyle`. Fan report only.
+     */
+    scene?: SceneId;
 }
 
 /**
@@ -451,7 +455,7 @@ export const PALETTES: Record<string, Palette> = {
     firework: {
         id: 'firework',
         label: 'Firework',
-        origin: 'Night sky: navy cards with firework bursts going off in the gaps, orange sparks for structure.',
+        origin: 'Night sky: navy cards under a band of fireworks over a city skyline, orange sparks for structure.',
         light: false,
         frame: '#090b1c',
         frameEnd: '#1a1f45',
@@ -468,12 +472,12 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#ffe14d',
         behind: '#ff5f7a',
         place: ['#ffd75e', '#e4e2f2', '#ff9f5e', '#7fb8ff'],
-        style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'bursts' },
+        style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'fireworks' },
     },
     confetti: {
         id: 'confetti',
         label: 'Confetti',
-        origin: 'Light and festive: cream cards with confetti scattered around them.',
+        origin: 'Light and festive: cream cards under falling confetti, sequins and streamers.',
         light: true,
         frame: '#fff1d6',
         frameEnd: '#ffe2b0',
@@ -490,7 +494,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#945200',
         behind: '#b3261e',
         place: ['#8a5a00', '#4f5868', '#9a4a12', '#c2185b'],
-        style: { radius: 18, border: null, glow: false, labels: 'plain', frameStyle: 'confetti' },
+        style: { radius: 18, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'confetti' },
     },
     finish: {
         id: 'finish',
