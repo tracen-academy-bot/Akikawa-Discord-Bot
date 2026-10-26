@@ -4,6 +4,43 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Timer rewards: weekly top 3 role, milestones, live and final boards
+
+Asked for: "collect id when people click the start autorun thing" so top
+runners can get roles and there is a leaderboard. The timer already stored
+who pressed Start and every completed run; what was missing was rewards.
+
+- **Weeks** run Monday 00:00 to Sunday 24:00 in the timer's day time zone
+  (JST, `TIMER_STREAK_TIMEZONE`), the same day keys as streaks. A run counts
+  in the week its 50 minutes ended in.
+- **Weekly top 3** (`rewards.ts`, `runWeeklyAwards`): 15 minutes into a new
+  week the timer loop (checked once a minute) claims the old week in
+  `TimerSettings.lastAwardedWeek`, so it is awarded once even across
+  restarts, then takes the role off last week's holders (from
+  `TimerWeeklyAward`, so only people the bot gave it to) and gives it to the
+  new top 3. Ties go to whoever reached their count first. The final board
+  posts in the chosen channel, pinging the winners. A new settings row starts
+  at last week, so turning it on mid-week does not award an earlier week.
+- **Milestones** (`TimerMilestoneRole`): kept for good; given when a run
+  makes the total exactly the milestone (runs rise by one, so each is met
+  once) and mentioned in the expiry ping without pinging the role; given to
+  everyone already past it when added.
+- **Commands**: `/timer rewards [top_role] [channel] [off]`, `/timer
+  milestone add|remove`, Club Managers only. Roles the bot cannot give
+  (above its own, integration roles, @everyone) are refused up front.
+- **Leaderboards**: this week (live, the default for the command and panel
+  button), last week (final), last 30 days, all time; the dashboard's
+  training page uses the same four. The image is redrawn in the report's
+  card style: a podium for the top 3 with a line on the role, then bars.
+  Header totals cover everyone, not only the rows shown.
+- Shared drawing pieces moved from `renderFanReport.ts` to
+  `src/lib/image/cards.ts`.
+
+Migration `20261026120000_add_timer_rewards` (three new tables). The
+streak leaderboard is deferred.
+
+---
+
 ## 2026-10-26 — Hot streaks replace "Closest to the line"
 
 GimmeKiss (2026-10-25): "Closest to the line" listed people 50M ahead as

@@ -142,10 +142,109 @@ async function main() {
     check('heatmap: nothing on the UTC weekday/hour', heat.grid[0]?.[15], 0);
     check('heatmap: max and total', [heat.max, heat.total], [2, 3]);
 
+    await rewardChecks();
+
     await prisma.trainingRun.deleteMany({ where: { guildId: G } });
     await prisma.trainingTimer.deleteMany({ where: { guildId: G } });
     await prisma.$disconnect();
     console.log(`\n${pass} passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);
 }
+/**
+ * Weekly top-runner awards and milestone roles. The week of Mon 2026-10-19 to
+ * Sun 2026-10-25 JST runs from 2026-10-18 15:00 UTC to 2026-10-25 15:00 UTC.
+ */
+async function rewardChecks() {
+    const rewards = await import('../src/lib/timer/rewards');
+    const G2 = 'test-guild-rewards';
+    const clean = async () => {
+        await prisma.trainingRun.deleteMany({ where: { guildId: G2 } });
+        await prisma.timerSettings.deleteMany({ where: { guildId: G2 } });
+        await prisma.timerMilestoneRole.deleteMany({ where: { guildId: G2 } });
+        await prisma.timerWeeklyAward.deleteMany({ where: { guildId: G2 } });
+    };
+    await clean();
+
+    // ── Weeks ─────────────────────────────────────────────────────────────────
+    check('Monday 00:00 JST starts its week', rewards.weekKey(new Date('2026-10-18T15:00:00Z')), '2026-10-19');
+    check('Sunday 23:59 JST is still the week before', rewards.weekKey(new Date('2026-10-18T14:59:00Z')), '2026-10-12');
+    check('the last minute of the week', rewards.weekKey(new Date('2026-10-25T14:59:00Z')), '2026-10-19');
+    check('the week ends Monday 00:00 JST', rewards.nextWeekStart(new Date('2026-10-21T00:00:00Z')).toISOString(), '2026-10-25T15:00:00.000Z');
+    check('a week label', rewards.weekLabel('2026-10-19'), 'Oct 19 – Oct 25');
+
+    // ── Standings ─────────────────────────────────────────────────────────────
+    const run = (user: string, iso: string) =>
+        prisma.trainingRun.create({ data: { guildId: G2, discordUserId: user, startedAt: new Date(iso), completedAt: new Date(iso) } });
+    for (const iso of ['2026-10-19T03:00:00Z', '2026-10-20T03:00:00Z', '2026-10-21T03:00:00Z']) await run('alice', iso);
+    for (const iso of ['2026-10-19T04:00:00Z', '2026-10-20T04:00:00Z', '2026-10-22T03:00:00Z']) await run('bob', iso);
+    for (const iso of ['2026-10-19T05:00:00Z', '2026-10-23T05:00:00Z']) await run('carol', iso);
+    await run('dave', '2026-10-24T05:00:00Z');
+    // Just outside the week at either end.
+    await run('dave', '2026-10-18T14:59:00Z');
+    await run('erin', '2026-10-25T15:00:00Z');
+    const standings = await rewards.getWeekStandings(G2, '2026-10-19');
+    check('a week counts only its own runs; a tie goes to who got there first',
+        standings.map((r) => [r.discordUserId, r.runs]), [['alice', 3], ['bob', 3], ['carol', 2], ['dave', 1]]);
+    const board = await rewards.getBoard(G2, 'lastweek', 2, new Date('2026-10-26T01:00:00Z'));
+    check('last week\'s board shows the top rows with totals over everyone',
+        [board.week, board.rows.length, board.totalRuns, board.trainers], ['2026-10-19', 2, 9, 4]);
+
+    // ── Weekly award ──────────────────────────────────────────────────────────
+    const log: string[] = [];
+    const guild = {
+        id: G2,
+        members: {
+            fetch: async (id: string) => {
+                if (id === 'gone') throw new Error('Unknown Member');
+                return { roles: { add: async (r: string) => void log.push(`+${id}:${r}`), remove: async (r: string) => void log.push(`-${id}:${r}`) } };
+            },
+            me: { roles: { highest: { position: 5 } } },
+        },
+        roles: {
+            cache: new Map([
+                ['r-low', { id: 'r-low', name: 'Low', position: 2, managed: false }],
+                ['r-high', { id: 'r-high', name: 'High', position: 10, managed: false }],
+            ]),
+            fetch: async () => null,
+        },
+    } as never;
+    const created = await rewards.saveTimerSettings(G2, { topRoleId: 'r-top' }, new Date('2026-10-20T00:00:00Z'));
+    check('turning rewards on mid-week skips weeks already over', created.lastAwardedWeek, '2026-10-12');
+    // Last week's holders: zed loses the role, alice keeps it.
+    await prisma.timerWeeklyAward.createMany({
+        data: [
+            { guildId: G2, week: '2026-10-12', place: 1, discordUserId: 'zed', runs: 9 },
+            { guildId: G2, week: '2026-10-12', place: 2, discordUserId: 'alice', runs: 8 },
+        ],
+    });
+    const guildOf = async () => guild;
+    check('not awarded in the first quarter hour of the new week',
+        (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T15:10:00Z'))).length, 0);
+    const [award] = await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T15:20:00Z'));
+    check('the top 3 are awarded', award?.winners.map((w) => w.discordUserId), ['alice', 'bob', 'carol']);
+    check('the role leaves last week\'s holders who did not place', award?.removed, ['zed']);
+    check('and goes to this week\'s', log, ['-zed:r-top', '+alice:r-top', '+bob:r-top', '+carol:r-top']);
+    check('the places are kept for next week',
+        (await prisma.timerWeeklyAward.findMany({ where: { guildId: G2, week: '2026-10-19' }, orderBy: { place: 'asc' } })).map((a) => a.discordUserId),
+        ['alice', 'bob', 'carol']);
+    check('a week is awarded once', (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T16:00:00Z'))).length, 0);
+    check('the week is marked done', (await rewards.getTimerSettings(G2))?.lastAwardedWeek, '2026-10-19');
+
+    // ── Milestones ────────────────────────────────────────────────────────────
+    await prisma.timerMilestoneRole.create({ data: { guildId: G2, runs: 3, roleId: 'r-3' } });
+    log.length = 0;
+    check('a run landing on a milestone gives its role', await rewards.awardMilestone(guild, 'alice', 3), 'r-3');
+    check('any other count gives nothing', await rewards.awardMilestone(guild, 'carol', 2), null);
+    log.length = 0;
+    check('adding a milestone gives it to everyone already past it', await rewards.backfillMilestone(guild, 3, 'r-3'), 2);
+    check('which is alice and bob', log.sort(), ['+alice:r-3', '+bob:r-3']);
+
+    // ── Which roles the bot can give ──────────────────────────────────────────
+    check('a role below the bot is fine', await rewards.roleProblem(guild, 'r-low'), null);
+    check('a role above the bot is refused', (await rewards.roleProblem(guild, 'r-high'))?.includes('above my highest role'), true);
+    check('a missing role is refused', await rewards.roleProblem(guild, 'r-none'), 'That role no longer exists.');
+
+    await clean();
+}
+
 main();
