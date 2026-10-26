@@ -278,6 +278,20 @@ function drawHeadings(ctx: SKRSContext2D, x: number, w: number, y: number, c: Co
 }
 
 /**
+ * A medal chip behind a name drawn at (x, baseline): a pill of `fill` with a
+ * faint dark hairline, so a pale silver still shows on a pale row.
+ */
+function medalChip(ctx: SKRSContext2D, name: string, x: number, baseline: number, size: number, spec: string, fill: string) {
+    const edge = 'rgba(30, 30, 50, 0.22)';
+    ctx.font = font(spec);
+    const w = ctx.measureText(name).width;
+    const h = Math.round(size * 1.45);
+    const top = baseline - Math.round(size * 1.05);
+    fillRound(ctx, x - 7, top - 1, w + 14, h + 2, h / 2 + 1, edge);
+    fillRound(ctx, x - 6, top, w + 12, h, h / 2, fill);
+}
+
+/**
  * Draws one member row. `recent` is the last-24h figure, or the latest game
  * day's; `striped` shades the row; `dayQuota` is one day's quota, the line
  * between a `warn` (yellow or amber) and a `behind` (red) name.
@@ -286,22 +300,26 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, x: number, w: number, y:
     if (striped) fillRound(ctx, x + 8, y, w - 16, c.rowHeight, innerRadius(p), p.stripe);
     const by = y + c.rowHeight / 2 + 6;
     const tint = p.place[m.rank - 1] ?? null;
+    const medal = p.medals?.[m.rank - 1] ?? null;
 
-    // Left bar: placement for the top four.
-    if (tint) {
+    // Left bar: placement for the top four, unless a medal chip shows it.
+    if (tint && !(medal && m.onPace)) {
         ctx.fillStyle = tint;
         ctx.fillRect(x + 12, y + 8, 3, c.rowHeight - 16);
     }
 
     text(ctx, String(m.rank), c.rank, by, { spec: `400 ${c.numSize}px`, color: p.muted, align: 'right' });
 
-    // The top 3 names are bold in their place colour (Fwoxie, 2026-10-26).
-    // This table lists only members on pace, so a coloured name here never
-    // means behind; behind names are in their own card.
+    // The top 3 names are bold in their place colour, or on a light palette
+    // on a medal chip (Fwoxie, 2026-10-26). This table lists only members on
+    // pace, so a coloured name here never means behind; behind names are in
+    // their own card.
     const podium = m.onPace && m.rank <= 3 && tint !== null;
     const nameSpec = `${podium ? 700 : 400} ${c.nameSize}px`;
-    const nameColor = podium ? tint : m.onPace ? p.text : m.behind < dayQuota ? p.warn : p.behind;
-    const nameWidth = text(ctx, fit(ctx, m.trainerName, c.nameMax, nameSpec), c.trainer, by, { spec: nameSpec, color: nameColor });
+    const nameColor = podium && !medal ? tint : m.onPace ? p.text : m.behind < dayQuota ? p.warn : p.behind;
+    const shown = fit(ctx, m.trainerName, c.nameMax - (medal ? 16 : 0), nameSpec);
+    if (podium && medal) medalChip(ctx, shown, c.trainer, by, c.nameSize, nameSpec, medal);
+    const nameWidth = text(ctx, shown, c.trainer, by, { spec: nameSpec, color: nameColor }) + (podium && medal ? 8 : 0);
     if (m.rankChange !== null && m.rankChange !== 0) {
         text(ctx, `${m.rankChange > 0 ? '▲' : '▼'}${Math.abs(m.rankChange)}`, c.trainer + nameWidth + 6, by - 1, {
             spec: '400 11px',
@@ -874,11 +892,15 @@ function renderWide(d: Prepared): Canvas {
     best.forEach((t, i) => {
         const by = y + (TOP_ROW * stretch) / 2 + 5;
         const gainWidth = text(ctx, `+${shortFans(t.gain)}`, x + inner, by, { spec: '700 15px', color: p.good, align: 'right' });
-        // Each place in its own colour, as in the table.
-        const placeWidth = text(ctx, `${i + 1}.`, x, by, { spec: '700 14px', color: p.place[i] ?? p.muted });
+        // Each place in its own colour, as in the table; on a light palette
+        // the name sits on its medal chip instead.
+        const medal = p.medals?.[i];
+        const placeWidth = text(ctx, `${i + 1}.`, x, by, { spec: '700 14px', color: medal ? p.muted : (p.place[i] ?? p.muted) });
         const rankWidth = text(ctx, `#${t.m.rank}`, x + placeWidth + 8, by, { spec: '400 12px', color: p.faint });
         const nameX = x + placeWidth + 8 + rankWidth + 8;
-        text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '700 15px'), nameX, by, { spec: '700 15px', color: p.place[i] ?? p.text });
+        const nameShown = fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX - (medal ? 16 : 0), '700 15px');
+        if (medal) medalChip(ctx, nameShown, nameX + 6, by, 15, '700 15px', medal);
+        text(ctx, nameShown, nameX + (medal ? 6 : 0), by, { spec: '700 15px', color: medal ? p.text : (p.place[i] ?? p.text) });
         y += TOP_ROW * stretch;
     });
     notes.forEach((line, i) => text(ctx, line, x, notesTop + 12 + i * 17, { spec: '400 12px', color: p.muted }));

@@ -125,6 +125,18 @@ function placeDistinctness(p: Palette): string[] {
             if (d < PLACE_DELTA_E) problems.push(`place ${i + 1} ${p.place[i]} and place ${j + 1} ${p.place[j]} differ by only ${d.toFixed(0)} (need ${PLACE_DELTA_E})`);
         }
     }
+    // Medal chips (light palettes): distinct from each other, and the name
+    // on each must read.
+    if (p.medals) {
+        for (let i = 0; i < 3; i += 1) {
+            const ratio = contrast(p.text, p.medals[i]!);
+            if (ratio < 4.5) problems.push(`text ${p.text} on medal ${i + 1} ${p.medals[i]} is only ${ratio.toFixed(2)}:1`);
+            for (let j = i + 1; j < 3; j += 1) {
+                const d = deltaE(p.medals[i]!, p.medals[j]!);
+                if (d < PLACE_DELTA_E) problems.push(`medals ${i + 1} and ${j + 1} differ by only ${d.toFixed(0)} (need ${PLACE_DELTA_E})`);
+            }
+        }
+    }
     // Each must also stand out from an ordinary name, or it reads as plain text.
     for (let i = 0; i < 3; i += 1) {
         const d = deltaE(p.place[i]!, p.text);

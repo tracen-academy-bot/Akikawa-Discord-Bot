@@ -126,6 +126,13 @@ export interface Palette {
     warn: string;
     behind: string;
     place: readonly [string, string, string, string];
+    /**
+     * Light palettes only: gold, silver and bronze chips behind the top 3
+     * names, which stay in `text`. A gold dark enough to read as text on a
+     * light card turns olive-brown, so on light palettes the colour goes
+     * behind the name instead (Fwoxie, 2026-10-26).
+     */
+    medals?: readonly [string, string, string];
     /** The look beyond colour: shape, outline and backdrop. See `PaletteStyle`. */
     style: PaletteStyle;
 }
@@ -159,6 +166,9 @@ export interface PaletteStyle {
      */
     scene?: SceneId;
 }
+
+/** Medal chips for light palettes: dark text reads at 7:1 or better on each. */
+const LIGHT_MEDALS = ['#ffd23f', '#cfd9e8', '#f2a46c'] as const;
 
 /**
  * Palettes the fan report can render in. `rose` is the default; the others
@@ -340,6 +350,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#945200',
         behind: '#b3261e',
         place: ['#6f5f00', '#4a6898', '#9c4600', '#2c5aa0'],
+        medals: LIGHT_MEDALS,
         style: { radius: 2, border: '#c9b88f', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     akikawa: {
@@ -362,6 +373,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#924f00',
         behind: '#c0262d',
         place: ['#b0306a', '#4a6898', '#94490f', '#2f58c4'],
+        medals: LIGHT_MEDALS,
         style: { radius: 24, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     clear: {
@@ -428,6 +440,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#995400',
         behind: '#bf2440',
         place: ['#a1307a', '#4a6898', '#9a4a12', '#7338c9'],
+        medals: LIGHT_MEDALS,
         style: { radius: 26, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     oguri: {
@@ -450,6 +463,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#945200',
         behind: '#b8241c',
         place: ['#6f5f00', '#4a6898', '#9c4600', '#2a63b5'],
+        medals: LIGHT_MEDALS,
         style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'oguri' },
     },
     firework: {
@@ -494,6 +508,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#945200',
         behind: '#b3261e',
         place: ['#6f5f00', '#4a6898', '#9c4600', '#c2185b'],
+        medals: LIGHT_MEDALS,
         style: { radius: 18, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'confetti' },
     },
     finish: {

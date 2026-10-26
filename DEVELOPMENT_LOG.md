@@ -27,6 +27,14 @@ looks like Oguri, maybe with a free chibi of her.
     light ones. It is now a steel blue, `#9fb8e6` on dark palettes and
     `#4a6898` on light ones. The check also requires ΔE ≥ 25 between each
     top 3 colour and `text`. Akikawa and Sakura swap their grey for it.
+  - Fwoxie: gold "looks annoying" on light palettes. A gold dark enough to
+    pass 4.5:1 as text on a light card is olive-brown. So light palettes
+    get `medals`: the top 3 names stay in `text`, bold, on a gold, silver
+    or bronze pill (`#ffd23f`, `#cfd9e8`, `#f2a46c`) with a faint
+    hairline. The same applies in the sidebar's Top 3, and those rows drop
+    the left bar. The check requires text on each medal at 4.5:1 or more
+    (it is 7:1 or more) and the medals at ΔE ≥ 35 from each other. Dark
+    palettes keep coloured names.
 - **Oguri scene** (`scenes.ts`): her blue sky with clouds, a garland of
   pennants in her blue, white and gold, her gold star glowing, and a white
   rail on mown turf. A stack of onigiri stands for her appetite. It
