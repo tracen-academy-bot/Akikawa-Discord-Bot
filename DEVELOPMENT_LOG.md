@@ -70,6 +70,19 @@ screen red. Food is no longer central.
     wiki, and what the theme uses or leaves out.
   - A red thread from her to the cards was tried and removed: without her
     body it read as a tail. It returns with the chibi.
+- Fifth pass (Fwoxie: the moonlight is still "ew"; "go read on SiL and
+  see what else you can add"):
+  - Light redesigned as a layer (`moonlightLayer`). Each moon now sits on
+    its window's outer side, so the light slants in towards her. Each pane
+    casts a shaft with brighter rays and dust in it. The shafts light the
+    lace and carry on, at 45% and blurred, over the top of the cards. Each
+    window also casts a soft glow on the wall round it. The cool crescent
+    light is fixed; the red light grows with mood.
+  - From the reading (reference sheet updated): red velvet curtains tied
+    back with white ribbons and gold hearts; gold heart charms and one blue
+    diamond on the lace (her dress); red spider lilies in the vase for her
+    "Scarlet Lily" unique skill (roses there removed); a glass of red for
+    her profile's "unquenched thirst", spilling at her worst.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
