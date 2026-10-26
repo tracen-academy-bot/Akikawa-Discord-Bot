@@ -4,6 +4,7 @@ import {
     claimExpiredTimers,
     getPanelContext,
     listActiveTimers,
+    dayKey,
     recordRun,
     scheduleNotificationDeletion,
     type CompletionSummary,
@@ -11,6 +12,7 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
+import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
 
 /**
  * Drives timer expiry and notification cleanup.
@@ -82,6 +84,8 @@ async function announceAward(client: Client, award: WeeklyAward): Promise<void> 
     const channel = await client.channels.fetch(settings.announceChannelId).catch(() => null);
     if (!guild || !channel?.isTextBased() || !('send' in channel)) return;
     await channel.send(await weekResultsPost(guild, award.week, true));
+    // Keep the timer panel below the results when they share a channel.
+    await keepPanelAtBottom(client, guild, settings.announceChannelId);
 }
 
 /** Awards any week that has ended and announces it. */
@@ -129,13 +133,13 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 await scheduleNotificationDeletion(timer.channelId, message.id);
             }
 
-            if (timer.panelMessageId) {
-                panels.set(`${timer.channelId}:${timer.panelMessageId}`, {
-                    channelId: timer.channelId,
-                    messageId: timer.panelMessageId,
-                    guildId: timer.guildId,
-                });
+            // The channel's current panel, which may have been reposted since
+            // this run started; else the panel the run was started from.
+            const panelId = (await currentPanelMessageId(timer.channelId)) ?? timer.panelMessageId;
+            if (panelId) {
+                panels.set(`${timer.channelId}:${panelId}`, { channelId: timer.channelId, messageId: panelId, guildId: timer.guildId });
             }
+            markLiveBoardsDirty(timer.guildId);
         } catch (e) {
             // One undeliverable ping must not stall the rest of the batch. The
             // run is already recorded, so the trainer keeps credit for it.
@@ -179,6 +183,8 @@ async function processExpiredNotifications(client: Client): Promise<void> {
 export function startScheduler(client: Client): () => void {
     let running = false;
     let lastAwardCheck = 0;
+    // The day the live boards were last reset for; empty, so startup redraws them.
+    let liveDay = '';
 
     const tick = async () => {
         // Skip if the previous tick is still working. Without this a slow batch
@@ -193,6 +199,13 @@ export function startScheduler(client: Client): () => void {
                 lastAwardCheck = Date.now();
                 await processWeeklyAwards(client);
             }
+            // A new day: every live board's "today" starts over.
+            const today = dayKey(new Date());
+            if (today !== liveDay) {
+                liveDay = today;
+                await markAllLiveBoardsDirty();
+            }
+            await flushLiveBoards(client);
         } catch (e) {
             console.error('Timer scheduler tick failed:', e);
         } finally {

@@ -119,10 +119,24 @@ model TimerSettings {
     topRoleId         String?
     /// Channel or thread for the end-of-week leaderboard. Null: not posted.
     announceChannelId String?
-    /// The last week awarded, as its Monday's `YYYY-MM-DD` (JST). Set when the
-    /// row is made, so turning rewards on mid-week awards nothing retroactively.
+    /// The last week awarded, as its Monday's `YYYY-MM-DD` (JST). A new row
+    /// starts at the week before last, so the first setup awards last week.
     lastAwardedWeek   String?
     updatedAt         DateTime @updatedAt
+}
+
+/// The timer panel in a channel and the live leaderboard posted just above
+/// it. Kept together at the bottom of the channel: `/timer panel` and the
+/// weekly results post replace both, deleting the old pair.
+model TimerPanel {
+    channelId      String   @id
+    guildId        String
+    panelMessageId String
+    /// The live board image above the panel; null if it could not be posted.
+    boardMessageId String?
+    updatedAt      DateTime @updatedAt
+
+    @@index([guildId])
 }
 
 /// A role given for good once a trainer's completed runs reach `runs`.

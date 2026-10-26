@@ -12,3 +12,7 @@ Without a picture, the scene is complete as drawn.
 `food/` holds the Oguri scene's food, cut from UmaViewer screenshots
 (burger, rice mountain, and the ramen and hamburg-steak trays). If any of them is missing,
 the scene draws its own food instead.
+
+`oguri-run.png` is the same character posed running. The race track uses
+it, and does not tilt it further; without it, the race leans `oguri.png`
+forward.

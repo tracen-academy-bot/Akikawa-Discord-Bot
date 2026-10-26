@@ -25,7 +25,7 @@ export const NOTIFICATION_LIFETIME_MINUTES = 10;
  * defines daily counts and streaks. Defaults to JST, matching the game's
  * daily reset. Override with TIMER_STREAK_TIMEZONE (an IANA name).
  */
-const STREAK_TIMEZONE = process.env.TIMER_STREAK_TIMEZONE ?? 'Asia/Tokyo';
+export const STREAK_TIMEZONE = process.env.TIMER_STREAK_TIMEZONE ?? 'Asia/Tokyo';
 
 /** Run counts that earn a callout in the expiry ping. */
 const MILESTONES = [1, 10, 25, 50, 100, 250, 500, 1000, 2500] as const;

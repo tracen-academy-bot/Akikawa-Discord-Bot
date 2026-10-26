@@ -57,13 +57,16 @@ const INNER = 16;
 /** Where a scene's optional picture lives, beside the other image assets. */
 const ART_DIR = path.join(__dirname, '..', '..', 'assets', 'scenes');
 
-/** Each scene's picture, once loaded; null when there is none. */
-const artCache = new Map<SceneId, Image | null>();
+/** Each scene picture, once loaded; null when there is none. */
+const artCache = new Map<string, Image | null>();
 
-/** The scene's picture, or null when the file is missing or unreadable. */
-async function sceneArt(scene: SceneId): Promise<Image | null> {
-    if (artCache.has(scene)) return artCache.get(scene)!;
-    const file = path.join(ART_DIR, `${scene}.png`);
+/**
+ * A scene picture (`<name>.png`), or null when the file is missing or
+ * unreadable: `oguri` stands; `oguri-run` is posed running, for the race.
+ */
+async function sceneArt(name: string): Promise<Image | null> {
+    if (artCache.has(name)) return artCache.get(name)!;
+    const file = path.join(ART_DIR, `${name}.png`);
     let art: Image | null = null;
     if (existsSync(file)) {
         try {
@@ -72,7 +75,7 @@ async function sceneArt(scene: SceneId): Promise<Image | null> {
             art = null;
         }
     }
-    artCache.set(scene, art);
+    artCache.set(name, art);
     return art;
 }
 
@@ -157,7 +160,7 @@ export async function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wi
     ctx.scale(RENDER_SCALE, RENDER_SCALE);
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
-    else drawOguri(ctx, w, h, hero, await sceneArt(scene), race, await foodArt());
+    else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     return canvas;
 }
@@ -603,7 +606,16 @@ function onigiri(ctx: SKRSContext2D, x: number, y: number, size: number, tilt: n
  * white rail on mown turf just above the cards, with food piled on the
  * grass. `art`, when given, stands on the right among it.
  */
-function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, race: SceneRace | null, food: FoodArt | null) {
+function drawOguri(
+    ctx: SKRSContext2D,
+    w: number,
+    h: number,
+    hero: number,
+    art: Image | null,
+    runArt: Image | null,
+    race: SceneRace | null,
+    food: FoodArt | null,
+) {
     const rand = seeded(1987);
 
     const sky = ctx.createLinearGradient(0, 0, 0, h);
@@ -693,8 +705,10 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     railBars(ctx, 0, w, railY);
 
     const ground = hero - 6;
-    if (art && race) {
-        drawRace(ctx, w, ground, art, race, food);
+    if ((runArt ?? art) && race) {
+        // The running pose leans a little too far, so it is turned back a
+        // touch; the standing picture is tipped forward instead.
+        drawRace(ctx, w, ground, (runArt ?? art)!, runArt ? -0.1 : 0.12, runArt ? 0.75 : 1, race, food);
     } else if (art) {
         // No rank to race for: she stands on the right with food piled round
         // her feet and an onigiri balanced on her head.
@@ -869,7 +883,7 @@ function startingGate(ctx: SKRSContext2D, x: number, ground: number, stalls: num
  * at `race.progress` along it, leaning forward, a little off the ground,
  * with speed lines and dust behind her.
  */
-function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, race: SceneRace, food: FoodArt | null) {
+function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, lean: number, size: number, race: SceneRace, food: FoodArt | null) {
     // The rail's posts end 18px above the ground line; the signposts match.
     const postBottom = ground - 18;
     const gateRight = startingGate(ctx, SIDE + 4, ground, 3);
@@ -880,7 +894,7 @@ function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, rac
     else drawFoodPile(ctx, w - SIDE - 70, ground, 100, false);
 
     // Short enough to run under the hanging food.
-    const artH = Math.min(130, ground - 68);
+    const artH = Math.min(130, ground - 68) * size;
     const artW = (art.width / art.height) * artH;
     const progress = Math.max(0, Math.min(1, race.progress));
     // Her centre runs from just past the start post to the finish post.
@@ -888,34 +902,14 @@ function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, rac
     const hop = 8;
     const feetY = ground - hop;
 
-    // Speed lines and dust behind her.
-    ctx.lineCap = 'round';
-    for (const [dy, len, alpha] of [[0.3, 46, 0.85], [0.48, 64, 0.7], [0.66, 40, 0.8]] as const) {
-        const y = feetY - artH * (1 - dy);
-        const from = cx - artW * 0.55;
-        const g = ctx.createLinearGradient(from - len, 0, from, 0);
-        g.addColorStop(0, 'rgba(255, 255, 255, 0)');
-        g.addColorStop(1, `rgba(255, 255, 255, ${alpha})`);
-        ctx.strokeStyle = g;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(from - len, y);
-        ctx.lineTo(from, y);
-        ctx.stroke();
-    }
-    ctx.lineCap = 'butt';
-    for (const [dx, r, alpha] of [[-0.45, 7, 0.55], [-0.75, 5, 0.4], [-1.0, 3.5, 0.3]] as const) {
-        ctx.fillStyle = `rgba(235, 225, 200, ${alpha})`;
-        ctx.beginPath();
-        ctx.arc(cx + artW * dx, ground - 4 - r * 0.6, r, 0, Math.PI * 2);
-        ctx.fill();
-    }
+    // The dirt her feet throw up, then her shadow.
+    drawDirt(ctx, cx - artW * 0.12, ground, artW);
     groundShadow(ctx, cx, ground, artW * 0.32);
 
     // Lean forward about the feet.
     ctx.save();
     ctx.translate(cx, feetY);
-    ctx.rotate(0.12);
+    ctx.rotate(lean);
     ctx.drawImage(art, -artW / 2, -artH, artW, artH);
     ctx.restore();
 
@@ -1069,4 +1063,73 @@ function bun(ctx: SKRSContext2D, x: number, y: number, r: number) {
         ctx.stroke();
     }
     ctx.restore();
+}
+
+/**
+ * The ground kicked up behind a runner whose feet strike at (`footX`,
+ * `ground`): a haze of dust along the ground fading behind her, then a
+ * spray of soil clods and torn turf thrown up and back in arcs, the big
+ * ones falling short and the small ones flying furthest.
+ */
+function drawDirt(ctx: SKRSContext2D, footX: number, ground: number, artW: number) {
+    const rand = seeded(4242);
+
+    // Dust haze: soft tan clouds along the ground, thinning behind her.
+    for (let i = 0; i < 5; i += 1) {
+        const x = footX - artW * (0.15 + i * 0.22);
+        const rx = artW * (0.28 + i * 0.06);
+        const ry = 8 + i * 3;
+        const y = ground - 4 - i * 2.5;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, rx);
+        const a = 0.42 * (1 - i / 5.5);
+        g.addColorStop(0, `rgba(176, 146, 104, ${a})`);
+        g.addColorStop(0.6, `rgba(176, 146, 104, ${a * 0.45})`);
+        g.addColorStop(1, 'rgba(176, 146, 104, 0)');
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(1, ry / rx);
+        ctx.translate(-x, -y);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x, y, rx, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // Clods and turf, thrown up and back.
+    const soil = ['#5b3d22', '#6e4a2a', '#83603a', '#4a3119', '#9a7448'];
+    for (let i = 0; i < 46; i += 1) {
+        const size = rand() < 0.2 ? 2.6 + rand() * 2.2 : 0.9 + rand() * 1.6;
+        // Small bits fly further; each sits somewhere along its arc.
+        const reach = artW * (0.25 + rand() * 0.9) * (3.2 / (size + 1.2));
+        const t = 0.25 + rand() * 0.75;
+        const x = footX - 8 - reach * t - rand() * 6;
+        // Kicked low off the heels, not thrown over her shoulder.
+        const rise = artW * (0.05 + rand() * 0.2);
+        const y = ground - 3 - rise * 4 * t * (1 - t) - rand() * 3;
+        const turf = rand() < 0.22;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rand() * Math.PI);
+        ctx.globalAlpha = 0.65 + rand() * 0.35;
+        // An irregular lump, not a circle.
+        ctx.beginPath();
+        const corners = 5 + Math.floor(rand() * 3);
+        for (let k = 0; k < corners; k += 1) {
+            const a = (k / corners) * Math.PI * 2;
+            const r = size * (0.7 + rand() * 0.5);
+            if (k === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+            else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        }
+        ctx.closePath();
+        ctx.fillStyle = turf ? '#4f9a4f' : soil[Math.floor(rand() * soil.length)]!;
+        ctx.fill();
+        if (turf) {
+            // Torn turf: grass on top, a little soil underneath.
+            ctx.fillStyle = '#6b4a2a';
+            ctx.fillRect(-size * 0.6, size * 0.15, size * 1.2, size * 0.5);
+        }
+        ctx.restore();
+    }
+    ctx.globalAlpha = 1;
 }

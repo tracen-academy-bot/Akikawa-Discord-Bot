@@ -244,6 +244,46 @@ async function rewardChecks() {
     check('and attaches the final board', post.files.length, 1);
     check('a quiet publish pings nobody', (await weekResultsPost(guild, '2026-10-19', false)).allowedMentions.users, []);
 
+    // ── Live board and panel, kept at the bottom ──────────────────────────────
+    const day = await rewards.getDayBoard(G2, 5, new Date('2026-10-21T12:00:00Z'));
+    check('today\'s board counts only that day', [day.week, day.totalRuns >= 0, day.rows.every((r) => r.runs > 0)], ['2026-10-21', true, true]);
+    const live = await import('../src/lib/timer/livePanel');
+    const sent: string[] = [];
+    const deleted: string[] = [];
+    const edited: string[] = [];
+    let next = 0;
+    const channel = {
+        id: 'c-timer',
+        isTextBased: () => true,
+        send: async (payload: { files?: unknown[] }) => {
+            const id = `${payload.files ? 'board' : 'panel'}-${++next}`;
+            sent.push(id);
+            return { id };
+        },
+        messages: {
+            delete: async (id: string) => void deleted.push(id),
+            fetch: async (id: string) => ({ edit: async () => void edited.push(id) }),
+        },
+    };
+    const client = {
+        channels: { fetch: async () => channel },
+        guilds: { cache: new Map([[G2, guild]]), fetch: async () => guild },
+    } as never;
+    await prisma.timerPanel.deleteMany({ where: { guildId: G2 } });
+    check('the pair posts board then panel', [await live.postPanelPair(client, guild, 'c-timer'), sent], [true, ['board-1', 'panel-2']]);
+    check('and is remembered', (await prisma.timerPanel.findUnique({ where: { channelId: 'c-timer' } }))?.panelMessageId, 'panel-2');
+    await live.postPanelPair(client, guild, 'c-timer');
+    check('posting again deletes the old pair', deleted, ['board-1', 'panel-2']);
+    check('and keeps the new one', [await live.currentPanelMessageId('c-timer'), sent.slice(2)], ['panel-4', ['board-3', 'panel-4']]);
+    live.markLiveBoardsDirty(G2);
+    await live.flushLiveBoards(client, Date.now());
+    check('a board just drawn waits out the throttle', edited, []);
+    await live.flushLiveBoards(client, Date.now() + 31_000);
+    check('then the finished runs redraw it', edited, ['board-3']);
+    await live.flushLiveBoards(client, Date.now() + 62_000);
+    check('and nothing redraws until a run finishes again', edited, ['board-3']);
+    await prisma.timerPanel.deleteMany({ where: { guildId: G2 } });
+
     // ── Milestones ────────────────────────────────────────────────────────────
     await prisma.timerMilestoneRole.create({ data: { guildId: G2, runs: 3, roleId: 'r-3' } });
     log.length = 0;

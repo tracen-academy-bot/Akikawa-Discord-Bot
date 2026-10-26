@@ -79,11 +79,18 @@ export function weekLabel(week: string): string {
  * Everyone's runs in a week, most first; ties go to whoever reached their
  * count first.
  */
-export async function getWeekStandings(guildId: string, week: string): Promise<WeekRow[]> {
+export function getWeekStandings(guildId: string, week: string): Promise<WeekRow[]> {
+    return standingsBetween(guildId, week, shiftKey(week, 6));
+}
+
+/**
+ * Everyone's runs from day key `first` to `last` inclusive, most first;
+ * ties go to whoever reached their count first.
+ */
+async function standingsBetween(guildId: string, first: string, last: string): Promise<WeekRow[]> {
     // A day either side covers any time zone; the day keys then decide.
-    const from = new Date(new Date(`${week}T00:00:00Z`).getTime() - 86_400_000);
-    const to = new Date(new Date(`${shiftKey(week, 7)}T00:00:00Z`).getTime() + 86_400_000);
-    const last = shiftKey(week, 6);
+    const from = new Date(new Date(`${first}T00:00:00Z`).getTime() - 86_400_000);
+    const to = new Date(new Date(`${shiftKey(last, 1)}T00:00:00Z`).getTime() + 86_400_000);
     const runs = await prisma.trainingRun.findMany({
         where: { guildId, completedAt: { gte: from, lt: to } },
         select: { discordUserId: true, completedAt: true },
@@ -91,7 +98,7 @@ export async function getWeekStandings(guildId: string, week: string): Promise<W
     const byUser = new Map<string, WeekRow>();
     for (const run of runs) {
         const key = dayKey(run.completedAt);
-        if (key < week || key > last) continue;
+        if (key < first || key > last) continue;
         const row = byUser.get(run.discordUserId) ?? { discordUserId: run.discordUserId, runs: 0, minutes: 0, lastAt: run.completedAt };
         row.runs += 1;
         row.minutes += TRAINING_MINUTES;
@@ -121,6 +128,15 @@ export async function getBoard(guildId: string, period: BoardPeriod, limit = 15,
     if (period === 'lastweek') return boardForWeek(guildId, shiftKey(weekKey(now), -7), period, limit);
     // Every trainer, so the totals cover the window; a guild has hundreds at most.
     return boardOf(period, null, await getLeaderboard(guildId, period, 100_000), limit);
+}
+
+/**
+ * Today's leaderboard (the day in the timer's time zone), top `limit` rows,
+ * for the live board.
+ */
+export async function getDayBoard(guildId: string, limit = 5, now = new Date()): Promise<Board> {
+    const today = dayKey(now);
+    return boardOf('thisweek', today, await standingsBetween(guildId, today, today), limit);
 }
 
 /** The leaderboard for one week; `period` says whether it is shown as live or final. */
