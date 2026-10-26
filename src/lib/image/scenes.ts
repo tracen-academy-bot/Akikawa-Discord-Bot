@@ -105,8 +105,8 @@ async function foodArt(): Promise<FoodArt | null> {
     return (foodCache = loaded as FoodArt);
 }
 
-/** Still in Love's blood and knives (`src/assets/scenes/stillinlove`, public domain). */
-const SIL_NAMES = ['splat', 'drips', 'drips-thin', 'smear', 'smear-short', 'spray', 'knife', 'cleaver'] as const;
+/** Still in Love's blood, knives and roses (`src/assets/scenes/stillinlove`, public domain). */
+const SIL_NAMES = ['splat', 'drips', 'drips-thin', 'smear', 'smear-short', 'spray', 'knife', 'cleaver', 'hand', 'hand-smear', 'rose'] as const;
 type SilArt = Record<(typeof SIL_NAMES)[number], Image>;
 let silCache: SilArt | null | undefined;
 
@@ -155,6 +155,20 @@ function stabbed(ctx: SKRSContext2D, knife: Image, x: number, y: number, length:
     const height = (knife.height / knife.width) * length;
     // The tip sits `buried` of the length below the surface.
     ctx.drawImage(knife, -length * buried, -height / 2, length, height);
+    ctx.restore();
+}
+
+/**
+ * A long-stemmed rose `height` tall, the foot of its stem at (x, y), turned
+ * by `angle` (0 is upright, a quarter turn lays it on its side).
+ */
+function roseStem(ctx: SKRSContext2D, rose: Image, x: number, y: number, height: number, angle: number) {
+    const width = (rose.width / rose.height) * height;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    // The stem's foot is a little left of the picture's centre.
+    ctx.drawImage(rose, -width * 0.45, -height, width, height);
     ctx.restore();
 }
 
@@ -1376,7 +1390,85 @@ function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bot
     ctx.lineTo(x + w, top + (bottom - top) * 0.62);
     ctx.stroke();
     ctx.fillStyle = '#3a2630';
-    ctx.fillRect(x - 6, bottom, w + 12, 5);
+    ctx.fillRect(x - 3, bottom, w + 6, 4);
+}
+
+/**
+ * Moonlight falling through a window into the room. Each pane casts its own
+ * shaft, so the mullions leave dark bars between them. The shafts slant
+ * down `slope` px across for each px down (`dir` 1 to the right, -1 to the
+ * left), fade out before the floor, and leave a soft pool where they land,
+ * with a few motes of dust caught in them. Drawn with `screen`, so they
+ * lighten whatever they cross (the wall, the table) without covering it.
+ */
+function moonlight(
+    ctx: SKRSContext2D,
+    w: number,
+    x: number,
+    top: number,
+    winW: number,
+    sill: number,
+    floor: number,
+    dir: 1 | -1,
+    slope: number,
+    colour: string,
+    strength: number,
+) {
+    const midY = top + (sill - top) * 0.62;
+    const panes: [number, number, number, number][] = [
+        [x + 3, top + winW * 0.3, x + winW / 2 - 2, midY - 2],
+        [x + winW / 2 + 2, top + winW * 0.3, x + winW - 3, midY - 2],
+        [x + 3, midY + 2, x + winW / 2 - 2, sill - 2],
+        [x + winW / 2 + 2, midY + 2, x + winW - 3, sill - 2],
+    ];
+    ctx.save();
+    // Light the room only: not the glass itself, and nothing below the lace.
+    ctx.beginPath();
+    ctx.rect(0, 0, w, floor);
+    ctx.rect(x - 4, 0, winW + 8, sill + 4);
+    ctx.clip('evenodd');
+    ctx.globalCompositeOperation = 'screen';
+    for (const [x0, y0, x1, y1] of panes) {
+        const drop = floor - y0;
+        const shift = dir * slope * drop;
+        // The hull of the pane and the pane moved along the light.
+        const pts: [number, number][] =
+            dir > 0
+                ? [[x0, y0], [x1, y0], [x1 + shift, y0 + drop], [x1 + shift, y1 + drop], [x0 + shift, y1 + drop], [x0, y1]]
+                : [[x0, y0], [x1, y0], [x1, y1], [x1 + shift, y1 + drop], [x0 + shift, y1 + drop], [x0 + shift, y0 + drop]];
+        const cx = (x0 + x1) / 2;
+        const fade = ctx.createLinearGradient(cx, y0, cx + shift, y0 + drop);
+        fade.addColorStop(0, rgba(colour, strength));
+        fade.addColorStop(0.55, rgba(colour, strength * 0.45));
+        fade.addColorStop(1, rgba(colour, 0));
+        ctx.fillStyle = fade;
+        ctx.beginPath();
+        ctx.moveTo(pts[0]![0], pts[0]![1]);
+        for (const [px, py] of pts.slice(1)) ctx.lineTo(px, py);
+        ctx.closePath();
+        ctx.fill();
+    }
+    // Where it lands, just above the lace.
+    const landX = x + winW / 2 + dir * slope * (floor - (top + sill) / 2);
+    const pool = ctx.createRadialGradient(landX, floor - 4, 0, landX, floor - 4, winW);
+    pool.addColorStop(0, rgba(colour, strength * 0.9));
+    pool.addColorStop(1, rgba(colour, 0));
+    ctx.fillStyle = pool;
+    ctx.beginPath();
+    ctx.ellipse(landX, floor - 4, winW, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Dust in the beam.
+    const rand = seeded(Math.round(x));
+    for (let i = 0; i < 9; i += 1) {
+        const t = 0.15 + rand() * 0.6;
+        const py = top + winW * 0.3 + t * (floor - top - winW * 0.3);
+        const px = x + rand() * winW + dir * slope * (py - top - winW * 0.3);
+        ctx.fillStyle = rgba(colour, 0.5 * (1 - t));
+        ctx.beginPath();
+        ctx.arc(px, py, 0.9 + rand() * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
 }
 
 /**
@@ -1486,10 +1578,29 @@ function sideTable(ctx: SKRSContext2D, x: number, floor: number, mood: number, a
     ctx.fill();
     // The table top.
     ctx.fillStyle = '#3a2028';
-    ctx.fillRect(x, floor - 30, 150, 6);
+    ctx.fillRect(x, floor - 30, 178, 6);
     ctx.fillStyle = '#2a161c';
     ctx.fillRect(x + 10, floor - 24, 6, 24);
-    ctx.fillRect(x + 134, floor - 24, 6, 24);
+    ctx.fillRect(x + 162, floor - 24, 6, 24);
+    // A bud vase of red roses at the end of the table.
+    if (art) {
+        roseStem(ctx, art.rose, x + 154, floor - 40, 40, -0.3);
+        roseStem(ctx, art.rose, x + 156, floor - 40, 46, 0.05);
+        roseStem(ctx, art.rose, x + 158, floor - 40, 36, 0.4);
+    }
+    const glass = ctx.createLinearGradient(x + 148, 0, x + 164, 0);
+    glass.addColorStop(0, '#5a1420');
+    glass.addColorStop(0.4, '#8a2232');
+    glass.addColorStop(1, '#40101a');
+    ctx.fillStyle = glass;
+    ctx.beginPath();
+    ctx.moveTo(x + 152, floor - 52);
+    ctx.lineTo(x + 160, floor - 52);
+    ctx.quadraticCurveTo(x + 158, floor - 44, x + 165, floor - 36);
+    ctx.quadraticCurveTo(x + 166, floor - 30, x + 156, floor - 30);
+    ctx.quadraticCurveTo(x + 146, floor - 30, x + 147, floor - 36);
+    ctx.quadraticCurveTo(x + 154, floor - 44, x + 152, floor - 52);
+    ctx.fill();
     jamJar(ctx, x + 32, floor - 30, 24);
     jamJar(ctx, x + 56, floor - 30, 18);
     // Her jam knife: lying by the jars while she is calm, then stabbed
@@ -1676,33 +1787,37 @@ function laceDrips(ctx: SKRSContext2D, w: number, y: number, mood: number, art: 
 }
 
 /**
- * Blood sprayed onto the report's outer edges and card corners, drawn over
- * the finished report: none when calm, spreading as she turns. It keeps to
- * the margins and corners so no figure is covered.
+ * Blood on the report, drawn over it: none when calm, spreading as she
+ * turns. Splatter on the cards' corners, then a hand reaching up over the
+ * bottom edge, then the knives driven into the top corners.
  */
 function bloodOnTheCards(ctx: SKRSContext2D, w: number, h: number, hero: number, mood: number, art: SilArt | null) {
     if (mood < 0.2) return;
     const rand = seeded(616);
     if (art) {
-        // Smears and spray along the outer edges and margins, more as she
-        // turns. Kept off the cards' middles so every number stays readable.
-        const quarter = Math.PI / 2;
+        // Splatter on the cards' outer corners and a bloody hand reaching up
+        // over the bottom edge: actual marks on the cards, not paint
+        // running in from the sides.
         const marks: [Image, number, number, number, number][] = [
-            [art.smear, SIDE * 0.5, hero + 70, 110, quarter],
-            [art.spray, w * 0.5, h - SIDE * 0.35, 170, 0],
-            [art['smear-short'], w - SIDE * 0.45, hero + 140, 90, -quarter],
-            [art.splat, SIDE * 0.35, h - SIDE * 0.35, 80, 0.6],
-            [art.spray, w - SIDE * 0.4, h - 110, 150, -quarter],
-            [art.smear, w * 0.25, h - SIDE * 0.4, 130, 0.05],
+            [art.splat, SIDE + 10, hero + 12, 54, 0.4],
+            [art.splat, w - SIDE - 12, h - SIDE - 12, 60, 2.2],
+            [art.spray, SIDE + 30, h - SIDE - 8, 90, -0.2],
+            [art.splat, w - SIDE - 10, hero + (h - hero) * 0.55, 46, 1.3],
         ];
         const n = Math.max(1, Math.round(marks.length * mood));
-        for (const [image, x, y, width, angle] of marks.slice(0, n)) placed(ctx, image, x, y, width * (0.7 + mood * 0.4), angle, 0.85);
+        for (const [image, x, y, width, angle] of marks.slice(0, n)) placed(ctx, image, x, y, width * (0.8 + mood * 0.3), angle, 0.9);
+        if (mood >= 0.5) {
+            const handW = 46;
+            const handH = (art.hand.height / art.hand.width) * handW;
+            // Fingers over the last few pixels of the cards, palm in the margin.
+            placed(ctx, art.hand, w * 0.45, h - SIDE + handH / 2 - 30, handW, 0.08, 0.92);
+        }
         // At her worst the knives are driven into the cards' outer corners.
         if (mood >= 0.67) {
-            stabbed(ctx, art.cleaver, SIDE + 14, hero + 12, 130, 0.35, 0.2);
-            placed(ctx, art['drips-thin'], SIDE + 18, hero + 34, 30, 0, 0.9);
-            stabbed(ctx, art.knife, w - SIDE - 14, hero + 12, 120, -0.35, 0.22);
-            placed(ctx, art['drips-thin'], w - SIDE - 18, hero + 30, 24, 0, 0.9);
+            stabbed(ctx, art.cleaver, SIDE + 12, hero + 12, 105, -0.2, 0.2);
+            placed(ctx, art['drips-thin'], SIDE + 14, hero + 32, 28, 0, 0.9);
+            stabbed(ctx, art.knife, w - SIDE - 12, hero + 12, 100, 0.2, 0.22);
+            placed(ctx, art['drips-thin'], w - SIDE - 14, hero + 30, 24, 0, 0.9);
         }
         return;
     }
@@ -1748,19 +1863,27 @@ function drawStillInLove(
     for (let x = 0; x < w; x += 26) ctx.fillRect(x, 0, 10, h);
 
     const floor = hero - 14;
-    const winW = w > 1200 ? 140 : 110;
-    const top = 20;
+    // Tall, narrow arched windows, as in the first draft.
+    const winW = 88;
+    const top = 12;
     const leftX = SIDE + 24;
     const rightX = w - SIDE - 24 - winW;
     // The windows stop short of the lace, leaving room for each plaque.
-    const sill = floor - 40;
+    const sill = floor - 34;
     gothicWindow(ctx, leftX, top, winW, sill, 'crescent', mood, 11, blood);
     gothicWindow(ctx, rightX, top, winW, sill, 'blood', mood, 23, blood);
+    // A single rose left lying on the calm window's ledge.
+    if (blood) roseStem(ctx, blood.rose, leftX + 12, sill - 5, 44, 1.45);
     if (race) {
-        rankPlaque(ctx, leftX + winW / 2, sill + 10, race.start);
-        rankPlaque(ctx, rightX + winW / 2, sill + 10, race.finish);
+        rankPlaque(ctx, leftX + winW / 2, sill + 5, race.start);
+        rankPlaque(ctx, rightX + winW / 2, sill + 5, race.finish);
     }
-    sideTable(ctx, rightX - 175, floor, mood, blood);
+    sideTable(ctx, rightX - 200, floor, mood, blood);
+    // Moonlight slanting in towards her: cool from the crescent, red from the
+    // blood moon, which burns stronger as she turns.
+    const slope = w > 1200 ? 2.6 : 1.7;
+    moonlight(ctx, w, leftX, top, winW, sill, floor, 1, slope, '#a8c4ff', 0.16);
+    moonlight(ctx, w, rightX, top, winW, sill, floor, -1, slope, '#ff7a80', 0.16 + mood * 0.1);
 
     // Her, between the windows, staring out; until her picture exists, her eyes.
     const herX = w * 0.45;
@@ -1774,6 +1897,13 @@ function drawStillInLove(
     }
     const line = mood < 0.34 ? 'I still love you.' : mood < 0.67 ? 'I still love you…' : '…why are you leaving me behind?';
     speechBubble(ctx, herX + 52, 18, line, herX + 30, eyeY - 14, mood);
+
+    // Bloody handprints on the wall once she has turned.
+    if (blood && mood >= 0.4) {
+        const gap = herX - (leftX + winW);
+        placed(ctx, blood['hand-smear'], leftX + winW + gap * 0.45, hero * 0.5, 52, -0.25, 0.55 + mood * 0.35);
+        if (w > 1200 && mood >= 0.67) placed(ctx, blood.hand, rightX - 250, hero * 0.42, 40, 0.2, 0.85);
+    }
 
     // Petals drifting down, more as she turns.
     const rand = seeded(214);

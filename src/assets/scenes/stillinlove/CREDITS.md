@@ -1,7 +1,8 @@
 # Still in Love scene art
 
 All from Openclipart, released into the public domain (CC0). Cropped and
-scaled; otherwise unchanged.
+scaled; otherwise unchanged, except the handprints, which are cut out of
+their parchment background and recoloured to the other blood's red.
 
 | File | Openclipart |
 | --- | --- |
@@ -13,3 +14,6 @@ scaled; otherwise unchanged.
 | spray.png | https://openclipart.org/detail/192062 ("blood") |
 | knife.png | https://openclipart.org/detail/161719 ("Chef's knife") |
 | cleaver.png | https://openclipart.org/detail/166374 ("butcher knife") |
+| hand.png | https://openclipart.org/detail/316609 ("Bloody Handprints"), one print |
+| hand-smear.png | https://openclipart.org/detail/316609 ("Bloody Handprints"), another print |
+| rose.png | https://openclipart.org/detail/202514 ("Raseone rose red") |

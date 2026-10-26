@@ -51,6 +51,25 @@ screen red. Food is no longer central.
     her worst: a cleaver and the knife are driven into the cards' outer
     top corners, dripping. `stabbed()` clips the blade at the surface so
     it reads as driven in.
+- Fourth pass (Fwoxie: moonlight "ew", windows too wide, "blood bleeds
+  from sides", "add some roses", "where's my SiL reference sheet?!"):
+  - Windows are back to the first draft's tall, narrow shape (88 wide),
+    with a slimmer ledge. The plaques sit just under the ledge.
+  - `moonlight()`: one shaft per pane, so the mullions cast dark bars. The
+    shafts slant in towards her, fade before the lace, pool where they land,
+    and carry dust motes. They are drawn with `screen` so the table and wall
+    stay visible through them. Cool from the crescent; red from the blood
+    moon, stronger as she turns.
+  - No more smears running in from the image's sides. Blood on the report
+    is now splatter on the cards' corners, a bloody hand reaching up over
+    the bottom edge (mood 0.5+), and the knives in the top corners.
+    Bloody handprints appear on the wall from mood 0.4.
+  - Roses (Openclipart 202514): a bud vase of three on a longer side
+    table, and one lying on the calm window's ledge.
+  - `docs/still-in-love-reference.md`: her design and character from the
+    wiki, and what the theme uses or leaves out.
+  - A red thread from her to the cards was tried and removed: without her
+    body it read as a tail. It returns with the chibi.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
