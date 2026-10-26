@@ -682,19 +682,11 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         ctx.fill();
     }
 
-    // The white rail along the turf.
+    // The white rail along the turf: posts first, then the bars across them,
+    // so the bars sit in front.
     const railY = turfTop - 18;
-    ctx.fillStyle = 'rgba(20, 60, 30, 0.25)';
-    ctx.fillRect(0, railY + 3, w, 4);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, railY, w, 5);
-    ctx.fillRect(0, railY + 11, w, 3);
-    for (let x = RAIL_FIRST_POST; x < w; x += RAIL_POST_GAP) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(x, railY, 4, turfTop - railY + 6);
-        ctx.fillStyle = 'rgba(40, 90, 140, 0.25)';
-        ctx.fillRect(x + 3, railY + 2, 1, turfTop - railY + 4);
-    }
+    for (let x = RAIL_FIRST_POST; x < w; x += RAIL_POST_GAP) railPost(ctx, x, railY, turfTop + 6);
+    railBars(ctx, 0, w, railY);
 
     const ground = hero - 6;
     if (art && race) {
@@ -727,6 +719,31 @@ function onRailPost(x: number): number {
     return RAIL_FIRST_POST + Math.round((x - RAIL_FIRST_POST) / RAIL_POST_GAP) * RAIL_POST_GAP;
 }
 
+/** A rail post from `top` to `bottom`: white, with a light grey shaded side. */
+function railPost(ctx: SKRSContext2D, x: number, top: number, bottom: number) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, top, 4, bottom - top);
+    ctx.fillStyle = RAIL_SHADE;
+    ctx.fillRect(x + 3, top, 1, bottom - top);
+}
+
+/**
+ * The rail's two bars from `x0` to `x1`, the top one at `railY`: white,
+ * each with a light grey underside. Drawn after the posts so they cross in
+ * front of them.
+ */
+function railBars(ctx: SKRSContext2D, x0: number, x1: number, railY: number) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x0, railY, x1 - x0, 5);
+    ctx.fillRect(x0, railY + 11, x1 - x0, 3);
+    ctx.fillStyle = RAIL_SHADE;
+    ctx.fillRect(x0, railY + 4, x1 - x0, 1);
+    ctx.fillRect(x0, railY + 13, x1 - x0, 1);
+}
+
+/** The rail's shading: a light cool grey, not a dark band. */
+const RAIL_SHADE = '#d3dbe6';
+
 /** A soft shadow on the grass. */
 function groundShadow(ctx: SKRSContext2D, x: number, ground: number, rx: number) {
     ctx.fillStyle = 'rgba(20, 60, 30, 0.3)';
@@ -744,10 +761,10 @@ function groundShadow(ctx: SKRSContext2D, x: number, ground: number, rx: number)
  */
 function trackPost(ctx: SKRSContext2D, x: number, bottom: number, label: string, finish: boolean) {
     const top = bottom - 78;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(x, top, 4, bottom - top);
-    ctx.fillStyle = 'rgba(40, 90, 140, 0.25)';
-    ctx.fillRect(x + 3, top + 2, 1, bottom - top - 2);
+    railPost(ctx, x, top, bottom);
+    // The rail's bars cross in front of this post too (the top bar is 24px
+    // above the posts' feet).
+    railBars(ctx, x - 1, x + 5, bottom - 24);
 
     ctx.font = font('700 13px');
     const body = ctx.measureText(label).width + 16;

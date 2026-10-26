@@ -37,6 +37,11 @@ replaces the plush.
     it leans on the rim.
   - The signposts snap onto the nearest rail post (`onRailPost`). Before,
     one landed 2px beside a rail post and read as a doubled post.
+  - The rail is drawn posts first, then the bars, so the bars cross in
+    front, at the signposts too. Fwoxie had said the posts "feel above the
+    horizontal bar". The dark shadow band under the top bar and the blue
+    shade on the posts read as odd colouring. Both are now a light grey
+    edge (`RAIL_SHADE`).
   - Real burgers and rice mountains hang in the garland between the drawn
     onigiri and carrots.
   - If any picture is missing, the scene draws its own food as before.
