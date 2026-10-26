@@ -1525,10 +1525,11 @@ function heart(ctx: SKRSContext2D, x: number, y: number, s: number) {
 }
 
 /**
- * Red velvet curtains on a rod over a window, tied back at either side with
- * a white ribbon and a gold heart: the ribbons and hearts of her dress.
+ * Velvet curtains on a rod over a window, tied back at either side with a
+ * white ribbon and a gold heart: the ribbons and hearts of her dress. Deep
+ * blue (her blue) while she is calm, turning red as she turns.
  */
-function curtains(ctx: SKRSContext2D, x: number, top: number, winW: number, sill: number) {
+function curtains(ctx: SKRSContext2D, x: number, top: number, winW: number, sill: number, mood: number) {
     const rodY = top - 4;
     const tieY = top + (sill - top) * 0.62;
     const hem = sill + 2;
@@ -1540,11 +1541,9 @@ function curtains(ctx: SKRSContext2D, x: number, top: number, winW: number, sill
         const pinchIn = edge - side * 3;
         const pinchOut = edge + side * 7;
         const velvet = ctx.createLinearGradient(Math.min(out, inner), 0, Math.max(out, inner), 0);
-        velvet.addColorStop(0, '#4a0b16');
-        velvet.addColorStop(0.3, '#8a1c2c');
-        velvet.addColorStop(0.55, '#5c1020');
-        velvet.addColorStop(0.8, '#7a1828');
-        velvet.addColorStop(1, '#3e0912');
+        const blue = ['#132338', '#2c537e', '#1a3352', '#264a72', '#101d30'];
+        const red = ['#4a0b16', '#8a1c2c', '#5c1020', '#7a1828', '#3e0912'];
+        [0, 0.3, 0.55, 0.8, 1].forEach((at, i) => velvet.addColorStop(at, mix(blue[i]!, red[i]!, mood)));
         ctx.fillStyle = velvet;
         ctx.beginPath();
         ctx.moveTo(out, rodY);
@@ -1831,6 +1830,71 @@ interface LaceTrack {
     at: number;
 }
 
+/** A four-pointed glint of light at (x, y), `s` from tip to tip. */
+function glint(ctx: SKRSContext2D, x: number, y: number, s: number, alpha: number) {
+    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+    ctx.beginPath();
+    ctx.moveTo(x, y - s / 2);
+    ctx.quadraticCurveTo(x, y, x + s / 2, y);
+    ctx.quadraticCurveTo(x, y, x, y + s / 2);
+    ctx.quadraticCurveTo(x, y, x - s / 2, y);
+    ctx.quadraticCurveTo(x, y, x, y - s / 2);
+    ctx.fill();
+}
+
+/**
+ * The blue diamond from her dress, as a brilliant-cut gem seen from the
+ * side, centred on (cx, cy), `r` from girdle to tip: a crown of light and
+ * mid-blue facets over a pavilion of deeper ones, a glow, and glints.
+ */
+function blueDiamond(ctx: SKRSContext2D, cx: number, cy: number, r: number) {
+    const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 2.6);
+    halo.addColorStop(0, 'rgba(120, 200, 255, 0.7)');
+    halo.addColorStop(1, 'rgba(120, 200, 255, 0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    const girdle = cy - r * 0.2;
+    const table = cy - r * 0.75;
+    const wide = r;
+    const tableW = r * 0.5;
+    const tip = cy + r;
+    const fill = (colour: string, pts: [number, number][]) => {
+        ctx.fillStyle = colour;
+        ctx.beginPath();
+        ctx.moveTo(pts[0]![0], pts[0]![1]);
+        for (const [px, py] of pts.slice(1)) ctx.lineTo(px, py);
+        ctx.closePath();
+        ctx.fill();
+    };
+    // Crown: the table on top and the facets down to the girdle.
+    fill('#d8f1ff', [[cx - tableW, table], [cx + tableW, table], [cx, girdle]]);
+    fill('#9ed6ff', [[cx - wide, girdle], [cx - tableW, table], [cx, girdle]]);
+    fill('#6fbbf1', [[cx + wide, girdle], [cx + tableW, table], [cx, girdle]]);
+    // Pavilion: down to the tip, light catching the left.
+    fill('#7cc6f7', [[cx - wide, girdle], [cx - wide * 0.35, girdle], [cx, tip]]);
+    fill('#3d8fd6', [[cx - wide * 0.35, girdle], [cx + wide * 0.35, girdle], [cx, tip]]);
+    fill('#225f9e', [[cx + wide * 0.35, girdle], [cx + wide, girdle], [cx, tip]]);
+    ctx.strokeStyle = '#163f6b';
+    ctx.lineWidth = 0.9;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - tableW, table);
+    ctx.lineTo(cx + tableW, table);
+    ctx.lineTo(cx + wide, girdle);
+    ctx.lineTo(cx, tip);
+    ctx.lineTo(cx - wide, girdle);
+    ctx.closePath();
+    ctx.moveTo(cx - wide, girdle);
+    ctx.lineTo(cx + wide, girdle);
+    ctx.stroke();
+    // The glisten.
+    glint(ctx, cx - r * 0.35, table + r * 0.2, r * 1.3, 0.95);
+    glint(ctx, cx + r * 0.95, cy - r * 0.95, r * 0.8, 0.85);
+    glint(ctx, cx - r * 1.2, cy + r * 0.55, r * 0.55, 0.7);
+}
+
 /** Lace scallops are this far apart; the track snaps to them. */
 const LACE_STEP = 18;
 
@@ -1843,9 +1907,9 @@ function trackMarker(track: LaceTrack): number {
 /**
  * Bobbin lace along `y`: scallops with picot holes, `colour` turning red
  * with mood, and gold heart charms. With a `track`, the holes between the
- * two windows become a strip of lights: lit gold from the bottom cutoff up
- * to the club, the club's own hole glowing with a heart charm hanging from
- * it, and dark beyond.
+ * two windows become a strip of lights: gold beads from the bottom cutoff
+ * up to the club, the club's place marked with her blue diamond, and dark
+ * beyond.
  */
 function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, track: LaceTrack | null) {
     const r = LACE_STEP / 2;
@@ -1885,40 +1949,28 @@ function laceTrim(ctx: SKRSContext2D, w: number, y: number, colour: string, trac
     for (let x = first; x <= last; x += step) {
         if (x === marker) continue;
         if (x < marker) {
-            // Lit: a warm gold light with a little glow, like a light strip.
-            const glow = ctx.createRadialGradient(x, y + 2, 0, x, y + 2, hole * 2.6);
-            glow.addColorStop(0, 'rgba(255, 214, 120, 0.55)');
-            glow.addColorStop(1, 'rgba(255, 214, 120, 0)');
+            // Lit: a rich gold bead with a warm glow, like a light strip.
+            const glow = ctx.createRadialGradient(x, y + 2, 0, x, y + 2, hole * 2.8);
+            glow.addColorStop(0, 'rgba(255, 176, 0, 0.6)');
+            glow.addColorStop(1, 'rgba(255, 176, 0, 0)');
             ctx.fillStyle = glow;
             ctx.beginPath();
-            ctx.arc(x, y + 2, hole * 2.6, 0, Math.PI * 2);
+            ctx.arc(x, y + 2, hole * 2.8, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#ffd98a';
+            const bead = ctx.createRadialGradient(x - hole * 0.35, y + 2 - hole * 0.35, 0, x, y + 2, hole * 1.15);
+            bead.addColorStop(0, '#fff0a8');
+            bead.addColorStop(0.45, '#ffc21a');
+            bead.addColorStop(1, '#c47a00');
+            ctx.fillStyle = bead;
         } else {
             // Still to come: dark.
             ctx.fillStyle = 'rgba(30, 12, 18, 0.85)';
         }
         ctx.beginPath();
-        ctx.arc(x, y + 2, hole, 0, Math.PI * 2);
+        ctx.arc(x, y + 2, x < marker ? hole * 1.15 : hole, 0, Math.PI * 2);
         ctx.fill();
     }
-    // The club: a heart, her emoji, ruby set in gold, glowing in place of
-    // the hole (anything hung lower would sit behind the cards).
-    const halo = ctx.createRadialGradient(marker, y + 1, 0, marker, y + 1, hole * 7);
-    halo.addColorStop(0, 'rgba(255, 170, 185, 0.8)');
-    halo.addColorStop(1, 'rgba(255, 170, 185, 0)');
-    ctx.fillStyle = halo;
-    ctx.beginPath();
-    ctx.arc(marker, y + 1, hole * 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#f2c560';
-    heart(ctx, marker, y + 1, 19);
-    ctx.fillStyle = '#d0142c';
-    heart(ctx, marker, y + 0.6, 14);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.beginPath();
-    ctx.arc(marker - 2.8, y - 2, 1.5, 0, Math.PI * 2);
-    ctx.fill();
+    blueDiamond(ctx, marker, y + 1, 11);
 }
 
 /** How wide `speechBubble` draws `text`; leaves the bubble's font set. */
@@ -1928,16 +1980,53 @@ function bubbleWidth(ctx: SKRSContext2D, text: string): number {
 }
 
 /**
- * Spider lilies grown along the lace from `from` up to `to` (the club's
- * place), rooted at `y`: a sparse field she has walked through, none
- * where the club has yet to reach.
+ * A field of red spider lilies across the bottom of the room, from `from`
+ * to `to`, its front row rooted at `y`. Rows further back stand higher up
+ * the wall, smaller and darker, so the ground seems to recede. Left of
+ * `marker` (the club's place) they are in bloom; past it they are bare
+ * stalks with closed buds, as spider lilies flower before their leaves.
+ * Under `low` (the side table) only a short front row grows.
  */
-function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y: number) {
+function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y: number, marker: number, low: [number, number]) {
+    // A dark ground for the field to stand in.
+    const ground = ctx.createLinearGradient(0, y - 44, 0, y + 4);
+    ground.addColorStop(0, 'rgba(15, 4, 8, 0)');
+    ground.addColorStop(1, 'rgba(15, 4, 8, 0.6)');
+    ctx.fillStyle = ground;
+    ctx.fillRect(from, y - 44, to - from, 48);
+    const rows = [
+        { root: y - 30, h: [16, 22], gap: [18, 30], light: 0.42, front: false },
+        { root: y - 15, h: [24, 32], gap: [24, 40], light: 0.68, front: false },
+        { root: y, h: [34, 44], gap: [32, 54], light: 1, front: true },
+    ] as const;
     const rand = seeded(1229);
-    for (let x = from + 10 + rand() * 30; x < to - 22; x += 55 + rand() * 60) {
-        roseStem(ctx, lily, x, y, 22 + rand() * 12, (rand() - 0.5) * 0.3);
-        // Now and then a second one beside it.
-        if (rand() < 0.35) roseStem(ctx, lily, x + 9, y, 16 + rand() * 8, 0.12 + rand() * 0.15);
+    for (const row of rows) {
+        for (let x = from + rand() * row.gap[1]; x < to; x += row.gap[0] + rand() * (row.gap[1] - row.gap[0])) {
+            let height = row.h[0] + rand() * (row.h[1] - row.h[0]);
+            const underTable = x > low[0] && x < low[1];
+            if (underTable && !row.front) continue;
+            if (underTable) height *= 0.6;
+            const lean = (rand() - 0.5) * 0.35;
+            if (x < marker - 6) {
+                ctx.filter = row.light < 1 ? `brightness(${row.light})` : 'none';
+                roseStem(ctx, lily, x, row.root, height, lean);
+                ctx.filter = 'none';
+            } else {
+                // Not yet: a bare stalk and a closed red bud.
+                const tipX = x + Math.sin(lean) * height * 0.75;
+                const tipY = row.root - Math.cos(lean) * height * 0.75;
+                ctx.strokeStyle = mix('#0e1608', '#4c6b34', row.light);
+                ctx.lineWidth = 0.9;
+                ctx.beginPath();
+                ctx.moveTo(x, row.root);
+                ctx.quadraticCurveTo(x, (row.root + tipY) / 2, tipX, tipY);
+                ctx.stroke();
+                ctx.fillStyle = mix('#1a0306', '#9a1424', row.light);
+                ctx.beginPath();
+                ctx.ellipse(tipX, tipY - 1.5, 1.2, 2.6, lean, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
     }
 }
 
@@ -2128,8 +2217,8 @@ function drawStillInLove(
     windowGlow(ctx, rightX, top, winW, sill, redLight, redStrength * 0.7);
     gothicWindow(ctx, leftX, top, winW, sill, 'crescent', mood, 11, blood);
     gothicWindow(ctx, rightX, top, winW, sill, 'blood', mood, 23, blood);
-    curtains(ctx, leftX, top, winW, sill);
-    curtains(ctx, rightX, top, winW, sill);
+    curtains(ctx, leftX, top, winW, sill, mood);
+    curtains(ctx, rightX, top, winW, sill, mood);
     // A single rose left lying on the calm window's ledge.
     if (blood) roseStem(ctx, blood.rose, leftX + 12, sill - 5, 44, 1.45);
     if (race) {
@@ -2157,8 +2246,11 @@ function drawStillInLove(
     // The club's place between the ranks, marked on the lace.
     const track = race ? { from: leftX + winW / 2, to: rightX + winW / 2, at: race.progress } : null;
     const marker = track ? trackMarker(track) : null;
-    // A field of spider lilies up to it.
-    if (blood && marker !== null) lilyField(ctx, blood.lily, leftX + winW + 16, marker, floor - 4);
+    // A field of spider lilies, in bloom up to it.
+    if (blood && marker !== null) {
+        const tableX = rightX - 222;
+        lilyField(ctx, blood.lily, leftX + winW + 18, rightX - 18, floor - 3, marker, [tableX, tableX + 190]);
+    }
 
     // Her, standing over the club's place; until her picture exists, her eyes.
     const herX = marker ?? w * 0.45;

@@ -105,6 +105,20 @@ screen red. Food is no longer central.
   - `lilyField`: a sparse field of red spider lilies (Openclipart 345040)
     along the lace from past the left plaque up to the marker, none
     beyond: she has walked through it.
+- Then (Fwoxie: keep the blue diamond idea but do it justice, "where
+  glisten"; the pale yellow on white is "a crime"; the heart "ain't
+  working"; curtains not always red; "a real flower field"):
+  - `blueDiamond`: a brilliant-cut gem from the side, crown and pavilion
+    facets in her blues, a glow and three four-pointed glints. It replaces
+    the heart as the club's marker.
+  - Lit holes are saturated gold beads (`#fff0a8` → `#ffc21a` → `#c47a00`)
+    with a warm glow.
+  - Curtains go from deep blue velvet (calm) to red (at her worst).
+  - `lilyField` is a real field now: three rows, each further back rooted
+    higher up the wall, smaller and darker (brightness filter), so the
+    ground recedes. In bloom up to the marker; past it, bare stalks with
+    closed buds (spider lilies flower before their leaves). Under the side
+    table only a short front row grows, so its things stay visible.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
