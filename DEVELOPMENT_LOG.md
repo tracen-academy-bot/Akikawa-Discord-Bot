@@ -4,6 +4,35 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Oguri theme; report layout ticks in a new /club look form
+
+Asked for: a palette from Oguri Cap's two main colours (from the
+Umamusume wiki), and a tick for tall/wide next to the palette choice, with
+both allowed and at least one required.
+
+- **Oguri palette** (`theme.ts`): umamusu.wiki lists her image colours as
+  `#3A7AD2` (blue) and `#ECE7E7` (off-white). Light palette: off-white
+  cards on a blue frame with off-white stars. The accent is a darker blue
+  (`#2a63b5`), because `#3A7AD2` itself is under 4.5:1 on the cards. The
+  target is gold (her star), and behind is red (her neckerchief). All
+  colours pass `scripts/palettes.ts`.
+- **Layouts** (`TrackedCircle.reportLayouts`, default `["tall"]`, additive
+  migration `20261026150000_add_report_layouts`): `buildCircleReport`
+  renders one image per ticked layout, tall first. Tall keeps its old file
+  name. `CircleReport.image` became `images`, and every sender attaches
+  all of them.
+- **`/club look`**: Discord allows 5 fields per form, and `/club reports`
+  already used all five. So the theme moved out of `/club reports` into a
+  new form, with a checkbox group for the layouts (required, 1 to 2
+  ticks). Every save replies with a preview in the saved look. An empty or
+  unknown layout answer keeps the stored layouts. Untracked clubs are
+  refused, since they have no report.
+- **Fix**: the behind card's key said "cream <1 day", left over from before
+  `warn` became yellow. It now says "yellow" on dark palettes and "amber"
+  on light ones.
+
+---
+
 ## 2026-10-26 — Timer rewards: weekly top 3 role, milestones, live and final boards
 
 Asked for: "collect id when people click the start autorun thing" so top

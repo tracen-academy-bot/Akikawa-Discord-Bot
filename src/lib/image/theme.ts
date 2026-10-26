@@ -423,6 +423,28 @@ export const PALETTES: Record<string, Palette> = {
         place: ['#a1307a', '#4f5868', '#9a4a12', '#7338c9'],
         style: { radius: 26, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
+    oguri: {
+        id: 'oguri',
+        label: 'Oguri',
+        origin: "Oguri Cap's image colours on the Umamusume wiki (umamusu.wiki, 2026-10-26): blue #3A7AD2 and white #ECE7E7, as off-white stars on blue, with the gold of her star and the red of her neckerchief.",
+        light: true,
+        frame: '#3a7ad2',
+        frameEnd: '#ece7e7',
+        bg: '#f8f6f6',
+        panel: '#ece7e7',
+        stripe: '#f1eeee',
+        line: '#d9d3d3',
+        text: '#16233a',
+        muted: '#3f4c63',
+        faint: '#66708a',
+        accent: '#2a63b5',
+        target: '#835400',
+        good: '#2a63b5',
+        warn: '#945200',
+        behind: '#b8241c',
+        place: ['#835400', '#4e5866', '#9a4a12', '#2a63b5'],
+        style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'stars' },
+    },
 };
 
 /** The default palette. */

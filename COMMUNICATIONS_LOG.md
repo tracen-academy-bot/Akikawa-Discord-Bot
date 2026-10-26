@@ -4,6 +4,16 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-26 — Theme and layout move to /club look
+
+Fwoxie asked for a tall/wide tick beside the palette choice. "Both allowed"
+was left to Claude, with at least one required. Discord caps a form at 5
+fields, and `/club reports` was full. So the theme and layout now share
+their own form, `/club look`, and `/club reports` keeps quota, period,
+time and zone. Both layouts may be ticked; the report then posts two images.
+
+---
+
 ## 2026-10-26 — No "closest to the line"; hot streaks instead
 
 GimmeKiss: the closest-to-the-line card felt like a shame list for people

@@ -4,6 +4,7 @@ import {
     AutocompleteInteraction,
     GuildMember,
     AttachmentBuilder,
+    CheckboxGroupBuilder,
     LabelBuilder,
     MessageFlags,
     ModalBuilder,
@@ -25,6 +26,7 @@ import { renderClubView } from "../lib/image/renderClubView";
 import type { AlertFrequency, TrackedCircle, ClubMember, ClubRank, ClubMemberRole, FanCountPeriod, QuotaPeriod } from '@prisma/client';
 import { buildCircleReport, describeAlertFrequency } from '../lib/fans/scheduler';
 import { DEFAULT_PALETTE, PALETTES, paletteOf } from '../lib/image/theme';
+import { FAN_REPORT_LAYOUTS, layoutsOf, type FanReportLayout } from '../lib/image/renderFanReport';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
 import { toSafeNumber } from '../lib/fans/metrics';
@@ -110,11 +112,17 @@ async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId:
 /** The `theme` choice that clears a club's theme back to the default. */
 const DEFAULT_THEME_CHOICE = 'default';
 
-/** Report theme choices in the `/club reports` form: the default, then every palette. Discord allows 25. */
+/** Report theme choices in the `/club look` form: the default, then every palette. Discord allows 25. */
 const THEME_CHOICES = [
     { name: `Default (${PALETTES[DEFAULT_PALETTE]!.label})`, value: DEFAULT_THEME_CHOICE },
     ...Object.values(PALETTES).map((p) => ({ name: `${p.label}${p.light ? ' (light)' : ''}`, value: p.id })),
 ].slice(0, 25);
+
+/** Report layout choices in the `/club look` form; at least one is ticked. */
+const LAYOUT_CHOICES: Record<FanReportLayout, { label: string; description: string }> = {
+    tall: { label: 'Tall', description: 'One column. Reads best on a phone.' },
+    wide: { label: 'Wide', description: 'Three panels side by side. Reads best on a computer.' },
+};
 
 export const data = new SlashCommandBuilder()
     .setName('club')
@@ -175,7 +183,13 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('reports')
-            .setDescription("Set a club's quota, report time and report theme (its staff or Club Managers).")
+            .setDescription("Set a club's quota and report time (its staff or Club Managers).")
+            .addStringOption((opt) => opt.setName('club').setDescription('Club').setRequired(true).setAutocomplete(true))
+    )
+    .addSubcommand((sub) =>
+        sub
+            .setName('look')
+            .setDescription("Pick a club's report theme and layout, with a preview (its staff or Club Managers).")
             .addStringOption((opt) => opt.setName('club').setDescription('Club').setRequired(true).setAutocomplete(true))
     )
     .addSubcommandGroup((group) =>
@@ -266,6 +280,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         case 'reports':
             await handleReports(interaction, member);
             break;
+        case 'look':
+            await handleLook(interaction, member);
+            break;
     }
     // A club's card shows its name, rank and quota; create and delete change the list.
     if (['create', 'delete', 'fancount'].includes(sub)) void refreshDirectory(interaction.guild as unknown as DirectoryGuild | null);
@@ -333,12 +350,13 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
 // ─── Forms ────────────────────────────────────────────────────────────────────
 
 /**
- * A club's settings live in three forms, split by who may change them and by
+ * A club's settings live in four forms, split by who may change them and by
  * Discord's limit of five fields per form:
  *
- *   /club reports  the club's staff and Club Managers: expected rank, quota,
- *                  quota period, and for a tracked club its report time and
- *                  time zone.
+ *   /club reports  the club's staff and Club Managers: quota, quota period,
+ *                  and for a tracked club its report time and time zone.
+ *   /club look     the same people, tracked clubs only: the report theme and
+ *                  layouts (tall, wide or both), answered with a preview.
  *   /club profile  the club's staff (Club Managers also set the tier): bio,
  *                  rules, banner. See `clubProfile.ts`.
  *   /club admin    Club Managers only: who and where. The name (a club
@@ -352,6 +370,7 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
  */
 const REPORTS_MODAL_PREFIX = 'club:reports:';
 const ADMIN_MODAL_PREFIX = 'club:admin:';
+const LOOK_MODAL_PREFIX = 'club:look:';
 const FIELD = {
     name: 'club:name',
     rank: 'club:rank',
@@ -364,6 +383,7 @@ const FIELD = {
     reportChannel: 'club:report-channel',
     alertFrequency: 'club:alert-frequency',
     theme: 'club:theme',
+    layouts: 'club:layouts',
 } as const;
 
 /** How often the staff roles are pinged about members behind quota. */
@@ -399,12 +419,13 @@ async function formLinks(club: Club, guild: LinkableGuild | null): Promise<ClubF
 
 /** True for a modal this module owns. */
 export function isClubModal(customId: string): boolean {
-    return customId.startsWith(REPORTS_MODAL_PREFIX) || customId.startsWith(ADMIN_MODAL_PREFIX);
+    return [REPORTS_MODAL_PREFIX, ADMIN_MODAL_PREFIX, LOOK_MODAL_PREFIX].some((prefix) => customId.startsWith(prefix));
 }
 
-/** Handles a submitted `/club reports` or `/club admin` form. */
+/** Handles a submitted `/club reports`, `/club look` or `/club admin` form. */
 export async function handleClubModal(interaction: ModalSubmitInteraction) {
     if (interaction.customId.startsWith(ADMIN_MODAL_PREFIX)) return handleAdminModal(interaction);
+    if (interaction.customId.startsWith(LOOK_MODAL_PREFIX)) return handleLookModal(interaction);
     return handleReportsModal(interaction);
 }
 
@@ -476,8 +497,9 @@ function rankField(club: Club): LabelBuilder {
 
 /**
  * Builds the `/club reports` form: quota and period, and for a tracked club
- * its report time, time zone and report theme. The same form for the club's
- * staff and Club Managers. The expected rank is in `/club admin`.
+ * its report time and time zone. The same form for the club's staff and Club
+ * Managers. The expected rank is in `/club admin`; the theme and layout in
+ * `/club look`, since a form holds at most five fields.
  */
 export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
     const labels: LabelBuilder[] = [];
@@ -520,18 +542,6 @@ export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
                         })),
                     ),
             ),
-            new LabelBuilder()
-                .setLabel('Report theme')
-                .setDescription('Colours and style of the report image. Saving a new one shows a preview.')
-                .setStringSelectMenuComponent(
-                    new StringSelectMenuBuilder().setCustomId(FIELD.theme).addOptions(
-                        THEME_CHOICES.map((t) => ({
-                            label: t.name,
-                            value: t.value,
-                            default: t.value === (club.reportTheme && PALETTES[club.reportTheme] ? club.reportTheme : DEFAULT_THEME_CHOICE),
-                        })),
-                    ),
-                ),
         );
     }
     return new ModalBuilder()
@@ -571,7 +581,6 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
         fanCountPeriod: null;
         reportMinute?: number | null;
         reportTimeZone?: string | null;
-        reportTheme?: string | null;
     } = { quota: BigInt(0), quotaPeriod: club.quotaPeriod, fanCountAmount: null, fanCountPeriod: null };
 
     const rawQuota = interaction.fields.getTextInputValue(FIELD.quota).trim();
@@ -595,14 +604,7 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
             data.reportMinute = minute;
             data.reportTimeZone = zone;
         }
-        // Not picking leaves the theme as it was.
-        const theme = interaction.fields.getStringSelectValues(FIELD.theme)[0];
-        if (theme === DEFAULT_THEME_CHOICE) data.reportTheme = null;
-        else if (theme && PALETTES[theme]) data.reportTheme = theme;
     }
-    // A new theme gets a preview; rendering it can take a moment.
-    const themeChanged = data.reportTheme !== undefined && data.reportTheme !== club.reportTheme;
-    if (themeChanged) await interaction.deferReply();
 
     const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
     const headcount = await clubHeadcount(updated);
@@ -614,14 +616,98 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
         ...(cutoffDetail(cutoffForRank(updated.rank)) ? [cutoffDetail(cutoffForRank(updated.rank))!] : []),
         ...(updated.circleId !== null ? ['', reportSummary(updated)] : []),
     ];
-    if (themeChanged) {
-        const report = await buildCircleReport(updated);
-        lines.push('', report ? "Here is today's report in the new theme." : 'There is no fan data this month yet, so there is no preview.');
-        await interaction.editReply({ embeds: [successEmbed('Club updated', lines.join('\n'))], files: report ? [report.image] : [] });
-    } else {
-        await interaction.reply({ embeds: [successEmbed('Club updated', lines.join('\n'))] });
-    }
+    await interaction.reply({ embeds: [successEmbed('Club updated', lines.join('\n'))] });
     void refreshDirectory(interaction.guild as unknown as DirectoryGuild | null);
+}
+
+// ─── /club look ───────────────────────────────────────────────────────────────
+
+/**
+ * Builds the `/club look` form: the report theme, and which layouts the
+ * report posts in. Ticking both posts a tall and a wide image together.
+ */
+export function buildLookModal(club: Club): ModalBuilder {
+    const layouts = layoutsOf(club.reportLayouts);
+    return new ModalBuilder()
+        .setCustomId(`${LOOK_MODAL_PREFIX}${club.id}`)
+        .setTitle(`${club.name} report look`.slice(0, 45))
+        .addLabelComponents(
+            new LabelBuilder()
+                .setLabel('Report theme')
+                .setDescription('Colours and style of the report image.')
+                .setStringSelectMenuComponent(
+                    new StringSelectMenuBuilder().setCustomId(FIELD.theme).addOptions(
+                        THEME_CHOICES.map((t) => ({
+                            label: t.name,
+                            value: t.value,
+                            default: t.value === (club.reportTheme && PALETTES[club.reportTheme] ? club.reportTheme : DEFAULT_THEME_CHOICE),
+                        })),
+                    ),
+                ),
+            new LabelBuilder()
+                .setLabel('Layout')
+                .setDescription('Tick one or both. Both posts two images with each report.')
+                .setCheckboxGroupComponent(
+                    new CheckboxGroupBuilder()
+                        .setCustomId(FIELD.layouts)
+                        .setRequired(true)
+                        .setMinValues(1)
+                        .setMaxValues(FAN_REPORT_LAYOUTS.length)
+                        .setOptions(FAN_REPORT_LAYOUTS.map((l) => ({ value: l, ...LAYOUT_CHOICES[l], default: layouts.includes(l) }))),
+                ),
+        );
+}
+
+/** `/club look`: opens the theme and layout form for a tracked club. */
+async function handleLook(interaction: ChatInputCommandInteraction, member: GuildMember) {
+    const club = await findClubOrReply(interaction, interaction.options.getString('club', true));
+    if (!club) return;
+    if (!(await canManageClubStats(member, club))) {
+        await interaction.reply({ embeds: [errorEmbed(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`)] });
+        return;
+    }
+    if (club.circleId === null) {
+        await interaction.reply({ embeds: [errorEmbed(`**${club.name}** is not tracked on uma.moe, so it has no fan report to style.`)] });
+        return;
+    }
+    await interaction.showModal(buildLookModal(club));
+}
+
+/**
+ * Handles a submitted `/club look` form and answers with today's report in
+ * the saved look, so the club sees what it picked.
+ */
+async function handleLookModal(interaction: ModalSubmitInteraction) {
+    const clubId = interaction.customId.slice(LOOK_MODAL_PREFIX.length);
+    const refuse = (text: string) => interaction.reply({ embeds: [errorEmbed(text)], flags: MessageFlags.Ephemeral });
+
+    const club = clubId ? await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId ?? '' } }) : null;
+    if (!club) return void (await refuse('That club no longer exists.'));
+    if (!(await canManageClubStats(interaction.member as GuildMember, club))) {
+        return void (await refuse(`You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
+    }
+
+    const data: { reportTheme?: string | null; reportLayouts?: FanReportLayout[] } = {};
+    // Not picking leaves the theme as it was.
+    const theme = interaction.fields.getStringSelectValues(FIELD.theme)[0];
+    if (theme === DEFAULT_THEME_CHOICE) data.reportTheme = null;
+    else if (theme && PALETTES[theme]) data.reportTheme = theme;
+    // Discord requires a tick; an empty answer keeps the stored layouts.
+    const ticked = FAN_REPORT_LAYOUTS.filter((l) => interaction.fields.getCheckboxGroup(FIELD.layouts).includes(l));
+    if (ticked.length > 0) data.reportLayouts = ticked;
+
+    // Rendering the preview can take a moment.
+    await interaction.deferReply();
+    const updated = await prisma.trackedCircle.update({ where: { id: club.id }, data });
+    const report = await buildCircleReport(updated);
+    const lines = [
+        `**${updated.name}**`,
+        '',
+        reportSummary(updated),
+        '',
+        report ? "Here is today's report in this look." : 'There is no fan data this month yet, so there is no preview.',
+    ];
+    await interaction.editReply({ embeds: [successEmbed('Report look updated', lines.join('\n'))], files: report ? report.images : [] });
 }
 
 /**
@@ -634,7 +720,7 @@ export function reportSummary(club: Club, now = new Date()): string {
     const theme = paletteOf(club.reportTheme);
     const lines = [
         `Fan report: daily at **${formatTimeOfDay(time.minute)} ${describeZone(time.zone, now)}**${hasOwnReportTime(club) ? '' : ' (the default: the daily reset)'}`,
-        `Report theme: **${theme.label}**${club.reportTheme && PALETTES[club.reportTheme] ? '' : ' (the default)'}`,
+        `Report theme: **${theme.label}**${club.reportTheme && PALETTES[club.reportTheme] ? '' : ' (the default)'} · layout: **${layoutsOf(club.reportLayouts).map((l) => LAYOUT_CHOICES[l].label).join(' and ')}**`,
         `Next: <t:${next}:F> (<t:${next}:R>), shown in your own time.`,
     ];
     if (!club.reportChannelId) lines.push('No report channel yet, so nothing posts; a Club Manager sets one with `/club admin`.');

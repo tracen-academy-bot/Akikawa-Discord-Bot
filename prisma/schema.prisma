@@ -220,6 +220,9 @@ model TrackedCircle {
     /// Palette the fan report is drawn in: an id from `PALETTES` in
     /// src/lib/image/theme.ts. Null, or an id no longer known, is the default.
     reportTheme     String?
+    /// Layouts the fan report posts in, one image each: "tall" (phones) and/or
+    /// "wide". Empty, or only unknown values, is tall alone.
+    reportLayouts   String[]  @default(["tall"])
 
     // Club info, from the former `Club` model.
     /// Intended tier (B to S+). Null when never set.

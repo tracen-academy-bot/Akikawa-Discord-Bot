@@ -47,6 +47,18 @@ import { describeQuota, formatMillionsFans, type CircleProgress, type MemberProg
 
 export type FanReportLayout = 'tall' | 'wide';
 
+/** Every layout, in the order a club with both gets them. */
+export const FAN_REPORT_LAYOUTS: readonly FanReportLayout[] = ['tall', 'wide'];
+
+/**
+ * The layouts a club's report posts in, from its stored list: the known
+ * ones, in `FAN_REPORT_LAYOUTS` order. An empty or unknown list is `tall`.
+ */
+export function layoutsOf(stored: readonly string[] | null | undefined): FanReportLayout[] {
+    const known = FAN_REPORT_LAYOUTS.filter((l) => stored?.includes(l));
+    return known.length > 0 ? known : ['tall'];
+}
+
 /** Frame visible around and between the cards. */
 const FRAME = 16;
 const GAP = 12;
@@ -267,7 +279,7 @@ function drawHeadings(ctx: SKRSContext2D, x: number, w: number, y: number, c: Co
 /**
  * Draws one member row. `recent` is the last-24h figure, or the latest game
  * day's; `striped` shades the row; `dayQuota` is one day's quota, the line
- * between a cream and a red name.
+ * between a `warn` (yellow or amber) and a `behind` (red) name.
  */
 function drawRow(ctx: SKRSContext2D, m: MemberProgress, x: number, w: number, y: number, c: Columns, recent: number | null, striped: boolean, dayQuota: number, p: Palette) {
     if (striped) fillRound(ctx, x + 8, y, w - 16, c.rowHeight, innerRadius(p), p.stripe);
@@ -455,7 +467,8 @@ function drawBehindCard(ctx: SKRSContext2D, members: MemberProgress[], x: number
     }
     const titleWidth = text(ctx, `Behind pace · ${members.length}`, x + pad, y + 34, { spec: '700 17px', color: p.behind });
     // The colour key beside the title, where it fits (it does in both layouts).
-    const key = 'cream <1 day · red more';
+    // `warn` is a saturated yellow on dark palettes and amber on light ones.
+    const key = `${p.light ? 'amber' : 'yellow'} <1 day · red more`;
     ctx.font = font('400 12px');
     if (ctx.measureText(key).width < w - pad * 2 - titleWidth - 16) {
         text(ctx, key, x + w - pad, y + 34, { spec: '400 12px', color: p.muted, align: 'right' });

@@ -96,10 +96,12 @@ role must be mentionable, or the bot needs the "Mention @everyone, @here, and
 All Roles" permission.
 
 The report image comes in several themes (`PALETTES` in
-`src/lib/image/theme.ts`). A club's staff pick one in the `/club reports`
-form; saving a new one replies with the current report drawn in it, and
-`Default` goes back to Rose. The expected rank is set by Club Managers in
-`/club admin`.
+`src/lib/image/theme.ts`) and two layouts: tall (one column, for phones)
+and wide (three panels, for computers). A club's staff pick both in the
+`/club look` form. At least one layout must be ticked; ticking both posts a
+tall and a wide image with every report. Saving replies with the current
+report in the chosen look, and `Default` goes back to Rose. The expected
+rank is set by Club Managers in `/club admin`.
 
 Behind-quota alerts post in the club's report channel. A separate alert
 channel can still be set with `/fans circle config alert_channel:` or on the

@@ -403,12 +403,21 @@ async function main() {
     const reportsForm = clubCmd.buildReportsModal(editable).toJSON() as unknown as ModalJson;
     const adminForm = clubCmd.buildAdminModal(editable).toJSON() as unknown as ModalJson;
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
-    check('reports form for a tracked club: quota, period, report time, zone, theme', reportsForm.components.map((c) => c.label),
-        ['Quota per member', 'Quota period', 'Report time', 'Time zone', 'Report theme']);
+    check('reports form for a tracked club: quota, period, report time, zone', reportsForm.components.map((c) => c.label),
+        ['Quota per member', 'Quota period', 'Report time', 'Time zone']);
+    type LookJson = { custom_id: string; components: { label: string; component: { min_values?: number; max_values?: number; required?: boolean; options?: { value: string; default?: boolean }[] } }[] };
+    const lookForm = clubCmd.buildLookModal(editable).toJSON() as unknown as LookJson;
+    const lookPart = (label: string) => lookForm.components.find((c) => c.label === label)?.component;
+    check('look form: theme and layout', lookForm.components.map((c) => c.label), ['Report theme', 'Layout']);
     check('admin form for a tracked club: rank, home channels, staff roles, report channel, staff pings', adminForm.components.map((c) => c.label),
         ['Expected rank', 'Home channels', 'Staff roles', 'Report channel', 'Ping staff roles about members behind']);
     check('the admin form pre-selects the expected rank', pre(adminForm, 'Expected rank')?.options?.find((o) => o.default)?.value, 'S');
-    check('the reports form pre-selects the default theme', pre(reportsForm, 'Report theme')?.options?.find((o) => o.default)?.value, 'default');
+    check('the look form pre-selects the default theme', lookPart('Report theme')?.options?.find((o) => o.default)?.value, 'default');
+    check('the look form offers tall and wide, tall ticked by default',
+        lookPart('Layout')?.options?.map((o) => [o.value, o.default ?? false]), [['tall', true], ['wide', false]]);
+    check('at least one layout must be ticked, both may be',
+        [lookPart('Layout')?.required, lookPart('Layout')?.min_values, lookPart('Layout')?.max_values], [true, 1, 2]);
+    check('the Oguri theme is offered', lookPart('Report theme')?.options?.some((o) => o.value === 'oguri'), true);
     check('headcount is not a field', [...reportsForm.components, ...adminForm.components].some((c) => c.label.toLowerCase().includes('headcount')), false);
     check('the form shows the real quota, exactly', pre(reportsForm, 'Quota per member')?.value, '31M');
     check('the form pre-selects the quota period', pre(reportsForm, 'Quota period')?.options?.find((o) => o.default)?.value, 'MONTH');
@@ -435,11 +444,12 @@ async function main() {
     const loose = await prisma.trackedCircle.create({ data: { guildId: GUILD, name: 'Loose Club', rank: 'B_PLUS', fanCountAmount: 0.25 } });
     const looseReports = clubCmd.buildReportsModal(loose).toJSON() as unknown as ModalJson;
     const looseAdmin = clubCmd.buildAdminModal(loose).toJSON() as unknown as ModalJson;
-    check('an untracked club has no report time or theme', looseReports.components.map((c) => c.label), ['Quota per member', 'Quota period']);
+    check('an untracked club has no report time', looseReports.components.map((c) => c.label), ['Quota per member', 'Quota period']);
     check('an untracked club admin form: the name, rank and staff roles', looseAdmin.components.map((c) => c.label), ['Name', 'Expected rank', 'Staff roles']);
     check('an untracked club form pre-fills the name', pre(looseAdmin, 'Name')?.value, 'Loose Club');
     check('with no quota yet, an old club fan count pre-fills it', pre(looseReports, 'Quota per member')?.value, '0.25M');
-    check('both forms are routed by their prefix', [clubCmd.isClubModal(reportsForm.custom_id), clubCmd.isClubModal(adminForm.custom_id)], [true, true]);
+    check('all three forms are routed by their prefix',
+        [reportsForm.custom_id, adminForm.custom_id, lookForm.custom_id].map((id) => clubCmd.isClubModal(id)), [true, true, true]);
 
     /** Submits a club form; `channels` gives each channel field's picks. */
     const submitClub = async (
@@ -454,6 +464,8 @@ async function main() {
             fields: {
                 getTextInputValue: (id: string) => values[id] ?? '',
                 getStringSelectValues: (id: string) => (values[id] ? [values[id]] : []),
+                // A checkbox group's ticks, comma-separated.
+                getCheckboxGroup: (id: string) => (values[id] ? values[id].split(',') : []),
                 getSelectedChannels: (id: string) => new Collection((channels[id] ?? []).map((c) => [c, { id: c }])),
                 getSelectedRoles: () => new Collection(roles.map((id) => [id, { id }])),
             },
@@ -584,19 +596,31 @@ async function main() {
     await runClubCmd({ sub: 'fancount', userId: 'u-trainer', strings: { club: club.id, amount: '35', period: 'MONTH' } });
     check('/club fancount sets the quota', String((await reload()).quota), '35000000');
 
-    // The report theme, in the reports form. A new theme gets a preview.
-    const themeForm = { 'club:quota': '35M', 'club:period': 'MONTH' };
-    const themed = await submitClub(reportsForm.custom_id, 'u-trainer', false, { ...themeForm, 'club:theme': 'neon' });
+    // The report theme and layouts, in the look form. Every save gets a preview.
+    const themed = await submitClub(lookForm.custom_id, 'u-trainer', false, { 'club:theme': 'neon', 'club:layouts': 'tall' });
     check('staff set the report theme', (await reload()).reportTheme, 'neon');
-    check('a new theme is confirmed with a preview', [themed?.description?.includes('Report theme: **Neon**'), themed?.files], [true, 1]);
-    const same = await submitClub(reportsForm.custom_id, 'u-trainer', false, { ...themeForm, 'club:theme': 'neon' });
-    check('the same theme again: no preview', same?.files, undefined);
-    check('the form pre-selects the saved theme',
-        pre(clubCmd.buildReportsModal(await reload()).toJSON() as unknown as ModalJson, 'Report theme')?.options?.find((o) => o.default)?.value, 'neon');
-    await submitClub(reportsForm.custom_id, 'u-trainer', false, themeForm);
+    check('the look is confirmed with a preview', [themed?.description?.includes('Report theme: **Neon**'), themed?.files], [true, 1]);
+    const lookOf = async () => clubCmd.buildLookModal(await reload()).toJSON() as unknown as LookJson;
+    check('the form pre-selects the saved theme', (await lookOf()).components[0]?.component.options?.find((o) => o.default)?.value, 'neon');
+    const both = await submitClub(lookForm.custom_id, 'u-trainer', false, { 'club:layouts': 'tall,wide' });
     check('not picking leaves the theme', (await reload()).reportTheme, 'neon');
-    const reset = await submitClub(reportsForm.custom_id, 'u-trainer', false, { ...themeForm, 'club:theme': 'default' });
+    check('both layouts are saved, tall first', (await reload()).reportLayouts, ['tall', 'wide']);
+    check('both layouts: the preview has two images, and the summary says so',
+        [both?.files, both?.description?.includes('layout: **Tall and Wide**')], [2, true]);
+    check('the form ticks both saved layouts',
+        (await lookOf()).components[1]?.component.options?.filter((o) => o.default).map((o) => o.value), ['tall', 'wide']);
+    await submitClub(lookForm.custom_id, 'u-trainer', false, { 'club:layouts': 'wide' });
+    check('wide alone', (await reload()).reportLayouts, ['wide']);
+    const posted2 = await (await import('../src/lib/fans/scheduler')).buildCircleReport(await reload());
+    check('a wide-only report renders one wide image', posted2?.images.map((a) => a.name), [`fan-report-${club.circleId}-wide.png`]);
+    await submitClub(lookForm.custom_id, 'u-trainer', false, { 'club:layouts': 'sideways' });
+    check('an unknown layout keeps the saved ones', (await reload()).reportLayouts, ['wide']);
+    const reset = await submitClub(lookForm.custom_id, 'u-trainer', false, { 'club:theme': 'default', 'club:layouts': 'tall' });
     check('default clears the theme', [(await reload()).reportTheme, reset?.description?.includes('Report theme: **Rose** (the default)')], [null, true]);
+    const outsider = await submitClub(lookForm.custom_id, 'u-nobody', false, { 'club:theme': 'neon', 'club:layouts': 'tall' });
+    check('someone outside the club cannot change the look', [outsider?.ephemeral, (await reload()).reportTheme], [true, null]);
+    const { layoutsOf } = await import('../src/lib/image/renderFanReport');
+    check('stored layouts: empty or unknown is tall; order is fixed', [layoutsOf([]), layoutsOf(['x']), layoutsOf(['wide', 'tall'])], [['tall'], ['tall'], ['tall', 'wide']]);
     check('an unknown stored theme draws in the default', paletteOf('gone').id, 'rose');
 
     // ── Staff roles matched by name ───────────────────────────────────────────
