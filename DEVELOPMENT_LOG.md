@@ -64,9 +64,9 @@ looks like Oguri, maybe with a free chibi of her.
     Onigiri, carrots, dango and steamed buns now hang from the string on
     threads of different lengths, each swayed a little. Fwoxie will supply a
     proper chibi later; it drops in at `src/assets/scenes/oguri.png`.
-  stands on the turf with
-  a shadow and an onigiri balanced on her head. A food pile sits at her
-  feet: a rice bowl in her blue, stacked onigiri, carrots and dango.
+  - The plush stands on the turf with a shadow and an onigiri balanced on
+    her head. A food pile sits at her feet: a rice bowl in her blue,
+    stacked onigiri, carrots and dango.
 - **Oguri scene** (`scenes.ts`): her blue sky with clouds, a garland of
   pennants in her blue, white and gold, her gold star glowing, and a white
   rail on mown turf. A stack of onigiri stands for her appetite. It
