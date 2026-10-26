@@ -62,6 +62,9 @@ Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
   the winners. With no options it shows the setup and the live top 3;
   `off:true` stops it. The first setup awards last week straight away and
   posts its board, so set the role and the channel in the same command.
+- `/timer publish [channel] [ping]`: posts last week's final leaderboard
+  once, now: in the given channel, else the rewards channel, else where it
+  is used. It pings the top 3 unless `ping:false`. It does not change roles.
 - `/timer milestone add runs:<n> role:<role>`: a role kept for good at `n`
   completed runs, given the moment someone reaches it (and straight away to
   everyone already past it). `/timer milestone remove runs:<n>` stops it.

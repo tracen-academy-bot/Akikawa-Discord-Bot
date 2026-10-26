@@ -1,4 +1,4 @@
-import { AttachmentBuilder, type Client, type Guild } from 'discord.js';
+import type { Client, Guild } from 'discord.js';
 import {
     claimExpiredNotifications,
     claimExpiredTimers,
@@ -9,8 +9,8 @@ import {
     type CompletionSummary,
 } from './service';
 import { refreshPanel } from './panel';
-import { TOP_PLACES, awardMilestone, boardForWeek, getTimerSettings, runWeeklyAwards, weekLabel, type WeeklyAward } from './rewards';
-import { renderBoardFor } from './boardImage';
+import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
+import { weekResultsPost } from './boardImage';
 
 /**
  * Drives timer expiry and notification cleanup.
@@ -74,30 +74,14 @@ async function guildOf(client: Client, guildId: string): Promise<Guild | null> {
     return client.guilds.cache.get(guildId) ?? (await client.guilds.fetch(guildId).catch(() => null));
 }
 
-/**
- * Posts a week's final board where the guild asked for it, naming and
- * pinging the winners and saying which role they now hold.
- */
+/** Posts a week's final board where the guild asked for it, pinging the winners. */
 async function announceAward(client: Client, award: WeeklyAward): Promise<void> {
     const settings = await getTimerSettings(award.guildId);
     if (!settings?.announceChannelId) return;
     const guild = await guildOf(client, award.guildId);
     const channel = await client.channels.fetch(settings.announceChannelId).catch(() => null);
     if (!guild || !channel?.isTextBased() || !('send' in channel)) return;
-
-    const board = await boardForWeek(award.guildId, award.week, 'lastweek');
-    const image = await renderBoardFor(guild, 'lastweek', board);
-    const lines = [`**Top runners for ${weekLabel(award.week)}**`];
-    if (award.winners.length === 0) lines.push('No runs were recorded that week.');
-    award.winners.forEach((w, i) => lines.push(`${i + 1}. <@${w.discordUserId}> · ${w.runs} run${w.runs === 1 ? '' : 's'}`));
-    if (settings.topRoleId && award.winners.length > 0) {
-        lines.push(`${award.winners.length === 1 ? 'They hold' : `The top ${Math.min(TOP_PLACES, award.winners.length)} hold`} <@&${settings.topRoleId}> until next week's results.`);
-    }
-    await channel.send({
-        content: lines.join('\n'),
-        files: [new AttachmentBuilder(image, { name: `training-week-${award.week}.png` })],
-        allowedMentions: { users: award.winners.map((w) => w.discordUserId) },
-    });
+    await channel.send(await weekResultsPost(guild, award.week, true));
 }
 
 /** Awards any week that has ended and announces it. */

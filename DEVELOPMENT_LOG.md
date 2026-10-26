@@ -36,6 +36,12 @@ replaces the plush.
   - The `/timer rewards` reply says so on first setup, and asks for the
     channel in the same command.
   - Tested in `test-timer`.
+- Fwoxie: "do a one time leaderboard publish thingy". `/timer publish
+  [channel] [ping]` posts last week's final board on demand: in the given
+  channel, else the rewards channel, else where it is used. It pings the top
+  3 unless `ping:false`, and never changes roles. The Monday award and this
+  build the same post (`weekResultsPost` in `boardImage.ts`), tested in
+  `test-timer`.
 
 ---
 
