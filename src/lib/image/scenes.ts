@@ -595,7 +595,9 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         else ctx.lineTo(x, along(x));
     }
     ctx.stroke();
-    const flags = [OGURI_BLUE, OGURI_WHITE, OGURI_GOLD];
+    // Her mid blue vanishes against the sky, so the blue pennants are a
+    // deep navy, and every pennant has a white edge.
+    const flags = ['#1b3f86', OGURI_WHITE, OGURI_GOLD];
     for (let i = 0, x = 10; x < w - 10; i += 1, x += 34) {
         const top = along(x);
         ctx.fillStyle = flags[i % flags.length]!;
@@ -605,8 +607,9 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         ctx.lineTo(x, top + 24);
         ctx.closePath();
         ctx.fill();
-        ctx.strokeStyle = 'rgba(20, 50, 110, 0.25)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 1.5;
+        ctx.lineJoin = 'round';
         ctx.stroke();
     }
 

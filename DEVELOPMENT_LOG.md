@@ -45,8 +45,15 @@ looks like Oguri, maybe with a free chibi of her.
   like official merchandise, which was flagged to Fwoxie. It is cut out of
   its warm grey backdrop by a flood fill from the edges. The backdrop is
   told apart from her cool white hair by warmth, and from her lighter, pinker
-  face by brightness and green against blue. The fringe is trimmed and
-  softened. It is `src/assets/scenes/oguri.png`, and stands on the turf with
+  face by brightness and green against blue. Fwoxie: "the crop is off".
+  The photo's drop shadow and the shadowed hair strands are mauve-grey and
+  stayed stuck to her side. The cut is now OpenCV GrabCut at 3x, seeded by
+  that flood fill: sure background far out, sure plush deep in. Then the
+  largest piece is kept, holes are filled, and the edge is smoothed. (OpenCV
+  was used once to make the asset; it is not a dependency.) The pennants'
+  mid blue vanished against the sky, so they are deep navy, white and gold,
+  each with a white edge. The plush is `src/assets/scenes/oguri.png`, and
+  stands on the turf with
   a shadow and an onigiri balanced on her head. A food pile sits at her
   feet: a rice bowl in her blue, stacked onigiri, carrots and dango.
 - **Oguri scene** (`scenes.ts`): her blue sky with clouds, a garland of
