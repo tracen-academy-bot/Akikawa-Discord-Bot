@@ -295,9 +295,12 @@ function drawRow(ctx: SKRSContext2D, m: MemberProgress, x: number, w: number, y:
 
     text(ctx, String(m.rank), c.rank, by, { spec: `400 ${c.numSize}px`, color: p.muted, align: 'right' });
 
-    const nameSpec = `400 ${c.nameSize}px`;
-    // Placement shows in the left bar only; a coloured name means behind.
-    const nameColor = m.onPace ? p.text : m.behind < dayQuota ? p.warn : p.behind;
+    // The top 3 names are bold in their place colour (Fwoxie, 2026-10-26).
+    // This table lists only members on pace, so a coloured name here never
+    // means behind; behind names are in their own card.
+    const podium = m.onPace && m.rank <= 3 && tint !== null;
+    const nameSpec = `${podium ? 700 : 400} ${c.nameSize}px`;
+    const nameColor = podium ? tint : m.onPace ? p.text : m.behind < dayQuota ? p.warn : p.behind;
     const nameWidth = text(ctx, fit(ctx, m.trainerName, c.nameMax, nameSpec), c.trainer, by, { spec: nameSpec, color: nameColor });
     if (m.rankChange !== null && m.rankChange !== 0) {
         text(ctx, `${m.rankChange > 0 ? '▲' : '▼'}${Math.abs(m.rankChange)}`, c.trainer + nameWidth + 6, by - 1, {
@@ -875,7 +878,7 @@ function renderWide(d: Prepared): Canvas {
         const placeWidth = text(ctx, `${i + 1}.`, x, by, { spec: '700 14px', color: p.place[i] ?? p.muted });
         const rankWidth = text(ctx, `#${t.m.rank}`, x + placeWidth + 8, by, { spec: '400 12px', color: p.faint });
         const nameX = x + placeWidth + 8 + rankWidth + 8;
-        text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '400 15px'), nameX, by, { spec: '400 15px', color: p.text });
+        text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '700 15px'), nameX, by, { spec: '700 15px', color: p.place[i] ?? p.text });
         y += TOP_ROW * stretch;
     });
     notes.forEach((line, i) => text(ctx, line, x, notesTop + 12 + i * 17, { spec: '400 12px', color: p.muted }));

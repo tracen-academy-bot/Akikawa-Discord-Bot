@@ -185,7 +185,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#7be0a0',
         warn: '#ffd23f',
         behind: '#ff6b63',
-        place: ['#ffd23a', '#e9e2e6', '#ff8f3f', '#ff9ccc'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#ff9ccc'],
         style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     classic: {
@@ -207,7 +207,7 @@ export const PALETTES: Record<string, Palette> = {
         good: THEME.green,
         warn: '#ffe14d',
         behind: '#e0665a',
-        place: ['#ffd23a', '#d5d6dc', '#ff8f3f', '#e9c8f2'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#e9c8f2'],
         style: { radius: 0, border: 'rgba(212, 165, 74, 0.45)', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     midnight: {
@@ -229,7 +229,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#62adff',
         warn: '#ffd84d',
         behind: '#ff7a7a',
-        place: ['#f5c84c', '#d4dae8', '#ff8a45', '#b49cff'],
+        place: ['#f5c84c', '#9fb8e6', '#ff8a45', '#b49cff'],
         style: { radius: 14, border: '#2c3a66', glow: false, labels: 'plain', frameStyle: 'stars' },
     },
     jewel: {
@@ -251,7 +251,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1abc9c',
         warn: '#ffe14d',
         behind: '#ff6f61',
-        place: ['#f1c40f', '#dfe4ea', '#ff8a3a', '#00bfff'],
+        place: ['#f1c40f', '#9fb8e6', '#ff8a3a', '#00bfff'],
         style: { radius: 20, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     plum: {
@@ -273,7 +273,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#7ee0c3',
         warn: '#ffd84d',
         behind: '#ff7b7b',
-        place: ['#ffd23a', '#e6dcef', '#ff8f3f', '#ff8fc7'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#ff8fc7'],
         style: { radius: 22, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     turf: {
@@ -295,7 +295,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#6fd6a8',
         warn: '#ffe14d',
         behind: '#ff8a7a',
-        place: ['#ffd23a', '#dbe6e0', '#ff8f3f', '#8fc8ff'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#8fc8ff'],
         style: { radius: 10, border: null, glow: false, labels: 'upper', frameStyle: 'lanes' },
     },
     graphite: {
@@ -317,7 +317,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#6fdc8c',
         warn: '#ffd84d',
         behind: '#ff8a8a',
-        place: ['#ffd23a', '#e3e5e8', '#ff8f3f', '#8ea1ff'],
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#8ea1ff'],
         style: { radius: 8, border: '#44474e', glow: false, labels: 'plain', frameStyle: 'solid' },
     },
     paper: {
@@ -339,7 +339,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1f6e3a',
         warn: '#945200',
         behind: '#b3261e',
-        place: ['#6f5f00', '#4a5563', '#9c4600', '#2c5aa0'],
+        place: ['#6f5f00', '#4a6898', '#9c4600', '#2c5aa0'],
         style: { radius: 2, border: '#c9b88f', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     akikawa: {
@@ -361,7 +361,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#2f58c4',
         warn: '#924f00',
         behind: '#c0262d',
-        place: ['#b0306a', '#94490f', '#5b5f6b', '#2f58c4'],
+        place: ['#b0306a', '#4a6898', '#94490f', '#2f58c4'],
         style: { radius: 24, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     clear: {
@@ -383,7 +383,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#56b4e9',
         warn: '#f0e442',
         behind: '#e2661a',
-        place: ['#f0e442', '#e2e2e2', '#cc79a7', '#009e73'],
+        place: ['#f0e442', '#9fb8e6', '#cc79a7', '#009e73'],
         style: { radius: 10, border: '#3a3a42', glow: false, labels: 'plain', frameStyle: 'solid' },
     },
     neon: {
@@ -405,7 +405,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#39ff9c',
         warn: '#fff35c',
         behind: '#ff5c7a',
-        place: ['#fff35c', '#e6e6ff', '#ffad5c', '#ff6cf3'],
+        place: ['#fff35c', '#9fb8e6', '#ffad5c', '#ff6cf3'],
         style: { radius: 6, border: '#ff3df2', glow: true, labels: 'upper', frameStyle: 'grid' },
     },
     sakura: {
@@ -427,7 +427,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1d7448',
         warn: '#995400',
         behind: '#bf2440',
-        place: ['#a1307a', '#4f5868', '#9a4a12', '#7338c9'],
+        place: ['#a1307a', '#4a6898', '#9a4a12', '#7338c9'],
         style: { radius: 26, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     oguri: {
@@ -449,7 +449,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#2a63b5',
         warn: '#945200',
         behind: '#b8241c',
-        place: ['#6f5f00', '#4e5866', '#9c4600', '#2a63b5'],
+        place: ['#6f5f00', '#4a6898', '#9c4600', '#2a63b5'],
         style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'oguri' },
     },
     firework: {
@@ -471,7 +471,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#5ee6b0',
         warn: '#ffe14d',
         behind: '#ff5f7a',
-        place: ['#ffd75e', '#e4e2f2', '#ff9f5e', '#7fb8ff'],
+        place: ['#ffd75e', '#9fb8e6', '#ff9f5e', '#7fb8ff'],
         style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'fireworks' },
     },
     confetti: {
@@ -493,7 +493,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1b6e45',
         warn: '#945200',
         behind: '#b3261e',
-        place: ['#6f5f00', '#4f5868', '#9c4600', '#c2185b'],
+        place: ['#6f5f00', '#4a6898', '#9c4600', '#c2185b'],
         style: { radius: 18, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'confetti' },
     },
     finish: {
@@ -515,7 +515,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#57d68d',
         warn: '#ffe14d',
         behind: '#ff5a4f',
-        place: ['#ffcc33', '#dcdde3', '#e39a5c', '#5ab4ff'],
+        place: ['#ffcc33', '#9fb8e6', '#e39a5c', '#5ab4ff'],
         style: { radius: 4, border: '#3a3c44', glow: false, labels: 'upper', frameStyle: 'checker' },
     },
 };

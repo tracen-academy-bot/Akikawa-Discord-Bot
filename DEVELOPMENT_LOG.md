@@ -18,6 +18,15 @@ looks like Oguri, maybe with a free chibi of her.
     reads as behind.
   - Light palettes use olive gold `#6f5f00` and copper `#9c4600`.
   - The wide sidebar's "Top 3" list now numbers each place in its colour.
+  - Fwoxie then clarified they meant the names. The top 3 names in the
+    on-pace table, and in the sidebar's Top 3, are now bold in their place
+    colour. This drops the old rule that "a coloured name means behind".
+    That rule is safe to drop: the table lists only members on pace, and
+    behind names sit in their own card.
+  - Silver read as plain text: near-white on dark palettes, dark grey on
+    light ones. It is now a steel blue, `#9fb8e6` on dark palettes and
+    `#4a6898` on light ones. The check also requires ΔE ≥ 25 between each
+    top 3 colour and `text`. Akikawa and Sakura swap their grey for it.
 - **Oguri scene** (`scenes.ts`): her blue sky with clouds, a garland of
   pennants in her blue, white and gold, her gold star glowing, and a white
   rail on mown turf. A stack of onigiri stands for her appetite. It

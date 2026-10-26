@@ -108,6 +108,9 @@ function deltaE(a: string, b: string): number {
 /** Least colour difference allowed between any two of the top 3. */
 const PLACE_DELTA_E = 35;
 
+/** Least colour difference allowed between a top 3 colour and the text colour. */
+const PLACE_TEXT_DELTA_E = 25;
+
 /**
  * Problems telling the top 3 apart (Fwoxie, 2026-10-26: "top 3 should have
  * different colors"). Gold and bronze drift together, especially once
@@ -121,6 +124,11 @@ function placeDistinctness(p: Palette): string[] {
             const d = deltaE(p.place[i]!, p.place[j]!);
             if (d < PLACE_DELTA_E) problems.push(`place ${i + 1} ${p.place[i]} and place ${j + 1} ${p.place[j]} differ by only ${d.toFixed(0)} (need ${PLACE_DELTA_E})`);
         }
+    }
+    // Each must also stand out from an ordinary name, or it reads as plain text.
+    for (let i = 0; i < 3; i += 1) {
+        const d = deltaE(p.place[i]!, p.text);
+        if (d < PLACE_TEXT_DELTA_E) problems.push(`place ${i + 1} ${p.place[i]} is too close to the text colour ${p.text} (${d.toFixed(0)}, need ${PLACE_TEXT_DELTA_E})`);
     }
     return problems;
 }
