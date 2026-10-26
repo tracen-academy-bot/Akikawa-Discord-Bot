@@ -84,6 +84,47 @@ function distinctness(p: Palette): string[] {
     return problems;
 }
 
+/** CIE L*a*b* of a `#rrggbb` colour (D65). */
+function toLab(hex: string): [number, number, number] {
+    const n = parseInt(hex.slice(1), 16);
+    const linear = (c: number) => {
+        const v = c / 255;
+        return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    };
+    const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(linear) as [number, number, number];
+    const x = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047;
+    const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883;
+    const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+    return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))];
+}
+
+/** CIE76 colour difference: about 2 is just noticeable, 35 is plainly different. */
+function deltaE(a: string, b: string): number {
+    const [p, q] = [toLab(a), toLab(b)];
+    return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+}
+
+/** Least colour difference allowed between any two of the top 3. */
+const PLACE_DELTA_E = 35;
+
+/**
+ * Problems telling the top 3 apart (Fwoxie, 2026-10-26: "top 3 should have
+ * different colors"). Gold and bronze drift together, especially once
+ * darkened for a light palette, so every pair must differ by
+ * `PLACE_DELTA_E`.
+ */
+function placeDistinctness(p: Palette): string[] {
+    const problems: string[] = [];
+    for (let i = 0; i < 3; i += 1) {
+        for (let j = i + 1; j < 3; j += 1) {
+            const d = deltaE(p.place[i]!, p.place[j]!);
+            if (d < PLACE_DELTA_E) problems.push(`place ${i + 1} ${p.place[i]} and place ${j + 1} ${p.place[j]} differ by only ${d.toFixed(0)} (need ${PLACE_DELTA_E})`);
+        }
+    }
+    return problems;
+}
+
 /**
  * A 29-member circle like Cosmos on 2026-10-24: a biweekly 42.5M quota, day
  * 23 finished, the second half (days 15-31) in progress. A spread of totals,
@@ -149,12 +190,12 @@ async function main() {
             if (!ok) failures += 1;
             console.log(`  ${ok ? 'ok  ' : 'LOW '} ${row.key.padEnd(8)} ${row.color}  ${row.ratio.toFixed(2)}:1 (floor ${row.floor}:1)`);
         }
-        for (const problem of distinctness(palette)) {
+        for (const problem of [...distinctness(palette), ...placeDistinctness(palette)]) {
             failures += 1;
             console.log(`  SAME ${problem}`);
         }
     }
-    console.log(failures === 0 ? '\nEvery colour meets its floor and the behind colours are distinct.' : `\n${failures} problem(s).`);
+    console.log(failures === 0 ? '\nEvery colour meets its floor, and the behind colours and the top 3 are distinct.' : `\n${failures} problem(s).`);
     process.exitCode = failures === 0 ? 0 : 1;
 }
 

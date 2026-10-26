@@ -871,7 +871,8 @@ function renderWide(d: Prepared): Canvas {
     best.forEach((t, i) => {
         const by = y + (TOP_ROW * stretch) / 2 + 5;
         const gainWidth = text(ctx, `+${shortFans(t.gain)}`, x + inner, by, { spec: '700 15px', color: p.good, align: 'right' });
-        const placeWidth = text(ctx, `${i + 1}.`, x, by, { spec: '700 14px', color: p.muted });
+        // Each place in its own colour, as in the table.
+        const placeWidth = text(ctx, `${i + 1}.`, x, by, { spec: '700 14px', color: p.place[i] ?? p.muted });
         const rankWidth = text(ctx, `#${t.m.rank}`, x + placeWidth + 8, by, { spec: '400 12px', color: p.faint });
         const nameX = x + placeWidth + 8 + rankWidth + 8;
         text(ctx, fit(ctx, t.m.trainerName, x + inner - gainWidth - 12 - nameX, '400 15px'), nameX, by, { spec: '400 15px', color: p.text });
@@ -939,5 +940,5 @@ export async function renderFanReport(
     };
     const report = layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
     // A palette with a scene draws on a transparent background; set it in the scene.
-    return withScene(report, palette, layout).encode('png');
+    return (await withScene(report, palette, layout)).encode('png');
 }

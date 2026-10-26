@@ -4,6 +4,32 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Distinct top 3 colours; an Oguri Cap scene
+
+Asked for: "top 3 should have different colors", and an Oguri theme that
+looks like Oguri, maybe with a free chibi of her.
+
+- **Top 3**: gold and bronze drifted together, most of all once darkened
+  for light palettes. 1st vs 3rd measured only 17 to 34 (CIE76 ΔE) in 10
+  of 16 palettes. `scripts/palettes.ts` now requires ΔE ≥ 35 between each
+  pair of the top 3.
+  - Dark palettes use a clear gold (`#ffd23a`) and an orange bronze
+    (`#ff8f3f`). The bronze is kept orange, not red, so a top-3 name never
+    reads as behind.
+  - Light palettes use olive gold `#6f5f00` and copper `#9c4600`.
+  - The wide sidebar's "Top 3" list now numbers each place in its colour.
+- **Oguri scene** (`scenes.ts`): her blue sky with clouds, a garland of
+  pennants in her blue, white and gold, her gold star glowing, and a white
+  rail on mown turf. A stack of onigiri stands for her appetite. It
+  replaces the starfield backdrop, which only showed as specks.
+- **No chibi shipped**: no Oguri chibi with a clear free-use licence turned
+  up. Cygames' fan-work guidelines govern what fans may make; they do not
+  license other people's art. So a scene takes an optional picture from
+  `src/assets/scenes/<scene>.png`, which a club adds only with permission.
+  `withScene` is async to load it, and it is cached.
+
+---
+
 ## 2026-10-26 — /club fancount is a form; Firework, Confetti, Finish Line themes
 
 Asked for: "just do a form if you do fancount", and more designs.

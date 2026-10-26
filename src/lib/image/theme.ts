@@ -185,7 +185,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#7be0a0',
         warn: '#ffd23f',
         behind: '#ff6b63',
-        place: ['#ffd27a', '#e9e2e6', '#f0a774', '#ff9ccc'],
+        place: ['#ffd23a', '#e9e2e6', '#ff8f3f', '#ff9ccc'],
         style: { radius: 16, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     classic: {
@@ -207,7 +207,7 @@ export const PALETTES: Record<string, Palette> = {
         good: THEME.green,
         warn: '#ffe14d',
         behind: '#e0665a',
-        place: THEME.place,
+        place: ['#ffd23a', '#d5d6dc', '#ff8f3f', '#e9c8f2'],
         style: { radius: 0, border: 'rgba(212, 165, 74, 0.45)', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     midnight: {
@@ -229,7 +229,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#62adff',
         warn: '#ffd84d',
         behind: '#ff7a7a',
-        place: ['#f5c84c', '#d4dae8', '#e8a06a', '#b49cff'],
+        place: ['#f5c84c', '#d4dae8', '#ff8a45', '#b49cff'],
         style: { radius: 14, border: '#2c3a66', glow: false, labels: 'plain', frameStyle: 'stars' },
     },
     jewel: {
@@ -251,7 +251,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1abc9c',
         warn: '#ffe14d',
         behind: '#ff6f61',
-        place: ['#f1c40f', '#dfe4ea', '#f39c45', '#00bfff'],
+        place: ['#f1c40f', '#dfe4ea', '#ff8a3a', '#00bfff'],
         style: { radius: 20, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     plum: {
@@ -273,7 +273,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#7ee0c3',
         warn: '#ffd84d',
         behind: '#ff7b7b',
-        place: ['#ffd479', '#e6dcef', '#ffa978', '#ff8fc7'],
+        place: ['#ffd23a', '#e6dcef', '#ff8f3f', '#ff8fc7'],
         style: { radius: 22, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
     },
     turf: {
@@ -295,7 +295,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#6fd6a8',
         warn: '#ffe14d',
         behind: '#ff8a7a',
-        place: ['#f0c75e', '#dbe6e0', '#e8a36c', '#8fc8ff'],
+        place: ['#ffd23a', '#dbe6e0', '#ff8f3f', '#8fc8ff'],
         style: { radius: 10, border: null, glow: false, labels: 'upper', frameStyle: 'lanes' },
     },
     graphite: {
@@ -317,7 +317,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#6fdc8c',
         warn: '#ffd84d',
         behind: '#ff8a8a',
-        place: ['#ffcf5c', '#e3e5e8', '#f0a774', '#8ea1ff'],
+        place: ['#ffd23a', '#e3e5e8', '#ff8f3f', '#8ea1ff'],
         style: { radius: 8, border: '#44474e', glow: false, labels: 'plain', frameStyle: 'solid' },
     },
     paper: {
@@ -339,7 +339,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1f6e3a',
         warn: '#945200',
         behind: '#b3261e',
-        place: ['#8a5a00', '#4a5563', '#9a4a12', '#2c5aa0'],
+        place: ['#6f5f00', '#4a5563', '#9c4600', '#2c5aa0'],
         style: { radius: 2, border: '#c9b88f', glow: false, labels: 'upper', frameStyle: 'solid' },
     },
     akikawa: {
@@ -433,7 +433,7 @@ export const PALETTES: Record<string, Palette> = {
     oguri: {
         id: 'oguri',
         label: 'Oguri',
-        origin: "Oguri Cap's image colours on the Umamusume wiki (umamusu.wiki, 2026-10-26): blue #3A7AD2 and white #ECE7E7, as off-white stars on blue, with the gold of her star and the red of her neckerchief.",
+        origin: "Oguri Cap's image colours on the Umamusume wiki (umamusu.wiki, 2026-10-26), blue #3A7AD2 and white #ECE7E7, in a scene of her: blue sky, her gold star, pennants, a white rail and onigiri. Red for behind is her neckerchief.",
         light: true,
         frame: '#3a7ad2',
         frameEnd: '#ece7e7',
@@ -449,8 +449,8 @@ export const PALETTES: Record<string, Palette> = {
         good: '#2a63b5',
         warn: '#945200',
         behind: '#b8241c',
-        place: ['#835400', '#4e5866', '#9a4a12', '#2a63b5'],
-        style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'stars' },
+        place: ['#6f5f00', '#4e5866', '#9c4600', '#2a63b5'],
+        style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'oguri' },
     },
     firework: {
         id: 'firework',
@@ -493,7 +493,7 @@ export const PALETTES: Record<string, Palette> = {
         good: '#1b6e45',
         warn: '#945200',
         behind: '#b3261e',
-        place: ['#8a5a00', '#4f5868', '#9a4a12', '#c2185b'],
+        place: ['#6f5f00', '#4f5868', '#9c4600', '#c2185b'],
         style: { radius: 18, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'confetti' },
     },
     finish: {

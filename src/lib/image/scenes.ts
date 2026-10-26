@@ -1,4 +1,6 @@
-import { createCanvas, type Canvas, type SKRSContext2D } from '@napi-rs/canvas';
+import { existsSync } from 'node:fs';
+import * as path from 'node:path';
+import { createCanvas, loadImage, type Canvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import { seeded } from './cards';
 import type { Palette } from './theme';
 
@@ -15,13 +17,21 @@ import type { Palette } from './theme';
  *              city skyline; the cards stand where the street would be
  *   confetti   a warm wash with tumbling, shaded confetti, sequins and
  *              curled streamers, densest at the top and thinning downwards
+ *   oguri      Oguri Cap's colours: a blue sky with clouds and pennants in
+ *              blue, white and gold, her gold star, and a white rail on
+ *              mown turf with a stack of onigiri (she is famously hungry)
+ *
+ * A scene may also show a picture from `src/assets/scenes/<scene>.png`,
+ * standing on the right of the band, when one is there. None is shipped: a
+ * picture of a character belongs to its artist, so a club adds one it has
+ * permission to use. Without it the scene is complete as drawn.
  *
  * Every scene is drawn from a fixed seed, so the same report always looks
  * the same.
  */
 
 /** The scenes a palette can carry. */
-export type SceneId = 'fireworks' | 'confetti';
+export type SceneId = 'fireworks' | 'confetti' | 'oguri';
 
 /** Height of the open band above the cards, by layout. */
 const HERO = { tall: 190, wide: 170 } as const;
@@ -32,11 +42,33 @@ const SIDE = 30;
 /** The margin the report draws around its cards, which is transparent here. */
 const INNER = 16;
 
+/** Where a scene's optional picture lives, beside the other image assets. */
+const ART_DIR = path.join(__dirname, '..', '..', 'assets', 'scenes');
+
+/** Each scene's picture, once loaded; null when there is none. */
+const artCache = new Map<SceneId, Image | null>();
+
+/** The scene's picture, or null when the file is missing or unreadable. */
+async function sceneArt(scene: SceneId): Promise<Image | null> {
+    if (artCache.has(scene)) return artCache.get(scene)!;
+    const file = path.join(ART_DIR, `${scene}.png`);
+    let art: Image | null = null;
+    if (existsSync(file)) {
+        try {
+            art = await loadImage(file);
+        } catch {
+            art = null;
+        }
+    }
+    artCache.set(scene, art);
+    return art;
+}
+
 /**
  * Places a report, drawn on a transparent background, on its palette's
  * scene. Returns the report unchanged for a palette without one.
  */
-export function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wide'): Canvas {
+export async function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wide'): Promise<Canvas> {
     const scene = p.style.scene;
     if (!scene) return report;
     const hero = HERO[layout];
@@ -47,7 +79,8 @@ export function withScene(report: Canvas, p: Palette, layout: 'tall' | 'wide'): 
     const canvas = createCanvas(w, h);
     const ctx = canvas.getContext('2d');
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
-    else drawConfetti(ctx, w, h, hero);
+    else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
+    else drawOguri(ctx, w, h, hero, await sceneArt(scene));
     ctx.drawImage(report, offsetX, offsetY);
     return canvas;
 }
@@ -409,4 +442,219 @@ function drawStreamer(
         ctx.stroke();
     }
     ctx.lineCap = 'butt';
+}
+
+// ─── Oguri ────────────────────────────────────────────────────────────────────
+
+/** Oguri Cap's blue and white (umamusu.wiki), and the gold of her star. */
+const OGURI_BLUE = '#3a7ad2';
+const OGURI_WHITE = '#ece7e7';
+const OGURI_GOLD = '#ffcc33';
+
+/** A five-pointed star path centred on (cx, cy). */
+function starPath(ctx: SKRSContext2D, cx: number, cy: number, outer: number, inner: number, turn: number) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i += 1) {
+        const r = i % 2 === 0 ? outer : inner;
+        const a = turn - Math.PI / 2 + (i * Math.PI) / 5;
+        if (i === 0) ctx.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+        else ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    }
+    ctx.closePath();
+}
+
+/** A four-pointed twinkle. */
+function twinkle(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string) {
+    ctx.fillStyle = colour;
+    ctx.beginPath();
+    ctx.moveTo(x, y - r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.quadraticCurveTo(x, y, x, y + r);
+    ctx.quadraticCurveTo(x, y, x - r, y);
+    ctx.quadraticCurveTo(x, y, x, y - r);
+    ctx.fill();
+}
+
+/** A puffy cloud: overlapping circles, white on top and shaded underneath. */
+function cloud(ctx: SKRSContext2D, x: number, y: number, size: number, rand: () => number) {
+    const puffs = Array.from({ length: 5 }, (_, i) => ({
+        dx: (i - 2) * size * 0.42 + (rand() - 0.5) * size * 0.15,
+        dy: -Math.sin((i / 4) * Math.PI) * size * 0.32,
+        r: size * (0.34 + Math.sin((i / 4) * Math.PI) * 0.22),
+    }));
+    ctx.fillStyle = 'rgba(40, 90, 170, 0.12)';
+    for (const p of puffs) {
+        ctx.beginPath();
+        ctx.arc(x + p.dx + 3, y + p.dy + 5, p.r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    const g = ctx.createLinearGradient(0, y - size * 0.7, 0, y + size * 0.35);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(1, '#dfe9f7');
+    ctx.fillStyle = g;
+    for (const p of puffs) {
+        ctx.beginPath();
+        ctx.arc(x + p.dx, y + p.dy, p.r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+/** One onigiri: a rounded white triangle on a strip of nori. */
+function onigiri(ctx: SKRSContext2D, x: number, y: number, size: number, tilt: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    const half = size / 2;
+    ctx.shadowColor = 'rgba(30, 60, 30, 0.25)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 2;
+    ctx.fillStyle = '#fffdf7';
+    ctx.strokeStyle = '#e4ddcf';
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, -half);
+    ctx.quadraticCurveTo(half * 0.25, -half * 0.95, half * 0.95, half * 0.55);
+    ctx.quadraticCurveTo(half, half, half * 0.55, half);
+    ctx.lineTo(-half * 0.55, half);
+    ctx.quadraticCurveTo(-half, half, -half * 0.95, half * 0.55);
+    ctx.quadraticCurveTo(-half * 0.25, -half * 0.95, 0, -half);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.stroke();
+    // Nori, with a little sheen.
+    ctx.fillStyle = '#1d2b25';
+    ctx.fillRect(-half * 0.32, half * 0.28, half * 0.64, half * 0.72);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.fillRect(-half * 0.32, half * 0.28, half * 0.12, half * 0.72);
+    // A few sesame seeds.
+    ctx.fillStyle = '#d9cfb8';
+    for (const [sx, sy] of [[-0.2, -0.2], [0.18, -0.05], [-0.05, 0.08]] as const) ctx.fillRect(sx * half, sy * half, 2, 1.2);
+    ctx.restore();
+}
+
+/**
+ * Oguri Cap: her blue sky, clouds, a garland of pennants in her colours,
+ * her gold star, and a white rail on mown turf just above the cards, with a
+ * stack of onigiri on the grass. `art`, when given, stands on the right.
+ */
+function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null) {
+    const rand = seeded(1987);
+
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#2c69c2');
+    sky.addColorStop(Math.min(0.99, (hero * 0.7) / h), '#5d95df');
+    sky.addColorStop(Math.min(0.995, hero / h), '#a9c8f0');
+    sky.addColorStop(1, '#e3ecf8');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // Clouds, away from the star on the left.
+    for (let i = 0; i < Math.max(3, Math.round(w / 260)); i += 1) {
+        const x = w * 0.25 + rand() * w * 0.75;
+        cloud(ctx, x, hero * (0.3 + rand() * 0.28), 26 + rand() * 22, rand);
+    }
+
+    // Her star, glowing.
+    const sx = Math.min(w * 0.14, 130);
+    const sy = hero * 0.42;
+    const sr = hero * 0.27;
+    const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 2.2);
+    glow.addColorStop(0, 'rgba(255, 236, 150, 0.75)');
+    glow.addColorStop(1, 'rgba(255, 236, 150, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr * 2.2, 0, Math.PI * 2);
+    ctx.fill();
+    starPath(ctx, sx, sy, sr, sr * 0.45, -0.2);
+    const gold = ctx.createLinearGradient(sx - sr, sy - sr, sx + sr, sy + sr);
+    gold.addColorStop(0, '#fff0a0');
+    gold.addColorStop(0.45, OGURI_GOLD);
+    gold.addColorStop(1, '#e09a00');
+    ctx.fillStyle = gold;
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+    starPath(ctx, sx - sr * 0.12, sy - sr * 0.12, sr * 0.38, sr * 0.17, -0.2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.fill();
+    for (let i = 0; i < Math.round(w / 90); i += 1) {
+        twinkle(ctx, rand() * w, rand() * hero * 0.75, 3 + rand() * 5, rand() < 0.5 ? '#ffffff' : '#fff2b0');
+    }
+
+    // A garland of pennants sagging across the top.
+    const sag = 16;
+    const along = (x: number) => 6 + sag * Math.sin((x / w) * Math.PI);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 8) {
+        if (x === 0) ctx.moveTo(x, along(x));
+        else ctx.lineTo(x, along(x));
+    }
+    ctx.stroke();
+    const flags = [OGURI_BLUE, OGURI_WHITE, OGURI_GOLD];
+    for (let i = 0, x = 10; x < w - 10; i += 1, x += 34) {
+        const top = along(x);
+        ctx.fillStyle = flags[i % flags.length]!;
+        ctx.beginPath();
+        ctx.moveTo(x - 11, top);
+        ctx.lineTo(x + 11, along(x + 22) - (along(x + 22) - top) / 2);
+        ctx.lineTo(x, top + 24);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(20, 50, 110, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    // Turf, mown in stripes, running into the cards.
+    const turfTop = hero - 30;
+    const turf = ctx.createLinearGradient(0, turfTop, 0, hero + 20);
+    turf.addColorStop(0, '#5fbf6c');
+    turf.addColorStop(1, '#3d9a52');
+    ctx.fillStyle = turf;
+    ctx.fillRect(0, turfTop, w, h - turfTop);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    for (let x = -40; x < w; x += 48) {
+        ctx.beginPath();
+        ctx.moveTo(x, turfTop);
+        ctx.lineTo(x + 24, turfTop);
+        ctx.lineTo(x + 34, h);
+        ctx.lineTo(x + 10, h);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // The white rail along the turf.
+    const railY = turfTop - 18;
+    ctx.fillStyle = 'rgba(20, 60, 30, 0.25)';
+    ctx.fillRect(0, railY + 3, w, 4);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, railY, w, 5);
+    ctx.fillRect(0, railY + 11, w, 3);
+    for (let x = 6; x < w; x += 30) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x, railY, 4, turfTop - railY + 6);
+        ctx.fillStyle = 'rgba(40, 90, 140, 0.25)';
+        ctx.fillRect(x + 3, railY + 2, 1, turfTop - railY + 4);
+    }
+
+    // The picture, when there is one, standing on the right; the onigiri
+    // pile sits beside it, or at the right edge without it.
+    let pileX = w - SIDE - 70;
+    if (art) {
+        const artH = hero - 16;
+        const artW = (art.width / art.height) * artH;
+        const artX = w - SIDE - artW;
+        ctx.drawImage(art, artX, hero - artH - 2, artW, artH);
+        pileX = artX - 46;
+    }
+    const size = 38;
+    const ground = hero - 8;
+    onigiri(ctx, pileX - size * 0.55, ground - size / 2, size, -0.08);
+    onigiri(ctx, pileX + size * 0.55, ground - size / 2, size, 0.1);
+    onigiri(ctx, pileX, ground - size * 1.35, size, 0.02);
 }
