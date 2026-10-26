@@ -1426,9 +1426,9 @@ interface Moonbeam {
  *
  * Each pane of a window throws its own shaft, so the mullions leave dark
  * bars between them, and a few brighter rays streak each shaft. The shafts
- * slant down at `slope` across per px down, cross the lace and fade out on
- * the cards (at `reach`), where the panes' shapes land as a dim window. The
- * glass itself is left clear.
+ * slant down at `slope` across per px down and fade quickly, mostly gone
+ * by the lace and out entirely just onto the cards (at `reach`). The glass
+ * itself is left clear.
  */
 function moonlightLayer(
     w: number,
@@ -1462,8 +1462,10 @@ function moonlightLayer(
                     : [[x0, y0], [x1, y0], [x1, y1], [x1 + shift, y1 + drop], [x0 + shift, y1 + drop], [x0 + shift, y0 + drop]];
             const cx = (x0 + x1) / 2;
             const fade = ctx.createLinearGradient(cx, y0, cx + shift, y0 + drop);
+            // Bright at the glass, mostly gone by the lace.
             fade.addColorStop(0, rgba(colour, alpha));
-            fade.addColorStop(0.45, rgba(colour, alpha * 0.55));
+            fade.addColorStop(0.25, rgba(colour, alpha * 0.45));
+            fade.addColorStop(0.6, rgba(colour, alpha * 0.12));
             fade.addColorStop(1, rgba(colour, 0));
             ctx.fillStyle = fade;
             ctx.beginPath();
@@ -2066,7 +2068,7 @@ function drawStillInLove(
         top,
         winW,
         sill,
-        hero + 120,
+        hero + 40,
         0.85,
     );
 

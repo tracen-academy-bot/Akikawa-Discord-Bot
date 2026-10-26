@@ -83,6 +83,9 @@ screen red. Food is no longer central.
     diamond on the lace (her dress); red spider lilies in the vase for her
     "Scarlet Lily" unique skill (roses there removed); a glass of red for
     her profile's "unquenched thirst", spilling at her worst.
+  - Then, at Fwoxie's ask, the light fades much faster: down to 45% a
+    quarter of the way and 12% by 60%, and gone just past the top of the
+    cards (`reach` hero + 40, was hero + 120).
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
