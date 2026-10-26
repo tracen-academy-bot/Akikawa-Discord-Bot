@@ -33,6 +33,10 @@ replaces the plush.
     the hamburg-steak tray.
   - A first cut stacked the trays. Fwoxie: "who stacks multiple plates on
     top of each other". The burger tray was dropped.
+  - The burger sits out at the ramen tray's left edge, tipped 0.18 rad so
+    it leans on the rim.
+  - The signposts snap onto the nearest rail post (`onRailPost`). Before,
+    one landed 2px beside a rail post and read as a doubled post.
   - Real burgers and rice mountains hang in the garland between the drawn
     onigiri and carrots.
   - If any picture is missing, the scene draws its own food as before.

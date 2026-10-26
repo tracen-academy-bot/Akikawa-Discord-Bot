@@ -125,7 +125,14 @@ function drawMealPile(ctx: SKRSContext2D, food: FoodArt, cx: number, ground: num
     standing(ctx, food.ramen_tray, ramenX, ground, s);
     // On the ramen tray's surface, about 20 tray pixels above its bottom edge.
     const onTray = ground - 20 * s;
-    standing(ctx, food.burger, ramenX - trayW * 0.3, onTray, s);
+    // The burger sits out at the tray's left edge, tipped a little so it
+    // leans on the rim rather than floating past it.
+    const burgerX = ramenX - trayW * 0.4;
+    ctx.save();
+    ctx.translate(burgerX, onTray);
+    ctx.rotate(-0.18);
+    standing(ctx, food.burger, 0, 0, s);
+    ctx.restore();
     standing(ctx, food.rice_mountain, ramenX + trayW * 0.37, onTray, s);
     ctx.restore();
 }
@@ -682,7 +689,7 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, railY, w, 5);
     ctx.fillRect(0, railY + 11, w, 3);
-    for (let x = 6; x < w; x += 30) {
+    for (let x = RAIL_FIRST_POST; x < w; x += RAIL_POST_GAP) {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(x, railY, 4, turfTop - railY + 6);
         ctx.fillStyle = 'rgba(40, 90, 140, 0.25)';
@@ -709,6 +716,15 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     } else {
         drawFoodPile(ctx, w - SIDE - 90, ground, 120, false);
     }
+}
+
+/** Where the rail's dividing posts stand: every `RAIL_POST_GAP` from `RAIL_FIRST_POST`. */
+const RAIL_FIRST_POST = 6;
+const RAIL_POST_GAP = 30;
+
+/** The rail post nearest `x`, so a signpost is one of them run taller rather than a second post beside it. */
+function onRailPost(x: number): number {
+    return RAIL_FIRST_POST + Math.round((x - RAIL_FIRST_POST) / RAIL_POST_GAP) * RAIL_POST_GAP;
 }
 
 /** A soft shadow on the grass. */
@@ -836,8 +852,8 @@ function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, rac
     // The rail's posts end 18px above the ground line; the signposts match.
     const postBottom = ground - 18;
     const gateRight = startingGate(ctx, SIDE + 4, ground, 3);
-    const startX = gateRight + 14;
-    const finishX = w - SIDE - (food ? 215 : 150);
+    const startX = onRailPost(gateRight + 14);
+    const finishX = onRailPost(w - SIDE - (food ? 215 : 150));
     trackPost(ctx, startX, postBottom, race.start, false);
     if (food) drawMealPile(ctx, food, w - SIDE - 100, ground);
     else drawFoodPile(ctx, w - SIDE - 70, ground, 100, false);
