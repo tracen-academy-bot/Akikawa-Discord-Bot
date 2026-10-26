@@ -18,3 +18,4 @@ their parchment background and recoloured to the other blood's red.
 | hand-smear.png | https://openclipart.org/detail/316609 ("Bloody Handprints"), another print |
 | rose.png | https://openclipart.org/detail/202514 ("Raseone rose red") |
 | lilies.png | https://openclipart.org/detail/324913 ("Red Spider Lily") |
+| lily.png | https://openclipart.org/detail/345040 ("Red Spider Lily") |

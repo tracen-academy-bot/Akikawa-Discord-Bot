@@ -48,10 +48,10 @@ all read on 2026-10-26. Anything not from there is marked.
 | Red fruit jam | the jam jars on the side table |
 | Large mirrors | the mirror on the table is draped with cloth |
 | Tagline | her line in the speech bubble |
-| Scarlet Lily skill | a vase of red spider lilies on the side table |
+| Scarlet Lily skill | a vase of red spider lilies on the side table, and a field of them along the lace up to the club's place |
 | "Unquenched thirst", vampire | a glass of red wine on the table, spilling over at her worst |
 | Ribbons, gold hearts | white ribbon tie-backs with gold hearts on the curtains; gold heart charms on the lace |
-| Blue diamond | one blue diamond at the centre of the lace |
+| Her heart emoji | the heart on the lace marking the club's place between the two ranks; she stands over it |
 | Roses | not canon (only the Rose Stakes); one lies on the calm window's ledge |
 
 **Not used yet:** the veil and heart ring, her diary, coffee or tea, the red thread, and the skill names (possible speech-bubble lines). A red thread from her to the cards needs her chibi to start from; on bare eyes it looked like a tail.

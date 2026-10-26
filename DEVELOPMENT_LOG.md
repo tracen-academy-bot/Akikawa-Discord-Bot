@@ -93,6 +93,18 @@ screen red. Food is no longer central.
   her blue with her blue diamond hanging from it, and dark beyond. It uses
   the same `race.progress` as Oguri's runner. The fixed centre diamond is
   gone; the diamond now marks the club.
+- Then (Fwoxie: "grow a flower field", "the uma should stand on top of the
+  dot", the blue marker "looks mid"):
+  - The marker is a heart (her emoji), ruby in gold, glowing in place of
+    the hole. A hanging charm sat below the lace, behind the cards. The
+    blue diamond is gone.
+  - She stands over the marker: her eyes (and later her chibi) move with
+    the club's progress. Her bubble flips to her left when it would run
+    off the right edge. Wall handprints skip spots where she or her
+    bubble is.
+  - `lilyField`: a sparse field of red spider lilies (Openclipart 345040)
+    along the lace from past the left plaque up to the marker, none
+    beyond: she has walked through it.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
