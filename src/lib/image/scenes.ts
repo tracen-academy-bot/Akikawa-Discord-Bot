@@ -105,6 +105,59 @@ async function foodArt(): Promise<FoodArt | null> {
     return (foodCache = loaded as FoodArt);
 }
 
+/** Still in Love's blood and knives (`src/assets/scenes/stillinlove`, public domain). */
+const SIL_NAMES = ['splat', 'drips', 'drips-thin', 'smear', 'smear-short', 'spray', 'knife', 'cleaver'] as const;
+type SilArt = Record<(typeof SIL_NAMES)[number], Image>;
+let silCache: SilArt | null | undefined;
+
+/** The blood and knife pictures, or null when any is missing (the scene then draws its own blood). */
+async function stillInLoveArt(): Promise<SilArt | null> {
+    if (silCache !== undefined) return silCache;
+    const loaded: Partial<SilArt> = {};
+    for (const name of SIL_NAMES) {
+        const file = path.join(ART_DIR, 'stillinlove', `${name}.png`);
+        if (!existsSync(file)) return (silCache = null);
+        try {
+            loaded[name] = await loadImage(file);
+        } catch {
+            return (silCache = null);
+        }
+    }
+    return (silCache = loaded as SilArt);
+}
+
+/**
+ * Draws `image` `width` wide (height to scale), centred on (x, y), turned by
+ * `angle` and at `alpha`.
+ */
+function placed(ctx: SKRSContext2D, image: Image, x: number, y: number, width: number, angle = 0, alpha = 1) {
+    const height = (image.height / image.width) * width;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(image, -width / 2, -height / 2, width, height);
+    ctx.restore();
+}
+
+/**
+ * A knife stabbed into a surface at (x, y), blade down: only the part above
+ * `y` shows, so it reads as driven in. The pictures have the blade on the
+ * left, so a quarter turn points it down; `lean` tips it.
+ */
+function stabbed(ctx: SKRSContext2D, knife: Image, x: number, y: number, length: number, lean: number, buried = 0.3) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x - length, y - length * 2, length * 2, length * 2);
+    ctx.clip();
+    ctx.translate(x, y);
+    ctx.rotate(-Math.PI / 2 + lean);
+    const height = (knife.height / knife.width) * length;
+    // The tip sits `buried` of the length below the surface.
+    ctx.drawImage(knife, -length * buried, -height / 2, length, height);
+    ctx.restore();
+}
+
 /** Draws a picture scaled by `scale`, centred on `cx`, standing on `bottom`. */
 function standing(ctx: SKRSContext2D, image: Image, cx: number, bottom: number, scale: number): number {
     const w = image.width * scale;
@@ -172,11 +225,11 @@ export async function withScene(
     ctx.scale(RENDER_SCALE, RENDER_SCALE);
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
-    else if (scene === 'stillinlove') drawStillInLove(ctx, w, h, hero, await sceneArt(scene), mood, race);
+    else if (scene === 'stillinlove') drawStillInLove(ctx, w, h, hero, await sceneArt(scene), mood, race, await stillInLoveArt());
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     // Still in Love's blood reaches past the scene onto the cards' edges.
-    if (scene === 'stillinlove') bloodOnTheCards(ctx, w, h, hero, mood);
+    if (scene === 'stillinlove') bloodOnTheCards(ctx, w, h, hero, mood, await stillInLoveArt());
     return canvas;
 }
 
@@ -1269,7 +1322,7 @@ function bat(ctx: SKRSContext2D, x: number, y: number, s: number, colour: string
  * its moon (a pale crescent or a full blood moon), bats, dark mullions and
  * a stone frame, with blood on the glass as `mood` rises.
  */
-function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bottom: number, moon: 'crescent' | 'blood', mood: number, seed: number) {
+function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bottom: number, moon: 'crescent' | 'blood', mood: number, seed: number, art: SilArt | null) {
     const arch = () => {
         ctx.beginPath();
         ctx.moveTo(x, bottom);
@@ -1301,8 +1354,14 @@ function gothicWindow(ctx: SKRSContext2D, x: number, top: number, w: number, bot
     // Blood on the glass, more as she turns.
     if (mood > 0.15) {
         const r2 = seeded(seed + 9);
-        const n = Math.round(mood * 3);
-        for (let i = 0; i < n; i += 1) bloodSplat(ctx, x + w * (0.2 + r2() * 0.6), top + (bottom - top) * (0.2 + r2() * 0.45), 6 + mood * 8, mood, r2);
+        if (art) {
+            // Blood thrown at the glass, running down it.
+            placed(ctx, art.drips, x + w * 0.5, top + (bottom - top) * 0.3, w * (0.7 + mood * 0.5), (r2() - 0.5) * 0.3, 0.55 + mood * 0.45);
+            if (mood > 0.5) placed(ctx, art.splat, x + w * (0.3 + r2() * 0.4), top + (bottom - top) * 0.55, w * 0.5 * mood, r2() * Math.PI, 0.9);
+        } else {
+            const n = Math.round(mood * 3);
+            for (let i = 0; i < n; i += 1) bloodSplat(ctx, x + w * (0.2 + r2() * 0.6), top + (bottom - top) * (0.2 + r2() * 0.45), 6 + mood * 8, mood, r2);
+        }
     }
     ctx.restore();
     ctx.strokeStyle = '#3a2630';
@@ -1405,7 +1464,7 @@ function jamJar(ctx: SKRSContext2D, cx: number, bottom: number, s: number) {
  * The side table: two jars of jam, a candle, and a mirror draped with
  * cloth, because she does not like large mirrors.
  */
-function sideTable(ctx: SKRSContext2D, x: number, floor: number, mood: number) {
+function sideTable(ctx: SKRSContext2D, x: number, floor: number, mood: number, art: SilArt | null) {
     // The draped mirror behind.
     ctx.fillStyle = '#2a1a22';
     ctx.beginPath();
@@ -1433,6 +1492,14 @@ function sideTable(ctx: SKRSContext2D, x: number, floor: number, mood: number) {
     ctx.fillRect(x + 134, floor - 24, 6, 24);
     jamJar(ctx, x + 32, floor - 30, 24);
     jamJar(ctx, x + 56, floor - 30, 18);
+    // Her jam knife: lying by the jars while she is calm, then stabbed
+    // upright into the table. At her worst it is in the cards instead.
+    if (art && mood < 0.34) {
+        placed(ctx, art.knife, x + 90, floor - 34, 74, 0.05);
+    } else if (art && mood < 0.67) {
+        stabbed(ctx, art.knife, x + 96, floor - 28, 82, 0.18);
+        placed(ctx, art['smear-short'], x + 96, floor - 30, 30, 0.4, 0.8);
+    }
     // A candle, its flame brighter as she turns.
     ctx.fillStyle = '#efe4dc';
     ctx.fillRect(x + 122, floor - 58, 8, 28);
@@ -1583,9 +1650,19 @@ function rankPlaque(ctx: SKRSContext2D, cx: number, y: number, text: string) {
 }
 
 /** Drops of blood hanging from the lace's scallops, more as she turns. */
-function laceDrips(ctx: SKRSContext2D, w: number, y: number, mood: number) {
+function laceDrips(ctx: SKRSContext2D, w: number, y: number, mood: number, art: SilArt | null) {
     if (mood < 0.3) return;
     const rand = seeded(88);
+    if (art) {
+        const count = Math.round((w / 140) * mood);
+        for (let i = 0; i < count; i += 1) {
+            const x = rand() * w;
+            const width = 22 + rand() * 26 * mood;
+            const height = (art['drips-thin'].height / art['drips-thin'].width) * width;
+            placed(ctx, art['drips-thin'], x, y + height / 2 - 2, width, 0, 0.85);
+        }
+        return;
+    }
     const count = Math.round((w / 60) * mood);
     for (let i = 0; i < count; i += 1) {
         const x = Math.round((rand() * w) / 18) * 18;
@@ -1603,9 +1680,32 @@ function laceDrips(ctx: SKRSContext2D, w: number, y: number, mood: number) {
  * the finished report: none when calm, spreading as she turns. It keeps to
  * the margins and corners so no figure is covered.
  */
-function bloodOnTheCards(ctx: SKRSContext2D, w: number, h: number, hero: number, mood: number) {
+function bloodOnTheCards(ctx: SKRSContext2D, w: number, h: number, hero: number, mood: number, art: SilArt | null) {
     if (mood < 0.2) return;
     const rand = seeded(616);
+    if (art) {
+        // Smears and spray along the outer edges and margins, more as she
+        // turns. Kept off the cards' middles so every number stays readable.
+        const quarter = Math.PI / 2;
+        const marks: [Image, number, number, number, number][] = [
+            [art.smear, SIDE * 0.5, hero + 70, 110, quarter],
+            [art.spray, w * 0.5, h - SIDE * 0.35, 170, 0],
+            [art['smear-short'], w - SIDE * 0.45, hero + 140, 90, -quarter],
+            [art.splat, SIDE * 0.35, h - SIDE * 0.35, 80, 0.6],
+            [art.spray, w - SIDE * 0.4, h - 110, 150, -quarter],
+            [art.smear, w * 0.25, h - SIDE * 0.4, 130, 0.05],
+        ];
+        const n = Math.max(1, Math.round(marks.length * mood));
+        for (const [image, x, y, width, angle] of marks.slice(0, n)) placed(ctx, image, x, y, width * (0.7 + mood * 0.4), angle, 0.85);
+        // At her worst the knives are driven into the cards' outer corners.
+        if (mood >= 0.67) {
+            stabbed(ctx, art.cleaver, SIDE + 14, hero + 12, 130, 0.35, 0.2);
+            placed(ctx, art['drips-thin'], SIDE + 18, hero + 34, 30, 0, 0.9);
+            stabbed(ctx, art.knife, w - SIDE - 14, hero + 12, 120, -0.35, 0.22);
+            placed(ctx, art['drips-thin'], w - SIDE - 18, hero + 30, 24, 0, 0.9);
+        }
+        return;
+    }
     const spots: [number, number][] = [
         [SIDE + 4, hero + 6],
         [w - SIDE - 4, hero + 10],
@@ -1627,7 +1727,16 @@ function bloodOnTheCards(ctx: SKRSContext2D, w: number, h: number, hero: number,
  * is calm; towards 1 the room reddens, her eyes burn, and blood spreads
  * over the glass, the lace and the cards' edges.
  */
-function drawStillInLove(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null) {
+function drawStillInLove(
+    ctx: SKRSContext2D,
+    w: number,
+    h: number,
+    hero: number,
+    art: Image | null,
+    mood: number,
+    race: SceneRace | null,
+    blood: SilArt | null,
+) {
     // The room: dark wine walls with faint damask stripes, warming to red.
     const wall = ctx.createLinearGradient(0, 0, 0, h);
     wall.addColorStop(0, mix('#1b0f17', '#2e0810', mood * 0.8));
@@ -1645,13 +1754,13 @@ function drawStillInLove(ctx: SKRSContext2D, w: number, h: number, hero: number,
     const rightX = w - SIDE - 24 - winW;
     // The windows stop short of the lace, leaving room for each plaque.
     const sill = floor - 40;
-    gothicWindow(ctx, leftX, top, winW, sill, 'crescent', mood, 11);
-    gothicWindow(ctx, rightX, top, winW, sill, 'blood', mood, 23);
+    gothicWindow(ctx, leftX, top, winW, sill, 'crescent', mood, 11, blood);
+    gothicWindow(ctx, rightX, top, winW, sill, 'blood', mood, 23, blood);
     if (race) {
         rankPlaque(ctx, leftX + winW / 2, sill + 10, race.start);
         rankPlaque(ctx, rightX + winW / 2, sill + 10, race.finish);
     }
-    sideTable(ctx, rightX - 175, floor, mood);
+    sideTable(ctx, rightX - 175, floor, mood, blood);
 
     // Her, between the windows, staring out; until her picture exists, her eyes.
     const herX = w * 0.45;
@@ -1686,7 +1795,7 @@ function drawStillInLove(ctx: SKRSContext2D, w: number, h: number, hero: number,
 
     // Lace along the bottom of the band, white to red, dripping when she turns.
     laceTrim(ctx, w, floor, mix('#f3e6ec', '#c8202e', mood));
-    laceDrips(ctx, w, floor, mood);
+    laceDrips(ctx, w, floor, mood, blood);
 
     // The red closing in from the edges.
     if (mood > 0) {

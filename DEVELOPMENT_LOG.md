@@ -38,6 +38,19 @@ screen red. Food is no longer central.
     hanging from the lace, the bubble bleeding at its worst, and spray on
     the report's outer corners and edges. That spray is drawn after the
     report, kept to the margins and corners so no figure is covered.
+- Third pass ("blood splatter looks mid … put some knives and shit too"):
+  - The drawn blood is replaced by public-domain Openclipart pictures in
+    `src/assets/scenes/stillinlove/` (sources in its `CREDITS.md`): splat,
+    drips, thin drips, smears and spray. If any file is missing, the
+    scene falls back to the drawn blood.
+  - Glass: drips running down each window, plus a splat past mood 0.5.
+    Lace: thin drips hang from it. Report: smears and spray along the
+    outer edges and the bottom margin only, so no figure is covered.
+  - Knives escalate by mood. Calm (under 0.34): her jam knife lies on the
+    table. Uneasy (under 0.67): it is stabbed upright into the table. At
+    her worst: a cleaver and the knife are driven into the cards' outer
+    top corners, dripping. `stabbed()` clips the blade at the surface so
+    it reads as driven in.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
