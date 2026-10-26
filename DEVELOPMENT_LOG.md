@@ -47,10 +47,19 @@ looks like Oguri, maybe with a free chibi of her.
   told apart from her cool white hair by warmth, and from her lighter, pinker
   face by brightness and green against blue. Fwoxie: "the crop is off".
   The photo's drop shadow and the shadowed hair strands are mauve-grey and
-  stayed stuck to her side. The cut is now OpenCV GrabCut at 3x, seeded by
-  that flood fill: sure background far out, sure plush deep in. Then the
-  largest piece is kept, holes are filled, and the edge is smoothed. (OpenCV
-  was used once to make the asset; it is not a dependency.) The pennants'
+  stayed stuck to her side. GrabCut came next. Fwoxie: "that's even worse".
+  It lost her left side hair and left a grey lump on the right.
+  - The final cut is traced by hand: an outline of her ears, ahoge, head,
+    cheeks, body and feet, in photo pixels, filled at 4x.
+  - Only a thin band along that outline is cleaned of backdrop-tinted
+    pixels. Her cheek rows are left alone, since their shading has nearly
+    the backdrop's tint.
+  - The mask is then tidied: the largest piece kept, gaps closed, edge
+    softened.
+  - The thin side-hair strands are left out. In a 217px JPEG they are
+    barely apart from the backdrop and read as noise.
+  - OpenCV was used once to make the asset; it is not a dependency.
+  - The pennants'
   mid blue vanished against the sky, so they are deep navy, white and gold,
   each with a white edge. The plush is `src/assets/scenes/oguri.png`, and
   stands on the turf with
