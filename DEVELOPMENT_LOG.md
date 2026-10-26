@@ -59,9 +59,11 @@ looks like Oguri, maybe with a free chibi of her.
   - The thin side-hair strands are left out. In a 217px JPEG they are
     barely apart from the backdrop and read as noise.
   - OpenCV was used once to make the asset; it is not a dependency.
-  - The pennants'
-  mid blue vanished against the sky, so they are deep navy, white and gold,
-  each with a white edge. The plush is `src/assets/scenes/oguri.png`, and
+  - The garland: pennants first. Their mid blue vanished against the sky,
+    so they went navy with white edges. Then Fwoxie asked for food instead.
+    Onigiri, carrots, dango and steamed buns now hang from the string on
+    threads of different lengths, each swayed a little. Fwoxie will supply a
+    proper chibi later; it drops in at `src/assets/scenes/oguri.png`.
   stands on the turf with
   a shadow and an onigiri balanced on her head. A food pile sits at her
   feet: a rice bowl in her blue, stacked onigiri, carrots and dango.

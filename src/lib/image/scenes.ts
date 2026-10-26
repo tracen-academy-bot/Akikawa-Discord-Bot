@@ -17,9 +17,9 @@ import type { Palette } from './theme';
  *              city skyline; the cards stand where the street would be
  *   confetti   a warm wash with tumbling, shaded confetti, sequins and
  *              curled streamers, densest at the top and thinning downwards
- *   oguri      Oguri Cap's colours: a blue sky with clouds and pennants in
- *              blue, white and gold, her gold star, and a white rail on
- *              mown turf with a stack of onigiri (she is famously hungry)
+ *   oguri      Oguri Cap: a blue sky with clouds and a garland of her food
+ *              (onigiri, carrots, dango, buns), her gold star, and a white
+ *              rail on mown turf with food piled up (she is famously hungry)
  *
  * A scene may also show a picture from `src/assets/scenes/<scene>.png`,
  * standing on the right of the band, when one is there. None is shipped: a
@@ -446,9 +446,8 @@ function drawStreamer(
 
 // ─── Oguri ────────────────────────────────────────────────────────────────────
 
-/** Oguri Cap's blue and white (umamusu.wiki), and the gold of her star. */
+/** Oguri Cap's blue (umamusu.wiki), and the gold of her star. */
 const OGURI_BLUE = '#3a7ad2';
-const OGURI_WHITE = '#ece7e7';
 const OGURI_GOLD = '#ffcc33';
 
 /** A five-pointed star path centred on (cx, cy). */
@@ -584,9 +583,10 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         twinkle(ctx, rand() * w, rand() * hero * 0.75, 3 + rand() * 5, rand() < 0.5 ? '#ffffff' : '#fff2b0');
     }
 
-    // A garland of pennants sagging across the top.
+    // A garland sagging across the top, with her food hanging from it on
+    // short threads of different lengths, so it swings rather than lines up.
     const sag = 16;
-    const along = (x: number) => 6 + sag * Math.sin((x / w) * Math.PI);
+    const along = (x: number) => 4 + sag * Math.sin((x / w) * Math.PI);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -595,22 +595,23 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         else ctx.lineTo(x, along(x));
     }
     ctx.stroke();
-    // Her mid blue vanishes against the sky, so the blue pennants are a
-    // deep navy, and every pennant has a white edge.
-    const flags = ['#1b3f86', OGURI_WHITE, OGURI_GOLD];
-    for (let i = 0, x = 10; x < w - 10; i += 1, x += 34) {
+    const hanging = ['onigiri', 'carrot', 'dango', 'bun'] as const;
+    for (let i = 0, x = 24; x < w - 16; i += 1, x += 52) {
         const top = along(x);
-        ctx.fillStyle = flags[i % flags.length]!;
+        const thread = 6 + ((i * 7) % 4) * 4;
+        const sway = ((i % 3) - 1) * 0.12;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(x - 11, top);
-        ctx.lineTo(x + 11, along(x + 22) - (along(x + 22) - top) / 2);
-        ctx.lineTo(x, top + 24);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.lineWidth = 1.5;
-        ctx.lineJoin = 'round';
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, top + thread);
         ctx.stroke();
+        const y = top + thread;
+        const kind = hanging[i % hanging.length]!;
+        if (kind === 'onigiri') onigiri(ctx, x, y + 13, 26, sway);
+        else if (kind === 'carrot') carrot(ctx, x, y + 16, 34, Math.PI / 2 + sway);
+        else if (kind === 'dango') dango(ctx, x, y + 15, 7.5, Math.PI / 2 + sway);
+        else bun(ctx, x, y + 11, 13);
     }
 
     // Turf, mown in stripes, running into the cards.
@@ -785,4 +786,29 @@ function drawFoodPile(ctx: SKRSContext2D, cx: number, ground: number, width: num
     carrot(ctx, left + 12, ground - 6, 44, -0.25);
     carrot(ctx, right - 6, ground - 4, 40, 0.35);
     dango(ctx, cx + (split ? half * 0.55 : 0), ground - 6, 7, -0.2);
+}
+
+/** A steamed bun: a soft white dome with pleats gathered at the top. */
+function bun(ctx: SKRSContext2D, x: number, y: number, r: number) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(30, 60, 110, 0.25)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetY = 2;
+    const body = ctx.createRadialGradient(x - r * 0.3, y - r * 0.2, r * 0.2, x, y, r * 1.1);
+    body.addColorStop(0, '#ffffff');
+    body.addColorStop(1, '#efe6d8');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.ellipse(x, y + r * 0.15, r, r * 0.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = 'rgba(170, 150, 120, 0.7)';
+    ctx.lineWidth = 1;
+    for (const a of [-0.7, -0.35, 0, 0.35, 0.7]) {
+        ctx.beginPath();
+        ctx.moveTo(x, y - r * 0.55);
+        ctx.quadraticCurveTo(x + a * r * 0.6, y - r * 0.2, x + a * r, y + r * 0.1);
+        ctx.stroke();
+    }
+    ctx.restore();
 }
