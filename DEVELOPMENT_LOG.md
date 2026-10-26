@@ -26,10 +26,13 @@ replaces the plush.
   before.
 - Tested in `test-cutoff` (labels, 60% along, no race without data).
 - Fwoxie supplied the game's food from UmaViewer as transparent pictures:
-  burger, rice mountain, and ramen, burger and hamburg-steak meal trays.
-  They are cropped into `src/assets/scenes/food/`.
-  - The finish-line pile is now a stack of three meal trays, the rice
-    mountain beside it, and a loose burger in front.
+  burger, rice mountain, and ramen and hamburg-steak meal trays. They are
+  cropped into `src/assets/scenes/food/`.
+  - Past the finish, laid side by side at one scale: the ramen tray, with
+    the lone burger on its left and the tall rice bowl on its right, then
+    the hamburg-steak tray.
+  - A first cut stacked the trays. Fwoxie: "who stacks multiple plates on
+    top of each other". The burger tray was dropped.
   - Real burgers and rice mountains hang in the garland between the drawn
     onigiri and carrots.
   - If any picture is missing, the scene draws its own food as before.

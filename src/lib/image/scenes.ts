@@ -77,7 +77,7 @@ async function sceneArt(scene: SceneId): Promise<Image | null> {
 }
 
 /** Oguri's food from the game (`src/assets/scenes/food`), cut out by Fwoxie. */
-const FOOD_NAMES = ['burger', 'rice_mountain', 'ramen_tray', 'burger_tray', 'hamburg_tray'] as const;
+const FOOD_NAMES = ['burger', 'rice_mountain', 'ramen_tray', 'hamburg_tray'] as const;
 type FoodArt = Record<(typeof FOOD_NAMES)[number], Image>;
 let foodCache: FoodArt | null | undefined;
 
@@ -106,9 +106,11 @@ function standing(ctx: SKRSContext2D, image: Image, cx: number, bottom: number, 
 }
 
 /**
- * The game's food piled up, centred on `cx` and standing on `ground`: a
- * stack of three meal trays, the rice mountain beside it, and a loose
- * burger in front. About 150px wide.
+ * The game's food laid out side by side on the grass, centred on `cx`: the
+ * ramen tray with the lone burger on its left and the tall rice bowl on its
+ * right, then the hamburg-steak tray. One scale for all, nothing stacked
+ * (Fwoxie, 2026-10-26: "who stacks multiple plates on top of each other").
+ * About 190px wide.
  */
 function drawMealPile(ctx: SKRSContext2D, food: FoodArt, cx: number, ground: number) {
     ctx.save();
@@ -116,12 +118,15 @@ function drawMealPile(ctx: SKRSContext2D, food: FoodArt, cx: number, ground: num
     ctx.shadowBlur = 5;
     ctx.shadowOffsetY = 2;
     const s = 0.42;
-    standing(ctx, food.rice_mountain, cx - 52, ground, 0.55);
-    let top = ground;
-    top -= standing(ctx, food.burger_tray, cx + 10, top, s) - 6;
-    top -= standing(ctx, food.hamburg_tray, cx + 4, top, s) - 8;
-    standing(ctx, food.ramen_tray, cx + 14, top, s);
-    standing(ctx, food.burger, cx + 58, ground + 2, 0.6);
+    const trayW = food.ramen_tray.width * s;
+    const ramenX = cx - trayW / 2 - 2;
+    const hamburgX = cx + trayW / 2 + 2;
+    standing(ctx, food.hamburg_tray, hamburgX, ground, s);
+    standing(ctx, food.ramen_tray, ramenX, ground, s);
+    // On the ramen tray's surface, about 20 tray pixels above its bottom edge.
+    const onTray = ground - 20 * s;
+    standing(ctx, food.burger, ramenX - trayW * 0.3, onTray, s);
+    standing(ctx, food.rice_mountain, ramenX + trayW * 0.37, onTray, s);
     ctx.restore();
 }
 
@@ -697,10 +702,10 @@ function drawOguri(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         groundShadow(ctx, artX + artW / 2, ground, artW * 0.42);
         ctx.drawImage(art, artX, artY, artW, artH);
         onigiri(ctx, artX + artW * 0.5, artY + 10, 30, 0.18);
-        if (food) drawMealPile(ctx, food, artX - 70, ground);
+        if (food) drawMealPile(ctx, food, artX - 110, ground);
         else drawFoodPile(ctx, artX + artW / 2, ground, artW, true);
     } else if (food) {
-        drawMealPile(ctx, food, w - SIDE - 90, ground);
+        drawMealPile(ctx, food, w - SIDE - 100, ground);
     } else {
         drawFoodPile(ctx, w - SIDE - 90, ground, 120, false);
     }
@@ -832,9 +837,9 @@ function drawRace(ctx: SKRSContext2D, w: number, ground: number, art: Image, rac
     const postBottom = ground - 18;
     const gateRight = startingGate(ctx, SIDE + 4, ground, 3);
     const startX = gateRight + 14;
-    const finishX = w - SIDE - (food ? 175 : 150);
+    const finishX = w - SIDE - (food ? 215 : 150);
     trackPost(ctx, startX, postBottom, race.start, false);
-    if (food) drawMealPile(ctx, food, w - SIDE - 85, ground);
+    if (food) drawMealPile(ctx, food, w - SIDE - 100, ground);
     else drawFoodPile(ctx, w - SIDE - 70, ground, 100, false);
 
     // Short enough to run under the hanging food.
