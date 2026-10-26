@@ -4,6 +4,35 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Live timer leaderboard; panel kept at the bottom
+
+Asked for: "design a current lb one too", "repost panel", "show live daily
+results too". The first weekly results post landed under the timer panel in
+the same channel, so the panel was no longer at the bottom.
+
+- **Live board** (`renderLiveBoard`, 2x): this week's top 10 on the left,
+  top 3 bold in their place colours with bars against the leader and a line
+  on who takes the weekly role. Today on the right: the day's runs and
+  trainers, then its top 5 (`getDayBoard`, sharing `standingsBetween` with
+  the week).
+- **Kept at the bottom** (`livePanel.ts`, new `TimerPanel` table, additive
+  migration `20261026170000_add_timer_panel`): `postPanelPair` deletes a
+  channel's old board and panel and posts the board, then the panel.
+  - `/timer panel` uses it.
+  - The weekly results post and `/timer publish` repost the pair under
+    themselves when it lives in the same channel (`keepPanelAtBottom`).
+- **Refresh.** A finished run marks its guild dirty. The scheduler redraws
+  dirty boards at most once every 30 seconds per channel; a guild stays
+  dirty until redrawn, so nothing is lost inside the throttle. At each new
+  day (and at startup) every board is redrawn, so "today" resets.
+- **Expiry refresh** now uses the channel's current panel from
+  `TimerPanel`, falling back to the panel the run started from. Runs begun
+  before a repost still update the new panel.
+- Tested in `test-timer`: day board, pair post and repost, and throttled
+  redraw.
+
+---
+
 ## 2026-10-26 — Oguri posed running; real dirt and flow
 
 - Fwoxie rigged the chibi in UmaViewer into a forward-leaning dash, facing

@@ -42,6 +42,7 @@ import {
     type BoardPeriod,
 } from '../lib/timer/rewards';
 import { displayName, renderBoardFor, weekResultsPost } from '../lib/timer/boardImage';
+import { keepPanelAtBottom, postPanelPair } from '../lib/timer/livePanel';
 import { prisma } from '../db/prisma';
 import { renderTimerStats } from '../lib/image/renderTimerStats';
 
@@ -181,27 +182,17 @@ async function handlePanel(interaction: ChatInputCommandInteraction) {
         return;
     }
 
-    const guildId = interaction.guildId!;
-    const [timers, context] = await Promise.all([listActiveTimers(guildId), getPanelContext(guildId)]);
-
-    // Sent as a normal channel message rather than the interaction reply so it
-    // is permanent and can be pinned; interaction replies expire.
-    const channel = interaction.channel;
-    if (!channel?.isTextBased() || !('send' in channel)) {
-        await interaction.reply({
-            embeds: [errorEmbed('The panel can only be posted in a text channel.')],
-            flags: MessageFlags.Ephemeral,
-        });
-        return;
-    }
-
-    // The panel's own message ID is not stored here. A button press carries it
-    // on `interaction.message.id`, which is how refreshes find the panel, so
-    // any number of panels can coexist and each refreshes itself.
-    await channel.send(buildPanel(timers, context));
-    await interaction.reply({
-        embeds: [successEmbed('Panel posted', 'Pin it so trainers can find it easily.')],
-        flags: MessageFlags.Ephemeral,
+    // The live board and the panel are posted as normal channel messages,
+    // not the interaction reply, so they are permanent and can be pinned. An
+    // old pair in this channel is deleted, so this also moves it to the bottom.
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    const posted = await postPanelPair(interaction.client, interaction.guild!, interaction.channelId);
+    await interaction.editReply({
+        embeds: [
+            posted
+                ? successEmbed('Panel posted', 'The live leaderboard and the panel are at the bottom. Pin the panel so trainers can find it.')
+                : errorEmbed('The panel can only be posted in a text channel I can send messages in.'),
+        ],
     });
 }
 
@@ -327,6 +318,8 @@ async function handlePublish(interaction: ChatInputCommandInteraction) {
         await interaction.editReply({ embeds: [errorEmbed(`Posting in <#${channelId}> failed. Check that I can send messages and attach files there.`)] });
         return;
     }
+    // Keep the timer panel below the results when they share a channel.
+    await keepPanelAtBottom(interaction.client, guild, channelId).catch((e) => console.error('Timer panel repost failed:', e));
     await interaction.editReply({ embeds: [successEmbed('Published', `Posted the final board for ${weekLabel(week)} in <#${channelId}>${ping ? ', pinging the top 3' : ''}.`)] });
 }
 
