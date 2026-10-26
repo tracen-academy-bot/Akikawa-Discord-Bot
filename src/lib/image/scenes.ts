@@ -125,15 +125,15 @@ function drawMealPile(ctx: SKRSContext2D, food: FoodArt, cx: number, ground: num
     standing(ctx, food.ramen_tray, ramenX, ground, s);
     // On the ramen tray's surface, about 20 tray pixels above its bottom edge.
     const onTray = ground - 20 * s;
-    // The burger sits out at the tray's left edge, tipped a little so it
-    // leans on the rim rather than floating past it.
-    const burgerX = ramenX - trayW * 0.4;
+    // The burger leans inwards against the ramen bowl: bottom edge on the
+    // tray, top resting on the bowl's upper side.
+    const burgerX = ramenX - trayW * 0.34;
     ctx.save();
     ctx.translate(burgerX, onTray);
-    ctx.rotate(-0.18);
+    ctx.rotate(0.22);
     standing(ctx, food.burger, 0, 0, s);
     ctx.restore();
-    standing(ctx, food.rice_mountain, ramenX + trayW * 0.37, onTray, s);
+    standing(ctx, food.rice_mountain, ramenX + trayW * 0.41, onTray, s);
     ctx.restore();
 }
 

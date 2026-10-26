@@ -33,8 +33,9 @@ replaces the plush.
     the hamburg-steak tray.
   - A first cut stacked the trays. Fwoxie: "who stacks multiple plates on
     top of each other". The burger tray was dropped.
-  - The burger sits out at the ramen tray's left edge, tipped 0.18 rad so
-    it leans on the rim.
+  - The burger leans inwards against the ramen bowl (0.22 rad): bottom on
+    the tray, top on the bowl's upper side.
+  - The rice bowl sits a little further out, so the ramen's seaweed shows.
   - The signposts snap onto the nearest rail post (`onRailPost`). Before,
     one landed 2px beside a rail post and read as a doubled post.
   - The rail is drawn posts first, then the bars, so the bars cross in
