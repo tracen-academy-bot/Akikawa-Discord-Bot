@@ -577,19 +577,16 @@ export function sceneMood(progress: CircleProgress): number {
 
 /**
  * The club's place in its band for a scene's race track: how far it is
- * from the bottom cutoff to the next one up, by rank, as the track's ends
- * are labelled. #79 between #100 and #30 is 30% along. (By points it would
- * sit much nearer the bottom, since the top clubs pull far ahead; the
- * report's band bar shows that fan gap.) Null without a cutoff on both
- * sides.
+ * from the bottom cutoff to the next one up, by points. Null without both
+ * cutoffs' points.
  */
 export function sceneRace(band: RankBand | null): SceneRace | null {
-    if (!band?.above || !band.below || band.below.rank <= band.above.rank) return null;
-    const progress = (band.below.rank - band.rank) / (band.below.rank - band.above.rank);
+    const ends = band ? bandEnds(band) : null;
+    if (!band || !ends) return null;
     return {
-        progress: Math.max(0, Math.min(1, progress)),
-        start: `#${band.below.rank} ${band.below.tier}`,
-        finish: `#${band.above.rank} ${band.above.tier}`,
+        progress: (band.points - ends.low) / (ends.high - ends.low),
+        start: `#${band.below!.rank} ${band.below!.tier}`,
+        finish: `#${band.above!.rank} ${band.above!.tier}`,
     };
 }
 

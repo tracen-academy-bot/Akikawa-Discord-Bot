@@ -4,24 +4,6 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
-## 2026-10-30 — Scene race position by rank (on the branch, undecided)
-
-Fwoxie reported the Oguri runner sat near the start for a club that is 30%
-of the way from #100 to #30. Not a broken number: `sceneRace` placed it by
-monthly points, and the top is steep. Live uma.moe points that day: #100
-7.42B, #79 7.78B, #50 8.22B, #30 10.77B. So #79 is 30% along by rank but
-about 11% by points.
-
-- `sceneRace` now goes by rank, as the track's ends are labelled:
-  `(below.rank - rank) / (below.rank - above.rank)`, clamped. It no longer
-  needs the cutoffs' points. The report card's band bar still shows points.
-- Tests: #194 between #500 and #100 is 76.5%; #79 between #100 and #30 is
-  30%; on the bottom cutoff is 0.
-- Fwoxie has not chosen between rank and points yet. This is on the branch
-  only; master still places the runner by points.
-
----
-
 ## 2026-10-26 — Still in Love theme (preview, not merged)
 
 Fwoxie asked for a Still in Love theme: no race, her "staring at you with

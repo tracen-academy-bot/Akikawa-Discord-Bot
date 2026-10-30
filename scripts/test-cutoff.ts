@@ -120,16 +120,12 @@ async function main() {
     check('past the last cutoff there is nothing below', [past?.tier, past?.above?.rank, past?.below, past?.above?.points], ['below B+', 3000, null, null]);
     check('no rank or points, no band', [cutoff.rankBand(null, 1), cutoff.rankBand(5, null)], [null, null]);
 
-    // The scenes' race track goes by rank, as its ends are labelled:
-    // #194 between #500 and #100 is (500 - 194) / 400 = 76.5% along.
+    // The Oguri scene's race track: 5.0B between 3.5B (#500) and 6.0B (#100) is 60% along.
     const { sceneRace } = await import('../src/lib/image/renderFanReport');
     const race = sceneRace(a194);
     check('the race runs from the band bottom to the next cutoff', [race?.start, race?.finish], ['#500 A+', '#100 S']);
-    check('she stands 76.5% along, by rank', (race?.progress ?? 0) * 1000, 765);
-    // The reported case: #79 is 30% from #100 to #30, though by points it is near the start.
-    check('#79 between #100 and #30 is 30% along', Math.round((sceneRace(cutoff.rankBand(79, 6_100_000_000))?.progress ?? 0) * 100), 30);
-    check('on the bottom cutoff: the start', sceneRace(cutoff.rankBand(100, 6_000_000_000))?.progress, 0);
-    check('no race in the top band or past the last cutoff', [sceneRace(top), sceneRace(past), sceneRace(null)], [null, null, null]);
+    check('she stands 60% along', Math.round((race?.progress ?? 0) * 100), 60);
+    check('no race in the top band or without points', [sceneRace(top), sceneRace(past), sceneRace(null)], [null, null, null]);
 
     // Still in Love's mood: calm under 5% behind, fully turned at half the club.
     const { sceneMood } = await import('../src/lib/image/renderFanReport');
