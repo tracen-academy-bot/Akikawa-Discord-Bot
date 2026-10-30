@@ -1024,6 +1024,25 @@ async function main() {
     const other2 = await prisma.trackedCircle.create({ data: { guildId: GUILD, circleId: BigInt(999991), name: 'No Match' } });
     check('no same-name club means no change', (await adoptUntrackedClub(other2)).id, other2.id);
 
+    // /help lists every command, and says who can use each one.
+    const help = await import('../src/commands/help');
+    const { commands: registered } = await import('../src/commands/index');
+    const helpJson = [...registered.values()].map((c) => c.data.toJSON() as unknown as import('../src/commands/help').CommandJson);
+    const entries = help.helpEntries(helpJson);
+    check('every command has a /help audience', entries.filter((e) => !(e.name in help.AUDIENCE)).map((e) => e.name), []);
+    check('no /help audience is left for a command that is gone', Object.keys(help.AUDIENCE).filter((k) => !entries.some((e) => e.name === k)), []);
+    check('subcommands in a group are listed', entries.some((e) => e.name === 'club member add'), true);
+    const helpEmbed = help.buildHelp(helpJson).toJSON();
+    const helpText = (helpEmbed.fields ?? []).map((f) => `${f.name}\n${f.value}`).join('\n');
+    check('every command is in the help', entries.every((e) => helpText.includes(`\`/${e.name}\``)), true);
+    check('no field passes Discord\'s limit', (helpEmbed.fields ?? []).every((f) => f.value.length <= 1024), true);
+    check('the whole embed fits in 6000 characters', JSON.stringify(helpEmbed).length < 6000, true);
+    check('within 25 fields', (helpEmbed.fields ?? []).length <= 25, true);
+    let helpReply: { embeds?: { toJSON(): { fields?: { value: string }[] } }[]; flags?: unknown } | undefined;
+    await help.execute({ reply: async (r: typeof helpReply) => void (helpReply = r) } as never);
+    check('/help replies only to the asker, listing the real commands',
+        [helpReply?.flags !== undefined, (helpReply?.embeds?.[0]?.toJSON().fields ?? []).some((f) => f.value.includes('`/club reports`'))], [true, true]);
+
     await prisma.clubDirectory.deleteMany({ where: { guildId: GUILD } });
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });

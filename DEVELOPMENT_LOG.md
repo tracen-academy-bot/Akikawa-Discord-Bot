@@ -4,6 +4,26 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-30 — /help
+
+Fwoxie asked for "an Akikawa help that lists everything".
+
+- `/help` (`src/commands/help.ts`) replies only to the asker with one embed:
+  every command and subcommand, grouped by who can use it (everyone; a
+  club's staff and Club Managers; Club Managers; moderators, with the
+  Discord permission each needs), then the Trainer Timer panel's buttons.
+- The list is built from the registered commands' own names and
+  descriptions, so new commands appear by themselves. Only the audience is
+  kept by hand (`AUDIENCE`), mirroring the handlers' permission checks.
+  `index.ts` hands the command list to the help (`setHelpSource`), since
+  the help cannot import the list that imports it.
+- Tests: every command has an audience and no audience entry is stale;
+  every command appears; fields stay under 1024 characters, the embed
+  under 6000 and 25 fields (it is about 4000 and 14 now); the real handler
+  replies ephemerally with the real commands.
+
+---
+
 ## 2026-10-30 — Mambo palette (Matikanetannhauser), colours only
 
 The first light theme meant for a scene: her sports-festival design is
