@@ -175,11 +175,6 @@ export function isAlertDue(frequency: AlertFrequency, lastAlertAt: Date | null, 
     return now.getTime() - lastAlertAt.getTime() >= days * 24 * 60 * 60_000 - ALERT_SLACK_MS;
 }
 
-/** "daily", "every 3 days", "weekly" or "off", for confirmations. */
-export function describeAlertFrequency(frequency: AlertFrequency): string {
-    return { DAILY: 'daily', EVERY_3_DAYS: 'every 3 days', WEEKLY: 'weekly', NONE: 'off' }[frequency];
-}
-
 /**
  * Role IDs to ping for a club: its staff roles as `/club admin` set them, or
  * else its Trainer and Assistant roles matched by name. Name matching needs

@@ -100,8 +100,9 @@ derived and verified.
 
 When anyone is behind, the alert lists them by name and pings the club's staff
 roles (its Trainer and Assistant roles, or the roles set in `/club admin`).
-Trainers themselves are not tagged. Club Managers pick how often in
-`/club admin`: daily, every 3 days, weekly, or never. For the ping to notify, each staff
+Trainers themselves are not tagged. It posts with each report; the club's
+staff or a Club Manager can untick it in `/club reports` to post the picture
+only, with no pings and no list. For the ping to notify, each staff
 role must be mentionable, or the bot needs the "Mention @everyone, @here, and
 All Roles" permission.
 

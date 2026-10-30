@@ -4,6 +4,33 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-30 — Behind-quota alert: a tick in /club reports
+
+GimmeKiss asked for the report to be "only the picture", without the pings
+and the behind list. That was possible (alert frequency "Never" in `/club
+admin`), but only Club Managers can open that form. Fwoxie: move the
+setting to `/club reports`, make "never" drop the text too, and have the
+alert follow the report rather than its own timer.
+
+- `/club reports` has a fifth field, **Behind-quota alert**, one tick:
+  "Ping staff and list who is behind". Ticked, each report comes with the
+  alert when anyone is behind (`alertFrequency` DAILY); unticked, the
+  report is the picture only (NONE: no pings, no list). The confirmation
+  says which.
+- `/club admin` no longer has the alert select (it was full at five fields).
+- Migration `20261030120000_alerts_with_each_report` moves clubs on
+  EVERY_3_DAYS or WEEKLY to DAILY. The enum keeps those values; nothing
+  offers them now. `isAlertDue` is unchanged: DAILY's 12-hour slack still
+  stops a manual post and the scheduled one double-pinging.
+- The rank-based race position tried earlier today was reverted: Fwoxie
+  chose fans. The runner still shows the fan gap between the cutoffs.
+- Tests: the reports form has the tick (ticked for a club with alerts on,
+  may be left empty); unticking saves NONE, ticking saves DAILY; the admin
+  form has four fields for a tracked club. README and `docs/quota-math.md`
+  updated.
+
+---
+
 ## 2026-10-26 — Still in Love theme (preview, not merged)
 
 Fwoxie asked for a Still in Love theme: no race, her "staring at you with
