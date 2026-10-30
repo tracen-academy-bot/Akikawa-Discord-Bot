@@ -230,9 +230,11 @@ In checkpoint periods:
 - **The alert** no longer waits for a checkpoint to close (since
   2026-10-24). That rule was left over from when `expected` only rose at
   checkpoints; with daily growth, the report showed people behind for days
-  with no alert. How often it posts is now the club's `alertFrequency`
-  (daily, every 3 days, weekly or never), the same in every period, and it pings the
-  club's staff roles rather than the trainers behind.
+  with no alert. Whether it posts is the club's `alertFrequency`, the same
+  in every period, and it pings the club's staff roles rather than the
+  trainers behind. Since 2026-10-30 it is a tick in `/club reports`: with
+  each report (`DAILY`) or never (`NONE`, the picture only); the every-3-days
+  and weekly cadences were dropped and moved to every report.
 
 The projection (`projectedTotal`) is still computed but no longer shown
 anywhere (removed 2026-10-24 at the club's request).

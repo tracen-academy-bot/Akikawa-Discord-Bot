@@ -404,12 +404,14 @@ async function main() {
     const adminForm = clubCmd.buildAdminModal(editable).toJSON() as unknown as ModalJson;
     const fancountForm = clubCmd.buildFancountModal(editable).toJSON() as unknown as ModalJson;
     const pre = (f: ModalJson, label: string) => f.components.find((c) => c.label === label)?.component;
-    check('reports form: report time, zone, theme, layout', reportsForm.components.map((c) => c.label),
-        ['Report time', 'Time zone', 'Report theme', 'Layout']);
+    check('reports form: report time, zone, theme, layout, alert', reportsForm.components.map((c) => c.label),
+        ['Report time', 'Time zone', 'Report theme', 'Layout', 'Behind-quota alert']);
     type LayoutJson = { min_values?: number; max_values?: number; required?: boolean; options?: { value: string; default?: boolean }[] };
     const lookPart = (label: string) => reportsForm.components.find((c) => c.label === label)?.component as LayoutJson | undefined;
-    check('admin form for a tracked club: rank, home channels, staff roles, report channel, staff pings', adminForm.components.map((c) => c.label),
-        ['Expected rank', 'Home channels', 'Staff roles', 'Report channel', 'Ping staff roles about members behind']);
+    check('admin form for a tracked club: rank, home channels, staff roles, report channel', adminForm.components.map((c) => c.label),
+        ['Expected rank', 'Home channels', 'Staff roles', 'Report channel']);
+    check('the alert tick is ticked for a club with alerts on', lookPart('Behind-quota alert')?.options?.map((o) => o.default ?? false), [true]);
+    check('and may be left unticked', [lookPart('Behind-quota alert')?.required, lookPart('Behind-quota alert')?.min_values], [false, 0]);
     check('the admin form pre-selects the expected rank', pre(adminForm, 'Expected rank')?.options?.find((o) => o.default)?.value, 'S');
     check('the reports form pre-selects the default theme', lookPart('Report theme')?.options?.find((o) => o.default)?.value, 'default');
     check('the reports form offers tall and wide, tall ticked by default',
@@ -500,7 +502,7 @@ async function main() {
     check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M per week')], [false, true]);
     await submitClub(fancountForm.custom_id, 'u-officer', true, { 'club:quota': '15M' });
     check('not picking a period keeps the current one', [String((await reload()).quota), (await reload()).quotaPeriod], ['15000000', 'WEEK']);
-    const plain = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall' });
+    const plain = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall', 'club:alerts': 'on' });
     check('the reports form confirms publicly with the report time',
         [plain?.ephemeral, plain?.description?.includes('Fan report: daily at **00:00 Japan time (JST)** (the default: the daily reset)')], [false, true]);
     check('an unchanged look gets no preview', plain?.files, undefined);
@@ -510,11 +512,13 @@ async function main() {
     check('admin form saves home channels', afterAdmin.homeChannelIds, ['c-room', 'c-room-bot']);
     check('admin form saves the expected rank', afterAdmin.rank, 'A_PLUS');
     check('admin form keeps the report channel and a separate alert channel', [afterAdmin.reportChannelId, afterAdmin.alertChannelId], ['t-check', 'c-alert']);
-    check('admin form leaves staff pings daily when not picked', afterAdmin.alertFrequency, 'DAILY');
-    const weekly = await submitClub(adminForm.custom_id, 'u-officer', true, { ...keepChannels, 'club:alert-frequency': 'WEEKLY' }, { 'club:home': ['c-room', 'c-room-bot'] });
-    check('admin form sets staff pings to weekly', (await reload()).alertFrequency, 'WEEKLY');
-    check('admin form confirms the cadence', weekly?.description?.includes('Staff pings about members behind: **weekly**'), true);
-    await prisma.trackedCircle.update({ where: { id: club.id }, data: { alertFrequency: 'DAILY' } });
+    check('admin form leaves the alert alone', afterAdmin.alertFrequency, 'DAILY');
+    const pictureOnly = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall' });
+    check('unticking the alert: the picture only', (await reload()).alertFrequency, 'NONE');
+    check('the reports form confirms it', pictureOnly?.description?.includes('Behind-quota alert: **off**, so each report is the picture only.'), true);
+    const withAlert = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall', 'club:alerts': 'on' });
+    check('ticking it: with each report', (await reload()).alertFrequency, 'DAILY');
+    check('and says so', withAlert?.description?.includes('Behind-quota alert: **with each report**'), true);
     check('admin form confirms the channels', adminSaved?.description?.includes('Report channel: <#t-check>\nAlerts: <#c-alert> (set separately)'), true);
     check('admin form leaves the quota alone', String(afterAdmin.quota), '15000000');
     check('admin form leaves the rank alone when not picked',

@@ -206,8 +206,10 @@ model TrackedCircle {
     reportChannelId String?
     /// Where behind-quota alerts are posted. May be a thread.
     alertChannelId  String?
-    /// How often scheduled reports ping the club's staff roles when anyone
-    /// is behind. EVERY_3_DAYS and WEEKLY wait that long after the last ping.
+    /// Whether reports come with the behind-quota alert: DAILY is with each
+    /// report, NONE is never (the picture only), set by the tick in
+    /// /club reports. EVERY_3_DAYS and WEEKLY are no longer offered; the
+    /// 20261030120000 migration moved them to DAILY.
     alertFrequency  AlertFrequency @default(DAILY)
     /// When the staff roles were last pinged; drives EVERY_3_DAYS and WEEKLY.
     lastAlertAt     DateTime?

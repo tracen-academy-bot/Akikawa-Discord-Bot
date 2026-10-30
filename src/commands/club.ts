@@ -24,7 +24,7 @@ import { successEmbed, errorEmbed, infoEmbed } from "../lib/embeds";
 import { renderClubList, type ClubSummary } from "../lib/image/renderClubList";
 import { renderClubView } from "../lib/image/renderClubView";
 import type { AlertFrequency, TrackedCircle, ClubMember, ClubRank, ClubMemberRole, QuotaPeriod } from '@prisma/client';
-import { buildCircleReport, describeAlertFrequency } from '../lib/fans/scheduler';
+import { buildCircleReport } from '../lib/fans/scheduler';
 import { DEFAULT_PALETTE, PALETTES, paletteOf } from '../lib/image/theme';
 import { FAN_REPORT_LAYOUTS, layoutsOf, type FanReportLayout } from '../lib/image/renderFanReport';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
@@ -332,8 +332,9 @@ async function handleCreate(interaction: ChatInputCommandInteraction, member: Gu
  *   /club fancount the club's staff and Club Managers: the quota and its
  *                  period.
  *   /club reports  the same people, tracked clubs only: report time, time
- *                  zone, theme and layouts (tall, wide or both). A new look
- *                  is answered with a preview.
+ *                  zone, theme, layouts (tall, wide or both), and whether
+ *                  each report also pings the staff roles with who is
+ *                  behind. A new look is answered with a preview.
  *   /club profile  the club's staff (Club Managers also set the tier): bio,
  *                  rules, banner. See `clubProfile.ts`.
  *   /club admin    Club Managers only: who and where. The name (a club
@@ -358,18 +359,13 @@ const FIELD = {
     home: 'club:home',
     roles: 'club:roles',
     reportChannel: 'club:report-channel',
-    alertFrequency: 'club:alert-frequency',
+    alerts: 'club:alerts',
     theme: 'club:theme',
     layouts: 'club:layouts',
 } as const;
 
-/** How often the staff roles are pinged about members behind quota. */
-const ALERT_FREQUENCY_CHOICES: { value: AlertFrequency; label: string; description: string }[] = [
-    { value: 'DAILY', label: 'Daily', description: 'Ping the staff roles with every report that has anyone behind.' },
-    { value: 'EVERY_3_DAYS', label: 'Every 3 days', description: 'At most once every 3 days, with the first report that has anyone behind.' },
-    { value: 'WEEKLY', label: 'Weekly', description: 'At most once a week, with the first report that has anyone behind.' },
-    { value: 'NONE', label: 'Never', description: 'No pings and no alert post. The report still shows who is behind.' },
-];
+/** The `/club reports` tick for the behind-quota alert; unticked, the report is the picture only. */
+const ALERT_ON = 'on';
 /** Home channels a club may list. Threads inside them count without listing. */
 const MAX_HOME_CHANNELS = 10;
 /** Staff roles a club may list. */
@@ -474,7 +470,8 @@ function rankField(club: Club): LabelBuilder {
 
 /**
  * Builds the `/club reports` form for a tracked club: when the daily report
- * posts (time and time zone) and how it looks (theme and layouts). The same
+ * posts (time and time zone), how it looks (theme and layouts), and whether
+ * it comes with the behind-quota alert. The same
  * form for the club's staff and Club Managers. The quota is set with
  * `/club fancount`, the expected rank in `/club admin`.
  */
@@ -528,6 +525,24 @@ export function buildReportsModal(club: Club, now = new Date()): ModalBuilder {
                         .setMaxValues(FAN_REPORT_LAYOUTS.length)
                         .setOptions(FAN_REPORT_LAYOUTS.map((l) => ({ value: l, ...LAYOUT_CHOICES[l], default: layouts.includes(l) }))),
                 ),
+            new LabelBuilder()
+                .setLabel('Behind-quota alert')
+                .setDescription('Posts with each report when anyone is behind. Untick for the picture only: no pings, no list.')
+                .setCheckboxGroupComponent(
+                    new CheckboxGroupBuilder()
+                        .setCustomId(FIELD.alerts)
+                        .setRequired(false)
+                        .setMinValues(0)
+                        .setMaxValues(1)
+                        .setOptions([
+                            {
+                                value: ALERT_ON,
+                                label: 'Ping staff and list who is behind',
+                                description: "Pings the club's staff roles with each trainer behind and what they need a day.",
+                                default: club.alertFrequency !== 'NONE',
+                            },
+                        ]),
+                ),
         );
 }
 
@@ -567,7 +582,8 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
         reportTimeZone: string | null;
         reportTheme?: string | null;
         reportLayouts?: FanReportLayout[];
-    } = { reportMinute: null, reportTimeZone: null };
+        alertFrequency: AlertFrequency;
+    } = { reportMinute: null, reportTimeZone: null, alertFrequency: 'NONE' };
 
     const rawTime = interaction.fields.getTextInputValue(FIELD.time).trim();
     if (rawTime) {
@@ -585,6 +601,8 @@ async function handleReportsModal(interaction: ModalSubmitInteraction) {
     // Discord requires a tick; an empty or unknown answer keeps the stored layouts.
     const ticked = FAN_REPORT_LAYOUTS.filter((l) => interaction.fields.getCheckboxGroup(FIELD.layouts).includes(l));
     if (ticked.length > 0) data.reportLayouts = ticked;
+    // The alert goes with every report, or not at all.
+    data.alertFrequency = interaction.fields.getCheckboxGroup(FIELD.alerts).includes(ALERT_ON) ? 'DAILY' : 'NONE';
 
     const before = layoutsOf(club.reportLayouts).join(',');
     const lookChanged =
@@ -616,6 +634,9 @@ export function reportSummary(club: Club, now = new Date()): string {
         `Fan report: daily at **${formatTimeOfDay(time.minute)} ${describeZone(time.zone, now)}**${hasOwnReportTime(club) ? '' : ' (the default: the daily reset)'}`,
         `Report theme: **${theme.label}**${club.reportTheme && PALETTES[club.reportTheme] ? '' : ' (the default)'} · layout: **${layoutsOf(club.reportLayouts).map((l) => LAYOUT_CHOICES[l].label).join(' and ')}**`,
         `Next: <t:${next}:F> (<t:${next}:R>), shown in your own time.`,
+        club.alertFrequency === 'NONE'
+            ? 'Behind-quota alert: **off**, so each report is the picture only.'
+            : 'Behind-quota alert: **with each report** when anyone is behind, pinging the staff roles.',
     ];
     if (!club.reportChannelId) lines.push('No report channel yet, so nothing posts; a Club Manager sets one with `/club admin`.');
     if (!club.active) lines.push('Syncing is paused, so nothing posts until it is resumed.');
@@ -669,13 +690,6 @@ export function buildAdminModal(club: Club, links: ClubFormLinks = { home: club.
                 .setLabel('Report channel')
                 .setDescription('Daily report and behind-quota pings post here: ID, #mention or link. Empty: none.')
                 .setTextInputComponent(reportChannelInput(FIELD.reportChannel, club.reportChannelId)),
-            new LabelBuilder()
-                .setLabel('Ping staff roles about members behind')
-                .setStringSelectMenuComponent(
-                    new StringSelectMenuBuilder()
-                        .setCustomId(FIELD.alertFrequency)
-                        .addOptions(ALERT_FREQUENCY_CHOICES.map((c) => ({ ...c, default: c.value === club.alertFrequency }))),
-                ),
         );
     }
     return new ModalBuilder()
@@ -711,7 +725,6 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
         staffRoleIds: string[];
         reportChannelId?: string | null;
         alertChannelId?: string | null;
-        alertFrequency?: AlertFrequency;
         rank?: ClubRank | null;
     } = { staffRoleIds: [] };
     const rank = interaction.fields.getStringSelectValues(FIELD.rank)[0];
@@ -734,9 +747,6 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
         // Alerts follow the report channel (stored as no alert channel). A
         // separate one set with `/fans circle config` or the dashboard stays.
         if (club.alertChannelId === null || club.alertChannelId === club.reportChannelId) data.alertChannelId = null;
-        const frequency = interaction.fields.getStringSelectValues(FIELD.alertFrequency)[0];
-        const choice = ALERT_FREQUENCY_CHOICES.find((c) => c.value === frequency);
-        if (choice) data.alertFrequency = choice.value;
     }
     // A role list equal to the name matches is stored empty, so the club keeps
     // following its name (a role made later is picked up).
@@ -759,7 +769,6 @@ async function handleAdminModal(interaction: ModalSubmitInteraction) {
             ? [
                   `Report channel: ${updated.reportChannelId ? `<#${updated.reportChannelId}>` : 'none, so no report or alert posts'}`,
                   ...(updated.alertChannelId ? [`Alerts: <#${updated.alertChannelId}> (set separately)`] : []),
-                  `Staff pings about members behind: **${describeAlertFrequency(updated.alertFrequency)}**`,
               ]
             : []),
     ];
