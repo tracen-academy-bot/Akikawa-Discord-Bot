@@ -564,6 +564,18 @@ function bandEnds(band: RankBand): { low: number; high: number } | null {
 }
 
 /**
+ * How far a scene with a mood has turned, 0 to 1, from the share of the club
+ * behind pace: calm under 5%, fully turned at half the club.
+ */
+export function sceneMood(progress: CircleProgress): number {
+    const members = progress.members.length;
+    if (members === 0) return 0;
+    const share = progress.members.filter((m) => !m.onPace).length / members;
+    const t = Math.max(0, Math.min(1, (share - 0.05) / 0.45));
+    return t * t * (3 - 2 * t);
+}
+
+/**
  * The club's place in its band for a scene's race track: how far it is
  * from the bottom cutoff to the next one up, by points. Null without both
  * cutoffs' points.
@@ -960,5 +972,5 @@ export async function renderFanReport(
     };
     const report = layout === 'wide' ? renderWide(prepared) : renderTall(prepared);
     // A palette with a scene draws on a transparent background; set it in the scene.
-    return (await withScene(report, palette, layout, sceneRace(meta.rankBand ?? null))).encode('png');
+    return (await withScene(report, palette, layout, sceneRace(meta.rankBand ?? null), sceneMood(progress))).encode('png');
 }

@@ -4,6 +4,145 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-26 — Still in Love theme (preview, not merged)
+
+Fwoxie asked for a Still in Love theme: no race, her "staring at you with
+evil eyes", and her yandere side shown the way her scenario turns the
+screen red. Food is no longer central.
+
+- **Palette `stillinlove`**: dark wine cards. Her blue `#6FBBF1` is the
+  accent and mint means on pace. Red appears only for behind (and her
+  mood), so the only red in her report is whoever is behind.
+- **Scene** (`drawStillInLove`): her room at night.
+  - A gallery of gothic arched windows with a crescent moon (never full;
+    she dislikes full moons) and bats.
+  - Her, centre stage, staring out. Until her chibi exists, her
+    half-lidded red eyes in the dark.
+  - A side table of red jam jars, a candle, and a mirror draped with cloth
+    (she dislikes large mirrors).
+  - Bobbin lace along the bottom of the band.
+  - Her line, faint, under her gaze.
+- **Mood** (`sceneMood`, smoothstep of the share behind: 0 under 5%, 1 at
+  half the club): the walls, window sky, moon, lace, petals, candle and
+  eyes all turn from calm to red, and a red vignette closes in. The line
+  goes from "I still love you." to "…why are you leaving me behind?".
+- Fwoxie's second pass:
+  - Two windows only, standing for the rank band. The bottom cutoff is
+    under a pale crescent (left) and the next rank up under a full blood
+    moon (right), each named on a brass plaque. The window gallery is gone.
+  - The moons are drawn, not tinted: the crescent has its own layer and
+    shading; the blood moon has maria, rimmed craters, a halo and a cloud
+    wisp. They no longer change colour with mood.
+  - Her line is in a game-style speech bubble pointing at her.
+  - Blood, scaled by mood: splats with drips on the window glass, drops
+    hanging from the lace, the bubble bleeding at its worst, and spray on
+    the report's outer corners and edges. That spray is drawn after the
+    report, kept to the margins and corners so no figure is covered.
+- Third pass ("blood splatter looks mid … put some knives and shit too"):
+  - The drawn blood is replaced by public-domain Openclipart pictures in
+    `src/assets/scenes/stillinlove/` (sources in its `CREDITS.md`): splat,
+    drips, thin drips, smears and spray. If any file is missing, the
+    scene falls back to the drawn blood.
+  - Glass: drips running down each window, plus a splat past mood 0.5.
+    Lace: thin drips hang from it. Report: smears and spray along the
+    outer edges and the bottom margin only, so no figure is covered.
+  - Knives escalate by mood. Calm (under 0.34): her jam knife lies on the
+    table. Uneasy (under 0.67): it is stabbed upright into the table. At
+    her worst: a cleaver and the knife are driven into the cards' outer
+    top corners, dripping. `stabbed()` clips the blade at the surface so
+    it reads as driven in.
+- Fourth pass (Fwoxie: moonlight "ew", windows too wide, "blood bleeds
+  from sides", "add some roses", "where's my SiL reference sheet?!"):
+  - Windows are back to the first draft's tall, narrow shape (88 wide),
+    with a slimmer ledge. The plaques sit just under the ledge.
+  - `moonlight()`: one shaft per pane, so the mullions cast dark bars. The
+    shafts slant in towards her, fade before the lace, pool where they land,
+    and carry dust motes. They are drawn with `screen` so the table and wall
+    stay visible through them. Cool from the crescent; red from the blood
+    moon, stronger as she turns.
+  - No more smears running in from the image's sides. Blood on the report
+    is now splatter on the cards' corners, a bloody hand reaching up over
+    the bottom edge (mood 0.5+), and the knives in the top corners.
+    Bloody handprints appear on the wall from mood 0.4.
+  - Roses (Openclipart 202514): a bud vase of three on a longer side
+    table, and one lying on the calm window's ledge.
+  - `docs/still-in-love-reference.md`: her design and character from the
+    wiki, and what the theme uses or leaves out.
+  - A red thread from her to the cards was tried and removed: without her
+    body it read as a tail. It returns with the chibi.
+- Fifth pass (Fwoxie: the moonlight is still "ew"; "go read on SiL and
+  see what else you can add"):
+  - Light redesigned as a layer (`moonlightLayer`). Each moon now sits on
+    its window's outer side, so the light slants in towards her. Each pane
+    casts a shaft with brighter rays and dust in it. The shafts light the
+    lace and carry on, at 45% and blurred, over the top of the cards. Each
+    window also casts a soft glow on the wall round it. The cool crescent
+    light is fixed; the red light grows with mood.
+  - From the reading (reference sheet updated): red velvet curtains tied
+    back with white ribbons and gold hearts; gold heart charms and one blue
+    diamond on the lace (her dress); red spider lilies in the vase for her
+    "Scarlet Lily" unique skill (roses there removed); a glass of red for
+    her profile's "unquenched thirst", spilling at her worst.
+  - Then, at Fwoxie's ask, the light fades much faster: down to 45% a
+    quarter of the way and 12% by 60%, and gone just past the top of the
+    cards (`reach` hero + 40, was hero + 120).
+- The lace shows the distance between the two ranks (Fwoxie: "something
+  to show the proper distance … like how rgb thingies work"). Between the
+  two windows' centres its holes are a light strip: lit gold from the
+  bottom cutoff up to the club, the club's own hole bigger and glowing in
+  her blue with her blue diamond hanging from it, and dark beyond. It uses
+  the same `race.progress` as Oguri's runner. The fixed centre diamond is
+  gone; the diamond now marks the club.
+- Then (Fwoxie: "grow a flower field", "the uma should stand on top of the
+  dot", the blue marker "looks mid"):
+  - The marker is a heart (her emoji), ruby in gold, glowing in place of
+    the hole. A hanging charm sat below the lace, behind the cards. The
+    blue diamond is gone.
+  - She stands over the marker: her eyes (and later her chibi) move with
+    the club's progress. Her bubble flips to her left when it would run
+    off the right edge. Wall handprints skip spots where she or her
+    bubble is.
+  - `lilyField`: a sparse field of red spider lilies (Openclipart 345040)
+    along the lace from past the left plaque up to the marker, none
+    beyond: she has walked through it.
+- Then (Fwoxie: keep the blue diamond idea but do it justice, "where
+  glisten"; the pale yellow on white is "a crime"; the heart "ain't
+  working"; curtains not always red; "a real flower field"):
+  - `blueDiamond`: a brilliant-cut gem from the side, crown and pavilion
+    facets in her blues, a glow and three four-pointed glints. It replaces
+    the heart as the club's marker.
+  - Lit holes are saturated gold beads (`#fff0a8` → `#ffc21a` → `#c47a00`)
+    with a warm glow.
+  - Curtains go from deep blue velvet (calm) to red (at her worst).
+  - `lilyField` is a real field now: three rows, each further back rooted
+    higher up the wall, smaller and darker (brightness filter), so the
+    ground recedes. In bloom up to the marker; past it, bare stalks with
+    closed buds (spider lilies flower before their leaves). Under the side
+    table only a short front row grows, so its things stay visible.
+  - The faceted diamond read as "too specific". The marker is now
+    `blueHeartGem`: a heart-cut blue diamond drawn as one polished stone
+    (light pooling from the upper left through ice blue into sapphire,
+    facets only hinted at, a bright rim, a soft highlight, one fine glint),
+    13 px, sitting in the dot's place.
+  - Then 10 px, with a five-stop sapphire gradient and light coming back
+    out low on the right. The gold beads now change with mood: deep amber
+    on the white lace (pale gold washed out there), bright yellow gold on
+    the red lace, so they read on both.
+- Her chibi (three UmaViewer poses from Fwoxie): smiling when calm,
+  worried when uneasy, teeth gritted at her worst (`stillInLovePose`, the
+  same thirds as her lines). She stands on the lace right over the club's
+  marker, with a shadow at her feet and, past mood 0.4, a red aura behind
+  her. The bubble keeps clear of her and points at her face. Petals now
+  fall behind her, so none lands on her face.
+- Tried without the speech bubble for Fwoxie to compare; the bubble is
+  still on in the code.
+- The unbloomed side looked scattered ("holy scatter"): every row of the
+  field now has dark grass (`grassTuft`), and past the marker the buds
+  grow in clusters of two or three stalks.
+- Tested in `test-cutoff`. `scripts/palettes.ts` passes.
+
+---
+
 ## 2026-10-26 — Live timer leaderboard; panel kept at the bottom
 
 Asked for: "design a current lb one too", "repost panel", "show live daily

@@ -4,6 +4,26 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-10-30 — Still in Love theme; a private send for later
+
+Fwoxie shaped the Still in Love theme over many rounds (details in
+`DEVELOPMENT_LOG.md` and `docs/still-in-love-reference.md`): she stares
+rather than races, the screen reddens as more of the club falls behind,
+the lace shows the club's place between the two ranks with her blue heart
+gem, and her chibi stands on it, changing face with her mood. Not merged
+yet.
+
+Open:
+- Keep or drop the speech bubble. Fwoxie was shown both; Claude leans to
+  dropping it. The code still has it.
+- "Design a private send too (for later)": not started. Read as a way to
+  send a report privately (to the person asking, or a DM) instead of to
+  the club channel; to be confirmed before designing.
+- "Do that for Oguri too" (real online pictures for the Oguri scene):
+  still unclear what to replace.
+
+---
+
 ## 2026-10-26 — The mascot races the rank band
 
 Verillia proposed the mascot running along the top, placed by the club's
