@@ -136,6 +136,9 @@ screen red. Food is no longer central.
   fall behind her, so none lands on her face.
 - Tried without the speech bubble for Fwoxie to compare; the bubble is
   still on in the code.
+- The unbloomed side looked scattered ("holy scatter"): every row of the
+  field now has dark grass (`grassTuft`), and past the marker the buds
+  grow in clusters of two or three stalks.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---

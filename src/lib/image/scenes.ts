@@ -2025,13 +2025,32 @@ function bubbleWidth(ctx: SKRSContext2D, text: string): number {
     return ctx.measureText(text).width + 28;
 }
 
+/** A tuft of grass: a few thin blades fanning out from (x, root), `height` tall. */
+function grassTuft(ctx: SKRSContext2D, x: number, root: number, height: number, colour: string, rand: () => number) {
+    ctx.fillStyle = colour;
+    const blades = 3 + Math.floor(rand() * 3);
+    for (let i = 0; i < blades; i += 1) {
+        const lean = (i / (blades - 1) - 0.5) * 1.1 + (rand() - 0.5) * 0.3;
+        const tall = height * (0.6 + rand() * 0.4);
+        const tipX = x + Math.sin(lean) * tall;
+        const tipY = root - Math.cos(lean) * tall;
+        const base = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(x - base, root);
+        ctx.quadraticCurveTo(x + (tipX - x) * 0.3, root - tall * 0.6, tipX, tipY);
+        ctx.quadraticCurveTo(x + (tipX - x) * 0.3 + base, root - tall * 0.55, x + base, root);
+        ctx.fill();
+    }
+}
+
 /**
  * A field of red spider lilies across the bottom of the room, from `from`
  * to `to`, its front row rooted at `y`. Rows further back stand higher up
  * the wall, smaller and darker, so the ground seems to recede. Left of
  * `marker` (the club's place) they are in bloom; past it they are bare
  * stalks with closed buds, as spider lilies flower before their leaves.
- * Under `low` (the side table) only a short front row grows.
+ * Under `low` (the side table) only a short front row grows. Dark grass
+ * covers the ground of every row, so the field reads as one.
  */
 function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y: number, marker: number, low: [number, number]) {
     // A dark ground for the field to stand in.
@@ -2046,7 +2065,15 @@ function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y:
         { root: y, h: [34, 44], gap: [32, 54], light: 1, front: true },
     ] as const;
     const rand = seeded(1229);
+    const grass = seeded(77);
     for (const row of rows) {
+        // The row's grass first, flowers and stalks over it.
+        const grassH = row.h[0] * 0.38;
+        for (let x = from; x < to; x += 4 + grass() * 5) {
+            const underTable = x > low[0] && x < low[1];
+            if (underTable && !row.front) continue;
+            grassTuft(ctx, x, row.root + 1, grassH * (0.6 + grass() * 0.7), mix('#060b04', '#2f5222', row.light * (0.75 + grass() * 0.25)), grass);
+        }
         for (let x = from + rand() * row.gap[1]; x < to; x += row.gap[0] + rand() * (row.gap[1] - row.gap[0])) {
             let height = row.h[0] + rand() * (row.h[1] - row.h[0]);
             const underTable = x > low[0] && x < low[1];
@@ -2058,19 +2085,25 @@ function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y:
                 roseStem(ctx, lily, x, row.root, height, lean);
                 ctx.filter = 'none';
             } else {
-                // Not yet: a bare stalk and a closed red bud.
-                const tipX = x + Math.sin(lean) * height * 0.75;
-                const tipY = row.root - Math.cos(lean) * height * 0.75;
-                ctx.strokeStyle = mix('#0e1608', '#4c6b34', row.light);
-                ctx.lineWidth = 0.9;
-                ctx.beginPath();
-                ctx.moveTo(x, row.root);
-                ctx.quadraticCurveTo(x, (row.root + tipY) / 2, tipX, tipY);
-                ctx.stroke();
-                ctx.fillStyle = mix('#1a0306', '#9a1424', row.light);
-                ctx.beginPath();
-                ctx.ellipse(tipX, tipY - 1.5, 1.2, 2.6, lean, 0, Math.PI * 2);
-                ctx.fill();
+                // Not yet: bare stalks with closed red buds, in twos and threes.
+                const stalks = 2 + Math.floor(rand() * 2);
+                for (let k = 0; k < stalks; k += 1) {
+                    const sx = x + (k - (stalks - 1) / 2) * 5;
+                    const sl = lean + (k - (stalks - 1) / 2) * 0.15;
+                    const sh = height * (0.55 + rand() * 0.25);
+                    const tipX = sx + Math.sin(sl) * sh;
+                    const tipY = row.root - Math.cos(sl) * sh;
+                    ctx.strokeStyle = mix('#0e1608', '#4c6b34', row.light);
+                    ctx.lineWidth = 0.9;
+                    ctx.beginPath();
+                    ctx.moveTo(sx, row.root);
+                    ctx.quadraticCurveTo(sx, (row.root + tipY) / 2, tipX, tipY);
+                    ctx.stroke();
+                    ctx.fillStyle = mix('#1a0306', '#9a1424', row.light);
+                    ctx.beginPath();
+                    ctx.ellipse(tipX, tipY - 1.5, 1.2, 2.6, sl, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
         }
     }
