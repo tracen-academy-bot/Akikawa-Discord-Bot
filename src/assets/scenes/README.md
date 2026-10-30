@@ -16,3 +16,8 @@ the scene draws its own food instead.
 `oguri-run.png` is the same character posed running. The race track uses
 it, and does not tilt it further; without it, the race leans `oguri.png`
 forward.
+
+`stillinlove-calm.png`, `stillinlove-uneasy.png` and `stillinlove-yandere.png`
+are Still in Love's chibi, smiling, worried and teeth gritted, from UmaViewer
+(supplied by Fwoxie). The scene picks one by her mood and stands it on the
+lace over the club's place. Without them it draws her eyes instead.

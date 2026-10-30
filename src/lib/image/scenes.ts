@@ -105,6 +105,17 @@ async function foodArt(): Promise<FoodArt | null> {
     return (foodCache = loaded as FoodArt);
 }
 
+/**
+ * Her picture for `mood`: `stillinlove-calm.png` (smiling),
+ * `stillinlove-uneasy.png` (worried) or `stillinlove-yandere.png` (teeth
+ * gritted), the same thirds as her lines. Falls back to `stillinlove.png`,
+ * then to none (the scene then draws her eyes).
+ */
+async function stillInLovePose(mood: number): Promise<Image | null> {
+    const pose = mood < 0.34 ? 'calm' : mood < 0.67 ? 'uneasy' : 'yandere';
+    return (await sceneArt(`stillinlove-${pose}`)) ?? sceneArt('stillinlove');
+}
+
 /** Still in Love's blood, knives and roses (`src/assets/scenes/stillinlove`, public domain). */
 const SIL_NAMES = ['splat', 'drips', 'drips-thin', 'smear', 'smear-short', 'spray', 'knife', 'cleaver', 'hand', 'hand-smear', 'rose', 'lilies', 'lily'] as const;
 type SilArt = Record<(typeof SIL_NAMES)[number], Image>;
@@ -241,7 +252,7 @@ export async function withScene(
     let moonlight: Canvas | null = null;
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
-    else if (scene === 'stillinlove') moonlight = drawStillInLove(ctx, w, h, hero, await sceneArt(scene), mood, race, await stillInLoveArt());
+    else if (scene === 'stillinlove') moonlight = drawStillInLove(ctx, w, h, hero, await stillInLovePose(mood), mood, race, await stillInLoveArt());
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     // Her moonlight carries on over the cards, faintly.
@@ -2287,34 +2298,7 @@ function drawStillInLove(
         lilyField(ctx, blood.lily, leftX + winW + 18, rightX - 18, floor - 3, marker, [tableX, tableX + 190]);
     }
 
-    // Her, standing over the club's place; until her picture exists, her eyes.
-    const herX = marker ?? w * 0.45;
-    const eyeY = hero * 0.5;
-    if (art) {
-        const artH = hero - 24;
-        const artW = (art.width / art.height) * artH;
-        ctx.drawImage(art, herX - artW / 2, floor - artH + 6, artW, artH);
-    } else {
-        watchingEyes(ctx, herX, eyeY, 15, mood);
-    }
-    const line = mood < 0.34 ? 'I still love you.' : mood < 0.67 ? 'I still love you…' : '…why are you leaving me behind?';
-    // Her bubble to her right, or her left when it would run off the edge.
-    const bw = bubbleWidth(ctx, line);
-    const bubbleX = herX + 52 + bw > w - SIDE ? herX - 52 - bw : herX + 52;
-    speechBubble(ctx, bubbleX, 18, line, herX + (bubbleX > herX ? 30 : -30), eyeY - 14, mood);
-
-    // Bloody handprints on the wall once she has turned.
-    if (blood && mood >= 0.4) {
-        // On the wall past the left window, unless she is standing there.
-        const smearX = leftX + winW + 70;
-        if (Math.abs(smearX - herX) > 80) placed(ctx, blood['hand-smear'], smearX, hero * 0.5, 52, -0.25, 0.55 + mood * 0.35);
-        // And one more in the wide image, clear of her and her bubble.
-        const handX = rightX - 250;
-        const clear = Math.abs(handX - herX) > 90 && (handX < bubbleX - 30 || handX > bubbleX + bw + 30);
-        if (w > 1200 && mood >= 0.67 && clear) placed(ctx, blood.hand, handX, hero * 0.42, 40, 0.2, 0.85);
-    }
-
-    // Petals drifting down, more as she turns.
+    // Petals drifting down, more as she turns; behind her, so none lands on her face.
     const rand = seeded(214);
     const petals = Math.round(6 + mood * 18);
     for (let i = 0; i < petals; i += 1) {
@@ -2331,6 +2315,56 @@ function drawStillInLove(
         ctx.restore();
     }
     ctx.globalAlpha = 1;
+
+    // Her, standing over the club's place; until her picture exists, her eyes.
+    const herX = marker ?? w * 0.45;
+    let faceY = hero * 0.5;
+    // How far her bubble keeps from her centre.
+    let reach = 52;
+    if (art) {
+        // Standing on the lace, right over the club's place.
+        const artH = hero - 30;
+        const artW = (art.width / art.height) * artH;
+        const footY = floor - 2;
+        // Once she turns, a red aura behind her.
+        if (mood > 0.4) {
+            const cy = footY - artH * 0.5;
+            const aura = ctx.createRadialGradient(herX, cy, artW * 0.2, herX, cy, artH * 0.65);
+            aura.addColorStop(0, `rgba(230, 20, 40, ${0.4 * mood})`);
+            aura.addColorStop(1, 'rgba(230, 20, 40, 0)');
+            ctx.fillStyle = aura;
+            ctx.beginPath();
+            ctx.arc(herX, cy, artH * 0.65, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.beginPath();
+        ctx.ellipse(herX, footY, artW * 0.38, 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.drawImage(art, herX - artW / 2, footY - artH, artW, artH);
+        faceY = footY - artH * 0.6;
+        reach = artW / 2 + 10;
+    } else {
+        watchingEyes(ctx, herX, faceY, 15, mood);
+    }
+    const eyeY = faceY;
+    const line = mood < 0.34 ? 'I still love you.' : mood < 0.67 ? 'I still love you…' : '…why are you leaving me behind?';
+    // Her bubble to her right, or her left when it would run off the edge.
+    const bw = bubbleWidth(ctx, line);
+    const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
+    speechBubble(ctx, bubbleX, 18, line, herX + (bubbleX > herX ? 30 : -30), eyeY - 14, mood);
+
+    // Bloody handprints on the wall once she has turned.
+    if (blood && mood >= 0.4) {
+        // On the wall past the left window, unless she is standing there.
+        const smearX = leftX + winW + 70;
+        if (Math.abs(smearX - herX) > 80) placed(ctx, blood['hand-smear'], smearX, hero * 0.5, 52, -0.25, 0.55 + mood * 0.35);
+        // And one more in the wide image, clear of her and her bubble.
+        const handX = rightX - 250;
+        const clear = Math.abs(handX - herX) > 90 && (handX < bubbleX - 30 || handX > bubbleX + bw + 30);
+        if (w > 1200 && mood >= 0.67 && clear) placed(ctx, blood.hand, handX, hero * 0.42, 40, 0.2, 0.85);
+    }
+
 
     // Lace along the bottom of the band, white to red, dripping when she turns.
     laceTrim(ctx, w, floor, mix('#f3e6ec', '#c8202e', mood), track, mood);

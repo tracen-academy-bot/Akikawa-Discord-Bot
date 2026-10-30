@@ -128,6 +128,14 @@ screen red. Food is no longer central.
     out low on the right. The gold beads now change with mood: deep amber
     on the white lace (pale gold washed out there), bright yellow gold on
     the red lace, so they read on both.
+- Her chibi (three UmaViewer poses from Fwoxie): smiling when calm,
+  worried when uneasy, teeth gritted at her worst (`stillInLovePose`, the
+  same thirds as her lines). She stands on the lace right over the club's
+  marker, with a shadow at her feet and, past mood 0.4, a red aura behind
+  her. The bubble keeps clear of her and points at her face. Petals now
+  fall behind her, so none lands on her face.
+- Tried without the speech bubble for Fwoxie to compare; the bubble is
+  still on in the code.
 - Tested in `test-cutoff`. `scripts/palettes.ts` passes.
 
 ---
