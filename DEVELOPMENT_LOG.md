@@ -4,6 +4,24 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-30 — Mambo palette (Matikanetannhauser), colours only
+
+The first light theme meant for a scene: her sports-festival design is
+daytime. Her image colours are blue `#0f8dce` and coral `#ee5b56`; both
+are too pale for text on white, so the backdrop uses bright versions and
+the text uses deepened ones.
+
+- Backdrop: her sky blue `#58b4ea` fading to coral blush `#ffc9c2`.
+- Cards near-white (`#fffdf9`), panels pale sky (`#eaf5fc`).
+- Accent and #1: deep blue `#0a6aa3` (5.26:1). #2 ribbon pink `#b0307a`,
+  #3 bronze `#7a5600`, #4 violet `#5b4bb5`. Behind: coral-red `#c42f2a`.
+- `scripts/palettes.ts`: every colour meets its floor; top 3 and behind
+  colours are distinct.
+- No scene yet (sports festival, tug-of-war rope, her chibi); it needs
+  her art.
+
+---
+
 ## 2026-10-30 — Behind-quota alert: a tick in /club reports
 
 GimmeKiss asked for the report to be "only the picture", without the pings
