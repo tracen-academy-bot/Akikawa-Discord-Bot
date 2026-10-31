@@ -30,8 +30,9 @@ suits. Transparent pictures standing upright work best; they are scaled
 to about 40px tall. Empty or missing, the trainers watch alone.
 
 UmaViewer screenshots are full-window and mostly empty (a few MB each).
-`scripts/shrink_chibis.py` crops each to its character and scales it down
-(about 140 KB at the default 440px; use `--height 220` for crowd chibis):
+`scripts/shrink_chibis.py` crops each to its character, scales it down and
+reduces it to 256 colours (about 20 KB at the default 320px; use
+`--height 160` for crowd chibis, about 8 KB):
 
     pip install pillow
     python scripts/shrink_chibis.py <screenshots folder> <output folder>

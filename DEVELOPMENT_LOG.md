@@ -106,6 +106,12 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   channel and scales it to at most 440px (or `--height 220` for crowd
   chibis): about 140 KB each. Tried on three earlier screenshots: 1.0 MB in,
   0.4 MB out (0.1 MB at crowd size).
+- Still 44 MB for Fwoxie's batch, so the script now also reduces each
+  picture to 256 colours (Pillow's fast octree, which keeps alpha), and the
+  defaults drop to 320px (main) and 160px (crowd), still above the 280px
+  and 80px the 2x render draws them at. The same three screenshots: about
+  20 KB each at 320px, 8 KB at 160px; side by side with full colour they
+  are indistinguishable. `--colors 0` keeps full colour.
 
 ---
 

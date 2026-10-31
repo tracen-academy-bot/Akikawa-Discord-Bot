@@ -3,23 +3,26 @@
 UmaViewer saves full-window screenshots (about 1920 x 1000, a few MB each),
 mostly empty transparent space around a small character. The report scenes
 draw a character at most about 140 px tall (280 px in the 2x image), so each
-picture only needs to be the character, cropped tight and about 440 px tall:
-roughly 50 to 150 KB instead of several MB.
+picture only needs to be the character, cropped tight and about 320 px tall,
+in 256 colours: roughly 20 to 50 KB instead of several MB.
 
 For every ``.png`` in the input folder this:
 
 1. crops to the character, using the alpha channel (pixels with alpha above
    ``ALPHA_FLOOR`` count as the character, so faint edge noise is ignored);
 2. scales it so its height is at most ``--height`` pixels (never up);
-3. saves it, optimised, under the same name in the output folder.
+3. reduces it to ``--colors`` colours (256 by default; anime-style art
+   barely changes, and the file shrinks about three to four times);
+4. saves it, optimised, under the same name in the output folder.
 
 Usage (needs Pillow: ``pip install pillow``)::
 
     python scripts/shrink_chibis.py "C:/Users/you/Downloads/UmaViewer/.../Screenshots" shrunk
-    python scripts/shrink_chibis.py screenshots shrunk --height 220
+    python scripts/shrink_chibis.py screenshots shrunk-crowd --height 160
 
-Use the default 440 for a scene's main character (``mambo-calm.png`` and so
-on) and 220 is plenty for crowd chibis (``mambo-crowd/``).
+Use the default 320 for a scene's main character (``mambo-calm.png`` and so
+on) and 160 for crowd chibis (``mambo-crowd/``). ``--colors 0`` keeps full
+colour, if a picture ever shows banding.
 """
 
 import argparse
@@ -32,16 +35,20 @@ from PIL import Image
 ALPHA_FLOOR = 8
 
 #: Default tallest height, in pixels, of a shrunk picture.
-DEFAULT_HEIGHT = 440
+DEFAULT_HEIGHT = 320
+
+#: Default number of colours to reduce to; 0 keeps full colour.
+DEFAULT_COLORS = 256
 
 
-def shrink(source: Path, target: Path, max_height: int) -> tuple[int, int] | None:
+def shrink(source: Path, target: Path, max_height: int, colors: int = DEFAULT_COLORS) -> tuple[int, int] | None:
     """Crop one screenshot to its character, scale it down and save it.
 
     Args:
         source: The screenshot to read (a PNG with transparency).
         target: Where to write the shrunk picture.
         max_height: The tallest the result may be, in pixels.
+        colors: How many colours to keep (at most 256); 0 keeps full colour.
 
     Returns:
         The saved picture's (width, height), or None when the screenshot has
@@ -58,6 +65,9 @@ def shrink(source: Path, target: Path, max_height: int) -> tuple[int, int] | Non
     if character.height > max_height:
         width = round(character.width * max_height / character.height)
         character = character.resize((width, max_height), Image.LANCZOS)
+    if colors > 0:
+        # Fast octree keeps the alpha channel when quantizing RGBA.
+        character = character.quantize(colors=min(colors, 256), method=Image.Quantize.FASTOCTREE)
     character.save(target, optimize=True)
     return character.size
 
@@ -71,7 +81,13 @@ def main() -> int:
         "--height",
         type=int,
         default=DEFAULT_HEIGHT,
-        help=f"tallest height in pixels (default {DEFAULT_HEIGHT}; 220 suits crowd chibis)",
+        help=f"tallest height in pixels (default {DEFAULT_HEIGHT}; 160 suits crowd chibis)",
+    )
+    parser.add_argument(
+        "--colors",
+        type=int,
+        default=DEFAULT_COLORS,
+        help=f"colours to keep, at most 256 (default {DEFAULT_COLORS}; 0 keeps full colour)",
     )
     args = parser.parse_args()
 
@@ -83,7 +99,7 @@ def main() -> int:
     before = after = 0
     for source in sorted(args.input.glob("*.png")):
         target = args.output / source.name
-        size = shrink(source, target, args.height)
+        size = shrink(source, target, args.height, args.colors)
         if size is None:
             print(f"skipped {source.name}: nothing visible")
             continue
