@@ -2511,6 +2511,24 @@ function trainerFigure(ctx: SKRSContext2D, x: number, base: number, h: number, t
 }
 
 /**
+ * One crowd chibi standing at (x, feet), `h` tall, leaning by `lean`
+ * (radians, about her feet): back for a tug-of-war, upright to watch.
+ */
+function crowdChibi(ctx: SKRSContext2D, art: Image, x: number, feet: number, h: number, lean = 0, flip = false) {
+    const w = (art.width / art.height) * h;
+    ctx.fillStyle = 'rgba(60, 40, 20, 0.22)';
+    ctx.beginPath();
+    ctx.ellipse(x, feet, w * 0.38, 2.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(x, feet);
+    ctx.rotate(lean);
+    if (flip) ctx.scale(-1, 1);
+    ctx.drawImage(art, -w / 2, -h, w, h);
+    ctx.restore();
+}
+
+/**
  * Classmates and trainers watching from the back of the field, between x0
  * and x1 with their feet at `base`: the pictures in `mambo-crowd/` (small
  * chibis of other Umamusume) in turn with drawn trainers, every `gap`,
@@ -2531,13 +2549,7 @@ function crowd(ctx: SKRSContext2D, x0: number, x1: number, base: number, gap: nu
         if (useChibi) {
             const art = chibis[chibi % chibis.length]!;
             chibi += 1;
-            const h = 40 * scale;
-            const w = (art.width / art.height) * h;
-            ctx.fillStyle = 'rgba(60, 40, 20, 0.2)';
-            ctx.beginPath();
-            ctx.ellipse(x, feet, w * 0.35, 2.5, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.drawImage(art, x - w / 2, feet - h, w, h);
+            crowdChibi(ctx, art, x, feet, 40 * scale);
         } else {
             trainerFigure(ctx, x, feet, 34 * scale, ties[k % ties.length]!, rand() < 0.4, rand() < 0.45);
         }
@@ -3184,6 +3196,15 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     capRow(ctx, 6, w - 6, horizon + 9, [[tentX0 - 6, tentX1 + 6]]);
     cheerTent(ctx, tentX0, tentX1, tentTop, horizon + 26);
     sittingCat(ctx, tentX0 + (tentX1 - tentX0) * 0.72, tentTop + 4, 19);
+    // A few classmates cheering in front of the tent.
+    if (crowdArt.length > 0) {
+        const cheer = wide ? 4 : 3;
+        for (let k = 0; k < cheer; k += 1) {
+            const x = tentX0 + 22 + ((tentX1 - tentX0 - 44) * k) / (cheer - 1);
+            // Feet low enough that their heads stay under the banner.
+            crowdChibi(ctx, crowdArt[(k + 3) % crowdArt.length]!, x, horizon + 48 + (k % 2) * 3, 38, (k % 2 === 0 ? -1 : 1) * 0.06, k % 2 === 1);
+        }
+    }
 
     // Flag strings from a pole in the middle down to either edge.
     ctx.fillStyle = '#9aa0aa';
@@ -3214,6 +3235,17 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         tugRope(ctx, x0, x1, ropeLevel);
         teamPole(ctx, x0, floor, '#d9443f', race.start, -1);
         teamPole(ctx, x1, floor, '#0a6aa3', race.finish, 1);
+        // A team on each end of the rope, leaning back to pull, clear of the banners and of her.
+        if (crowdArt.length > 0) {
+            const team = wide ? 4 : 3;
+            for (let k = 0; k < team; k += 1) {
+                const left = x0 + 92 + k * 30;
+                const right = x1 - 92 - k * 30;
+                const feet = floor - 2 + (k % 2) * 2;
+                if (Math.abs(left - herX) > 50) crowdChibi(ctx, crowdArt[k % crowdArt.length]!, left, feet, 44, -0.22, true);
+                if (Math.abs(right - herX) > 50) crowdChibi(ctx, crowdArt[(k + 1) % crowdArt.length]!, right, feet, 44, 0.22);
+            }
+        }
     }
 
     // Chickens loose on the field, kept clear of her.

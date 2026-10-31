@@ -23,10 +23,18 @@ are Still in Love's chibi, smiling, worried and teeth gritted, from UmaViewer
 lace over the club's place. Without them it draws her eyes instead.
 
 `mambo-crowd/` holds small chibis of other Umamusume (any `.png`, in file
-name order) who watch from the back of the field in the Mambo scene, in
-turn with trainers drawn in suits. Transparent pictures standing upright
-work best; they are scaled to about 40px tall. Empty or missing, the
-trainers watch alone.
+name order) for the Mambo scene: a team on each end of the tug-of-war
+rope, leaning back to pull; a few cheering in front of her tent; and the
+rest watching from the back of the field in turn with trainers drawn in
+suits. Transparent pictures standing upright work best; they are scaled
+to about 40px tall. Empty or missing, the trainers watch alone.
+
+UmaViewer screenshots are full-window and mostly empty (a few MB each).
+`scripts/shrink_chibis.py` crops each to its character and scales it down
+(about 140 KB at the default 440px; use `--height 220` for crowd chibis):
+
+    pip install pillow
+    python scripts/shrink_chibis.py <screenshots folder> <output folder>
 
 Mambo, Nice Nature and Dream Journey take their own pictures the same way
 as Still in Love: `mambo-calm.png`, `mambo-uneasy.png`, `mambo-yandere.png`

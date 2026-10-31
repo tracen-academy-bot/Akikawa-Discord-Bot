@@ -97,6 +97,15 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   in turn with drawn trainers in suits, some cheering, each a little in
   front or behind. It keeps clear of the tent, the team banners and her.
   No pictures yet, so trainers watch alone for now.
+- More of them (Fwoxie: "put the umas in more places"): with crowd
+  pictures, a team of three or four on each end of the rope leans back to
+  pull (`crowdChibi` with a lean), and three or four cheer in front of the
+  tent, low enough to keep the banner clear.
+- `scripts/shrink_chibis.py` (Python, Pillow): Fwoxie's UmaViewer
+  screenshots came to 200 MB. It crops each to its character by the alpha
+  channel and scales it to at most 440px (or `--height 220` for crowd
+  chibis): about 140 KB each. Tried on three earlier screenshots: 1.0 MB in,
+  0.4 MB out (0.1 MB at crowd size).
 
 ---
 
