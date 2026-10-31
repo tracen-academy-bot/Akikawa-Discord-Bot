@@ -2546,21 +2546,23 @@ function crowdChibi(ctx: SKRSContext2D, art: Image, x: number, feet: number, h: 
 /**
  * Classmates and trainers watching from the back of the field, between x0
  * and x1 with their feet at `base`: the pictures in `mambo-crowd/` (small
- * chibis of other Umamusume) in turn with drawn trainers, every `gap`,
- * skipping `gaps`. Without pictures, trainers alone.
+ * chibis of other Umamusume), every third a drawn trainer, every `gap`,
+ * skipping `gaps`, scaled by `size`. `seed` and `offset` vary a second row
+ * so it is not a copy of the first. Without pictures, trainers alone.
  */
-function crowd(ctx: SKRSContext2D, x0: number, x1: number, base: number, gap: number, gaps: [number, number][], chibis: Image[]) {
-    const rand = seeded(907);
+function crowd(ctx: SKRSContext2D, x0: number, x1: number, base: number, gap: number, gaps: [number, number][], chibis: Image[], size = 1, seed = 907, offset = 0) {
+    const rand = seeded(seed);
     const ties = ['#c0392b', '#2d6cdf', '#3a8f5a', '#8e44ad', '#d4a017'];
-    let chibi = 0;
+    let chibi = offset;
     let k = 0;
     for (let x = x0; x < x1; x += gap * (0.8 + rand() * 0.4)) {
         if (gaps.some(([a, b]) => x > a && x < b)) continue;
-        const useChibi = chibis.length > 0 && k % 2 === 0;
+        // Mostly classmates; every third a trainer.
+        const useChibi = chibis.length > 0 && k % 3 !== 2;
         // A little in front or behind, a little bigger or smaller, so it is not a line-up.
         const depth = rand() * 2 - 1;
         const feet = base + depth * 5;
-        const scale = 1 + depth * 0.1;
+        const scale = (1 + depth * 0.1) * size;
         if (useChibi) {
             const art = chibis[chibi % chibis.length]!;
             chibi += 1;
@@ -3166,7 +3168,7 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     const horizon = Math.round(hero * 0.56);
     const wide = w > 1200;
     // Today's classmates: a different draw from the pictures each day.
-    crowdArt = dailyPick(crowdArt, 28);
+    crowdArt = dailyPick(crowdArt, 80);
 
     // Sky, greying as she turns.
     const sky = ctx.createLinearGradient(0, 0, 0, horizon);
@@ -3215,7 +3217,7 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     sittingCat(ctx, tentX0 + (tentX1 - tentX0) * 0.72, tentTop + 4, 19);
     // A few classmates cheering in front of the tent.
     if (crowdArt.length > 0) {
-        const cheer = wide ? 4 : 3;
+        const cheer = wide ? 6 : 4;
         for (let k = 0; k < cheer; k += 1) {
             const x = tentX0 + 22 + ((tentX1 - tentX0 - 44) * k) / (cheer - 1);
             // Feet low enough that their heads stay under the banner.
@@ -3237,7 +3239,10 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     let herX = w * 0.5;
     if (race) herX = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
     // Classmates and trainers along the back of the field, clear of the tent and of her.
-    crowd(ctx, x0 + 95, x1 - 95, horizon + 40, wide ? 74 : 66, [[tentX0 - 20, tentX1 + 20], [herX - 70, herX + 70]], crowdArt);
+    const clear: [number, number][] = [[tentX0 - 20, tentX1 + 20], [herX - 70, herX + 70]];
+    // A row further back, smaller and tighter, then the main row in front.
+    crowd(ctx, x0 + 80, x1 - 80, horizon + 30, wide ? 30 : 28, [[tentX0 - 10, tentX1 + 10], [herX - 50, herX + 50]], crowdArt, 0.78, 311, 37);
+    crowd(ctx, x0 + 95, x1 - 95, horizon + 42, wide ? 40 : 38, clear, crowdArt);
     if (race) {
         // Chalk ticks every tenth, under the rope.
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
@@ -3254,10 +3259,10 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         teamPole(ctx, x1, floor, '#0a6aa3', race.finish, 1);
         // A team on each end of the rope, leaning back to pull, clear of the banners and of her.
         if (crowdArt.length > 0) {
-            const team = wide ? 4 : 3;
+            const team = wide ? 6 : 4;
             for (let k = 0; k < team; k += 1) {
-                const left = x0 + 92 + k * 30;
-                const right = x1 - 92 - k * 30;
+                const left = x0 + 92 + k * 26;
+                const right = x1 - 92 - k * 26;
                 const feet = floor - 2 + (k % 2) * 2;
                 if (Math.abs(left - herX) > 50) crowdChibi(ctx, crowdArt[k % crowdArt.length]!, left, feet, 44, -0.22, true);
                 if (Math.abs(right - herX) > 50) crowdChibi(ctx, crowdArt[(k + 1) % crowdArt.length]!, right, feet, 44, 0.22);

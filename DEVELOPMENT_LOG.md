@@ -119,6 +119,10 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   `assets/scenes/mambo-crowd/` as `001.png` to `163.png`. `dailyPick`
   shuffles them by the UTC day, so each day's report draws a different 28
   and the same report all day.
+- "More ppl": two crowd rows (a back row at 78% size, tighter), two
+  classmates to each trainer, six per tug-of-war team and six cheering at
+  the tent in the wide image (four in tall), and 80 drawn a day. About 75
+  umas in the wide band.
 
 ---
 

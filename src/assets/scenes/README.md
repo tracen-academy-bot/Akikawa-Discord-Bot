@@ -23,7 +23,7 @@ are Still in Love's chibi, smiling, worried and teeth gritted, from UmaViewer
 lace over the club's place. Without them it draws her eyes instead.
 
 `mambo-crowd/` holds small chibis of other Umamusume (any `.png`; each day's
-report draws a different shuffle of up to 28 of them) for the Mambo scene: a team on each end of the tug-of-war
+report draws a different shuffle of up to 80 of them) for the Mambo scene: a team on each end of the tug-of-war
 rope, leaning back to pull; a few cheering in front of her tent; and the
 rest watching from the back of the field in turn with trainers drawn in
 suits. Transparent pictures standing upright work best; they are scaled
