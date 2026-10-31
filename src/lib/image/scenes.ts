@@ -3115,19 +3115,60 @@ function ribbonBow(ctx: SKRSContext2D, x: number, y: number, s: number) {
     ctx.fill();
 }
 
-/** A pom-pom: a burst of strands in `colour`, for when there is no picture of her. */
+/**
+ * A cheerleading pom-pom, radius `r`, in `colour`: a few hundred thin
+ * glossy strips fanning out from its handle at the centre, the inner ones
+ * in shadow and the outer ones lit, each strip curling a little and
+ * catching a glint of light, as the real vinyl ones do. `light` is the lit
+ * tint.
+ */
 function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, light: string, seed: number) {
     const rand = seeded(seed);
+    const dark = mix(colour, '#000000', 0.45);
+    // A soft shadowed core so the gaps between strips read as depth.
+    const core = ctx.createRadialGradient(x, y, 0, x, y, r * 0.95);
+    core.addColorStop(0, rgba(dark, 0.95));
+    core.addColorStop(1, rgba(dark, 0));
+    ctx.fillStyle = core;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.95, 0, Math.PI * 2);
+    ctx.fill();
     ctx.lineCap = 'round';
-    for (let i = 0; i < 46; i += 1) {
-        const a = rand() * Math.PI * 2;
-        const len = r * (0.5 + rand() * 0.55);
-        ctx.strokeStyle = rand() < 0.35 ? light : colour;
-        ctx.lineWidth = 1.6;
+    const strips = Math.round(180 + r * 9);
+    // Back to front: short shadowed strips first, long lit ones over them.
+    const order = Array.from({ length: strips }, (_, i) => ({ i, depth: rand() }));
+    order.sort((p, q) => p.depth - q.depth);
+    for (const { depth } of order) {
+        const angle = rand() * Math.PI * 2;
+        const len = r * (0.7 + 0.3 * depth) * (0.9 + rand() * 0.2);
+        const curl = (rand() - 0.5) * 1.6;
+        const ex = x + Math.cos(angle) * len;
+        const ey = y + Math.sin(angle) * len;
+        const cx = x + Math.cos(angle + curl * 0.5) * len * 0.6;
+        const cy = y + Math.sin(angle + curl * 0.5) * len * 0.6;
+        // Lit from the upper left: strips pointing that way are brighter.
+        const facing = (Math.cos(angle + Math.PI * 0.75) + 1) / 2;
+        const tone = mix(mix(dark, colour, Math.min(1, depth * 1.4)), light, Math.max(0, depth - 0.45) * facing * 1.4);
+        const g = ctx.createLinearGradient(x, y, ex, ey);
+        g.addColorStop(0, dark);
+        g.addColorStop(0.45, tone);
+        g.addColorStop(1, mix(tone, '#ffffff', 0.18 * facing));
+        ctx.strokeStyle = g;
+        ctx.lineWidth = Math.max(1.4, r * 0.1) * (0.7 + rand() * 0.6);
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+        ctx.quadraticCurveTo(cx, cy, ex, ey);
         ctx.stroke();
+        // A glint near the tip of the front strips.
+        if (depth > 0.7 && rand() < 0.35) {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + facing * 0.45})`;
+            ctx.lineWidth = Math.max(0.6, r * 0.03);
+            const t0 = 0.6 + rand() * 0.2;
+            ctx.beginPath();
+            ctx.moveTo(x + (ex - x) * t0, y + (ey - y) * t0);
+            ctx.lineTo(x + (ex - x) * (t0 + 0.15), y + (ey - y) * (t0 + 0.15));
+            ctx.stroke();
+        }
     }
     ctx.lineCap = 'butt';
 }

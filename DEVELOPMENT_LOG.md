@@ -141,6 +141,12 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   the same pose and crop as `mambo.png`, which stays as the fallback.
   Her hands are up behind her head, so the pom-poms (blue left, coral
   right) are drawn there, at either side of her head, over the picture.
+- Better pom-poms (Fwoxie: "like real ones"). Openclipart has none on
+  their own, only on cheerleaders, and the best of those (330069, cut out
+  and recoloured) was a flat cartoon shape. `pomPom` is redrawn instead:
+  a few hundred wide, curling, glossy strips fanning from the handle, back
+  to front, shadowed at the core and lit from the upper left, with glints
+  near the tips, like the real vinyl ones.
 
 ---
 
