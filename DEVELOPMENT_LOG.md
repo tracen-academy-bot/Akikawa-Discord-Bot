@@ -153,6 +153,13 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   each side) and fanning to either side, longest along the throw, curling
   back into it; no core shading. Then ("away from her hand", "too high") thrown
   sideways at hand height instead of up, and a little smaller.
+  Still "terrible": soft outline-free strands clash with the cel-shaded
+  chibis. `pomPom` now draws them in the chibi style: a fringed silhouette
+  with rounded strand tips and a dark outline, a flat base, a lighter lobe
+  to the upper left, a few strand lines and a small shine, stretched along
+  the shake. Colours deepened ("bad color"): blue `#1478c4` / `#4fb3f2`,
+  coral `#d8433f` / `#ff8a78`. A game pom-pom from UmaViewer (Nice
+  Nature's or King Halo's cheer outfit) would match best, if supplied.
 - A school sports day (*undōkai*): blue sky with the sun and clouds, two
   strings of little flags hung from a pole in the middle, trees and the
   school at the horizon, children in red and white caps along the far

@@ -3116,56 +3116,82 @@ function ribbonBow(ctx: SKRSContext2D, x: number, y: number, s: number) {
 }
 
 /**
- * A cheerleading pom-pom mid-shake, `r` across its body, in `colour`: a few
- * hundred glossy strips flung out from the handle at (x, y), streaming
- * towards `fly` (radians; 0 is right, -π/2 straight up) and fanning to
- * either side, longest along the throw, curling as they go, lit from the
- * upper left with glints near the tips. No ball and no dark core: the
- * shape is the motion. `light` is the lit tint.
+ * A cheerleading pom-pom drawn like the chibis: cel-shaded with a dark
+ * outline. A fringed silhouette (many pointed strand tips round the edge),
+ * centred `r` from the hand at (x, y) towards `fly` and stretched along it
+ * as it shakes; a flat base `colour`, a lighter `light` lobe towards the
+ * upper left, and a few dark strand lines fanning from the hand.
  */
 function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, light: string, seed: number, fly = -Math.PI / 2) {
     const rand = seeded(seed);
-    const base = mix(colour, '#000000', 0.18);
-    ctx.lineCap = 'round';
-    const strips = Math.round(160 + r * 8);
-    const order = Array.from({ length: strips }, () => ({ depth: rand() }));
-    order.sort((p, q) => p.depth - q.depth);
-    for (const { depth } of order) {
-        // Spread about the throw, most near it: a roughly normal fan.
-        const off = (rand() + rand() + rand() - 1.5) * 1.5;
-        const angle = fly + off;
-        // Longest straight along the throw, shorter out at the sides.
-        const len = r * (0.6 + 0.9 * Math.cos(off * 0.8) ** 2) * (0.8 + rand() * 0.35) * (0.85 + depth * 0.25);
-        // Strips curl back towards the throw as they stream out.
-        const curl = -Math.sign(off) * (0.15 + rand() * 0.35);
-        const cx = x + Math.cos(angle) * len * 0.5;
-        const cy = y + Math.sin(angle) * len * 0.5;
-        const ex = x + Math.cos(angle + curl) * len;
-        const ey = y + Math.sin(angle + curl) * len;
-        // Lit from the upper left: strips facing that way are brighter.
-        const facing = (Math.cos(angle + curl + Math.PI * 0.75) + 1) / 2;
-        const tone = mix(mix(base, colour, 0.5 + depth * 0.5), light, Math.max(0, depth - 0.4) * facing * 1.3);
-        const g = ctx.createLinearGradient(x, y, ex, ey);
-        g.addColorStop(0, base);
-        g.addColorStop(0.4, tone);
-        g.addColorStop(1, mix(tone, '#ffffff', 0.2 * facing));
-        ctx.strokeStyle = g;
-        ctx.lineWidth = Math.max(1.3, r * 0.09) * (0.6 + rand() * 0.6) * (1 - 0.4 * (Math.abs(off) / 2.2));
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.quadraticCurveTo(cx, cy, ex, ey);
-        ctx.stroke();
-        if (depth > 0.65 && rand() < 0.3) {
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + facing * 0.45})`;
-            ctx.lineWidth = Math.max(0.6, r * 0.03);
-            const t0 = 0.6 + rand() * 0.2;
-            ctx.beginPath();
-            ctx.moveTo(x + (ex - x) * t0, y + (ey - y) * t0);
-            ctx.lineTo(x + (ex - x) * (t0 + 0.14), y + (ey - y) * (t0 + 0.14));
-            ctx.stroke();
+    const cx = x + Math.cos(fly) * r * 0.55;
+    const cy = y + Math.sin(fly) * r * 0.55;
+    const tips = 30;
+    // The fringe: alternating strand tips and notches, stretched along the throw.
+    const outline = (scale: number) => {
+        const pts: [number, number][] = [];
+        for (let i = 0; i < tips * 2; i += 1) {
+            const a = (i / (tips * 2)) * Math.PI * 2;
+            const along = Math.cos(a - fly);
+            const stretch = 1 + 0.3 * along;
+            const rr = r * scale * stretch * (i % 2 === 0 ? 1 + rand() * 0.1 : 0.84 + rand() * 0.05);
+            pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]);
         }
+        return pts;
+    };
+    // Soft strand tips: curves through the notches, bulging out to each tip.
+    const path = (pts: [number, number][]) => {
+        const n = pts.length;
+        const mid = (i: number): [number, number] => {
+            const p = pts[i % n]!;
+            const q = pts[(i + 1) % n]!;
+            return [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+        };
+        ctx.beginPath();
+        const start = mid(n - 1);
+        ctx.moveTo(start[0], start[1]);
+        for (let i = 0; i < n; i += 1) {
+            const m = mid(i);
+            ctx.quadraticCurveTo(pts[i]![0], pts[i]![1], m[0], m[1]);
+        }
+        ctx.closePath();
+    };
+    const body = outline(1);
+    // Outline first, a little fatter, then the fill over it.
+    ctx.lineJoin = 'round';
+    path(body);
+    ctx.strokeStyle = '#2a1e22';
+    ctx.lineWidth = Math.max(1.6, r * 0.12);
+    ctx.stroke();
+    ctx.fillStyle = colour;
+    ctx.fill();
+    // The lit lobe, offset towards the upper left and clipped to the body.
+    ctx.save();
+    path(body);
+    ctx.clip();
+    const lit = outline(0.72).map(([px, py]) => [px - r * 0.18, py - r * 0.2] as [number, number]);
+    path(lit);
+    ctx.fillStyle = light;
+    ctx.fill();
+    // Strand lines from the hand out into the fringe.
+    ctx.strokeStyle = mix(colour, '#000000', 0.22);
+    ctx.lineWidth = Math.max(0.7, r * 0.05);
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 9; i += 1) {
+        const a = fly + (i / 8 - 0.5) * 2.4 + (rand() - 0.5) * 0.15;
+        const len = r * (0.9 + rand() * 0.35);
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a) * r * 0.25, y + Math.sin(a) * r * 0.25);
+        ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+        ctx.stroke();
     }
     ctx.lineCap = 'butt';
+    ctx.restore();
+    // A small shine.
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.beginPath();
+    ctx.ellipse(cx - r * 0.35, cy - r * 0.38, r * 0.1, r * 0.05, -0.6, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 /** Her newsboy cap, blue-purple with a white brim and a pink ribbon, lying where it fell. */
@@ -3419,15 +3445,15 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         // Her hands are at either side of her head; the pom-poms shake out
         // sideways from them, at hand height.
         const handY = footY - artH * 0.5;
-        const pom = artW * 0.2;
-        pomPom(ctx, herX - artW * 0.44, handY, pom, '#0f8dce', '#bfe4ff', 21, Math.PI + 0.12);
-        pomPom(ctx, herX + artW * 0.44, handY, pom, '#ee5b56', '#ffd0cc', 22, -0.12);
+        const pom = artW * 0.17;
+        pomPom(ctx, herX - artW * 0.44, handY, pom, '#1478c4', '#4fb3f2', 21, Math.PI + 0.12);
+        pomPom(ctx, herX + artW * 0.44, handY, pom, '#d8433f', '#ff8a78', 22, -0.12);
         faceY = footY - artH * 0.62;
         reach = artW / 2 + pom * 0.6 + 10;
     } else {
         const bounce = mood < 0.34 ? 14 : 0;
-        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#0f8dce', '#bfe4ff', 21, -Math.PI * 0.72);
-        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#ee5b56', '#ffd0cc', 22, -Math.PI * 0.28);
+        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#1478c4', '#4fb3f2', 21, -Math.PI * 0.72);
+        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#d8433f', '#ff8a78', 22, -Math.PI * 0.28);
         faceY = floor - 104 - bounce;
     }
 
