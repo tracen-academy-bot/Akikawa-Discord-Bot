@@ -2114,14 +2114,11 @@ function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y:
 
 /**
  * Her words in a speech bubble, as the game shows them: a white rounded
- * bubble with a tail pointing at her (to `tailX`, `tailY`), unless
- * `withTail` is false. Its edge and text turn red as she turns.
+ * bubble beside her, no tail. Its edge and text turn red as she turns.
  */
-function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, tailX: number, tailY: number, mood: number, withTail = true) {
+function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, mood: number) {
     const w = bubbleWidth(ctx, text);
     const pad = 14;
-    // The tail leaves from whichever lower corner is nearer her.
-    const tail = tailX < x + w / 2 ? 18 : w - 36;
     const h = 36;
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
@@ -2131,15 +2128,6 @@ function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, ta
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 16);
     ctx.fill();
-    // The tail, from the bubble's lower left towards her.
-    if (withTail) {
-        ctx.beginPath();
-        ctx.moveTo(x + tail, y + h - 2);
-        ctx.lineTo(tailX, tailY);
-        ctx.lineTo(x + tail + 18, y + h - 2);
-        ctx.closePath();
-        ctx.fill();
-    }
     ctx.restore();
     ctx.strokeStyle = mix('#d8b9c4', '#c0101e', mood);
     ctx.lineWidth = 2;
@@ -2390,7 +2378,7 @@ function drawStillInLove(
     // Her bubble to her right, or her left when it would run off the edge.
     const bw = bubbleWidth(ctx, line);
     const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
-    speechBubble(ctx, bubbleX, 18, line, herX + (bubbleX > herX ? 30 : -30), eyeY - 14, mood);
+    speechBubble(ctx, bubbleX, 18, line, mood);
 
     // Bloody handprints on the wall once she has turned.
     if (blood && mood >= 0.4) {
@@ -3118,82 +3106,61 @@ function ribbonBow(ctx: SKRSContext2D, x: number, y: number, s: number) {
 }
 
 /**
- * A cheerleading pom-pom drawn like the chibis: cel-shaded with a dark
- * outline. A fringed silhouette (many pointed strand tips round the edge),
- * centred `r` from the hand at (x, y) towards `fly` and stretched along it
- * as it shakes; a flat base `colour`, a lighter `light` lobe towards the
- * upper left, and a few dark strand lines fanning from the hand.
+ * A cheerleading pom-pom, radius `r`, in `colour`: a few hundred thin
+ * glossy strips fanning out from its handle at the centre, the inner ones
+ * in shadow and the outer ones lit, each strip curling a little and
+ * catching a glint of light, as the real vinyl ones do. `light` is the lit
+ * tint.
  */
-function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, light: string, seed: number, fly = -Math.PI / 2) {
+function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, light: string, seed: number) {
     const rand = seeded(seed);
-    const cx = x + Math.cos(fly) * r * 0.55;
-    const cy = y + Math.sin(fly) * r * 0.55;
-    const tips = 30;
-    // The fringe: alternating strand tips and notches, stretched along the throw.
-    const outline = (scale: number) => {
-        const pts: [number, number][] = [];
-        for (let i = 0; i < tips * 2; i += 1) {
-            const a = (i / (tips * 2)) * Math.PI * 2;
-            const along = Math.cos(a - fly);
-            const stretch = 1 + 0.3 * along;
-            const rr = r * scale * stretch * (i % 2 === 0 ? 1 + rand() * 0.1 : 0.84 + rand() * 0.05);
-            pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]);
-        }
-        return pts;
-    };
-    // Soft strand tips: curves through the notches, bulging out to each tip.
-    const path = (pts: [number, number][]) => {
-        const n = pts.length;
-        const mid = (i: number): [number, number] => {
-            const p = pts[i % n]!;
-            const q = pts[(i + 1) % n]!;
-            return [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
-        };
-        ctx.beginPath();
-        const start = mid(n - 1);
-        ctx.moveTo(start[0], start[1]);
-        for (let i = 0; i < n; i += 1) {
-            const m = mid(i);
-            ctx.quadraticCurveTo(pts[i]![0], pts[i]![1], m[0], m[1]);
-        }
-        ctx.closePath();
-    };
-    const body = outline(1);
-    // Outline first, a little fatter, then the fill over it.
-    ctx.lineJoin = 'round';
-    path(body);
-    ctx.strokeStyle = '#3a2a2e';
-    ctx.lineWidth = Math.max(1.4, r * 0.1);
-    ctx.stroke();
-    ctx.fillStyle = colour;
+    const dark = mix(colour, '#000000', 0.45);
+    // A soft shadowed core so the gaps between strips read as depth.
+    const core = ctx.createRadialGradient(x, y, 0, x, y, r * 0.95);
+    core.addColorStop(0, rgba(dark, 0.95));
+    core.addColorStop(1, rgba(dark, 0));
+    ctx.fillStyle = core;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.95, 0, Math.PI * 2);
     ctx.fill();
-    // The lit lobe, offset towards the upper left and clipped to the body.
-    ctx.save();
-    path(body);
-    ctx.clip();
-    const lit = outline(0.72).map(([px, py]) => [px - r * 0.18, py - r * 0.2] as [number, number]);
-    path(lit);
-    ctx.fillStyle = light;
-    ctx.fill();
-    // Strand lines from the hand out into the fringe.
-    ctx.strokeStyle = mix(colour, '#3a2a40', 0.25);
-    ctx.lineWidth = Math.max(0.7, r * 0.05);
     ctx.lineCap = 'round';
-    for (let i = 0; i < 9; i += 1) {
-        const a = fly + (i / 8 - 0.5) * 2.4 + (rand() - 0.5) * 0.15;
-        const len = r * (0.9 + rand() * 0.35);
+    const strips = Math.round(180 + r * 9);
+    // Back to front: short shadowed strips first, long lit ones over them.
+    const order = Array.from({ length: strips }, (_, i) => ({ i, depth: rand() }));
+    order.sort((p, q) => p.depth - q.depth);
+    for (const { depth } of order) {
+        const angle = rand() * Math.PI * 2;
+        const len = r * (0.7 + 0.3 * depth) * (0.9 + rand() * 0.2);
+        const curl = (rand() - 0.5) * 1.6;
+        const ex = x + Math.cos(angle) * len;
+        const ey = y + Math.sin(angle) * len;
+        const cx = x + Math.cos(angle + curl * 0.5) * len * 0.6;
+        const cy = y + Math.sin(angle + curl * 0.5) * len * 0.6;
+        // Lit from the upper left: strips pointing that way are brighter.
+        const facing = (Math.cos(angle + Math.PI * 0.75) + 1) / 2;
+        const tone = mix(mix(dark, colour, Math.min(1, depth * 1.4)), light, Math.max(0, depth - 0.45) * facing * 1.4);
+        const g = ctx.createLinearGradient(x, y, ex, ey);
+        g.addColorStop(0, dark);
+        g.addColorStop(0.45, tone);
+        g.addColorStop(1, mix(tone, '#ffffff', 0.18 * facing));
+        ctx.strokeStyle = g;
+        ctx.lineWidth = Math.max(1.4, r * 0.1) * (0.7 + rand() * 0.6);
         ctx.beginPath();
-        ctx.moveTo(x + Math.cos(a) * r * 0.25, y + Math.sin(a) * r * 0.25);
-        ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(cx, cy, ex, ey);
         ctx.stroke();
+        // A glint near the tip of the front strips.
+        if (depth > 0.7 && rand() < 0.35) {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + facing * 0.45})`;
+            ctx.lineWidth = Math.max(0.6, r * 0.03);
+            const t0 = 0.6 + rand() * 0.2;
+            ctx.beginPath();
+            ctx.moveTo(x + (ex - x) * t0, y + (ey - y) * t0);
+            ctx.lineTo(x + (ex - x) * (t0 + 0.15), y + (ey - y) * (t0 + 0.15));
+            ctx.stroke();
+        }
     }
     ctx.lineCap = 'butt';
-    ctx.restore();
-    // A small shine.
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.beginPath();
-    ctx.ellipse(cx - r * 0.35, cy - r * 0.38, r * 0.1, r * 0.05, -0.6, 0, Math.PI * 2);
-    ctx.fill();
 }
 
 /** Her newsboy cap, blue-purple with a white brim and a pink ribbon, lying where it fell. */
@@ -3444,19 +3411,16 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         ctx.fill();
         ctx.drawImage(art, herX - artW / 2, footY - artH, artW, artH);
         // Pom-poms in her hands, which are up behind her head on either side.
-        // Her hands are at either side of her head; the pom-poms shake out
-        // sideways from them, at hand height.
-        const handY = footY - artH * 0.5;
-        const pom = artW * 0.17;
-        // A clear sky blue and an orchid purple-pink: bright, not neon.
-        pomPom(ctx, herX - artW * 0.44, handY, pom, '#4f9fe0', '#86c2f0', 21, Math.PI + 0.12);
-        pomPom(ctx, herX + artW * 0.44, handY, pom, '#c86ac8', '#e39ae0', 22, -0.12);
+        const handY = footY - artH * 0.52;
+        const pom = artW * 0.24;
+        pomPom(ctx, herX - artW * 0.46, handY, pom, '#0f8dce', '#bfe4ff', 21);
+        pomPom(ctx, herX + artW * 0.46, handY, pom, '#ee5b56', '#ffd0cc', 22);
         faceY = footY - artH * 0.62;
         reach = artW / 2 + pom * 0.6 + 10;
     } else {
         const bounce = mood < 0.34 ? 14 : 0;
-        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#4f9fe0', '#86c2f0', 21, -Math.PI * 0.72);
-        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#c86ac8', '#e39ae0', 22, -Math.PI * 0.28);
+        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#0f8dce', '#bfe4ff', 21);
+        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#ee5b56', '#ffd0cc', 22);
         faceY = floor - 104 - bounce;
     }
 
@@ -3471,8 +3435,7 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     const line = mood < 0.34 ? 'Mambo~♪ Wasshoi!' : mood < 0.67 ? 'This time for sure!' : 'Wah—!? Not again…';
     const bw = bubbleWidth(ctx, line);
     const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
-    // No tail: she is right beside it, and the long thin tail only added a stray line.
-    speechBubble(ctx, bubbleX, 26, line, herX, faceY, 0, false);
+    speechBubble(ctx, bubbleX, 26, line, 0);
 }
 
 // ─── Nice Nature ──────────────────────────────────────────────────────────────
@@ -3901,7 +3864,7 @@ function drawNature(ctx: SKRSContext2D, w: number, h: number, hero: number, art:
     const line = mood < 0.34 ? 'Huh. Since when are we this good?' : mood < 0.67 ? "Third's not bad… right?" : 'Eat something first. Then we fight.';
     const bw = bubbleWidth(ctx, line);
     const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
-    speechBubble(ctx, bubbleX, Math.max(54, faceY - 40), line, herX + (bubbleX > herX ? 14 : -14), faceY, 0);
+    speechBubble(ctx, bubbleX, Math.max(54, faceY - 40), line, 0);
 }
 
 // ─── Dream Journey ────────────────────────────────────────────────────────────
@@ -4235,5 +4198,5 @@ function drawJourney(ctx: SKRSContext2D, w: number, h: number, hero: number, art
     const line = mood < 0.34 ? 'Thorough preparation. All as planned.' : mood < 0.67 ? "A small detour. I'll amend the itinerary." : 'Leave the rest to me. Personally.';
     const bw = bubbleWidth(ctx, line);
     const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
-    speechBubble(ctx, bubbleX, wide ? 22 : 18, line, herX + (bubbleX > herX ? 12 : -12), faceY, 0);
+    speechBubble(ctx, bubbleX, wide ? 22 : 18, line, 0);
 }

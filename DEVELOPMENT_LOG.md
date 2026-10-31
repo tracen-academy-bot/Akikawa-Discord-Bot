@@ -164,10 +164,12 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   (`#8fbcd9` / `#b4d6ea`) and her ribbon's pink (`#e49aab` / `#f2bcc6`),
   with a small step between base and highlight, and a softer outline. Too
   grey ("make a proper purple/pink… same w blue"): settled between the two,
-  sky blue `#4f9fe0` / `#86c2f0` and orchid `#c86ac8` / `#e39ae0`.
-- Her speech bubble has no tail (Fwoxie: "most useless line ever"); she
-  stands right beside it. `speechBubble` takes `withTail`; the other
-  scenes keep theirs. A game pom-pom from UmaViewer (Nice
+  sky blue `#4f9fe0` / `#86c2f0` and orchid `#c86ac8` / `#e39ae0`. In
+  the end Fwoxie preferred the earlier round, glossy strand pom-poms
+  ("the old circle one is just better"), so `pomPom` and its placement are
+  back to that version (blue `#0f8dce`, coral `#ee5b56`, at her hands).
+- Speech bubbles have no tail in any scene (Fwoxie: "most useless line
+  ever", then "the other themes too"); each speaker stands beside hers. A game pom-pom from UmaViewer (Nice
   Nature's or King Halo's cheer outfit) would match best, if supplied.
 - A school sports day (*undōkai*): blue sky with the sun and clouds, two
   strings of little flags hung from a pole in the middle, trees and the
