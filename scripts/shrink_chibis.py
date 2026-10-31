@@ -9,7 +9,10 @@ in 256 colours: roughly 20 to 50 KB instead of several MB.
 For every ``.png`` in the input folder this:
 
 1. crops to the character, using the alpha channel (pixels with alpha above
-   ``ALPHA_FLOOR`` count as the character, so faint edge noise is ignored);
+   ``ALPHA_FLOOR`` count as the character, so faint edge noise is ignored),
+   or, for a screenshot with no transparency, everything that differs from
+   the background colour in its top-left corner (flagged in the output, as
+   the background stays in the picture);
 2. scales it so its height is at most ``--height`` pixels (never up);
 3. reduces it to ``--colors`` colours (256 by default; anime-style art
    barely changes, and the file shrinks about three to four times);
@@ -29,10 +32,13 @@ import argparse
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 #: Alpha at or below this is treated as empty when finding the character.
 ALPHA_FLOOR = 8
+
+#: How far a pixel may differ from an opaque background and still count as it.
+BACKGROUND_TOLERANCE = 24
 
 #: Default tallest height, in pixels, of a shrunk picture.
 DEFAULT_HEIGHT = 320
@@ -41,7 +47,7 @@ DEFAULT_HEIGHT = 320
 DEFAULT_COLORS = 256
 
 
-def shrink(source: Path, target: Path, max_height: int, colors: int = DEFAULT_COLORS) -> tuple[int, int] | None:
+def shrink(source: Path, target: Path, max_height: int, colors: int = DEFAULT_COLORS) -> tuple[int, int, bool] | None:
     """Crop one screenshot to its character, scale it down and save it.
 
     Args:
@@ -51,13 +57,23 @@ def shrink(source: Path, target: Path, max_height: int, colors: int = DEFAULT_CO
         colors: How many colours to keep (at most 256); 0 keeps full colour.
 
     Returns:
-        The saved picture's (width, height), or None when the screenshot has
-        no visible pixels to crop to.
+        The saved picture's (width, height, opaque), where opaque is True when
+        the screenshot had no transparency and was cropped by its background
+        colour instead; or None when there is nothing visible to crop to.
     """
     with Image.open(source) as image:
         rgba = image.convert("RGBA")
-    # The character's bounds: where alpha is clearly above zero.
-    mask = rgba.getchannel("A").point(lambda a: 255 if a > ALPHA_FLOOR else 0)
+    alpha = rgba.getchannel("A")
+    opaque = alpha.getextrema()[0] == 255
+    if opaque:
+        # No transparency: the character is whatever differs from the
+        # background colour in the top-left corner.
+        background = Image.new("RGB", rgba.size, rgba.getpixel((0, 0))[:3])
+        difference = ImageChops.difference(rgba.convert("RGB"), background).convert("L")
+        mask = difference.point(lambda d: 255 if d > BACKGROUND_TOLERANCE else 0)
+    else:
+        # The character's bounds: where alpha is clearly above zero.
+        mask = alpha.point(lambda a: 255 if a > ALPHA_FLOOR else 0)
     box = mask.getbbox()
     if box is None:
         return None
@@ -69,7 +85,7 @@ def shrink(source: Path, target: Path, max_height: int, colors: int = DEFAULT_CO
         # Fast octree keeps the alpha channel when quantizing RGBA.
         character = character.quantize(colors=min(colors, 256), method=Image.Quantize.FASTOCTREE)
     character.save(target, optimize=True)
-    return character.size
+    return character.size[0], character.size[1], opaque
 
 
 def main() -> int:
@@ -96,7 +112,7 @@ def main() -> int:
         return 1
     args.output.mkdir(parents=True, exist_ok=True)
 
-    before = after = 0
+    before = after = count = opaque_count = 0
     for source in sorted(args.input.glob("*.png")):
         target = args.output / source.name
         size = shrink(source, target, args.height, args.colors)
@@ -105,8 +121,14 @@ def main() -> int:
             continue
         before += source.stat().st_size
         after += target.stat().st_size
-        print(f"{source.name}: {size[0]} x {size[1]}, {target.stat().st_size / 1024:.0f} KB")
-    print(f"\n{before / 1_048_576:.1f} MB in, {after / 1_048_576:.1f} MB out")
+        count += 1
+        opaque_count += size[2]
+        note = "  (no transparency: background kept)" if size[2] else ""
+        print(f"{source.name}: {size[0]} x {size[1]}, {target.stat().st_size / 1024:.0f} KB{note}")
+    average = after / count / 1024 if count else 0
+    print(f"\n{count} pictures: {before / 1_048_576:.1f} MB in, {after / 1_048_576:.1f} MB out, {average:.0f} KB each on average")
+    if opaque_count:
+        print(f"{opaque_count} had no transparency; export with a transparent background for clean cut-outs.")
     return 0
 
 
