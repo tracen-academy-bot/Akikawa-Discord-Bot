@@ -3160,8 +3160,8 @@ function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: str
     // Outline first, a little fatter, then the fill over it.
     ctx.lineJoin = 'round';
     path(body);
-    ctx.strokeStyle = '#2a1e22';
-    ctx.lineWidth = Math.max(1.6, r * 0.12);
+    ctx.strokeStyle = '#3a2a2e';
+    ctx.lineWidth = Math.max(1.4, r * 0.1);
     ctx.stroke();
     ctx.fillStyle = colour;
     ctx.fill();
@@ -3174,7 +3174,7 @@ function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: str
     ctx.fillStyle = light;
     ctx.fill();
     // Strand lines from the hand out into the fringe.
-    ctx.strokeStyle = mix(colour, '#000000', 0.22);
+    ctx.strokeStyle = mix(colour, '#3a2a40', 0.25);
     ctx.lineWidth = Math.max(0.7, r * 0.05);
     ctx.lineCap = 'round';
     for (let i = 0; i < 9; i += 1) {
@@ -3446,14 +3446,15 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         // sideways from them, at hand height.
         const handY = footY - artH * 0.5;
         const pom = artW * 0.17;
-        pomPom(ctx, herX - artW * 0.44, handY, pom, '#1478c4', '#4fb3f2', 21, Math.PI + 0.12);
-        pomPom(ctx, herX + artW * 0.44, handY, pom, '#d8433f', '#ff8a78', 22, -0.12);
+        // Her own soft colours: the coat's pale blue and the ribbon's pink.
+        pomPom(ctx, herX - artW * 0.44, handY, pom, '#8fbcd9', '#b4d6ea', 21, Math.PI + 0.12);
+        pomPom(ctx, herX + artW * 0.44, handY, pom, '#e49aab', '#f2bcc6', 22, -0.12);
         faceY = footY - artH * 0.62;
         reach = artW / 2 + pom * 0.6 + 10;
     } else {
         const bounce = mood < 0.34 ? 14 : 0;
-        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#1478c4', '#4fb3f2', 21, -Math.PI * 0.72);
-        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#d8433f', '#ff8a78', 22, -Math.PI * 0.28);
+        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#8fbcd9', '#b4d6ea', 21, -Math.PI * 0.72);
+        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#e49aab', '#f2bcc6', 22, -Math.PI * 0.28);
         faceY = floor - 104 - bounce;
     }
 

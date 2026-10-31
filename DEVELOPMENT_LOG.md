@@ -158,7 +158,11 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   with rounded strand tips and a dark outline, a flat base, a lighter lobe
   to the upper left, a few strand lines and a small shine, stretched along
   the shake. Colours deepened ("bad color"): blue `#1478c4` / `#4fb3f2`,
-  coral `#d8433f` / `#ff8a78`. A game pom-pom from UmaViewer (Nice
+  coral `#d8433f` / `#ff8a78`. Still clashed ("atrocious… colour change too big?"):
+  her outfit is pastel, about 30% saturation (cap `#9084c0`, coat
+  `#c0d8e4`, ribbon pink). The pom-poms now take her coat's blue
+  (`#8fbcd9` / `#b4d6ea`) and her ribbon's pink (`#e49aab` / `#f2bcc6`),
+  with a small step between base and highlight, and a softer outline. A game pom-pom from UmaViewer (Nice
   Nature's or King Halo's cheer outfit) would match best, if supplied.
 - A school sports day (*undōkai*): blue sky with the sun and clouds, two
   strings of little flags hung from a pole in the middle, trees and the
