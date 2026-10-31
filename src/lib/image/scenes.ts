@@ -37,7 +37,7 @@ import type { Palette } from './theme';
  */
 
 /** The scenes a palette can carry. */
-export type SceneId = 'fireworks' | 'confetti' | 'oguri' | 'stillinlove' | 'mambo';
+export type SceneId = 'fireworks' | 'confetti' | 'oguri' | 'stillinlove' | 'mambo' | 'nature' | 'journey';
 
 /**
  * Where the club stands in its rank band, for a scene that races it along a
@@ -254,6 +254,7 @@ export async function withScene(
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
     else if (scene === 'stillinlove') moonlight = drawStillInLove(ctx, w, h, hero, await stillInLovePose(mood), mood, race, await stillInLoveArt());
     else if (scene === 'mambo') drawMambo(ctx, w, h, hero, await mamboPose(mood), mood, race);
+    else if (scene === 'nature') drawNature(ctx, w, h, hero, await naturePose(mood), mood, race);
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     // Her moonlight carries on over the cards, faintly.
@@ -3081,4 +3082,433 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     const bw = bubbleWidth(ctx, line);
     const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
     speechBubble(ctx, bubbleX, 26, line, herX + (bubbleX > herX ? 18 : -18), faceY - 8, 0);
+}
+
+// ─── Nice Nature ──────────────────────────────────────────────────────────────
+
+/**
+ * Her picture for `mood`: `nature-calm.png`, `nature-uneasy.png` or
+ * `nature-yandere.png` (the same thirds as her lines), else `nature.png`,
+ * else none (the scene then sets out a bowl of oden in her place).
+ */
+async function naturePose(mood: number): Promise<Image | null> {
+    const pose = mood < 0.34 ? 'calm' : mood < 0.67 ? 'uneasy' : 'yandere';
+    return (await sceneArt(`nature-${pose}`)) ?? sceneArt('nature');
+}
+
+/**
+ * An origami crane, `s` across, facing right, in `colour` with a darker
+ * fold: the paper cranes fans brought the real Nice Nature, folded the way
+ * she folds them.
+ */
+function paperCrane(ctx: SKRSContext2D, x: number, y: number, s: number, colour: string, fold: string, tilt: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    const p = (px: number, py: number): [number, number] => [px * s, py * s];
+    const shape = (colourOf: string, pts: [number, number][]) => {
+        ctx.fillStyle = colourOf;
+        ctx.beginPath();
+        ctx.moveTo(...pts[0]!);
+        for (const pt of pts.slice(1)) ctx.lineTo(...pt);
+        ctx.closePath();
+        ctx.fill();
+    };
+    // Far wing (shaded), tail, neck and head, body, near wing raised.
+    shape(fold, [p(0.02, -0.04), p(0.22, -0.04), p(0.16, -0.66)]);
+    shape(fold, [p(-0.12, 0.02), p(-0.24, 0.06), p(-0.52, -0.42)]);
+    shape(fold, [p(0.14, 0.02), p(0.26, 0.06), p(0.5, -0.46)]);
+    shape(fold, [p(0.5, -0.46), p(0.47, -0.39), p(0.64, -0.38)]);
+    shape(colour, [p(-0.26, 0.02), p(0, -0.12), p(0.28, 0.02), p(0, 0.2)]);
+    shape(colour, [p(-0.08, -0.04), p(0.14, -0.04), p(-0.18, -0.78)]);
+    ctx.restore();
+}
+
+/** A square of origami paper, not folded yet, hanging by a corner. */
+function paperSquare(ctx: SKRSContext2D, x: number, y: number, s: number, colour: string, tilt: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(Math.PI / 4 + tilt);
+    ctx.fillStyle = colour;
+    ctx.globalAlpha = 0.8;
+    ctx.fillRect(0, 0, s * 0.42, s * 0.42);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(s * 0.42, s * 0.42);
+    ctx.stroke();
+    ctx.restore();
+}
+
+/**
+ * The crane garland across the bar: a string from x0 to x1 at `y`, cranes
+ * folded in her green and red up to `upTo` (the club's place), flat paper
+ * squares beyond it.
+ */
+function craneGarland(ctx: SKRSContext2D, x0: number, x1: number, y: number, upTo: number | null) {
+    const at = (x: number) => y + Math.sin(((x - x0) / (x1 - x0)) * Math.PI) * 16;
+    ctx.strokeStyle = 'rgba(230, 215, 190, 0.55)';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    for (let x = x0; x <= x1; x += 6) {
+        if (x === x0) ctx.moveTo(x, at(x));
+        else ctx.lineTo(x, at(x));
+    }
+    ctx.stroke();
+    const rand = seeded(1203);
+    let i = 0;
+    for (let x = x0 + 18; x < x1 - 10; x += 38) {
+        const hang = 8 + (i % 2) * 7;
+        const cy = at(x) + hang;
+        ctx.strokeStyle = 'rgba(230, 215, 190, 0.45)';
+        ctx.beginPath();
+        ctx.moveTo(x, at(x));
+        ctx.lineTo(x, cy);
+        ctx.stroke();
+        const green = i % 2 === 0;
+        if (upTo === null || x < upTo - 4) paperCrane(ctx, x, cy + 20, 32, green ? '#3fbf72' : '#d9433b', green ? '#23874d' : '#9c241f', (rand() - 0.5) * 0.25);
+        else paperSquare(ctx, x, cy, 30, green ? '#3fbf72' : '#d9433b', (rand() - 0.5) * 0.4);
+        i += 1;
+    }
+}
+
+/** A red paper lantern (akachōchin) with "おでん" down it, glowing. */
+function redLantern(ctx: SKRSContext2D, x: number, top: number, h: number) {
+    const w = h * 0.62;
+    const glow = ctx.createRadialGradient(x, top + h / 2, 0, x, top + h / 2, h * 1.3);
+    glow.addColorStop(0, 'rgba(255, 120, 70, 0.35)');
+    glow.addColorStop(1, 'rgba(255, 120, 70, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, top + h / 2, h * 1.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2a1a12';
+    ctx.fillRect(x - w * 0.3, top - 3, w * 0.6, 4);
+    ctx.fillRect(x - w * 0.3, top + h - 1, w * 0.6, 4);
+    const body = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0);
+    body.addColorStop(0, '#9e1d16');
+    body.addColorStop(0.45, '#e8402e');
+    body.addColorStop(1, '#8a1812');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.ellipse(x, top + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(60, 10, 5, 0.35)';
+    ctx.lineWidth = 0.8;
+    for (let k = 1; k < 6; k += 1) {
+        const yy = top + (h * k) / 6;
+        const half = (w / 2) * Math.sqrt(1 - ((yy - top - h / 2) / (h / 2)) ** 2);
+        ctx.beginPath();
+        ctx.moveTo(x - half, yy);
+        ctx.lineTo(x + half, yy);
+        ctx.stroke();
+    }
+    ctx.fillStyle = '#1a0c08';
+    ctx.font = font(`700 ${Math.round(h * 0.2)}px`);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ['お', 'で', 'ん'].forEach((ch, k) => ctx.fillText(ch, x, top + h * (0.27 + k * 0.23)));
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** The oden pot: a square steel pot of daikon, eggs, konnyaku and chikuwa, steaming. */
+function odenPot(ctx: SKRSContext2D, x: number, top: number, w: number) {
+    const h = w * 0.34;
+    ctx.fillStyle = '#9aa1a8';
+    ctx.fillRect(x, top, w, h);
+    ctx.fillStyle = '#5a3a1c';
+    ctx.fillRect(x + 3, top + 3, w - 6, h * 0.55);
+    // Dividers.
+    ctx.fillStyle = '#c4cad0';
+    for (let k = 1; k < 3; k += 1) ctx.fillRect(x + (w * k) / 3 - 1, top + 2, 2, h * 0.6);
+    const rand = seeded(5);
+    for (let k = 0; k < 9; k += 1) {
+        const cx = x + 8 + rand() * (w - 16);
+        const cy = top + 5 + rand() * (h * 0.4);
+        const kind = k % 4;
+        if (kind === 0) {
+            ctx.fillStyle = '#e9d29a';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 6, 3.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (kind === 1) {
+            ctx.fillStyle = '#b8743a';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 4.5, 3.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (kind === 2) {
+            ctx.fillStyle = '#6d6a66';
+            ctx.beginPath();
+            ctx.moveTo(cx - 5, cy + 3);
+            ctx.lineTo(cx + 5, cy + 3);
+            ctx.lineTo(cx, cy - 4);
+            ctx.fill();
+        } else {
+            ctx.fillStyle = '#c58a4a';
+            ctx.fillRect(cx - 7, cy - 2, 14, 4);
+            ctx.fillStyle = '#f2e3c6';
+            ctx.fillRect(cx - 7, cy - 0.6, 14, 1.2);
+        }
+    }
+    steam(ctx, x + w * 0.3, top - 2, 22);
+    steam(ctx, x + w * 0.7, top - 2, 26);
+}
+
+/** A curl of steam rising `h` from (x, y). */
+function steam(ctx: SKRSContext2D, x: number, y: number, h: number) {
+    ctx.strokeStyle = 'rgba(255, 245, 230, 0.35)';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x - 6, y - h * 0.3, x + 6, y - h * 0.6, x, y - h);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+}
+
+/** Wooden menu tags (oshinagaki) hung in a row from x0 to x1 at `top`: the oden of the day. */
+function menuTags(ctx: SKRSContext2D, x0: number, x1: number, top: number) {
+    const items = ['だいこん', 'たまご', 'ちくわ', 'はんぺん', 'つくね', 'ごぼう', 'もち', 'こんぶ'];
+    const tagW = 15;
+    const gap = 22;
+    const count = Math.min(items.length, Math.floor((x1 - x0) / gap));
+    ctx.font = font('700 9px');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let k = 0; k < count; k += 1) {
+        const x = x0 + k * gap;
+        const chars = [...items[k]!];
+        const h = Math.max(46, chars.length * 10 + 10);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(x + 2, top + 2, tagW, h);
+        ctx.fillStyle = '#e9d6b0';
+        ctx.fillRect(x, top, tagW, h);
+        ctx.fillStyle = '#2a1a10';
+        chars.forEach((ch, c) => ctx.fillText(ch, x + tagW / 2, top + 8 + c * 10));
+    }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** A bottle on the shelf: sake or soy, in brown, green or clear glass. */
+function bottle(ctx: SKRSContext2D, x: number, shelf: number, h: number, rand: () => number) {
+    const glass = ['#3d6b3a', '#6b3d1e', '#a7b8b0', '#2f4a63'][Math.floor(rand() * 4)]!;
+    ctx.fillStyle = glass;
+    ctx.fillRect(x - 4, shelf - h * 0.65, 8, h * 0.65);
+    ctx.fillRect(x - 1.8, shelf - h, 3.6, h * 0.38);
+    ctx.fillStyle = '#efe4cc';
+    ctx.fillRect(x - 4, shelf - h * 0.45, 8, h * 0.2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.fillRect(x - 3, shelf - h * 0.62, 1.2, h * 0.5);
+}
+
+/** A bowl of oden on the counter, steaming: what she sets out when you're down. */
+function odenBowl(ctx: SKRSContext2D, x: number, counter: number, s: number) {
+    ctx.fillStyle = '#e9e0cf';
+    ctx.beginPath();
+    ctx.ellipse(x, counter - s * 0.05, s * 0.75, s * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1f3f6e';
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.7, counter - s * 0.45);
+    ctx.quadraticCurveTo(x, counter + s * 0.25, x + s * 0.7, counter - s * 0.45);
+    ctx.fill();
+    ctx.fillStyle = '#e9d29a';
+    ctx.beginPath();
+    ctx.ellipse(x - s * 0.15, counter - s * 0.48, s * 0.3, s * 0.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#b8743a';
+    ctx.beginPath();
+    ctx.ellipse(x + s * 0.28, counter - s * 0.5, s * 0.18, s * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    steam(ctx, x - s * 0.15, counter - s * 0.6, s * 0.9);
+    steam(ctx, x + s * 0.2, counter - s * 0.6, s * 0.7);
+}
+
+/** A newspaper clipping pinned to the wall: a headline bar, a photo, lines of text. */
+function clipping(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, tilt: number, headline: string) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(2, 2, w, h);
+    ctx.fillStyle = '#e8dcc2';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#2a2118';
+    ctx.font = font('700 8px');
+    ctx.fillText(headline, 3, 9);
+    ctx.fillStyle = '#9b8d76';
+    ctx.fillRect(3, 12, w * 0.42, h - 16);
+    ctx.fillStyle = 'rgba(42, 33, 24, 0.5)';
+    for (let yy = 13; yy < h - 4; yy += 3.5) ctx.fillRect(w * 0.48, yy, w * 0.46, 1.2);
+    ctx.fillStyle = '#c0392b';
+    ctx.beginPath();
+    ctx.arc(w / 2, 1, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/** The window onto the street: a winter night, snow falling, heavier as she turns. */
+function snowWindow(ctx: SKRSContext2D, x: number, top: number, w: number, h: number, mood: number) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, top, w, h);
+    ctx.clip();
+    const night = ctx.createLinearGradient(0, top, 0, top + h);
+    night.addColorStop(0, '#16223a');
+    night.addColorStop(1, '#2c3a56');
+    ctx.fillStyle = night;
+    ctx.fillRect(x, top, w, h);
+    // Rooftops across the street, a lit window or two.
+    ctx.fillStyle = '#0e1626';
+    ctx.fillRect(x, top + h * 0.62, w, h);
+    ctx.beginPath();
+    ctx.moveTo(x, top + h * 0.62);
+    ctx.lineTo(x + w * 0.3, top + h * 0.48);
+    ctx.lineTo(x + w * 0.6, top + h * 0.62);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 210, 120, 0.8)';
+    ctx.fillRect(x + w * 0.18, top + h * 0.7, 6, 5);
+    ctx.fillRect(x + w * 0.72, top + h * 0.74, 6, 5);
+    ctx.fillStyle = '#f4f8ff';
+    ctx.fillRect(x, top + h * 0.6, w, 2.5);
+    const rand = seeded(71);
+    for (let k = 0; k < 18 + mood * 30; k += 1) {
+        ctx.globalAlpha = 0.5 + rand() * 0.5;
+        ctx.beginPath();
+        ctx.arc(x + rand() * w, top + rand() * h, 0.8 + rand() * 1.3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    ctx.strokeStyle = '#5a3f28';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x, top, w, h);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, top);
+    ctx.lineTo(x + w / 2, top + h);
+    ctx.stroke();
+}
+
+/**
+ * Nice Nature at her mother's bar after hours, the place where articles
+ * about her hang on the walls. Warm wood and lantern light, a window onto a
+ * snowy December street (the Arima Kinen, where she came third three years
+ * running), clippings on the wall, a red lantern, the oden pot, and the
+ * neighbourhood cat from her phone's wallpaper on a stool.
+ *
+ * The rank band is a garland of paper cranes across the bar, her origami:
+ * folded in her green and red up to the club's place, still flat squares
+ * beyond, between rank tags at either end. She stands behind the counter
+ * under the club's place, the bar's quiet supporting star.
+ *
+ * Her mood stays in character, cynical but kind: "Huh. Since when are we
+ * this good?" when all is well, "Third's not bad… right?" in between, and
+ * at her worst, with the snow heavier, she sets out a bowl: "Eat something
+ * first. Then we fight."
+ */
+function drawNature(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null) {
+    const floor = hero - 10;
+    const wide = w > 1200;
+    const counter = floor - 20;
+
+    // Plank wall, warm under the lamps.
+    const wall = ctx.createLinearGradient(0, 0, 0, hero);
+    wall.addColorStop(0, '#3a2618');
+    wall.addColorStop(1, '#4e3320');
+    ctx.fillStyle = wall;
+    ctx.fillRect(0, 0, w, hero);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    for (let x = 0; x < w; x += 34) ctx.fillRect(x, 0, 1.5, counter);
+    const lamp = ctx.createRadialGradient(w * 0.5, 0, 0, w * 0.5, 0, w * 0.5);
+    lamp.addColorStop(0, 'rgba(255, 200, 120, 0.18)');
+    lamp.addColorStop(1, 'rgba(255, 200, 120, 0)');
+    ctx.fillStyle = lamp;
+    ctx.fillRect(0, 0, w, hero);
+
+    // The window, clippings and a calendar torn down to December.
+    const winX = SIDE + 30;
+    const winW = wide ? 150 : 110;
+    snowWindow(ctx, winX, 14, winW, counter - 30, mood);
+    const clips: [string, number][] = [['3RD!', -0.06], ['ARIMA KINEN', 0.05], ['3RD AGAIN', -0.03], ['BRONZE', 0.07]];
+    const clipX = winX + winW + 26;
+    clips.slice(0, wide ? 4 : 2).forEach(([text, tilt], k) => clipping(ctx, clipX + k * 64, 62 + (k % 2) * 12, 54, 40, tilt, text));
+    if (wide) {
+        const calX = clipX + 4 * 64 + 16;
+        ctx.fillStyle = '#f4ede0';
+        ctx.fillRect(calX, 62, 40, 46);
+        ctx.fillStyle = '#c0392b';
+        ctx.fillRect(calX, 62, 40, 11);
+        ctx.fillStyle = '#fff';
+        ctx.font = font('700 8px');
+        ctx.textAlign = 'center';
+        ctx.fillText('DEC', calX + 20, 70.5);
+        ctx.fillStyle = '#2a2118';
+        ctx.font = font('700 18px');
+        ctx.fillText('25', calX + 20, 98);
+        ctx.textAlign = 'left';
+    }
+
+    // A shelf of bottles and the wooden menu tags (oshinagaki).
+    // Tags first, then the shelf of bottles beside them.
+    const tagsX0 = wide ? w * 0.42 : w * 0.4;
+    const tagsX1 = tagsX0 + (wide ? 180 : 110);
+    menuTags(ctx, tagsX0, tagsX1, 58);
+    const shelfX0 = tagsX1 + 14;
+    const shelfX1 = shelfX0 + (wide ? 150 : 0);
+    if (shelfX1 > shelfX0) {
+        ctx.fillStyle = '#5a3a20';
+        ctx.fillRect(shelfX0 - 6, 104, shelfX1 - shelfX0 + 12, 4);
+        const bottles = seeded(17);
+        for (let x = shelfX0; x < shelfX1; x += 15 + bottles() * 6) bottle(ctx, x, 104, 20 + bottles() * 10, bottles);
+    }
+
+    // The garland of cranes.
+    const x0 = SIDE + 20;
+    const x1 = w - SIDE - 20;
+    let herX = w * 0.55;
+    if (race) herX = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
+    craneGarland(ctx, x0, x1, 10, race ? herX : null);
+    if (race) {
+        rankPlaque(ctx, x0 + 34, counter - 46, race.start);
+        rankPlaque(ctx, x1 - 34, counter - 46, race.finish);
+    }
+
+    // The lantern and the oden pot at the end of the counter.
+    const potX = w - SIDE - (wide ? 210 : 150);
+    redLantern(ctx, potX - 30, 58, 40);
+
+    // Her behind the counter, under the club's place.
+    let faceY = counter - 40;
+    let reach = 40;
+    if (art) {
+        const artH = hero - 30;
+        const artW = (art.width / art.height) * artH;
+        ctx.drawImage(art, herX - artW / 2, counter + 18 - artH, artW, artH);
+        faceY = counter + 18 - artH * 0.62;
+        reach = artW / 2 + 10;
+    }
+
+    // The counter, over her lower half.
+    ctx.fillStyle = '#6b4526';
+    ctx.fillRect(0, counter, w, hero - counter);
+    ctx.fillStyle = '#8a5a32';
+    ctx.fillRect(0, counter, w, 5);
+    ctx.fillStyle = 'rgba(255, 220, 170, 0.15)';
+    ctx.fillRect(0, counter, w, 1.5);
+    odenPot(ctx, potX, counter - (wide ? 120 : 92) * 0.34 + 3, wide ? 120 : 92);
+    // The cat on its stool at the near end.
+    ctx.fillStyle = '#3b2a1e';
+    ctx.fillRect(x1 - 14, counter + 5, 4, hero - counter);
+    sittingCat(ctx, x1 - 12, counter + 2, 16);
+    if (!art || mood >= 0.67) odenBowl(ctx, art ? herX + reach + 22 : herX, counter, 24);
+
+    const line = mood < 0.34 ? 'Huh. Since when are we this good?' : mood < 0.67 ? "Third's not bad… right?" : 'Eat something first. Then we fight.';
+    const bw = bubbleWidth(ctx, line);
+    const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
+    speechBubble(ctx, bubbleX, Math.max(54, faceY - 40), line, herX + (bubbleX > herX ? 14 : -14), faceY, 0);
 }
