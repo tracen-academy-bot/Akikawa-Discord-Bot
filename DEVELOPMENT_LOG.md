@@ -112,6 +112,13 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   and 80px the 2x render draws them at. The same three screenshots: about
   20 KB each at 320px, 8 KB at 160px; side by side with full colour they
   are indistinguishable. `--colors 0` keeps full colour.
+- The crowd itself: Fwoxie's zip had 266 chibis at crowd size (7.3 MB for
+  both sizes; 2.2 MB at 160px). Near-duplicates were removed (each picture
+  scaled to 12 x 24 and compared by mean colour difference; a picture
+  within 0.10 of one already kept is dropped), leaving 163, 1.4 MB, in
+  `assets/scenes/mambo-crowd/` as `001.png` to `163.png`. `dailyPick`
+  shuffles them by the UTC day, so each day's report draws a different 28
+  and the same report all day.
 
 ---
 

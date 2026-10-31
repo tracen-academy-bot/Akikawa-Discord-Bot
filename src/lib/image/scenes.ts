@@ -2511,6 +2511,21 @@ function trainerFigure(ctx: SKRSContext2D, x: number, base: number, h: number, t
 }
 
 /**
+ * Up to `count` of `images` in an order that changes once a day: a
+ * shuffle seeded by the UTC day, so each day's report has a different crowd
+ * and the same report all day. `day` is for tests.
+ */
+function dailyPick<T>(images: T[], count: number, day = Math.floor(Date.now() / 86_400_000)): T[] {
+    const rand = seeded(day * 7919 + images.length);
+    const order = [...images];
+    for (let i = order.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(rand() * (i + 1));
+        [order[i], order[j]] = [order[j]!, order[i]!];
+    }
+    return order.slice(0, count);
+}
+
+/**
  * One crowd chibi standing at (x, feet), `h` tall, leaning by `lean`
  * (radians, about her feet): back for a tug-of-war, upright to watch.
  */
@@ -3150,6 +3165,8 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     const floor = hero - 10;
     const horizon = Math.round(hero * 0.56);
     const wide = w > 1200;
+    // Today's classmates: a different draw from the pictures each day.
+    crowdArt = dailyPick(crowdArt, 28);
 
     // Sky, greying as she turns.
     const sky = ctx.createLinearGradient(0, 0, 0, horizon);
