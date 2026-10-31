@@ -255,6 +255,7 @@ export async function withScene(
     else if (scene === 'stillinlove') moonlight = drawStillInLove(ctx, w, h, hero, await stillInLovePose(mood), mood, race, await stillInLoveArt());
     else if (scene === 'mambo') drawMambo(ctx, w, h, hero, await mamboPose(mood), mood, race);
     else if (scene === 'nature') drawNature(ctx, w, h, hero, await naturePose(mood), mood, race);
+    else if (scene === 'journey') drawJourney(ctx, w, h, hero, await journeyPose(mood), mood, race);
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     // Her moonlight carries on over the cards, faintly.
@@ -3511,4 +3512,338 @@ function drawNature(ctx: SKRSContext2D, w: number, h: number, hero: number, art:
     const bw = bubbleWidth(ctx, line);
     const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
     speechBubble(ctx, bubbleX, Math.max(54, faceY - 40), line, herX + (bubbleX > herX ? 14 : -14), faceY, 0);
+}
+
+// ─── Dream Journey ────────────────────────────────────────────────────────────
+
+/**
+ * Her picture for `mood`: `journey-calm.png`, `journey-uneasy.png` or
+ * `journey-yandere.png` (the same thirds as her lines), else `journey.png`,
+ * else none (the scene then stands her suitcase on the track in her place).
+ */
+async function journeyPose(mood: number): Promise<Image | null> {
+    const pose = mood < 0.34 ? 'calm' : mood < 0.67 ? 'uneasy' : 'yandere';
+    return (await sceneArt(`journey-${pose}`)) ?? sceneArt('journey');
+}
+
+/**
+ * A Japanese station name board (ekimeihyō): white, on two posts, the
+ * station's name large, a line in her pale gold beneath it, and the next
+ * station along it in small type.
+ */
+function stationBoard(ctx: SKRSContext2D, cx: number, ground: number, name: string, next: string, nextSide: -1 | 1) {
+    const bw = 96;
+    const bh = 40;
+    const top = ground - 64;
+    ctx.fillStyle = '#4a4a4a';
+    ctx.fillRect(cx - bw / 2 + 8, top + bh, 3, ground - top - bh);
+    ctx.fillRect(cx + bw / 2 - 11, top + bh, 3, ground - top - bh);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(cx - bw / 2 + 2, top + 2, bw, bh);
+    ctx.fillStyle = '#f7f4ea';
+    ctx.fillRect(cx - bw / 2, top, bw, bh);
+    ctx.fillStyle = '#1e1e1e';
+    ctx.font = font('700 15px');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, cx, top + 14);
+    ctx.fillStyle = '#c9b23a';
+    ctx.fillRect(cx - bw / 2, top + 25, bw, 4);
+    ctx.fillStyle = '#4a4a4a';
+    ctx.font = font('600 8px');
+    ctx.textAlign = nextSide > 0 ? 'right' : 'left';
+    ctx.fillText(nextSide > 0 ? `${next} →` : `← ${next}`, nextSide > 0 ? cx + bw / 2 - 5 : cx - bw / 2 + 5, top + 35);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** Rails from x0 to x1 at `y`, sleepers under them; gold up to `goldTo`, Stay Gold's streak. */
+function railway(ctx: SKRSContext2D, x0: number, x1: number, y: number, goldTo: number | null) {
+    ctx.fillStyle = '#4a4636';
+    ctx.fillRect(x0 - 20, y - 2, x1 - x0 + 40, 12);
+    ctx.fillStyle = '#2a2619';
+    for (let x = x0 - 16; x < x1 + 16; x += 11) ctx.fillRect(x, y - 3, 6, 11);
+    for (const off of [0, 6]) {
+        ctx.fillStyle = '#7d8088';
+        ctx.fillRect(x0 - 20, y + off - 1, x1 - x0 + 40, 2);
+    }
+    if (goldTo === null) return;
+    ctx.save();
+    ctx.shadowColor = 'rgba(255, 210, 90, 0.9)';
+    ctx.shadowBlur = 8;
+    for (const off of [0, 6]) {
+        const g = ctx.createLinearGradient(x0, 0, goldTo, 0);
+        g.addColorStop(0, '#b8902a');
+        g.addColorStop(1, '#ffe27a');
+        ctx.fillStyle = g;
+        ctx.fillRect(x0 - 20, y + off - 1.2, goldTo - x0 + 20, 2.4);
+    }
+    ctx.restore();
+}
+
+/** A three-light railway signal: green, yellow or red lit by her mood. */
+function railSignal(ctx: SKRSContext2D, x: number, ground: number, mood: number) {
+    ctx.fillStyle = '#3a3a3a';
+    ctx.fillRect(x - 1.5, ground - 64, 3, 64);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath();
+    ctx.roundRect(x - 7, ground - 76, 14, 36, 4);
+    ctx.fill();
+    const lit = mood < 0.34 ? 2 : mood < 0.67 ? 1 : 0;
+    const lamps = ['#ff3b30', '#ffcc33', '#3ddc84'];
+    lamps.forEach((colour, k) => {
+        const ly = ground - 70 + k * 11;
+        if (k === lit) {
+            const glow = ctx.createRadialGradient(x, ly, 0, x, ly, 16);
+            glow.addColorStop(0, rgba(colour, 0.7));
+            glow.addColorStop(1, rgba(colour, 0));
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(x, ly, 16, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.fillStyle = k === lit ? colour : '#333';
+        ctx.beginPath();
+        ctx.arc(x, ly, 3.6, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+/** Her travel case, packed (she loves packing): brown leather, gold clasps, stickers. */
+function suitcase(ctx: SKRSContext2D, cx: number, ground: number, s: number) {
+    const w = s;
+    const h = s * 0.72;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(cx, ground, w * 0.55, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#3a2614';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.roundRect(cx - w * 0.16, ground - h - 8, w * 0.32, 10, 4);
+    ctx.stroke();
+    ctx.fillStyle = '#7a4a24';
+    ctx.beginPath();
+    ctx.roundRect(cx - w / 2, ground - h, w, h, 4);
+    ctx.fill();
+    ctx.fillStyle = '#5e3818';
+    ctx.fillRect(cx - w / 2, ground - h * 0.55, w, 3);
+    ctx.fillStyle = '#e6c75a';
+    ctx.fillRect(cx - w * 0.3, ground - h * 0.6, 5, 7);
+    ctx.fillRect(cx + w * 0.3 - 5, ground - h * 0.6, 5, 7);
+    for (const [dx, dy, c] of [[-0.25, -0.3, '#e6e08a'], [0.18, -0.25, '#d9433b'], [0.05, -0.82, '#9fb8e6']] as const) {
+        ctx.fillStyle = c;
+        ctx.beginPath();
+        ctx.ellipse(cx + dx * w, ground + dy * h, w * 0.1, w * 0.07, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+/**
+ * Her bench on the platform: a chess game she is winning, a cup of chamomile
+ * (she makes it for Orfevre), a sketchbook. At her worst a black piece has
+ * taken the white king, laid on its side.
+ */
+function platformBench(ctx: SKRSContext2D, x: number, ground: number, mood: number) {
+    ctx.fillStyle = '#5a4630';
+    ctx.fillRect(x, ground - 20, 96, 5);
+    ctx.fillStyle = '#3a2c1c';
+    ctx.fillRect(x + 6, ground - 15, 4, 15);
+    ctx.fillRect(x + 86, ground - 15, 4, 15);
+    // The board.
+    const bx = x + 12;
+    const by = ground - 26;
+    for (let r = 0; r < 2; r += 1) {
+        for (let c = 0; c < 8; c += 1) {
+            ctx.fillStyle = (r + c) % 2 === 0 ? '#e9dfc4' : '#5a4630';
+            ctx.fillRect(bx + c * 5, by + r * 3, 5, 3);
+        }
+    }
+    const piece = (px: number, colour: string, tall: number) => {
+        ctx.fillStyle = colour;
+        ctx.fillRect(px - 1.5, by - tall, 3, tall);
+        ctx.beginPath();
+        ctx.arc(px, by - tall, 2, 0, Math.PI * 2);
+        ctx.fill();
+    };
+    piece(bx + 6, '#f4efe0', 6);
+    piece(bx + 30, '#1a1a1a', 8);
+    piece(bx + 18, '#1a1a1a', 5);
+    if (mood >= 0.67) {
+        ctx.fillStyle = '#f4efe0';
+        ctx.fillRect(bx + 22, by - 3, 9, 3);
+        ctx.beginPath();
+        ctx.arc(bx + 32, by - 1.5, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+    } else piece(bx + 24, '#f4efe0', 9);
+    // Tea and a sketchbook.
+    ctx.fillStyle = '#f4efe0';
+    ctx.fillRect(x + 62, ground - 30, 9, 10);
+    ctx.fillStyle = '#e6c75a';
+    ctx.fillRect(x + 63, ground - 29, 7, 2);
+    steam(ctx, x + 66, ground - 31, 14);
+    ctx.fillStyle = '#efe6cf';
+    ctx.fillRect(x + 76, ground - 25, 16, 5);
+    ctx.fillStyle = '#8a7a5a';
+    ctx.fillRect(x + 76, ground - 25, 16, 1.2);
+}
+
+/** Telegraph poles along the line, every `gap`, with their wires sagging between. */
+function telegraphPoles(ctx: SKRSContext2D, w: number, ground: number, gap: number, colour: string) {
+    const tops: number[] = [];
+    for (let x = 18; x < w; x += gap) tops.push(x);
+    ctx.fillStyle = colour;
+    for (const x of tops) {
+        ctx.fillRect(x - 1.5, ground - 70, 3, 70);
+        ctx.fillRect(x - 9, ground - 66, 18, 2.5);
+        ctx.fillRect(x - 6, ground - 58, 12, 2);
+    }
+    ctx.strokeStyle = colour;
+    ctx.lineWidth = 0.7;
+    for (const [dy, half] of [[-66, 8], [-58, 5]] as const) {
+        for (const side of [-1, 1]) {
+            for (let k = 0; k < tops.length - 1; k += 1) {
+                const a = tops[k]! + side * half;
+                const b = tops[k + 1]! + side * half;
+                ctx.beginPath();
+                ctx.moveTo(a, ground + dy);
+                ctx.quadraticCurveTo((a + b) / 2, ground + dy + 9, b, ground + dy);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+/** A night train waiting from x0 to x1, its windows lit, a gold line along it. */
+function nightTrain(ctx: SKRSContext2D, x0: number, x1: number, rail: number) {
+    const top = rail - 34;
+    const cars = Math.max(1, Math.round((x1 - x0) / 120));
+    const carW = (x1 - x0) / cars;
+    for (let k = 0; k < cars; k += 1) {
+        const cx = x0 + k * carW;
+        ctx.fillStyle = '#1f2a24';
+        ctx.beginPath();
+        ctx.roundRect(cx + 2, top, carW - 4, 30, 5);
+        ctx.fill();
+        ctx.fillStyle = '#c9a43a';
+        ctx.fillRect(cx + 2, top + 22, carW - 4, 2);
+        for (let wx = cx + 10; wx < cx + carW - 14; wx += 13) {
+            const glow = ctx.createLinearGradient(0, top + 6, 0, top + 16);
+            glow.addColorStop(0, '#ffe7a8');
+            glow.addColorStop(1, '#e8b85a');
+            ctx.fillStyle = glow;
+            ctx.fillRect(wx, top + 6, 8, 10);
+        }
+        ctx.fillStyle = '#111';
+        for (const wx of [cx + 14, cx + carW - 18]) {
+            ctx.beginPath();
+            ctx.arc(wx, rail + 1, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    // Headlamp at the front, towards the end of the line.
+    const lamp = ctx.createRadialGradient(x1 - 4, top + 14, 0, x1 - 4, top + 14, 22);
+    lamp.addColorStop(0, 'rgba(255, 240, 190, 0.8)');
+    lamp.addColorStop(1, 'rgba(255, 240, 190, 0)');
+    ctx.fillStyle = lamp;
+    ctx.beginPath();
+    ctx.arc(x1 - 4, top + 14, 22, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/** Rolling hills at `base`, with a few town lights on them. */
+function hills(ctx: SKRSContext2D, w: number, base: number, height: number, colour: string, seed: number, lights: boolean) {
+    const rand = seeded(seed);
+    ctx.fillStyle = colour;
+    ctx.beginPath();
+    ctx.moveTo(0, base + 20);
+    for (let x = 0; x <= w; x += 20) ctx.lineTo(x, base - height * (0.5 + 0.5 * Math.sin(x / (90 + seed * 7) + seed)) - rand() * 3);
+    ctx.lineTo(w, base + 20);
+    ctx.fill();
+    if (!lights) return;
+    for (let k = 0; k < w / 40; k += 1) {
+        ctx.fillStyle = `rgba(255, 214, 120, ${0.5 + rand() * 0.5})`;
+        ctx.fillRect(rand() * w, base - rand() * height * 0.5, 1.6, 1.6);
+    }
+}
+
+/**
+ * Dream Journey's railway at dusk: "Witness of Journey's End". Rolling hills
+ * with town lights under a sky from her pale gold into night; a line of
+ * track across the band between two station boards, the bottom cutoff and
+ * the next rank up. The rails already travelled are gold, Stay Gold's
+ * streak of gold, up to the club's place, where she stands (or, until her
+ * picture exists, her packed case). Beside her a railway signal; on the
+ * platform her bench with a chess game and chamomile.
+ *
+ * Her mood is the signal and the dusk: green and golden when all is well
+ * ("Thorough preparation. All as planned."), yellow as night comes on ("A
+ * small detour. I'll amend the itinerary."), and red in the dark at her
+ * worst, the white king down on the board and her manners intact: "Leave
+ * the rest to me. Personally."
+ */
+function drawJourney(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null) {
+    const floor = hero - 10;
+    const wide = w > 1200;
+    const railY = floor - 14;
+
+    const sky = ctx.createLinearGradient(0, 0, 0, railY);
+    sky.addColorStop(0, mix('#2e3048', '#0d0d16', mood));
+    sky.addColorStop(0.65, mix('#b88a5a', '#2a2238', mood));
+    sky.addColorStop(1, mix('#efd48a', '#4a2a2a', mood));
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, hero);
+    // Stars as it darkens; the evening star always.
+    const stars = seeded(33);
+    for (let k = 0; k < 20 + mood * 50; k += 1) {
+        ctx.fillStyle = `rgba(255, 248, 220, ${(0.3 + stars() * 0.6) * Math.min(1, 0.3 + mood)})`;
+        ctx.fillRect(stars() * w, stars() * railY * 0.55, 1.4, 1.4);
+    }
+    twinkle(ctx, w * 0.3, 24, 5, '#fff3c4');
+
+    hills(ctx, w, railY - 6, 34, mix('#5a5236', '#1e1c16', mood), 2, false);
+    hills(ctx, w, railY + 2, 22, mix('#3d3824', '#14130e', mood), 5, true);
+
+    const x0 = SIDE + 70;
+    const x1 = w - SIDE - 70;
+    let herX = w * 0.55;
+    if (race) herX = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
+    telegraphPoles(ctx, w, railY + 2, wide ? 150 : 120, mix('#2e2a1c', '#0c0b08', mood));
+    railway(ctx, x0, x1, railY, race ? herX : null);
+    // The night train waiting at journey's end, if she is not there yet.
+    const trainLen = Math.min(wide ? 300 : 180, (x1 - x0) * 0.24);
+    if (herX < x1 - trainLen - 50) nightTrain(ctx, x1 - trainLen, x1 - 6, railY - 1);
+    // The ground in front of the track.
+    ctx.fillStyle = mix('#2b2719', '#121109', mood);
+    ctx.fillRect(0, railY + 10, w, hero - railY - 10);
+
+    if (race) {
+        stationBoard(ctx, x0 - 10, floor, race.start, race.finish, 1);
+        stationBoard(ctx, x1 + 10, floor, race.finish, race.start, -1);
+    }
+    ctx.save();
+    ctx.translate(x0 + 70, floor);
+    ctx.scale(1.5, 1.5);
+    platformBench(ctx, 0, 0, mood);
+    ctx.restore();
+    railSignal(ctx, Math.min(x1 - 70, herX + 46), railY + 4, mood);
+
+    let faceY = railY - 40;
+    let reach = 30;
+    if (art) {
+        const artH = hero - 30;
+        const artW = (art.width / art.height) * artH;
+        const footY = railY + 6;
+        ctx.drawImage(art, herX - artW / 2, footY - artH, artW, artH);
+        faceY = footY - artH * 0.62;
+        reach = artW / 2 + 10;
+    } else {
+        suitcase(ctx, herX, railY + 4, 48);
+        faceY = railY - 34;
+    }
+
+    const line = mood < 0.34 ? 'Thorough preparation. All as planned.' : mood < 0.67 ? "A small detour. I'll amend the itinerary." : 'Leave the rest to me. Personally.';
+    const bw = bubbleWidth(ctx, line);
+    const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
+    speechBubble(ctx, bubbleX, wide ? 22 : 18, line, herX + (bubbleX > herX ? 12 : -12), faceY, 0);
 }

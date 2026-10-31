@@ -47,6 +47,45 @@ Fwoxie asked for "an Akikawa help that lists everything".
 
 ---
 
+## 2026-10-31 — Nice Nature and Dream Journey themes
+
+Fwoxie: "just do some designing for Nice Nature and DoJo too". Each is a
+palette (both pass `scripts/palettes.ts`) and a scene band, built like
+Mambo's: her picture by mood when supplied (`nature-*.png`,
+`journey-*.png`), a stand-in until then. The theme menu is at 21 of 25.
+
+- **Nice Nature** (`drawNature`, palette `nature`): her family bar after
+  hours, where articles about her hang on the walls (canon). Plank walls,
+  a window onto a snowy December street (the Arima Kinen, third three
+  years running), clippings ("3RD!", "ARIMA KINEN", "3RD AGAIN",
+  "BRONZE"), a calendar at Dec 25, wooden menu tags (oshinagaki), a bottle
+  shelf, a red lantern, the oden pot (her usual buy) and the cat from her
+  phone's wallpaper on a stool. The rank band is a garland of origami
+  cranes (her origami; the cranes fans brought the real horse): folded in
+  her green and red up to the club's place, flat paper beyond. She stands
+  behind the counter; until her picture exists a bowl of oden sits there.
+  Lines: "Huh. Since when are we this good?" / "Third's not bad… right?" /
+  "Eat something first. Then we fight." (and at her worst she sets out a
+  bowl). Palette: dark wood cards, her green as the accent, bronze `#e8935a`
+  for third.
+- **Dream Journey** (`drawJourney`, palette `journey`): a railway at dusk,
+  "Witness of Journey's End". Hills with town lights, telegraph poles,
+  Japanese station name boards for the two ranks, the rails travelled
+  gold (Stay Gold's streak of gold) up to the club's place, where she
+  stands (her packed case until her picture exists: she loves packing).
+  A night train waits at journey's end; her bench holds a chess game and
+  chamomile (she makes it for Orfevre). The mood is a railway signal and
+  the light: green at golden dusk ("Thorough preparation. All as
+  planned."), yellow at nightfall ("A small detour. I'll amend the
+  itinerary."), red in the dark with the white king down on the board
+  ("Leave the rest to me. Personally."). Palette: dark olive cards, her
+  pale gold `#e6e08a` as the accent.
+- Mambo's flags: no dorm flags or emblems exist in any source found
+  (Ritto/Miho have none on the wiki or fan sites); the canon sports day is
+  the "Tracen Cheer Squad" story event. Left as is pending Fwoxie's call.
+
+---
+
 ## 2026-10-31 — Mambo scene: the sports day
 
 Fwoxie: "what do we put at the top? go crazy designing, don't ask me".

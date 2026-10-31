@@ -560,7 +560,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#ffb347',
         behind: '#ff6b5e',
         place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#c9adb8'],
-        style: { radius: 12, border: null, glow: false, labels: 'plain', frameStyle: 'solid' },
+        style: { radius: 12, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'journey' },
     },
     mambo: {
         id: 'mambo',
