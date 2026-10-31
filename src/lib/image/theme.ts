@@ -538,7 +538,7 @@ export const PALETTES: Record<string, Palette> = {
         warn: '#995400',
         behind: '#c42f2a',
         place: ['#0a6aa3', '#b0307a', '#7a5600', '#5b4bb5'],
-        style: { radius: 20, border: null, glow: false, labels: 'plain', frameStyle: 'gradient' },
+        style: { radius: 20, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'mambo' },
     },
     stillinlove: {
         id: 'stillinlove',

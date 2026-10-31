@@ -47,6 +47,34 @@ Fwoxie asked for "an Akikawa help that lists everything".
 
 ---
 
+## 2026-10-31 — Mambo scene: the sports day
+
+Fwoxie: "what do we put at the top? go crazy designing, don't ask me".
+`drawMambo` (scene `mambo`, the Mambo palette now uses it):
+
+- A school sports day (*undōkai*): blue sky with the sun and clouds, two
+  strings of little flags hung from a pole in the middle, trees and the
+  school at the horizon, children in red and white caps along the far
+  edge, a packed-dirt field with chalk lane lines.
+- Her cheer tent, striped coral and white, with "TALENT TAKES TIME!" (her
+  tagline) on its banner and an orange cat on the roof (Hachimi, the cat
+  half of the Mambo meme). Chickens loose on the field (the "Mambo oh
+  yeah" clip), one at her feet.
+- The rank band is a tug-of-war: a braided rope between the bottom
+  cutoff's coral team pole and the next rank's blue one, chalk ticks every
+  tenth beneath, her ribbon bow (her emoji) tied on at the club's place
+  (`race.progress`, fan points as everywhere). She stands on it.
+- Her mood (`sceneMood`), as comedy rather than Still in Love's dread:
+  sunny with confetti bursting round her and "Mambo~♪ Wasshoi!"; the sky
+  greying and "This time for sure!"; at her worst her own rain cloud, her
+  newsboy cap on the ground, a spider let down beside her (she hates
+  them) and "Wah—!? Not again…".
+- Her picture: `mambo-calm.png`, `mambo-uneasy.png`, `mambo-yandere.png`
+  (or `mambo.png`) when supplied; until then two pom-poms, coral and
+  blue, bounce on the bow.
+
+---
+
 ## 2026-10-30 — Mambo palette (Matikanetannhauser), colours only
 
 The first light theme meant for a scene: her sports-festival design is

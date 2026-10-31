@@ -37,7 +37,7 @@ import type { Palette } from './theme';
  */
 
 /** The scenes a palette can carry. */
-export type SceneId = 'fireworks' | 'confetti' | 'oguri' | 'stillinlove';
+export type SceneId = 'fireworks' | 'confetti' | 'oguri' | 'stillinlove' | 'mambo';
 
 /**
  * Where the club stands in its rank band, for a scene that races it along a
@@ -253,6 +253,7 @@ export async function withScene(
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
     else if (scene === 'stillinlove') moonlight = drawStillInLove(ctx, w, h, hero, await stillInLovePose(mood), mood, race, await stillInLoveArt());
+    else if (scene === 'mambo') drawMambo(ctx, w, h, hero, await mamboPose(mood), mood, race);
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     // Her moonlight carries on over the cards, faintly.
@@ -2422,4 +2423,662 @@ function drawStillInLove(
         ctx.fillRect(0, 0, w, h);
     }
     return light;
+}
+
+// ─── Mambo (Matikanetannhauser) ──────────────────────────────────────────────
+
+/**
+ * Her picture for `mood`, the same thirds as her lines: `mambo-calm.png`
+ * (cheering), `mambo-uneasy.png` (worried) or `mambo-yandere.png` (her
+ * fumble). Falls back to `mambo.png`, then to none (the scene then draws
+ * her pom-poms).
+ */
+async function mamboPose(mood: number): Promise<Image | null> {
+    const pose = mood < 0.34 ? 'calm' : mood < 0.67 ? 'uneasy' : 'yandere';
+    return (await sceneArt(`mambo-${pose}`)) ?? sceneArt('mambo');
+}
+
+/** Colours of the sports-day flag strings: hers, and the usual festival brights. */
+const MAMBO_FLAGS: readonly [string, string][] = [
+    ['#0f8dce', '#ffffff'],
+    ['#ee5b56', '#ffffff'],
+    ['#ffd23a', '#0f8dce'],
+    ['#f48fb1', '#ffffff'],
+    ['#3fae6a', '#ffd23a'],
+    ['#ffffff', '#ee5b56'],
+];
+
+/**
+ * A string of little flags, as every Japanese school sports day has, sagging
+ * from (x0, y0) to (x1, y1) by `sag`.
+ */
+function flagString(ctx: SKRSContext2D, x0: number, y0: number, x1: number, y1: number, sag: number, seed: number) {
+    const at = (t: number) => ({ x: x0 + (x1 - x0) * t, y: y0 + (y1 - y0) * t + Math.sin(t * Math.PI) * sag });
+    ctx.strokeStyle = 'rgba(60, 60, 70, 0.6)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    for (let i = 0; i <= 40; i += 1) {
+        const p = at(i / 40);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+    const rand = seeded(seed);
+    const count = Math.max(4, Math.round(Math.abs(x1 - x0) / 30));
+    for (let i = 1; i < count; i += 1) {
+        const p = at(i / count);
+        const [a, b] = MAMBO_FLAGS[Math.floor(rand() * MAMBO_FLAGS.length)]!;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((rand() - 0.5) * 0.25);
+        ctx.fillStyle = a;
+        ctx.fillRect(-8, 0, 16, 11);
+        ctx.fillStyle = b;
+        if (rand() < 0.5) ctx.fillRect(-8, 4, 16, 3);
+        else {
+            ctx.beginPath();
+            ctx.arc(0, 5.5, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(-8, 0, 16, 11);
+        ctx.restore();
+    }
+}
+
+/** The sun with soft rays, fading as the sky clouds over. */
+function sun(ctx: SKRSContext2D, x: number, y: number, r: number, alpha: number) {
+    if (alpha <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const glow = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 3.2);
+    glow.addColorStop(0, 'rgba(255, 244, 190, 0.7)');
+    glow.addColorStop(1, 'rgba(255, 244, 190, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 236, 150, 0.55)';
+    for (let i = 0; i < 12; i += 1) {
+        const a = (i / 12) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a - 0.08) * r * 1.25, y + Math.sin(a - 0.08) * r * 1.25);
+        ctx.lineTo(x + Math.cos(a) * r * 2.1, y + Math.sin(a) * r * 2.1);
+        ctx.lineTo(x + Math.cos(a + 0.08) * r * 1.25, y + Math.sin(a + 0.08) * r * 1.25);
+        ctx.fill();
+    }
+    const disc = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 0, x, y, r);
+    disc.addColorStop(0, '#fffbe0');
+    disc.addColorStop(1, '#ffd84d');
+    ctx.fillStyle = disc;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/** The school behind the field: cream walls, a blue roof, rows of windows and a clock. */
+function school(ctx: SKRSContext2D, x0: number, x1: number, base: number, height: number) {
+    const w = x1 - x0;
+    ctx.fillStyle = '#efe7d6';
+    ctx.fillRect(x0, base - height, w, height);
+    ctx.fillStyle = '#e2d7c0';
+    ctx.fillRect(x0, base - height * 0.18, w, height * 0.18);
+    ctx.fillStyle = '#5b7fa8';
+    ctx.fillRect(x0 - 3, base - height - 4, w + 6, 5);
+    // A clock tower in the middle.
+    const tx = x0 + w / 2;
+    const tw = Math.min(34, w * 0.14);
+    ctx.fillStyle = '#efe7d6';
+    ctx.fillRect(tx - tw / 2, base - height - 18, tw, 18);
+    ctx.fillStyle = '#5b7fa8';
+    ctx.beginPath();
+    ctx.moveTo(tx - tw / 2 - 3, base - height - 18);
+    ctx.lineTo(tx, base - height - 30);
+    ctx.lineTo(tx + tw / 2 + 3, base - height - 18);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(tx, base - height - 9, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#3b4a5e';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(tx, base - height - 9);
+    ctx.lineTo(tx, base - height - 13);
+    ctx.moveTo(tx, base - height - 9);
+    ctx.lineTo(tx + 3, base - height - 8);
+    ctx.stroke();
+    // Two rows of windows.
+    ctx.fillStyle = '#9fc3dd';
+    for (const row of [0.22, 0.52]) {
+        for (let x = x0 + 8; x + 12 < x1 - 4; x += 20) {
+            if (Math.abs(x + 6 - tx) < tw / 2 + 4) continue;
+            ctx.fillRect(x, base - height + height * row, 12, height * 0.2);
+        }
+    }
+}
+
+/** A round tree at the edge of the field. */
+function tree(ctx: SKRSContext2D, x: number, base: number, r: number) {
+    ctx.fillStyle = '#7a5a3a';
+    ctx.fillRect(x - 1.5, base - r * 0.8, 3, r * 0.8);
+    for (const [dx, dy, rr, c] of [[-0.45, -1.1, 0.7, '#4f9d5c'], [0.45, -1.15, 0.7, '#4f9d5c'], [0, -1.6, 0.8, '#5fb06a']] as const) {
+        ctx.fillStyle = c;
+        ctx.beginPath();
+        ctx.arc(x + dx * r, base + dy * r, rr * r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+/**
+ * The cheer tent: a roof striped in her coral and white, two poles, shade
+ * beneath, and a long cheer banner with her tagline across the front.
+ */
+function cheerTent(ctx: SKRSContext2D, x0: number, x1: number, top: number, ground: number) {
+    const w = x1 - x0;
+    const roofBottom = top + 16;
+    ctx.fillStyle = 'rgba(40, 30, 20, 0.18)';
+    ctx.fillRect(x0 + 4, roofBottom, w - 8, ground - roofBottom);
+    ctx.fillStyle = '#8a8f99';
+    ctx.fillRect(x0 + 4, roofBottom, 2.5, ground - roofBottom);
+    ctx.fillRect(x1 - 6.5, roofBottom, 2.5, ground - roofBottom);
+    const stripes = Math.max(6, Math.round(w / 22));
+    for (let i = 0; i < stripes; i += 1) {
+        const a = x0 + (w * i) / stripes;
+        const b = x0 + (w * (i + 1)) / stripes;
+        ctx.fillStyle = i % 2 === 0 ? '#ee5b56' : '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(a + (w / 2 - (a - x0)) * 0.12, top);
+        ctx.lineTo(b + (w / 2 - (b - x0)) * 0.12, top);
+        ctx.lineTo(b, roofBottom);
+        ctx.lineTo(a, roofBottom);
+        ctx.fill();
+    }
+    // Scalloped valance.
+    for (let i = 0; i < stripes; i += 1) {
+        ctx.fillStyle = i % 2 === 0 ? '#ee5b56' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x0 + (w * (i + 0.5)) / stripes, roofBottom, w / stripes / 2, 0, Math.PI);
+        ctx.fill();
+    }
+    // The cheer banner: her tagline.
+    const by = roofBottom + 9;
+    const bh = 15;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x0 + 10, by, w - 20, bh);
+    ctx.strokeStyle = '#0f8dce';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x0 + 10, by, w - 20, bh);
+    ctx.fillStyle = '#0a6aa3';
+    ctx.font = font(`700 ${w > 200 ? 11 : 9.5}px`);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('TALENT TAKES TIME!', x0 + w / 2, by + bh / 2 + 0.5);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** An orange cat sitting, tail curled round: Hachimi, watching from the roof. */
+function sittingCat(ctx: SKRSContext2D, x: number, base: number, s: number) {
+    ctx.fillStyle = '#f0a24a';
+    ctx.beginPath();
+    ctx.ellipse(x, base - s * 0.45, s * 0.42, s * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + s * 0.05, base - s * 1.05, s * 0.32, 0, Math.PI * 2);
+    ctx.fill();
+    for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(x + s * 0.05 + side * s * 0.12, base - s * 1.3);
+        ctx.lineTo(x + s * 0.05 + side * s * 0.3, base - s * 1.5);
+        ctx.lineTo(x + s * 0.05 + side * s * 0.3, base - s * 1.18);
+        ctx.fill();
+    }
+    ctx.strokeStyle = '#f0a24a';
+    ctx.lineWidth = s * 0.14;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.35, base - s * 0.15);
+    ctx.quadraticCurveTo(x - s * 0.9, base - s * 0.3, x - s * 0.7, base - s * 0.85);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    ctx.fillStyle = '#c97a2a';
+    ctx.fillRect(x - s * 0.2, base - s * 0.7, s * 0.4, s * 0.06);
+    ctx.fillStyle = '#3a2a1a';
+    ctx.beginPath();
+    ctx.arc(x - s * 0.06, base - s * 1.08, s * 0.04, 0, Math.PI * 2);
+    ctx.arc(x + s * 0.16, base - s * 1.08, s * 0.04, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/** A chicken loose on the field, facing `dir`; pecking puts its head down. */
+function chicken(ctx: SKRSContext2D, x: number, ground: number, s: number, dir: 1 | -1, pecking: boolean) {
+    ctx.save();
+    ctx.translate(x, ground);
+    ctx.scale(dir, 1);
+    ctx.strokeStyle = '#e08a1e';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.1, -s * 0.35);
+    ctx.lineTo(-s * 0.12, 0);
+    ctx.moveTo(s * 0.12, -s * 0.35);
+    ctx.lineTo(s * 0.1, 0);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s * 0.5, s * 0.08, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Tail, body, wing.
+    ctx.fillStyle = '#f4f1ea';
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.4, -s * 0.6);
+    ctx.lineTo(-s * 0.72, -s * 1.0);
+    ctx.lineTo(-s * 0.55, -s * 0.5);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(0, -s * 0.55, s * 0.48, s * 0.3, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(120, 110, 100, 0.5)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.ellipse(-s * 0.05, -s * 0.55, s * 0.25, s * 0.14, -0.2, 0, Math.PI * 2);
+    ctx.stroke();
+    // Head: up, or down to the ground.
+    const hx = pecking ? s * 0.55 : s * 0.38;
+    const hy = pecking ? -s * 0.25 : -s * 0.95;
+    ctx.fillStyle = '#f4f1ea';
+    ctx.beginPath();
+    ctx.arc(hx, hy, s * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#e23a2e';
+    ctx.beginPath();
+    ctx.arc(hx - s * 0.04, hy - s * 0.2, s * 0.08, 0, Math.PI * 2);
+    ctx.arc(hx + s * 0.08, hy - s * 0.18, s * 0.07, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(hx + s * 0.12, hy + s * 0.17, s * 0.04, s * 0.07, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f0a020';
+    ctx.beginPath();
+    ctx.moveTo(hx + s * 0.18, hy - s * 0.04);
+    ctx.lineTo(hx + s * 0.34, hy + s * 0.02);
+    ctx.lineTo(hx + s * 0.18, hy + s * 0.07);
+    ctx.fill();
+    ctx.fillStyle = '#222';
+    ctx.beginPath();
+    ctx.arc(hx + s * 0.07, hy - s * 0.04, s * 0.035, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/** The tug-of-war rope's height at `x`: a gentle sag between its two poles. */
+function ropeY(x: number, x0: number, x1: number, y: number): number {
+    const t = (x - x0) / (x1 - x0);
+    return y + Math.sin(Math.max(0, Math.min(1, t)) * Math.PI) * 5;
+}
+
+/** A thick braided rope from x0 to x1, sagging at `y`. */
+function tugRope(ctx: SKRSContext2D, x0: number, x1: number, y: number) {
+    const steps = Math.ceil((x1 - x0) / 4);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(60, 40, 20, 0.2)';
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i += 1) {
+        const x = x0 + ((x1 - x0) * i) / steps;
+        if (i === 0) ctx.moveTo(x, ropeY(x, x0, x1, y) + 3);
+        else ctx.lineTo(x, ropeY(x, x0, x1, y) + 3);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = '#d6b479';
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i += 1) {
+        const x = x0 + ((x1 - x0) * i) / steps;
+        if (i === 0) ctx.moveTo(x, ropeY(x, x0, x1, y));
+        else ctx.lineTo(x, ropeY(x, x0, x1, y));
+    }
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    // The braid.
+    ctx.strokeStyle = 'rgba(120, 85, 40, 0.55)';
+    ctx.lineWidth = 1.1;
+    for (let x = x0 + 3; x < x1 - 3; x += 6) {
+        const yy = ropeY(x, x0, x1, y);
+        ctx.beginPath();
+        ctx.moveTo(x - 2.4, yy - 3.8);
+        ctx.lineTo(x + 2.4, yy + 3.8);
+        ctx.stroke();
+    }
+}
+
+/** A team pole at the rope's end, with its rank on a banner in the team colour. */
+function teamPole(ctx: SKRSContext2D, x: number, ground: number, colour: string, label: string, side: -1 | 1) {
+    ctx.fillStyle = '#9aa0aa';
+    ctx.fillRect(x - 1.5, ground - 52, 3, 52);
+    ctx.fillStyle = '#ffd23a';
+    ctx.beginPath();
+    ctx.arc(x, ground - 53, 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = font('700 12px');
+    const tw = ctx.measureText(label).width + 16;
+    const bx = side < 0 ? x : x - tw;
+    ctx.fillStyle = colour;
+    ctx.beginPath();
+    ctx.roundRect(bx, ground - 50, tw, 20, 3);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, bx + tw / 2, ground - 39.5);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** Her ribbon bow (her emoji), tied on the rope at the club's place. */
+function ribbonBow(ctx: SKRSContext2D, x: number, y: number, s: number) {
+    ctx.fillStyle = '#e8578f';
+    for (const side of [-1, 1]) {
+        // Tails, then loops.
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + side * s * 0.35, y + s * 0.9);
+        ctx.lineTo(x + side * s * 0.12, y + s * 0.75);
+        ctx.fill();
+    }
+    ctx.fillStyle = '#f48fb1';
+    for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.bezierCurveTo(x + side * s * 0.9, y - s * 0.7, x + side * s * 1.0, y + s * 0.5, x, y);
+        ctx.fill();
+    }
+    ctx.strokeStyle = '#d6467d';
+    ctx.lineWidth = 0.9;
+    for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.bezierCurveTo(x + side * s * 0.9, y - s * 0.7, x + side * s * 1.0, y + s * 0.5, x, y);
+        ctx.stroke();
+    }
+    ctx.fillStyle = '#e8578f';
+    ctx.beginPath();
+    ctx.arc(x, y, s * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.beginPath();
+    ctx.ellipse(x - s * 0.45, y - s * 0.18, s * 0.14, s * 0.07, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/** A pom-pom: a burst of strands in `colour`, for when there is no picture of her. */
+function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, light: string, seed: number) {
+    const rand = seeded(seed);
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 46; i += 1) {
+        const a = rand() * Math.PI * 2;
+        const len = r * (0.5 + rand() * 0.55);
+        ctx.strokeStyle = rand() < 0.35 ? light : colour;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+        ctx.stroke();
+    }
+    ctx.lineCap = 'butt';
+}
+
+/** Her newsboy cap, blue-purple with a white brim and a pink ribbon, lying where it fell. */
+function fallenHat(ctx: SKRSContext2D, x: number, ground: number, s: number) {
+    ctx.save();
+    ctx.translate(x, ground);
+    ctx.rotate(-0.25);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.ellipse(0, 1, s * 1.1, s * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(s * 0.55, -s * 0.05, s * 0.55, s * 0.16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#6a63b8';
+    ctx.beginPath();
+    ctx.ellipse(-s * 0.05, -s * 0.32, s * 0.75, s * 0.42, 0, Math.PI, 0);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.1, -s * 0.72);
+    ctx.lineTo(s * 0.05, -s * 0.5);
+    ctx.lineTo(-s * 0.1, -s * 0.36);
+    ctx.lineTo(-s * 0.25, -s * 0.5);
+    ctx.fill();
+    ctx.fillStyle = '#f48fb1';
+    ctx.fillRect(-s * 0.75, -s * 0.38, s * 1.4, s * 0.12);
+    ctx.restore();
+}
+
+/** A rain cloud of her own, dark and dripping: her bad luck. */
+function rainCloud(ctx: SKRSContext2D, x: number, y: number, s: number) {
+    ctx.fillStyle = '#6b7380';
+    for (const [dx, dy, r] of [[-0.55, 0.05, 0.42], [0, -0.2, 0.55], [0.55, 0.05, 0.42], [0, 0.15, 0.5]] as const) {
+        ctx.beginPath();
+        ctx.arc(x + dx * s, y + dy * s, r * s, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.strokeStyle = 'rgba(120, 170, 230, 0.85)';
+    ctx.lineWidth = 1.3;
+    ctx.lineCap = 'round';
+    const rand = seeded(9);
+    for (let i = 0; i < 9; i += 1) {
+        const rx = x + (rand() - 0.5) * s * 1.6;
+        const ry = y + s * 0.6 + rand() * s * 1.4;
+        ctx.beginPath();
+        ctx.moveTo(rx, ry);
+        ctx.lineTo(rx - 1.5, ry + 6);
+        ctx.stroke();
+    }
+    ctx.lineCap = 'butt';
+}
+
+/** A small spider let down on its thread from `top` to `y`: she hates real spiders. */
+function danglingSpider(ctx: SKRSContext2D, x: number, top: number, y: number) {
+    ctx.strokeStyle = 'rgba(80, 80, 90, 0.7)';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(1.6, 1.6);
+    ctx.translate(-x, -y);
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 0.9;
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 4; i += 1) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + 2);
+            ctx.quadraticCurveTo(x + side * 4, y - 1 + i * 2, x + side * 5.5, y + 2 + i * 2.2);
+            ctx.stroke();
+        }
+    }
+    ctx.fillStyle = '#222';
+    ctx.beginPath();
+    ctx.arc(x, y + 3, 2.6, 0, Math.PI * 2);
+    ctx.arc(x, y, 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
+ * Children watching from the far edge of the field in red and white caps,
+ * as every school sports day has, from x0 to x1 along `y`, skipping `gaps`.
+ */
+function capRow(ctx: SKRSContext2D, x0: number, x1: number, y: number, gaps: [number, number][]) {
+    const rand = seeded(61);
+    let team = 0;
+    for (let x = x0; x < x1; x += 9 + rand() * 2) {
+        if (gaps.some(([a, b]) => x > a && x < b)) continue;
+        if (rand() < 0.12) team = 1 - team;
+        const hy = y - rand() * 1.5;
+        ctx.fillStyle = '#f6f2ea';
+        ctx.fillRect(x - 3, hy + 2, 6, 5);
+        ctx.fillStyle = '#f2cfae';
+        ctx.beginPath();
+        ctx.arc(x, hy, 3.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = team === 0 ? '#e0453f' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x, hy - 0.8, 3.5, Math.PI, 0);
+        ctx.fill();
+        ctx.fillRect(x - 0.5, hy - 1.2, 4.6, 1.2);
+    }
+}
+
+/**
+ * Mambo (Matikanetannhauser) at the school sports day, cheering for the
+ * club. The band: a blue sky with the sun, clouds and strings of little
+ * flags; the school and trees at the horizon; her cheer tent with "Talent
+ * Takes Time" across it and a cat (Hachimi) on the roof; a dirt field with
+ * chalk lines and chickens loose on it.
+ *
+ * The rank band is a tug-of-war: a rope between the bottom cutoff's coral
+ * team pole and the next rank's blue one, her ribbon bow tied on at the
+ * club's place, chalk ticks every tenth beneath, and her standing on it.
+ *
+ * Her mood follows the share behind, as a comedy: sunny with confetti and
+ * "Mambo~♪ Wasshoi!" when all is well; clouding over and "This time for
+ * sure!" in between; at her worst, her own rain cloud, her hat on the
+ * ground, a spider let down beside her, and "Wah—!? Not again…".
+ */
+function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null) {
+    const floor = hero - 10;
+    const horizon = Math.round(hero * 0.56);
+    const wide = w > 1200;
+
+    // Sky, greying as she turns.
+    const sky = ctx.createLinearGradient(0, 0, 0, horizon);
+    sky.addColorStop(0, mix('#4aa8e6', '#7f8fa3', mood * 0.75));
+    sky.addColorStop(1, mix('#c4e9ff', '#d3d9e1', mood * 0.75));
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, horizon + 2);
+    sun(ctx, w * (wide ? 0.82 : 0.8), 30, wide ? 14 : 12, 1 - mood * 1.1);
+    const rand = seeded(415);
+    ctx.save();
+    ctx.filter = mood > 0 ? `grayscale(${Math.min(1, mood * 1.2)}) brightness(${1 - mood * 0.25})` : 'none';
+    const clouds = wide ? 6 : 4;
+    for (let i = 0; i < clouds + Math.round(mood * 3); i += 1) cloud(ctx, w * (0.08 + rand() * 0.84), 16 + rand() * (horizon - 44), 22 + rand() * 14, rand);
+    ctx.restore();
+
+    // The horizon: trees and the school.
+    for (let x = 12; x < w; x += 46 + ((x * 7) % 30)) tree(ctx, x, horizon + 2, 9 + ((x * 13) % 5));
+    school(ctx, w * (wide ? 0.6 : 0.56), w * (wide ? 0.9 : 0.94), horizon + 2, horizon * 0.42);
+
+    // The field: packed dirt with chalk lane lines, a grass edge at the horizon.
+    const dirt = ctx.createLinearGradient(0, horizon, 0, hero);
+    dirt.addColorStop(0, mix('#e6c99a', '#bfa480', mood * 0.6));
+    dirt.addColorStop(1, mix('#d4a86c', '#a88a62', mood * 0.6));
+    ctx.fillStyle = dirt;
+    ctx.fillRect(0, horizon + 2, w, hero - horizon);
+    ctx.fillStyle = '#6fb86e';
+    ctx.fillRect(0, horizon, w, 4);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.lineWidth = 1.6;
+    for (const [lift, curve] of [[0.25, 10], [0.55, 16], [0.85, 22]] as const) {
+        const y = horizon + 4 + (floor - horizon - 4) * lift;
+        ctx.beginPath();
+        ctx.moveTo(-10, y + curve);
+        ctx.quadraticCurveTo(w / 2, y - curve, w + 10, y + curve);
+        ctx.stroke();
+    }
+
+    // Her cheer tent, with Hachimi on the roof.
+    const tentX0 = SIDE + (wide ? 120 : 100);
+    const tentX1 = tentX0 + (wide ? 260 : 180);
+    const tentTop = horizon - 34;
+    // The children along the far edge, then the tent over them.
+    capRow(ctx, 6, w - 6, horizon + 9, [[tentX0 - 6, tentX1 + 6]]);
+    cheerTent(ctx, tentX0, tentX1, tentTop, horizon + 26);
+    sittingCat(ctx, tentX0 + (tentX1 - tentX0) * 0.72, tentTop + 4, 19);
+
+    // Flag strings from a pole in the middle down to either edge.
+    ctx.fillStyle = '#9aa0aa';
+    ctx.fillRect(w / 2 - 1.5, 0, 3, horizon + 4);
+    flagString(ctx, w / 2, 4, -10, 30, 22, 3);
+    flagString(ctx, w / 2, 4, w + 10, 30, 22, 7);
+
+    // The tug-of-war.
+    const ropeLevel = floor - 16;
+    const x0 = SIDE + 26;
+    const x1 = w - SIDE - 26;
+    let herX = w * 0.5;
+    if (race) {
+        const at = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
+        herX = at;
+        // Chalk ticks every tenth, under the rope.
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 1.4;
+        for (let i = 1; i < 10; i += 1) {
+            const x = x0 + ((x1 - x0) * i) / 10;
+            ctx.beginPath();
+            ctx.moveTo(x, floor - 5);
+            ctx.lineTo(x, floor - (i === 5 ? 1 : 3));
+            ctx.stroke();
+        }
+        tugRope(ctx, x0, x1, ropeLevel);
+        teamPole(ctx, x0, floor, '#d9443f', race.start, -1);
+        teamPole(ctx, x1, floor, '#0a6aa3', race.finish, 1);
+    }
+
+    // Chickens loose on the field, kept clear of her.
+    const spots = [w * 0.22, w * 0.4, w * 0.78].filter((x) => Math.abs(x - herX) > 60);
+    spots.forEach((x, i) => chicken(ctx, x, floor - 22 - (i % 2) * 6, 19, i % 2 === 0 ? 1 : -1, i === 1));
+    // One at her feet.
+    if (herX + 60 < x1 - 20) chicken(ctx, herX + 60, floor - 3, 16, -1, false);
+
+    // Confetti bursting round her while all is well.
+    if (mood < 0.34) {
+        const c = seeded(88);
+        for (let i = 0; i < 18; i += 1) {
+            const a = c() * Math.PI * 2;
+            const r = 30 + c() * 50;
+            drawPiece(ctx, herX + Math.cos(a) * r * 1.4, floor - 70 + Math.sin(a) * r * 0.6, 0.3 + c() * 0.3, c);
+        }
+    }
+
+    // Her, on the bow; until her picture exists, her pom-poms.
+    let faceY = floor - 52;
+    let reach = 40;
+    if (race) ribbonBow(ctx, herX, ropeY(herX, x0, x1, ropeLevel), 17);
+    if (art) {
+        const artH = hero - 34;
+        const artW = (art.width / art.height) * artH;
+        const footY = floor - 1;
+        ctx.fillStyle = 'rgba(60, 40, 20, 0.22)';
+        ctx.beginPath();
+        ctx.ellipse(herX, footY, artW * 0.38, 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.drawImage(art, herX - artW / 2, footY - artH, artW, artH);
+        faceY = footY - artH * 0.62;
+        reach = artW / 2 + 10;
+    } else {
+        const bounce = mood < 0.34 ? 10 : 0;
+        pomPom(ctx, herX - 22, floor - 58 - bounce, 19, '#0f8dce', '#bfe4ff', 21);
+        pomPom(ctx, herX + 22, floor - 58 - bounce, 19, '#ee5b56', '#ffd0cc', 22);
+        faceY = floor - 70 - bounce;
+    }
+
+    // At her worst: her own rain cloud, her hat on the ground, a spider beside her.
+    if (mood >= 0.67) {
+        rainCloud(ctx, herX, Math.max(22, faceY - 46), 22);
+        fallenHat(ctx, herX - 48, floor - 2, 17);
+        danglingSpider(ctx, herX + reach + 14, 30, faceY + 10);
+    }
+
+    const line = mood < 0.34 ? 'Mambo~♪ Wasshoi!' : mood < 0.67 ? 'This time for sure!' : 'Wah—!? Not again…';
+    const bw = bubbleWidth(ctx, line);
+    const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
+    speechBubble(ctx, bubbleX, 26, line, herX + (bubbleX > herX ? 18 : -18), faceY - 8, 0);
 }
