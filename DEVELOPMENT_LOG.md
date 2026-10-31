@@ -162,7 +162,9 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   her outfit is pastel, about 30% saturation (cap `#9084c0`, coat
   `#c0d8e4`, ribbon pink). The pom-poms now take her coat's blue
   (`#8fbcd9` / `#b4d6ea`) and her ribbon's pink (`#e49aab` / `#f2bcc6`),
-  with a small step between base and highlight, and a softer outline. A game pom-pom from UmaViewer (Nice
+  with a small step between base and highlight, and a softer outline. Too
+  grey ("make a proper purple/pink… same w blue"): settled between the two,
+  sky blue `#4f9fe0` / `#86c2f0` and orchid `#c86ac8` / `#e39ae0`. A game pom-pom from UmaViewer (Nice
   Nature's or King Halo's cheer outfit) would match best, if supplied.
 - A school sports day (*undōkai*): blue sky with the sun and clouds, two
   strings of little flags hung from a pole in the middle, trees and the

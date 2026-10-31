@@ -3446,15 +3446,15 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         // sideways from them, at hand height.
         const handY = footY - artH * 0.5;
         const pom = artW * 0.17;
-        // Her own soft colours: the coat's pale blue and the ribbon's pink.
-        pomPom(ctx, herX - artW * 0.44, handY, pom, '#8fbcd9', '#b4d6ea', 21, Math.PI + 0.12);
-        pomPom(ctx, herX + artW * 0.44, handY, pom, '#e49aab', '#f2bcc6', 22, -0.12);
+        // A clear sky blue and an orchid purple-pink: bright, not neon.
+        pomPom(ctx, herX - artW * 0.44, handY, pom, '#4f9fe0', '#86c2f0', 21, Math.PI + 0.12);
+        pomPom(ctx, herX + artW * 0.44, handY, pom, '#c86ac8', '#e39ae0', 22, -0.12);
         faceY = footY - artH * 0.62;
         reach = artW / 2 + pom * 0.6 + 10;
     } else {
         const bounce = mood < 0.34 ? 14 : 0;
-        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#8fbcd9', '#b4d6ea', 21, -Math.PI * 0.72);
-        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#e49aab', '#f2bcc6', 22, -Math.PI * 0.28);
+        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#4f9fe0', '#86c2f0', 21, -Math.PI * 0.72);
+        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#c86ac8', '#e39ae0', 22, -Math.PI * 0.28);
         faceY = floor - 104 - bounce;
     }
 
