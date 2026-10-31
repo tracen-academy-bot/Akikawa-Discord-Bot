@@ -21,3 +21,14 @@ forward.
 are Still in Love's chibi, smiling, worried and teeth gritted, from UmaViewer
 (supplied by Fwoxie). The scene picks one by her mood and stands it on the
 lace over the club's place. Without them it draws her eyes instead.
+
+`mambo-crowd/` holds small chibis of other Umamusume (any `.png`, in file
+name order) who watch from the back of the field in the Mambo scene, in
+turn with trainers drawn in suits. Transparent pictures standing upright
+work best; they are scaled to about 40px tall. Empty or missing, the
+trainers watch alone.
+
+Mambo, Nice Nature and Dream Journey take their own pictures the same way
+as Still in Love: `mambo-calm.png`, `mambo-uneasy.png`, `mambo-yandere.png`
+(and `nature-*`, `journey-*`), or one `mambo.png` for every mood.
+

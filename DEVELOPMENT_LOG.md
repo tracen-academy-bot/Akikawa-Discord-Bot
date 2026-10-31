@@ -91,6 +91,12 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   (`pennantString`); the centre pole carries the motto on a banner
   (`mottoBanner`); the Three Goddesses stand in bronze between her tent
   and the school (`threeGoddesses`).
+- Then a crowd at the back of the field (Fwoxie: "put small fellow umas
+  and trainers behind"): `crowd()` places the pictures in
+  `assets/scenes/mambo-crowd/` (chibis of other Umamusume, from Fwoxie)
+  in turn with drawn trainers in suits, some cheering, each a little in
+  front or behind. It keeps clear of the tent, the team banners and her.
+  No pictures yet, so trainers watch alone for now.
 
 ---
 

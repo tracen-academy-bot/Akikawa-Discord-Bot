@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import * as path from 'node:path';
 import { createCanvas, loadImage, type Canvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import { RENDER_SCALE, seeded } from './cards';
@@ -253,7 +253,7 @@ export async function withScene(
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
     else if (scene === 'stillinlove') moonlight = drawStillInLove(ctx, w, h, hero, await stillInLovePose(mood), mood, race, await stillInLoveArt());
-    else if (scene === 'mambo') drawMambo(ctx, w, h, hero, await mamboPose(mood), mood, race);
+    else if (scene === 'mambo') drawMambo(ctx, w, h, hero, await mamboPose(mood), mood, race, await sceneArtFolder('mambo-crowd'));
     else if (scene === 'nature') drawNature(ctx, w, h, hero, await naturePose(mood), mood, race);
     else if (scene === 'journey') drawJourney(ctx, w, h, hero, await journeyPose(mood), mood, race);
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
@@ -2440,6 +2440,111 @@ async function mamboPose(mood: number): Promise<Image | null> {
     return (await sceneArt(`mambo-${pose}`)) ?? sceneArt('mambo');
 }
 
+/** Every picture in a folder under the scene art, by file name; none when it is missing. */
+const folderCache = new Map<string, Image[]>();
+async function sceneArtFolder(name: string): Promise<Image[]> {
+    const cached = folderCache.get(name);
+    if (cached) return cached;
+    const dir = path.join(ART_DIR, name);
+    const images: Image[] = [];
+    if (existsSync(dir)) {
+        for (const file of readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.png')).sort()) {
+            try {
+                images.push(await loadImage(path.join(dir, file)));
+            } catch {
+                // An unreadable picture is left out.
+            }
+        }
+    }
+    folderCache.set(name, images);
+    return images;
+}
+
+/**
+ * A trainer watching, small: dark suit, white shirt, a tie in `tie`, hair
+ * dark or light; `cheer` puts an arm up. Generic, so drawn rather than
+ * pictured.
+ */
+function trainerFigure(ctx: SKRSContext2D, x: number, base: number, h: number, tie: string, light: boolean, cheer: boolean) {
+    const u = h / 10;
+    ctx.fillStyle = 'rgba(60, 40, 20, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(x, base, u * 2.2, u * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Legs, then the jacket.
+    ctx.fillStyle = '#2b2f3a';
+    ctx.fillRect(x - u * 1.1, base - u * 4, u * 0.9, u * 4);
+    ctx.fillRect(x + u * 0.2, base - u * 4, u * 0.9, u * 4);
+    ctx.fillStyle = '#353b4a';
+    ctx.beginPath();
+    ctx.roundRect(x - u * 1.6, base - u * 7.6, u * 3.2, u * 4, u * 0.6);
+    ctx.fill();
+    ctx.fillStyle = '#f4f2ee';
+    ctx.beginPath();
+    ctx.moveTo(x - u * 0.6, base - u * 7.6);
+    ctx.lineTo(x + u * 0.6, base - u * 7.6);
+    ctx.lineTo(x, base - u * 6.2);
+    ctx.fill();
+    ctx.fillStyle = tie;
+    ctx.fillRect(x - u * 0.2, base - u * 7.4, u * 0.4, u * 1.6);
+    // Arms: one up to cheer, or both down.
+    ctx.strokeStyle = '#353b4a';
+    ctx.lineWidth = u * 0.8;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - u * 1.5, base - u * 7);
+    ctx.lineTo(x - u * 1.8, base - u * 4.4);
+    ctx.moveTo(x + u * 1.5, base - u * 7);
+    if (cheer) ctx.lineTo(x + u * 2.4, base - u * 9.6);
+    else ctx.lineTo(x + u * 1.8, base - u * 4.4);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    // Head and hair.
+    ctx.fillStyle = '#f2cfae';
+    ctx.beginPath();
+    ctx.arc(x, base - u * 8.6, u * 1.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = light ? '#b08a5a' : '#2a2420';
+    ctx.beginPath();
+    ctx.arc(x, base - u * 8.9, u * 1.15, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.fill();
+}
+
+/**
+ * Classmates and trainers watching from the back of the field, between x0
+ * and x1 with their feet at `base`: the pictures in `mambo-crowd/` (small
+ * chibis of other Umamusume) in turn with drawn trainers, every `gap`,
+ * skipping `gaps`. Without pictures, trainers alone.
+ */
+function crowd(ctx: SKRSContext2D, x0: number, x1: number, base: number, gap: number, gaps: [number, number][], chibis: Image[]) {
+    const rand = seeded(907);
+    const ties = ['#c0392b', '#2d6cdf', '#3a8f5a', '#8e44ad', '#d4a017'];
+    let chibi = 0;
+    let k = 0;
+    for (let x = x0; x < x1; x += gap * (0.8 + rand() * 0.4)) {
+        if (gaps.some(([a, b]) => x > a && x < b)) continue;
+        const useChibi = chibis.length > 0 && k % 2 === 0;
+        // A little in front or behind, a little bigger or smaller, so it is not a line-up.
+        const depth = rand() * 2 - 1;
+        const feet = base + depth * 5;
+        const scale = 1 + depth * 0.1;
+        if (useChibi) {
+            const art = chibis[chibi % chibis.length]!;
+            chibi += 1;
+            const h = 40 * scale;
+            const w = (art.width / art.height) * h;
+            ctx.fillStyle = 'rgba(60, 40, 20, 0.2)';
+            ctx.beginPath();
+            ctx.ellipse(x, feet, w * 0.35, 2.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.drawImage(art, x - w / 2, feet - h, w, h);
+        } else {
+            trainerFigure(ctx, x, feet, 34 * scale, ties[k % ties.length]!, rand() < 0.4, rand() < 0.45);
+        }
+        k += 1;
+    }
+}
+
 /** Pennant colours: her blue and coral, Tracen white. */
 const PENNANTS: readonly string[] = ['#0f8dce', '#ee5b56', '#f7f4ea'];
 
@@ -3029,7 +3134,7 @@ function capRow(ctx: SKRSContext2D, x0: number, x1: number, y: number, gaps: [nu
  * sure!" in between; at her worst, her own rain cloud, her hat on the
  * ground, a spider let down beside her, and "Wah—!? Not again…".
  */
-function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null) {
+function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null, crowdArt: Image[] = []) {
     const floor = hero - 10;
     const horizon = Math.round(hero * 0.56);
     const wide = w > 1200;
@@ -3092,9 +3197,10 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     const x0 = SIDE + 26;
     const x1 = w - SIDE - 26;
     let herX = w * 0.5;
+    if (race) herX = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
+    // Classmates and trainers along the back of the field, clear of the tent and of her.
+    crowd(ctx, x0 + 95, x1 - 95, horizon + 40, wide ? 74 : 66, [[tentX0 - 20, tentX1 + 20], [herX - 70, herX + 70]], crowdArt);
     if (race) {
-        const at = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
-        herX = at;
         // Chalk ticks every tenth, under the rope.
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.lineWidth = 1.4;
