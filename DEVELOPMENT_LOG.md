@@ -132,6 +132,10 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   rope and bow still mark the club's place. Her picture is drawn nearly
   the band's full height, in front; the stand-in pom-poms are bigger too.
   Without crowd pictures the standing trainers return.
+- Her picture (Fwoxie, 2026-10-31): `mambo.png`, cropped to 184 x 320 and
+  256 colours, used for every mood until `mambo-calm/uneasy/yandere.png`
+  arrive (Fwoxie will do her expressions). Her fallen cap at her worst is
+  only drawn without a picture, since the picture wears it.
 
 ---
 

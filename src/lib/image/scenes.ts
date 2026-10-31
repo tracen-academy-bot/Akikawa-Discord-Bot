@@ -3391,7 +3391,8 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     // At her worst: her own rain cloud, her hat on the ground, a spider beside her.
     if (mood >= 0.67) {
         rainCloud(ctx, herX, Math.max(22, faceY - 46), 22);
-        fallenHat(ctx, herX - 48, floor - 2, 17);
+        // Her cap on the ground, unless her picture is wearing it.
+        if (!art) fallenHat(ctx, herX - 48, floor - 2, 17);
         danglingSpider(ctx, herX + reach + 14, 30, faceY + 10);
     }
 
