@@ -147,14 +147,11 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   a few hundred wide, curling, glossy strips fanning from the handle, back
   to front, shadowed at the core and lit from the upper left, with glints
   near the tips, like the real vinyl ones.
-
----
-
-## 2026-10-31 — Mambo scene: the sports day
-
-Fwoxie: "what do we put at the top? go crazy designing, don't ask me".
-`drawMambo` (scene `mambo`, the Mambo palette now uses it):
-
+- Then in motion (Fwoxie: the ball was "too round", they can fly, "commit
+  to a moving area", no dark middles): each pom-pom is a burst flung from
+  her hand, strips streaming towards a throw direction (up and out on
+  each side) and fanning to either side, longest along the throw, curling
+  back into it; no core shading.
 - A school sports day (*undōkai*): blue sky with the sun and clouds, two
   strings of little flags hung from a pole in the middle, trees and the
   school at the horizon, children in red and white caps along the far

@@ -3116,57 +3116,52 @@ function ribbonBow(ctx: SKRSContext2D, x: number, y: number, s: number) {
 }
 
 /**
- * A cheerleading pom-pom, radius `r`, in `colour`: a few hundred thin
- * glossy strips fanning out from its handle at the centre, the inner ones
- * in shadow and the outer ones lit, each strip curling a little and
- * catching a glint of light, as the real vinyl ones do. `light` is the lit
- * tint.
+ * A cheerleading pom-pom mid-shake, `r` across its body, in `colour`: a few
+ * hundred glossy strips flung out from the handle at (x, y), streaming
+ * towards `fly` (radians; 0 is right, -π/2 straight up) and fanning to
+ * either side, longest along the throw, curling as they go, lit from the
+ * upper left with glints near the tips. No ball and no dark core: the
+ * shape is the motion. `light` is the lit tint.
  */
-function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, light: string, seed: number) {
+function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, light: string, seed: number, fly = -Math.PI / 2) {
     const rand = seeded(seed);
-    const dark = mix(colour, '#000000', 0.45);
-    // A soft shadowed core so the gaps between strips read as depth.
-    const core = ctx.createRadialGradient(x, y, 0, x, y, r * 0.95);
-    core.addColorStop(0, rgba(dark, 0.95));
-    core.addColorStop(1, rgba(dark, 0));
-    ctx.fillStyle = core;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.95, 0, Math.PI * 2);
-    ctx.fill();
+    const base = mix(colour, '#000000', 0.18);
     ctx.lineCap = 'round';
-    const strips = Math.round(180 + r * 9);
-    // Back to front: short shadowed strips first, long lit ones over them.
-    const order = Array.from({ length: strips }, (_, i) => ({ i, depth: rand() }));
+    const strips = Math.round(160 + r * 8);
+    const order = Array.from({ length: strips }, () => ({ depth: rand() }));
     order.sort((p, q) => p.depth - q.depth);
     for (const { depth } of order) {
-        const angle = rand() * Math.PI * 2;
-        const len = r * (0.7 + 0.3 * depth) * (0.9 + rand() * 0.2);
-        const curl = (rand() - 0.5) * 1.6;
-        const ex = x + Math.cos(angle) * len;
-        const ey = y + Math.sin(angle) * len;
-        const cx = x + Math.cos(angle + curl * 0.5) * len * 0.6;
-        const cy = y + Math.sin(angle + curl * 0.5) * len * 0.6;
-        // Lit from the upper left: strips pointing that way are brighter.
-        const facing = (Math.cos(angle + Math.PI * 0.75) + 1) / 2;
-        const tone = mix(mix(dark, colour, Math.min(1, depth * 1.4)), light, Math.max(0, depth - 0.45) * facing * 1.4);
+        // Spread about the throw, most near it: a roughly normal fan.
+        const off = (rand() + rand() + rand() - 1.5) * 1.5;
+        const angle = fly + off;
+        // Longest straight along the throw, shorter out at the sides.
+        const len = r * (0.6 + 0.9 * Math.cos(off * 0.8) ** 2) * (0.8 + rand() * 0.35) * (0.85 + depth * 0.25);
+        // Strips curl back towards the throw as they stream out.
+        const curl = -Math.sign(off) * (0.15 + rand() * 0.35);
+        const cx = x + Math.cos(angle) * len * 0.5;
+        const cy = y + Math.sin(angle) * len * 0.5;
+        const ex = x + Math.cos(angle + curl) * len;
+        const ey = y + Math.sin(angle + curl) * len;
+        // Lit from the upper left: strips facing that way are brighter.
+        const facing = (Math.cos(angle + curl + Math.PI * 0.75) + 1) / 2;
+        const tone = mix(mix(base, colour, 0.5 + depth * 0.5), light, Math.max(0, depth - 0.4) * facing * 1.3);
         const g = ctx.createLinearGradient(x, y, ex, ey);
-        g.addColorStop(0, dark);
-        g.addColorStop(0.45, tone);
-        g.addColorStop(1, mix(tone, '#ffffff', 0.18 * facing));
+        g.addColorStop(0, base);
+        g.addColorStop(0.4, tone);
+        g.addColorStop(1, mix(tone, '#ffffff', 0.2 * facing));
         ctx.strokeStyle = g;
-        ctx.lineWidth = Math.max(1.4, r * 0.1) * (0.7 + rand() * 0.6);
+        ctx.lineWidth = Math.max(1.3, r * 0.09) * (0.6 + rand() * 0.6) * (1 - 0.4 * (Math.abs(off) / 2.2));
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.quadraticCurveTo(cx, cy, ex, ey);
         ctx.stroke();
-        // A glint near the tip of the front strips.
-        if (depth > 0.7 && rand() < 0.35) {
+        if (depth > 0.65 && rand() < 0.3) {
             ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + facing * 0.45})`;
             ctx.lineWidth = Math.max(0.6, r * 0.03);
             const t0 = 0.6 + rand() * 0.2;
             ctx.beginPath();
             ctx.moveTo(x + (ex - x) * t0, y + (ey - y) * t0);
-            ctx.lineTo(x + (ex - x) * (t0 + 0.15), y + (ey - y) * (t0 + 0.15));
+            ctx.lineTo(x + (ex - x) * (t0 + 0.14), y + (ey - y) * (t0 + 0.14));
             ctx.stroke();
         }
     }
@@ -3423,14 +3418,14 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         // Pom-poms in her hands, which are up behind her head on either side.
         const handY = footY - artH * 0.52;
         const pom = artW * 0.24;
-        pomPom(ctx, herX - artW * 0.46, handY, pom, '#0f8dce', '#bfe4ff', 21);
-        pomPom(ctx, herX + artW * 0.46, handY, pom, '#ee5b56', '#ffd0cc', 22);
+        pomPom(ctx, herX - artW * 0.46, handY, pom, '#0f8dce', '#bfe4ff', 21, -Math.PI * 0.72);
+        pomPom(ctx, herX + artW * 0.46, handY, pom, '#ee5b56', '#ffd0cc', 22, -Math.PI * 0.28);
         faceY = footY - artH * 0.62;
         reach = artW / 2 + pom * 0.6 + 10;
     } else {
         const bounce = mood < 0.34 ? 14 : 0;
-        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#0f8dce', '#bfe4ff', 21);
-        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#ee5b56', '#ffd0cc', 22);
+        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#0f8dce', '#bfe4ff', 21, -Math.PI * 0.72);
+        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#ee5b56', '#ffd0cc', 22, -Math.PI * 0.28);
         faceY = floor - 104 - bounce;
     }
 
