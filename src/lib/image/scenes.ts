@@ -2114,10 +2114,10 @@ function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y:
 
 /**
  * Her words in a speech bubble, as the game shows them: a white rounded
- * bubble with a tail pointing at her (to `tailX`, `tailY`). Its edge and
- * text turn red as she turns.
+ * bubble with a tail pointing at her (to `tailX`, `tailY`), unless
+ * `withTail` is false. Its edge and text turn red as she turns.
  */
-function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, tailX: number, tailY: number, mood: number) {
+function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, tailX: number, tailY: number, mood: number, withTail = true) {
     const w = bubbleWidth(ctx, text);
     const pad = 14;
     // The tail leaves from whichever lower corner is nearer her.
@@ -2132,12 +2132,14 @@ function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, ta
     ctx.roundRect(x, y, w, h, 16);
     ctx.fill();
     // The tail, from the bubble's lower left towards her.
-    ctx.beginPath();
-    ctx.moveTo(x + tail, y + h - 2);
-    ctx.lineTo(tailX, tailY);
-    ctx.lineTo(x + tail + 18, y + h - 2);
-    ctx.closePath();
-    ctx.fill();
+    if (withTail) {
+        ctx.beginPath();
+        ctx.moveTo(x + tail, y + h - 2);
+        ctx.lineTo(tailX, tailY);
+        ctx.lineTo(x + tail + 18, y + h - 2);
+        ctx.closePath();
+        ctx.fill();
+    }
     ctx.restore();
     ctx.strokeStyle = mix('#d8b9c4', '#c0101e', mood);
     ctx.lineWidth = 2;
@@ -3469,7 +3471,8 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     const line = mood < 0.34 ? 'Mambo~♪ Wasshoi!' : mood < 0.67 ? 'This time for sure!' : 'Wah—!? Not again…';
     const bw = bubbleWidth(ctx, line);
     const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
-    speechBubble(ctx, bubbleX, 26, line, herX + (bubbleX > herX ? 18 : -18), faceY - 8, 0);
+    // No tail: she is right beside it, and the long thin tail only added a stray line.
+    speechBubble(ctx, bubbleX, 26, line, herX, faceY, 0, false);
 }
 
 // ─── Nice Nature ──────────────────────────────────────────────────────────────
