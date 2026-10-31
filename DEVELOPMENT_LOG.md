@@ -136,6 +136,11 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   256 colours, used for every mood until `mambo-calm/uneasy/yandere.png`
   arrive (Fwoxie will do her expressions). Her fallen cap at her worst is
   only drawn without a picture, since the picture wears it.
+- Her expressions (Fwoxie): `mambo-calm.png` (big smile),
+  `mambo-uneasy.png` (surprised "o"), `mambo-yandere.png` (crying ><),
+  the same pose and crop as `mambo.png`, which stays as the fallback.
+  Her hands are up behind her head, so the pom-poms (blue left, coral
+  right) are drawn there, at either side of her head, over the picture.
 
 ---
 

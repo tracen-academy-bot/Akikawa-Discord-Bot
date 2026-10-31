@@ -3379,8 +3379,13 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         ctx.ellipse(herX, footY, artW * 0.38, 3.5, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.drawImage(art, herX - artW / 2, footY - artH, artW, artH);
+        // Pom-poms in her hands, which are up behind her head on either side.
+        const handY = footY - artH * 0.52;
+        const pom = artW * 0.24;
+        pomPom(ctx, herX - artW * 0.46, handY, pom, '#0f8dce', '#bfe4ff', 21);
+        pomPom(ctx, herX + artW * 0.46, handY, pom, '#ee5b56', '#ffd0cc', 22);
         faceY = footY - artH * 0.62;
-        reach = artW / 2 + 10;
+        reach = artW / 2 + pom * 0.6 + 10;
     } else {
         const bounce = mood < 0.34 ? 14 : 0;
         pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#0f8dce', '#bfe4ff', 21);
