@@ -1,5 +1,6 @@
 import { REST, Routes, type Client } from 'discord.js';
 import { commands } from '../commands';
+import { rememberCommandIds } from './commandIds';
 
 /**
  * Registers the slash commands with Discord.
@@ -34,11 +35,10 @@ export async function registerCommands(client: Client<true>): Promise<Registrati
     const applicationId = client.application.id;
     const guildId = process.env.DEV_GUILD_ID?.trim() || null;
 
-    if (guildId) {
-        await rest.put(Routes.applicationGuildCommands(applicationId, guildId), { body });
-    } else {
-        await rest.put(Routes.applicationCommands(applicationId), { body });
-    }
+    const route = guildId ? Routes.applicationGuildCommands(applicationId, guildId) : Routes.applicationCommands(applicationId);
+    // Discord answers with the commands and their IDs, for clickable mentions.
+    const registered = (await rest.put(route, { body })) as { id: string; name: string }[];
+    rememberCommandIds(registered);
 
     return { count: body.length, guildId };
 }

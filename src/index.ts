@@ -21,6 +21,7 @@ import { handlePostModal, isPostModal } from './commands/post';
 import { handleClubModal, isClubModal } from './commands/club';
 import { handleProfileModal, isProfileModal } from './commands/clubProfile';
 import { handlePrefixMessage } from './prefix';
+import { handleHelpSelect, isHelpSelect } from './commands/help';
 
 /**
  * Builds a client with every handler attached.
@@ -178,6 +179,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
             } catch (replyError) {
                 console.error(`${label}Could not deliver the button error reply:`, replyError);
             }
+        }
+        return;
+    }
+
+    // The /help topic menu, routed by custom ID like the panel buttons.
+    if (interaction.isStringSelectMenu() && isHelpSelect(interaction.customId)) {
+        try {
+            await handleHelpSelect(interaction);
+        } catch (e) {
+            const classified = classifyError(e);
+            const label = classified.incidentId ? `[incident ${classified.incidentId}] ` : '';
+            console.error(`${label}Error handling the help menu:`, e);
         }
         return;
     }

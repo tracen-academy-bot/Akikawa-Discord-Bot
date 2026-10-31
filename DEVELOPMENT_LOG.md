@@ -4,6 +4,29 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-10-31 — /help redesigned as a panel
+
+Fwoxie: "design the help thing first". The embed list worked but was a wall
+of text. `/help` is now a laid-out panel (Discord's components V2), only to
+the asker:
+
+- A honey-peach edge (Akikawa's avatar colour), a header with her avatar,
+  who she is in a line, then the page, then a **Browse a topic** menu that
+  swaps the page in place (`help:topic`, routed in `index.ts`).
+- **Start here**: what every trainer uses (`/uma-id`, `/fans me`, the
+  timer) and what a club's staff set (`/club reports`, `fancount`,
+  `profile`). A Club Manager is told everything is open to them.
+- Topic pages (Fans and quota, Clubs, Trainer Timer, Moderation and
+  posting) list their commands grouped by who can use them; the timer page
+  explains the panel's buttons.
+- Commands are clickable mentions: `registerCommands` now keeps the IDs
+  Discord returns (`commandIds.ts`); without them a name shows as code.
+- Tests: every command has an audience and a page and appears on it; each
+  page under 4000 characters and 40 components; the menu swaps pages; the
+  reply is private and components V2; mentions with and without IDs.
+
+---
+
 ## 2026-10-30 — /help
 
 Fwoxie asked for "an Akikawa help that lists everything".
