@@ -2440,21 +2440,32 @@ async function mamboPose(mood: number): Promise<Image | null> {
     return (await sceneArt(`mambo-${pose}`)) ?? sceneArt('mambo');
 }
 
-/** Colours of the sports-day flag strings: hers, and the usual festival brights. */
-const MAMBO_FLAGS: readonly [string, string][] = [
-    ['#0f8dce', '#ffffff'],
-    ['#ee5b56', '#ffffff'],
-    ['#ffd23a', '#0f8dce'],
-    ['#f48fb1', '#ffffff'],
-    ['#3fae6a', '#ffd23a'],
-    ['#ffffff', '#ee5b56'],
-];
+/** Pennant colours: her blue and coral, Tracen white. */
+const PENNANTS: readonly string[] = ['#0f8dce', '#ee5b56', '#f7f4ea'];
+
+/** A small gold horseshoe, open end up, centred on (x, y): the Tracen uniform's brooch. */
+function horseshoe(ctx: SKRSContext2D, x: number, y: number, r: number) {
+    ctx.strokeStyle = '#d9b44a';
+    ctx.lineWidth = r * 0.45;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(x, y, r, Math.PI * 0.1, Math.PI * 0.9);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    ctx.fillStyle = '#7a5a10';
+    for (const a of [0.3, 0.5, 0.7]) {
+        ctx.beginPath();
+        ctx.arc(x + Math.cos(Math.PI * a) * r, y + Math.sin(Math.PI * a) * r, r * 0.09, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
 
 /**
- * A string of little flags, as every Japanese school sports day has, sagging
- * from (x0, y0) to (x1, y1) by `sag`.
+ * A string of Tracen pennants sagging from (x0, y0) to (x1, y1) by `sag`:
+ * triangles in her blue and coral and Tracen white, each with a gold
+ * horseshoe, the school's emblem on its uniform brooch.
  */
-function flagString(ctx: SKRSContext2D, x0: number, y0: number, x1: number, y1: number, sag: number, seed: number) {
+function pennantString(ctx: SKRSContext2D, x0: number, y0: number, x1: number, y1: number, sag: number) {
     const at = (t: number) => ({ x: x0 + (x1 - x0) * t, y: y0 + (y1 - y0) * t + Math.sin(t * Math.PI) * sag });
     ctx.strokeStyle = 'rgba(60, 60, 70, 0.6)';
     ctx.lineWidth = 0.8;
@@ -2465,28 +2476,89 @@ function flagString(ctx: SKRSContext2D, x0: number, y0: number, x1: number, y1: 
         else ctx.lineTo(p.x, p.y);
     }
     ctx.stroke();
-    const rand = seeded(seed);
     const count = Math.max(4, Math.round(Math.abs(x1 - x0) / 30));
     for (let i = 1; i < count; i += 1) {
         const p = at(i / count);
-        const [a, b] = MAMBO_FLAGS[Math.floor(rand() * MAMBO_FLAGS.length)]!;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((rand() - 0.5) * 0.25);
-        ctx.fillStyle = a;
-        ctx.fillRect(-8, 0, 16, 11);
-        ctx.fillStyle = b;
-        if (rand() < 0.5) ctx.fillRect(-8, 4, 16, 3);
-        else {
-            ctx.beginPath();
-            ctx.arc(0, 5.5, 3, 0, Math.PI * 2);
-            ctx.fill();
-        }
+        const colour = PENNANTS[i % PENNANTS.length]!;
+        ctx.fillStyle = colour;
+        ctx.beginPath();
+        ctx.moveTo(p.x - 9, p.y);
+        ctx.lineTo(p.x + 9, p.y);
+        ctx.lineTo(p.x, p.y + 20);
+        ctx.closePath();
+        ctx.fill();
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
-        ctx.lineWidth = 0.5;
-        ctx.strokeRect(-8, 0, 16, 11);
-        ctx.restore();
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+        horseshoe(ctx, p.x, p.y + 4.5, 3.6);
     }
+}
+
+/** Tracen's motto on a cloth banner hung across (cx, y): "Eclipse first, the rest nowhere." */
+function mottoBanner(ctx: SKRSContext2D, cx: number, y: number, wide: boolean) {
+    const text = 'Eclipse first, the rest nowhere.';
+    ctx.font = font(`700 ${wide ? 11 : 10}px`);
+    const bw = ctx.measureText(text).width + 28;
+    const bh = 18;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.fillRect(cx - bw / 2 + 2, y + 2, bw, bh);
+    ctx.fillStyle = '#f7f4ea';
+    ctx.fillRect(cx - bw / 2, y, bw, bh);
+    ctx.fillStyle = '#2d3f78';
+    ctx.fillRect(cx - bw / 2, y, bw, 3);
+    ctx.fillRect(cx - bw / 2, y + bh - 3, bw, 3);
+    horseshoe(ctx, cx - bw / 2 + 9, y + bh / 2 - 1, 3.2);
+    horseshoe(ctx, cx + bw / 2 - 9, y + bh / 2 - 1, 3.2);
+    ctx.fillStyle = '#2d3f78';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, cx, y + bh / 2 + 0.5);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/**
+ * The Three Goddesses statue on its plinth, bronze gone green: Tracen's
+ * statue of the three founding sires, where trainees inherit.
+ */
+function threeGoddesses(ctx: SKRSContext2D, x: number, base: number, s: number) {
+    // A stepped stone plinth.
+    ctx.fillStyle = '#a9a396';
+    ctx.fillRect(x - s * 0.95, base - s * 0.18, s * 1.9, s * 0.18);
+    ctx.fillStyle = '#c4beb0';
+    ctx.fillRect(x - s * 0.75, base - s * 0.42, s * 1.5, s * 0.24);
+    ctx.fillStyle = '#d6d1c4';
+    ctx.fillRect(x - s * 0.6, base - s * 0.5, s * 1.2, s * 0.08);
+    const foot = base - s * 0.5;
+    const bronze = '#5f8a74';
+    const light = '#86b09a';
+    // Three robed figures, back to back, the middle one tallest, arms raised.
+    const figure = (fx: number, h: number, arm: -1 | 0 | 1) => {
+        ctx.fillStyle = bronze;
+        ctx.beginPath();
+        ctx.moveTo(fx - s * 0.22, foot);
+        ctx.quadraticCurveTo(fx - s * 0.16, foot - h * 0.45, fx - s * 0.08, foot - h * 0.8);
+        ctx.lineTo(fx + s * 0.08, foot - h * 0.8);
+        ctx.quadraticCurveTo(fx + s * 0.16, foot - h * 0.45, fx + s * 0.22, foot);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(fx, foot - h * 0.88, s * 0.085, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = bronze;
+        ctx.lineWidth = s * 0.055;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(fx, foot - h * 0.72);
+        if (arm === 0) ctx.lineTo(fx, foot - h * 1.12);
+        else ctx.lineTo(fx + arm * s * 0.3, foot - h * 1.0);
+        ctx.stroke();
+        ctx.lineCap = 'butt';
+        ctx.fillStyle = light;
+        ctx.fillRect(fx - s * 0.05, foot - h * 0.75, s * 0.025, h * 0.6);
+    };
+    figure(x - s * 0.36, s * 0.95, -1);
+    figure(x + s * 0.36, s * 0.95, 1);
+    figure(x, s * 1.15, 0);
 }
 
 /** The sun with soft rays, fading as the sky clouds over. */
@@ -2941,8 +3013,10 @@ function capRow(ctx: SKRSContext2D, x0: number, x1: number, y: number, gaps: [nu
 
 /**
  * Mambo (Matikanetannhauser) at the school sports day, cheering for the
- * club. The band: a blue sky with the sun, clouds and strings of little
- * flags; the school and trees at the horizon; her cheer tent with "Talent
+ * club. The band: a blue sky with the sun, clouds and strings of Tracen
+ * pennants (gold horseshoes, from the uniform brooch) under the school
+ * motto, "Eclipse first, the rest nowhere."; the school, trees and the
+ * Three Goddesses statue at the horizon; her cheer tent with "Talent
  * Takes Time" across it and a cat (Hachimi) on the roof; a dirt field with
  * chalk lines and chickens loose on it.
  *
@@ -2974,9 +3048,10 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     for (let i = 0; i < clouds + Math.round(mood * 3); i += 1) cloud(ctx, w * (0.08 + rand() * 0.84), 16 + rand() * (horizon - 44), 22 + rand() * 14, rand);
     ctx.restore();
 
-    // The horizon: trees and the school.
+    // The horizon: trees, the school, and the Three Goddesses in front of it.
     for (let x = 12; x < w; x += 46 + ((x * 7) % 30)) tree(ctx, x, horizon + 2, 9 + ((x * 13) % 5));
     school(ctx, w * (wide ? 0.6 : 0.56), w * (wide ? 0.9 : 0.94), horizon + 2, horizon * 0.42);
+    threeGoddesses(ctx, w * (wide ? 0.42 : 0.44), horizon + 4, 34);
 
     // The field: packed dirt with chalk lane lines, a grass edge at the horizon.
     const dirt = ctx.createLinearGradient(0, horizon, 0, hero);
@@ -3008,8 +3083,9 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     // Flag strings from a pole in the middle down to either edge.
     ctx.fillStyle = '#9aa0aa';
     ctx.fillRect(w / 2 - 1.5, 0, 3, horizon + 4);
-    flagString(ctx, w / 2, 4, -10, 30, 22, 3);
-    flagString(ctx, w / 2, 4, w + 10, 30, 22, 7);
+    pennantString(ctx, w / 2, 4, -10, 30, 22);
+    pennantString(ctx, w / 2, 4, w + 10, 30, 22);
+    mottoBanner(ctx, w / 2, 8, wide);
 
     // The tug-of-war.
     const ropeLevel = floor - 16;

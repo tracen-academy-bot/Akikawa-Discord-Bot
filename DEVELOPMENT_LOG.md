@@ -82,7 +82,15 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   pale gold `#e6e08a` as the accent.
 - Mambo's flags: no dorm flags or emblems exist in any source found
   (Ritto/Miho have none on the wiki or fan sites); the canon sports day is
-  the "Tracen Cheer Squad" story event. Left as is pending Fwoxie's call.
+  the "Tracen Cheer Squad" story event. Fwoxie: use Tracen things instead.
+  What is confirmed canon: the motto "Eclipse first, the rest nowhere."
+  (唯一抜きん出て、並ぶ者なし), the Three Goddesses statue (三女神像), and
+  the horseshoe (the summer uniform's clip and brooch). No crest design or
+  school colours were found, so none are invented. The generic flags are
+  now pennants in her blue and coral and white, each with a gold horseshoe
+  (`pennantString`); the centre pole carries the motto on a banner
+  (`mottoBanner`); the Three Goddesses stand in bronze between her tent
+  and the school (`threeGoddesses`).
 
 ---
 
