@@ -123,6 +123,15 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   classmates to each trainer, six per tug-of-war team and six cheering at
   the tent in the wide image (four in tall), and 80 drawn a day. About 75
   umas in the wide band.
+- Then (Fwoxie: the crowd as a backdrop, sitting; Mambo cheering, big;
+  "signs and shit"): `seatedAudience` sits the pictures in two rows on
+  coloured picnic sheets across the back of the field, each cut off below
+  the waist where she sits, every fourth holding up a cheer sign on sticks
+  ("MAMBO!", "ファイト!", "WASSHOI!", "がんばれ!", "110%!", "♥ MACHITAN ♥",
+  "マンボ〜♪"). The tug-of-war teams and the tent cheerers are gone; the
+  rope and bow still mark the club's place. Her picture is drawn nearly
+  the band's full height, in front; the stand-in pom-poms are bigger too.
+  Without crowd pictures the standing trainers return.
 
 ---
 

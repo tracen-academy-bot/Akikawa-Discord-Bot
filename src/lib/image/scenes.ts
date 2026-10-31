@@ -2543,6 +2543,100 @@ function crowdChibi(ctx: SKRSContext2D, art: Image, x: number, feet: number, h: 
     ctx.restore();
 }
 
+/** Cheer signs the audience holds up for her: words, and her ribbon colours. */
+const CHEER_SIGNS: readonly [string, string, string][] = [
+    ['MAMBO!', '#0f8dce', '#ffffff'],
+    ['ファイト!', '#ee5b56', '#ffffff'],
+    ['WASSHOI!', '#ffd23a', '#0a3a5a'],
+    ['がんばれ!', '#ffffff', '#c42f2a'],
+    ['110%!', '#f48fb1', '#ffffff'],
+    ['♥ MACHITAN ♥', '#ffffff', '#0a6aa3'],
+    ['マンボ〜♪', '#0f8dce', '#ffffff'],
+];
+
+/** A cheer sign held up on two sticks, its bottom edge at (x, y). */
+function cheerSign(ctx: SKRSContext2D, x: number, y: number, text: string, fill: string, ink: string, tilt: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    ctx.font = font('800 9px');
+    const sw = Math.max(34, ctx.measureText(text).width + 10);
+    const sh = 15;
+    ctx.fillStyle = '#c9a26a';
+    ctx.fillRect(-sw * 0.3, 0, 1.6, 9);
+    ctx.fillRect(sw * 0.3 - 1.6, 0, 1.6, 9);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.fillRect(-sw / 2 + 1.5, -sh + 1.5, sw, sh);
+    ctx.fillStyle = fill;
+    ctx.fillRect(-sw / 2, -sh, sw, sh);
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-sw / 2 + 1.5, -sh + 1.5, sw - 3, sh - 3);
+    ctx.fillStyle = ink;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, -sh / 2 + 0.5);
+    ctx.restore();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/**
+ * The audience: classmates sitting on picnic sheets across the back of the
+ * field, as families and classes do at a sports day, from x0 to x1 in rows
+ * whose seats are at each `seat`. Each picture is cut off below the waist
+ * where she sits on the sheet. Every few hold up a cheer sign; now and then
+ * a trainer stands at the back. Skips `gaps`.
+ */
+function seatedAudience(ctx: SKRSContext2D, x0: number, x1: number, rows: { seat: number; h: number; gap: number }[], gaps: [number, number][], chibis: Image[]) {
+    if (chibis.length === 0) return;
+    const sheets = ['#3d7fd6', '#e35d6a', '#3fae6a', '#f2b632'];
+    let pick = 0;
+    rows.forEach((row, r) => {
+        const rand = seeded(500 + r * 37);
+        // The sheets the row sits on: one colour per stretch.
+        const sheetTop = row.seat - row.h * 0.12;
+        const sheetBottom = row.seat + row.h * 0.18;
+        let sx = x0 - 20;
+        let s = r;
+        while (sx < x1 + 20) {
+            const len = 90 + rand() * 80;
+            ctx.fillStyle = sheets[s % sheets.length]!;
+            ctx.beginPath();
+            ctx.moveTo(sx + 6, sheetTop);
+            ctx.lineTo(sx + len - 2, sheetTop);
+            ctx.lineTo(sx + len + 4, sheetBottom);
+            ctx.lineTo(sx, sheetBottom);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+            ctx.fillRect(sx + 4, sheetTop + 1, len - 6, 1.2);
+            sx += len + 6;
+            s += 1;
+        }
+        let k = 0;
+        for (let x = x0; x < x1; x += row.gap * (0.8 + rand() * 0.4)) {
+            if (gaps.some(([a, b]) => x > a && x < b)) continue;
+            const art = chibis[pick % chibis.length]!;
+            pick += 1;
+            // Sitting: only the top of her shows above the seat.
+            const shown = 0.66;
+            const h = row.h * (0.92 + rand() * 0.16);
+            const w = (art.width / art.height) * h;
+            const seat = row.seat + (rand() - 0.5) * 3;
+            ctx.drawImage(art, 0, 0, art.width, art.height * shown, x - w / 2, seat - h * shown, w, h * shown);
+            ctx.fillStyle = 'rgba(30, 30, 50, 0.12)';
+            ctx.beginPath();
+            ctx.ellipse(x, seat + 1, w * 0.4, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            if (k % 4 === 1) {
+                const [text, fill, ink] = CHEER_SIGNS[(pick + r) % CHEER_SIGNS.length]!;
+                cheerSign(ctx, x, seat - h * shown - 2, text, fill, ink, (rand() - 0.5) * 0.25);
+            }
+            k += 1;
+        }
+    });
+}
+
 /**
  * Classmates and trainers watching from the back of the field, between x0
  * and x1 with their feet at `base`: the pictures in `mambo-crowd/` (small
@@ -3215,15 +3309,6 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     capRow(ctx, 6, w - 6, horizon + 9, [[tentX0 - 6, tentX1 + 6]]);
     cheerTent(ctx, tentX0, tentX1, tentTop, horizon + 26);
     sittingCat(ctx, tentX0 + (tentX1 - tentX0) * 0.72, tentTop + 4, 19);
-    // A few classmates cheering in front of the tent.
-    if (crowdArt.length > 0) {
-        const cheer = wide ? 6 : 4;
-        for (let k = 0; k < cheer; k += 1) {
-            const x = tentX0 + 22 + ((tentX1 - tentX0 - 44) * k) / (cheer - 1);
-            // Feet low enough that their heads stay under the banner.
-            crowdChibi(ctx, crowdArt[(k + 3) % crowdArt.length]!, x, horizon + 48 + (k % 2) * 3, 38, (k % 2 === 0 ? -1 : 1) * 0.06, k % 2 === 1);
-        }
-    }
 
     // Flag strings from a pole in the middle down to either edge.
     ctx.fillStyle = '#9aa0aa';
@@ -3238,11 +3323,16 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     const x1 = w - SIDE - 26;
     let herX = w * 0.5;
     if (race) herX = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
-    // Classmates and trainers along the back of the field, clear of the tent and of her.
-    const clear: [number, number][] = [[tentX0 - 20, tentX1 + 20], [herX - 70, herX + 70]];
-    // A row further back, smaller and tighter, then the main row in front.
-    crowd(ctx, x0 + 80, x1 - 80, horizon + 30, wide ? 30 : 28, [[tentX0 - 10, tentX1 + 10], [herX - 50, herX + 50]], crowdArt, 0.78, 311, 37);
-    crowd(ctx, x0 + 95, x1 - 95, horizon + 42, wide ? 40 : 38, clear, crowdArt);
+    // The audience sitting on picnic sheets across the back of the field,
+    // a backdrop for her; without pictures, trainers stand there instead.
+    if (crowdArt.length > 0) {
+        seatedAudience(ctx, x0 + 70, x1 - 70, [
+            { seat: horizon + 30, h: 34, gap: wide ? 22 : 21 },
+            { seat: horizon + 50, h: 42, gap: wide ? 27 : 26 },
+        ], [[tentX0 - 8, tentX1 + 8]], crowdArt);
+    } else {
+        crowd(ctx, x0 + 95, x1 - 95, horizon + 42, wide ? 74 : 66, [[tentX0 - 20, tentX1 + 20], [herX - 70, herX + 70]], crowdArt);
+    }
     if (race) {
         // Chalk ticks every tenth, under the rope.
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
@@ -3257,17 +3347,6 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         tugRope(ctx, x0, x1, ropeLevel);
         teamPole(ctx, x0, floor, '#d9443f', race.start, -1);
         teamPole(ctx, x1, floor, '#0a6aa3', race.finish, 1);
-        // A team on each end of the rope, leaning back to pull, clear of the banners and of her.
-        if (crowdArt.length > 0) {
-            const team = wide ? 6 : 4;
-            for (let k = 0; k < team; k += 1) {
-                const left = x0 + 92 + k * 26;
-                const right = x1 - 92 - k * 26;
-                const feet = floor - 2 + (k % 2) * 2;
-                if (Math.abs(left - herX) > 50) crowdChibi(ctx, crowdArt[k % crowdArt.length]!, left, feet, 44, -0.22, true);
-                if (Math.abs(right - herX) > 50) crowdChibi(ctx, crowdArt[(k + 1) % crowdArt.length]!, right, feet, 44, 0.22);
-            }
-        }
     }
 
     // Chickens loose on the field, kept clear of her.
@@ -3291,9 +3370,10 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     let reach = 40;
     if (race) ribbonBow(ctx, herX, ropeY(herX, x0, x1, ropeLevel), 17);
     if (art) {
-        const artH = hero - 34;
+        // Big, front and centre: she is the cheerleader.
+        const artH = hero - 6;
         const artW = (art.width / art.height) * artH;
-        const footY = floor - 1;
+        const footY = floor + 4;
         ctx.fillStyle = 'rgba(60, 40, 20, 0.22)';
         ctx.beginPath();
         ctx.ellipse(herX, footY, artW * 0.38, 3.5, 0, 0, Math.PI * 2);
@@ -3302,10 +3382,10 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
         faceY = footY - artH * 0.62;
         reach = artW / 2 + 10;
     } else {
-        const bounce = mood < 0.34 ? 10 : 0;
-        pomPom(ctx, herX - 22, floor - 58 - bounce, 19, '#0f8dce', '#bfe4ff', 21);
-        pomPom(ctx, herX + 22, floor - 58 - bounce, 19, '#ee5b56', '#ffd0cc', 22);
-        faceY = floor - 70 - bounce;
+        const bounce = mood < 0.34 ? 14 : 0;
+        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#0f8dce', '#bfe4ff', 21);
+        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#ee5b56', '#ffd0cc', 22);
+        faceY = floor - 104 - bounce;
     }
 
     // At her worst: her own rain cloud, her hat on the ground, a spider beside her.
