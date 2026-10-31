@@ -168,6 +168,13 @@ Mambo's: her picture by mood when supplied (`nature-*.png`,
   the end Fwoxie preferred the earlier round, glossy strand pom-poms
   ("the old circle one is just better"), so `pomPom` and its placement are
   back to that version (blue `#0f8dce`, coral `#ee5b56`, at her hands).
+- The scenes now frame the cards (Fwoxie: "the pic colours should bleed
+  through the sides"): Mambo's field, Nice Nature's counter wood and Dream
+  Journey's ground run down the full image instead of stopping under the
+  band, which left the sides black. Mambo's field deepens below the band.
+- Mambo is a dark theme now ("swap to dark mode"): navy cards (`#131f2e`),
+  her blue `#4fb3f2` as the accent, top 3 gold, ribbon pink `#f48fb1` and
+  sky blue `#6fc3f5`. `scripts/palettes.ts` passes.
 - Speech bubbles have no tail in any scene (Fwoxie: "most useless line
   ever", then "the other themes too"); each speaker stands beside hers. A game pom-pom from UmaViewer (Nice
   Nature's or King Halo's cheer outfit) would match best, if supplied.

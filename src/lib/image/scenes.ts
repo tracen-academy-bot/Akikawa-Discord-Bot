@@ -3315,11 +3315,14 @@ function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: 
     threeGoddesses(ctx, w * (wide ? 0.42 : 0.44), horizon + 4, 34);
 
     // The field: packed dirt with chalk lane lines, a grass edge at the horizon.
-    const dirt = ctx.createLinearGradient(0, horizon, 0, hero);
+    // The field runs down past the band, round the cards, deepening as it goes.
+    const dirt = ctx.createLinearGradient(0, horizon, 0, h);
+    const fieldEnd = Math.min(0.99, (hero - horizon) / (h - horizon));
     dirt.addColorStop(0, mix('#e6c99a', '#bfa480', mood * 0.6));
-    dirt.addColorStop(1, mix('#d4a86c', '#a88a62', mood * 0.6));
+    dirt.addColorStop(fieldEnd, mix('#d4a86c', '#a88a62', mood * 0.6));
+    dirt.addColorStop(1, mix('#9a7650', '#7a6248', mood * 0.6));
     ctx.fillStyle = dirt;
-    ctx.fillRect(0, horizon + 2, w, hero - horizon);
+    ctx.fillRect(0, horizon + 2, w, h - horizon);
     ctx.fillStyle = '#6fb86e';
     ctx.fillRect(0, horizon, w, 4);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
@@ -3849,7 +3852,7 @@ function drawNature(ctx: SKRSContext2D, w: number, h: number, hero: number, art:
 
     // The counter, over her lower half.
     ctx.fillStyle = '#6b4526';
-    ctx.fillRect(0, counter, w, hero - counter);
+    ctx.fillRect(0, counter, w, h - counter);
     ctx.fillStyle = '#8a5a32';
     ctx.fillRect(0, counter, w, 5);
     ctx.fillStyle = 'rgba(255, 220, 170, 0.15)';
@@ -4168,7 +4171,7 @@ function drawJourney(ctx: SKRSContext2D, w: number, h: number, hero: number, art
     if (herX < x1 - trainLen - 50) nightTrain(ctx, x1 - trainLen, x1 - 6, railY - 1);
     // The ground in front of the track.
     ctx.fillStyle = mix('#2b2719', '#121109', mood);
-    ctx.fillRect(0, railY + 10, w, hero - railY - 10);
+    ctx.fillRect(0, railY + 10, w, h - railY - 10);
 
     if (race) {
         stationBoard(ctx, x0 - 10, floor, race.start, race.finish, 1);
