@@ -4,6 +4,16 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+
+## 2026-10-31 — Merge Mambo and /help; Nice Nature and Dream Journey held back
+
+Fwoxie: merge Mambo (with `/help`), not the two themes still waiting on
+their pictures. `Palette.hidden` leaves a theme out of the `/club reports`
+menu; Nice Nature and Dream Journey set it. Their scenes and palettes stay
+in the code, ready to show once `nature-*.png` and `journey-*.png` exist:
+remove `hidden` then.
+
+---
 ## 2026-10-31 — /help redesigned as a panel
 
 Fwoxie: "design the help thing first". The embed list worked but was a wall

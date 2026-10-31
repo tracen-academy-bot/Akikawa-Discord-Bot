@@ -419,6 +419,8 @@ async function main() {
     check('at least one layout must be ticked, both may be',
         [lookPart('Layout')?.required, lookPart('Layout')?.min_values, lookPart('Layout')?.max_values], [true, 1, 2]);
     check('the Oguri theme is offered', lookPart('Report theme')?.options?.some((o) => o.value === 'oguri'), true);
+    check('Mambo is offered; the unfinished Nice Nature and Dream Journey are not',
+        ['mambo', 'nature', 'journey'].map((t) => lookPart('Report theme')?.options?.some((o) => o.value === t)), [true, false, false]);
     check('headcount is not a field', [...reportsForm.components, ...adminForm.components].some((c) => c.label.toLowerCase().includes('headcount')), false);
     check('with no time set, the time is empty and Japan time is picked',
         [pre(reportsForm, 'Report time')?.value, pre(reportsForm, 'Time zone')?.options?.find((o) => o.default)?.value], [undefined, 'Asia/Tokyo']);

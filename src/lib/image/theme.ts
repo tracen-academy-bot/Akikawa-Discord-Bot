@@ -128,6 +128,11 @@ export interface Palette {
     place: readonly [string, string, string, string];
     /** The look beyond colour: shape, outline and backdrop. See `PaletteStyle`. */
     style: PaletteStyle;
+    /**
+     * Left out of the `/club reports` theme menu while unfinished (a scene
+     * still waiting on its character's pictures). A club already on it keeps it.
+     */
+    hidden?: boolean;
 }
 
 /**
@@ -521,6 +526,7 @@ export const PALETTES: Record<string, Palette> = {
     nature: {
         id: 'nature',
         label: 'Nice Nature',
+        hidden: true,
         origin: "Nice Nature's family bar after hours: dark wood, lantern light, her green and red, bronze for third.",
         light: false,
         frame: '#1a120d',
@@ -543,6 +549,7 @@ export const PALETTES: Record<string, Palette> = {
     journey: {
         id: 'journey',
         label: 'Dream Journey',
+        hidden: true,
         origin: "Dream Journey's railway at dusk: dark olive cards, her pale gold, and Stay Gold's streak of gold.",
         light: false,
         frame: '#1c1a12',
