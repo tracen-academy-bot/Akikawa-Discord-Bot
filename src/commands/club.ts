@@ -100,7 +100,9 @@ const DEFAULT_THEME_CHOICE = 'default';
 /** Report theme choices in the `/club reports` form: the default, then every palette. Discord allows 25. */
 const THEME_CHOICES = [
     { name: `Default (${PALETTES[DEFAULT_PALETTE]!.label})`, value: DEFAULT_THEME_CHOICE },
-    ...Object.values(PALETTES).map((p) => ({ name: `${p.label}${p.light ? ' (light)' : ''}`, value: p.id })),
+    ...Object.values(PALETTES)
+        .filter((p) => !p.hidden)
+        .map((p) => ({ name: `${p.label}${p.light ? ' (light)' : ''}`, value: p.id })),
 ].slice(0, 25);
 
 /** Report layout choices in the `/club reports` form; at least one is ticked. */

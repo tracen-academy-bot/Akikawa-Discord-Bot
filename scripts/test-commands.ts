@@ -419,6 +419,8 @@ async function main() {
     check('at least one layout must be ticked, both may be',
         [lookPart('Layout')?.required, lookPart('Layout')?.min_values, lookPart('Layout')?.max_values], [true, 1, 2]);
     check('the Oguri theme is offered', lookPart('Report theme')?.options?.some((o) => o.value === 'oguri'), true);
+    check('Mambo is offered; the unfinished Nice Nature and Dream Journey are not',
+        ['mambo', 'nature', 'journey'].map((t) => lookPart('Report theme')?.options?.some((o) => o.value === t)), [true, false, false]);
     check('headcount is not a field', [...reportsForm.components, ...adminForm.components].some((c) => c.label.toLowerCase().includes('headcount')), false);
     check('with no time set, the time is empty and Japan time is picked',
         [pre(reportsForm, 'Report time')?.value, pre(reportsForm, 'Time zone')?.options?.find((o) => o.default)?.value], [undefined, 'Asia/Tokyo']);
@@ -1023,6 +1025,45 @@ async function main() {
     check('its fan data moved to the club', await prisma.fanSnapshot.count({ where: { trackedCircleId: survivor.id } }), 1);
     const other2 = await prisma.trackedCircle.create({ data: { guildId: GUILD, circleId: BigInt(999991), name: 'No Match' } });
     check('no same-name club means no change', (await adoptUntrackedClub(other2)).id, other2.id);
+
+    // /help: every command on a page, said who can use it, within Discord's limits.
+    const help = await import('../src/commands/help');
+    const { commands: registered } = await import('../src/commands/index');
+    const helpJson = [...registered.values()].map((c) => c.data.toJSON() as unknown as import('../src/commands/help').CommandJson);
+    const entries = help.helpEntries(helpJson);
+    check('every command has a /help audience', entries.filter((e) => !(e.name in help.AUDIENCE)).map((e) => e.name), []);
+    check('no /help audience is left for a command that is gone', Object.keys(help.AUDIENCE).filter((k) => !entries.some((e) => e.name === k)), []);
+    check('every command has a /help page', [...new Set(entries.map((e) => e.name.split(' ')[0]!))].filter((n) => !(n in help.TOPIC_OF)), []);
+    check('subcommands in a group are listed', entries.some((e) => e.name === 'club member add'), true);
+    type V2 = { type: number; content?: string; components?: V2[]; accessory?: V2 };
+    const flat = (c: V2): V2[] => [c, ...(c.components ?? []).flatMap(flat), ...(c.accessory ? flat(c.accessory) : [])];
+    const pages = (['start', 'fans', 'clubs', 'timer', 'tools'] as const).map((t) => ({
+        topic: t,
+        parts: flat(help.buildHelp(helpJson, t, { manager: false, avatarUrl: 'https://cdn.example/a.png' }).toJSON() as unknown as V2),
+    }));
+    const pageText = (parts: V2[]) => parts.map((p) => p.content ?? '').join('\n');
+    const shown = pages.filter((p) => p.topic !== 'start').map((p) => pageText(p.parts)).join('\n');
+    check('every command is on a topic page', entries.filter((e) => !shown.includes(`\`/${e.name}\``)).map((e) => e.name), []);
+    check('each page stays under 4000 characters of text', pages.every((p) => pageText(p.parts).length <= 4000), true);
+    check('and 40 components', pages.every((p) => p.parts.length <= 40), true);
+    check('each page has the topic menu, its page picked',
+        pages.every((p) => p.parts.some((c) => c.type === 3 && (c as unknown as { options: { value: string; default?: boolean }[] }).options.find((o) => o.default)?.value === p.topic)), true);
+    check('a Club Manager is told everything is open to them',
+        pageText(flat(help.buildHelp(helpJson, 'start', { manager: true }).toJSON() as unknown as V2)).includes('You are a Club Manager'), true);
+    const { rememberCommandIds, commandMention } = await import('../src/lib/commandIds');
+    check('without IDs a command is shown as code', commandMention('fans me'), '`/fans me`');
+    rememberCommandIds([{ id: '111', name: 'fans' }, { id: '222', name: 'club' }]);
+    check('with them it is a clickable mention, grouped subcommands too', [commandMention('fans me'), commandMention('club member add')], ['</fans me:111>', '</club member add:222>']);
+    rememberCommandIds([]);
+    help.setHelpSource(() => helpJson);
+    let helpReply: { components?: { toJSON(): unknown }[]; flags?: number } | undefined;
+    await help.execute({ reply: async (r: typeof helpReply) => void (helpReply = r), member: null, client: null } as never);
+    const { MessageFlags: Flags } = await import('discord.js');
+    check('/help replies only to the asker, as a laid-out panel', helpReply?.flags, Flags.IsComponentsV2 | Flags.Ephemeral);
+    let updated: { components?: { toJSON(): unknown }[] } | undefined;
+    await help.handleHelpSelect({ values: ['timer'], update: async (r: typeof updated) => void (updated = r), member: null, client: null } as never);
+    check('picking a topic swaps the page in place', pageText(flat(updated?.components?.[0]?.toJSON() as V2)).includes('## Trainer Timer'), true);
+    check('the menu is routed to it', [help.isHelpSelect(help.HELP_SELECT_ID), help.isHelpSelect('timer:start')], [true, false]);
 
     await prisma.clubDirectory.deleteMany({ where: { guildId: GUILD } });
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });

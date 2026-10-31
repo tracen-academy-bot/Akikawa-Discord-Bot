@@ -6,6 +6,7 @@ import * as timer from './timer';
 import * as fans from './fans';
 import * as umaId from './umaId';
 import * as post from './post';
+import * as help from './help';
 
 export interface Command {
     data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
@@ -22,3 +23,7 @@ commands.set(timer.data.name, timer as Command);
 commands.set(fans.data.name, fans as Command);
 commands.set(umaId.data.name, umaId as Command);
 commands.set(post.data.name, post as Command);
+commands.set(help.data.name, help as Command);
+
+// /help lists whatever is registered above.
+help.setHelpSource(() => [...commands.values()].map((c) => c.data.toJSON() as unknown as help.CommandJson));

@@ -128,6 +128,11 @@ export interface Palette {
     place: readonly [string, string, string, string];
     /** The look beyond colour: shape, outline and backdrop. See `PaletteStyle`. */
     style: PaletteStyle;
+    /**
+     * Left out of the `/club reports` theme menu while unfinished (a scene
+     * still waiting on its character's pictures). A club already on it keeps it.
+     */
+    hidden?: boolean;
 }
 
 /**
@@ -517,6 +522,74 @@ export const PALETTES: Record<string, Palette> = {
         behind: '#ff5a4f',
         place: ['#ffcc33', '#9fb8e6', '#e39a5c', '#5ab4ff'],
         style: { radius: 4, border: '#3a3c44', glow: false, labels: 'upper', frameStyle: 'checker' },
+    },
+    nature: {
+        id: 'nature',
+        label: 'Nice Nature',
+        hidden: true,
+        origin: "Nice Nature's family bar after hours: dark wood, lantern light, her green and red, bronze for third.",
+        light: false,
+        frame: '#1a120d',
+        frameEnd: '#2a1c13',
+        bg: '#211812',
+        panel: '#2c2119',
+        stripe: '#271d16',
+        line: '#3d2f24',
+        text: '#f3e9dc',
+        muted: '#c9b8a3',
+        faint: '#9a8774',
+        accent: '#4fc77e',
+        target: '#ffcf6b',
+        good: '#9be3b0',
+        warn: '#ffb347',
+        behind: '#ff6b5e',
+        place: ['#ffd23a', '#9fb8e6', '#e8935a', '#c9adb8'],
+        style: { radius: 14, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'nature' },
+    },
+    journey: {
+        id: 'journey',
+        label: 'Dream Journey',
+        hidden: true,
+        origin: "Dream Journey's railway at dusk: dark olive cards, her pale gold, and Stay Gold's streak of gold.",
+        light: false,
+        frame: '#1c1a12',
+        frameEnd: '#2b2618',
+        bg: '#211f16',
+        panel: '#2b281d',
+        stripe: '#26241a',
+        line: '#3c3828',
+        text: '#f1ecd6',
+        muted: '#c4bc9c',
+        faint: '#958d70',
+        accent: '#e6e08a',
+        target: '#ffcf6b',
+        good: '#8fd6a6',
+        warn: '#ffb347',
+        behind: '#ff6b5e',
+        place: ['#ffd23a', '#9fb8e6', '#ff8f3f', '#c9adb8'],
+        style: { radius: 12, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'journey' },
+    },
+    mambo: {
+        id: 'mambo',
+        label: 'Mambo',
+        origin: "Matikanetannhauser's sports festival: dark navy cards on the sunny field, her blue and her ribbon pink.",
+        light: false,
+        frame: '#0f1a28',
+        frameEnd: '#16263a',
+        bg: '#131f2e',
+        panel: '#1a2a3d',
+        stripe: '#172536',
+        line: '#29405a',
+        text: '#eef4fb',
+        muted: '#b6c6d8',
+        faint: '#8698ad',
+        accent: '#4fb3f2',
+        target: '#ffcf6b',
+        good: '#7ee0b4',
+        warn: '#ffb347',
+        behind: '#ff6b5e',
+        place: ['#ffd23a', '#f48fb1', '#6fc3f5', '#c9adb8'],
+        style: { radius: 20, border: null, glow: false, labels: 'plain', frameStyle: 'solid', scene: 'mambo' },
     },
     stillinlove: {
         id: 'stillinlove',

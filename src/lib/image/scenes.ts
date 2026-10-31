@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import * as path from 'node:path';
 import { createCanvas, loadImage, type Canvas, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import { RENDER_SCALE, seeded } from './cards';
@@ -37,7 +37,7 @@ import type { Palette } from './theme';
  */
 
 /** The scenes a palette can carry. */
-export type SceneId = 'fireworks' | 'confetti' | 'oguri' | 'stillinlove';
+export type SceneId = 'fireworks' | 'confetti' | 'oguri' | 'stillinlove' | 'mambo' | 'nature' | 'journey';
 
 /**
  * Where the club stands in its rank band, for a scene that races it along a
@@ -253,6 +253,9 @@ export async function withScene(
     if (scene === 'fireworks') drawFireworks(ctx, w, h, hero);
     else if (scene === 'confetti') drawConfetti(ctx, w, h, hero);
     else if (scene === 'stillinlove') moonlight = drawStillInLove(ctx, w, h, hero, await stillInLovePose(mood), mood, race, await stillInLoveArt());
+    else if (scene === 'mambo') drawMambo(ctx, w, h, hero, await mamboPose(mood), mood, race, await sceneArtFolder('mambo-crowd'));
+    else if (scene === 'nature') drawNature(ctx, w, h, hero, await naturePose(mood), mood, race);
+    else if (scene === 'journey') drawJourney(ctx, w, h, hero, await journeyPose(mood), mood, race);
     else drawOguri(ctx, w, h, hero, await sceneArt(scene), await sceneArt(`${scene}-run`), race, await foodArt());
     ctx.drawImage(report, offsetX, offsetY, reportW, reportH);
     // Her moonlight carries on over the cards, faintly.
@@ -2111,14 +2114,11 @@ function lilyField(ctx: SKRSContext2D, lily: Image, from: number, to: number, y:
 
 /**
  * Her words in a speech bubble, as the game shows them: a white rounded
- * bubble with a tail pointing at her (to `tailX`, `tailY`). Its edge and
- * text turn red as she turns.
+ * bubble beside her, no tail. Its edge and text turn red as she turns.
  */
-function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, tailX: number, tailY: number, mood: number) {
+function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, mood: number) {
     const w = bubbleWidth(ctx, text);
     const pad = 14;
-    // The tail leaves from whichever lower corner is nearer her.
-    const tail = tailX < x + w / 2 ? 18 : w - 36;
     const h = 36;
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
@@ -2127,13 +2127,6 @@ function speechBubble(ctx: SKRSContext2D, x: number, y: number, text: string, ta
     ctx.fillStyle = mix('#fffafc', '#ffe3e6', mood);
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 16);
-    ctx.fill();
-    // The tail, from the bubble's lower left towards her.
-    ctx.beginPath();
-    ctx.moveTo(x + tail, y + h - 2);
-    ctx.lineTo(tailX, tailY);
-    ctx.lineTo(x + tail + 18, y + h - 2);
-    ctx.closePath();
     ctx.fill();
     ctx.restore();
     ctx.strokeStyle = mix('#d8b9c4', '#c0101e', mood);
@@ -2385,7 +2378,7 @@ function drawStillInLove(
     // Her bubble to her right, or her left when it would run off the edge.
     const bw = bubbleWidth(ctx, line);
     const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
-    speechBubble(ctx, bubbleX, 18, line, herX + (bubbleX > herX ? 30 : -30), eyeY - 14, mood);
+    speechBubble(ctx, bubbleX, 18, line, mood);
 
     // Bloody handprints on the wall once she has turned.
     if (blood && mood >= 0.4) {
@@ -2422,4 +2415,1791 @@ function drawStillInLove(
         ctx.fillRect(0, 0, w, h);
     }
     return light;
+}
+
+// ─── Mambo (Matikanetannhauser) ──────────────────────────────────────────────
+
+/**
+ * Her picture for `mood`, the same thirds as her lines: `mambo-calm.png`
+ * (cheering), `mambo-uneasy.png` (worried) or `mambo-yandere.png` (her
+ * fumble). Falls back to `mambo.png`, then to none (the scene then draws
+ * her pom-poms).
+ */
+async function mamboPose(mood: number): Promise<Image | null> {
+    const pose = mood < 0.34 ? 'calm' : mood < 0.67 ? 'uneasy' : 'yandere';
+    return (await sceneArt(`mambo-${pose}`)) ?? sceneArt('mambo');
+}
+
+/** Every picture in a folder under the scene art, by file name; none when it is missing. */
+const folderCache = new Map<string, Image[]>();
+async function sceneArtFolder(name: string): Promise<Image[]> {
+    const cached = folderCache.get(name);
+    if (cached) return cached;
+    const dir = path.join(ART_DIR, name);
+    const images: Image[] = [];
+    if (existsSync(dir)) {
+        for (const file of readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.png')).sort()) {
+            try {
+                images.push(await loadImage(path.join(dir, file)));
+            } catch {
+                // An unreadable picture is left out.
+            }
+        }
+    }
+    folderCache.set(name, images);
+    return images;
+}
+
+/**
+ * A trainer watching, small: dark suit, white shirt, a tie in `tie`, hair
+ * dark or light; `cheer` puts an arm up. Generic, so drawn rather than
+ * pictured.
+ */
+function trainerFigure(ctx: SKRSContext2D, x: number, base: number, h: number, tie: string, light: boolean, cheer: boolean) {
+    const u = h / 10;
+    ctx.fillStyle = 'rgba(60, 40, 20, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(x, base, u * 2.2, u * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Legs, then the jacket.
+    ctx.fillStyle = '#2b2f3a';
+    ctx.fillRect(x - u * 1.1, base - u * 4, u * 0.9, u * 4);
+    ctx.fillRect(x + u * 0.2, base - u * 4, u * 0.9, u * 4);
+    ctx.fillStyle = '#353b4a';
+    ctx.beginPath();
+    ctx.roundRect(x - u * 1.6, base - u * 7.6, u * 3.2, u * 4, u * 0.6);
+    ctx.fill();
+    ctx.fillStyle = '#f4f2ee';
+    ctx.beginPath();
+    ctx.moveTo(x - u * 0.6, base - u * 7.6);
+    ctx.lineTo(x + u * 0.6, base - u * 7.6);
+    ctx.lineTo(x, base - u * 6.2);
+    ctx.fill();
+    ctx.fillStyle = tie;
+    ctx.fillRect(x - u * 0.2, base - u * 7.4, u * 0.4, u * 1.6);
+    // Arms: one up to cheer, or both down.
+    ctx.strokeStyle = '#353b4a';
+    ctx.lineWidth = u * 0.8;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - u * 1.5, base - u * 7);
+    ctx.lineTo(x - u * 1.8, base - u * 4.4);
+    ctx.moveTo(x + u * 1.5, base - u * 7);
+    if (cheer) ctx.lineTo(x + u * 2.4, base - u * 9.6);
+    else ctx.lineTo(x + u * 1.8, base - u * 4.4);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    // Head and hair.
+    ctx.fillStyle = '#f2cfae';
+    ctx.beginPath();
+    ctx.arc(x, base - u * 8.6, u * 1.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = light ? '#b08a5a' : '#2a2420';
+    ctx.beginPath();
+    ctx.arc(x, base - u * 8.9, u * 1.15, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.fill();
+}
+
+/**
+ * Up to `count` of `images` in an order that changes once a day: a
+ * shuffle seeded by the UTC day, so each day's report has a different crowd
+ * and the same report all day. `day` is for tests.
+ */
+function dailyPick<T>(images: T[], count: number, day = Math.floor(Date.now() / 86_400_000)): T[] {
+    const rand = seeded(day * 7919 + images.length);
+    const order = [...images];
+    for (let i = order.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(rand() * (i + 1));
+        [order[i], order[j]] = [order[j]!, order[i]!];
+    }
+    return order.slice(0, count);
+}
+
+/**
+ * One crowd chibi standing at (x, feet), `h` tall, leaning by `lean`
+ * (radians, about her feet): back for a tug-of-war, upright to watch.
+ */
+function crowdChibi(ctx: SKRSContext2D, art: Image, x: number, feet: number, h: number, lean = 0, flip = false) {
+    const w = (art.width / art.height) * h;
+    ctx.fillStyle = 'rgba(60, 40, 20, 0.22)';
+    ctx.beginPath();
+    ctx.ellipse(x, feet, w * 0.38, 2.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(x, feet);
+    ctx.rotate(lean);
+    if (flip) ctx.scale(-1, 1);
+    ctx.drawImage(art, -w / 2, -h, w, h);
+    ctx.restore();
+}
+
+/** Cheer signs the audience holds up for her: words, and her ribbon colours. */
+const CHEER_SIGNS: readonly [string, string, string][] = [
+    ['MAMBO!', '#0f8dce', '#ffffff'],
+    ['ファイト!', '#ee5b56', '#ffffff'],
+    ['WASSHOI!', '#ffd23a', '#0a3a5a'],
+    ['がんばれ!', '#ffffff', '#c42f2a'],
+    ['110%!', '#f48fb1', '#ffffff'],
+    ['♥ MACHITAN ♥', '#ffffff', '#0a6aa3'],
+    ['マンボ〜♪', '#0f8dce', '#ffffff'],
+];
+
+/** A cheer sign held up on two sticks, its bottom edge at (x, y). */
+function cheerSign(ctx: SKRSContext2D, x: number, y: number, text: string, fill: string, ink: string, tilt: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    ctx.font = font('800 9px');
+    const sw = Math.max(34, ctx.measureText(text).width + 10);
+    const sh = 15;
+    ctx.fillStyle = '#c9a26a';
+    ctx.fillRect(-sw * 0.3, 0, 1.6, 9);
+    ctx.fillRect(sw * 0.3 - 1.6, 0, 1.6, 9);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.fillRect(-sw / 2 + 1.5, -sh + 1.5, sw, sh);
+    ctx.fillStyle = fill;
+    ctx.fillRect(-sw / 2, -sh, sw, sh);
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-sw / 2 + 1.5, -sh + 1.5, sw - 3, sh - 3);
+    ctx.fillStyle = ink;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, -sh / 2 + 0.5);
+    ctx.restore();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/**
+ * The audience: classmates sitting on picnic sheets across the back of the
+ * field, as families and classes do at a sports day, from x0 to x1 in rows
+ * whose seats are at each `seat`. Each picture is cut off below the waist
+ * where she sits on the sheet. Every few hold up a cheer sign; now and then
+ * a trainer stands at the back. Skips `gaps`.
+ */
+function seatedAudience(ctx: SKRSContext2D, x0: number, x1: number, rows: { seat: number; h: number; gap: number }[], gaps: [number, number][], chibis: Image[]) {
+    if (chibis.length === 0) return;
+    const sheets = ['#3d7fd6', '#e35d6a', '#3fae6a', '#f2b632'];
+    let pick = 0;
+    rows.forEach((row, r) => {
+        const rand = seeded(500 + r * 37);
+        // The sheets the row sits on: one colour per stretch.
+        const sheetTop = row.seat - row.h * 0.12;
+        const sheetBottom = row.seat + row.h * 0.18;
+        let sx = x0 - 20;
+        let s = r;
+        while (sx < x1 + 20) {
+            const len = 90 + rand() * 80;
+            ctx.fillStyle = sheets[s % sheets.length]!;
+            ctx.beginPath();
+            ctx.moveTo(sx + 6, sheetTop);
+            ctx.lineTo(sx + len - 2, sheetTop);
+            ctx.lineTo(sx + len + 4, sheetBottom);
+            ctx.lineTo(sx, sheetBottom);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+            ctx.fillRect(sx + 4, sheetTop + 1, len - 6, 1.2);
+            sx += len + 6;
+            s += 1;
+        }
+        let k = 0;
+        for (let x = x0; x < x1; x += row.gap * (0.8 + rand() * 0.4)) {
+            if (gaps.some(([a, b]) => x > a && x < b)) continue;
+            const art = chibis[pick % chibis.length]!;
+            pick += 1;
+            // Sitting: only the top of her shows above the seat.
+            const shown = 0.66;
+            const h = row.h * (0.92 + rand() * 0.16);
+            const w = (art.width / art.height) * h;
+            const seat = row.seat + (rand() - 0.5) * 3;
+            ctx.drawImage(art, 0, 0, art.width, art.height * shown, x - w / 2, seat - h * shown, w, h * shown);
+            ctx.fillStyle = 'rgba(30, 30, 50, 0.12)';
+            ctx.beginPath();
+            ctx.ellipse(x, seat + 1, w * 0.4, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            if (k % 4 === 1) {
+                const [text, fill, ink] = CHEER_SIGNS[(pick + r) % CHEER_SIGNS.length]!;
+                cheerSign(ctx, x, seat - h * shown - 2, text, fill, ink, (rand() - 0.5) * 0.25);
+            }
+            k += 1;
+        }
+    });
+}
+
+/**
+ * Classmates and trainers watching from the back of the field, between x0
+ * and x1 with their feet at `base`: the pictures in `mambo-crowd/` (small
+ * chibis of other Umamusume), every third a drawn trainer, every `gap`,
+ * skipping `gaps`, scaled by `size`. `seed` and `offset` vary a second row
+ * so it is not a copy of the first. Without pictures, trainers alone.
+ */
+function crowd(ctx: SKRSContext2D, x0: number, x1: number, base: number, gap: number, gaps: [number, number][], chibis: Image[], size = 1, seed = 907, offset = 0) {
+    const rand = seeded(seed);
+    const ties = ['#c0392b', '#2d6cdf', '#3a8f5a', '#8e44ad', '#d4a017'];
+    let chibi = offset;
+    let k = 0;
+    for (let x = x0; x < x1; x += gap * (0.8 + rand() * 0.4)) {
+        if (gaps.some(([a, b]) => x > a && x < b)) continue;
+        // Mostly classmates; every third a trainer.
+        const useChibi = chibis.length > 0 && k % 3 !== 2;
+        // A little in front or behind, a little bigger or smaller, so it is not a line-up.
+        const depth = rand() * 2 - 1;
+        const feet = base + depth * 5;
+        const scale = (1 + depth * 0.1) * size;
+        if (useChibi) {
+            const art = chibis[chibi % chibis.length]!;
+            chibi += 1;
+            crowdChibi(ctx, art, x, feet, 40 * scale);
+        } else {
+            trainerFigure(ctx, x, feet, 34 * scale, ties[k % ties.length]!, rand() < 0.4, rand() < 0.45);
+        }
+        k += 1;
+    }
+}
+
+/** Pennant colours: her blue and coral, Tracen white. */
+const PENNANTS: readonly string[] = ['#0f8dce', '#ee5b56', '#f7f4ea'];
+
+/** A small gold horseshoe, open end up, centred on (x, y): the Tracen uniform's brooch. */
+function horseshoe(ctx: SKRSContext2D, x: number, y: number, r: number) {
+    ctx.strokeStyle = '#d9b44a';
+    ctx.lineWidth = r * 0.45;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(x, y, r, Math.PI * 0.1, Math.PI * 0.9);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    ctx.fillStyle = '#7a5a10';
+    for (const a of [0.3, 0.5, 0.7]) {
+        ctx.beginPath();
+        ctx.arc(x + Math.cos(Math.PI * a) * r, y + Math.sin(Math.PI * a) * r, r * 0.09, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+/**
+ * A string of Tracen pennants sagging from (x0, y0) to (x1, y1) by `sag`:
+ * triangles in her blue and coral and Tracen white, each with a gold
+ * horseshoe, the school's emblem on its uniform brooch.
+ */
+function pennantString(ctx: SKRSContext2D, x0: number, y0: number, x1: number, y1: number, sag: number) {
+    const at = (t: number) => ({ x: x0 + (x1 - x0) * t, y: y0 + (y1 - y0) * t + Math.sin(t * Math.PI) * sag });
+    ctx.strokeStyle = 'rgba(60, 60, 70, 0.6)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    for (let i = 0; i <= 40; i += 1) {
+        const p = at(i / 40);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+    const count = Math.max(4, Math.round(Math.abs(x1 - x0) / 30));
+    for (let i = 1; i < count; i += 1) {
+        const p = at(i / count);
+        const colour = PENNANTS[i % PENNANTS.length]!;
+        ctx.fillStyle = colour;
+        ctx.beginPath();
+        ctx.moveTo(p.x - 9, p.y);
+        ctx.lineTo(p.x + 9, p.y);
+        ctx.lineTo(p.x, p.y + 20);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+        horseshoe(ctx, p.x, p.y + 4.5, 3.6);
+    }
+}
+
+/** Tracen's motto on a cloth banner hung across (cx, y): "Eclipse first, the rest nowhere." */
+function mottoBanner(ctx: SKRSContext2D, cx: number, y: number, wide: boolean) {
+    const text = 'Eclipse first, the rest nowhere.';
+    ctx.font = font(`700 ${wide ? 11 : 10}px`);
+    const bw = ctx.measureText(text).width + 28;
+    const bh = 18;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.fillRect(cx - bw / 2 + 2, y + 2, bw, bh);
+    ctx.fillStyle = '#f7f4ea';
+    ctx.fillRect(cx - bw / 2, y, bw, bh);
+    ctx.fillStyle = '#2d3f78';
+    ctx.fillRect(cx - bw / 2, y, bw, 3);
+    ctx.fillRect(cx - bw / 2, y + bh - 3, bw, 3);
+    horseshoe(ctx, cx - bw / 2 + 9, y + bh / 2 - 1, 3.2);
+    horseshoe(ctx, cx + bw / 2 - 9, y + bh / 2 - 1, 3.2);
+    ctx.fillStyle = '#2d3f78';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, cx, y + bh / 2 + 0.5);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/**
+ * The Three Goddesses statue on its plinth, bronze gone green: Tracen's
+ * statue of the three founding sires, where trainees inherit.
+ */
+function threeGoddesses(ctx: SKRSContext2D, x: number, base: number, s: number) {
+    // A stepped stone plinth.
+    ctx.fillStyle = '#a9a396';
+    ctx.fillRect(x - s * 0.95, base - s * 0.18, s * 1.9, s * 0.18);
+    ctx.fillStyle = '#c4beb0';
+    ctx.fillRect(x - s * 0.75, base - s * 0.42, s * 1.5, s * 0.24);
+    ctx.fillStyle = '#d6d1c4';
+    ctx.fillRect(x - s * 0.6, base - s * 0.5, s * 1.2, s * 0.08);
+    const foot = base - s * 0.5;
+    const bronze = '#5f8a74';
+    const light = '#86b09a';
+    // Three robed figures, back to back, the middle one tallest, arms raised.
+    const figure = (fx: number, h: number, arm: -1 | 0 | 1) => {
+        ctx.fillStyle = bronze;
+        ctx.beginPath();
+        ctx.moveTo(fx - s * 0.22, foot);
+        ctx.quadraticCurveTo(fx - s * 0.16, foot - h * 0.45, fx - s * 0.08, foot - h * 0.8);
+        ctx.lineTo(fx + s * 0.08, foot - h * 0.8);
+        ctx.quadraticCurveTo(fx + s * 0.16, foot - h * 0.45, fx + s * 0.22, foot);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(fx, foot - h * 0.88, s * 0.085, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = bronze;
+        ctx.lineWidth = s * 0.055;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(fx, foot - h * 0.72);
+        if (arm === 0) ctx.lineTo(fx, foot - h * 1.12);
+        else ctx.lineTo(fx + arm * s * 0.3, foot - h * 1.0);
+        ctx.stroke();
+        ctx.lineCap = 'butt';
+        ctx.fillStyle = light;
+        ctx.fillRect(fx - s * 0.05, foot - h * 0.75, s * 0.025, h * 0.6);
+    };
+    figure(x - s * 0.36, s * 0.95, -1);
+    figure(x + s * 0.36, s * 0.95, 1);
+    figure(x, s * 1.15, 0);
+}
+
+/** The sun with soft rays, fading as the sky clouds over. */
+function sun(ctx: SKRSContext2D, x: number, y: number, r: number, alpha: number) {
+    if (alpha <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const glow = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 3.2);
+    glow.addColorStop(0, 'rgba(255, 244, 190, 0.7)');
+    glow.addColorStop(1, 'rgba(255, 244, 190, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 236, 150, 0.55)';
+    for (let i = 0; i < 12; i += 1) {
+        const a = (i / 12) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a - 0.08) * r * 1.25, y + Math.sin(a - 0.08) * r * 1.25);
+        ctx.lineTo(x + Math.cos(a) * r * 2.1, y + Math.sin(a) * r * 2.1);
+        ctx.lineTo(x + Math.cos(a + 0.08) * r * 1.25, y + Math.sin(a + 0.08) * r * 1.25);
+        ctx.fill();
+    }
+    const disc = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 0, x, y, r);
+    disc.addColorStop(0, '#fffbe0');
+    disc.addColorStop(1, '#ffd84d');
+    ctx.fillStyle = disc;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/** The school behind the field: cream walls, a blue roof, rows of windows and a clock. */
+function school(ctx: SKRSContext2D, x0: number, x1: number, base: number, height: number) {
+    const w = x1 - x0;
+    ctx.fillStyle = '#efe7d6';
+    ctx.fillRect(x0, base - height, w, height);
+    ctx.fillStyle = '#e2d7c0';
+    ctx.fillRect(x0, base - height * 0.18, w, height * 0.18);
+    ctx.fillStyle = '#5b7fa8';
+    ctx.fillRect(x0 - 3, base - height - 4, w + 6, 5);
+    // A clock tower in the middle.
+    const tx = x0 + w / 2;
+    const tw = Math.min(34, w * 0.14);
+    ctx.fillStyle = '#efe7d6';
+    ctx.fillRect(tx - tw / 2, base - height - 18, tw, 18);
+    ctx.fillStyle = '#5b7fa8';
+    ctx.beginPath();
+    ctx.moveTo(tx - tw / 2 - 3, base - height - 18);
+    ctx.lineTo(tx, base - height - 30);
+    ctx.lineTo(tx + tw / 2 + 3, base - height - 18);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(tx, base - height - 9, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#3b4a5e';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(tx, base - height - 9);
+    ctx.lineTo(tx, base - height - 13);
+    ctx.moveTo(tx, base - height - 9);
+    ctx.lineTo(tx + 3, base - height - 8);
+    ctx.stroke();
+    // Two rows of windows.
+    ctx.fillStyle = '#9fc3dd';
+    for (const row of [0.22, 0.52]) {
+        for (let x = x0 + 8; x + 12 < x1 - 4; x += 20) {
+            if (Math.abs(x + 6 - tx) < tw / 2 + 4) continue;
+            ctx.fillRect(x, base - height + height * row, 12, height * 0.2);
+        }
+    }
+}
+
+/** A round tree at the edge of the field. */
+function tree(ctx: SKRSContext2D, x: number, base: number, r: number) {
+    ctx.fillStyle = '#7a5a3a';
+    ctx.fillRect(x - 1.5, base - r * 0.8, 3, r * 0.8);
+    for (const [dx, dy, rr, c] of [[-0.45, -1.1, 0.7, '#4f9d5c'], [0.45, -1.15, 0.7, '#4f9d5c'], [0, -1.6, 0.8, '#5fb06a']] as const) {
+        ctx.fillStyle = c;
+        ctx.beginPath();
+        ctx.arc(x + dx * r, base + dy * r, rr * r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+/**
+ * The cheer tent: a roof striped in her coral and white, two poles, shade
+ * beneath, and a long cheer banner with her tagline across the front.
+ */
+function cheerTent(ctx: SKRSContext2D, x0: number, x1: number, top: number, ground: number) {
+    const w = x1 - x0;
+    const roofBottom = top + 16;
+    ctx.fillStyle = 'rgba(40, 30, 20, 0.18)';
+    ctx.fillRect(x0 + 4, roofBottom, w - 8, ground - roofBottom);
+    ctx.fillStyle = '#8a8f99';
+    ctx.fillRect(x0 + 4, roofBottom, 2.5, ground - roofBottom);
+    ctx.fillRect(x1 - 6.5, roofBottom, 2.5, ground - roofBottom);
+    const stripes = Math.max(6, Math.round(w / 22));
+    for (let i = 0; i < stripes; i += 1) {
+        const a = x0 + (w * i) / stripes;
+        const b = x0 + (w * (i + 1)) / stripes;
+        ctx.fillStyle = i % 2 === 0 ? '#ee5b56' : '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(a + (w / 2 - (a - x0)) * 0.12, top);
+        ctx.lineTo(b + (w / 2 - (b - x0)) * 0.12, top);
+        ctx.lineTo(b, roofBottom);
+        ctx.lineTo(a, roofBottom);
+        ctx.fill();
+    }
+    // Scalloped valance.
+    for (let i = 0; i < stripes; i += 1) {
+        ctx.fillStyle = i % 2 === 0 ? '#ee5b56' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x0 + (w * (i + 0.5)) / stripes, roofBottom, w / stripes / 2, 0, Math.PI);
+        ctx.fill();
+    }
+    // The cheer banner: her tagline.
+    const by = roofBottom + 9;
+    const bh = 15;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x0 + 10, by, w - 20, bh);
+    ctx.strokeStyle = '#0f8dce';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x0 + 10, by, w - 20, bh);
+    ctx.fillStyle = '#0a6aa3';
+    ctx.font = font(`700 ${w > 200 ? 11 : 9.5}px`);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('TALENT TAKES TIME!', x0 + w / 2, by + bh / 2 + 0.5);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** An orange cat sitting, tail curled round: Hachimi, watching from the roof. */
+function sittingCat(ctx: SKRSContext2D, x: number, base: number, s: number) {
+    ctx.fillStyle = '#f0a24a';
+    ctx.beginPath();
+    ctx.ellipse(x, base - s * 0.45, s * 0.42, s * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + s * 0.05, base - s * 1.05, s * 0.32, 0, Math.PI * 2);
+    ctx.fill();
+    for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(x + s * 0.05 + side * s * 0.12, base - s * 1.3);
+        ctx.lineTo(x + s * 0.05 + side * s * 0.3, base - s * 1.5);
+        ctx.lineTo(x + s * 0.05 + side * s * 0.3, base - s * 1.18);
+        ctx.fill();
+    }
+    ctx.strokeStyle = '#f0a24a';
+    ctx.lineWidth = s * 0.14;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.35, base - s * 0.15);
+    ctx.quadraticCurveTo(x - s * 0.9, base - s * 0.3, x - s * 0.7, base - s * 0.85);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    ctx.fillStyle = '#c97a2a';
+    ctx.fillRect(x - s * 0.2, base - s * 0.7, s * 0.4, s * 0.06);
+    ctx.fillStyle = '#3a2a1a';
+    ctx.beginPath();
+    ctx.arc(x - s * 0.06, base - s * 1.08, s * 0.04, 0, Math.PI * 2);
+    ctx.arc(x + s * 0.16, base - s * 1.08, s * 0.04, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/** A chicken loose on the field, facing `dir`; pecking puts its head down. */
+function chicken(ctx: SKRSContext2D, x: number, ground: number, s: number, dir: 1 | -1, pecking: boolean) {
+    ctx.save();
+    ctx.translate(x, ground);
+    ctx.scale(dir, 1);
+    ctx.strokeStyle = '#e08a1e';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.1, -s * 0.35);
+    ctx.lineTo(-s * 0.12, 0);
+    ctx.moveTo(s * 0.12, -s * 0.35);
+    ctx.lineTo(s * 0.1, 0);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s * 0.5, s * 0.08, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Tail, body, wing.
+    ctx.fillStyle = '#f4f1ea';
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.4, -s * 0.6);
+    ctx.lineTo(-s * 0.72, -s * 1.0);
+    ctx.lineTo(-s * 0.55, -s * 0.5);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(0, -s * 0.55, s * 0.48, s * 0.3, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(120, 110, 100, 0.5)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.ellipse(-s * 0.05, -s * 0.55, s * 0.25, s * 0.14, -0.2, 0, Math.PI * 2);
+    ctx.stroke();
+    // Head: up, or down to the ground.
+    const hx = pecking ? s * 0.55 : s * 0.38;
+    const hy = pecking ? -s * 0.25 : -s * 0.95;
+    ctx.fillStyle = '#f4f1ea';
+    ctx.beginPath();
+    ctx.arc(hx, hy, s * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#e23a2e';
+    ctx.beginPath();
+    ctx.arc(hx - s * 0.04, hy - s * 0.2, s * 0.08, 0, Math.PI * 2);
+    ctx.arc(hx + s * 0.08, hy - s * 0.18, s * 0.07, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(hx + s * 0.12, hy + s * 0.17, s * 0.04, s * 0.07, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f0a020';
+    ctx.beginPath();
+    ctx.moveTo(hx + s * 0.18, hy - s * 0.04);
+    ctx.lineTo(hx + s * 0.34, hy + s * 0.02);
+    ctx.lineTo(hx + s * 0.18, hy + s * 0.07);
+    ctx.fill();
+    ctx.fillStyle = '#222';
+    ctx.beginPath();
+    ctx.arc(hx + s * 0.07, hy - s * 0.04, s * 0.035, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/** The tug-of-war rope's height at `x`: a gentle sag between its two poles. */
+function ropeY(x: number, x0: number, x1: number, y: number): number {
+    const t = (x - x0) / (x1 - x0);
+    return y + Math.sin(Math.max(0, Math.min(1, t)) * Math.PI) * 5;
+}
+
+/** A thick braided rope from x0 to x1, sagging at `y`. */
+function tugRope(ctx: SKRSContext2D, x0: number, x1: number, y: number) {
+    const steps = Math.ceil((x1 - x0) / 4);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(60, 40, 20, 0.2)';
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i += 1) {
+        const x = x0 + ((x1 - x0) * i) / steps;
+        if (i === 0) ctx.moveTo(x, ropeY(x, x0, x1, y) + 3);
+        else ctx.lineTo(x, ropeY(x, x0, x1, y) + 3);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = '#d6b479';
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i += 1) {
+        const x = x0 + ((x1 - x0) * i) / steps;
+        if (i === 0) ctx.moveTo(x, ropeY(x, x0, x1, y));
+        else ctx.lineTo(x, ropeY(x, x0, x1, y));
+    }
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    // The braid.
+    ctx.strokeStyle = 'rgba(120, 85, 40, 0.55)';
+    ctx.lineWidth = 1.1;
+    for (let x = x0 + 3; x < x1 - 3; x += 6) {
+        const yy = ropeY(x, x0, x1, y);
+        ctx.beginPath();
+        ctx.moveTo(x - 2.4, yy - 3.8);
+        ctx.lineTo(x + 2.4, yy + 3.8);
+        ctx.stroke();
+    }
+}
+
+/** A team pole at the rope's end, with its rank on a banner in the team colour. */
+function teamPole(ctx: SKRSContext2D, x: number, ground: number, colour: string, label: string, side: -1 | 1) {
+    ctx.fillStyle = '#9aa0aa';
+    ctx.fillRect(x - 1.5, ground - 52, 3, 52);
+    ctx.fillStyle = '#ffd23a';
+    ctx.beginPath();
+    ctx.arc(x, ground - 53, 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = font('700 12px');
+    const tw = ctx.measureText(label).width + 16;
+    const bx = side < 0 ? x : x - tw;
+    ctx.fillStyle = colour;
+    ctx.beginPath();
+    ctx.roundRect(bx, ground - 50, tw, 20, 3);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, bx + tw / 2, ground - 39.5);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** Her ribbon bow (her emoji), tied on the rope at the club's place. */
+function ribbonBow(ctx: SKRSContext2D, x: number, y: number, s: number) {
+    ctx.fillStyle = '#e8578f';
+    for (const side of [-1, 1]) {
+        // Tails, then loops.
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + side * s * 0.35, y + s * 0.9);
+        ctx.lineTo(x + side * s * 0.12, y + s * 0.75);
+        ctx.fill();
+    }
+    ctx.fillStyle = '#f48fb1';
+    for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.bezierCurveTo(x + side * s * 0.9, y - s * 0.7, x + side * s * 1.0, y + s * 0.5, x, y);
+        ctx.fill();
+    }
+    ctx.strokeStyle = '#d6467d';
+    ctx.lineWidth = 0.9;
+    for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.bezierCurveTo(x + side * s * 0.9, y - s * 0.7, x + side * s * 1.0, y + s * 0.5, x, y);
+        ctx.stroke();
+    }
+    ctx.fillStyle = '#e8578f';
+    ctx.beginPath();
+    ctx.arc(x, y, s * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.beginPath();
+    ctx.ellipse(x - s * 0.45, y - s * 0.18, s * 0.14, s * 0.07, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/**
+ * A cheerleading pom-pom, radius `r`, in `colour`: a few hundred thin
+ * glossy strips fanning out from its handle at the centre, the inner ones
+ * in shadow and the outer ones lit, each strip curling a little and
+ * catching a glint of light, as the real vinyl ones do. `light` is the lit
+ * tint.
+ */
+function pomPom(ctx: SKRSContext2D, x: number, y: number, r: number, colour: string, light: string, seed: number) {
+    const rand = seeded(seed);
+    const dark = mix(colour, '#000000', 0.45);
+    // A soft shadowed core so the gaps between strips read as depth.
+    const core = ctx.createRadialGradient(x, y, 0, x, y, r * 0.95);
+    core.addColorStop(0, rgba(dark, 0.95));
+    core.addColorStop(1, rgba(dark, 0));
+    ctx.fillStyle = core;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.95, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineCap = 'round';
+    const strips = Math.round(180 + r * 9);
+    // Back to front: short shadowed strips first, long lit ones over them.
+    const order = Array.from({ length: strips }, (_, i) => ({ i, depth: rand() }));
+    order.sort((p, q) => p.depth - q.depth);
+    for (const { depth } of order) {
+        const angle = rand() * Math.PI * 2;
+        const len = r * (0.7 + 0.3 * depth) * (0.9 + rand() * 0.2);
+        const curl = (rand() - 0.5) * 1.6;
+        const ex = x + Math.cos(angle) * len;
+        const ey = y + Math.sin(angle) * len;
+        const cx = x + Math.cos(angle + curl * 0.5) * len * 0.6;
+        const cy = y + Math.sin(angle + curl * 0.5) * len * 0.6;
+        // Lit from the upper left: strips pointing that way are brighter.
+        const facing = (Math.cos(angle + Math.PI * 0.75) + 1) / 2;
+        const tone = mix(mix(dark, colour, Math.min(1, depth * 1.4)), light, Math.max(0, depth - 0.45) * facing * 1.4);
+        const g = ctx.createLinearGradient(x, y, ex, ey);
+        g.addColorStop(0, dark);
+        g.addColorStop(0.45, tone);
+        g.addColorStop(1, mix(tone, '#ffffff', 0.18 * facing));
+        ctx.strokeStyle = g;
+        ctx.lineWidth = Math.max(1.4, r * 0.1) * (0.7 + rand() * 0.6);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(cx, cy, ex, ey);
+        ctx.stroke();
+        // A glint near the tip of the front strips.
+        if (depth > 0.7 && rand() < 0.35) {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + facing * 0.45})`;
+            ctx.lineWidth = Math.max(0.6, r * 0.03);
+            const t0 = 0.6 + rand() * 0.2;
+            ctx.beginPath();
+            ctx.moveTo(x + (ex - x) * t0, y + (ey - y) * t0);
+            ctx.lineTo(x + (ex - x) * (t0 + 0.15), y + (ey - y) * (t0 + 0.15));
+            ctx.stroke();
+        }
+    }
+    ctx.lineCap = 'butt';
+}
+
+/** Her newsboy cap, blue-purple with a white brim and a pink ribbon, lying where it fell. */
+function fallenHat(ctx: SKRSContext2D, x: number, ground: number, s: number) {
+    ctx.save();
+    ctx.translate(x, ground);
+    ctx.rotate(-0.25);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.ellipse(0, 1, s * 1.1, s * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(s * 0.55, -s * 0.05, s * 0.55, s * 0.16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#6a63b8';
+    ctx.beginPath();
+    ctx.ellipse(-s * 0.05, -s * 0.32, s * 0.75, s * 0.42, 0, Math.PI, 0);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.1, -s * 0.72);
+    ctx.lineTo(s * 0.05, -s * 0.5);
+    ctx.lineTo(-s * 0.1, -s * 0.36);
+    ctx.lineTo(-s * 0.25, -s * 0.5);
+    ctx.fill();
+    ctx.fillStyle = '#f48fb1';
+    ctx.fillRect(-s * 0.75, -s * 0.38, s * 1.4, s * 0.12);
+    ctx.restore();
+}
+
+/** A rain cloud of her own, dark and dripping: her bad luck. */
+function rainCloud(ctx: SKRSContext2D, x: number, y: number, s: number) {
+    ctx.fillStyle = '#6b7380';
+    for (const [dx, dy, r] of [[-0.55, 0.05, 0.42], [0, -0.2, 0.55], [0.55, 0.05, 0.42], [0, 0.15, 0.5]] as const) {
+        ctx.beginPath();
+        ctx.arc(x + dx * s, y + dy * s, r * s, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.strokeStyle = 'rgba(120, 170, 230, 0.85)';
+    ctx.lineWidth = 1.3;
+    ctx.lineCap = 'round';
+    const rand = seeded(9);
+    for (let i = 0; i < 9; i += 1) {
+        const rx = x + (rand() - 0.5) * s * 1.6;
+        const ry = y + s * 0.6 + rand() * s * 1.4;
+        ctx.beginPath();
+        ctx.moveTo(rx, ry);
+        ctx.lineTo(rx - 1.5, ry + 6);
+        ctx.stroke();
+    }
+    ctx.lineCap = 'butt';
+}
+
+/** A small spider let down on its thread from `top` to `y`: she hates real spiders. */
+function danglingSpider(ctx: SKRSContext2D, x: number, top: number, y: number) {
+    ctx.strokeStyle = 'rgba(80, 80, 90, 0.7)';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(1.6, 1.6);
+    ctx.translate(-x, -y);
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 0.9;
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 4; i += 1) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + 2);
+            ctx.quadraticCurveTo(x + side * 4, y - 1 + i * 2, x + side * 5.5, y + 2 + i * 2.2);
+            ctx.stroke();
+        }
+    }
+    ctx.fillStyle = '#222';
+    ctx.beginPath();
+    ctx.arc(x, y + 3, 2.6, 0, Math.PI * 2);
+    ctx.arc(x, y, 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
+ * Children watching from the far edge of the field in red and white caps,
+ * as every school sports day has, from x0 to x1 along `y`, skipping `gaps`.
+ */
+function capRow(ctx: SKRSContext2D, x0: number, x1: number, y: number, gaps: [number, number][]) {
+    const rand = seeded(61);
+    let team = 0;
+    for (let x = x0; x < x1; x += 9 + rand() * 2) {
+        if (gaps.some(([a, b]) => x > a && x < b)) continue;
+        if (rand() < 0.12) team = 1 - team;
+        const hy = y - rand() * 1.5;
+        ctx.fillStyle = '#f6f2ea';
+        ctx.fillRect(x - 3, hy + 2, 6, 5);
+        ctx.fillStyle = '#f2cfae';
+        ctx.beginPath();
+        ctx.arc(x, hy, 3.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = team === 0 ? '#e0453f' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x, hy - 0.8, 3.5, Math.PI, 0);
+        ctx.fill();
+        ctx.fillRect(x - 0.5, hy - 1.2, 4.6, 1.2);
+    }
+}
+
+/**
+ * Mambo (Matikanetannhauser) at the school sports day, cheering for the
+ * club. The band: a blue sky with the sun, clouds and strings of Tracen
+ * pennants (gold horseshoes, from the uniform brooch) under the school
+ * motto, "Eclipse first, the rest nowhere."; the school, trees and the
+ * Three Goddesses statue at the horizon; her cheer tent with "Talent
+ * Takes Time" across it and a cat (Hachimi) on the roof; a dirt field with
+ * chalk lines and chickens loose on it.
+ *
+ * The rank band is a tug-of-war: a rope between the bottom cutoff's coral
+ * team pole and the next rank's blue one, her ribbon bow tied on at the
+ * club's place, chalk ticks every tenth beneath, and her standing on it.
+ *
+ * Her mood follows the share behind, as a comedy: sunny with confetti and
+ * "Mambo~♪ Wasshoi!" when all is well; clouding over and "This time for
+ * sure!" in between; at her worst, her own rain cloud, her hat on the
+ * ground, a spider let down beside her, and "Wah—!? Not again…".
+ */
+function drawMambo(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null, crowdArt: Image[] = []) {
+    const floor = hero - 10;
+    const horizon = Math.round(hero * 0.56);
+    const wide = w > 1200;
+    // Today's classmates: a different draw from the pictures each day.
+    crowdArt = dailyPick(crowdArt, 80);
+
+    // Sky, greying as she turns.
+    const sky = ctx.createLinearGradient(0, 0, 0, horizon);
+    sky.addColorStop(0, mix('#4aa8e6', '#7f8fa3', mood * 0.75));
+    sky.addColorStop(1, mix('#c4e9ff', '#d3d9e1', mood * 0.75));
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, horizon + 2);
+    sun(ctx, w * (wide ? 0.82 : 0.8), 30, wide ? 14 : 12, 1 - mood * 1.1);
+    const rand = seeded(415);
+    ctx.save();
+    ctx.filter = mood > 0 ? `grayscale(${Math.min(1, mood * 1.2)}) brightness(${1 - mood * 0.25})` : 'none';
+    const clouds = wide ? 6 : 4;
+    for (let i = 0; i < clouds + Math.round(mood * 3); i += 1) cloud(ctx, w * (0.08 + rand() * 0.84), 16 + rand() * (horizon - 44), 22 + rand() * 14, rand);
+    ctx.restore();
+
+    // The horizon: trees, the school, and the Three Goddesses in front of it.
+    for (let x = 12; x < w; x += 46 + ((x * 7) % 30)) tree(ctx, x, horizon + 2, 9 + ((x * 13) % 5));
+    school(ctx, w * (wide ? 0.6 : 0.56), w * (wide ? 0.9 : 0.94), horizon + 2, horizon * 0.42);
+    threeGoddesses(ctx, w * (wide ? 0.42 : 0.44), horizon + 4, 34);
+
+    // The field: packed dirt with chalk lane lines, a grass edge at the horizon.
+    // The field runs down past the band, round the cards, deepening as it goes.
+    const dirt = ctx.createLinearGradient(0, horizon, 0, h);
+    const fieldEnd = Math.min(0.99, (hero - horizon) / (h - horizon));
+    dirt.addColorStop(0, mix('#e6c99a', '#bfa480', mood * 0.6));
+    dirt.addColorStop(fieldEnd, mix('#d4a86c', '#a88a62', mood * 0.6));
+    dirt.addColorStop(1, mix('#9a7650', '#7a6248', mood * 0.6));
+    ctx.fillStyle = dirt;
+    ctx.fillRect(0, horizon + 2, w, h - horizon);
+    ctx.fillStyle = '#6fb86e';
+    ctx.fillRect(0, horizon, w, 4);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.lineWidth = 1.6;
+    for (const [lift, curve] of [[0.25, 10], [0.55, 16], [0.85, 22]] as const) {
+        const y = horizon + 4 + (floor - horizon - 4) * lift;
+        ctx.beginPath();
+        ctx.moveTo(-10, y + curve);
+        ctx.quadraticCurveTo(w / 2, y - curve, w + 10, y + curve);
+        ctx.stroke();
+    }
+
+    // Her cheer tent, with Hachimi on the roof.
+    const tentX0 = SIDE + (wide ? 120 : 100);
+    const tentX1 = tentX0 + (wide ? 260 : 180);
+    const tentTop = horizon - 34;
+    // The children along the far edge, then the tent over them.
+    capRow(ctx, 6, w - 6, horizon + 9, [[tentX0 - 6, tentX1 + 6]]);
+    cheerTent(ctx, tentX0, tentX1, tentTop, horizon + 26);
+    sittingCat(ctx, tentX0 + (tentX1 - tentX0) * 0.72, tentTop + 4, 19);
+
+    // Flag strings from a pole in the middle down to either edge.
+    ctx.fillStyle = '#9aa0aa';
+    ctx.fillRect(w / 2 - 1.5, 0, 3, horizon + 4);
+    pennantString(ctx, w / 2, 4, -10, 30, 22);
+    pennantString(ctx, w / 2, 4, w + 10, 30, 22);
+    mottoBanner(ctx, w / 2, 8, wide);
+
+    // The tug-of-war.
+    const ropeLevel = floor - 16;
+    const x0 = SIDE + 26;
+    const x1 = w - SIDE - 26;
+    let herX = w * 0.5;
+    if (race) herX = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
+    // The audience sitting on picnic sheets across the back of the field,
+    // a backdrop for her; without pictures, trainers stand there instead.
+    if (crowdArt.length > 0) {
+        seatedAudience(ctx, x0 + 70, x1 - 70, [
+            { seat: horizon + 30, h: 34, gap: wide ? 22 : 21 },
+            { seat: horizon + 50, h: 42, gap: wide ? 27 : 26 },
+        ], [[tentX0 - 8, tentX1 + 8]], crowdArt);
+    } else {
+        crowd(ctx, x0 + 95, x1 - 95, horizon + 42, wide ? 74 : 66, [[tentX0 - 20, tentX1 + 20], [herX - 70, herX + 70]], crowdArt);
+    }
+    if (race) {
+        // Chalk ticks every tenth, under the rope.
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 1.4;
+        for (let i = 1; i < 10; i += 1) {
+            const x = x0 + ((x1 - x0) * i) / 10;
+            ctx.beginPath();
+            ctx.moveTo(x, floor - 5);
+            ctx.lineTo(x, floor - (i === 5 ? 1 : 3));
+            ctx.stroke();
+        }
+        tugRope(ctx, x0, x1, ropeLevel);
+        teamPole(ctx, x0, floor, '#d9443f', race.start, -1);
+        teamPole(ctx, x1, floor, '#0a6aa3', race.finish, 1);
+    }
+
+    // Chickens loose on the field, kept clear of her.
+    const spots = [w * 0.22, w * 0.4, w * 0.78].filter((x) => Math.abs(x - herX) > 60);
+    spots.forEach((x, i) => chicken(ctx, x, floor - 22 - (i % 2) * 6, 19, i % 2 === 0 ? 1 : -1, i === 1));
+    // One at her feet.
+    if (herX + 60 < x1 - 20) chicken(ctx, herX + 60, floor - 3, 16, -1, false);
+
+    // Confetti bursting round her while all is well.
+    if (mood < 0.34) {
+        const c = seeded(88);
+        for (let i = 0; i < 18; i += 1) {
+            const a = c() * Math.PI * 2;
+            const r = 30 + c() * 50;
+            drawPiece(ctx, herX + Math.cos(a) * r * 1.4, floor - 70 + Math.sin(a) * r * 0.6, 0.3 + c() * 0.3, c);
+        }
+    }
+
+    // Her, on the bow; until her picture exists, her pom-poms.
+    let faceY = floor - 52;
+    let reach = 40;
+    if (race) ribbonBow(ctx, herX, ropeY(herX, x0, x1, ropeLevel), 17);
+    if (art) {
+        // Big, front and centre: she is the cheerleader.
+        const artH = hero - 6;
+        const artW = (art.width / art.height) * artH;
+        const footY = floor + 4;
+        ctx.fillStyle = 'rgba(60, 40, 20, 0.22)';
+        ctx.beginPath();
+        ctx.ellipse(herX, footY, artW * 0.38, 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.drawImage(art, herX - artW / 2, footY - artH, artW, artH);
+        // Pom-poms in her hands, which are up behind her head on either side.
+        const handY = footY - artH * 0.52;
+        const pom = artW * 0.24;
+        pomPom(ctx, herX - artW * 0.46, handY, pom, '#0f8dce', '#bfe4ff', 21);
+        pomPom(ctx, herX + artW * 0.46, handY, pom, '#ee5b56', '#ffd0cc', 22);
+        faceY = footY - artH * 0.62;
+        reach = artW / 2 + pom * 0.6 + 10;
+    } else {
+        const bounce = mood < 0.34 ? 14 : 0;
+        pomPom(ctx, herX - 34, floor - 96 - bounce, 30, '#0f8dce', '#bfe4ff', 21);
+        pomPom(ctx, herX + 34, floor - 96 - bounce, 30, '#ee5b56', '#ffd0cc', 22);
+        faceY = floor - 104 - bounce;
+    }
+
+    // At her worst: her own rain cloud, her hat on the ground, a spider beside her.
+    if (mood >= 0.67) {
+        rainCloud(ctx, herX, Math.max(22, faceY - 46), 22);
+        // Her cap on the ground, unless her picture is wearing it.
+        if (!art) fallenHat(ctx, herX - 48, floor - 2, 17);
+        danglingSpider(ctx, herX + reach + 14, 30, faceY + 10);
+    }
+
+    const line = mood < 0.34 ? 'Mambo~♪ Wasshoi!' : mood < 0.67 ? 'This time for sure!' : 'Wah—!? Not again…';
+    const bw = bubbleWidth(ctx, line);
+    const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
+    speechBubble(ctx, bubbleX, 26, line, 0);
+}
+
+// ─── Nice Nature ──────────────────────────────────────────────────────────────
+
+/**
+ * Her picture for `mood`: `nature-calm.png`, `nature-uneasy.png` or
+ * `nature-yandere.png` (the same thirds as her lines), else `nature.png`,
+ * else none (the scene then sets out a bowl of oden in her place).
+ */
+async function naturePose(mood: number): Promise<Image | null> {
+    const pose = mood < 0.34 ? 'calm' : mood < 0.67 ? 'uneasy' : 'yandere';
+    return (await sceneArt(`nature-${pose}`)) ?? sceneArt('nature');
+}
+
+/**
+ * An origami crane, `s` across, facing right, in `colour` with a darker
+ * fold: the paper cranes fans brought the real Nice Nature, folded the way
+ * she folds them.
+ */
+function paperCrane(ctx: SKRSContext2D, x: number, y: number, s: number, colour: string, fold: string, tilt: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    const p = (px: number, py: number): [number, number] => [px * s, py * s];
+    const shape = (colourOf: string, pts: [number, number][]) => {
+        ctx.fillStyle = colourOf;
+        ctx.beginPath();
+        ctx.moveTo(...pts[0]!);
+        for (const pt of pts.slice(1)) ctx.lineTo(...pt);
+        ctx.closePath();
+        ctx.fill();
+    };
+    // Far wing (shaded), tail, neck and head, body, near wing raised.
+    shape(fold, [p(0.02, -0.04), p(0.22, -0.04), p(0.16, -0.66)]);
+    shape(fold, [p(-0.12, 0.02), p(-0.24, 0.06), p(-0.52, -0.42)]);
+    shape(fold, [p(0.14, 0.02), p(0.26, 0.06), p(0.5, -0.46)]);
+    shape(fold, [p(0.5, -0.46), p(0.47, -0.39), p(0.64, -0.38)]);
+    shape(colour, [p(-0.26, 0.02), p(0, -0.12), p(0.28, 0.02), p(0, 0.2)]);
+    shape(colour, [p(-0.08, -0.04), p(0.14, -0.04), p(-0.18, -0.78)]);
+    ctx.restore();
+}
+
+/** A square of origami paper, not folded yet, hanging by a corner. */
+function paperSquare(ctx: SKRSContext2D, x: number, y: number, s: number, colour: string, tilt: number) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(Math.PI / 4 + tilt);
+    ctx.fillStyle = colour;
+    ctx.globalAlpha = 0.8;
+    ctx.fillRect(0, 0, s * 0.42, s * 0.42);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(s * 0.42, s * 0.42);
+    ctx.stroke();
+    ctx.restore();
+}
+
+/**
+ * The crane garland across the bar: a string from x0 to x1 at `y`, cranes
+ * folded in her green and red up to `upTo` (the club's place), flat paper
+ * squares beyond it.
+ */
+function craneGarland(ctx: SKRSContext2D, x0: number, x1: number, y: number, upTo: number | null) {
+    const at = (x: number) => y + Math.sin(((x - x0) / (x1 - x0)) * Math.PI) * 16;
+    ctx.strokeStyle = 'rgba(230, 215, 190, 0.55)';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    for (let x = x0; x <= x1; x += 6) {
+        if (x === x0) ctx.moveTo(x, at(x));
+        else ctx.lineTo(x, at(x));
+    }
+    ctx.stroke();
+    const rand = seeded(1203);
+    let i = 0;
+    for (let x = x0 + 18; x < x1 - 10; x += 38) {
+        const hang = 8 + (i % 2) * 7;
+        const cy = at(x) + hang;
+        ctx.strokeStyle = 'rgba(230, 215, 190, 0.45)';
+        ctx.beginPath();
+        ctx.moveTo(x, at(x));
+        ctx.lineTo(x, cy);
+        ctx.stroke();
+        const green = i % 2 === 0;
+        if (upTo === null || x < upTo - 4) paperCrane(ctx, x, cy + 20, 32, green ? '#3fbf72' : '#d9433b', green ? '#23874d' : '#9c241f', (rand() - 0.5) * 0.25);
+        else paperSquare(ctx, x, cy, 30, green ? '#3fbf72' : '#d9433b', (rand() - 0.5) * 0.4);
+        i += 1;
+    }
+}
+
+/** A red paper lantern (akachōchin) with "おでん" down it, glowing. */
+function redLantern(ctx: SKRSContext2D, x: number, top: number, h: number) {
+    const w = h * 0.62;
+    const glow = ctx.createRadialGradient(x, top + h / 2, 0, x, top + h / 2, h * 1.3);
+    glow.addColorStop(0, 'rgba(255, 120, 70, 0.35)');
+    glow.addColorStop(1, 'rgba(255, 120, 70, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, top + h / 2, h * 1.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2a1a12';
+    ctx.fillRect(x - w * 0.3, top - 3, w * 0.6, 4);
+    ctx.fillRect(x - w * 0.3, top + h - 1, w * 0.6, 4);
+    const body = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0);
+    body.addColorStop(0, '#9e1d16');
+    body.addColorStop(0.45, '#e8402e');
+    body.addColorStop(1, '#8a1812');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.ellipse(x, top + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(60, 10, 5, 0.35)';
+    ctx.lineWidth = 0.8;
+    for (let k = 1; k < 6; k += 1) {
+        const yy = top + (h * k) / 6;
+        const half = (w / 2) * Math.sqrt(1 - ((yy - top - h / 2) / (h / 2)) ** 2);
+        ctx.beginPath();
+        ctx.moveTo(x - half, yy);
+        ctx.lineTo(x + half, yy);
+        ctx.stroke();
+    }
+    ctx.fillStyle = '#1a0c08';
+    ctx.font = font(`700 ${Math.round(h * 0.2)}px`);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ['お', 'で', 'ん'].forEach((ch, k) => ctx.fillText(ch, x, top + h * (0.27 + k * 0.23)));
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** The oden pot: a square steel pot of daikon, eggs, konnyaku and chikuwa, steaming. */
+function odenPot(ctx: SKRSContext2D, x: number, top: number, w: number) {
+    const h = w * 0.34;
+    ctx.fillStyle = '#9aa1a8';
+    ctx.fillRect(x, top, w, h);
+    ctx.fillStyle = '#5a3a1c';
+    ctx.fillRect(x + 3, top + 3, w - 6, h * 0.55);
+    // Dividers.
+    ctx.fillStyle = '#c4cad0';
+    for (let k = 1; k < 3; k += 1) ctx.fillRect(x + (w * k) / 3 - 1, top + 2, 2, h * 0.6);
+    const rand = seeded(5);
+    for (let k = 0; k < 9; k += 1) {
+        const cx = x + 8 + rand() * (w - 16);
+        const cy = top + 5 + rand() * (h * 0.4);
+        const kind = k % 4;
+        if (kind === 0) {
+            ctx.fillStyle = '#e9d29a';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 6, 3.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (kind === 1) {
+            ctx.fillStyle = '#b8743a';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 4.5, 3.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (kind === 2) {
+            ctx.fillStyle = '#6d6a66';
+            ctx.beginPath();
+            ctx.moveTo(cx - 5, cy + 3);
+            ctx.lineTo(cx + 5, cy + 3);
+            ctx.lineTo(cx, cy - 4);
+            ctx.fill();
+        } else {
+            ctx.fillStyle = '#c58a4a';
+            ctx.fillRect(cx - 7, cy - 2, 14, 4);
+            ctx.fillStyle = '#f2e3c6';
+            ctx.fillRect(cx - 7, cy - 0.6, 14, 1.2);
+        }
+    }
+    steam(ctx, x + w * 0.3, top - 2, 22);
+    steam(ctx, x + w * 0.7, top - 2, 26);
+}
+
+/** A curl of steam rising `h` from (x, y). */
+function steam(ctx: SKRSContext2D, x: number, y: number, h: number) {
+    ctx.strokeStyle = 'rgba(255, 245, 230, 0.35)';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x - 6, y - h * 0.3, x + 6, y - h * 0.6, x, y - h);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+}
+
+/** Wooden menu tags (oshinagaki) hung in a row from x0 to x1 at `top`: the oden of the day. */
+function menuTags(ctx: SKRSContext2D, x0: number, x1: number, top: number) {
+    const items = ['だいこん', 'たまご', 'ちくわ', 'はんぺん', 'つくね', 'ごぼう', 'もち', 'こんぶ'];
+    const tagW = 15;
+    const gap = 22;
+    const count = Math.min(items.length, Math.floor((x1 - x0) / gap));
+    ctx.font = font('700 9px');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let k = 0; k < count; k += 1) {
+        const x = x0 + k * gap;
+        const chars = [...items[k]!];
+        const h = Math.max(46, chars.length * 10 + 10);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(x + 2, top + 2, tagW, h);
+        ctx.fillStyle = '#e9d6b0';
+        ctx.fillRect(x, top, tagW, h);
+        ctx.fillStyle = '#2a1a10';
+        chars.forEach((ch, c) => ctx.fillText(ch, x + tagW / 2, top + 8 + c * 10));
+    }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** A bottle on the shelf: sake or soy, in brown, green or clear glass. */
+function bottle(ctx: SKRSContext2D, x: number, shelf: number, h: number, rand: () => number) {
+    const glass = ['#3d6b3a', '#6b3d1e', '#a7b8b0', '#2f4a63'][Math.floor(rand() * 4)]!;
+    ctx.fillStyle = glass;
+    ctx.fillRect(x - 4, shelf - h * 0.65, 8, h * 0.65);
+    ctx.fillRect(x - 1.8, shelf - h, 3.6, h * 0.38);
+    ctx.fillStyle = '#efe4cc';
+    ctx.fillRect(x - 4, shelf - h * 0.45, 8, h * 0.2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.fillRect(x - 3, shelf - h * 0.62, 1.2, h * 0.5);
+}
+
+/** A bowl of oden on the counter, steaming: what she sets out when you're down. */
+function odenBowl(ctx: SKRSContext2D, x: number, counter: number, s: number) {
+    ctx.fillStyle = '#e9e0cf';
+    ctx.beginPath();
+    ctx.ellipse(x, counter - s * 0.05, s * 0.75, s * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1f3f6e';
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.7, counter - s * 0.45);
+    ctx.quadraticCurveTo(x, counter + s * 0.25, x + s * 0.7, counter - s * 0.45);
+    ctx.fill();
+    ctx.fillStyle = '#e9d29a';
+    ctx.beginPath();
+    ctx.ellipse(x - s * 0.15, counter - s * 0.48, s * 0.3, s * 0.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#b8743a';
+    ctx.beginPath();
+    ctx.ellipse(x + s * 0.28, counter - s * 0.5, s * 0.18, s * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    steam(ctx, x - s * 0.15, counter - s * 0.6, s * 0.9);
+    steam(ctx, x + s * 0.2, counter - s * 0.6, s * 0.7);
+}
+
+/** A newspaper clipping pinned to the wall: a headline bar, a photo, lines of text. */
+function clipping(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, tilt: number, headline: string) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(2, 2, w, h);
+    ctx.fillStyle = '#e8dcc2';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#2a2118';
+    ctx.font = font('700 8px');
+    ctx.fillText(headline, 3, 9);
+    ctx.fillStyle = '#9b8d76';
+    ctx.fillRect(3, 12, w * 0.42, h - 16);
+    ctx.fillStyle = 'rgba(42, 33, 24, 0.5)';
+    for (let yy = 13; yy < h - 4; yy += 3.5) ctx.fillRect(w * 0.48, yy, w * 0.46, 1.2);
+    ctx.fillStyle = '#c0392b';
+    ctx.beginPath();
+    ctx.arc(w / 2, 1, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/** The window onto the street: a winter night, snow falling, heavier as she turns. */
+function snowWindow(ctx: SKRSContext2D, x: number, top: number, w: number, h: number, mood: number) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, top, w, h);
+    ctx.clip();
+    const night = ctx.createLinearGradient(0, top, 0, top + h);
+    night.addColorStop(0, '#16223a');
+    night.addColorStop(1, '#2c3a56');
+    ctx.fillStyle = night;
+    ctx.fillRect(x, top, w, h);
+    // Rooftops across the street, a lit window or two.
+    ctx.fillStyle = '#0e1626';
+    ctx.fillRect(x, top + h * 0.62, w, h);
+    ctx.beginPath();
+    ctx.moveTo(x, top + h * 0.62);
+    ctx.lineTo(x + w * 0.3, top + h * 0.48);
+    ctx.lineTo(x + w * 0.6, top + h * 0.62);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 210, 120, 0.8)';
+    ctx.fillRect(x + w * 0.18, top + h * 0.7, 6, 5);
+    ctx.fillRect(x + w * 0.72, top + h * 0.74, 6, 5);
+    ctx.fillStyle = '#f4f8ff';
+    ctx.fillRect(x, top + h * 0.6, w, 2.5);
+    const rand = seeded(71);
+    for (let k = 0; k < 18 + mood * 30; k += 1) {
+        ctx.globalAlpha = 0.5 + rand() * 0.5;
+        ctx.beginPath();
+        ctx.arc(x + rand() * w, top + rand() * h, 0.8 + rand() * 1.3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    ctx.strokeStyle = '#5a3f28';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x, top, w, h);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, top);
+    ctx.lineTo(x + w / 2, top + h);
+    ctx.stroke();
+}
+
+/**
+ * Nice Nature at her mother's bar after hours, the place where articles
+ * about her hang on the walls. Warm wood and lantern light, a window onto a
+ * snowy December street (the Arima Kinen, where she came third three years
+ * running), clippings on the wall, a red lantern, the oden pot, and the
+ * neighbourhood cat from her phone's wallpaper on a stool.
+ *
+ * The rank band is a garland of paper cranes across the bar, her origami:
+ * folded in her green and red up to the club's place, still flat squares
+ * beyond, between rank tags at either end. She stands behind the counter
+ * under the club's place, the bar's quiet supporting star.
+ *
+ * Her mood stays in character, cynical but kind: "Huh. Since when are we
+ * this good?" when all is well, "Third's not bad… right?" in between, and
+ * at her worst, with the snow heavier, she sets out a bowl: "Eat something
+ * first. Then we fight."
+ */
+function drawNature(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null) {
+    const floor = hero - 10;
+    const wide = w > 1200;
+    const counter = floor - 20;
+
+    // Plank wall, warm under the lamps.
+    const wall = ctx.createLinearGradient(0, 0, 0, hero);
+    wall.addColorStop(0, '#3a2618');
+    wall.addColorStop(1, '#4e3320');
+    ctx.fillStyle = wall;
+    ctx.fillRect(0, 0, w, hero);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    for (let x = 0; x < w; x += 34) ctx.fillRect(x, 0, 1.5, counter);
+    const lamp = ctx.createRadialGradient(w * 0.5, 0, 0, w * 0.5, 0, w * 0.5);
+    lamp.addColorStop(0, 'rgba(255, 200, 120, 0.18)');
+    lamp.addColorStop(1, 'rgba(255, 200, 120, 0)');
+    ctx.fillStyle = lamp;
+    ctx.fillRect(0, 0, w, hero);
+
+    // The window, clippings and a calendar torn down to December.
+    const winX = SIDE + 30;
+    const winW = wide ? 150 : 110;
+    snowWindow(ctx, winX, 14, winW, counter - 30, mood);
+    const clips: [string, number][] = [['3RD!', -0.06], ['ARIMA KINEN', 0.05], ['3RD AGAIN', -0.03], ['BRONZE', 0.07]];
+    const clipX = winX + winW + 26;
+    clips.slice(0, wide ? 4 : 2).forEach(([text, tilt], k) => clipping(ctx, clipX + k * 64, 62 + (k % 2) * 12, 54, 40, tilt, text));
+    if (wide) {
+        const calX = clipX + 4 * 64 + 16;
+        ctx.fillStyle = '#f4ede0';
+        ctx.fillRect(calX, 62, 40, 46);
+        ctx.fillStyle = '#c0392b';
+        ctx.fillRect(calX, 62, 40, 11);
+        ctx.fillStyle = '#fff';
+        ctx.font = font('700 8px');
+        ctx.textAlign = 'center';
+        ctx.fillText('DEC', calX + 20, 70.5);
+        ctx.fillStyle = '#2a2118';
+        ctx.font = font('700 18px');
+        ctx.fillText('25', calX + 20, 98);
+        ctx.textAlign = 'left';
+    }
+
+    // A shelf of bottles and the wooden menu tags (oshinagaki).
+    // Tags first, then the shelf of bottles beside them.
+    const tagsX0 = wide ? w * 0.42 : w * 0.4;
+    const tagsX1 = tagsX0 + (wide ? 180 : 110);
+    menuTags(ctx, tagsX0, tagsX1, 58);
+    const shelfX0 = tagsX1 + 14;
+    const shelfX1 = shelfX0 + (wide ? 150 : 0);
+    if (shelfX1 > shelfX0) {
+        ctx.fillStyle = '#5a3a20';
+        ctx.fillRect(shelfX0 - 6, 104, shelfX1 - shelfX0 + 12, 4);
+        const bottles = seeded(17);
+        for (let x = shelfX0; x < shelfX1; x += 15 + bottles() * 6) bottle(ctx, x, 104, 20 + bottles() * 10, bottles);
+    }
+
+    // The garland of cranes.
+    const x0 = SIDE + 20;
+    const x1 = w - SIDE - 20;
+    let herX = w * 0.55;
+    if (race) herX = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
+    craneGarland(ctx, x0, x1, 10, race ? herX : null);
+    if (race) {
+        rankPlaque(ctx, x0 + 34, counter - 46, race.start);
+        rankPlaque(ctx, x1 - 34, counter - 46, race.finish);
+    }
+
+    // The lantern and the oden pot at the end of the counter.
+    const potX = w - SIDE - (wide ? 210 : 150);
+    redLantern(ctx, potX - 30, 58, 40);
+
+    // Her behind the counter, under the club's place.
+    let faceY = counter - 40;
+    let reach = 40;
+    if (art) {
+        const artH = hero - 30;
+        const artW = (art.width / art.height) * artH;
+        ctx.drawImage(art, herX - artW / 2, counter + 18 - artH, artW, artH);
+        faceY = counter + 18 - artH * 0.62;
+        reach = artW / 2 + 10;
+    }
+
+    // The counter, over her lower half.
+    ctx.fillStyle = '#6b4526';
+    ctx.fillRect(0, counter, w, h - counter);
+    ctx.fillStyle = '#8a5a32';
+    ctx.fillRect(0, counter, w, 5);
+    ctx.fillStyle = 'rgba(255, 220, 170, 0.15)';
+    ctx.fillRect(0, counter, w, 1.5);
+    odenPot(ctx, potX, counter - (wide ? 120 : 92) * 0.34 + 3, wide ? 120 : 92);
+    // The cat on its stool at the near end.
+    ctx.fillStyle = '#3b2a1e';
+    ctx.fillRect(x1 - 14, counter + 5, 4, hero - counter);
+    sittingCat(ctx, x1 - 12, counter + 2, 16);
+    if (!art || mood >= 0.67) odenBowl(ctx, art ? herX + reach + 22 : herX, counter, 24);
+
+    const line = mood < 0.34 ? 'Huh. Since when are we this good?' : mood < 0.67 ? "Third's not bad… right?" : 'Eat something first. Then we fight.';
+    const bw = bubbleWidth(ctx, line);
+    const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
+    speechBubble(ctx, bubbleX, Math.max(54, faceY - 40), line, 0);
+}
+
+// ─── Dream Journey ────────────────────────────────────────────────────────────
+
+/**
+ * Her picture for `mood`: `journey-calm.png`, `journey-uneasy.png` or
+ * `journey-yandere.png` (the same thirds as her lines), else `journey.png`,
+ * else none (the scene then stands her suitcase on the track in her place).
+ */
+async function journeyPose(mood: number): Promise<Image | null> {
+    const pose = mood < 0.34 ? 'calm' : mood < 0.67 ? 'uneasy' : 'yandere';
+    return (await sceneArt(`journey-${pose}`)) ?? sceneArt('journey');
+}
+
+/**
+ * A Japanese station name board (ekimeihyō): white, on two posts, the
+ * station's name large, a line in her pale gold beneath it, and the next
+ * station along it in small type.
+ */
+function stationBoard(ctx: SKRSContext2D, cx: number, ground: number, name: string, next: string, nextSide: -1 | 1) {
+    const bw = 96;
+    const bh = 40;
+    const top = ground - 64;
+    ctx.fillStyle = '#4a4a4a';
+    ctx.fillRect(cx - bw / 2 + 8, top + bh, 3, ground - top - bh);
+    ctx.fillRect(cx + bw / 2 - 11, top + bh, 3, ground - top - bh);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(cx - bw / 2 + 2, top + 2, bw, bh);
+    ctx.fillStyle = '#f7f4ea';
+    ctx.fillRect(cx - bw / 2, top, bw, bh);
+    ctx.fillStyle = '#1e1e1e';
+    ctx.font = font('700 15px');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, cx, top + 14);
+    ctx.fillStyle = '#c9b23a';
+    ctx.fillRect(cx - bw / 2, top + 25, bw, 4);
+    ctx.fillStyle = '#4a4a4a';
+    ctx.font = font('600 8px');
+    ctx.textAlign = nextSide > 0 ? 'right' : 'left';
+    ctx.fillText(nextSide > 0 ? `${next} →` : `← ${next}`, nextSide > 0 ? cx + bw / 2 - 5 : cx - bw / 2 + 5, top + 35);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/** Rails from x0 to x1 at `y`, sleepers under them; gold up to `goldTo`, Stay Gold's streak. */
+function railway(ctx: SKRSContext2D, x0: number, x1: number, y: number, goldTo: number | null) {
+    ctx.fillStyle = '#4a4636';
+    ctx.fillRect(x0 - 20, y - 2, x1 - x0 + 40, 12);
+    ctx.fillStyle = '#2a2619';
+    for (let x = x0 - 16; x < x1 + 16; x += 11) ctx.fillRect(x, y - 3, 6, 11);
+    for (const off of [0, 6]) {
+        ctx.fillStyle = '#7d8088';
+        ctx.fillRect(x0 - 20, y + off - 1, x1 - x0 + 40, 2);
+    }
+    if (goldTo === null) return;
+    ctx.save();
+    ctx.shadowColor = 'rgba(255, 210, 90, 0.9)';
+    ctx.shadowBlur = 8;
+    for (const off of [0, 6]) {
+        const g = ctx.createLinearGradient(x0, 0, goldTo, 0);
+        g.addColorStop(0, '#b8902a');
+        g.addColorStop(1, '#ffe27a');
+        ctx.fillStyle = g;
+        ctx.fillRect(x0 - 20, y + off - 1.2, goldTo - x0 + 20, 2.4);
+    }
+    ctx.restore();
+}
+
+/** A three-light railway signal: green, yellow or red lit by her mood. */
+function railSignal(ctx: SKRSContext2D, x: number, ground: number, mood: number) {
+    ctx.fillStyle = '#3a3a3a';
+    ctx.fillRect(x - 1.5, ground - 64, 3, 64);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath();
+    ctx.roundRect(x - 7, ground - 76, 14, 36, 4);
+    ctx.fill();
+    const lit = mood < 0.34 ? 2 : mood < 0.67 ? 1 : 0;
+    const lamps = ['#ff3b30', '#ffcc33', '#3ddc84'];
+    lamps.forEach((colour, k) => {
+        const ly = ground - 70 + k * 11;
+        if (k === lit) {
+            const glow = ctx.createRadialGradient(x, ly, 0, x, ly, 16);
+            glow.addColorStop(0, rgba(colour, 0.7));
+            glow.addColorStop(1, rgba(colour, 0));
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(x, ly, 16, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.fillStyle = k === lit ? colour : '#333';
+        ctx.beginPath();
+        ctx.arc(x, ly, 3.6, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+/** Her travel case, packed (she loves packing): brown leather, gold clasps, stickers. */
+function suitcase(ctx: SKRSContext2D, cx: number, ground: number, s: number) {
+    const w = s;
+    const h = s * 0.72;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(cx, ground, w * 0.55, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#3a2614';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.roundRect(cx - w * 0.16, ground - h - 8, w * 0.32, 10, 4);
+    ctx.stroke();
+    ctx.fillStyle = '#7a4a24';
+    ctx.beginPath();
+    ctx.roundRect(cx - w / 2, ground - h, w, h, 4);
+    ctx.fill();
+    ctx.fillStyle = '#5e3818';
+    ctx.fillRect(cx - w / 2, ground - h * 0.55, w, 3);
+    ctx.fillStyle = '#e6c75a';
+    ctx.fillRect(cx - w * 0.3, ground - h * 0.6, 5, 7);
+    ctx.fillRect(cx + w * 0.3 - 5, ground - h * 0.6, 5, 7);
+    for (const [dx, dy, c] of [[-0.25, -0.3, '#e6e08a'], [0.18, -0.25, '#d9433b'], [0.05, -0.82, '#9fb8e6']] as const) {
+        ctx.fillStyle = c;
+        ctx.beginPath();
+        ctx.ellipse(cx + dx * w, ground + dy * h, w * 0.1, w * 0.07, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+/**
+ * Her bench on the platform: a chess game she is winning, a cup of chamomile
+ * (she makes it for Orfevre), a sketchbook. At her worst a black piece has
+ * taken the white king, laid on its side.
+ */
+function platformBench(ctx: SKRSContext2D, x: number, ground: number, mood: number) {
+    ctx.fillStyle = '#5a4630';
+    ctx.fillRect(x, ground - 20, 96, 5);
+    ctx.fillStyle = '#3a2c1c';
+    ctx.fillRect(x + 6, ground - 15, 4, 15);
+    ctx.fillRect(x + 86, ground - 15, 4, 15);
+    // The board.
+    const bx = x + 12;
+    const by = ground - 26;
+    for (let r = 0; r < 2; r += 1) {
+        for (let c = 0; c < 8; c += 1) {
+            ctx.fillStyle = (r + c) % 2 === 0 ? '#e9dfc4' : '#5a4630';
+            ctx.fillRect(bx + c * 5, by + r * 3, 5, 3);
+        }
+    }
+    const piece = (px: number, colour: string, tall: number) => {
+        ctx.fillStyle = colour;
+        ctx.fillRect(px - 1.5, by - tall, 3, tall);
+        ctx.beginPath();
+        ctx.arc(px, by - tall, 2, 0, Math.PI * 2);
+        ctx.fill();
+    };
+    piece(bx + 6, '#f4efe0', 6);
+    piece(bx + 30, '#1a1a1a', 8);
+    piece(bx + 18, '#1a1a1a', 5);
+    if (mood >= 0.67) {
+        ctx.fillStyle = '#f4efe0';
+        ctx.fillRect(bx + 22, by - 3, 9, 3);
+        ctx.beginPath();
+        ctx.arc(bx + 32, by - 1.5, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+    } else piece(bx + 24, '#f4efe0', 9);
+    // Tea and a sketchbook.
+    ctx.fillStyle = '#f4efe0';
+    ctx.fillRect(x + 62, ground - 30, 9, 10);
+    ctx.fillStyle = '#e6c75a';
+    ctx.fillRect(x + 63, ground - 29, 7, 2);
+    steam(ctx, x + 66, ground - 31, 14);
+    ctx.fillStyle = '#efe6cf';
+    ctx.fillRect(x + 76, ground - 25, 16, 5);
+    ctx.fillStyle = '#8a7a5a';
+    ctx.fillRect(x + 76, ground - 25, 16, 1.2);
+}
+
+/** Telegraph poles along the line, every `gap`, with their wires sagging between. */
+function telegraphPoles(ctx: SKRSContext2D, w: number, ground: number, gap: number, colour: string) {
+    const tops: number[] = [];
+    for (let x = 18; x < w; x += gap) tops.push(x);
+    ctx.fillStyle = colour;
+    for (const x of tops) {
+        ctx.fillRect(x - 1.5, ground - 70, 3, 70);
+        ctx.fillRect(x - 9, ground - 66, 18, 2.5);
+        ctx.fillRect(x - 6, ground - 58, 12, 2);
+    }
+    ctx.strokeStyle = colour;
+    ctx.lineWidth = 0.7;
+    for (const [dy, half] of [[-66, 8], [-58, 5]] as const) {
+        for (const side of [-1, 1]) {
+            for (let k = 0; k < tops.length - 1; k += 1) {
+                const a = tops[k]! + side * half;
+                const b = tops[k + 1]! + side * half;
+                ctx.beginPath();
+                ctx.moveTo(a, ground + dy);
+                ctx.quadraticCurveTo((a + b) / 2, ground + dy + 9, b, ground + dy);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+/** A night train waiting from x0 to x1, its windows lit, a gold line along it. */
+function nightTrain(ctx: SKRSContext2D, x0: number, x1: number, rail: number) {
+    const top = rail - 34;
+    const cars = Math.max(1, Math.round((x1 - x0) / 120));
+    const carW = (x1 - x0) / cars;
+    for (let k = 0; k < cars; k += 1) {
+        const cx = x0 + k * carW;
+        ctx.fillStyle = '#1f2a24';
+        ctx.beginPath();
+        ctx.roundRect(cx + 2, top, carW - 4, 30, 5);
+        ctx.fill();
+        ctx.fillStyle = '#c9a43a';
+        ctx.fillRect(cx + 2, top + 22, carW - 4, 2);
+        for (let wx = cx + 10; wx < cx + carW - 14; wx += 13) {
+            const glow = ctx.createLinearGradient(0, top + 6, 0, top + 16);
+            glow.addColorStop(0, '#ffe7a8');
+            glow.addColorStop(1, '#e8b85a');
+            ctx.fillStyle = glow;
+            ctx.fillRect(wx, top + 6, 8, 10);
+        }
+        ctx.fillStyle = '#111';
+        for (const wx of [cx + 14, cx + carW - 18]) {
+            ctx.beginPath();
+            ctx.arc(wx, rail + 1, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    // Headlamp at the front, towards the end of the line.
+    const lamp = ctx.createRadialGradient(x1 - 4, top + 14, 0, x1 - 4, top + 14, 22);
+    lamp.addColorStop(0, 'rgba(255, 240, 190, 0.8)');
+    lamp.addColorStop(1, 'rgba(255, 240, 190, 0)');
+    ctx.fillStyle = lamp;
+    ctx.beginPath();
+    ctx.arc(x1 - 4, top + 14, 22, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/** Rolling hills at `base`, with a few town lights on them. */
+function hills(ctx: SKRSContext2D, w: number, base: number, height: number, colour: string, seed: number, lights: boolean) {
+    const rand = seeded(seed);
+    ctx.fillStyle = colour;
+    ctx.beginPath();
+    ctx.moveTo(0, base + 20);
+    for (let x = 0; x <= w; x += 20) ctx.lineTo(x, base - height * (0.5 + 0.5 * Math.sin(x / (90 + seed * 7) + seed)) - rand() * 3);
+    ctx.lineTo(w, base + 20);
+    ctx.fill();
+    if (!lights) return;
+    for (let k = 0; k < w / 40; k += 1) {
+        ctx.fillStyle = `rgba(255, 214, 120, ${0.5 + rand() * 0.5})`;
+        ctx.fillRect(rand() * w, base - rand() * height * 0.5, 1.6, 1.6);
+    }
+}
+
+/**
+ * Dream Journey's railway at dusk: "Witness of Journey's End". Rolling hills
+ * with town lights under a sky from her pale gold into night; a line of
+ * track across the band between two station boards, the bottom cutoff and
+ * the next rank up. The rails already travelled are gold, Stay Gold's
+ * streak of gold, up to the club's place, where she stands (or, until her
+ * picture exists, her packed case). Beside her a railway signal; on the
+ * platform her bench with a chess game and chamomile.
+ *
+ * Her mood is the signal and the dusk: green and golden when all is well
+ * ("Thorough preparation. All as planned."), yellow as night comes on ("A
+ * small detour. I'll amend the itinerary."), and red in the dark at her
+ * worst, the white king down on the board and her manners intact: "Leave
+ * the rest to me. Personally."
+ */
+function drawJourney(ctx: SKRSContext2D, w: number, h: number, hero: number, art: Image | null, mood: number, race: SceneRace | null) {
+    const floor = hero - 10;
+    const wide = w > 1200;
+    const railY = floor - 14;
+
+    const sky = ctx.createLinearGradient(0, 0, 0, railY);
+    sky.addColorStop(0, mix('#2e3048', '#0d0d16', mood));
+    sky.addColorStop(0.65, mix('#b88a5a', '#2a2238', mood));
+    sky.addColorStop(1, mix('#efd48a', '#4a2a2a', mood));
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, hero);
+    // Stars as it darkens; the evening star always.
+    const stars = seeded(33);
+    for (let k = 0; k < 20 + mood * 50; k += 1) {
+        ctx.fillStyle = `rgba(255, 248, 220, ${(0.3 + stars() * 0.6) * Math.min(1, 0.3 + mood)})`;
+        ctx.fillRect(stars() * w, stars() * railY * 0.55, 1.4, 1.4);
+    }
+    twinkle(ctx, w * 0.3, 24, 5, '#fff3c4');
+
+    hills(ctx, w, railY - 6, 34, mix('#5a5236', '#1e1c16', mood), 2, false);
+    hills(ctx, w, railY + 2, 22, mix('#3d3824', '#14130e', mood), 5, true);
+
+    const x0 = SIDE + 70;
+    const x1 = w - SIDE - 70;
+    let herX = w * 0.55;
+    if (race) herX = x0 + Math.max(0, Math.min(1, race.progress)) * (x1 - x0);
+    telegraphPoles(ctx, w, railY + 2, wide ? 150 : 120, mix('#2e2a1c', '#0c0b08', mood));
+    railway(ctx, x0, x1, railY, race ? herX : null);
+    // The night train waiting at journey's end, if she is not there yet.
+    const trainLen = Math.min(wide ? 300 : 180, (x1 - x0) * 0.24);
+    if (herX < x1 - trainLen - 50) nightTrain(ctx, x1 - trainLen, x1 - 6, railY - 1);
+    // The ground in front of the track.
+    ctx.fillStyle = mix('#2b2719', '#121109', mood);
+    ctx.fillRect(0, railY + 10, w, h - railY - 10);
+
+    if (race) {
+        stationBoard(ctx, x0 - 10, floor, race.start, race.finish, 1);
+        stationBoard(ctx, x1 + 10, floor, race.finish, race.start, -1);
+    }
+    ctx.save();
+    ctx.translate(x0 + 70, floor);
+    ctx.scale(1.5, 1.5);
+    platformBench(ctx, 0, 0, mood);
+    ctx.restore();
+    railSignal(ctx, Math.min(x1 - 70, herX + 46), railY + 4, mood);
+
+    let faceY = railY - 40;
+    let reach = 30;
+    if (art) {
+        const artH = hero - 30;
+        const artW = (art.width / art.height) * artH;
+        const footY = railY + 6;
+        ctx.drawImage(art, herX - artW / 2, footY - artH, artW, artH);
+        faceY = footY - artH * 0.62;
+        reach = artW / 2 + 10;
+    } else {
+        suitcase(ctx, herX, railY + 4, 48);
+        faceY = railY - 34;
+    }
+
+    const line = mood < 0.34 ? 'Thorough preparation. All as planned.' : mood < 0.67 ? "A small detour. I'll amend the itinerary." : 'Leave the rest to me. Personally.';
+    const bw = bubbleWidth(ctx, line);
+    const bubbleX = herX + reach + bw > w - SIDE ? herX - reach - bw : herX + reach;
+    speechBubble(ctx, bubbleX, wide ? 22 : 18, line, 0);
 }

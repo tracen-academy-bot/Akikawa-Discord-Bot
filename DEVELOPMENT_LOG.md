@@ -4,6 +4,231 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+
+## 2026-10-31 — Merge Mambo and /help; Nice Nature and Dream Journey held back
+
+Fwoxie: merge Mambo (with `/help`), not the two themes still waiting on
+their pictures. `Palette.hidden` leaves a theme out of the `/club reports`
+menu; Nice Nature and Dream Journey set it. Their scenes and palettes stay
+in the code, ready to show once `nature-*.png` and `journey-*.png` exist:
+remove `hidden` then.
+
+---
+## 2026-10-31 — /help redesigned as a panel
+
+Fwoxie: "design the help thing first". The embed list worked but was a wall
+of text. `/help` is now a laid-out panel (Discord's components V2), only to
+the asker:
+
+- A honey-peach edge (Akikawa's avatar colour), a header with her avatar,
+  who she is in a line, then the page, then a **Browse a topic** menu that
+  swaps the page in place (`help:topic`, routed in `index.ts`).
+- **Start here**: what every trainer uses (`/uma-id`, `/fans me`, the
+  timer) and what a club's staff set (`/club reports`, `fancount`,
+  `profile`). A Club Manager is told everything is open to them.
+- Topic pages (Fans and quota, Clubs, Trainer Timer, Moderation and
+  posting) list their commands grouped by who can use them; the timer page
+  explains the panel's buttons.
+- Commands are clickable mentions: `registerCommands` now keeps the IDs
+  Discord returns (`commandIds.ts`); without them a name shows as code.
+- Tests: every command has an audience and a page and appears on it; each
+  page under 4000 characters and 40 components; the menu swaps pages; the
+  reply is private and components V2; mentions with and without IDs.
+
+---
+
+## 2026-10-30 — /help
+
+Fwoxie asked for "an Akikawa help that lists everything".
+
+- `/help` (`src/commands/help.ts`) replies only to the asker with one embed:
+  every command and subcommand, grouped by who can use it (everyone; a
+  club's staff and Club Managers; Club Managers; moderators, with the
+  Discord permission each needs), then the Trainer Timer panel's buttons.
+- The list is built from the registered commands' own names and
+  descriptions, so new commands appear by themselves. Only the audience is
+  kept by hand (`AUDIENCE`), mirroring the handlers' permission checks.
+  `index.ts` hands the command list to the help (`setHelpSource`), since
+  the help cannot import the list that imports it.
+- Tests: every command has an audience and no audience entry is stale;
+  every command appears; fields stay under 1024 characters, the embed
+  under 6000 and 25 fields (it is about 4000 and 14 now); the real handler
+  replies ephemerally with the real commands.
+
+---
+
+## 2026-10-31 — Nice Nature and Dream Journey themes
+
+Fwoxie: "just do some designing for Nice Nature and DoJo too". Each is a
+palette (both pass `scripts/palettes.ts`) and a scene band, built like
+Mambo's: her picture by mood when supplied (`nature-*.png`,
+`journey-*.png`), a stand-in until then. The theme menu is at 21 of 25.
+
+- **Nice Nature** (`drawNature`, palette `nature`): her family bar after
+  hours, where articles about her hang on the walls (canon). Plank walls,
+  a window onto a snowy December street (the Arima Kinen, third three
+  years running), clippings ("3RD!", "ARIMA KINEN", "3RD AGAIN",
+  "BRONZE"), a calendar at Dec 25, wooden menu tags (oshinagaki), a bottle
+  shelf, a red lantern, the oden pot (her usual buy) and the cat from her
+  phone's wallpaper on a stool. The rank band is a garland of origami
+  cranes (her origami; the cranes fans brought the real horse): folded in
+  her green and red up to the club's place, flat paper beyond. She stands
+  behind the counter; until her picture exists a bowl of oden sits there.
+  Lines: "Huh. Since when are we this good?" / "Third's not bad… right?" /
+  "Eat something first. Then we fight." (and at her worst she sets out a
+  bowl). Palette: dark wood cards, her green as the accent, bronze `#e8935a`
+  for third.
+- **Dream Journey** (`drawJourney`, palette `journey`): a railway at dusk,
+  "Witness of Journey's End". Hills with town lights, telegraph poles,
+  Japanese station name boards for the two ranks, the rails travelled
+  gold (Stay Gold's streak of gold) up to the club's place, where she
+  stands (her packed case until her picture exists: she loves packing).
+  A night train waits at journey's end; her bench holds a chess game and
+  chamomile (she makes it for Orfevre). The mood is a railway signal and
+  the light: green at golden dusk ("Thorough preparation. All as
+  planned."), yellow at nightfall ("A small detour. I'll amend the
+  itinerary."), red in the dark with the white king down on the board
+  ("Leave the rest to me. Personally."). Palette: dark olive cards, her
+  pale gold `#e6e08a` as the accent.
+- Mambo's flags: no dorm flags or emblems exist in any source found
+  (Ritto/Miho have none on the wiki or fan sites); the canon sports day is
+  the "Tracen Cheer Squad" story event. Fwoxie: use Tracen things instead.
+  What is confirmed canon: the motto "Eclipse first, the rest nowhere."
+  (唯一抜きん出て、並ぶ者なし), the Three Goddesses statue (三女神像), and
+  the horseshoe (the summer uniform's clip and brooch). No crest design or
+  school colours were found, so none are invented. The generic flags are
+  now pennants in her blue and coral and white, each with a gold horseshoe
+  (`pennantString`); the centre pole carries the motto on a banner
+  (`mottoBanner`); the Three Goddesses stand in bronze between her tent
+  and the school (`threeGoddesses`).
+- Then a crowd at the back of the field (Fwoxie: "put small fellow umas
+  and trainers behind"): `crowd()` places the pictures in
+  `assets/scenes/mambo-crowd/` (chibis of other Umamusume, from Fwoxie)
+  in turn with drawn trainers in suits, some cheering, each a little in
+  front or behind. It keeps clear of the tent, the team banners and her.
+  No pictures yet, so trainers watch alone for now.
+- More of them (Fwoxie: "put the umas in more places"): with crowd
+  pictures, a team of three or four on each end of the rope leans back to
+  pull (`crowdChibi` with a lean), and three or four cheer in front of the
+  tent, low enough to keep the banner clear.
+- `scripts/shrink_chibis.py` (Python, Pillow): Fwoxie's UmaViewer
+  screenshots came to 200 MB. It crops each to its character by the alpha
+  channel and scales it to at most 440px (or `--height 220` for crowd
+  chibis): about 140 KB each. Tried on three earlier screenshots: 1.0 MB in,
+  0.4 MB out (0.1 MB at crowd size).
+- Still 44 MB for Fwoxie's batch, so the script now also reduces each
+  picture to 256 colours (Pillow's fast octree, which keeps alpha), and the
+  defaults drop to 320px (main) and 160px (crowd), still above the 280px
+  and 80px the 2x render draws them at. The same three screenshots: about
+  20 KB each at 320px, 8 KB at 160px; side by side with full colour they
+  are indistinguishable. `--colors 0` keeps full colour.
+- The crowd itself: Fwoxie's zip had 266 chibis at crowd size (7.3 MB for
+  both sizes; 2.2 MB at 160px). Near-duplicates were removed (each picture
+  scaled to 12 x 24 and compared by mean colour difference; a picture
+  within 0.10 of one already kept is dropped), leaving 163, 1.4 MB, in
+  `assets/scenes/mambo-crowd/` as `001.png` to `163.png`. `dailyPick`
+  shuffles them by the UTC day, so each day's report draws a different 28
+  and the same report all day.
+- "More ppl": two crowd rows (a back row at 78% size, tighter), two
+  classmates to each trainer, six per tug-of-war team and six cheering at
+  the tent in the wide image (four in tall), and 80 drawn a day. About 75
+  umas in the wide band.
+- Then (Fwoxie: the crowd as a backdrop, sitting; Mambo cheering, big;
+  "signs and shit"): `seatedAudience` sits the pictures in two rows on
+  coloured picnic sheets across the back of the field, each cut off below
+  the waist where she sits, every fourth holding up a cheer sign on sticks
+  ("MAMBO!", "ファイト!", "WASSHOI!", "がんばれ!", "110%!", "♥ MACHITAN ♥",
+  "マンボ〜♪"). The tug-of-war teams and the tent cheerers are gone; the
+  rope and bow still mark the club's place. Her picture is drawn nearly
+  the band's full height, in front; the stand-in pom-poms are bigger too.
+  Without crowd pictures the standing trainers return.
+- Her picture (Fwoxie, 2026-10-31): `mambo.png`, cropped to 184 x 320 and
+  256 colours, used for every mood until `mambo-calm/uneasy/yandere.png`
+  arrive (Fwoxie will do her expressions). Her fallen cap at her worst is
+  only drawn without a picture, since the picture wears it.
+- Her expressions (Fwoxie): `mambo-calm.png` (big smile),
+  `mambo-uneasy.png` (surprised "o"), `mambo-yandere.png` (crying ><),
+  the same pose and crop as `mambo.png`, which stays as the fallback.
+  Her hands are up behind her head, so the pom-poms (blue left, coral
+  right) are drawn there, at either side of her head, over the picture.
+- Better pom-poms (Fwoxie: "like real ones"). Openclipart has none on
+  their own, only on cheerleaders, and the best of those (330069, cut out
+  and recoloured) was a flat cartoon shape. `pomPom` is redrawn instead:
+  a few hundred wide, curling, glossy strips fanning from the handle, back
+  to front, shadowed at the core and lit from the upper left, with glints
+  near the tips, like the real vinyl ones.
+- Then in motion (Fwoxie: the ball was "too round", they can fly, "commit
+  to a moving area", no dark middles): each pom-pom is a burst flung from
+  her hand, strips streaming towards a throw direction (up and out on
+  each side) and fanning to either side, longest along the throw, curling
+  back into it; no core shading. Then ("away from her hand", "too high") thrown
+  sideways at hand height instead of up, and a little smaller.
+  Still "terrible": soft outline-free strands clash with the cel-shaded
+  chibis. `pomPom` now draws them in the chibi style: a fringed silhouette
+  with rounded strand tips and a dark outline, a flat base, a lighter lobe
+  to the upper left, a few strand lines and a small shine, stretched along
+  the shake. Colours deepened ("bad color"): blue `#1478c4` / `#4fb3f2`,
+  coral `#d8433f` / `#ff8a78`. Still clashed ("atrocious… colour change too big?"):
+  her outfit is pastel, about 30% saturation (cap `#9084c0`, coat
+  `#c0d8e4`, ribbon pink). The pom-poms now take her coat's blue
+  (`#8fbcd9` / `#b4d6ea`) and her ribbon's pink (`#e49aab` / `#f2bcc6`),
+  with a small step between base and highlight, and a softer outline. Too
+  grey ("make a proper purple/pink… same w blue"): settled between the two,
+  sky blue `#4f9fe0` / `#86c2f0` and orchid `#c86ac8` / `#e39ae0`. In
+  the end Fwoxie preferred the earlier round, glossy strand pom-poms
+  ("the old circle one is just better"), so `pomPom` and its placement are
+  back to that version (blue `#0f8dce`, coral `#ee5b56`, at her hands).
+- The scenes now frame the cards (Fwoxie: "the pic colours should bleed
+  through the sides"): Mambo's field, Nice Nature's counter wood and Dream
+  Journey's ground run down the full image instead of stopping under the
+  band, which left the sides black. Mambo's field deepens below the band.
+- Mambo is a dark theme now ("swap to dark mode"): navy cards (`#131f2e`),
+  her blue `#4fb3f2` as the accent, top 3 gold, ribbon pink `#f48fb1` and
+  sky blue `#6fc3f5`. `scripts/palettes.ts` passes.
+- Speech bubbles have no tail in any scene (Fwoxie: "most useless line
+  ever", then "the other themes too"); each speaker stands beside hers. A game pom-pom from UmaViewer (Nice
+  Nature's or King Halo's cheer outfit) would match best, if supplied.
+- A school sports day (*undōkai*): blue sky with the sun and clouds, two
+  strings of little flags hung from a pole in the middle, trees and the
+  school at the horizon, children in red and white caps along the far
+  edge, a packed-dirt field with chalk lane lines.
+- Her cheer tent, striped coral and white, with "TALENT TAKES TIME!" (her
+  tagline) on its banner and an orange cat on the roof (Hachimi, the cat
+  half of the Mambo meme). Chickens loose on the field (the "Mambo oh
+  yeah" clip), one at her feet.
+- The rank band is a tug-of-war: a braided rope between the bottom
+  cutoff's coral team pole and the next rank's blue one, chalk ticks every
+  tenth beneath, her ribbon bow (her emoji) tied on at the club's place
+  (`race.progress`, fan points as everywhere). She stands on it.
+- Her mood (`sceneMood`), as comedy rather than Still in Love's dread:
+  sunny with confetti bursting round her and "Mambo~♪ Wasshoi!"; the sky
+  greying and "This time for sure!"; at her worst her own rain cloud, her
+  newsboy cap on the ground, a spider let down beside her (she hates
+  them) and "Wah—!? Not again…".
+- Her picture: `mambo-calm.png`, `mambo-uneasy.png`, `mambo-yandere.png`
+  (or `mambo.png`) when supplied; until then two pom-poms, coral and
+  blue, bounce on the bow.
+
+---
+
+## 2026-10-30 — Mambo palette (Matikanetannhauser), colours only
+
+The first light theme meant for a scene: her sports-festival design is
+daytime. Her image colours are blue `#0f8dce` and coral `#ee5b56`; both
+are too pale for text on white, so the backdrop uses bright versions and
+the text uses deepened ones.
+
+- Backdrop: her sky blue `#58b4ea` fading to coral blush `#ffc9c2`.
+- Cards near-white (`#fffdf9`), panels pale sky (`#eaf5fc`).
+- Accent and #1: deep blue `#0a6aa3` (5.26:1). #2 ribbon pink `#b0307a`,
+  #3 bronze `#7a5600`, #4 violet `#5b4bb5`. Behind: coral-red `#c42f2a`.
+- `scripts/palettes.ts`: every colour meets its floor; top 3 and behind
+  colours are distinct.
+- No scene yet (sports festival, tug-of-war rope, her chibi); it needs
+  her art.
+
+---
+
 ## 2026-10-30 — Behind-quota alert: a tick in /club reports
 
 GimmeKiss asked for the report to be "only the picture", without the pings
