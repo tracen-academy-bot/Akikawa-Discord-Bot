@@ -15,7 +15,8 @@ spread. A 100,000-step sweep in the test gives exactly 1,000 rare picks.
 The bold celebration lines underneath are unchanged.
 
 Follow-ups: 「dominare」 in corner brackets; three more rare openers
-(Mejiro, Wassho, Onii-sama); the rare share raised to 2% as the list grew.
+(Mejiro, Wassho, Onii-sama); the rare share raised to 2%, then 4%, as the list grew to
+12 rare lines.
 
 ---
 
