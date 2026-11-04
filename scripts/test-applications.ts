@@ -584,8 +584,11 @@ async function main() {
         await mk('resolved', { status: 'ACCEPTED', clubName: 'Rose', resolvedById: '42' });
         await mk('pinned', { status: 'ACCEPTED' });
         await mk('closed-old', { status: 'CLOSED', closedAt: new Date('2025-01-01T00:00:00Z') });
+        // Read while its text was unreadable: open, no ID stored, the ID on the body's first line.
+        await mk('zix', { status: 'OPEN' });
         const tthread = (id: string, extra: Record<string, unknown> = {}) => ({
-            ...thread, id: `${tg}-${id}`, parentId: 'forum-tidy', guildId: tg, locked: false, flags: { has: () => false }, ...extra,
+            ...thread, id: `${tg}-${id}`, name: 'Looking for a club', parentId: 'forum-tidy', guildId: tg, locked: false, flags: { has: () => false },
+            send: async () => ({ id: 'm' }), fetchStarterMessage: async () => ({ content: 'hello', author: { id: '1' } }), ...extra,
         });
         const tidyForum = {
             id: 'forum-tidy',
@@ -597,6 +600,7 @@ async function main() {
                         [
                             tthread('open'),
                             tthread('joined-open'),
+                            tthread('zix', { name: 'Looking For Casual Club', fetchStarterMessage: async () => ({ content: '647176684566\n\nHi!\nIm a Casual Player', author: { id: '1' } }) }),
                             tthread('resolved', { locked: true }),
                             tthread('pinned', { flags: { has: (f: number) => f === ChannelFlags.Pinned } }),
                         ].map((t) => [t.id, t]),
@@ -606,7 +610,13 @@ async function main() {
         };
         const tr = await tidy.tidyApplications(tidyForum as unknown as Parameters<typeof tidy.tidyApplications>[0]);
         const after = async (id: string) => prisma.clubApplication.findUnique({ where: { threadId: `${tg}-${id}` } });
-        check('tidy: counts', tr, { reopened: 1, closed: 2, removed: 1, rescouted: 1 });
+        check('tidy: counts', tr, { reopened: 1, closed: 2, removed: 1, rescouted: 1, idsFound: 1 });
+        check('tidy: an ID in the post body is found on a second read', (await after('zix'))?.viewerId?.toString(), '647176684566');
+        check('tidy: a post with no ID anywhere stays without one', (await after('joined-open'))?.viewerId ?? null, null);
+        await mk('zix2', { status: 'OPEN' });
+        const zix2 = tthread('zix2', { fetchStarterMessage: async () => ({ content: 'ID: 647 176 684 566 thanks', author: { id: '1' } }) });
+        await svc.rescoutApplication(zix2 as unknown as Thread, null);
+        check('/scout with no ID re-reads the post when none is stored', (await after('zix2'))?.viewerId?.toString(), '647176684566');
         check('tidy: open post stays open', [(await after('open'))?.status, (await after('open'))?.closedAt], ['OPEN', null]);
         check('tidy: open post marked joined goes back to open', [(await after('joined-open'))?.status, (await after('joined-open'))?.clubName], ['OPEN', null]);
         check('tidy: old accepted post closed, still reads accepted', [(await after('accepted-old'))?.status, (await after('accepted-old'))?.closedAt !== null], ['ACCEPTED', true]);
