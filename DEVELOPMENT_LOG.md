@@ -21,7 +21,8 @@ Asked:
   (`announceWithId`). `/scout id:` in the post does the same. Later numbers
   do not replace it; `/scout id:` does. Reading replies needs the Message
   Content intent; without it, `/scout id:` is the way.
-- **`/resolve`** refuses until the application has an ID.
+- **`/resolve`** refuses to accept until the application has an ID.
+  Rejected works without one (asked as a follow-up).
 - **Linking:** `linkApplicant` writes the `/uma-id` link (`TrainerLink`)
   with `skipDuplicates`, so it never overwrites the member's link or takes
   a trainer another member has. New applications link on close, and only

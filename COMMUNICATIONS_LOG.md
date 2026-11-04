@@ -12,7 +12,7 @@ Discord member to their trainer when possible. Decisions:
 - New applications link only when the post is closed.
 - Old posts (backfill) link when they are already done.
 - A post without an ID pings the applicant for it, and nothing is decided
-  until it is in.
+  until it is in, except a rejection, which needs no ID.
 - Of the ID-format gaps, comma/dot-grouped and full-width IDs are handled.
   Trying every number in a post until one exists on uma.moe was not wanted.
 

@@ -13,7 +13,7 @@ import { REJECTED, decisionMessage, ensureApplication, isApplicationThread, reso
 
 /**
  * `/resolve outcome:<club | Rejected> [note]`: decides an application. Used
- * in the post, once it has a trainer ID. Tags it (Club App Accepted, or Rejected), locks it so only
+ * in the post; accepting needs a trainer ID, rejecting does not. Tags it (Club App Accepted, or Rejected), locks it so only
  * staff can write in it, posts the decision with a Close button for the
  * applicant, and updates the recruitment entry. Running it again changes the
  * decision.
@@ -56,12 +56,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         return;
     }
 
-    // A decision needs the trainer ID: staff decide on numbers, and closing
-    // the post links the applicant to that trainer.
+    // Accepting needs the trainer ID: staff decide on numbers, and closing
+    // the post links the applicant to that trainer. Rejecting does not.
     const { app: current } = await ensureApplication(thread as ThreadChannel);
-    if (current.viewerId === null) {
+    if (club && current.viewerId === null) {
         await interaction.reply({
-            embeds: [errorEmbed(`No trainer ID yet. <@${current.applicantId}> has been asked to send it here; decide once it is in.`)],
+            embeds: [errorEmbed(`No trainer ID yet, so it cannot be accepted. <@${current.applicantId}> has been asked to send it here. Rejected works without one.`)],
             flags: MessageFlags.Ephemeral,
         });
         return;

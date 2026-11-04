@@ -155,7 +155,7 @@ uma.moe:
 | Command | Who | Purpose |
 | --- | --- | --- |
 | `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
-| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. It needs the trainer ID first. Staff accept into their own club only. |
+| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Accepting needs the trainer ID; rejecting does not. Staff accept into their own club only. |
 | `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined, and the applicant's Discord is linked to their trainer, as `/uma-id` does. |
 | `/applications backfill [post_open]` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
 
