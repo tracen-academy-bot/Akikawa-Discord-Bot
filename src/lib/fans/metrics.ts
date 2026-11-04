@@ -503,7 +503,10 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         // reset shows the day that just closed, so counting it again would
         // spread the gap over one day too many and ask for less than pace).
         daysRemaining = Math.max(0, daysInMonth - finishedDay);
-        judgedDay = daysElapsed;
+        // Owed through the last finished day: the day in progress is not
+        // over, so it is neither owed nor averaged yet (only on day 1, before
+        // any day has finished, does today count).
+        judgedDay = finishedDay > 0 ? finishedDay : daysElapsed;
         effectiveQuota = quotaPerDay * daysInMonth;
         nextCheckpointTarget = effectiveQuota;
         requirement = (days) => quotaPerDay * days;
@@ -531,17 +534,14 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         // Quota is owed only for days spent in the circle: a mid-month joiner
         // from their first full day, and a returning member not for the gap.
         const firstDay = g.firstDay;
-        // Days in and the average count finished days, as the quota does
-        // outside MONTH: the day in progress has a snapshot from just after
-        // the reset but almost no fans yet, so counting it said "3 days" on
-        // day 2's report and cut the average by a third. MONTH keeps the
-        // reference's count through today. Before any day has finished,
-        // today counts.
-        const averagedThrough = period !== 'MONTH' && finishedDay > 0 ? finishedDay : daysElapsed;
+        // Days in and the average count finished days, as the quota does: the
+        // day in progress has a snapshot from just after the reset but almost
+        // no fans yet, so counting it said "3 days" on day 2's report and cut
+        // the average by a third. Before any day has finished, today counts.
+        const averagedThrough = finishedDay > 0 ? finishedDay : daysElapsed;
         const dataDays = daysInCircleThrough(g, averagedThrough);
         const owedThrough = (day: number) => Math.max(0, daysInCircleThrough(g, day) - quotaDaysOffset);
-        // MONTH owes through the latest day with data, as the reference does.
-        const quotaDays = period === 'MONTH' ? Math.max(0, daysInCircleThrough(g, daysElapsed) - quotaDaysOffset) : owedThrough(judgedDay);
+        const quotaDays = period === 'MONTH' ? Math.max(0, daysInCircleThrough(g, judgedDay) - quotaDaysOffset) : owedThrough(judgedDay);
 
         const expected = requirement(quotaDays);
         // Fans and requirement over the same days. In MONTH this is `total`.
