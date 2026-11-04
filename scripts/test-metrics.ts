@@ -232,6 +232,17 @@ function biweeklyChecks() {
     check('biweekly: 62M due by month end', bm.target, 62_000_000);
     check('biweekly days until the next check', b16.daysRemaining, 15);
     check('biweekly need/day', bm.needPerDay, 2_000_000);
+    // Day 2's report at the reset: a snapshot for day 3 already exists (a
+    // few fans in), but only two days are finished. Days in is 2 and the
+    // average is over those two, not three (Cosmos, 2026-11-03: 38.32M
+    // showed 12.77M/day over 3 days).
+    const reset = steady(1, 19_000_000, 2);
+    reset.dailyFans[3] = reset.dailyFans[2]! + 50_000;
+    const atReset = computeCircleProgress([reset], { ...bOpts, currentDay: 3 }).members[0]!;
+    check('day 2 report: 2 days in, not 3', atReset.dataDays, 2);
+    check('day 2 report: average over the 2 finished days', atReset.avgPerDay, 19_000_000);
+    const firstReport = computeCircleProgress([steady(1, 5_000_000, 1)], { ...bOpts, currentDay: 1 }).members[0]!;
+    check('day 1 in progress still counts as 1 day', firstReport.dataDays, 1);
     const b29 = computeCircleProgress([steady(1, 2_000_000, 29)], { ...bOpts, currentDay: 30 });
     check('biweekly: day 28 is not a check', b29.checkpointDay, 14);
     check('biweekly: no alert after day 28', b29.checkpointJustClosed, false);

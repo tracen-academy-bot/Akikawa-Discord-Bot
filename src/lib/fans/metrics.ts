@@ -531,15 +531,23 @@ export function computeCircleProgress(series: MemberSeries[], options: QuotaOpti
         // Quota is owed only for days spent in the circle: a mid-month joiner
         // from their first full day, and a returning member not for the gap.
         const firstDay = g.firstDay;
-        const dataDays = daysInCircleThrough(g, daysElapsed);
+        // Days in and the average count finished days, as the quota does
+        // outside MONTH: the day in progress has a snapshot from just after
+        // the reset but almost no fans yet, so counting it said "3 days" on
+        // day 2's report and cut the average by a third. MONTH keeps the
+        // reference's count through today. Before any day has finished,
+        // today counts.
+        const averagedThrough = period !== 'MONTH' && finishedDay > 0 ? finishedDay : daysElapsed;
+        const dataDays = daysInCircleThrough(g, averagedThrough);
         const owedThrough = (day: number) => Math.max(0, daysInCircleThrough(g, day) - quotaDaysOffset);
-        const quotaDays = period === 'MONTH' ? Math.max(0, dataDays - quotaDaysOffset) : owedThrough(judgedDay);
+        // MONTH owes through the latest day with data, as the reference does.
+        const quotaDays = period === 'MONTH' ? Math.max(0, daysInCircleThrough(g, daysElapsed) - quotaDaysOffset) : owedThrough(judgedDay);
 
         const expected = requirement(quotaDays);
         // Fans and requirement over the same days. In MONTH this is `total`.
         const behind = Math.max(0, expected - cumulativeAt(g, judgedDay));
         const onPace = behind === 0;
-        const avgPerDay = dataDays === 0 ? 0 : Math.floor(total / dataDays);
+        const avgPerDay = dataDays === 0 ? 0 : Math.floor(cumulativeAt(g, averagedThrough) / dataDays);
 
         let target: number;
         let needPerDay: number | null;
