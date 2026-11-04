@@ -92,6 +92,21 @@ async function main() {
     for (let i = 0; i < 100000; i += 1) if (RARE_PING_OPENERS.includes(pickOpener(i / 100000))) rare += 1;
     check('openers: rare ones are 4% of the range', rare, 4000);
     check('openers: the mention can sit mid-sentence', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => (RARE_PING_OPENERS.findIndex((o) => o.startsWith('Torena')) + 0.5) / RARE_PING_OPENERS.length * 0.04), "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay <@u1>? We can host a party afterwards too! I can't wait...");
+
+    // Rare lines are recorded and tallied.
+    const rares = await import('../src/lib/timer/rares');
+    const RG = `test-rares-${Date.now()}`;
+    check('rares: a rare line is rare, a common one is not', [rares.isRareOpener(RARE_PING_OPENERS[2]!), rares.isRareOpener(PING_OPENERS[0]!)], [true, false]);
+    check('rares: preview drops the mention and trims', rares.preview('{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food!', 30), 'Hayaku, はやく! Tachyon is hungr…');
+    await rares.recordRareOpener(RG, 'u1', RARE_PING_OPENERS[1]!);
+    await rares.recordRareOpener(RG, 'u2', RARE_PING_OPENERS[1]!);
+    await rares.recordRareOpener(RG, 'u3', RARE_PING_OPENERS[4]!);
+    const tally = await rares.rareTally(RG);
+    check('rares: tally per line, first finder kept', [tally.length, tally[1]?.count, tally[1]?.firstUserId, tally[4]?.count, tally[0]?.count], [RARE_PING_OPENERS.length, 2, 'u1', 1, 0]);
+    const embed = rares.raresEmbed(tally).toJSON();
+    check('rares: embed counts lines found and hides the rest', [embed.title, embed.description?.split('\n')[0]], [`Rare lines found: 2 of ${RARE_PING_OPENERS.length}`, '**1.** ???']);
+    check('rares: a found line shows its count and finder', embed.description?.includes('×2 · first: <@u1>'), true);
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [
         '<@u1> Time! Your Independent Training is complete!',

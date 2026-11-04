@@ -159,6 +159,19 @@ model TimerMilestoneSettings {
     updatedAt DateTime @updatedAt
 }
 
+/// A rare timer-ping opener that came up: who got it, which line, when.
+/// `/timer rares` tallies them. `opener` is the line's template text, so a
+/// line keeps its tally if the list is reordered.
+model RareOpenerHit {
+    id            String   @id @default(cuid())
+    guildId       String
+    discordUserId String
+    opener        String
+    at            DateTime @default(now())
+
+    @@index([guildId])
+}
+
 /// Who placed 1st to 3rd in a week, so the role comes off exactly the people
 /// it was given to when the next week is awarded.
 model TimerWeeklyAward {

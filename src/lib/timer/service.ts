@@ -18,7 +18,7 @@ import { prisma } from '../../db/prisma';
 export const TRAINING_MINUTES = 50;
 
 /** How long an expiry ping stays in the channel before it is deleted. */
-export const NOTIFICATION_LIFETIME_MINUTES = 10;
+export const NOTIFICATION_LIFETIME_MINUTES = 2;
 
 /**
  * Timezone used to decide which calendar day a run belongs to, which in turn

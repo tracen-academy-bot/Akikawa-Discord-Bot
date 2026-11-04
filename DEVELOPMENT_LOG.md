@@ -4,6 +4,21 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-05 — Rare lines recorded; pings cleared after 2 minutes
+
+- Asked whether anyone had hit a rare opener yet: nothing recorded it,
+  and pings are deleted, so there was no way to know. Each rare opener
+  posted is now stored (`RareOpenerHit`: guild, trainer, line, time).
+  `/timer rares` lists every rare line, found ones with their count and
+  first finder, and the rest as "???". The scheduler draws the random
+  number once, so the line posted is the one recorded. Openers moved to
+  `timer/openers.ts`, so the tally and the scheduler share them without
+  importing each other.
+- Expiry pings are now deleted after 2 minutes instead of 10
+  (`NOTIFICATION_LIFETIME_MINUTES`).
+
+---
+
 ## 2026-11-05 — Milestone roles as a ladder
 
 Asked by staff: reaching the next milestone should take the previous role

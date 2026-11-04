@@ -1,3 +1,4 @@
+import { rareTally, raresEmbed } from '../lib/timer/rares';
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
@@ -86,6 +87,7 @@ export const data = new SlashCommandBuilder()
                 opt.setName('trainer').setDescription('Whose stats to show (defaults to you)').setRequired(false),
             ),
     )
+    .addSubcommand((sub) => sub.setName('rares').setDescription('The rare timer lines found so far, and who found each first.'))
     .addSubcommand((sub) =>
         sub
             .setName('leaderboard')
@@ -174,6 +176,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             break;
         case 'leaderboard':
             await handleLeaderboard(interaction);
+            break;
+        case 'rares':
+            await interaction.reply({ embeds: [raresEmbed(await rareTally(interaction.guildId))], allowedMentions: { parse: [] } });
             break;
     }
 }
