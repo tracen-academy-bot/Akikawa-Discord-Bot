@@ -1,3 +1,4 @@
+import { rareTally, raresEmbed } from '../lib/timer/rares';
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
@@ -11,6 +12,7 @@ import { isOfficer } from '../lib/permissions';
 import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
 import {
     BUTTON_LEADERBOARD,
+    BUTTON_SPECIALS,
     BUTTON_START,
     BUTTON_STATS,
     BUTTON_STOP,
@@ -85,6 +87,9 @@ export const data = new SlashCommandBuilder()
             .addUserOption((opt) =>
                 opt.setName('trainer').setDescription('Whose stats to show (defaults to you)').setRequired(false),
             ),
+    )
+    .addSubcommand((sub) =>
+        sub.setName('specials').setDescription("The whole server's special timer lines: how often, and who found each first. Club Managers only."),
     )
     .addSubcommand((sub) =>
         sub
@@ -175,7 +180,27 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         case 'leaderboard':
             await handleLeaderboard(interaction);
             break;
+        case 'specials':
+            await handleSpecials(interaction);
+            break;
     }
+}
+
+/**
+ * `/timer specials`: the whole server's tally of special lines, only to the
+ * Club Manager who asks. Trainers see their own with the panel's Specials
+ * button.
+ */
+async function handleSpecials(interaction: ChatInputCommandInteraction) {
+    if (!isOfficer(interaction.member as GuildMember)) {
+        await interaction.reply({
+            embeds: [errorEmbed('Only Club Managers can see the whole server\'s specials. Press **Specials** on the Trainer Timer panel to see yours.')],
+            flags: MessageFlags.Ephemeral,
+        });
+        return;
+    }
+    const tally = await rareTally(interaction.guildId!);
+    await interaction.reply({ embeds: [raresEmbed(tally, false)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 /** Posts a fresh control panel. */
@@ -431,6 +456,13 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
     const guildId = interaction.guildId!;
 
     switch (interaction.customId) {
+        case BUTTON_SPECIALS: {
+            // The same hidden list as /timer specials: your own finds only.
+            const tally = await rareTally(guildId, interaction.user.id);
+            await interaction.reply({ embeds: [raresEmbed(tally, true)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+            break;
+        }
+
         case BUTTON_START: {
             const { timer, wasReset } = await startTimer(
                 guildId,

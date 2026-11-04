@@ -92,6 +92,36 @@ async function main() {
     for (let i = 0; i < 100000; i += 1) if (RARE_PING_OPENERS.includes(pickOpener(i / 100000))) rare += 1;
     check('openers: rare ones are 4% of the range', rare, 4000);
     check('openers: the mention can sit mid-sentence', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => (RARE_PING_OPENERS.findIndex((o) => o.startsWith('Torena')) + 0.5) / RARE_PING_OPENERS.length * 0.04), "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay <@u1>? We can host a party afterwards too! I can't wait...");
+
+    // Rare lines are recorded and tallied.
+    const rares = await import('../src/lib/timer/rares');
+    const RG = `test-rares-${Date.now()}`;
+    check('rares: a rare line is rare, a common one is not', [rares.isRareOpener(RARE_PING_OPENERS[2]!), rares.isRareOpener(PING_OPENERS[0]!)], [true, false]);
+    await rares.recordRareOpener(RG, 'u1', RARE_PING_OPENERS[1]!);
+    await rares.recordRareOpener(RG, 'u2', RARE_PING_OPENERS[1]!);
+    await rares.recordRareOpener(RG, 'u3', RARE_PING_OPENERS[4]!);
+    const tally = await rares.rareTally(RG);
+    check('rares: tally per line, first finder kept', [tally.length, tally[1]?.count, tally[1]?.firstUserId, tally[4]?.count, tally[0]?.count], [RARE_PING_OPENERS.length, 2, 'u1', 1, 0]);
+    const embed = rares.raresEmbed(tally).toJSON();
+    const col = (n: number) => embed.fields?.[n]?.value.split('\n') ?? [];
+    check('specials: three columns, one row per special', [embed.title, embed.fields?.map((f) => f.name), col(0).length, col(1).length, col(2).length], [
+        `Specials found: 2 of ${RARE_PING_OPENERS.length}`,
+        ['Special', 'Times', 'First found by'],
+        RARE_PING_OPENERS.length,
+        RARE_PING_OPENERS.length,
+        RARE_PING_OPENERS.length,
+    ]);
+    check('specials: unfound rows hide the name', [col(0)[0], col(1)[0], col(2)[0]], ['**1.** ???', '—', '—']);
+    check('specials: a found row shows name, count and finder', [col(0)[1], col(1)[1], col(2)[1]?.startsWith('<@u1> <t:')], ['**2.** Agnes Tachyon', '**×2**', true]);
+    check('specials: no line text is ever shown', RARE_PING_OPENERS.some((t) => JSON.stringify(embed).includes(t.replace('{user}', '').trim().slice(0, 20))), false);
+    const { buildPanel, BUTTON_SPECIALS } = await import('../src/lib/timer/panel');
+    const panelJson = JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never));
+    check('panel: has the Specials button', [panelJson.includes(BUTTON_SPECIALS), panelJson.includes('"label":"Specials"')], [true, true]);
+    const mine = rares.raresEmbed(await rares.rareTally(RG, 'u2'), true).toJSON();
+    const mcol = (n: number) => mine.fields?.[n]?.value.split('\n') ?? [];
+    check('specials: your own list counts only your finds', [mine.title, mcol(0)[1], mcol(1)[1], mcol(0)[4]], [`Your specials: 1 of ${RARE_PING_OPENERS.length}`, '**2.** Agnes Tachyon', '**×1**', '**5.** ???']);
+    check('specials: your own list shows when, not who', [mine.fields?.[2]?.name, mcol(2)[1]?.startsWith('<t:'), mine.footer?.text.startsWith('1 special ping for you')], ['First got', true, true]);
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [
         '<@u1> Time! Your Independent Training is complete!',
