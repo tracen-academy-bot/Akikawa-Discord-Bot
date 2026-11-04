@@ -18,11 +18,16 @@ import { prisma } from '../db/prisma';
  *   {clubs}   the channel the club directory is posted in
  */
 
-/** The text used until one is set. */
+/**
+ * The text used until one is set, in the voice of the academy's chairwoman,
+ * Yayoi Akikawa: short, emphatic declarations, each opened by a bold word,
+ * the way she addresses her trainers.
+ */
 export const DEFAULT_WELCOME =
-    'Welcome to **{server}**, {user}! You are member #{count}.\n\n' +
-    'Looking for a club? Read about ours in {clubs}, then open a post in {apply} with your trainer ID ' +
-    '(the 9 to 12 digit number on your in-game profile).';
+    '**Welcome!** {user}, I, Chairwoman Akikawa, welcome you to **{server}**! You are trainer #{count}!\n\n' +
+    '**Instruction!** Find your club! Read about ours in {clubs}, then open a post in {apply} with your trainer ID, ' +
+    'the number on your in-game Trainer Card!\n\n' +
+    '**Expectation!** Train hard, run your best, and let your Umamusume shine! This academy is counting on you!';
 
 /** Longest welcome text accepted, well inside an embed's 4096 characters. */
 export const WELCOME_MAX_LENGTH = 2000;

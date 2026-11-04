@@ -47,7 +47,7 @@ async function main() {
         check('bots are not welcomed', sent.length, 0);
         await w.welcomeMember(member() as unknown as Member);
         const first = sent[0] as { embeds: { toJSON(): { description?: string } }[] };
-        check('member welcomed with the default text', first?.embeds[0]?.toJSON().description?.startsWith('Welcome to **Tracen Academy**, <@42>! You are member #99.'), true);
+        check('member welcomed with the default text', first?.embeds[0]?.toJSON().description?.startsWith('**Welcome!** <@42>, I, Chairwoman Akikawa, welcome you to **Tracen Academy**! You are trainer #99!'), true);
         await prisma.welcomeSettings.update({ where: { guildId }, data: { message: 'Yo {user}' } });
         await w.welcomeMember(member() as unknown as Member);
         check('custom text used', (sent[1] as typeof first).embeds[0]?.toJSON().description, 'Yo <@42>');

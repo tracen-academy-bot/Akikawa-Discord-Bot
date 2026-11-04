@@ -4,6 +4,16 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Welcome in Chairwoman Akikawa's voice
+
+Asked: the welcome should sound like Yayoi Akikawa. The default text is
+rewritten as the chairwoman: short, emphatic lines, each opened by a bold
+word ("**Welcome!**", "**Instruction!**", "**Expectation!**"), greeting
+the newcomer as a trainer. A text saved with `/welcome message` is not
+touched.
+
+---
+
 ## 2026-11-04 — Board survives a move to a new bot account
 
 The user is moving to their own bot application (they hold Railway but not
