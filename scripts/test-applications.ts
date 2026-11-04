@@ -475,6 +475,25 @@ async function main() {
         await svc.takeIdFromMessage({ author: { id: '7007', bot: false }, content: '111222333444', channel: thread2 });
         check('reply: a later number does not replace the ID', (await prisma.clubApplication.findUnique({ where: { threadId: thread2.id } }))?.viewerId?.toString(), '467492654277');
 
+        // The same post opened twice at once (a repeated event, or two processes) asks once.
+        const posted3: unknown[] = [];
+        const thread3 = {
+            ...thread2,
+            id: `${guildId}-thread3`,
+            ownerId: '7003',
+            fetch: async () => thread3,
+            fetchStarterMessage: async () => {
+                await new Promise((r) => setTimeout(r, 50));
+                return { content: 'no id', author: { id: '7003' } };
+            },
+            send: async (p: unknown) => void posted3.push(p),
+        };
+        await Promise.all([svc.openApplication(thread3 as unknown as Thread), svc.openApplication(thread3 as unknown as Thread)]);
+        check('duplicate open: one ask posted', posted3.length, 1);
+        const thread4 = { ...thread3, id: `${guildId}-thread4`, fetch: async () => thread4 };
+        const both = await Promise.all([svc.ensureApplication(thread4 as unknown as Thread), svc.ensureApplication(thread4 as unknown as Thread)]);
+        check('duplicate create: exactly one made the row', both.filter((b) => b.created).length, 1);
+
         // Backfill over a fake forum: one active post, two pages of archived ones.
         const post = (id: string, name: string, extra: Record<string, unknown> = {}) => ({
             id: `${guildId}-${id}`,

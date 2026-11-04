@@ -4,6 +4,26 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — One ask per post; a clearer ID ask
+
+A new post got the "send your trainer ID" ping twice. `ensureApplication`
+checked for a row, then waited for the opening message (up to three tries
+1.5 s apart), then upserted. Two handlers for the same post (a repeated
+event, or the old and new process overlapping during a deploy) both saw
+no row and both reported `created`.
+
+- The row is now made with a plain `create`. A second caller hits the
+  unique key, reads the row, and gets `created: false`, so only one
+  posts. `openApplication` also drops a repeat for a post it is already
+  opening in this process.
+- The ask now says what to type ("reply here with … for example
+  `530 923 123 456`") and that a screenshot alone does not work. That post
+  had the ID only in its picture.
+- Tests: two concurrent opens of one post send one ask; two concurrent
+  creates make one row.
+
+---
+
 ## 2026-11-04 — Welcome message for new members
 
 Asked: a message when someone joins the server.
