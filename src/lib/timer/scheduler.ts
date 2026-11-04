@@ -39,34 +39,50 @@ const LATE_DELIVERY_THRESHOLD_S = 120;
 /** How often to check whether a week needs awarding. */
 const AWARD_CHECK_MS = 60_000;
 
+/** Openers for an expiry ping, one picked at random: Yayoi, cheering a run home. */
+export const PING_OPENERS: readonly string[] = [
+    '**Time!** Your Independent Training is complete! Splendid work!',
+    '**Finished!** The timer has reached zero! Back to the track, trainer!',
+    '**Well run!** Training complete! The academy saw every stride!',
+    '**Excellent!** Your run is done! Rest a moment, then go again!',
+];
+
 /**
- * Builds the message body for an expiry ping. `milestoneRoleId` is a role the
- * run just earned; it is mentioned but, with only the user allowed to be
- * pinged, does not notify the role.
+ * Builds the message body for an expiry ping, in the chairwoman's voice:
+ * a cheerful opener, then a bold-led line for each thing worth celebrating
+ * (the run's number, a streak, a new milestone role). `milestoneRoleId` is
+ * a role the run just earned; it is mentioned but, with only the user
+ * allowed to be pinged, does not notify the role. `random` is injectable
+ * for tests.
  */
-function buildPingContent(discordUserId: string, summary: CompletionSummary, lagSeconds: number, milestoneRoleId: string | null = null): string {
-    const lines = [`<@${discordUserId}> Your trainer timer has reached 0.`];
+export function buildPingContent(
+    discordUserId: string,
+    summary: CompletionSummary,
+    lagSeconds: number,
+    milestoneRoleId: string | null = null,
+    random: () => number = Math.random,
+): string {
+    const opener = PING_OPENERS[Math.min(PING_OPENERS.length - 1, Math.floor(random() * PING_OPENERS.length))]!;
+    const lines = [`<@${discordUserId}> ${opener}`];
 
     if (lagSeconds > LATE_DELIVERY_THRESHOLD_S) {
         const minutes = Math.round(lagSeconds / 60);
-        lines.push(`*This run ended about ${minutes} minute${minutes === 1 ? '' : 's'} ago while the bot was offline. It still counted.*`);
+        lines.push(`*Apologies! This run ended about ${minutes} minute${minutes === 1 ? '' : 's'} ago while I was offline. It still counts!*`);
     }
 
-    const rewards: string[] = [];
     if (summary.milestone !== null) {
-        rewards.push(
+        lines.push(
             summary.milestone === 1
-                ? 'First run recorded. Welcome.'
-                : `Run number **${summary.milestone}**.`,
+                ? '**Debut!** Your very first run is on the record! Welcome to the track!'
+                : `**Milestone!** That makes run #**${summary.milestone}**!`,
         );
     }
     if (summary.newLongestStreak) {
-        rewards.push(`New personal best: **${summary.currentStreakDays} day** streak.`);
+        lines.push(`**Record!** A new personal best: **${summary.currentStreakDays} days** in a row!`);
     } else if (summary.firstOfDay && summary.currentStreakDays > 1) {
-        rewards.push(`**${summary.currentStreakDays} day** streak.`);
+        lines.push(`**Persistence!** **${summary.currentStreakDays} days** straight! Keep it going!`);
     }
-    if (milestoneRoleId) rewards.push(`You reached **${summary.totalRuns} runs** and earned <@&${milestoneRoleId}>.`);
-    if (rewards.length > 0) lines.push(rewards.join(' '));
+    if (milestoneRoleId) lines.push(`**Promotion!** **${summary.totalRuns} runs** reached, and <@&${milestoneRoleId}> is yours!`);
 
     return lines.join('\n');
 }

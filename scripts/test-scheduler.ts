@@ -8,7 +8,7 @@
  *   DATABASE_URL=postgresql://... npm run test:scheduler
  */
 import { prisma } from '../src/db/prisma';
-import { startScheduler } from '../src/lib/timer/scheduler';
+import { PING_OPENERS, buildPingContent, startScheduler } from '../src/lib/timer/scheduler';
 
 const G = 'test-guild-sched';
 const CHANNEL = 'chan-1';
@@ -80,9 +80,20 @@ async function main() {
     check('offline expiry delivered one ping', sent.length, 1);
     check('ping mentions the right trainer', sent[0]?.mentions, ['trainer-a']);
     check('ping pings the trainer', sent[0]?.content.includes('<@trainer-a>'), true);
-    check('ping explains the delay', sent[0]?.content.includes('while the bot was offline'), true);
-    check('ping confirms it still counted', sent[0]?.content.includes('It still counted'), true);
-    check('first run is celebrated', sent[0]?.content.includes('First run recorded'), true);
+    check('ping explains the delay', sent[0]?.content.includes('while I was offline'), true);
+    check('ping confirms it still counted', sent[0]?.content.includes('It still counts!'), true);
+    check('first run is celebrated', sent[0]?.content.includes('**Debut!** Your very first run is on the record!'), true);
+    check('ping opens with one of the openers', PING_OPENERS.some((o) => sent[0]?.content.includes(o)), true);
+    const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0);
+    check('ping: every celebration on its own bold-led line', full.split('\n'), [
+        '<@u1> **Time!** Your Independent Training is complete! Splendid work!',
+        '*Apologies! This run ended about 10 minutes ago while I was offline. It still counts!*',
+        '**Milestone!** That makes run #**25**!',
+        '**Record!** A new personal best: **7 days** in a row!',
+        '**Promotion!** **25 runs** reached, and <@&role-25> is yours!',
+    ]);
+    check('ping: a plain run is just the opener', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => 0.99), '<@u1> **Excellent!** Your run is done! Rest a moment, then go again!');
+    check('ping: an ongoing streak, first run of the day', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 4, firstOfDay: true, totalRuns: 9 } as never, 0, null, () => 0).split('\n')[1], '**Persistence!** **4 days** straight! Keep it going!');
 
     check('expired timer removed', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-a' } }), 0);
     check('in-progress timer untouched', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-b' } }), 1);
