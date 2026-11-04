@@ -296,6 +296,12 @@ export async function ensureApplication(thread: ThreadChannel): Promise<{ app: C
 /** Posts being opened by this process, so a repeated event is dropped at once. */
 const opening = new Set<string>();
 
+/** The trainer ID in a post's title or opening message, read afresh; null when none. */
+export async function idInPost(thread: ThreadChannel): Promise<string | null> {
+    const starter = await starterMessage(thread);
+    return extractTrainerId(thread.name, starter?.content);
+}
+
 /** Handles a new post in the application forum. Never throws. */
 export async function openApplication(thread: ThreadChannel): Promise<void> {
     if (opening.has(thread.id)) return;
@@ -370,7 +376,11 @@ export async function takeIdFromMessage(message: {
  */
 export async function rescoutApplication(thread: ThreadChannel, viewerId: string | null): Promise<{ app: ClubApplication; outcome: ScoutOutcome }> {
     const { app } = await ensureApplication(thread);
-    const id = viewerId ?? app.viewerId?.toString() ?? null;
+    // No ID given and none stored: read the post again. Its opening message
+    // may have been unreadable when the application was made (the Message
+    // Content intent off), which stored "no ID" for good.
+    const reread = viewerId === null && app.viewerId === null ? await idInPost(thread) : null;
+    const id = viewerId ?? app.viewerId?.toString() ?? reread;
     if (id && app.viewerId === null && app.status === 'OPEN') return announceWithId(thread, app, id);
     const outcome = await tryScout(id);
     const updated = await prisma.clubApplication.update({

@@ -113,6 +113,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
                             `**Closed** (not open in the forum): ${r.closed}`,
                             `**Pinned posts removed**: ${r.removed}`,
                             `**Pace filled in**: ${r.rescouted}`,
+                            `**IDs found on a second read**: ${r.idsFound}`,
                             messageContentLine(interaction.client.options.intents.has(GatewayIntentBits.MessageContent)),
                             '-# Applications decided with /resolve were left as they are. The recruitment board is updated.',
                         ].join('\n'),

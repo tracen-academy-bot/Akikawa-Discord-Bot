@@ -4,6 +4,25 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-05 — Re-read open posts that were stored with no ID
+
+Zix's post opens with `647176684566`, yet it read "no ID yet". The row was
+made while the Message Content intent was off, so the opening message came
+back empty and "no ID" was stored. Nothing read an open post again:
+`/scout` with no ID only reused the stored one, and `backfill rescan`
+skips open posts.
+
+- `idInPost` reads a post's title and opening message afresh.
+- `/scout` with no ID, in a post with none stored, uses it.
+- `/applications tidy` re-reads every open post with no stored ID; an ID
+  found is announced like a new post's (card, board, staff notice). The
+  summary counts these as "IDs found on a second read".
+- Tests: the Zix case (ID on the body's first line) through tidy, and a
+  spaced ID through `/scout`. The tidy fixture's posts now have plain
+  titles and can be sent to.
+
+---
+
 ## 2026-11-05 — Rare lines recorded; pings cleared after 2 minutes
 
 - Asked whether anyone had hit a rare opener yet: nothing recorded it,
