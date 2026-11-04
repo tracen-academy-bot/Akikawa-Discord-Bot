@@ -466,3 +466,14 @@ model RecruitmentBoard {
     messageId String
     updatedAt DateTime @updatedAt
 }
+
+/// The welcome message for new members, one per guild, set with `/welcome`.
+model WelcomeSettings {
+    guildId   String   @id
+    /// Where the welcome is posted. Null: welcomes are off.
+    channelId String?
+    /// The text, with {user}, {server}, {count}, {apply} and {clubs}
+    /// placeholders. Null: the default text.
+    message   String?
+    updatedAt DateTime @updatedAt
+}

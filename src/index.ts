@@ -24,6 +24,8 @@ import { handlePrefixMessage } from './prefix';
 import { handleHelpSelect, isHelpSelect } from './commands/help';
 import { handleCloseButton, isCloseButton } from './commands/close';
 import { openApplication, takeIdFromMessage } from './lib/applications/service';
+import { welcomeMember } from './lib/welcome';
+import { handleWelcomeModal, isWelcomeModal } from './commands/welcome';
 
 /**
  * Builds a client with every handler attached.
@@ -96,6 +98,11 @@ client.on(Events.ThreadCreate, (thread: ThreadChannel, newlyCreated: boolean) =>
     void openApplication(thread);
 });
 
+// A new member: the welcome set with /welcome. Needs the Server Members intent.
+client.on(Events.GuildMemberAdd, (member) => {
+    void welcomeMember(member);
+});
+
 client.on(Events.MessageCreate, (message) => {
     void handlePrefixMessage(message);
     // An applicant replying with their trainer ID after being asked for it.
@@ -163,7 +170,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
               ? handleProfileModal
               : isClubModal(interaction.customId)
                 ? handleClubModal
-                : null;
+                : isWelcomeModal(interaction.customId)
+                  ? handleWelcomeModal
+                  : null;
         if (!handler) return;
         try {
             await handler(interaction);

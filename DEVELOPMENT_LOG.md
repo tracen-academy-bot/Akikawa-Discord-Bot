@@ -4,6 +4,27 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Welcome message for new members
+
+Asked: a message when someone joins the server.
+
+- `GuildMemberAdd` posts the welcome (`lib/welcome.ts`) in the channel
+  stored in the new `WelcomeSettings` table: a ping, then an embed with
+  the text and the member's avatar. Bots are skipped. Only the newcomer can
+  be pinged, whatever the text says. A missing channel logs a warning and
+  posts nothing.
+- `/welcome channel | message | test | off` (Club Managers). The text is
+  edited in a modal so it can span lines. Placeholders: {user}, {server},
+  {count}, {apply} (the application forum), {clubs} (the directory
+  channel). The default text points newcomers to the club list and the
+  application forum, with their trainer ID.
+- Needs the Server Members intent for join events.
+- Tests: `scripts/test-welcome.ts` (placeholders, only the newcomer
+  pinged, bots skipped, off until a channel is set, custom text, a missing
+  channel).
+
+---
+
 ## 2026-11-04 — /applications tidy; Message Content check
 
 The board after the first backfill listed 35 under "Going to": imported

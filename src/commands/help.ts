@@ -103,6 +103,10 @@ export const AUDIENCE: Record<string, Audience> = {
     'timer milestone remove': 'managers',
     'applications backfill': 'managers',
     'applications tidy': 'managers',
+    'welcome channel': 'managers',
+    'welcome message': 'managers',
+    'welcome test': 'managers',
+    'welcome off': 'managers',
     post: 'managers',
 
     'role add': 'moderators',
@@ -122,7 +126,7 @@ const TOPICS: Record<Topic, { label: string; blurb: string }> = {
     clubs: { label: 'Clubs', blurb: 'Club info, the staff forms, members and the directory.' },
     applications: { label: 'Club applications', blurb: 'Scouting applicants on uma.moe, deciding their posts, and closing them.' },
     timer: { label: 'Trainer Timer', blurb: 'Independent Training runs, stats and weekly rewards.' },
-    tools: { label: 'Moderation and posting', blurb: 'Club roles, closing threads, and posting as Akikawa.' },
+    tools: { label: 'Moderation and posting', blurb: 'Club roles, closing threads, welcoming new members, and posting as Akikawa.' },
 };
 
 /** Which page each top-level command is on. */
@@ -138,6 +142,7 @@ export const TOPIC_OF: Record<string, Exclude<Topic, 'start'>> = {
     role: 'tools',
     settag: 'tools',
     post: 'tools',
+    welcome: 'tools',
     help: 'tools',
 };
 
