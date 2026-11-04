@@ -1,16 +1,20 @@
-import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
+import * as fs from 'fs';
+import * as path from 'path';
+import { createCanvas, loadImage, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import { THEME, drawLabel, drawRule, drawText } from './theme';
 import { drawChart } from './chart';
 import { drawTileRow, type Tile } from './tiles';
-import { formatCompactFans } from '../fans/metrics';
+import { formatCompactFans, formatFans } from '../fans/metrics';
+import { fit } from './cards';
+import { font } from './fonts';
 import type { DayGain, MonthSummary, MonthsAverage, WindowAverage } from '../applications/history';
 
 /**
  * An applicant's card: who they are, their pace over three spans, the last
- * 30 days as a line, and the last months as bars.
+ * 30 days as a line, and the last months as a table of totals with the
+ * rank of the club they were in each month.
  *
- * Both views plot fans per day, so the line and the bars read on the same
- * scale as each other and as a club's daily quota. The 30-day average is
+ * The 30-day average is
  * drawn across the line as a guide, so a good week is read against the
  * trainer's own norm.
  */
@@ -70,8 +74,9 @@ export function estimatedRuns(days: DayGain[]): string[] {
 function recentDetail(recent: WindowAverage): string {
     if (recent.days === 0) return 'no daily data on uma.moe';
     const recorded = recent.days - recent.estimatedDays;
-    const active = `${recent.activeDays} of ${recorded} recorded days with fans`;
-    return recent.estimatedDays > 0 ? `${active}, ${recent.estimatedDays} estimated` : active;
+    // Kept short: the tile is about 33 characters wide at this size.
+    if (recent.estimatedDays > 0) return `${recent.activeDays}/${recorded} days with fans, ${recent.estimatedDays} est.`;
+    return `${recent.activeDays} of ${recorded} days with fans`;
 }
 
 /** Detail line for a months average: "3 of 3 months", "1 of 6 months". */
@@ -80,45 +85,110 @@ function monthsDetail(avg: MonthsAverage): string {
     return `${avg.months} of ${avg.of} months on record`;
 }
 
-/** Bars of fans per day, one per month, oldest on the left. */
-function drawMonthBars(ctx: SKRSContext2D, months: MonthSummary[], x: number, y: number, w: number, h: number) {
-    const ordered = [...months].reverse();
-    const peak = Math.max(1, ...ordered.map((m) => m.perDay ?? 0));
-    const labelBand = 44;
-    const valueBand = 22;
-    const plotH = h - labelBand - valueBand;
-    const slot = w / ordered.length;
-    const barW = Math.min(90, slot * 0.6);
-    const baseY = y + valueBand + plotH;
+/** Club rank tiers, lowest first, as uma.moe names them. */
+export const CLUB_RANKS = ['D', 'D+', 'C', 'C+', 'B', 'B+', 'A', 'A+', 'S', 'S+', 'SS'] as const;
 
-    drawRule(ctx, x, baseY, w, THEME.line, 1);
-    ordered.forEach((m, i) => {
-        const cx = x + slot * i + slot / 2;
-        const label = `${MONTHS[m.month - 1]} ${String(m.year).slice(2)}`;
-        drawText(ctx, label, cx, baseY + 20, { spec: '500 13px', color: THEME.muted, align: 'center' });
-        const note = m.inProgress ? 'so far' : m.firstOnRecord ? 'first on record' : '';
-        if (note) drawText(ctx, note, cx, baseY + 37, { spec: '400 11px', color: THEME.faint, align: 'center' });
+/** Badge file stem for a rank name: "B+" is `B_PLUS.png`, "SS" is `SS.png`. */
+export function rankFileStem(rank: string): string {
+    return rank.trim().toUpperCase().replace('+', '_PLUS');
+}
 
-        if (m.perDay === null) {
-            drawText(ctx, 'no data', cx, baseY - 8, { spec: '400 12px', color: THEME.faint, align: 'center' });
-            return;
+/** Colour of a rank's text badge, when it has no picture yet. */
+function rankColor(rank: string): string {
+    const i = CLUB_RANKS.indexOf(rank as (typeof CLUB_RANKS)[number]);
+    if (i >= 8) return '#f4b13f';
+    if (i >= 6) return '#56d364';
+    if (i >= 4) return '#79c0ff';
+    if (i >= 2) return '#c9a0dc';
+    return THEME.muted;
+}
+
+const rankImages = new Map<string, Image | null>();
+
+/** A rank's badge picture from `assets/ranks`, or null when there is none yet. */
+async function rankImage(rank: string): Promise<Image | null> {
+    const stem = rankFileStem(rank);
+    if (rankImages.has(stem)) return rankImages.get(stem)!;
+    const file = path.join(__dirname, '..', '..', 'assets', 'ranks', `${stem}.png`);
+    const image = fs.existsSync(file) ? await loadImage(file).catch(() => null) : null;
+    rankImages.set(stem, image);
+    return image;
+}
+
+/** A club rank flag: its badge picture, or the rank in a coloured outline. */
+async function drawRankFlag(ctx: SKRSContext2D, rank: string, x: number, cy: number) {
+    const image = await rankImage(rank);
+    if (image) {
+        // The pictures are 310x360; drawn 26 tall.
+        const h = 26;
+        const w = (image.width / image.height) * h;
+        ctx.drawImage(image, x, cy - h / 2, w, h);
+        drawText(ctx, rank, x + w + 8, cy + 5, { spec: '700 15px', color: rankColor(rank) });
+        return;
+    }
+    const color = rankColor(rank);
+    ctx.font = font('700 14px');
+    const w = Math.max(30, ctx.measureText(rank).width + 16);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x + 0.5, cy - 11.5, w, 23);
+    drawText(ctx, rank, x + w / 2, cy + 5, { spec: '700 14px', color, align: 'center' });
+}
+
+/** Height of the month table for `rows` months. */
+function monthTableHeight(rows: number): number {
+    return 34 + rows * 38;
+}
+
+/**
+ * A row per month, newest first: the club the trainer was in, that club's
+ * rank tier that month, fans gained, and the trainer's place in the month's
+ * fan ranking. Plain totals, no per-day average: a month's per-day figure
+ * depends on how many of its days the trainer was tracked, which uma.moe
+ * does not give.
+ */
+async function drawMonthTable(ctx: SKRSContext2D, months: MonthSummary[], x: number, y: number, w: number) {
+    const cols = { month: x + 14, club: x + 190, rank: x + 480, gained: x + w - 260, fanRank: x + w - 14 };
+    drawLabel(ctx, 'Month', cols.month, y + 14, THEME.faint, 11);
+    drawLabel(ctx, 'Club', cols.club, y + 14, THEME.faint, 11);
+    drawLabel(ctx, 'Club rank', cols.rank, y + 14, THEME.faint, 11);
+    drawLabel(ctx, 'Fans gained', cols.gained, y + 14, THEME.faint, 11, 'right');
+    drawLabel(ctx, 'Fan ranking', cols.fanRank, y + 14, THEME.faint, 11, 'right');
+    drawRule(ctx, x, y + 24, w, THEME.line, 1);
+
+    for (const [i, m] of months.entries()) {
+        const top = y + 34 + i * 38;
+        const cy = top + 19;
+        if (i % 2 === 0) {
+            ctx.fillStyle = THEME.bgRaised;
+            ctx.fillRect(x, top, w, 38);
         }
-        const barH = Math.max(2, (m.perDay / peak) * plotH);
-        // The month in progress and a possibly partial first month are dimmed:
-        // their per-day figure is less settled than a full month's.
-        ctx.fillStyle = m.inProgress || m.firstOnRecord ? THEME.goldDim : THEME.gold;
-        ctx.fillRect(cx - barW / 2, baseY - barH, barW, barH);
-        drawText(ctx, formatCompactFans(Math.round(m.perDay)), cx, baseY - barH - 7, { spec: '600 13px', color: THEME.text, align: 'center' });
-    });
+        const monthW = drawText(ctx, `${MONTHS[m.month - 1]} ${m.year}`, cols.month, cy + 5, { spec: '600 15px', color: THEME.text });
+        const note = m.inProgress ? 'so far' : m.firstOnRecord ? 'first on record' : '';
+        if (note) drawText(ctx, note, cols.month + monthW + 10, cy + 5, { spec: '400 12px', color: THEME.faint });
+        if (m.gain === null) {
+            drawText(ctx, 'no record on uma.moe', cols.club, cy + 5, { spec: '400 14px', color: THEME.faint });
+            continue;
+        }
+        drawText(ctx, fit(ctx, m.clubName ?? '—', cols.rank - cols.club - 20, '400 15px'), cols.club, cy + 5, { spec: '400 15px', color: m.clubName ? THEME.text : THEME.faint });
+        if (m.clubRank) await drawRankFlag(ctx, m.clubRank, cols.rank, cy);
+        else drawText(ctx, '—', cols.rank, cy + 5, { spec: '400 15px', color: THEME.faint });
+        drawText(ctx, formatFans(m.gain), cols.gained, cy + 5, { spec: '600 15px', color: THEME.text, align: 'right' });
+        drawText(ctx, m.fanRank ? `#${m.fanRank.toLocaleString('en-US')}` : '—', cols.fanRank, cy + 5, {
+            spec: '400 15px',
+            color: m.fanRank ? THEME.muted : THEME.faint,
+            align: 'right',
+        });
+    }
 }
 
 export async function renderApplicantCard(data: ApplicantCardData): Promise<Buffer> {
     const headerHeight = 112;
     const tileHeight = 104;
     const chartHeight = 290;
-    const barsHeight = 230;
+    const tableHeight = monthTableHeight(data.months.length);
     const sectionGap = 56;
-    const height = headerHeight + 12 + tileHeight + sectionGap + chartHeight + 34 + sectionGap + barsHeight + 50;
+    const height = headerHeight + 12 + tileHeight + sectionGap + chartHeight + 34 + sectionGap + tableHeight + 50;
 
     const canvas = createCanvas(WIDTH, height);
     const ctx = canvas.getContext('2d');
@@ -189,8 +259,8 @@ export async function renderApplicantCard(data: ApplicantCardData): Promise<Buff
 
     // ── Months ────────────────────────────────────────────────────────────────
     top += chartHeight + 34 + sectionGap;
-    drawLabel(ctx, 'Fans per day, by month', MARGIN, top - 14, THEME.muted, 12);
-    drawMonthBars(ctx, data.months, MARGIN, top, WIDTH - MARGIN * 2, barsHeight);
+    drawLabel(ctx, 'By month', MARGIN, top - 14, THEME.muted, 12);
+    await drawMonthTable(ctx, data.months, MARGIN, top, WIDTH - MARGIN * 2);
 
     // ── Footer ────────────────────────────────────────────────────────────────
     const updated = data.lastUpdated ? data.lastUpdated.toUTCString() : 'unknown';

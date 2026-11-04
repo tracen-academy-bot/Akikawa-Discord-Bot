@@ -128,8 +128,9 @@ handled by the bot. When a post opens, it finds the trainer ID (9 to 12
 digits) in the title or the body and scouts the trainer on uma.moe:
 
 - **In the post:** the trainer's card. It shows fans per day over the last
-  30 days as a line, and over the last 3 and 6 finished months, with a bar
-  per month.
+  30 days as a line, the 3- and 6-month averages, and a table of the last
+  months. The table lists the club, that club's rank that month, fans
+  gained and the trainer's fan ranking.
 - **In #recruitment** (`RECRUITMENT_CHANNEL_ID`): one entry per application,
   with status, destination club and pace. The entry is edited in place as
   the application moves on.
@@ -151,7 +152,10 @@ Averages are per calendar day. uma.moe's own `avg_daily` divides by days
 with a gain, which flatters trainers who skip days. Daily figures come from
 the `daily_fans` of each circle the trainer was in. Where uma.moe has a gap
 (no snapshot, often a circle it does not track), the rise across the gap is
-spread evenly over its days, and the card says which days. Months uma.moe
+spread evenly over its days, and the card says which days. The month table
+shows totals, not per-day figures. Club rank badges come from
+`src/assets/ranks/<RANK>.png` (`B_PLUS.png`, `D_PLUS.png`, `SS.png`); a rank
+without a picture is drawn as an outlined label. Months uma.moe
 has no record of are left out of the averages, not counted as zero. The
 first month on record is also left out, because it may be partial.
 

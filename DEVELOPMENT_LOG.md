@@ -4,6 +4,25 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Applicant card: month table instead of per-day bars
+
+Asked: no per-day average on the monthly view; flag each month's club rank
+instead, as a list of numbers. The per-day bars were misleading. A month's
+figure depended on how many of its days uma.moe tracked the trainer, which
+the profile does not say. Zix's October read 250K/day, but they were in a
+circle uma.moe tracks for only part of the month.
+
+- The bars are replaced by a table, newest first: month, club, the club's
+  rank tier that month (`club_rank_name`: D to SS), fans gained, and the
+  trainer's monthly fan ranking (`rank`).
+- Rank flags use `src/assets/ranks/<stem>.png` (`B+` becomes `B_PLUS`).
+  D, D+, C, C+, B and SS have no picture yet; they are drawn as outlined
+  labels and will switch to pictures when their files are added.
+- The 3- and 6-month tiles are unchanged (still per calendar day).
+- Tests: the new fields, and the rank name to file name mapping.
+
+---
+
 ## 2026-11-04 — Club applications: scouting, /resolve, /close; club poster
 
 Asked: show each applicant's last 30 days as a line and their last 3 to 6

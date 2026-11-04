@@ -96,6 +96,12 @@ export interface UmaProfileMonth {
     avg_daily?: number | null;
     circle_id?: number | null;
     circle_name?: string | null;
+    /** The trainer's place in that month's fan ranking. */
+    rank?: number | null;
+    /** The circle's tier index that month (1 = D, 2 = D+, ... 11 = SS). */
+    club_rank?: number | null;
+    /** The circle's tier that month: D, D+, C, C+, B, B+, A, A+, S, S+, SS. */
+    club_rank_name?: string | null;
 }
 
 /** One month of `circle_history`: the circle the trainer was in that month. */

@@ -36,7 +36,7 @@ function near(a: number | null, b: number): boolean {
 async function main() {
     const h = await import('../src/lib/applications/history');
     const svc = await import('../src/lib/applications/service');
-    const { renderApplicantCard } = await import('../src/lib/image/renderApplicant');
+    const { renderApplicantCard, rankFileStem } = await import('../src/lib/image/renderApplicant');
     const { renderClubPoster } = await import('../src/lib/image/renderClubPoster');
     const { prisma } = await import('../src/db/prisma');
 
@@ -114,7 +114,7 @@ async function main() {
     const months = h.monthSummaries(
         [
             { year: 2026, month: 11, gain: 300, activeDays: 3 },
-            { year: 2026, month: 10, gain: 3100, activeDays: 20 },
+            { year: 2026, month: 10, gain: 3100, activeDays: 20, clubName: 'TeamSirius', clubRank: 'B', fanRank: 219762 },
             { year: 2026, month: 9, gain: 3000, activeDays: 30 },
             // August missing: not in a tracked circle.
             { year: 2026, month: 7, gain: 6200, activeDays: 31 },
@@ -132,6 +132,9 @@ async function main() {
         [6, 30, false, true],
         [5, 31, false, false],
     ]);
+    check('months: club, club rank and fan ranking carried', [months[1]!.clubName, months[1]!.clubRank, months[1]!.fanRank], ['TeamSirius', 'B', 219762]);
+    check('months: absent fields are null', [months[2]!.clubName, months[2]!.clubRank, months[2]!.fanRank], [null, null, null]);
+    check('rank files: names map to badge files', ['D', 'D+', 'B+', 'S+', 'SS'].map(rankFileStem), ['D', 'D_PLUS', 'B_PLUS', 'S_PLUS', 'SS']);
     check('months: missing month has no figure', [months[3]!.gain, months[3]!.perDay], [null, null]);
     const three = h.monthsAverage(months, 3);
     // Oct + Sep only (Aug missing): 6100 / 61 days.

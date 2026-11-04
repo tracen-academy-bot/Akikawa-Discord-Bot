@@ -92,7 +92,15 @@ export async function scoutTrainer(viewerId: string, now = currentGameMonth()): 
     const months = monthSummaries(
         (profile.fan_history?.monthly ?? [])
             .filter((m) => typeof m.year === 'number' && typeof m.month === 'number' && typeof m.monthly_gain === 'number')
-            .map((m) => ({ year: m.year!, month: m.month!, gain: m.monthly_gain!, activeDays: m.active_days ?? null })),
+            .map((m) => ({
+                year: m.year!,
+                month: m.month!,
+                gain: m.monthly_gain!,
+                activeDays: m.active_days ?? null,
+                clubName: m.circle_name ?? null,
+                clubRank: m.club_rank_name ?? null,
+                fanRank: m.rank ?? null,
+            })),
         now,
         MONTHS_SHOWN,
     );
