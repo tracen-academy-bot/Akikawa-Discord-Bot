@@ -4,6 +4,22 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Timer ping openers from the staff, with rare ones
+
+The user wrote the openers: seven common lines, and six rare ones (a nod
+to other characters) that together come up 1% of the time. They are used
+word for word. Openers are templates with `{user}`, so the mention can sit
+mid-sentence (the burger line). `pickOpener` maps one random number:
+below 0.01 a rare line, evenly spread; above it a common line, evenly
+spread. A 100,000-step sweep in the test gives exactly 1,000 rare picks.
+The bold celebration lines underneath are unchanged.
+
+Follow-ups: 「dominare」 in corner brackets; three more rare openers
+(Mejiro, Wassho, Onii-sama); the rare share raised to 2%, then 4%, as the list grew to
+12 rare lines.
+
+---
+
 ## 2026-11-04 — Timer ping in Yayoi's voice
 
 Asked: the timer's "has reached 0" ping should be livelier and more like
