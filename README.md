@@ -144,6 +144,22 @@ digits) in the title or the body and scouts the trainer on uma.moe:
 | `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
 | `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Staff accept into their own club only. |
 | `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined. |
+| `/applications backfill [post_open]` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
+
+The backfill uses one uma.moe profile request per trainer, about 3 per
+second, so a few hundred posts take a few minutes. It decides each post's
+status in this order:
+
+1. **Joined:** the trainer is in one of our clubs now.
+2. **Accepted:** the post has an accepted tag. The club recorded is the
+   latest of ours they were in since posting.
+3. **Rejected:** the post has a rejected tag.
+4. **Closed:** the post is archived or locked with no decision tag, so the
+   outcome is unknown.
+5. **Open:** none of the above.
+
+It posts nothing unless `post_open:true` is set, and then only entries for
+posts still open. A second run imports only posts with no row yet.
 
 A locked post has no message box for the applicant, so the decision comes
 with a **Close post** button. Applicants use that button, not `/close`.

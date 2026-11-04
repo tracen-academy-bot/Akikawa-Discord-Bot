@@ -204,6 +204,8 @@ export function statusOf(app: Pick<ClubApplication, 'status' | 'clubName' | 'res
             return { text: `Rejected${by}`, color: 0xed4245 };
         case 'WITHDRAWN':
             return { text: 'Closed before a decision', color: 0x80848e };
+        case 'CLOSED':
+            return { text: 'Closed (from before the bot; outcome not recorded)', color: 0x80848e };
     }
 }
 

@@ -4,6 +4,35 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Backfill: match old application posts
+
+Asked: #apply-for-club has a lot of old applicant posts; match them against
+the data. `/applications backfill` (Club Managers) walks every post in the
+forum: active ones, then archived ones, 100 per page. Each post without a
+row gets one:
+
+- The ID comes from the title, then the opening message. Old opening
+  messages may be deleted; the title still counts.
+- One uma.moe profile request per trainer (cached; 300 ms apart), with no
+  daily data. Pace is the 3- and 6-month averages, and the 30-day pace is
+  left empty.
+- `matchApplication` sets the status in this order: in one of our clubs
+  now (Joined); accepted tag (Accepted, with the latest of our clubs since
+  the post's month); rejected tag (Rejected); archived or locked (the new
+  `CLOSED` status, outcome unknown); otherwise Open. A trainer who was in
+  one of our clubs after posting but is not now gets a note.
+- The row keeps the post's own creation date. Nothing is posted unless
+  `post_open:true`, and then only entries for open posts.
+- It replies with a summary (statuses, how many are now in each club) and a
+  CSV of every imported post. A run longer than the 15-minute interaction
+  window reports in the channel instead.
+
+Tests: the matching rules, CSV quoting, and a run over a fake forum
+(pagination, other forums skipped, a deleted opening message, a second run
+importing nothing).
+
+---
+
 ## 2026-11-04 — Applicant card: month table instead of per-day bars
 
 Asked: no per-day average on the monthly view; flag each month's club rank

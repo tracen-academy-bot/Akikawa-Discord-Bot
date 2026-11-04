@@ -10,6 +10,7 @@ import * as help from './help';
 import * as resolve from './resolve';
 import * as close from './close';
 import * as scout from './scout';
+import * as applications from './applications';
 
 export interface Command {
     data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
@@ -30,6 +31,7 @@ commands.set(help.data.name, help as Command);
 commands.set(resolve.data.name, resolve as Command);
 commands.set(close.data.name, close as Command);
 commands.set(scout.data.name, scout as Command);
+commands.set(applications.data.name, applications as Command);
 
 // /help lists whatever is registered above.
 help.setHelpSource(() => [...commands.values()].map((c) => c.data.toJSON() as unknown as help.CommandJson));

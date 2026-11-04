@@ -101,6 +101,7 @@ export const AUDIENCE: Record<string, Audience> = {
     'timer publish': 'managers',
     'timer milestone add': 'managers',
     'timer milestone remove': 'managers',
+    'applications backfill': 'managers',
     post: 'managers',
 
     'role add': 'moderators',
@@ -131,6 +132,7 @@ export const TOPIC_OF: Record<string, Exclude<Topic, 'start'>> = {
     scout: 'applications',
     resolve: 'applications',
     close: 'applications',
+    applications: 'applications',
     timer: 'timer',
     role: 'tools',
     settag: 'tools',

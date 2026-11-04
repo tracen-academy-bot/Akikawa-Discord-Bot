@@ -39,6 +39,7 @@ async function main() {
     const { renderApplicantCard, rankFileStem } = await import('../src/lib/image/renderApplicant');
     const { renderClubPoster } = await import('../src/lib/image/renderClubPoster');
     const { prisma } = await import('../src/db/prisma');
+    const bf = await import('../src/lib/applications/backfill');
 
     // ── Trainer IDs ───────────────────────────────────────────────────────────
     check('id: bare in title', h.extractTrainerId('233568825060 want to transfer to First'), '233568825060');
@@ -239,6 +240,37 @@ async function main() {
     check('poster: renders a PNG', poster.subarray(1, 4).toString(), 'PNG');
     check('poster: renders with no clubs', (await renderClubPoster([])).subarray(1, 4).toString(), 'PNG');
 
+    // ── Matching old posts ────────────────────────────────────────────────────
+    const ourClubs = [
+        { id: 'rose', name: 'Rose', circleId: 132902185n },
+        { id: 'first', name: 'First', circleId: 999n },
+        { id: 'lily', name: 'Lily', circleId: null },
+    ];
+    const match = (over: Partial<Parameters<typeof bf.matchApplication>[0]>) =>
+        bf.matchApplication({ tagNames: [], archived: false, locked: false, postedIn: { year: 2026, month: 9 }, profile: null, clubs: ourClubs, ...over });
+    const prof = (current: number | null, history: [number, number, number | null][]) => ({
+        currentCircleId: current,
+        history: history.map(([year, month, circleId]) => ({ year, month, circleId })),
+    });
+    let m = match({ profile: prof(132902185, [[2026, 11, 132902185], [2026, 10, 132902185], [2026, 9, 555]]) });
+    check('match: in our club now is joined', [m.status, m.club?.name, m.since.map((c) => c.name), m.note], ['JOINED', 'Rose', ['Rose'], null]);
+    m = match({ tagNames: ['Club App Accepted'], profile: prof(555, [[2026, 11, 555], [2026, 10, 999], [2026, 8, 132902185]]) });
+    check('match: accepted then left; months before the post ignored', [m.status, m.club?.name, m.since.map((c) => c.name), m.note], [
+        'ACCEPTED',
+        'First',
+        ['First'],
+        'Was in First after posting; not any more.',
+    ]);
+    check('match: rejected tag', match({ tagNames: ['S', 'Rejected'], profile: prof(555, []) }).status, 'REJECTED');
+    check('match: archived, no decision', match({ archived: true }).status, 'CLOSED');
+    check('match: still open', match({}).status, 'OPEN');
+    check('match: joined beats a rejected tag', match({ tagNames: ['Rejected'], profile: prof(999, []) }).status, 'JOINED');
+    check('match: untracked club never matches', match({ profile: prof(null, [[2026, 10, null]]) }).nowIn, null);
+    check('csv: quotes commas and quotes', bf.backfillCsv([{
+        threadUrl: 'u', title: 'Hi, "me"', applicantId: 'a', openedAt: new Date('2026-01-02T00:00:00Z'), tags: ['S', 'A'], trainerId: null, trainerName: null,
+        umaCircle: null, status: 'OPEN', club: null, nowIn: null, since: [], pace3m: 1234.6, pace6m: null, problem: null,
+    }]).split('\n')[1], 'u,"Hi, ""me""",a,2026-01-02T00:00:00.000Z,S | A,,,,OPEN,,,,1235,,');
+
     // ── Resolve and close, against the database ───────────────────────────────
     const guildId = `test-applications-${Date.now()}`;
     const threadId = `${guildId}-thread`;
@@ -319,6 +351,54 @@ async function main() {
 
         await prisma.clubApplication.update({ where: { threadId }, data: { status: 'OPEN' } });
         check('close: open becomes withdrawn', (await svc.closeApplication(thread as unknown as Thread)).app.status, 'WITHDRAWN');
+
+        // Backfill over a fake forum: one active post, two pages of archived ones.
+        const post = (id: string, name: string, extra: Record<string, unknown> = {}) => ({
+            id: `${guildId}-${id}`,
+            name,
+            parentId: 'forum-bf',
+            ownerId: `owner-${id}`,
+            url: `https://discord.com/channels/${guildId}/${id}`,
+            appliedTags: [] as string[],
+            archived: false,
+            locked: false,
+            createdAt: new Date('2026-10-05T00:00:00Z'),
+            archivedAt: null,
+            client,
+            fetchStarterMessage: async () => ({ content: 'no id here', author: { id: `owner-${id}` } }),
+            ...extra,
+        });
+        const active = post('p1', '[123456789] hi');
+        const archivedA = post('p2', 'Looking for a club', { archived: true, appliedTags: ['tag-acc'] });
+        const archivedB = post('p3', 'old', { archived: true, fetchStarterMessage: async () => { throw new Error('Unknown Message'); } });
+        const asMap = (list: unknown[]) => new Map(list.map((t) => [(t as { id: string }).id, t]));
+        let archivedCalls = 0;
+        const forum = {
+            id: 'forum-bf',
+            guildId,
+            availableTags: [{ id: 'tag-acc', name: 'Club App Accepted' }],
+            threads: {
+                fetchActive: async () => ({ threads: asMap([active, post('other', 'elsewhere', { parentId: 'not-this-forum' })]) }),
+                fetchArchived: async (o: { before?: unknown }) => {
+                    archivedCalls += 1;
+                    return o.before ? { threads: asMap([archivedB]), hasMore: false } : { threads: asMap([archivedA]), hasMore: true };
+                },
+            },
+        };
+        type Forum = Parameters<typeof bf.backfillApplications>[0];
+        const progress: number[] = [];
+        const report = await bf.backfillApplications(forum as unknown as Forum, { onProgress: (d) => void progress.push(d) });
+        check('backfill: pages through archived posts, skips other forums', [report.scanned, archivedCalls], [3, 2]);
+        check('backfill: outcome by post', report.rows.map((r) => [r.title, r.status, r.trainerId, r.problem]), [
+            ['[123456789] hi', 'OPEN', '123456789', 'uma.moe not set up (EXTERNAL_API_KEY)'],
+            ['Looking for a club', 'ACCEPTED', null, 'no trainer ID in the post'],
+            ['old', 'CLOSED', null, 'no trainer ID in the post'],
+        ]);
+        check('backfill: rows written with the post date', (await prisma.clubApplication.findUnique({ where: { threadId: `${guildId}-p2` } }))?.createdAt.toISOString(), '2026-10-05T00:00:00.000Z');
+        check('backfill: nothing posted without post_open', sent.length, 1);
+        const again = await bf.backfillApplications(forum as unknown as Forum);
+        check('backfill: a second run imports nothing', [again.imported, again.alreadyTracked], [0, 3]);
+        check('backfill: progress reported at the end', progress.at(-1), 3);
     } finally {
         await prisma.clubApplication.deleteMany({ where: { guildId } });
         await prisma.trackedCircle.deleteMany({ where: { guildId } });

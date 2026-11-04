@@ -412,6 +412,9 @@ enum ApplicationStatus {
     JOINED
     /// Closed by the applicant before a decision.
     WITHDRAWN
+    /// A post from before the bot handled applications, archived or locked
+    /// with no decision tag: how it ended is not known.
+    CLOSED
 }
 
 /// One post in the club application forum (`FORUM_CHANNEL_ID`).
