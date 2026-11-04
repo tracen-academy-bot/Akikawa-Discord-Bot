@@ -101,6 +101,7 @@ export const AUDIENCE: Record<string, Audience> = {
     'timer publish': 'managers',
     'timer milestone add': 'managers',
     'timer milestone remove': 'managers',
+    'timer milestone ladder': 'managers',
     'applications backfill': 'managers',
     'applications tidy': 'managers',
     'welcome channel': 'managers',

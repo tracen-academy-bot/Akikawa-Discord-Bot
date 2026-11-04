@@ -4,6 +4,31 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-05 — Milestone roles as a ladder
+
+Asked by staff: reaching the next milestone should take the previous role
+off (Veteran to Ace), and the "Milestone added" reply read badly.
+
+- `milestoneRolesFor(total, milestones, ladder)`: on a ladder, keep the
+  highest milestone reached and drop every other milestone role; stacked,
+  keep all reached and drop nothing. `applyMilestoneRoles` adds only what a
+  member lacks and removes only what they hold.
+- `awardMilestone` (each run) and `syncMilestones` (adding a milestone,
+  turning the ladder on or off) both go through it. `syncMilestones`
+  replaces `backfillMilestone`.
+- The ladder flag lives in a new `TimerMilestoneSettings` table, defaulting
+  to on, kept apart from `TimerSettings` because a row there starts the
+  weekly award.
+- `/timer milestone ladder on:<bool>`. The add, remove and ladder replies
+  say plainly who got the role now, how many lower roles came off, and list
+  the whole ladder.
+- Existing stacked roles are not touched until a sync. One
+  `/timer milestone ladder on:true` re-sorts everyone.
+- Tests: the rule, a run swapping roles, a lower milestone added, ladder
+  off then on.
+
+---
+
 ## 2026-11-04 — Timer ping openers from the staff, with rare ones
 
 The user wrote the openers: seven common lines, and six rare ones (a nod
