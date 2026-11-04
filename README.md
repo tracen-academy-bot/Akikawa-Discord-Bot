@@ -216,6 +216,24 @@ first month on record is also left out, because it may be partial.
 #club-bio. The picture shows tiers, avatars, expected ranks, quotas and open
 spots. It does not update itself; run it again after clubs change.
 
+## Welcome message
+
+When someone joins the server, the bot posts a welcome in the channel set
+with `/welcome channel`: a ping, then the text with their avatar. Bots are
+not welcomed. Club Managers set it up:
+
+| Command | Purpose |
+| --- | --- |
+| `/welcome channel <channel>` | Turn welcomes on, posting there |
+| `/welcome message` | Edit the text in a form (it can span lines; empty goes back to the default) |
+| `/welcome test` | See the welcome as a new member would, only to you |
+| `/welcome off` | Stop welcoming; the text is kept |
+
+The text takes these placeholders: `{user}` (the new member), `{server}`,
+`{count}` (member number), `{apply}` (the application forum, from
+`FORUM_CHANNEL_ID`) and `{clubs}` (the club directory's channel). Join
+events need the Server Members intent.
+
 ## Dashboard
 
 Runs inside the bot process — no second container. Set `DISCORD_CLIENT_SECRET`,
