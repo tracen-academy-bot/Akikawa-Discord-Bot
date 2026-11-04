@@ -89,10 +89,7 @@ export const data = new SlashCommandBuilder()
             ),
     )
     .addSubcommand((sub) =>
-        sub
-            .setName('specials')
-            .setDescription('The special timer lines you have found, and how often. Only you see it.')
-            .addBooleanOption((opt) => opt.setName('everyone').setDescription('The whole server\'s tally instead (Club Managers only)').setRequired(false)),
+        sub.setName('specials').setDescription("The whole server's special timer lines: how often, and who found each first. Club Managers only."),
     )
     .addSubcommand((sub) =>
         sub
@@ -190,17 +187,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 }
 
 /**
- * `/timer specials [everyone]`: your own special lines, only to you. The
- * server-wide tally (`everyone:true`) is for Club Managers, also only to them.
+ * `/timer specials`: the whole server's tally of special lines, only to the
+ * Club Manager who asks. Trainers see their own with the panel's Specials
+ * button.
  */
 async function handleSpecials(interaction: ChatInputCommandInteraction) {
-    const everyone = interaction.options.getBoolean('everyone') ?? false;
-    if (everyone && !isOfficer(interaction.member as GuildMember)) {
-        await interaction.reply({ embeds: [errorEmbed('Only Club Managers can see the whole server\'s specials. Leave `everyone` off to see yours.')], flags: MessageFlags.Ephemeral });
+    if (!isOfficer(interaction.member as GuildMember)) {
+        await interaction.reply({
+            embeds: [errorEmbed('Only Club Managers can see the whole server\'s specials. Press **Specials** on the Trainer Timer panel to see yours.')],
+            flags: MessageFlags.Ephemeral,
+        });
         return;
     }
-    const tally = await rareTally(interaction.guildId!, everyone ? undefined : interaction.user.id);
-    await interaction.reply({ embeds: [raresEmbed(tally, !everyone)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+    const tally = await rareTally(interaction.guildId!);
+    await interaction.reply({ embeds: [raresEmbed(tally, false)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 /** Posts a fresh control panel. */

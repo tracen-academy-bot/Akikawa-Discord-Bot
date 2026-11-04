@@ -71,7 +71,7 @@ export const AUDIENCE: Record<string, Audience> = {
     'fans circle list': 'everyone',
     'timer stats': 'everyone',
     'timer leaderboard': 'everyone',
-    'timer specials': 'everyone',
+    'timer specials': 'managers',
     'club poster': 'everyone',
     scout: 'everyone',
     close: 'everyone',

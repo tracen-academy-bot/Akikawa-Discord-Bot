@@ -17,10 +17,10 @@ Newest first. Each entry records what changed and, more importantly, why.
 - Each rare line has a staff-given name (`RARE_OPENERS`: Overslept?!,
   Agnes Tachyon, Mihono Bourbon, and so on). `/timer specials` shows the name
   of a found line, never the line itself, so the list spoils nothing. It
-  is three columns: name, times it came up, first finder. It is hidden
-  (ephemeral) and shows only your own finds; `everyone:true` (Club
-  Managers) shows the server's tally, also hidden. The timer panel has a
-  **Specials** button that shows the same personal list.
+  is three columns: name, times it came up, first finder. Trainers see
+  their own finds, hidden, with the timer panel's **Specials** button;
+  `/timer specials` is for Club Managers and shows the server's tally,
+  also hidden.
 - Expiry pings are now deleted after 2 minutes instead of 10
   (`NOTIFICATION_LIFETIME_MINUTES`).
 
