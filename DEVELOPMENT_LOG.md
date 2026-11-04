@@ -4,6 +4,27 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — /applications tidy; Message Content check
+
+The board after the first backfill listed 35 under "Going to": imported
+accepted posts, mostly long archived. The user asked to close everything
+except the posts open in the forum now.
+
+- `tidyAction` applies these rules: a pinned post is removed; a `/resolve`
+  decision is kept; a post open in the forum (active, unlocked) is set to
+  Open, so it shows under Available; anything else still Open or without
+  `closedAt` is closed. Accepted rows keep their status, and closing them
+  is what takes them off the board. Open posts with an ID and no 30-day
+  pace are re-scouted, since the backfill reads no daily data.
+- Tyqical's open transfer post had been matched Joined (they are in Rose
+  now); tidy puts it back to Open, since the open post is the application.
+- Zix's open post begins with the ID, yet it read "no ID yet": the bot
+  gets no message text. Tidy and backfill now say whether the client
+  connected with the Message Content intent. Startup drops the intent
+  rather than fail when the portal has it off.
+
+---
+
 ## 2026-11-04 — Backfill: rescan, pinned posts, unread opening messages
 
 The first real backfill (1,039 posts) found an ID in 270 of 1,037, and

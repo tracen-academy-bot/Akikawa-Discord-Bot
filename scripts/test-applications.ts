@@ -37,6 +37,7 @@ async function main() {
     const { renderClubPoster } = await import('../src/lib/image/renderClubPoster');
     const { prisma } = await import('../src/db/prisma');
     const bf = await import('../src/lib/applications/backfill');
+    const tidyMod = await import('../src/lib/applications/tidy');
 
     // ── Trainer IDs ───────────────────────────────────────────────────────────
     check('id: bare in title', h.extractTrainerId('233568825060 want to transfer to First'), '233568825060');
@@ -262,6 +263,18 @@ async function main() {
         'Going to (3)',
         ['**First**', '<@f1>', '**Rose**', '<@r1>', '<@r2>'],
     ]);
+    check('tidy rule', (() => {
+        const tidyRule = (r: { status: 'OPEN' | 'ACCEPTED' | 'JOINED' | 'CLOSED'; resolvedById?: string; closedAt?: Date }, open: boolean, pinned = false) =>
+            tidyMod.tidyAction({ threadId: 't', status: r.status, resolvedById: r.resolvedById ?? null, closedAt: r.closedAt ?? null }, new Set(open ? ['t'] : []), new Set(pinned ? ['t'] : []));
+        return [
+            tidyRule({ status: 'OPEN' }, true),
+            tidyRule({ status: 'JOINED' }, true),
+            tidyRule({ status: 'ACCEPTED' }, false),
+            tidyRule({ status: 'ACCEPTED', resolvedById: 'x' }, false),
+            tidyRule({ status: 'CLOSED', closedAt: new Date() }, false),
+            tidyRule({ status: 'OPEN' }, true, true),
+        ];
+    })(), ['keep', 'reopen', 'close', 'keep', 'keep', 'remove']);
     check('board: an accepted post already closed is off it', board.boardEmbeds([{ ...base, status: 'ACCEPTED' as const, clubName: 'Rose', closedAt: at('2026-01-01T00:00:00Z') }])[1]!.toJSON().title, 'Going to (0)');
     check('board: rejected, joined and withdrawn are off it', /<@(x|j|w)>/.test(`${avail?.description}${going?.description}`), false);
     const [emptyA, emptyG] = board.boardEmbeds([]).map((e) => e.toJSON());
@@ -530,6 +543,51 @@ async function main() {
             bf.needsRescan({ status: 'OPEN', viewerId: null, trainerName: null }),
         ], [true, false, true, false]);
         check('backfill: progress reported at the end, pinned post included', progress.at(-1), 4);
+
+        // Tidy: only the posts open in the forum stay live.
+        const tidy = await import('../src/lib/applications/tidy');
+        const tg = `${guildId}-tidy`;
+        const mk = (id: string, data: Record<string, unknown>) =>
+            prisma.clubApplication.create({ data: { threadId: `${tg}-${id}`, guildId: tg, applicantId: '1', ...data } });
+        await mk('open', { status: 'OPEN', viewerId: 574910875032n });
+        await mk('joined-open', { status: 'JOINED', clubName: 'Rose' });
+        await mk('accepted-old', { status: 'ACCEPTED', clubName: 'Rose' });
+        await mk('open-gone', { status: 'OPEN' });
+        await mk('resolved', { status: 'ACCEPTED', clubName: 'Rose', resolvedById: '42' });
+        await mk('pinned', { status: 'ACCEPTED' });
+        await mk('closed-old', { status: 'CLOSED', closedAt: new Date('2025-01-01T00:00:00Z') });
+        const tthread = (id: string, extra: Record<string, unknown> = {}) => ({
+            ...thread, id: `${tg}-${id}`, parentId: 'forum-tidy', guildId: tg, locked: false, flags: { has: () => false }, ...extra,
+        });
+        const tidyForum = {
+            id: 'forum-tidy',
+            guildId: tg,
+            client,
+            threads: {
+                fetchActive: async () => ({
+                    threads: new Map(
+                        [
+                            tthread('open'),
+                            tthread('joined-open'),
+                            tthread('resolved', { locked: true }),
+                            tthread('pinned', { flags: { has: (f: number) => f === ChannelFlags.Pinned } }),
+                        ].map((t) => [t.id, t]),
+                    ),
+                }),
+            },
+        };
+        const tr = await tidy.tidyApplications(tidyForum as unknown as Parameters<typeof tidy.tidyApplications>[0]);
+        const after = async (id: string) => prisma.clubApplication.findUnique({ where: { threadId: `${tg}-${id}` } });
+        check('tidy: counts', tr, { reopened: 1, closed: 2, removed: 1, rescouted: 1 });
+        check('tidy: open post stays open', [(await after('open'))?.status, (await after('open'))?.closedAt], ['OPEN', null]);
+        check('tidy: open post marked joined goes back to open', [(await after('joined-open'))?.status, (await after('joined-open'))?.clubName], ['OPEN', null]);
+        check('tidy: old accepted post closed, still reads accepted', [(await after('accepted-old'))?.status, (await after('accepted-old'))?.closedAt !== null], ['ACCEPTED', true]);
+        check('tidy: open row with no open post closed', (await after('open-gone'))?.status, 'CLOSED');
+        check('tidy: /resolve decisions left alone', [(await after('resolved'))?.status, (await after('resolved'))?.closedAt], ['ACCEPTED', null]);
+        check('tidy: pinned post removed', await after('pinned'), null);
+        check('tidy: already closed kept as it was', (await after('closed-old'))?.closedAt?.toISOString(), '2025-01-01T00:00:00.000Z');
+        await prisma.clubApplication.deleteMany({ where: { guildId: tg } });
+        await prisma.recruitmentBoard.deleteMany({ where: { guildId: tg } });
     } finally {
         await prisma.trainerLink.deleteMany({ where: { guildId } });
         await prisma.recruitmentBoard.deleteMany({ where: { guildId } });
