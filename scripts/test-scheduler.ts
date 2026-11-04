@@ -86,12 +86,12 @@ async function main() {
     const allOpeners = [...PING_OPENERS, ...RARE_PING_OPENERS];
     check('ping opens with one of the openers', allOpeners.some((o) => sent[0]?.content.includes(o.replace('{user}', '').trim().slice(0, 30))), true);
     check('openers: every one names the trainer once', allOpeners.every((o) => o.split('{user}').length === 2), true);
-    check('openers: below 1% a rare one, spread evenly', [pickOpener(0), pickOpener(0.0099), pickOpener(0.005)], [RARE_PING_OPENERS[0], RARE_PING_OPENERS[5], RARE_PING_OPENERS[3]]);
+    check('openers: below 1% a rare one, spread evenly', [pickOpener(0), pickOpener(0.0099999), pickOpener(0.005)], [RARE_PING_OPENERS[0], RARE_PING_OPENERS[RARE_PING_OPENERS.length - 1], RARE_PING_OPENERS[Math.floor(RARE_PING_OPENERS.length / 2)]]);
     check('openers: from 1% up a common one, spread evenly', [pickOpener(0.01), pickOpener(0.5), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[3], PING_OPENERS[6]]);
     let rare = 0;
     for (let i = 0; i < 100000; i += 1) if (RARE_PING_OPENERS.includes(pickOpener(i / 100000))) rare += 1;
     check('openers: rare ones are 1% of the range', rare, 1000);
-    check('openers: the mention can sit mid-sentence', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => 0.0099), "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay <@u1>? We can host a party afterwards too! I can't wait...");
+    check('openers: the mention can sit mid-sentence', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => (RARE_PING_OPENERS.findIndex((o) => o.startsWith('Torena')) + 0.5) / RARE_PING_OPENERS.length * 0.01), "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay <@u1>? We can host a party afterwards too! I can't wait...");
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.01);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [
         '<@u1> Time! Your Independent Training is complete!',

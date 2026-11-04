@@ -62,6 +62,9 @@ export const RARE_PING_OPENERS: readonly string[] = [
     "{user} Yada yada yadaaaaaaaaaaa! Why are you ignoring me?! Didn't you promise you'd game with me after finishing the run?! Where are you at HAEH? Get back here, you gotta play with 「dominare」! YADAAAAAA! >.<",
     '{user} *tugs at shirt* Machan wants your attention...  can we hang out after you finish the run...',
     "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay {user}? We can host a party afterwards too! I can't wait...",
+    'The Mejiro Estate welcomes your return, {user}. Please attend to your trainee as soon as possible. We have provided detailed updates on her development.',
+    "Wassho~ *trips* Oooooow!...  ooh- My nose? It's fine, {user}! You're here now! Please come take a look at your trainee!",
+    "{user} Onii-samaaa~ I don't want to cause much trouble, but the independent run has finished! Will you come take a look with me?",
 ];
 
 /** Chance, across all of them, that a ping opens with a rare line. */
