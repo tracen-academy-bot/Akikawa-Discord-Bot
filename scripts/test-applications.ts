@@ -423,6 +423,15 @@ async function main() {
         await board.refreshRecruitmentBoard(client as never, guildId, 'recruit-1');
         const cleared = await prisma.clubApplication.findUnique({ where: { threadId } });
         check('board: old per-application entry deleted once', [deleted, cleared?.recruitmentMessageId ?? null], [['old-entry'], null]);
+        // A board posted by another bot account cannot be edited: a fresh one is posted.
+        const sentBeforeForeign = sent.length;
+        const foreign = {
+            ...recruitment,
+            messages: { fetch: async (id: string) => ({ id, edit: async () => { throw new Error('Cannot edit a message authored by another user'); }, delete: async () => undefined }) },
+        };
+        await board.refreshRecruitmentBoard({ channels: { fetch: async () => foreign } } as never, guildId, 'recruit-1');
+        const reposted = await prisma.recruitmentBoard.findUnique({ where: { guildId } });
+        check('board: another bot\'s board is replaced, not left stale', [sent.length - sentBeforeForeign, reposted?.messageId], [1, `msg-${sent.length}`]);
         check('accept: message names the club', svc.decisionMessage(resolved).content.includes('accepted into **Rose**'), true);
 
         const closed = await svc.closeApplication(thread as unknown as Thread);

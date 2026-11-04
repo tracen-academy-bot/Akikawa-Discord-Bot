@@ -115,8 +115,10 @@ export function refreshRecruitmentBoard(client: Client, guildId: string, channel
             const board = await prisma.recruitmentBoard.findUnique({ where: { guildId } });
             if (board && board.channelId === channel.id) {
                 const message = await channel.messages.fetch(board.messageId).catch(() => null);
-                if (message) {
-                    await message.edit(payload);
+                // A message posted by another bot (after moving to a new bot
+                // account) can be fetched but not edited: post a fresh board.
+                const edited = message ? await message.edit(payload).then(() => true, () => false) : false;
+                if (edited) {
                     await clearOldEntries(client, apps);
                     return;
                 }
