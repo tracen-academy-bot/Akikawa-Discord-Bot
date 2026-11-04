@@ -68,7 +68,7 @@ export const RARE_PING_OPENERS: readonly string[] = [
 ];
 
 /** Chance, across all of them, that a ping opens with a rare line. */
-export const RARE_OPENER_CHANCE = 0.01;
+export const RARE_OPENER_CHANCE = 0.02;
 
 /**
  * Picks an opener from one random number: below `RARE_OPENER_CHANCE` a rare
@@ -83,7 +83,7 @@ export function pickOpener(r: number): string {
 }
 
 /**
- * Builds the message body for an expiry ping: an opener (a rare one 1% of
+ * Builds the message body for an expiry ping: an opener (a rare one 2% of
  * the time), then a bold-led line for each thing worth celebrating
  * (the run's number, a streak, a new milestone role). `milestoneRoleId` is
  * a role the run just earned; it is mentioned but, with only the user

@@ -14,6 +14,9 @@ below 0.01 a rare line, evenly spread; above it a common line, evenly
 spread. A 100,000-step sweep in the test gives exactly 1,000 rare picks.
 The bold celebration lines underneath are unchanged.
 
+Follow-ups: 「dominare」 in corner brackets; three more rare openers
+(Mejiro, Wassho, Onii-sama); the rare share raised to 2% as the list grew.
+
 ---
 
 ## 2026-11-04 — Timer ping in Yayoi's voice
