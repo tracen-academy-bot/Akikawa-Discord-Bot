@@ -4,6 +4,38 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Backfill: rescan, pinned posts, unread opening messages
+
+The first real backfill (1,039 posts) found an ID in 270 of 1,037, and
+every one of those was in the title; no ID came from a post body. The
+pinned example post says "Trainer ID: 467492654277" in its body and was
+also reported as having no ID. So the bot read no opening message text at
+all. Either the Message Content intent was not in effect (Discord then
+returns empty text, also for fetched messages), or the opening messages
+could not be fetched. The old code swallowed both as "no trainer ID".
+
+- `problem` now says which: "no trainer ID in the title or the opening
+  message", "...; opening message could not be read (reason)", or
+  "...; opening message has no text the bot can read". The report counts
+  opening messages fetched with text, fetched empty, and failed. When none
+  had text, the summary warns and names the likely fix.
+- `rescan:true` re-reads imported posts that are done and have no ID, or
+  an ID uma.moe did not find (`needsRescan`). Open posts are left to the
+  live flow. Rows are upserted, keeping the post's date.
+- Pinned posts (the forum's guide and example) are skipped, and deleted
+  if an earlier run imported them. The example had been imported as
+  Accepted.
+- **Board:** "Going to" shows accepted applications only while the post
+  is open (`closedAt` null). The 35 backfilled Accepted posts were mostly
+  archived long ago and would have sat on it for good. The backfill now
+  sets `closedAt` for every archived post.
+- The no-ID posts are almost all from July 2025 to February 2026; from
+  March 2026 most titles carry the ID. After fixing the reading, a rescan
+  should recover the ones with the ID in the body. Posts whose ID is only
+  in a screenshot stay without one.
+
+---
+
 ## 2026-11-04 — Accepting gives the club role
 
 Asked: on resolve, give the club role and remove every other club role;

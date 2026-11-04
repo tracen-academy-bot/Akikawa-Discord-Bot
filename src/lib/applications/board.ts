@@ -48,7 +48,8 @@ export function availableLine(app: Pick<ClubApplication, 'applicantId' | 'thread
 /** The board's two embeds, from a guild's applications (any status). */
 export function boardEmbeds(apps: ClubApplication[]): EmbedBuilder[] {
     const open = apps.filter((a) => a.status === 'OPEN').sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-    const accepted = apps.filter((a) => a.status === 'ACCEPTED');
+    // Accepted and still open: an old post accepted long ago and archived is not on its way anywhere.
+    const accepted = apps.filter((a) => a.status === 'ACCEPTED' && a.closedAt === null);
 
     const clubs = new Map<string, ClubApplication[]>();
     for (const app of accepted) {
