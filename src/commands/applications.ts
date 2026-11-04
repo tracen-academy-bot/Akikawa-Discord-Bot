@@ -14,7 +14,7 @@ import { FORUM_ID } from '../lib/applications/service';
 import { backfillApplications, backfillCsv, type BackfillReport } from '../lib/applications/backfill';
 
 /**
- * `/applications backfill [post_open]`: imports every post already in the
+ * `/applications backfill`: imports every post already in the
  * application forum, open or archived, and matches each applicant against
  * uma.moe and the server's clubs. Replies with a summary and a CSV of every
  * imported post. Club Managers only. Running it again imports only posts
@@ -26,8 +26,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('backfill')
-            .setDescription('Import every old application post and match it to uma.moe and our clubs. Club Managers only.')
-            .addBooleanOption((opt) => opt.setName('post_open').setDescription('Also post recruitment entries for old posts still open (default: no)')),
+            .setDescription('Import every old application post and match it to uma.moe and our clubs. Club Managers only.'),
     );
 
 /** The summary embed. */
@@ -69,7 +68,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     // result as a plain message in the channel instead.
     const tokenAlive = () => Date.now() - started < 14 * 60_000;
     const report = await backfillApplications(forum as ForumChannel, {
-        postOpen: interaction.options.getBoolean('post_open') ?? false,
         onProgress: async (done, total) => {
             if (tokenAlive()) await interaction.editReply(`Matching old applications: ${done} of ${total} posts...`).catch(() => undefined);
         },

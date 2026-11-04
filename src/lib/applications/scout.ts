@@ -151,16 +151,3 @@ export async function scoutTrainer(viewerId: string, now = currentGameMonth()): 
     };
 }
 
-/** The pace a report is judged by: the last 30 days, else the last 3 months. */
-export function headlinePace(report: ScoutReport): { perDay: number; basis: string } | null {
-    if (report.recent.perDay !== null && report.recent.days >= 7) {
-        return { perDay: report.recent.perDay, basis: `last ${report.recent.days} days` };
-    }
-    if (report.threeMonths.perDay !== null) {
-        return { perDay: report.threeMonths.perDay, basis: `last ${report.threeMonths.months} month${report.threeMonths.months === 1 ? '' : 's'}` };
-    }
-    if (report.recent.perDay !== null) {
-        return { perDay: report.recent.perDay, basis: `last ${report.recent.days} day${report.recent.days === 1 ? '' : 's'}` };
-    }
-    return null;
-}

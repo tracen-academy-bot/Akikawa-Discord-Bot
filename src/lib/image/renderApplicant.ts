@@ -20,6 +20,8 @@ import type { DayGain, MonthSummary, MonthsAverage, WindowAverage } from '../app
  */
 
 const WIDTH = 1200;
+/** The image is this many times its layout size. */
+const SCALE = 2;
 const MARGIN = 40;
 
 /** Short month names, for bar labels. */
@@ -119,9 +121,12 @@ async function rankImage(rank: string): Promise<Image | null> {
 async function drawRankFlag(ctx: SKRSContext2D, rank: string, x: number, cy: number) {
     const image = await rankImage(rank);
     if (image) {
-        // The pictures are 310x360; drawn 26 tall.
-        const h = 26;
+        // The pictures are 310x360, drawn 30 tall (60 px at the card's 2x
+        // scale). High-quality smoothing keeps the shrink from going jagged.
+        const h = 30;
         const w = (image.width / image.height) * h;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(image, x, cy - h / 2, w, h);
         drawText(ctx, rank, x + w + 8, cy + 5, { spec: '700 15px', color: rankColor(rank) });
         return;
@@ -206,8 +211,11 @@ export async function renderApplicantCard(data: ApplicantCardData): Promise<Buff
     const sectionGap = 56;
     const height = headerHeight + 12 + tileHeight + sectionGap + chartHeight + 34 + sectionGap + tableHeight + 50;
 
-    const canvas = createCanvas(WIDTH, height);
+    // Drawn at twice the layout size, so text and badges stay sharp when
+    // Discord scales the image to the reader's screen.
+    const canvas = createCanvas(WIDTH * SCALE, height * SCALE);
     const ctx = canvas.getContext('2d');
+    ctx.scale(SCALE, SCALE);
     ctx.fillStyle = THEME.bg;
     ctx.fillRect(0, 0, WIDTH, height);
 

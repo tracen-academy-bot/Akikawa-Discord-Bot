@@ -1,6 +1,6 @@
 /**
  * Club applications: trainer ID parsing, the merged daily series, the
- * averages, club fits, the decision tags, the recruitment entry, the card
+ * averages, club fits, the decision tags, the recruitment board, the card
  * and poster images, and the resolve/close flow against a real database
  * with a fake forum post and channels.
  *
@@ -13,9 +13,6 @@ process.env.FORUM_CHANNEL_ID = 'forum-1';
 process.env.RECRUITMENT_CHANNEL_ID = 'recruit-1';
 process.env.STAFF_DISCUSSION_CHANNEL_ID = 'off';
 process.env.TAG_CLUB_APP_ACCEPTED_ID = 'tag-accepted';
-process.env.COMP_COUNCIL_ROLE_ID = 'role-comp';
-process.env.CASUAL_COUNCIL_ROLE_ID = 'role-casual';
-delete process.env.SEMI_COMP_COUNCIL_ROLE_ID;
 delete process.env.TAG_REJECTED_ID;
 delete process.env.EXTERNAL_API_KEY;
 
@@ -175,30 +172,13 @@ async function main() {
     check('club month: not in the circle', h.clubMonthStats(circleRows, 'Z'), null);
     check('club month: carried into the summary', h.monthSummaries([{ year: 2026, month: 10, gain: 30, activeDays: 1, club: h.clubMonthStats(circleRows, 'B') }], now, 2)[1]!.club?.share, 0.75);
 
-    // ── Club fits ─────────────────────────────────────────────────────────────
-    const clubs = [
-        { id: 'a', name: 'First', quotaPerDay: 12_000_000 },
-        { id: 'b', name: 'Rose', quotaPerDay: 2_000_000 },
-        { id: 'c', name: 'Lily', quotaPerDay: 0 },
-        { id: 'd', name: 'Spica', quotaPerDay: 5_000_000 },
-    ];
-    const fits = h.clubFits(6_000_000, clubs);
-    check('fits: highest quota first, no-quota clubs left out', fits.map((f) => [f.club.name, f.meets]), [
-        ['First', false],
-        ['Spica', true],
-        ['Rose', true],
-    ]);
-    check('fits: no pace meets nothing', h.clubFits(null, clubs).some((f) => f.meets), false);
-    check('fits text: clears', svc.fitsText(fits).clears, 'Spica (5.0M/day), Rose (2.0M/day)');
-    check('fits text: clears none', svc.fitsText(h.clubFits(1, clubs)).clears, 'None (lowest quota: Rose, 2.0M/day)');
-
     // ── Tags and pings ────────────────────────────────────────────────────────
     check('tags: status tag first, rejected one removed', svc.withStatusTag(['s', 'rej', 'casual'], 'acc', ['rej']), ['acc', 's', 'casual']);
     check('tags: five-tag limit keeps the decision', svc.withStatusTag(['1', '2', '3', '4', '5'], 'acc', []), ['acc', '1', '2', '3', '4']);
     check('tags: no status tag configured', svc.withStatusTag(['1', '2'], null, ['x']), ['1', '2']);
-    check('pings: S+ and Casual', svc.tierRolesFor(['S+', 'Casual']), { roles: ['role-comp', 'role-casual'], labels: ['competitive', 'casual'] });
-    check('pings: unset role still labels', svc.tierRolesFor(['A']), { roles: [], labels: ['semi-competitive'] });
-    check('pings: no tier tags', svc.tierRolesFor(['Transfer']), { roles: [], labels: [] });
+    check('labels: S+ and Casual', svc.tierLabelsFor(['S+', 'Casual']), ['competitive', 'casual']);
+    check('labels: no tier tags', svc.tierLabelsFor(['Transfer']), []);
+    check('recruiting: an A+ post pings A+ only, not A', svc.recruitingRolesFor(['A+'], [{ id: 'r-ap', name: 'A+ recruiting' }, { id: 'r-a', name: 'A recruiting' }]), ['r-ap']);
     const serverRoles = [
         { id: 'r-s', name: 'S recruiting' },
         { id: 'r-ap', name: 'A+ recruiting' },
@@ -213,7 +193,7 @@ async function main() {
     check('recruiting: no tier tags, no pings', svc.recruitingRolesFor(['Transfer'], serverRoles), []);
     check('recruiting: missing role is skipped', svc.recruitingRolesFor(['A'], [{ id: 'r-s', name: 'S recruiting' }]), []);
 
-    // ── Recruitment entry ─────────────────────────────────────────────────────
+    // ── Recruitment board ─────────────────────────────────────────────────────
     const base = {
         threadId: 't',
         guildId: 'g',
@@ -236,17 +216,33 @@ async function main() {
         createdAt: new Date('2026-11-04T00:00:00Z'),
         updatedAt: new Date('2026-11-04T00:00:00Z'),
     };
-    const entry = svc.recruitmentEmbed(base, 'https://discord.com/channels/g/t').toJSON();
-    check('entry: title', entry.title, 'Typical · 233568825060');
-    check('entry: open status and pace', entry.description?.split('\n').slice(0, 4), [
-        '**Status**: Open, waiting for a decision',
-        '**Applicant**: <@u1>',
-        '**Looking for**: Transfer',
-        '**Pace**: **7.8M/day** (30d) · — (3 mo) · — (6 mo)',
+    const board = await import('../src/lib/applications/board');
+    const t0 = Math.floor(base.createdAt.getTime() / 1000);
+    check('board line: applicant, pace, time open, post', board.availableLine(base), `<@u1> · 7.8M/day · <t:${t0}:R> · <#t>`);
+    check('board line: no ID yet', board.availableLine({ ...base, viewerId: null, pace30: null }), `<@u1> · no ID yet · <t:${t0}:R> · <#t>`);
+    check('board line: no 30-day data', board.availableLine({ ...base, pace30: null }), `<@u1> · no 30d data · <t:${t0}:R> · <#t>`);
+    const at = (iso: string) => new Date(iso);
+    const apps = [
+        { ...base, threadId: 'newer', applicantId: 'n', createdAt: at('2026-11-03T00:00:00Z') },
+        { ...base, threadId: 'older', applicantId: 'o', createdAt: at('2026-11-01T00:00:00Z') },
+        { ...base, threadId: 'r2', applicantId: 'r2', status: 'ACCEPTED' as const, clubName: 'Rose', resolvedAt: at('2026-11-02T00:00:00Z') },
+        { ...base, threadId: 'r1', applicantId: 'r1', status: 'ACCEPTED' as const, clubName: 'Rose', resolvedAt: at('2026-11-01T00:00:00Z') },
+        { ...base, threadId: 'f1', applicantId: 'f1', status: 'ACCEPTED' as const, clubName: 'First', resolvedAt: null },
+        { ...base, threadId: 'x', applicantId: 'x', status: 'REJECTED' as const },
+        { ...base, threadId: 'j', applicantId: 'j', status: 'JOINED' as const, clubName: 'Rose' },
+        { ...base, threadId: 'w', applicantId: 'w', status: 'WITHDRAWN' as const },
+    ];
+    const [avail, going] = board.boardEmbeds(apps).map((e) => e.toJSON());
+    check('board: available, oldest first', [avail?.title, avail?.description?.split('\n').map((l) => l.split(' · ')[0])], ['Available (2)', ['<@o>', '<@n>']]);
+    check('board: going to, grouped by club', [going?.title, going?.description?.split('\n').map((l) => l.split(' · ')[0])], [
+        'Going to (3)',
+        ['**First**', '<@f1>', '**Rose**', '<@r1>', '<@r2>'],
     ]);
-    check('entry: accepted', svc.statusOf({ status: 'ACCEPTED', clubName: 'First', resolvedById: 'staff' }).text, 'Accepted into **First** by <@staff>, not joined yet');
-    check('entry: no data', svc.paceLine({ pace30: null, pace3m: null, pace6m: null }), 'No uma.moe data');
-    check('entry: open without an ID says so', svc.statusOf({ status: 'OPEN', clubName: null, resolvedById: null, viewerId: null }).text, 'Open, waiting for the trainer ID');
+    check('board: rejected, joined and withdrawn are off it', /<@(x|j|w)>/.test(`${avail?.description}${going?.description}`), false);
+    const [emptyA, emptyG] = board.boardEmbeds([]).map((e) => e.toJSON());
+    check('board: empty', [emptyA?.description, emptyG?.description], ['Nobody is waiting.', 'Nobody is on their way.']);
+    const many = board.boardEmbeds(Array.from({ length: 200 }, (_, i) => ({ ...base, threadId: `t${i}`, applicantId: `${100000 + i}` })))[0]!.toJSON();
+    check('board: a long list is cut with a count', [many.description!.length <= 4096, /\*\+\d+ more\*$/.test(many.description!)], [true, true]);
     check('ask for ID: pings only the applicant', svc.askForIdMessage('123').allowedMentions, { users: ['123'] });
 
     // ── Images ────────────────────────────────────────────────────────────────
@@ -318,6 +314,7 @@ async function main() {
     const threadId = `${guildId}-thread`;
     const sent: { id: string; payload: unknown }[] = [];
     const edits: unknown[] = [];
+    const deleted: string[] = [];
     const recruitment = {
         id: 'recruit-1',
         isSendable: () => true,
@@ -326,7 +323,7 @@ async function main() {
             sent.push({ id: m.id, payload });
             return m;
         },
-        messages: { fetch: async (id: string) => ({ id, edit: async (p: unknown) => void edits.push(p) }) },
+        messages: { fetch: async (id: string) => ({ id, edit: async (p: unknown) => void edits.push(p), delete: async () => void deleted.push(id) }) },
     };
     const client = { channels: { fetch: async (id: string) => (id === 'recruit-1' ? recruitment : null) } };
     const thread = {
@@ -372,9 +369,9 @@ async function main() {
 
         let resolved = await svc.resolveApplication(thread as unknown as Thread, null, 'staff-1', 'Quota too high for now.');
         check('reject: status, tag first, locked', [resolved.status, thread.appliedTags, thread.locked], ['REJECTED', ['tag-rejected', 'tag-bplus', 'tag-casual'], true]);
-        check('reject: entry posted once', [sent.length, resolved.resolvedById], [1, 'staff-1']);
-        const stored = await prisma.clubApplication.findUnique({ where: { threadId } });
-        check('reject: entry message stored', [stored?.recruitmentChannelId, stored?.recruitmentMessageId], ['recruit-1', 'msg-1']);
+        check('board: posted once', [sent.length, resolved.resolvedById], [1, 'staff-1']);
+        const boardRow = await prisma.recruitmentBoard.findUnique({ where: { guildId } });
+        check('board: message stored', [boardRow?.channelId, boardRow?.messageId], ['recruit-1', 'msg-1']);
         check('reject: message pings only the applicant', svc.decisionMessage(resolved).allowedMentions, { users: ['applicant-1'] });
 
         resolved = await svc.resolveApplication(thread as unknown as Thread, club, 'staff-2', null);
@@ -383,7 +380,11 @@ async function main() {
             'Rose',
             ['tag-accepted', 'tag-bplus', 'tag-casual'],
         ]);
-        check('accept: entry edited, not reposted', [sent.length, edits.length], [1, 1]);
+        check('board: edited, not reposted', [sent.length, edits.length], [1, 1]);
+        await prisma.clubApplication.update({ where: { threadId }, data: { recruitmentChannelId: 'recruit-1', recruitmentMessageId: 'old-entry' } });
+        await board.refreshRecruitmentBoard(client as never, guildId, 'recruit-1');
+        const cleared = await prisma.clubApplication.findUnique({ where: { threadId } });
+        check('board: old per-application entry deleted once', [deleted, cleared?.recruitmentMessageId ?? null], [['old-entry'], null]);
         check('accept: message names the club', svc.decisionMessage(resolved).content.includes('accepted into **Rose**'), true);
 
         const closed = await svc.closeApplication(thread as unknown as Thread);
@@ -420,11 +421,12 @@ async function main() {
             send: async (p: { content?: string; allowedMentions?: unknown }) => void posted.push(p),
         };
         const sentBefore = sent.length;
+        const editsBefore = edits.length;
         await svc.openApplication(thread2 as unknown as Thread);
         const opened2 = await prisma.clubApplication.findUnique({ where: { threadId: thread2.id } });
         check('no ID: application waits for one', [opened2?.viewerId ?? null, opened2?.status], [null, 'OPEN']);
         check('no ID: applicant pinged for it', [posted.length, posted[0]?.content?.startsWith('<@7007>'), posted[0]?.allowedMentions], [1, true, { users: ['7007'] }]);
-        check('no ID: recruitment entry posted', sent.length, sentBefore + 1);
+        check('no ID: board edited, nothing new posted', [sent.length, edits.length > editsBefore], [sentBefore, true]);
         await svc.takeIdFromMessage({ author: { id: '8008', bot: false }, content: '467492654277', channel: thread2 });
         check("reply: someone else's ID is ignored", (await prisma.clubApplication.findUnique({ where: { threadId: thread2.id } }))?.viewerId ?? null, null);
         await svc.takeIdFromMessage({ author: { id: '7007', bot: false }, content: 'sorry! my id is ４６７,４９２,６５４,２７７', channel: thread2 });
@@ -459,6 +461,7 @@ async function main() {
         const forum = {
             id: 'forum-bf',
             guildId,
+            client,
             availableTags: [{ id: 'tag-acc', name: 'Club App Accepted' }],
             threads: {
                 fetchActive: async () => ({ threads: asMap([active, post('other', 'elsewhere', { parentId: 'not-this-forum' })]) }),
@@ -471,6 +474,7 @@ async function main() {
         type Forum = Parameters<typeof bf.backfillApplications>[0];
         const progress: number[] = [];
         const sentBeforeBackfill = sent.length;
+        const editsBeforeBackfill = edits.length;
         const report = await bf.backfillApplications(forum as unknown as Forum, { onProgress: (d) => void progress.push(d) });
         check('backfill: pages through archived posts, skips other forums', [report.scanned, archivedCalls], [3, 2]);
         check('backfill: outcome by post', report.rows.map((r) => [r.title, r.status, r.trainerId, r.problem]), [
@@ -479,12 +483,13 @@ async function main() {
             ['old', 'CLOSED', null, 'no trainer ID in the post'],
         ]);
         check('backfill: rows written with the post date', (await prisma.clubApplication.findUnique({ where: { threadId: `${guildId}-p2` } }))?.createdAt.toISOString(), '2026-10-05T00:00:00.000Z');
-        check('backfill: nothing posted without post_open', sent.length, sentBeforeBackfill);
+        check('backfill: board refreshed once, nothing new posted', [sent.length, edits.length - editsBeforeBackfill], [sentBeforeBackfill, 1]);
         const again = await bf.backfillApplications(forum as unknown as Forum);
         check('backfill: a second run imports nothing', [again.imported, again.alreadyTracked], [0, 3]);
         check('backfill: progress reported at the end', progress.at(-1), 3);
     } finally {
         await prisma.trainerLink.deleteMany({ where: { guildId } });
+        await prisma.recruitmentBoard.deleteMany({ where: { guildId } });
         await prisma.clubApplication.deleteMany({ where: { guildId } });
         await prisma.trackedCircle.deleteMany({ where: { guildId } });
         await prisma.$disconnect();

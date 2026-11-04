@@ -1,16 +1,14 @@
 import { SlashCommandBuilder, MessageFlags, EmbedBuilder, type ChatInputCommandInteraction, type GuildMember, type ThreadChannel } from 'discord.js';
 import { errorEmbed } from '../lib/embeds';
-import { extractTrainerId, clubFits } from '../lib/applications/history';
-import { headlinePace } from '../lib/applications/scout';
+import { extractTrainerId } from '../lib/applications/history';
 import { isAnyClubStaff } from '../lib/applications/permissions';
-import { cardFile, clubsWithQuota, fitsText, isApplicationThread, rescoutApplication, tryScout } from '../lib/applications/service';
+import { cardFile, isApplicationThread, rescoutApplication, tryScout } from '../lib/applications/service';
 
 /**
  * `/scout [id]`: a trainer's uma.moe card (last 30 days, last 3 and 6
  * months). In an application post it scouts the post's trainer, or sets the
- * post's trainer ID when one is given, and updates the recruitment entry;
- * the applicant or club staff may run it there. Elsewhere it needs an ID and
- * also lists the clubs whose quota the trainer's pace clears.
+ * post's trainer ID when one is given; the applicant or club staff may run
+ * it there. Elsewhere it needs an ID.
  */
 export const data = new SlashCommandBuilder()
     .setName('scout')
@@ -56,18 +54,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         await interaction.editReply({ embeds: [errorEmbed(outcome.reason)] });
         return;
     }
-    const pace = headlinePace(outcome.report);
-    const fits = fitsText(clubFits(pace?.perDay ?? null, await clubsWithQuota(interaction.guildId)));
-    const lines = [`**Clears the quota of**: ${pace ? fits.clears : 'unknown, no pace'}`];
-    if (pace && fits.highestTier) lines.push(`**Highest tier cleared**: ${fits.highestTier}`);
-    if (pace) lines.push(`-# Judged on the ${pace.basis}, per calendar day.`);
     const file = await cardFile(outcome.report, []);
     await interaction.editReply({
         embeds: [
             new EmbedBuilder()
                 .setColor(0x5865f2)
                 .setTitle(`${outcome.report.trainerName ?? id} · ${id}`)
-                .setDescription(lines.join('\n'))
                 .setImage(`attachment://${file.name}`),
         ],
         files: [file],
