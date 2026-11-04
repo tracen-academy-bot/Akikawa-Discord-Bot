@@ -156,9 +156,9 @@ uma.moe:
 | Command | Who | Purpose |
 | --- | --- | --- |
 | `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
-| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Accepting needs the trainer ID; rejecting does not. Staff accept into their own club only. |
+| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Accepting needs the trainer ID; rejecting does not. Staff accept into their own club only. Accepting gives the applicant the club's role and takes off their other club roles and Tracen Applicant; visas and other roles stay. |
 | `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined, and the applicant's Discord is linked to their trainer, as `/uma-id` does. |
-| `/applications backfill` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
+| `/applications backfill [rescan]` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
 
 The backfill uses one uma.moe profile request per trainer, about 3 per
 second, so a few hundred posts take a few minutes. It decides each post's
@@ -174,13 +174,27 @@ status in this order:
 
 It posts nothing per post. Old posts still open appear on the recruitment
 board, which it refreshes once at the end. A second run imports only posts
-with no row yet. For
+with no row yet. `rescan:true` also re-reads imported posts that are done
+and have no trainer ID, or one uma.moe did not find. Pinned posts (the
+forum's guide and example) are skipped.
+
+The CSV's `problem` column says why a post has no ID: none in the title
+or the opening message, or the opening message could not be read. If no
+opening message can be read at all, the summary warns. Empty text means
+the Message Content intent is off; failed fetches mean Akikawa lacks Read
+Message History in the forum. Fix that, then run with `rescan:true`. For
 posts already done (any status except Open) whose trainer uma.moe knows, it
 links the applicant's Discord to the trainer.
 
 Links are made only when a post is closed, never while it is open, and an
 existing link is never overwritten: not the member's, and not one another
 member already has for that trainer.
+
+The club's role is the one in `CLUB_ROLE_IDS` whose name matches the
+club, by the same name matching as staff roles; Trainer, Assistant and
+Visa roles are never it. If no role matches, or two do, nothing is changed
+and the staff member who resolved is told why. The bot's own role must sit
+above the club roles.
 
 A locked post has no message box for the applicant, so the decision comes
 with a **Close post** button. Applicants use that button, not `/close`.

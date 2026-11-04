@@ -1,5 +1,5 @@
 import type { ApplicationStatus } from '@prisma/client';
-import type { ForumChannel, ThreadChannel } from 'discord.js';
+import { ChannelFlags, type ForumChannel, type ThreadChannel } from 'discord.js';
 import { prisma } from '../../db/prisma';
 import { getProfile, isConfigured } from '../umamoe/client';
 import type { UmaProfileResponse } from '../umamoe/types';
@@ -129,6 +129,12 @@ export interface BackfillReport {
     nowInClub: Record<string, number>;
     /** Discord accounts newly linked to their trainer. */
     linked: number;
+    /** Imported posts read again with `rescan`. */
+    rescanned: number;
+    /** Pinned posts (guides, examples) skipped, and removed if imported before. */
+    pinnedSkipped: number;
+    /** Opening messages read: fetched with text, fetched empty, or not fetched. */
+    starters: { withText: number; empty: number; failed: number };
     rows: BackfillRow[];
 }
 
@@ -165,6 +171,15 @@ export async function forumPosts(forum: ForumChannel): Promise<ThreadChannel[]> 
     return [...posts.values()];
 }
 
+/**
+ * True when `rescan` should read an imported post again: it is done (not
+ * Open, which the live flow handles) and has no trainer ID, or one uma.moe
+ * did not find (a failed request, or a typo the post was later fixed for).
+ */
+export function needsRescan(row: { status: string; viewerId: bigint | null; trainerName: string | null }): boolean {
+    return row.status !== 'OPEN' && (row.viewerId === null || row.trainerName === null);
+}
+
 /** Waits between uma.moe requests, so a few hundred posts do not trip its rate limit. */
 const UMA_GAP_MS = 300;
 
@@ -175,29 +190,63 @@ const UMA_GAP_MS = 300;
  */
 export async function backfillApplications(
     forum: ForumChannel,
-    { onProgress }: { onProgress?: (done: number, total: number) => Promise<void> | void } = {},
+    { rescan = false, onProgress }: { rescan?: boolean; onProgress?: (done: number, total: number) => Promise<void> | void } = {},
 ): Promise<BackfillReport> {
     const posts = await forumPosts(forum);
     const clubs = await prisma.trackedCircle.findMany({ where: { guildId: forum.guildId }, select: { id: true, name: true, circleId: true } });
-    const existing = new Set(
-        (await prisma.clubApplication.findMany({ where: { threadId: { in: posts.map((p) => p.id) } }, select: { threadId: true } })).map((a) => a.threadId),
+    const existing = new Map(
+        (
+            await prisma.clubApplication.findMany({
+                where: { threadId: { in: posts.map((p) => p.id) } },
+                select: { threadId: true, status: true, viewerId: true, trainerName: true },
+            })
+        ).map((a) => [a.threadId, a]),
     );
     const now = currentGameMonth();
     const profiles = new Map<string, UmaProfileResponse | null | Error>();
 
-    const report: BackfillReport = { scanned: posts.length, alreadyTracked: existing.size, imported: 0, withId: 0, foundOnUma: 0, byStatus: {}, nowInClub: {}, linked: 0, rows: [] };
+    const report: BackfillReport = {
+        scanned: posts.length,
+        alreadyTracked: existing.size,
+        imported: 0,
+        rescanned: 0,
+        pinnedSkipped: 0,
+        starters: { withText: 0, empty: 0, failed: 0 },
+        withId: 0,
+        foundOnUma: 0,
+        byStatus: {},
+        nowInClub: {},
+        linked: 0,
+        rows: [],
+    };
     let done = 0;
     for (const thread of posts) {
         done += 1;
         if (done % 25 === 0) await onProgress?.(done, posts.length);
-        if (existing.has(thread.id)) continue;
+        // A pinned post is the forum's guide or example, not an application.
+        if (thread.flags?.has(ChannelFlags.Pinned)) {
+            report.pinnedSkipped += 1;
+            if (existing.has(thread.id)) await prisma.clubApplication.delete({ where: { threadId: thread.id } }).catch(() => undefined);
+            continue;
+        }
+        const known = existing.get(thread.id);
+        if (known && !(rescan && needsRescan(known))) continue;
 
         const tagNames = thread.appliedTags.map((id) => forum.availableTags.find((t) => t.id === id)?.name).filter((n): n is string => Boolean(n));
         // An old post's opening message may be gone; the title still counts.
-        const starter = await thread.fetchStarterMessage().catch(() => null);
+        // Why it could not be read is kept, since "no ID" hides it otherwise.
+        let starterProblem: string | null = null;
+        const starter = await thread.fetchStarterMessage().catch((e: unknown) => {
+            starterProblem = `opening message could not be read (${e instanceof Error ? e.message : String(e)})`;
+            return null;
+        });
+        if (starter && !starter.content) starterProblem = 'opening message has no text the bot can read (Message Content intent off, or only images)';
+        if (!starter) report.starters.failed += 1;
+        else if (starter.content) report.starters.withText += 1;
+        else report.starters.empty += 1;
         const trainerId = extractTrainerId(thread.name, starter?.content);
         let profile: UmaProfileResponse | null = null;
-        let problem: string | null = trainerId ? null : 'no trainer ID in the post';
+        let problem: string | null = trainerId ? null : `no trainer ID in the title${starterProblem ? `; ${starterProblem}` : ' or the opening message'}`;
         if (trainerId && isConfigured()) {
             if (!profiles.has(trainerId)) {
                 profiles.set(trainerId, await getProfile(trainerId).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e)))));
@@ -239,24 +288,27 @@ export async function backfillApplications(
         const pace3m = monthsAverage(months, 3).perDay;
         const pace6m = monthsAverage(months, 6).perDay;
 
-        const app = await prisma.clubApplication.create({
-            data: {
-                threadId: thread.id,
-                guildId: forum.guildId,
-                applicantId: thread.ownerId ?? starter?.author.id ?? 'unknown',
-                viewerId: trainerId ? BigInt(trainerId) : null,
-                trainerName: profile?.trainer?.name ?? null,
-                tags: tagNames,
-                status: match.status,
-                clubId: match.club?.id ?? null,
-                clubName: match.club?.name ?? null,
-                note: match.note,
-                pace3m: pace3m === null ? null : BigInt(Math.round(pace3m)),
-                pace6m: pace6m === null ? null : BigInt(Math.round(pace6m)),
-                createdAt: opened,
-                closedAt: match.status === 'OPEN' ? null : (thread.archivedAt ?? null),
-            },
+        const fields = {
+            guildId: forum.guildId,
+            applicantId: thread.ownerId ?? starter?.author.id ?? 'unknown',
+            viewerId: trainerId ? BigInt(trainerId) : null,
+            trainerName: profile?.trainer?.name ?? null,
+            tags: tagNames,
+            status: match.status,
+            clubId: match.club?.id ?? null,
+            clubName: match.club?.name ?? null,
+            note: match.note,
+            pace3m: pace3m === null ? null : BigInt(Math.round(pace3m)),
+            pace6m: pace6m === null ? null : BigInt(Math.round(pace6m)),
+            // An archived post is closed; the recruitment board leaves it off.
+            closedAt: thread.archived ? (thread.archivedAt ?? opened) : null,
+        };
+        const app = await prisma.clubApplication.upsert({
+            where: { threadId: thread.id },
+            create: { threadId: thread.id, createdAt: opened, ...fields },
+            update: fields,
         });
+        if (known) report.rescanned += 1;
         // As with new posts, the applicant is linked to their trainer only
         // once the post is done: not while it is still open.
         let linked = false;
@@ -265,7 +317,7 @@ export async function backfillApplications(
         }
         if (linked) report.linked += 1;
 
-        report.imported += 1;
+        if (!known) report.imported += 1;
         if (trainerId) report.withId += 1;
         if (profile) report.foundOnUma += 1;
         report.byStatus[match.status] = (report.byStatus[match.status] ?? 0) + 1;
@@ -290,7 +342,7 @@ export async function backfillApplications(
         });
     }
     // Old posts still open belong on the board.
-    if (report.imported > 0) await refreshBoard(forum.client, forum.guildId);
+    if (report.imported > 0 || report.rescanned > 0 || report.pinnedSkipped > 0) await refreshBoard(forum.client, forum.guildId);
     await onProgress?.(posts.length, posts.length);
     return report;
 }

@@ -14,7 +14,7 @@ import { FORUM_ID } from '../lib/applications/service';
 import { backfillApplications, backfillCsv, type BackfillReport } from '../lib/applications/backfill';
 
 /**
- * `/applications backfill`: imports every post already in the
+ * `/applications backfill [rescan]`: imports every post already in the
  * application forum, open or archived, and matches each applicant against
  * uma.moe and the server's clubs. Replies with a summary and a CSV of every
  * imported post. Club Managers only. Running it again imports only posts
@@ -26,7 +26,10 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('backfill')
-            .setDescription('Import every old application post and match it to uma.moe and our clubs. Club Managers only.'),
+            .setDescription('Import every old application post and match it to uma.moe and our clubs. Club Managers only.')
+            .addBooleanOption((opt) =>
+                opt.setName('rescan').setDescription('Also re-read imported closed posts with no trainer ID, or one uma.moe did not find'),
+            ),
     );
 
 /** The summary embed. */
@@ -41,12 +44,24 @@ export function backfillSummary(report: BackfillReport): EmbedBuilder {
         .join(' · ');
     const lines = [
         `**Posts in the forum**: ${report.scanned} (${report.alreadyTracked} already tracked)`,
-        `**Imported**: ${report.imported}, ${report.withId} with a trainer ID, ${report.foundOnUma} found on uma.moe`,
+        `**Imported**: ${report.imported}${report.rescanned > 0 ? `, re-read ${report.rescanned}` : ''}; ${report.withId} with a trainer ID, ${report.foundOnUma} found on uma.moe`,
+        ...(report.pinnedSkipped > 0 ? [`**Pinned posts skipped**: ${report.pinnedSkipped}`] : []),
         `**Outcome**: ${status || 'none'}`,
         `**Now in our clubs**: ${clubs || 'none'}`,
         `**Discord linked to trainer**: ${report.linked} (closed posts only; existing links kept)`,
         '-# Every imported post is in the CSV, with the trainer, where they are now and any problem.',
     ];
+    const { withText, empty, failed } = report.starters;
+    const read = withText + empty + failed;
+    if (read > 0 && withText === 0) {
+        lines.push(
+            `**Warning**: none of the ${read} opening messages could be read (${empty} came back empty, ${failed} could not be fetched), so IDs in post bodies were missed. ` +
+                (empty >= failed
+                    ? 'Empty text means the Message Content intent is off: Discord developer portal, Bot, Privileged Gateway Intents.'
+                    : 'Failed fetches mean Akikawa lacks Read Message History in the forum.') +
+                ' Fix it, then run this again with `rescan:true`.',
+        );
+    }
     return new EmbedBuilder().setColor(0x5865f2).setTitle('Application backfill').setDescription(lines.join('\n'));
 }
 
@@ -68,6 +83,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     // result as a plain message in the channel instead.
     const tokenAlive = () => Date.now() - started < 14 * 60_000;
     const report = await backfillApplications(forum as ForumChannel, {
+        rescan: interaction.options.getBoolean('rescan') ?? false,
         onProgress: async (done, total) => {
             if (tokenAlive()) await interaction.editReply(`Matching old applications: ${done} of ${total} posts...`).catch(() => undefined);
         },

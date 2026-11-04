@@ -6,7 +6,7 @@
  *
  *   DATABASE_URL=postgresql://... npm run test:applications
  */
-import { ChannelType } from 'discord.js';
+import { ChannelFlags, ChannelType } from 'discord.js';
 
 // Read by the service at import, so set before importing it.
 process.env.FORUM_CHANNEL_ID = 'forum-1';
@@ -193,6 +193,30 @@ async function main() {
     check('recruiting: no tier tags, no pings', svc.recruitingRolesFor(['Transfer'], serverRoles), []);
     check('recruiting: missing role is skipped', svc.recruitingRolesFor(['A'], [{ id: 'r-s', name: 'S recruiting' }]), []);
 
+    // ── Club member role on accept ────────────────────────────────────────────
+    const cr = await import('../src/lib/applications/clubRole');
+    const roleClubs = [
+        { id: 'rose', name: 'Rose', staffRoleIds: [] },
+        { id: 'prim', name: 'Primrose', staffRoleIds: [] },
+        { id: 'lily', name: '☆Lily☆', staffRoleIds: [] },
+    ];
+    const guildRoles = [
+        { id: 'g-rose', name: 'Rose' },
+        { id: 'g-rose-t', name: 'Rose Trainer' },
+        { id: 'g-rose-v', name: 'Rose Visa' },
+        { id: 'g-prim', name: 'Primrose' },
+        { id: 'g-lily', name: 'Lily' },
+        { id: 'g-other', name: 'Rose fan club' },
+    ];
+    const clubIds = new Set(['g-rose', 'g-rose-t', 'g-rose-v', 'g-prim', 'g-lily']);
+    const isClub = (id: string) => clubIds.has(id);
+    check('club role: Rose gets Rose, not its Trainer or Visa role', cr.clubMemberRole(roleClubs[0]!, roleClubs, guildRoles, isClub)?.id, 'g-rose');
+    check('club role: Primrose is not taken for Rose', cr.clubMemberRole(roleClubs[1]!, roleClubs, guildRoles, isClub)?.id, 'g-prim');
+    check('club role: decorated club name still matches', cr.clubMemberRole(roleClubs[2]!, roleClubs, guildRoles, isClub)?.id, 'g-lily');
+    check('club role: roles outside CLUB_ROLE_IDS are never used', cr.clubMemberRole(roleClubs[0]!, roleClubs, guildRoles, () => false), null);
+    check('club role: two matching roles means none, not a guess', cr.clubMemberRole(roleClubs[0]!, roleClubs, [...guildRoles, { id: 'g-rose2', name: 'Team Rose' }], (id) => isClub(id) || id === 'g-rose2'), null);
+    check('visa: named visas are recognised', [cr.isVisaRoleName('Rose Visa'), cr.isVisaRoleName('VISA - Cosmos'), cr.isVisaRoleName('Rose')], [true, true, false]);
+
     // ── Recruitment board ─────────────────────────────────────────────────────
     const base = {
         threadId: 't',
@@ -238,6 +262,7 @@ async function main() {
         'Going to (3)',
         ['**First**', '<@f1>', '**Rose**', '<@r1>', '<@r2>'],
     ]);
+    check('board: an accepted post already closed is off it', board.boardEmbeds([{ ...base, status: 'ACCEPTED' as const, clubName: 'Rose', closedAt: at('2026-01-01T00:00:00Z') }])[1]!.toJSON().title, 'Going to (0)');
     check('board: rejected, joined and withdrawn are off it', /<@(x|j|w)>/.test(`${avail?.description}${going?.description}`), false);
     const [emptyA, emptyG] = board.boardEmbeds([]).map((e) => e.toJSON());
     check('board: empty', [emptyA?.description, emptyG?.description], ['Nobody is waiting.', 'Nobody is on their way.']);
@@ -456,6 +481,9 @@ async function main() {
         const active = post('p1', '[123456789] hi');
         const archivedA = post('p2', 'Looking for a club', { archived: true, appliedTags: ['tag-acc'] });
         const archivedB = post('p3', 'old', { archived: true, fetchStarterMessage: async () => { throw new Error('Unknown Message'); } });
+        let exampleBody = 'no id here';
+        archivedA.fetchStarterMessage = async () => ({ content: exampleBody, author: { id: 'owner-p2' } });
+        const pinned = post('p4', '[Trainer ID] Example', { flags: { has: (f: number) => f === ChannelFlags.Pinned } });
         const asMap = (list: unknown[]) => new Map(list.map((t) => [(t as { id: string }).id, t]));
         let archivedCalls = 0;
         const forum = {
@@ -464,7 +492,7 @@ async function main() {
             client,
             availableTags: [{ id: 'tag-acc', name: 'Club App Accepted' }],
             threads: {
-                fetchActive: async () => ({ threads: asMap([active, post('other', 'elsewhere', { parentId: 'not-this-forum' })]) }),
+                fetchActive: async () => ({ threads: asMap([active, pinned, post('other', 'elsewhere', { parentId: 'not-this-forum' })]) }),
                 fetchArchived: async (o: { before?: unknown }) => {
                     archivedCalls += 1;
                     return o.before ? { threads: asMap([archivedB]), hasMore: false } : { threads: asMap([archivedA]), hasMore: true };
@@ -476,17 +504,32 @@ async function main() {
         const sentBeforeBackfill = sent.length;
         const editsBeforeBackfill = edits.length;
         const report = await bf.backfillApplications(forum as unknown as Forum, { onProgress: (d) => void progress.push(d) });
-        check('backfill: pages through archived posts, skips other forums', [report.scanned, archivedCalls], [3, 2]);
-        check('backfill: outcome by post', report.rows.map((r) => [r.title, r.status, r.trainerId, r.problem]), [
+        check('backfill: pages through archived posts, skips other forums', [report.scanned, archivedCalls], [4, 2]);
+        check('backfill: pinned example post skipped', [report.pinnedSkipped, await prisma.clubApplication.findUnique({ where: { threadId: `${guildId}-p4` } })], [1, null]);
+        check('backfill: outcome by post, with why there is no ID', report.rows.map((r) => [r.title, r.status, r.trainerId, r.problem]), [
             ['[123456789] hi', 'OPEN', '123456789', 'uma.moe not set up (EXTERNAL_API_KEY)'],
-            ['Looking for a club', 'ACCEPTED', null, 'no trainer ID in the post'],
-            ['old', 'CLOSED', null, 'no trainer ID in the post'],
+            ['Looking for a club', 'ACCEPTED', null, 'no trainer ID in the title or the opening message'],
+            ['old', 'CLOSED', null, 'no trainer ID in the title; opening message could not be read (Unknown Message)'],
         ]);
+        check('backfill: opening messages counted', report.starters, { withText: 2, empty: 0, failed: 1 });
+        const acceptedRow = await prisma.clubApplication.findUnique({ where: { threadId: `${guildId}-p2` } });
+        check('backfill: archived post recorded as closed, so it stays off the board', acceptedRow?.closedAt !== null, true);
         check('backfill: rows written with the post date', (await prisma.clubApplication.findUnique({ where: { threadId: `${guildId}-p2` } }))?.createdAt.toISOString(), '2026-10-05T00:00:00.000Z');
         check('backfill: board refreshed once, nothing new posted', [sent.length, edits.length - editsBeforeBackfill], [sentBeforeBackfill, 1]);
         const again = await bf.backfillApplications(forum as unknown as Forum);
-        check('backfill: a second run imports nothing', [again.imported, again.alreadyTracked], [0, 3]);
-        check('backfill: progress reported at the end', progress.at(-1), 3);
+        check('backfill: a second run imports nothing', [again.imported, again.alreadyTracked, again.rescanned], [0, 3, 0]);
+        exampleBody = 'sorry, my ID is 467492654277';
+        const rescanned = await bf.backfillApplications(forum as unknown as Forum, { rescan: true });
+        const p2After = await prisma.clubApplication.findUnique({ where: { threadId: `${guildId}-p2` } });
+        check('rescan: re-reads closed posts with no ID, leaves open ones', [rescanned.imported, rescanned.rescanned], [0, 2]);
+        check('rescan: picks up an ID from the body, keeps the post date', [p2After?.viewerId?.toString(), p2After?.createdAt.toISOString()], ['467492654277', '2026-10-05T00:00:00.000Z']);
+        check('rescan: what needs it', [
+            bf.needsRescan({ status: 'CLOSED', viewerId: null, trainerName: null }),
+            bf.needsRescan({ status: 'JOINED', viewerId: 1n, trainerName: 'x' }),
+            bf.needsRescan({ status: 'ACCEPTED', viewerId: 1n, trainerName: null }),
+            bf.needsRescan({ status: 'OPEN', viewerId: null, trainerName: null }),
+        ], [true, false, true, false]);
+        check('backfill: progress reported at the end, pinned post included', progress.at(-1), 4);
     } finally {
         await prisma.trainerLink.deleteMany({ where: { guildId } });
         await prisma.recruitmentBoard.deleteMany({ where: { guildId } });
