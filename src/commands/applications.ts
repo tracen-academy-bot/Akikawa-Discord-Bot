@@ -2,6 +2,7 @@ import {
     AttachmentBuilder,
     ChannelType,
     EmbedBuilder,
+    GatewayIntentBits,
     MessageFlags,
     SlashCommandBuilder,
     type ChatInputCommandInteraction,
@@ -12,8 +13,11 @@ import { errorEmbed } from '../lib/embeds';
 import { isOfficer } from '../lib/permissions';
 import { FORUM_ID } from '../lib/applications/service';
 import { backfillApplications, backfillCsv, type BackfillReport } from '../lib/applications/backfill';
+import { tidyApplications } from '../lib/applications/tidy';
 
 /**
+ * `/applications tidy`: see `tidyApplications`.
+ *
  * `/applications backfill [rescan]`: imports every post already in the
  * application forum, open or archived, and matches each applicant against
  * uma.moe and the server's clubs. Replies with a summary and a CSV of every
@@ -30,10 +34,27 @@ export const data = new SlashCommandBuilder()
             .addBooleanOption((opt) =>
                 opt.setName('rescan').setDescription('Also re-read imported closed posts with no trainer ID, or one uma.moe did not find'),
             ),
+    )
+    .addSubcommand((sub) =>
+        sub
+            .setName('tidy')
+            .setDescription('Close every application except the posts still open in the forum. Club Managers only.'),
     );
 
+/**
+ * Whether the bot connected with the Message Content intent. Without it,
+ * Discord sends empty text for every message, so IDs in post bodies and in
+ * replies are never seen. Startup drops the intent instead of failing when
+ * the developer portal has it off.
+ */
+export function messageContentLine(on: boolean): string {
+    return on
+        ? '**Message Content**: on, so post bodies and replies are read.'
+        : '**Message Content**: OFF. Post bodies and replies are not read, so IDs written there are missed. Turn on "Message Content Intent" in the Discord developer portal (Bot, Privileged Gateway Intents) and restart the bot.';
+}
+
 /** The summary embed. */
-export function backfillSummary(report: BackfillReport): EmbedBuilder {
+export function backfillSummary(report: BackfillReport, intentOn?: boolean): EmbedBuilder {
     const status = Object.entries(report.byStatus)
         .sort((a, b) => b[1] - a[1])
         .map(([s, n]) => `${s.toLowerCase()} ${n}`)
@@ -51,6 +72,7 @@ export function backfillSummary(report: BackfillReport): EmbedBuilder {
         `**Discord linked to trainer**: ${report.linked} (closed posts only; existing links kept)`,
         '-# Every imported post is in the CSV, with the trainer, where they are now and any problem.',
     ];
+    if (intentOn !== undefined) lines.push(messageContentLine(intentOn));
     const { withText, empty, failed } = report.starters;
     const read = withText + empty + failed;
     if (read > 0 && withText === 0) {
@@ -77,6 +99,29 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         return;
     }
 
+    if (interaction.options.getSubcommand() === 'tidy') {
+        await interaction.deferReply();
+        const r = await tidyApplications(forum as ForumChannel);
+        await interaction.editReply({
+            embeds: [
+                new EmbedBuilder()
+                    .setColor(0x5865f2)
+                    .setTitle('Applications tidied')
+                    .setDescription(
+                        [
+                            `**Open again** (still open in the forum): ${r.reopened}`,
+                            `**Closed** (not open in the forum): ${r.closed}`,
+                            `**Pinned posts removed**: ${r.removed}`,
+                            `**Pace filled in**: ${r.rescouted}`,
+                            messageContentLine(interaction.client.options.intents.has(GatewayIntentBits.MessageContent)),
+                            '-# Applications decided with /resolve were left as they are. The recruitment board is updated.',
+                        ].join('\n'),
+                    ),
+            ],
+        });
+        return;
+    }
+
     await interaction.deferReply();
     const started = Date.now();
     // An interaction can be edited for 15 minutes. A long run reports its
@@ -90,7 +135,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     });
     const payload = {
         content: '',
-        embeds: [backfillSummary(report)],
+        embeds: [backfillSummary(report, interaction.client.options.intents.has(GatewayIntentBits.MessageContent))],
         files: [new AttachmentBuilder(Buffer.from(backfillCsv(report.rows), 'utf8'), { name: 'application-backfill.csv' })],
     };
     if (tokenAlive()) {

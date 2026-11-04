@@ -158,6 +158,7 @@ uma.moe:
 | `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
 | `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Accepting needs the trainer ID; rejecting does not. Staff accept into their own club only. Accepting gives the applicant the club's role and takes off their other club roles and Tracen Applicant; visas and other roles stay. |
 | `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined, and the applicant's Discord is linked to their trainer, as `/uma-id` does. |
+| `/applications tidy` | Club Managers | Closes every application except the posts still open (active, unlocked) in the forum, which go back to Open. Leaves `/resolve` decisions alone, removes pinned posts, fills in missing 30-day paces and says whether Message Content is on. |
 | `/applications backfill [rescan]` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
 
 The backfill uses one uma.moe profile request per trainer, about 3 per
