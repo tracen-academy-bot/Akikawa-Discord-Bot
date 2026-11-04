@@ -473,7 +473,12 @@ model WelcomeSettings {
     /// Where the welcome is posted. Null: welcomes are off.
     channelId String?
     /// The text, with {user}, {server}, {count}, {apply} and {clubs}
-    /// placeholders. Null: the default text.
+    /// placeholders. Lines of just `---` split it into variants, one picked
+    /// at random per welcome. Null: the built-in variants.
     message   String?
+    /// A "Say hi!" button under each welcome, for members to greet the newcomer.
+    wave      Boolean  @default(true)
+    /// A thank-you in the same channel when a member starts boosting.
+    boosts    Boolean  @default(true)
     updatedAt DateTime @updatedAt
 }
