@@ -9,11 +9,11 @@ import {
 import { prisma } from '../db/prisma';
 import { errorEmbed } from '../lib/embeds';
 import { canDecide } from '../lib/applications/permissions';
-import { REJECTED, decisionMessage, isApplicationThread, resolveApplication } from '../lib/applications/service';
+import { REJECTED, decisionMessage, ensureApplication, isApplicationThread, resolveApplication } from '../lib/applications/service';
 
 /**
  * `/resolve outcome:<club | Rejected> [note]`: decides an application. Used
- * in the post. Tags it (Club App Accepted, or Rejected), locks it so only
+ * in the post, once it has a trainer ID. Tags it (Club App Accepted, or Rejected), locks it so only
  * staff can write in it, posts the decision with a Close button for the
  * applicant, and updates the recruitment entry. Running it again changes the
  * decision.
@@ -53,6 +53,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (!(await canDecide(interaction.member as GuildMember, club))) {
         const who = club ? `${club.name}'s staff or a Club Manager` : "a club's staff or a Club Manager";
         await interaction.reply({ embeds: [errorEmbed(`Only ${who} can do that.`)], flags: MessageFlags.Ephemeral });
+        return;
+    }
+
+    // A decision needs the trainer ID: staff decide on numbers, and closing
+    // the post links the applicant to that trainer.
+    const { app: current } = await ensureApplication(thread as ThreadChannel);
+    if (current.viewerId === null) {
+        await interaction.reply({
+            embeds: [errorEmbed(`No trainer ID yet. <@${current.applicantId}> has been asked to send it here; decide once it is in.`)],
+            flags: MessageFlags.Ephemeral,
+        });
         return;
     }
 

@@ -4,6 +4,39 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Ask for the trainer ID; link Discord to trainer on close
+
+Asked:
+- With no ID in a post, ping the applicant for it, and decide only once it
+  is in.
+- Connect the applicant's Discord to the trainer, but for new applications
+  only once the post is closed.
+- Cover more ID formats.
+
+- **No ID:** `openApplication` pings the applicant (`askForIdMessage`) and
+  posts the recruitment entry as "Open, waiting for the trainer ID". The
+  staff notice waits for the ID. `takeIdFromMessage` (on `messageCreate`)
+  reads the applicant's own replies in their post while the application
+  has no ID. The first ID found is scouted, carded and announced
+  (`announceWithId`). `/scout id:` in the post does the same. Later numbers
+  do not replace it; `/scout id:` does. Reading replies needs the Message
+  Content intent; without it, `/scout id:` is the way.
+- **`/resolve`** refuses until the application has an ID.
+- **Linking:** `linkApplicant` writes the `/uma-id` link (`TrainerLink`)
+  with `skipDuplicates`, so it never overwrites the member's link or takes
+  a trainer another member has. New applications link on close, and only
+  to a trainer uma.moe found (a name is known). The backfill links posts
+  that are not Open, counts the links in its summary and marks them in the
+  CSV.
+- **ID formats:** text is NFKC-normalised first, so full-width digits and
+  spaces read as ASCII. Four groups of three split by commas or dots now
+  count as an ID ("467,492,654,277"). Only that exact shape counts, since
+  commas and dots also group fan counts ("1,234,567,890 fans" is not an
+  ID). Tested: "[467 492 654 277]", mixed separators, and a fan count
+  before a real ID.
+
+---
+
 ## 2026-11-04 — Month table: average per day in club, share of club
 
 Asked: share of club, and average per day if possible. Both come from the

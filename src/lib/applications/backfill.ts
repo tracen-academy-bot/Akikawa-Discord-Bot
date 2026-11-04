@@ -5,7 +5,7 @@ import { getProfile, isConfigured } from '../umamoe/client';
 import type { UmaProfileResponse } from '../umamoe/types';
 import { currentGameMonth } from '../fans/ingest';
 import { extractTrainerId, monthsAverage, monthSummaries } from './history';
-import { syncRecruitmentEntry } from './service';
+import { linkApplicant, syncRecruitmentEntry } from './service';
 
 /**
  * Backfill: every post already in the application forum, open or archived,
@@ -16,7 +16,10 @@ import { syncRecruitmentEntry } from './service';
  * request per trainer), and works out from the post's tags and the profile
  * where the application ended up (`matchApplication`). It writes the row
  * without posting anything, unless asked to post entries for posts still
- * open, so hundreds of old posts do not flood the recruitment channel.
+ * open, so hundreds of old posts do not flood the recruitment channel. For
+ * posts already done (not open) whose trainer uma.moe knows, it links the
+ * applicant's Discord to the trainer, as `/uma-id` does, never overwriting a
+ * link either side already has.
  */
 
 /** A club as matching reads it. */
@@ -110,6 +113,8 @@ export interface BackfillRow {
     pace3m: number | null;
     pace6m: number | null;
     problem: string | null;
+    /** A Discord account was newly linked to this trainer. */
+    linked: boolean;
 }
 
 /** What the backfill did. */
@@ -122,6 +127,8 @@ export interface BackfillReport {
     byStatus: Record<string, number>;
     /** Imported trainers now in each of the server's clubs. */
     nowInClub: Record<string, number>;
+    /** Discord accounts newly linked to their trainer. */
+    linked: number;
     rows: BackfillRow[];
 }
 
@@ -133,9 +140,9 @@ function csvField(value: unknown): string {
 
 /** The rows as CSV, one post per line. */
 export function backfillCsv(rows: BackfillRow[]): string {
-    const header = ['post', 'title', 'applicant_discord_id', 'opened', 'tags', 'trainer_id', 'trainer_name', 'uma_circle_now', 'status', 'club', 'in_our_club_now', 'our_clubs_since_post', 'pace_3m_per_day', 'pace_6m_per_day', 'problem'];
+    const header = ['post', 'title', 'applicant_discord_id', 'opened', 'tags', 'trainer_id', 'trainer_name', 'uma_circle_now', 'status', 'club', 'in_our_club_now', 'our_clubs_since_post', 'pace_3m_per_day', 'pace_6m_per_day', 'problem', 'linked'];
     const lines = rows.map((r) =>
-        [r.threadUrl, r.title, r.applicantId, r.openedAt, r.tags.join(' | '), r.trainerId, r.trainerName, r.umaCircle, r.status, r.club, r.nowIn, r.since.join(' > '), r.pace3m === null ? '' : Math.round(r.pace3m), r.pace6m === null ? '' : Math.round(r.pace6m), r.problem]
+        [r.threadUrl, r.title, r.applicantId, r.openedAt, r.tags.join(' | '), r.trainerId, r.trainerName, r.umaCircle, r.status, r.club, r.nowIn, r.since.join(' > '), r.pace3m === null ? '' : Math.round(r.pace3m), r.pace6m === null ? '' : Math.round(r.pace6m), r.problem, r.linked ? 'yes' : '']
             .map(csvField)
             .join(','),
     );
@@ -179,7 +186,7 @@ export async function backfillApplications(
     const now = currentGameMonth();
     const profiles = new Map<string, UmaProfileResponse | null | Error>();
 
-    const report: BackfillReport = { scanned: posts.length, alreadyTracked: existing.size, imported: 0, withId: 0, foundOnUma: 0, byStatus: {}, nowInClub: {}, rows: [] };
+    const report: BackfillReport = { scanned: posts.length, alreadyTracked: existing.size, imported: 0, withId: 0, foundOnUma: 0, byStatus: {}, nowInClub: {}, linked: 0, rows: [] };
     let done = 0;
     for (const thread of posts) {
         done += 1;
@@ -252,6 +259,13 @@ export async function backfillApplications(
             },
         });
         if (postOpen && app.status === 'OPEN') await syncRecruitmentEntry(thread.client, app, thread.url);
+        // As with new posts, the applicant is linked to their trainer only
+        // once the post is done: not while it is still open.
+        let linked = false;
+        if (app.status !== 'OPEN' && app.viewerId !== null && profile) {
+            linked = await linkApplicant(forum.guildId, app.applicantId, app.viewerId, app.trainerName).catch(() => false);
+        }
+        if (linked) report.linked += 1;
 
         report.imported += 1;
         if (trainerId) report.withId += 1;
@@ -274,6 +288,7 @@ export async function backfillApplications(
             pace3m,
             pace6m,
             problem,
+            linked,
         });
     }
     await onProgress?.(posts.length, posts.length);

@@ -52,6 +52,15 @@ async function main() {
     check('id: Discord snowflake is not an ID', h.extractTrainerId('see 1523241207600386188'), null);
     check('id: fan counts are not IDs', h.extractTrainerId('I average 9-10 million fans, 1M a day'), null);
     check('id: none', h.extractTrainerId('hello', null, undefined), null);
+    check('id: spaced groups in brackets', h.extractTrainerId('[467 492 654 277] Applying'), '467492654277');
+    check('id: commas in fours of three', h.extractTrainerId('id 467,492,654,277 pls'), '467492654277');
+    check('id: dots in fours of three', h.extractTrainerId('467.492.654.277'), '467492654277');
+    check('id: full-width digits', h.extractTrainerId('ＩＤ：４６７４９２６５４２７７'), '467492654277');
+    check('id: full-width spaced groups', h.extractTrainerId('４６７　４９２　６５４　２７７'), '467492654277');
+    check('id: comma fan count is not an ID', h.extractTrainerId('I have 1,234,567,890 fans'), null);
+    check('id: comma fan count of nine digits is not an ID', h.extractTrainerId('123,456,789 fans this month'), null);
+    check('id: mixed separators are not an ID', h.extractTrainerId('467,492.654,277'), null);
+    check('id: fan count then a real ID', h.extractTrainerId('1,234,567,890 fans, ID 467,492,654,277'), '467492654277');
 
     // ── Daily series ──────────────────────────────────────────────────────────
     // October: start 100, then +10, +20 on days 1-2.
@@ -237,6 +246,8 @@ async function main() {
     ]);
     check('entry: accepted', svc.statusOf({ status: 'ACCEPTED', clubName: 'First', resolvedById: 'staff' }).text, 'Accepted into **First** by <@staff>, not joined yet');
     check('entry: no data', svc.paceLine({ pace30: null, pace3m: null, pace6m: null }), 'No uma.moe data');
+    check('entry: open without an ID says so', svc.statusOf({ status: 'OPEN', clubName: null, resolvedById: null, viewerId: null }).text, 'Open, waiting for the trainer ID');
+    check('ask for ID: pings only the applicant', svc.askForIdMessage('123').allowedMentions, { users: ['123'] });
 
     // ── Images ────────────────────────────────────────────────────────────────
     const series = h.dailySeries([long]);
@@ -299,8 +310,8 @@ async function main() {
     check('match: untracked club never matches', match({ profile: prof(null, [[2026, 10, null]]) }).nowIn, null);
     check('csv: quotes commas and quotes', bf.backfillCsv([{
         threadUrl: 'u', title: 'Hi, "me"', applicantId: 'a', openedAt: new Date('2026-01-02T00:00:00Z'), tags: ['S', 'A'], trainerId: null, trainerName: null,
-        umaCircle: null, status: 'OPEN', club: null, nowIn: null, since: [], pace3m: 1234.6, pace6m: null, problem: null,
-    }]).split('\n')[1], 'u,"Hi, ""me""",a,2026-01-02T00:00:00.000Z,S | A,,,,OPEN,,,,1235,,');
+        umaCircle: null, status: 'OPEN', club: null, nowIn: null, since: [], pace3m: 1234.6, pace6m: null, problem: null, linked: false,
+    }]).split('\n')[1], 'u,"Hi, ""me""",a,2026-01-02T00:00:00.000Z,S | A,,,,OPEN,,,,1235,,,');
 
     // ── Resolve and close, against the database ───────────────────────────────
     const guildId = `test-applications-${Date.now()}`;
@@ -383,6 +394,47 @@ async function main() {
         await prisma.clubApplication.update({ where: { threadId }, data: { status: 'OPEN' } });
         check('close: open becomes withdrawn', (await svc.closeApplication(thread as unknown as Thread)).app.status, 'WITHDRAWN');
 
+        // Linking Discord to the trainer happens on close, and only to a trainer uma.moe knows.
+        const link = (user: string) => prisma.trainerLink.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId: user } } });
+        await prisma.clubApplication.update({ where: { threadId }, data: { status: 'ACCEPTED', applicantId: '9001', trainerName: null } });
+        await svc.closeApplication(thread as unknown as Thread);
+        check('link: not made for a trainer uma.moe does not know', await link('9001'), null);
+        await prisma.clubApplication.update({ where: { threadId }, data: { status: 'ACCEPTED', trainerName: 'WakuWaku' } });
+        await svc.closeApplication(thread as unknown as Thread);
+        check('link: made on close', (await link('9001'))?.viewerId.toString(), '574910875032');
+        check('link: never overwrites the member', await svc.linkApplicant(guildId, '9001', 111n, null), false);
+        check('link: never takes a trainer linked to someone else', await svc.linkApplicant(guildId, '9002', 574910875032n, null), false);
+        check('link: existing link kept', (await link('9001'))?.viewerId.toString(), '574910875032');
+
+        // A post with no ID: the applicant is pinged, and their reply with the ID is picked up.
+        const posted: { content?: string; allowedMentions?: unknown }[] = [];
+        const thread2 = {
+            ...thread,
+            id: `${guildId}-thread2`,
+            name: 'Looking for a casual club',
+            ownerId: '7007',
+            appliedTags: [] as string[],
+            isThread: () => true,
+            fetch: async () => thread2,
+            fetchStarterMessage: async () => ({ content: 'hi, I play daily', author: { id: '7007' } }),
+            send: async (p: { content?: string; allowedMentions?: unknown }) => void posted.push(p),
+        };
+        const sentBefore = sent.length;
+        await svc.openApplication(thread2 as unknown as Thread);
+        const opened2 = await prisma.clubApplication.findUnique({ where: { threadId: thread2.id } });
+        check('no ID: application waits for one', [opened2?.viewerId ?? null, opened2?.status], [null, 'OPEN']);
+        check('no ID: applicant pinged for it', [posted.length, posted[0]?.content?.startsWith('<@7007>'), posted[0]?.allowedMentions], [1, true, { users: ['7007'] }]);
+        check('no ID: recruitment entry posted', sent.length, sentBefore + 1);
+        await svc.takeIdFromMessage({ author: { id: '8008', bot: false }, content: '467492654277', channel: thread2 });
+        check("reply: someone else's ID is ignored", (await prisma.clubApplication.findUnique({ where: { threadId: thread2.id } }))?.viewerId ?? null, null);
+        await svc.takeIdFromMessage({ author: { id: '7007', bot: false }, content: 'sorry! my id is ４６７,４９２,６５４,２７７', channel: thread2 });
+        const withId = await prisma.clubApplication.findUnique({ where: { threadId: thread2.id } });
+        check("reply: applicant's ID picked up", withId?.viewerId?.toString(), '467492654277');
+        check('reply: post told the result', posted.length, 2);
+        check('reply: no link before the post closes', await link('7007'), null);
+        await svc.takeIdFromMessage({ author: { id: '7007', bot: false }, content: '111222333444', channel: thread2 });
+        check('reply: a later number does not replace the ID', (await prisma.clubApplication.findUnique({ where: { threadId: thread2.id } }))?.viewerId?.toString(), '467492654277');
+
         // Backfill over a fake forum: one active post, two pages of archived ones.
         const post = (id: string, name: string, extra: Record<string, unknown> = {}) => ({
             id: `${guildId}-${id}`,
@@ -418,6 +470,7 @@ async function main() {
         };
         type Forum = Parameters<typeof bf.backfillApplications>[0];
         const progress: number[] = [];
+        const sentBeforeBackfill = sent.length;
         const report = await bf.backfillApplications(forum as unknown as Forum, { onProgress: (d) => void progress.push(d) });
         check('backfill: pages through archived posts, skips other forums', [report.scanned, archivedCalls], [3, 2]);
         check('backfill: outcome by post', report.rows.map((r) => [r.title, r.status, r.trainerId, r.problem]), [
@@ -426,11 +479,12 @@ async function main() {
             ['old', 'CLOSED', null, 'no trainer ID in the post'],
         ]);
         check('backfill: rows written with the post date', (await prisma.clubApplication.findUnique({ where: { threadId: `${guildId}-p2` } }))?.createdAt.toISOString(), '2026-10-05T00:00:00.000Z');
-        check('backfill: nothing posted without post_open', sent.length, 1);
+        check('backfill: nothing posted without post_open', sent.length, sentBeforeBackfill);
         const again = await bf.backfillApplications(forum as unknown as Forum);
         check('backfill: a second run imports nothing', [again.imported, again.alreadyTracked], [0, 3]);
         check('backfill: progress reported at the end', progress.at(-1), 3);
     } finally {
+        await prisma.trainerLink.deleteMany({ where: { guildId } });
         await prisma.clubApplication.deleteMany({ where: { guildId } });
         await prisma.trackedCircle.deleteMany({ where: { guildId } });
         await prisma.$disconnect();

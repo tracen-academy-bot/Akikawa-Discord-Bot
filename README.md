@@ -125,7 +125,12 @@ dashboard.
 
 Posts in the application forum (`FORUM_CHANNEL_ID`, #apply-for-club) are
 handled by the bot. When a post opens, it finds the trainer ID (9 to 12
-digits) in the title or the body and scouts the trainer on uma.moe:
+digits) in the title or the body. The ID can be bare, in brackets, in
+groups split by spaces or dashes (`[467 492 654 277]`), in four groups of
+three split by commas or dots (`467,492,654,277`), or in full-width digits.
+With no ID, the bot pings the applicant to send it, and picks it up when
+they reply in the post. Once it has the ID, it scouts the trainer on
+uma.moe:
 
 - **In the post:** the trainer's card. It shows fans per day over the last
   30 days as a line, the 3- and 6-month averages, and a table of the last
@@ -150,8 +155,8 @@ digits) in the title or the body and scouts the trainer on uma.moe:
 | Command | Who | Purpose |
 | --- | --- | --- |
 | `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
-| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Staff accept into their own club only. |
-| `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined. |
+| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. It needs the trainer ID first. Staff accept into their own club only. |
+| `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined, and the applicant's Discord is linked to their trainer, as `/uma-id` does. |
 | `/applications backfill [post_open]` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
 
 The backfill uses one uma.moe profile request per trainer, about 3 per
@@ -167,7 +172,13 @@ status in this order:
 5. **Open:** none of the above.
 
 It posts nothing unless `post_open:true` is set, and then only entries for
-posts still open. A second run imports only posts with no row yet.
+posts still open. A second run imports only posts with no row yet. For
+posts already done (any status except Open) whose trainer uma.moe knows, it
+links the applicant's Discord to the trainer.
+
+Links are made only when a post is closed, never while it is open, and an
+existing link is never overwritten: not the member's, and not one another
+member already has for that trainer.
 
 A locked post has no message box for the applicant, so the decision comes
 with a **Close post** button. Applicants use that button, not `/close`.

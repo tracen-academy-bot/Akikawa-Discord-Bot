@@ -255,7 +255,7 @@ function topicPage(topic: Exclude<Topic, 'start'>, entries: HelpEntry[]): string
         );
     }
     if (topic === 'applications') {
-        blocks.push('-# A new application post is scouted by itself: its card goes in the post, its entry in the recruitment channel, and staff are told. Staff accept into their own club; any club\'s staff can reject. Applicants close a decided post with its **Close post** button.');
+        blocks.push('-# A new application post is scouted by itself: its card goes in the post, its entry in the recruitment channel, and staff are told. With no trainer ID in the post, the applicant is pinged for it and their reply is picked up. Decisions need the ID. Staff accept into their own club; any club\'s staff can reject. Applicants close a decided post with its **Close post** button, which links their Discord to their trainer.');
     }
     if (topic === 'fans') blocks.push("-# Each club's report posts by itself every day at the club's report time; these are for checking in between.");
     return blocks;
