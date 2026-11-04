@@ -4,6 +4,19 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Timer ping in Yayoi's voice
+
+Asked: the timer's "has reached 0" ping should be livelier and more like
+Yayoi (brighter wording, not colored text). The ping opens with one of
+four cheerful lines, picked at random. Each thing worth celebrating gets
+its own bold-led line: **Debut!** (first run), **Milestone!** (run #25
+and so on), **Record!** (new longest streak), **Persistence!** (an ongoing
+streak), **Promotion!** (milestone role). Late delivery reads "while I was
+offline. It still counts!". Only the trainer is pinged, as before.
+`buildPingContent` is exported for tests.
+
+---
+
 ## 2026-11-04 — Welcome: random greetings, "Say hi!", boost thank-yous
 
 Asked: replace Discord's system messages (random welcome, sticker reply
