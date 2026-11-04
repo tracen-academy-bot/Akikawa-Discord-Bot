@@ -142,16 +142,20 @@ function monthTableHeight(rows: number): number {
 
 /**
  * A row per month, newest first: the club the trainer was in, that club's
- * rank tier that month, and fans gained. Plain totals, no per-day average: a month's per-day figure
- * depends on how many of its days the trainer was tracked, which uma.moe
- * does not give.
+ * rank tier that month, fans gained (all circles), and the trainer's month
+ * inside that circle: fans per day over the days they were in it, and their
+ * share of the circle's fans with their place. The per-day figure divides by
+ * days in the circle, not days in the month: the month's length overstates
+ * the days a mid-month joiner was there.
  */
 async function drawMonthTable(ctx: SKRSContext2D, months: MonthSummary[], x: number, y: number, w: number) {
-    const cols = { month: x + 14, club: x + 220, rank: x + 600, gained: x + w - 14 };
+    const cols = { month: x + 14, club: x + 200, rank: x + 420, gained: x + w - 420, perDay: x + w - 200, share: x + w - 14 };
     drawLabel(ctx, 'Month', cols.month, y + 14, THEME.faint, 11);
     drawLabel(ctx, 'Club', cols.club, y + 14, THEME.faint, 11);
     drawLabel(ctx, 'Club rank', cols.rank, y + 14, THEME.faint, 11);
     drawLabel(ctx, 'Fans gained', cols.gained, y + 14, THEME.faint, 11, 'right');
+    drawLabel(ctx, 'Avg/day in club', cols.perDay, y + 14, THEME.faint, 11, 'right');
+    drawLabel(ctx, 'Share of club', cols.share, y + 14, THEME.faint, 11, 'right');
     drawRule(ctx, x, y + 24, w, THEME.line, 1);
 
     for (const [i, m] of months.entries()) {
@@ -172,6 +176,21 @@ async function drawMonthTable(ctx: SKRSContext2D, months: MonthSummary[], x: num
         if (m.clubRank) await drawRankFlag(ctx, m.clubRank, cols.rank, cy);
         else drawText(ctx, '—', cols.rank, cy + 5, { spec: '400 15px', color: THEME.faint });
         drawText(ctx, formatFans(m.gain), cols.gained, cy + 5, { spec: '600 15px', color: THEME.text, align: 'right' });
+        const club = m.club;
+        if (!club) {
+            drawText(ctx, '—', cols.perDay, cy + 5, { spec: '400 15px', color: THEME.faint, align: 'right' });
+            drawText(ctx, '—', cols.share, cy + 5, { spec: '400 15px', color: THEME.faint, align: 'right' });
+            continue;
+        }
+        // Figure first, its basis after it in small faint type.
+        const pair = (value: string, detail: string, right: number) => {
+            ctx.font = font('400 12px');
+            const detailW = ctx.measureText(detail).width;
+            drawText(ctx, detail, right, cy + 5, { spec: '400 12px', color: THEME.faint, align: 'right' });
+            drawText(ctx, value, right - detailW - 8, cy + 5, { spec: '600 15px', color: THEME.text, align: 'right' });
+        };
+        pair(club.perDay === null ? '—' : formatCompactFans(Math.round(club.perDay)), `${club.daysInClub}d`, cols.perDay);
+        pair(club.share === null ? '—' : `${(club.share * 100).toFixed(1)}%`, `#${club.place}/${club.members}`, cols.share);
     }
 }
 

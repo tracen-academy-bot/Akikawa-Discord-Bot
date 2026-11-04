@@ -4,6 +4,29 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Month table: average per day in club, share of club
+
+Asked: share of club, and average per day if possible. Both come from the
+month's circle member list (`/api/v4/circles` for the circle named in that
+month's profile row). That is one request per shown month, cached with the
+daily view's requests: up to about 9 per applicant instead of 4.
+
+- `clubMonthStats` runs every member's row through `monthGains`, the fan
+  reports' rules: a member earns only on days they were in the circle.
+- **Avg/day in club** is the trainer's in-circle fans divided by their days
+  in the circle, with the days shown ("183,631 6d"). This fixes what the
+  old bars got wrong: the divisor is days actually there, not the month's
+  length.
+- **Share of club** is the trainer's fans divided by every member's fans on
+  the same days the trainer was in, with place among the members present
+  then ("0.6% #21/30"). The first version measured the whole month and read
+  Zix's 6-day October as 0.2% of TeamSirius; same-days gives 0.6%.
+- A month in which the trainer was in two circles is measured in the circle
+  the profile names. "Fans gained" still covers both circles.
+- Ties share the better place.
+
+---
+
 ## 2026-11-04 — Backfill: match old application posts
 
 Asked: #apply-for-club has a lot of old applicant posts; match them against

@@ -18,6 +18,8 @@
  * `avg_daily` divides by days with a gain, which rewards skipping days.
  */
 
+import { circleSnapshots, monthGains } from '../fans/metrics';
+
 /** Milliseconds in a day. */
 const DAY_MS = 86_400_000;
 
@@ -144,6 +146,8 @@ export interface ProfileMonth {
     clubName?: string | null;
     /** That circle's rank tier that month: D, D+, C, C+, B, B+, A, A+, S, S+ or SS. */
     clubRank?: string | null;
+    /** The trainer's month inside that circle, when its member list was read. */
+    club?: ClubMonth | null;
 }
 
 /** One month of the monthly view. */
@@ -159,6 +163,7 @@ export interface MonthSummary {
     activeDays: number | null;
     clubName: string | null;
     clubRank: string | null;
+    club: ClubMonth | null;
     /** The current game month, not finished yet. */
     inProgress: boolean;
     /**
@@ -201,6 +206,7 @@ export function monthSummaries(months: ProfileMonth[], now: { year: number; mont
             activeDays: record?.activeDays ?? null,
             clubName: record?.clubName ?? null,
             clubRank: record?.clubRank ?? null,
+            club: record?.club ?? null,
             inProgress,
             firstOnRecord: earliest !== null && key(year, month) === earliest,
         });
@@ -279,4 +285,61 @@ export function extractTrainerId(...texts: (string | null | undefined)[]): strin
         }
     }
     return null;
+}
+
+/** A trainer's month inside one circle, against the rest of its members. */
+export interface ClubMonth {
+    /** Fans the trainer earned in the circle that month. */
+    gain: number;
+    /** Days the trainer was in the circle for all of. */
+    daysInClub: number;
+    /** `gain / daysInClub`; null with no full day in the circle. */
+    perDay: number | null;
+    /**
+     * The trainer's share of the fans the circle's members earned on the days
+     * the trainer was in it; null when they earned none. Counting only those
+     * days keeps a mid-month joiner from reading as a tiny share of a month
+     * they were mostly not there for.
+     */
+    share: number | null;
+    /** Place by fans earned on those days among the members in the circle then, 1 = most. */
+    place: number;
+    /** Members in the circle on at least one of those days. */
+    members: number;
+}
+
+/** Fans earned on each game day (index d-1 is day d), from `monthGains`' running totals. */
+function perDayGains(running: number[]): number[] {
+    return running.map((v, i) => v - (i > 0 ? running[i - 1]! : 0));
+}
+
+/**
+ * The trainer's month in a circle, from the circle's `daily_fans` rows for
+ * that month. Gains follow the fan reports' rules (`monthGains`): a member
+ * earns only on days they were in the circle. Share and place compare the
+ * trainer with the other members on the days the trainer was in the circle.
+ * Null when the trainer is not in the rows.
+ */
+export function clubMonthStats(rows: { viewerId: string; daily: number[] }[], viewerId: string): ClubMonth | null {
+    const scraped = circleSnapshots(rows.map((r) => r.daily));
+    const all = rows.map((r) => {
+        const g = monthGains(r.daily, scraped);
+        return { viewerId: r.viewerId, present: g.firstDay > 0, days: perDayGains(g.gains), inCircle: g.inCircle };
+    });
+    const mine = all.find((r) => r.viewerId === viewerId && r.present);
+    if (!mine) return null;
+    const mineDays = mine.inCircle.map((inside, i) => (inside ? i : -1)).filter((i) => i >= 0);
+    const over = (r: (typeof all)[number]) => mineDays.reduce((sum, i) => sum + (r.inCircle[i] ? (r.days[i] ?? 0) : 0), 0);
+    const peers = all.filter((r) => r.present && mineDays.some((i) => r.inCircle[i]));
+    const gains = peers.map((r) => ({ viewerId: r.viewerId, gain: over(r) }));
+    const myGain = over(mine);
+    const total = gains.reduce((sum, r) => sum + r.gain, 0);
+    return {
+        gain: myGain,
+        daysInClub: mineDays.length,
+        perDay: mineDays.length > 0 ? myGain / mineDays.length : null,
+        share: total > 0 ? myGain / total : null,
+        place: 1 + gains.filter((r) => r.gain > myGain).length,
+        members: Math.max(1, peers.length),
+    };
 }

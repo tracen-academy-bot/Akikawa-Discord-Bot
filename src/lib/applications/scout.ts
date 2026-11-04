@@ -1,7 +1,8 @@
 import { getCircle, getProfile } from '../umamoe/client';
-import type { UmaProfileResponse } from '../umamoe/types';
+import type { UmaCircleResponse, UmaProfileResponse } from '../umamoe/types';
 import { currentGameMonth } from '../fans/ingest';
 import {
+    clubMonthStats,
     dailySeries,
     monthsAverage,
     monthsBefore,
@@ -70,9 +71,18 @@ export async function scoutTrainer(viewerId: string, now = currentGameMonth()): 
     const profile = await getProfile(viewerId);
     if (!profile) return null;
 
+    // One request per circle and month, shared by the daily view and the
+    // month table.
+    const cache = new Map<string, Promise<UmaCircleResponse>>();
+    const circle = (circleId: number, year: number, month: number) => {
+        const key = `${circleId}:${year}-${month}`;
+        if (!cache.has(key)) cache.set(key, getCircle(circleId, month, year));
+        return cache.get(key)!;
+    };
+
     const wanted = [now, { ...monthsBefore(now.year, now.month, 1), day: 0 }];
     const requests = wanted.flatMap((m, i) => circlesFor(profile, m.year, m.month, i === 0).map((circleId) => ({ circleId, year: m.year, month: m.month })));
-    const responses = await Promise.allSettled(requests.map((r) => getCircle(r.circleId, r.month, r.year)));
+    const responses = await Promise.allSettled(requests.map((r) => circle(r.circleId, r.year, r.month)));
 
     const rows: MonthRow[] = [];
     let lastUpdated: Date | null = null;
@@ -89,17 +99,41 @@ export async function scoutTrainer(viewerId: string, now = currentGameMonth()): 
     });
 
     const daily = dailySeries(rows);
+
+    // The month table's months, each with its circle's member list for the
+    // share of club and the average per day in it.
+    const oldest = monthsBefore(now.year, now.month, MONTHS_SHOWN - 1);
+    // Every month on record: the earliest one decides "first on record".
+    const recorded = (profile.fan_history?.monthly ?? []).filter(
+        (m) => typeof m.year === 'number' && typeof m.month === 'number' && typeof m.monthly_gain === 'number',
+    );
+    const shown = recorded.filter((m) => m.year! * 12 + m.month! >= oldest.year * 12 + oldest.month);
+    const clubs = await Promise.all(
+        shown.map(async (m) => {
+            if (!m.circle_id) return null;
+            try {
+                const response = await circle(m.circle_id, m.year!, m.month!);
+                const members = (response.members ?? [])
+                    .filter((x) => x.viewer_id !== undefined && Array.isArray(x.daily_fans))
+                    .map((x) => ({ viewerId: String(x.viewer_id), daily: x.daily_fans! }));
+                return clubMonthStats(members, viewerId);
+            } catch (e) {
+                console.warn(`Scouting ${viewerId}: circle ${m.circle_id} ${m.year}-${m.month} failed:`, e instanceof Error ? e.message : e);
+                return null;
+            }
+        }),
+    );
+    const clubOf = new Map(shown.map((m, i) => [m.year! * 12 + m.month!, clubs[i] ?? null]));
     const months = monthSummaries(
-        (profile.fan_history?.monthly ?? [])
-            .filter((m) => typeof m.year === 'number' && typeof m.month === 'number' && typeof m.monthly_gain === 'number')
-            .map((m) => ({
-                year: m.year!,
-                month: m.month!,
-                gain: m.monthly_gain!,
-                activeDays: m.active_days ?? null,
-                clubName: m.circle_name ?? null,
-                clubRank: m.club_rank_name ?? null,
-            })),
+        recorded.map((m) => ({
+            year: m.year!,
+            month: m.month!,
+            gain: m.monthly_gain!,
+            activeDays: m.active_days ?? null,
+            clubName: m.circle_name ?? null,
+            clubRank: m.club_rank_name ?? null,
+            club: clubOf.get(m.year! * 12 + m.month!) ?? null,
+        })),
         now,
         MONTHS_SHOWN,
     );
