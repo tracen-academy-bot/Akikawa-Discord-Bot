@@ -71,11 +71,16 @@ export const AUDIENCE: Record<string, Audience> = {
     'fans circle list': 'everyone',
     'timer stats': 'everyone',
     'timer leaderboard': 'everyone',
+    'timer specials': 'managers',
+    'club poster': 'everyone',
+    scout: 'everyone',
+    close: 'everyone',
 
     'club profile': 'staff',
     'club fancount': 'staff',
     'club reports': 'staff',
     'fans club': 'staff',
+    resolve: 'staff',
 
     'club create': 'managers',
     'club admin': 'managers',
@@ -97,6 +102,14 @@ export const AUDIENCE: Record<string, Audience> = {
     'timer publish': 'managers',
     'timer milestone add': 'managers',
     'timer milestone remove': 'managers',
+    'timer milestone ladder': 'managers',
+    'applications backfill': 'managers',
+    'applications tidy': 'managers',
+    'welcome channel': 'managers',
+    'welcome message': 'managers',
+    'welcome test': 'managers',
+    'welcome options': 'managers',
+    'welcome off': 'managers',
     post: 'managers',
 
     'role add': 'moderators',
@@ -108,14 +121,15 @@ export const AUDIENCE: Record<string, Audience> = {
 const MODERATOR_PERMISSION: Record<string, string> = { role: 'Manage Roles', settag: 'Manage Threads' };
 
 /** The pages, in menu order. */
-export type Topic = 'start' | 'fans' | 'clubs' | 'timer' | 'tools';
+export type Topic = 'start' | 'fans' | 'clubs' | 'applications' | 'timer' | 'tools';
 
 const TOPICS: Record<Topic, { label: string; blurb: string }> = {
     start: { label: 'Start here', blurb: 'What every trainer uses, and what a club’s staff set.' },
     fans: { label: 'Fans and quota', blurb: 'Daily reports, your own progress, and how clubs compare.' },
     clubs: { label: 'Clubs', blurb: 'Club info, the staff forms, members and the directory.' },
+    applications: { label: 'Club applications', blurb: 'Scouting applicants on uma.moe, deciding their posts, and closing them.' },
     timer: { label: 'Trainer Timer', blurb: 'Independent Training runs, stats and weekly rewards.' },
-    tools: { label: 'Moderation and posting', blurb: 'Club roles, closing threads, and posting as Akikawa.' },
+    tools: { label: 'Moderation and posting', blurb: 'Club roles, closing threads, welcoming new members, and posting as Akikawa.' },
 };
 
 /** Which page each top-level command is on. */
@@ -123,10 +137,15 @@ export const TOPIC_OF: Record<string, Exclude<Topic, 'start'>> = {
     fans: 'fans',
     'uma-id': 'fans',
     club: 'clubs',
+    scout: 'applications',
+    resolve: 'applications',
+    close: 'applications',
+    applications: 'applications',
     timer: 'timer',
     role: 'tools',
     settag: 'tools',
     post: 'tools',
+    welcome: 'tools',
     help: 'tools',
 };
 
@@ -243,6 +262,9 @@ function topicPage(topic: Exclude<Topic, 'start'>, entries: HelpEntry[]): string
                 "**My Stats** shows your runs, **Leaderboard** this week's board. Both only to you.",
             ].join('\n'),
         );
+    }
+    if (topic === 'applications') {
+        blocks.push('-# A new application post is scouted by itself: its card goes in the post, the recruitment board updates, and staff are told. With no trainer ID in the post, the applicant is pinged for it and their reply is picked up. Accepting needs the ID; rejecting does not. Staff accept into their own club, which gives the applicant its role (other club roles come off; visas stay); any club\'s staff can reject. Applicants close a decided post with its **Close post** button, which links their Discord to their trainer.');
     }
     if (topic === 'fans') blocks.push("-# Each club's report posts by itself every day at the club's report time; these are for checking in between.");
     return blocks;

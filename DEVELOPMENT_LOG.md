@@ -4,7 +4,496 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-05 — Re-read open posts that were stored with no ID
 
+Zix's post opens with `647176684566`, yet it read "no ID yet". The row was
+made while the Message Content intent was off, so the opening message came
+back empty and "no ID" was stored. Nothing read an open post again:
+`/scout` with no ID only reused the stored one, and `backfill rescan`
+skips open posts.
+
+- `idInPost` reads a post's title and opening message afresh.
+- `/scout` with no ID, in a post with none stored, uses it.
+- `/applications tidy` re-reads every open post with no stored ID; an ID
+  found is announced like a new post's (card, board, staff notice). The
+  summary counts these as "IDs found on a second read".
+- Tests: the Zix case (ID on the body's first line) through tidy, and a
+  spaced ID through `/scout`. The tidy fixture's posts now have plain
+  titles and can be sent to.
+
+---
+
+## 2026-11-05 — Rare lines recorded; pings cleared after 2 minutes
+
+- Asked whether anyone had hit a rare opener yet: nothing recorded it,
+  and pings are deleted, so there was no way to know. Each rare opener
+  posted is now stored (`RareOpenerHit`: guild, trainer, line, time).
+  `/timer specials` lists every rare line, found ones with their count and
+  first finder, and the rest as "???". The scheduler draws the random
+  number once, so the line posted is the one recorded. Openers moved to
+  `timer/openers.ts`, so the tally and the scheduler share them without
+  importing each other.
+- Each rare line has a staff-given name (`RARE_OPENERS`: Overslept?!,
+  Agnes Tachyon, Mihono Bourbon, and so on). `/timer specials` shows the name
+  of a found line, never the line itself, so the list spoils nothing. It
+  is three columns: name, times it came up, first finder. Trainers see
+  their own finds, hidden, with the timer panel's **Specials** button;
+  `/timer specials` is for Club Managers and shows the server's tally,
+  also hidden.
+- Expiry pings are now deleted after 2 minutes instead of 10
+  (`NOTIFICATION_LIFETIME_MINUTES`).
+
+---
+
+## 2026-11-05 — Milestone roles as a ladder
+
+Asked by staff: reaching the next milestone should take the previous role
+off (Veteran to Ace), and the "Milestone added" reply read badly.
+
+- `milestoneRolesFor(total, milestones, ladder)`: on a ladder, keep the
+  highest milestone reached and drop every other milestone role; stacked,
+  keep all reached and drop nothing. `applyMilestoneRoles` adds only what a
+  member lacks and removes only what they hold.
+- `awardMilestone` (each run) and `syncMilestones` (adding a milestone,
+  turning the ladder on or off) both go through it. `syncMilestones`
+  replaces `backfillMilestone`.
+- The ladder flag lives in a new `TimerMilestoneSettings` table, defaulting
+  to on, kept apart from `TimerSettings` because a row there starts the
+  weekly award.
+- `/timer milestone ladder on:<bool>`. The add, remove and ladder replies
+  say plainly who got the role now, how many lower roles came off, and list
+  the whole ladder.
+- Existing stacked roles are not touched until a sync. One
+  `/timer milestone ladder on:true` re-sorts everyone.
+- Tests: the rule, a run swapping roles, a lower milestone added, ladder
+  off then on.
+
+---
+
+## 2026-11-04 — Timer ping openers from the staff, with rare ones
+
+The user wrote the openers: seven common lines, and six rare ones (a nod
+to other characters) that together come up 1% of the time. They are used
+word for word. Openers are templates with `{user}`, so the mention can sit
+mid-sentence (the burger line). `pickOpener` maps one random number:
+below 0.01 a rare line, evenly spread; above it a common line, evenly
+spread. A 100,000-step sweep in the test gives exactly 1,000 rare picks.
+The bold celebration lines underneath are unchanged.
+
+Follow-ups: 「dominare」 in corner brackets; three more rare openers
+(Mejiro, Wassho, Onii-sama); the rare share raised to 2%, then 4%, as the list grew to
+12 rare lines.
+
+---
+
+## 2026-11-04 — Timer ping in Yayoi's voice
+
+Asked: the timer's "has reached 0" ping should be livelier and more like
+Yayoi (brighter wording, not colored text). The ping opens with one of
+four cheerful lines, picked at random. Each thing worth celebrating gets
+its own bold-led line: **Debut!** (first run), **Milestone!** (run #25
+and so on), **Record!** (new longest streak), **Persistence!** (an ongoing
+streak), **Promotion!** (milestone role). Late delivery reads "while I was
+offline. It still counts!". Only the trainer is pinged, as before.
+`buildPingContent` is exported for tests.
+
+---
+
+## 2026-11-04 — Welcome: random greetings, "Say hi!", boost thank-yous
+
+Asked: replace Discord's system messages (random welcome, sticker reply
+prompt, boost message) with the bot, as Yayoi.
+
+- **Random welcome:** four built-in greetings in Yayoi's voice, one
+  picked per join. A custom text can hold its own variants, split by
+  lines of just `---`.
+- **"Say hi!":** bots cannot use Discord's sticker prompt, so a button
+  under the welcome posts a line from the presser to the newcomer
+  ("**Friendship!** @a waves hello to @b!"). It pings nobody. Each member
+  can wave once per welcome; this is remembered in memory for the last
+  500 welcomes, so a restart forgets. The newcomer cannot wave at
+  themselves.
+- **Boosts:** `GuildMemberUpdate` from no `premiumSince` to one means a
+  member started boosting, and gets a thank-you in the welcome channel
+  that pings them. Discord sends no event when a member already boosting
+  adds another boost, so those are not thanked. An uncached `before` is
+  skipped, since its missing boost state would make any update look like
+  a new boost.
+- `WelcomeSettings` gains `wave` and `boosts` (both default on), set with
+  `/welcome options`. `/welcome test` shows a random variant, the button,
+  and an example boost line.
+- Tests: variant splitting and picking, the button, waving once, boost
+  detection and the thank-you, with boosts on and off.
+
+---
+
+## 2026-11-04 — Welcome in Chairwoman Akikawa's voice
+
+Asked: the welcome should sound like Yayoi Akikawa. The default text is
+rewritten as the chairwoman: short, emphatic lines, each opened by a bold
+word ("**Welcome!**", "**Instruction!**", "**Expectation!**"), greeting
+the newcomer as a trainer. A text saved with `/welcome message` is not
+touched.
+
+---
+
+## 2026-11-04 — Board survives a move to a new bot account
+
+The user is moving to their own bot application (they hold Railway but not
+the old app's developer portal). A bot cannot edit another bot's messages.
+The club directory already reposts when an edit fails, but the recruitment
+board only reposted when the message could not be *fetched*. An unedited
+foreign board would have thrown on every refresh and never moved on. Now a
+failed edit also posts a fresh board. Test: an edit that throws
+"authored by another user" leads to one new board, stored.
+
+Also reverted the unused `idStatus` columns (1de37fc): the retry work they
+were for was dropped, and they had broken the test fixtures.
+
+---
+
+## 2026-11-04 — One ask per post; a clearer ID ask
+
+A new post got the "send your trainer ID" ping twice. `ensureApplication`
+checked for a row, then waited for the opening message (up to three tries
+1.5 s apart), then upserted. Two handlers for the same post (a repeated
+event, or the old and new process overlapping during a deploy) both saw
+no row and both reported `created`.
+
+- The row is now made with a plain `create`. A second caller hits the
+  unique key, reads the row, and gets `created: false`, so only one
+  posts. `openApplication` also drops a repeat for a post it is already
+  opening in this process.
+- The ask now says what to type ("reply here with … for example
+  `530 923 123 456`") and that a screenshot alone does not work. That post
+  had the ID only in its picture.
+- Tests: two concurrent opens of one post send one ask; two concurrent
+  creates make one row.
+
+---
+
+## 2026-11-04 — Welcome message for new members
+
+Asked: a message when someone joins the server.
+
+- `GuildMemberAdd` posts the welcome (`lib/welcome.ts`) in the channel
+  stored in the new `WelcomeSettings` table: a ping, then an embed with
+  the text and the member's avatar. Bots are skipped. Only the newcomer can
+  be pinged, whatever the text says. A missing channel logs a warning and
+  posts nothing.
+- `/welcome channel | message | test | off` (Club Managers). The text is
+  edited in a modal so it can span lines. Placeholders: {user}, {server},
+  {count}, {apply} (the application forum), {clubs} (the directory
+  channel). The default text points newcomers to the club list and the
+  application forum, with their trainer ID.
+- Needs the Server Members intent for join events.
+- Tests: `scripts/test-welcome.ts` (placeholders, only the newcomer
+  pinged, bots skipped, off until a channel is set, custom text, a missing
+  channel).
+
+---
+
+## 2026-11-04 — /applications tidy; Message Content check
+
+The board after the first backfill listed 35 under "Going to": imported
+accepted posts, mostly long archived. The user asked to close everything
+except the posts open in the forum now.
+
+- `tidyAction` applies these rules: a pinned post is removed; a `/resolve`
+  decision is kept; a post open in the forum (active, unlocked) is set to
+  Open, so it shows under Available; anything else still Open or without
+  `closedAt` is closed. Accepted rows keep their status, and closing them
+  is what takes them off the board. Open posts with an ID and no 30-day
+  pace are re-scouted, since the backfill reads no daily data.
+- Tyqical's open transfer post had been matched Joined (they are in Rose
+  now); tidy puts it back to Open, since the open post is the application.
+- Zix's open post begins with the ID, yet it read "no ID yet": the bot
+  gets no message text. Tidy and backfill now say whether the client
+  connected with the Message Content intent. Startup drops the intent
+  rather than fail when the portal has it off.
+
+---
+
+## 2026-11-04 — Backfill: rescan, pinned posts, unread opening messages
+
+The first real backfill (1,039 posts) found an ID in 270 of 1,037, and
+every one of those was in the title; no ID came from a post body. The
+pinned example post says "Trainer ID: 467492654277" in its body and was
+also reported as having no ID. So the bot read no opening message text at
+all. Either the Message Content intent was not in effect (Discord then
+returns empty text, also for fetched messages), or the opening messages
+could not be fetched. The old code swallowed both as "no trainer ID".
+
+- `problem` now says which: "no trainer ID in the title or the opening
+  message", "...; opening message could not be read (reason)", or
+  "...; opening message has no text the bot can read". The report counts
+  opening messages fetched with text, fetched empty, and failed. When none
+  had text, the summary warns and names the likely fix.
+- `rescan:true` re-reads imported posts that are done and have no ID, or
+  an ID uma.moe did not find (`needsRescan`). Open posts are left to the
+  live flow. Rows are upserted, keeping the post's date.
+- Pinned posts (the forum's guide and example) are skipped, and deleted
+  if an earlier run imported them. The example had been imported as
+  Accepted.
+- **Board:** "Going to" shows accepted applications only while the post
+  is open (`closedAt` null). The 35 backfilled Accepted posts were mostly
+  archived long ago and would have sat on it for good. The backfill now
+  sets `closedAt` for every archived post.
+- The no-ID posts are almost all from July 2025 to February 2026; from
+  March 2026 most titles carry the ID. After fixing the reading, a rescan
+  should recover the ones with the ID in the body. Posts whose ID is only
+  in a screenshot stay without one.
+
+---
+
+## 2026-11-04 — Accepting gives the club role
+
+Asked: on resolve, give the club role and remove every other club role;
+visas stay.
+
+- `clubMemberRole` (`applications/clubRole.ts`) picks the club's member
+  role. It must be one of `CLUB_ROLE_IDS`, its name must match the club by
+  `clubsForName` (the staff-role matching, so Primrose is not Rose), and it
+  must not be a Trainer, Assistant or Visa role. With none, or more than
+  one, it gives nothing rather than guess.
+- `giveClubRole` gives it through `assignRole`, the `/role` rule. Other
+  club roles and Tracen Applicant come off; everything else stays,
+  including visas, which are not club roles. It checks the bot's own role
+  is above the club role first.
+- `/resolve` does this on accept, before the decision is posted, so the
+  message can say "You now have the **Rose** role." On failure (no
+  matching role, role above the bot, applicant gone), staff get an
+  ephemeral note and nothing is changed.
+- Rejecting, or changing a decision afterwards, does not touch roles.
+- Tests: matching per club, Primrose vs Rose, decorated names, roles
+  outside `CLUB_ROLE_IDS` ignored, two matches giving none, visa names.
+
+---
+
+## 2026-11-04 — Recruitment board; exact pings; sharper card
+
+Asked: #recruitment should show only who is available and where they are
+going, as one live message. The staff notice should drop the quota line.
+An A+ post was pinging A. The card looked rough.
+
+- **Board** (`board.ts`, new `RecruitmentBoard` table): one message in
+  the recruitment channel, edited in place after every change. It has two
+  sections:
+  - **Available**: open applications, oldest first, one line each with
+    the applicant, 30-day pace, time open and the post.
+  - **Going to**: accepted applicants who have not closed their post,
+    grouped by club.
+
+  Refreshes are queued per guild. A deleted board, or a changed channel,
+  means a fresh post. On its first refresh it deletes the per-application
+  entries the previous version posted. The backfill's `post_open` option is
+  gone; it refreshes the board once at the end instead.
+- **Staff notice:** "Clears the quota of", "Highest tier cleared" and
+  "Judged on" are gone, and so is the same in `/scout` elsewhere. With them
+  went the dead code: `clubFits`, `fitsText`, `clubsWithQuota` and
+  `headlinePace`.
+- **Pings:** the A+ post pinged A because the old council roles were
+  grouped by tier (`SEMI_COMP_COUNCIL_ROLE_ID` stood for A+ and A). The
+  council pings and their `*_COUNCIL_ROLE_ID` variables are removed; the
+  notice now pings only the exact recruiting role of each tag.
+- **Badges:** the user supplied D, D+, C, C+, B and SS (310x360,
+  transparent, framed like the others), so every rank uma.moe reports now
+  has its picture. Their ribbon reads "CLUB RANK" where the older five read
+  "CIRCLE RANK"; at 30 px it does not show.
+- **Card:** drawn at 2x, with high-quality smoothing for the rank badge
+  (now 30 tall). The badge files (310x360) were never the problem; the 1x
+  canvas was.
+
+---
+
+## 2026-11-04 — Ask for the trainer ID; link Discord to trainer on close
+
+Asked:
+- With no ID in a post, ping the applicant for it, and decide only once it
+  is in.
+- Connect the applicant's Discord to the trainer, but for new applications
+  only once the post is closed.
+- Cover more ID formats.
+
+- **No ID:** `openApplication` pings the applicant (`askForIdMessage`) and
+  posts the recruitment entry as "Open, waiting for the trainer ID". The
+  staff notice waits for the ID. `takeIdFromMessage` (on `messageCreate`)
+  reads the applicant's own replies in their post while the application
+  has no ID. The first ID found is scouted, carded and announced
+  (`announceWithId`). `/scout id:` in the post does the same. Later numbers
+  do not replace it; `/scout id:` does. Reading replies needs the Message
+  Content intent; without it, `/scout id:` is the way.
+- **`/resolve`** refuses to accept until the application has an ID.
+  Rejected works without one (asked as a follow-up).
+- **Linking:** `linkApplicant` writes the `/uma-id` link (`TrainerLink`)
+  with `skipDuplicates`, so it never overwrites the member's link or takes
+  a trainer another member has. New applications link on close, and only
+  to a trainer uma.moe found (a name is known). The backfill links posts
+  that are not Open, counts the links in its summary and marks them in the
+  CSV.
+- **ID formats:** text is NFKC-normalised first, so full-width digits and
+  spaces read as ASCII. Four groups of three split by commas or dots now
+  count as an ID ("467,492,654,277"). Only that exact shape counts, since
+  commas and dots also group fan counts ("1,234,567,890 fans" is not an
+  ID). Tested: "[467 492 654 277]", mixed separators, and a fan count
+  before a real ID.
+
+---
+
+## 2026-11-04 — Month table: average per day in club, share of club
+
+Asked: share of club, and average per day if possible. Both come from the
+month's circle member list (`/api/v4/circles` for the circle named in that
+month's profile row). That is one request per shown month, cached with the
+daily view's requests: up to about 9 per applicant instead of 4.
+
+- `clubMonthStats` runs every member's row through `monthGains`, the fan
+  reports' rules: a member earns only on days they were in the circle.
+- **Avg/day in club** is the trainer's in-circle fans divided by their days
+  in the circle, with the days shown ("183,631 6d"). This fixes what the
+  old bars got wrong: the divisor is days actually there, not the month's
+  length.
+- **Share of club** is the trainer's fans divided by every member's fans on
+  the same days the trainer was in, with place among the members present
+  then ("0.6% #21/30"). The first version measured the whole month and read
+  Zix's 6-day October as 0.2% of TeamSirius; same-days gives 0.6%.
+- A month in which the trainer was in two circles is measured in the circle
+  the profile names. "Fans gained" still covers both circles.
+- Ties share the better place.
+- Follow-up: a raw 1.1% said little, so it was shown times 30. Then it was
+  changed to: only who is in the club at month end counts (as in the fan
+  reports, `isCurrentMember`). Leavers and kicked members are removed from
+  the fans and from the headcount, and the share is multiplied by that
+  month-end headcount ("vs avg member", 100% = an average member). A
+  trainer who themselves left before month end shows "left before month
+  end".
+
+---
+
+## 2026-11-04 — Backfill: match old application posts
+
+Asked: #apply-for-club has a lot of old applicant posts; match them against
+the data. `/applications backfill` (Club Managers) walks every post in the
+forum: active ones, then archived ones, 100 per page. Each post without a
+row gets one:
+
+- The ID comes from the title, then the opening message. Old opening
+  messages may be deleted; the title still counts.
+- One uma.moe profile request per trainer (cached; 300 ms apart), with no
+  daily data. Pace is the 3- and 6-month averages, and the 30-day pace is
+  left empty.
+- `matchApplication` sets the status in this order: in one of our clubs
+  now (Joined); accepted tag (Accepted, with the latest of our clubs since
+  the post's month); rejected tag (Rejected); archived or locked (the new
+  `CLOSED` status, outcome unknown); otherwise Open. A trainer who was in
+  one of our clubs after posting but is not now gets a note.
+- The row keeps the post's own creation date. Nothing is posted unless
+  `post_open:true`, and then only entries for open posts.
+- It replies with a summary (statuses, how many are now in each club) and a
+  CSV of every imported post. A run longer than the 15-minute interaction
+  window reports in the channel instead.
+
+Tests: the matching rules, CSV quoting, and a run over a fake forum
+(pagination, other forums skipped, a deleted opening message, a second run
+importing nothing).
+
+---
+
+## 2026-11-04 — Applicant card: month table instead of per-day bars
+
+Asked: no per-day average on the monthly view; flag each month's club rank
+instead, as a list of numbers. The per-day bars were misleading. A month's
+figure depended on how many of its days uma.moe tracked the trainer, which
+the profile does not say. Zix's October read 250K/day, but they were in a
+circle uma.moe tracks for only part of the month.
+
+- The bars are replaced by a table, newest first: month, club, the club's
+  rank tier that month (`club_rank_name`: D to SS) and fans gained. (A
+  fan-ranking column followed and was dropped the same day as noise.)
+- Rank flags use `src/assets/ranks/<stem>.png` (`B+` becomes `B_PLUS`).
+  D, D+, C, C+, B and SS have no picture yet; they are drawn as outlined
+  labels and will switch to pictures when their files are added.
+- The 3- and 6-month tiles are unchanged (still per calendar day).
+- Tests: the new fields, and the rank name to file name mapping.
+
+---
+
+## 2026-11-04 — Club applications: scouting, /resolve, /close; club poster
+
+Asked: show each applicant's last 30 days as a line and their last 3 to 6
+months, to sort them into club areas ahead of time; draw every club on one
+picture for #club-bio; add `/resolve` (a club, or Rejected) that locks the
+post, then `/close` once they join; put each applicant's status and average
+in #recruitment; and tell staff in #serious-discussion-only when someone
+applies.
+
+**Data (checked live against uma.moe on 2026-11-04).**
+
+- `/api/v4/user/profile/{id}` gives the name, current circle,
+  `circle_history` (one circle per month) and `fan_history.monthly`
+  (monthly gain across every circle). It has no daily series.
+- The daily series comes from each circle's `daily_fans` for that month.
+  The values are lifetime counts, so rows from different circles and months
+  merge into one timeline (`dailySeries`). `circle_history` names only one
+  circle per month, so a trainer who changed circle mid-month (Zix: Indomie
+  to TeamSirius in October) needs the previous month's circle as well.
+  `scoutTrainer` reads both.
+- `active_days` counts days with a gain, not days on record. In Zix's
+  September there were 30 days on record, 17 with a gain, and
+  `active_days` was 18. uma.moe's `avg_daily` is therefore per active day.
+  The bot divides by calendar days instead, to match how quotas are set.
+- A gap (no snapshot, often a circle uma.moe does not track): the rise
+  across the gap is exact, so it is spread evenly over the gap's days and
+  marked `estimated`. The card lists those days, and they do not count as
+  active days. Zix had 21 estimated days of 30.
+- Monthly averages leave out months uma.moe has no record of (not zero) and
+  the first month on record (it may be partial), unless that month is the
+  only one. The month in progress is shown but not averaged.
+- The headline pace for sorting is the last 30 days when at least 7 days
+  exist, else the last 3 months.
+
+**Flow** (`src/lib/applications/`).
+
+- `threadCreate` in `FORUM_CHANNEL_ID`: the bot finds the ID (title, then
+  body; bare, bracketed or grouped digits, 9 to 12), makes a
+  `ClubApplication` row, posts the card in the post, posts the
+  #recruitment entry and sends the staff notice. The staff notice carries
+  the card and the clubs whose per-day quota the pace clears.
+- This replaces the old in-post tier ping. The same `*_COUNCIL_ROLE_ID`
+  roles are now pinged in the staff channel, and Casual maps to the casual
+  council along with B+.
+- `/resolve`: a club's staff may accept into their own club only. Any
+  club's staff, or a Club Manager, or a member with Manage Threads may
+  reject. It tags the post (Club App Accepted or Rejected, the status tag
+  first, so the five-tag limit drops an applicant tag rather than the
+  decision), locks the post and replies with a Close post button. Running
+  it again changes the decision.
+- `/close` and the button: open by the applicant or club staff. An accepted
+  post becomes Joined, an open one becomes Withdrawn, and a rejected one
+  stays Rejected. For a tracked club, the bot checks whether uma.moe already
+  shows them in the circle and notes it on the entry. Then the post is
+  archived.
+- Posts from before this feature get their row the first time `/scout`,
+  `/resolve` or `/close` is used in them.
+- Recruitment and staff channels default to the IDs given and can be set,
+  or turned `off`, through `RECRUITMENT_CHANNEL_ID` and
+  `STAFF_DISCUSSION_CHANNEL_ID`.
+
+**Poster.** `/club poster [channel]`: a section per tier in directory
+order, then a card per club with its avatar, expected rank, quota, uma.moe
+rank and members with open spots. It is drawn at 2x scale. It is posted
+once, not kept up to date like the directory.
+
+**Not verified.** Clicking a button in a locked post was not tested against
+Discord itself. Applicants cannot type in a locked post, which is why the
+button exists. If the button is also refused, staff can still `/close`.
+
+**Tests.** `scripts/test-applications.ts` (59 assertions) covers ID
+parsing, the series (gaps, month boundaries, two circles), the averages,
+the fits, the tags, the entry text, both images, and resolve/close against
+Postgres with a fake post. `test-commands` now includes the new help page.
+
+---
 
 
 ## 2026-11-04 — Monthly quotas count finished days too

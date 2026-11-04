@@ -48,9 +48,15 @@ npm run dev                  # slash commands register themselves on start
 | **Stop** | Cancels your run; it does not count |
 | **My Stats** | Your statistics card |
 | **Leaderboard** | This week's standings, live |
+| **Specials** | The special lines you have found, only to you |
 
 Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
-(this week live, last week final, last 30 days, all time).
+(this week live, last week final, last 30 days, all time). The panel's
+**Specials** button shows, only to you, the special (rare) ping lines you
+have found, by name, with how many times each came up and when you first
+got it. `/timer specials` (Club Managers) shows the whole server's tally,
+only to them, with who found each first. Pings
+are deleted 2 minutes after they post.
 
 ### Rewards
 
@@ -71,9 +77,14 @@ Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
 - `/timer publish [channel] [ping]`: posts last week's final leaderboard
   once, now: in the given channel, else the rewards channel, else where it
   is used. It pings the top 3 unless `ping:false`. It does not change roles.
-- `/timer milestone add runs:<n> role:<role>`: a role kept for good at `n`
+- `/timer milestone add runs:<n> role:<role>`: a role earned at `n`
   completed runs, given the moment someone reaches it (and straight away to
   everyone already past it). `/timer milestone remove runs:<n>` stops it.
+  Milestones form a **ladder** by default: a trainer holds only the highest
+  milestone role they have reached, so reaching the next one (Veteran to
+  Ace) swaps the lower one off. `/timer milestone ladder on:false` makes
+  them stack instead, kept for good. Turning the ladder on or off re-sorts
+  everyone's roles straight away.
 
 The bot can only give roles below its own highest role.
 
@@ -120,6 +131,125 @@ Behind-quota alerts post in the club's report channel. A separate alert
 channel can still be set with `/fans circle config alert_channel:` or on the
 dashboard.
 `scripts/palettes.ts` renders a preview of every theme and checks contrast.
+
+## Club applications
+
+Posts in the application forum (`FORUM_CHANNEL_ID`, #apply-for-club) are
+handled by the bot. When a post opens, it finds the trainer ID (9 to 12
+digits) in the title or the body. The ID can be bare, in brackets, in
+groups split by spaces or dashes (`[467 492 654 277]`), in four groups of
+three split by commas or dots (`467,492,654,277`), or in full-width digits.
+With no ID, the bot pings the applicant to send it, and picks it up when
+they reply in the post. Once it has the ID, it scouts the trainer on
+uma.moe:
+
+- **In the post:** the trainer's card. It shows fans per day over the last
+  30 days as a line, the 3- and 6-month averages, and a table of the last
+  months. The table lists the club, that club's rank that month, fans
+  gained, average fans per day while in the club (with the days), and how
+  they compare with an average member (with place). 100% means an average
+  member's share. Only members still in the club at month end count: anyone
+  who left or was kicked is removed from both the fans and the headcount.
+  The comparison covers only the days the trainer was in the club, so a
+  mid-month joiner is compared fairly.
+- **In #recruitment** (`RECRUITMENT_CHANNEL_ID`): one live board, edited in
+  place on every change. **Available** lists open applications, oldest
+  first: the applicant, their 30-day pace, how long the post has been open,
+  and the post. **Going to** lists accepted applicants who have not closed
+  their post yet, grouped by club. Rejected, closed and joined applications
+  are not on it.
+- **In #serious-discussion-only** (`STAFF_DISCUSSION_CHANNEL_ID`): the card
+  and the pace, pinging the recruiting role of each tier tag the post has,
+  exactly. S+ and S ping "S recruiting", A+ pings "A+ recruiting", A pings
+  "A recruiting", and B+ and Casual ping "Casual recruiting". The roles are
+  found by name, and a role that does not exist is skipped.
+
+| Command | Who | Purpose |
+| --- | --- | --- |
+| `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
+| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Accepting needs the trainer ID; rejecting does not. Staff accept into their own club only. Accepting gives the applicant the club's role and takes off their other club roles and Tracen Applicant; visas and other roles stay. |
+| `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined, and the applicant's Discord is linked to their trainer, as `/uma-id` does. |
+| `/applications tidy` | Club Managers | Closes every application except the posts still open (active, unlocked) in the forum, which go back to Open. Leaves `/resolve` decisions alone, removes pinned posts, fills in missing 30-day paces and says whether Message Content is on. |
+| `/applications backfill [rescan]` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
+
+The backfill uses one uma.moe profile request per trainer, about 3 per
+second, so a few hundred posts take a few minutes. It decides each post's
+status in this order:
+
+1. **Joined:** the trainer is in one of our clubs now.
+2. **Accepted:** the post has an accepted tag. The club recorded is the
+   latest of ours they were in since posting.
+3. **Rejected:** the post has a rejected tag.
+4. **Closed:** the post is archived or locked with no decision tag, so the
+   outcome is unknown.
+5. **Open:** none of the above.
+
+It posts nothing per post. Old posts still open appear on the recruitment
+board, which it refreshes once at the end. A second run imports only posts
+with no row yet. `rescan:true` also re-reads imported posts that are done
+and have no trainer ID, or one uma.moe did not find. Pinned posts (the
+forum's guide and example) are skipped.
+
+The CSV's `problem` column says why a post has no ID: none in the title
+or the opening message, or the opening message could not be read. If no
+opening message can be read at all, the summary warns. Empty text means
+the Message Content intent is off; failed fetches mean Akikawa lacks Read
+Message History in the forum. Fix that, then run with `rescan:true`. For
+posts already done (any status except Open) whose trainer uma.moe knows, it
+links the applicant's Discord to the trainer.
+
+Links are made only when a post is closed, never while it is open, and an
+existing link is never overwritten: not the member's, and not one another
+member already has for that trainer.
+
+The club's role is the one in `CLUB_ROLE_IDS` whose name matches the
+club, by the same name matching as staff roles; Trainer, Assistant and
+Visa roles are never it. If no role matches, or two do, nothing is changed
+and the staff member who resolved is told why. The bot's own role must sit
+above the club roles.
+
+A locked post has no message box for the applicant, so the decision comes
+with a **Close post** button. Applicants use that button, not `/close`.
+
+Averages are per calendar day. uma.moe's own `avg_daily` divides by days
+with a gain, which flatters trainers who skip days. Daily figures come from
+the `daily_fans` of each circle the trainer was in. Where uma.moe has a gap
+(no snapshot, often a circle it does not track), the rise across the gap is
+spread evenly over its days, and the card says which days. The month table
+shows totals, not per-day figures. Club rank badges come from
+`src/assets/ranks/<RANK>.png` (`B_PLUS.png`, `D_PLUS.png`, `SS.png`); a rank
+without a picture (none since 2026-11-04; all of D to SS have one) is drawn
+as an outlined label. Months uma.moe
+has no record of are left out of the averages, not counted as zero. The
+first month on record is also left out, because it may be partial.
+
+`/club poster [channel]` draws every club with a tier on one picture, for
+#club-bio. The picture shows tiers, avatars, expected ranks, quotas and open
+spots. It does not update itself; run it again after clubs change.
+
+## Welcome message
+
+When someone joins the server, the bot posts a welcome in the channel set
+with `/welcome channel`: a ping, then the text with their avatar. The
+text is one of several greetings in Chairwoman Yayoi Akikawa's voice,
+picked at random. Under it, a **Say hi!** button lets members greet the
+newcomer, once each. When a member starts boosting, Yayoi thanks them in
+the same channel. Discord only tells bots about a member's first boost,
+not later ones, and bots cannot use Discord's own sticker prompt. Bots are
+not welcomed. Club Managers set it up:
+
+| Command | Purpose |
+| --- | --- |
+| `/welcome channel <channel>` | Turn welcomes on, posting there |
+| `/welcome message` | Edit the text in a form. A line of just `---` starts another variant; one is picked at random. Empty goes back to the built-in greetings. |
+| `/welcome options [wave] [boosts]` | Turn the "Say hi!" button and the boost thank-yous on or off (both on by default) |
+| `/welcome test` | See the welcome as a new member would, only to you |
+| `/welcome off` | Stop welcoming; the text is kept |
+
+The text takes these placeholders: `{user}` (the new member), `{server}`,
+`{count}` (member number), `{apply}` (the application forum, from
+`FORUM_CHANNEL_ID`) and `{clubs}` (the club directory's channel). Join
+events need the Server Members intent.
 
 ## Dashboard
 

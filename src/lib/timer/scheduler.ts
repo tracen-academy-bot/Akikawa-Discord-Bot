@@ -12,6 +12,8 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
+import { isRareOpener, recordRareOpener } from './rares';
+import { pickOpener } from './openers';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
 
 /**
@@ -39,34 +41,43 @@ const LATE_DELIVERY_THRESHOLD_S = 120;
 /** How often to check whether a week needs awarding. */
 const AWARD_CHECK_MS = 60_000;
 
+export { PING_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, pickOpener } from './openers';
+
 /**
- * Builds the message body for an expiry ping. `milestoneRoleId` is a role the
- * run just earned; it is mentioned but, with only the user allowed to be
- * pinged, does not notify the role.
+ * Builds the message body for an expiry ping: an opener (a rare one 4% of
+ * the time), then a bold-led line for each thing worth celebrating
+ * (the run's number, a streak, a new milestone role). `milestoneRoleId` is
+ * a role the run just earned; it is mentioned but, with only the user
+ * allowed to be pinged, does not notify the role. `random` is injectable
+ * for tests.
  */
-function buildPingContent(discordUserId: string, summary: CompletionSummary, lagSeconds: number, milestoneRoleId: string | null = null): string {
-    const lines = [`<@${discordUserId}> Your trainer timer has reached 0.`];
+export function buildPingContent(
+    discordUserId: string,
+    summary: CompletionSummary,
+    lagSeconds: number,
+    milestoneRoleId: string | null = null,
+    random: () => number = Math.random,
+): string {
+    const lines = [pickOpener(random()).replace('{user}', `<@${discordUserId}>`)];
 
     if (lagSeconds > LATE_DELIVERY_THRESHOLD_S) {
         const minutes = Math.round(lagSeconds / 60);
-        lines.push(`*This run ended about ${minutes} minute${minutes === 1 ? '' : 's'} ago while the bot was offline. It still counted.*`);
+        lines.push(`*Apologies! This run ended about ${minutes} minute${minutes === 1 ? '' : 's'} ago while I was offline. It still counts!*`);
     }
 
-    const rewards: string[] = [];
     if (summary.milestone !== null) {
-        rewards.push(
+        lines.push(
             summary.milestone === 1
-                ? 'First run recorded. Welcome.'
-                : `Run number **${summary.milestone}**.`,
+                ? '**Debut!** Your very first run is on the record! Welcome to the track!'
+                : `**Milestone!** That makes run #**${summary.milestone}**!`,
         );
     }
     if (summary.newLongestStreak) {
-        rewards.push(`New personal best: **${summary.currentStreakDays} day** streak.`);
+        lines.push(`**Record!** A new personal best: **${summary.currentStreakDays} days** in a row!`);
     } else if (summary.firstOfDay && summary.currentStreakDays > 1) {
-        rewards.push(`**${summary.currentStreakDays} day** streak.`);
+        lines.push(`**Persistence!** **${summary.currentStreakDays} days** straight! Keep it going!`);
     }
-    if (milestoneRoleId) rewards.push(`You reached **${summary.totalRuns} runs** and earned <@&${milestoneRoleId}>.`);
-    if (rewards.length > 0) lines.push(rewards.join(' '));
+    if (milestoneRoleId) lines.push(`**Promotion!** **${summary.totalRuns} runs** reached, and <@&${milestoneRoleId}> is yours!`);
 
     return lines.join('\n');
 }
@@ -126,11 +137,15 @@ async function processExpiredTimers(client: Client): Promise<void> {
 
             const channel = await client.channels.fetch(timer.channelId);
             if (channel?.isTextBased() && 'send' in channel) {
+                // One draw picks the opener, so the line posted is the one recorded.
+                const draw = Math.random();
                 const message = await channel.send({
-                    content: buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId),
+                    content: buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, () => draw),
                     allowedMentions: { users: [timer.discordUserId] },
                 });
                 await scheduleNotificationDeletion(timer.channelId, message.id);
+                const opener = pickOpener(draw);
+                if (isRareOpener(opener)) await recordRareOpener(timer.guildId, timer.discordUserId, opener);
             }
 
             // The channel's current panel, which may have been reposted since

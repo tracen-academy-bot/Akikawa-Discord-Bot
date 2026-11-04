@@ -161,6 +161,7 @@ async function rewardChecks() {
         await prisma.trainingRun.deleteMany({ where: { guildId: G2 } });
         await prisma.timerSettings.deleteMany({ where: { guildId: G2 } });
         await prisma.timerMilestoneRole.deleteMany({ where: { guildId: G2 } });
+        await prisma.timerMilestoneSettings.deleteMany({ where: { guildId: G2 } });
         await prisma.timerWeeklyAward.deleteMany({ where: { guildId: G2 } });
     };
     await clean();
@@ -191,12 +192,21 @@ async function rewardChecks() {
 
     // ── Weekly award ──────────────────────────────────────────────────────────
     const log: string[] = [];
+    const heldRoles = new Map<string, Set<string>>();
     const guild = {
         id: G2,
         members: {
             fetch: async (id: string) => {
                 if (id === 'gone') throw new Error('Unknown Member');
-                return { roles: { add: async (r: string) => void log.push(`+${id}:${r}`), remove: async (r: string) => void log.push(`-${id}:${r}`) } };
+                const held = heldRoles.get(id) ?? new Set<string>();
+                heldRoles.set(id, held);
+                return {
+                    roles: {
+                        cache: { has: (r: string) => held.has(r) },
+                        add: async (r: string) => void (log.push(`+${id}:${r}`), held.add(r)),
+                        remove: async (r: string) => void (log.push(`-${id}:${r}`), held.delete(r)),
+                    },
+                };
             },
             me: { roles: { highest: { position: 5 } } },
         },
@@ -285,13 +295,44 @@ async function rewardChecks() {
     await prisma.timerPanel.deleteMany({ where: { guildId: G2 } });
 
     // ── Milestones ────────────────────────────────────────────────────────────
+    const ms = [{ runs: 50, roleId: 'vet' }, { runs: 150, roleId: 'ace' }, { runs: 250, roleId: 'champ' }];
+    check('ladder: only the highest reached is kept', rewards.milestoneRolesFor(200, ms, true), { keep: ['ace'], drop: ['vet', 'champ'] });
+    check('ladder: below every milestone, none kept', rewards.milestoneRolesFor(10, ms, true), { keep: [], drop: ['vet', 'ace', 'champ'] });
+    check('stacked: every milestone reached is kept', rewards.milestoneRolesFor(200, ms, false), { keep: ['vet', 'ace'], drop: [] });
+    check('ladder is on by default', await rewards.milestoneLadder(G2), true);
+
+    // Totals here: alice 3, bob 3, carol 2, dave 2, erin 1.
     await prisma.timerMilestoneRole.create({ data: { guildId: G2, runs: 3, roleId: 'r-3' } });
     log.length = 0;
     check('a run landing on a milestone gives its role', await rewards.awardMilestone(guild, 'alice', 3), 'r-3');
     check('any other count gives nothing', await rewards.awardMilestone(guild, 'carol', 2), null);
     log.length = 0;
-    check('adding a milestone gives it to everyone already past it', await rewards.backfillMilestone(guild, 3, 'r-3'), 2);
-    check('which is alice and bob', log.sort(), ['+alice:r-3', '+bob:r-3']);
+    check('adding a milestone gives it to everyone already past it who lacks it', await rewards.syncMilestones(guild), { given: 1, removed: 0 });
+    check('which is bob (alice has it)', log.sort(), ['+bob:r-3']);
+
+    await prisma.timerMilestoneRole.create({ data: { guildId: G2, runs: 2, roleId: 'r-2' } });
+    log.length = 0;
+    check('a lower milestone added on a ladder goes only to those for whom it is the highest', await rewards.syncMilestones(guild), { given: 2, removed: 0 });
+    check('which is carol and dave, not alice and bob', log.sort(), ['+carol:r-2', '+dave:r-2']);
+    log.length = 0;
+    check('reaching the next milestone gives it', await rewards.awardMilestone(guild, 'carol', 3), 'r-3');
+    check('and takes the lower one off (Veteran to Ace)', log, ['+carol:r-3', '-carol:r-2']);
+
+    await prisma.timerMilestoneSettings.create({ data: { guildId: G2, ladder: false } });
+    log.length = 0;
+    const stacked = await rewards.syncMilestones(guild);
+    check('ladder off: everyone gets back the roles they passed', [stacked, log.sort()], [
+        { given: 3, removed: 0 },
+        ['+alice:r-2', '+bob:r-2', '+carol:r-2'],
+    ]);
+    await prisma.timerMilestoneSettings.update({ where: { guildId: G2 }, data: { ladder: true } });
+    log.length = 0;
+    const laddered = await rewards.syncMilestones(guild);
+    check('ladder on again: everything but the highest comes off', [laddered, log.sort()], [
+        { given: 0, removed: 3 },
+        ['-alice:r-2', '-bob:r-2', '-carol:r-3'],
+    ]);
+    check('a run landing on a milestone already held changes nothing', await rewards.awardMilestone(guild, 'alice', 3), null);
 
     // ── Which roles the bot can give ──────────────────────────────────────────
     check('a role below the bot is fine', await rewards.roleProblem(guild, 'r-low'), null);

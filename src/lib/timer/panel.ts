@@ -24,6 +24,7 @@ export const BUTTON_START = 'timer:start';
 export const BUTTON_STOP = 'timer:stop';
 export const BUTTON_STATS = 'timer:stats';
 export const BUTTON_LEADERBOARD = 'timer:leaderboard';
+export const BUTTON_SPECIALS = 'timer:specials';
 
 /** Roster entries shown before the list is truncated. */
 const MAX_ROSTER_ROWS = 20;
@@ -78,6 +79,7 @@ export function buildPanel(timers: TrainingTimer[], context: PanelContext) {
         new ButtonBuilder().setCustomId(BUTTON_STOP).setLabel('Stop').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId(BUTTON_STATS).setLabel('My Stats').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId(BUTTON_LEADERBOARD).setLabel('Leaderboard').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId(BUTTON_SPECIALS).setLabel('Specials').setStyle(ButtonStyle.Secondary),
     );
 
     return { embeds: [embed], components: [buttons] };

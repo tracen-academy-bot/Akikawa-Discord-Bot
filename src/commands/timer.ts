@@ -1,3 +1,4 @@
+import { rareTally, raresEmbed } from '../lib/timer/rares';
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
@@ -11,6 +12,7 @@ import { isOfficer } from '../lib/permissions';
 import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
 import {
     BUTTON_LEADERBOARD,
+    BUTTON_SPECIALS,
     BUTTON_START,
     BUTTON_STATS,
     BUTTON_STOP,
@@ -29,7 +31,8 @@ import {
 } from '../lib/timer/service';
 import {
     TOP_PLACES,
-    backfillMilestone,
+    milestoneLadder,
+    syncMilestones,
     getBoard,
     getMilestoneRoles,
     getTimerSettings,
@@ -86,6 +89,9 @@ export const data = new SlashCommandBuilder()
             ),
     )
     .addSubcommand((sub) =>
+        sub.setName('specials').setDescription("The whole server's special timer lines: how often, and who found each first. Club Managers only."),
+    )
+    .addSubcommand((sub) =>
         sub
             .setName('leaderboard')
             .setDescription('Show the training leaderboard.')
@@ -129,7 +135,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommandGroup((group) =>
         group
             .setName('milestone')
-            .setDescription('Roles kept for good once a trainer reaches a number of runs. Club Managers only.')
+            .setDescription('Roles earned at a number of runs; on a ladder, only the highest is kept. Club Managers only.')
             .addSubcommand((sub) =>
                 sub
                     .setName('add')
@@ -142,6 +148,12 @@ export const data = new SlashCommandBuilder()
                     .setName('remove')
                     .setDescription('Stop giving a milestone role. Trainers who have it keep it.')
                     .addIntegerOption((opt) => opt.setName('runs').setDescription('The milestone, e.g. 100').setRequired(true).setMinValue(1)),
+            )
+            .addSubcommand((sub) =>
+                sub
+                    .setName('ladder')
+                    .setDescription('On: trainers keep only their highest milestone role. Off: the roles stack.')
+                    .addBooleanOption((opt) => opt.setName('on').setDescription('Ladder on (the default) or off').setRequired(true)),
             ),
     );
 
@@ -168,7 +180,27 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         case 'leaderboard':
             await handleLeaderboard(interaction);
             break;
+        case 'specials':
+            await handleSpecials(interaction);
+            break;
     }
+}
+
+/**
+ * `/timer specials`: the whole server's tally of special lines, only to the
+ * Club Manager who asks. Trainers see their own with the panel's Specials
+ * button.
+ */
+async function handleSpecials(interaction: ChatInputCommandInteraction) {
+    if (!isOfficer(interaction.member as GuildMember)) {
+        await interaction.reply({
+            embeds: [errorEmbed('Only Club Managers can see the whole server\'s specials. Press **Specials** on the Trainer Timer panel to see yours.')],
+            flags: MessageFlags.Ephemeral,
+        });
+        return;
+    }
+    const tally = await rareTally(interaction.guildId!);
+    await interaction.reply({ embeds: [raresEmbed(tally, false)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 /** Posts a fresh control panel. */
@@ -323,18 +355,50 @@ async function handlePublish(interaction: ChatInputCommandInteraction) {
     await interaction.editReply({ embeds: [successEmbed('Published', `Posted the final board for ${weekLabel(week)} in <#${channelId}>${ping ? ', pinging the top 3' : ''}.`)] });
 }
 
-/** `/timer milestone add|remove`. */
+/** The guild's milestones as one line: "50 → @Veteran · 150 → @Ace". */
+async function ladderLine(guildId: string): Promise<string> {
+    const milestones = await getMilestoneRoles(guildId);
+    return milestones.length > 0 ? milestones.map((m) => `**${m.runs}** → <@&${m.roleId}>`).join(' · ') : 'none';
+}
+
+/** What the ladder setting means, for the replies. */
+function ladderNote(ladder: boolean): string {
+    return ladder
+        ? '-# Ladder on: trainers keep only their highest milestone role; reaching the next one swaps it.'
+        : '-# Ladder off: milestone roles stack, and trainers keep every one they reach.';
+}
+
+/** `/timer milestone add|remove|ladder`. */
 async function handleMilestone(interaction: ChatInputCommandInteraction) {
     if (!(await requireManager(interaction))) return;
     const guild = interaction.guild!;
-    const runs = interaction.options.getInteger('runs', true);
+    const sub = interaction.options.getSubcommand();
 
-    if (interaction.options.getSubcommand() === 'remove') {
+    if (sub === 'ladder') {
+        const on = interaction.options.getBoolean('on', true);
+        // Re-sorting everyone's roles can take a moment.
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        await prisma.timerMilestoneSettings.upsert({ where: { guildId: guild.id }, create: { guildId: guild.id, ladder: on }, update: { ladder: on } });
+        const sync = await syncMilestones(guild);
+        const changed = on
+            ? `${sync.removed} lower milestone role${sync.removed === 1 ? '' : 's'} taken off, so everyone holds only their highest.`
+            : `${sync.given} trainer${sync.given === 1 ? '' : 's'} got back the milestone roles they had passed.`;
+        await interaction.editReply({
+            embeds: [successEmbed(on ? 'Ladder on' : 'Ladder off', [changed, '', `**Milestones:** ${await ladderLine(guild.id)}`, ladderNote(on)].join('\n'))],
+        });
+        return;
+    }
+
+    const runs = interaction.options.getInteger('runs', true);
+    if (sub === 'remove') {
         const removed = await prisma.timerMilestoneRole.deleteMany({ where: { guildId: guild.id, runs } });
         await interaction.reply({
             embeds: [
                 removed.count > 0
-                    ? successEmbed('Milestone removed', `No role is given at ${runs} runs any more. Trainers who have it keep it.`)
+                    ? successEmbed(
+                          'Milestone removed',
+                          [`Nothing is given at **${runs}** runs any more. Trainers who hold that role keep it.`, '', `**Milestones:** ${await ladderLine(guild.id)}`].join('\n'),
+                      )
                     : errorEmbed(`There is no milestone at ${runs} runs.`),
             ],
             flags: MessageFlags.Ephemeral,
@@ -355,12 +419,18 @@ async function handleMilestone(interaction: ChatInputCommandInteraction) {
         create: { guildId: guild.id, runs, roleId: role.id },
         update: { roleId: role.id },
     });
-    const given = await backfillMilestone(guild, runs, role.id);
+    const ladder = await milestoneLadder(guild.id);
+    const sync = await syncMilestones(guild);
+    const now =
+        sync.given === 0
+            ? `Nobody has reached ${runs} runs yet. The first to get there earns it on the spot.`
+            : `${sync.given} trainer${sync.given === 1 ? ' has' : 's have'} already passed ${runs} runs and got it now. Everyone else earns it the moment they reach it.`;
+    const swapped = ladder && sync.removed > 0 ? ` ${sync.removed} lower role${sync.removed === 1 ? ' was' : 's were'} taken off on the way up.` : '';
     await interaction.editReply({
         embeds: [
             successEmbed(
-                'Milestone added',
-                `<@&${role.id}> at **${runs}** runs. Given to ${given} trainer${given === 1 ? '' : 's'} already there; others get it the moment they reach it.`,
+                'Milestone set',
+                [`<@&${role.id}> is earned at **${runs}** runs.`, now + swapped, '', `**Milestones:** ${await ladderLine(guild.id)}`, ladderNote(ladder)].join('\n'),
             ),
         ],
     });
@@ -386,6 +456,13 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
     const guildId = interaction.guildId!;
 
     switch (interaction.customId) {
+        case BUTTON_SPECIALS: {
+            // The same hidden list as /timer specials: your own finds only.
+            const tally = await rareTally(guildId, interaction.user.id);
+            await interaction.reply({ embeds: [raresEmbed(tally, true)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+            break;
+        }
+
         case BUTTON_START: {
             const { timer, wasReset } = await startTimer(
                 guildId,

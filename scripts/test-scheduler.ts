@@ -8,7 +8,7 @@
  *   DATABASE_URL=postgresql://... npm run test:scheduler
  */
 import { prisma } from '../src/db/prisma';
-import { startScheduler } from '../src/lib/timer/scheduler';
+import { PING_OPENERS, RARE_PING_OPENERS, buildPingContent, pickOpener, startScheduler } from '../src/lib/timer/scheduler';
 
 const G = 'test-guild-sched';
 const CHANNEL = 'chan-1';
@@ -80,9 +80,60 @@ async function main() {
     check('offline expiry delivered one ping', sent.length, 1);
     check('ping mentions the right trainer', sent[0]?.mentions, ['trainer-a']);
     check('ping pings the trainer', sent[0]?.content.includes('<@trainer-a>'), true);
-    check('ping explains the delay', sent[0]?.content.includes('while the bot was offline'), true);
-    check('ping confirms it still counted', sent[0]?.content.includes('It still counted'), true);
-    check('first run is celebrated', sent[0]?.content.includes('First run recorded'), true);
+    check('ping explains the delay', sent[0]?.content.includes('while I was offline'), true);
+    check('ping confirms it still counted', sent[0]?.content.includes('It still counts!'), true);
+    check('first run is celebrated', sent[0]?.content.includes('**Debut!** Your very first run is on the record!'), true);
+    const allOpeners = [...PING_OPENERS, ...RARE_PING_OPENERS];
+    check('ping opens with one of the openers', allOpeners.some((o) => sent[0]?.content.includes(o.replace('{user}', '').trim().slice(0, 30))), true);
+    check('openers: every one names the trainer once', allOpeners.every((o) => o.split('{user}').length === 2), true);
+    check('openers: below 4% a rare one, spread evenly', [pickOpener(0), pickOpener(0.0399999), pickOpener(0.02)], [RARE_PING_OPENERS[0], RARE_PING_OPENERS[RARE_PING_OPENERS.length - 1], RARE_PING_OPENERS[Math.floor(RARE_PING_OPENERS.length / 2)]]);
+    check('openers: from 4% up a common one, spread evenly', [pickOpener(0.04), pickOpener(0.52), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[3], PING_OPENERS[6]]);
+    let rare = 0;
+    for (let i = 0; i < 100000; i += 1) if (RARE_PING_OPENERS.includes(pickOpener(i / 100000))) rare += 1;
+    check('openers: rare ones are 4% of the range', rare, 4000);
+    check('openers: the mention can sit mid-sentence', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => (RARE_PING_OPENERS.findIndex((o) => o.startsWith('Torena')) + 0.5) / RARE_PING_OPENERS.length * 0.04), "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay <@u1>? We can host a party afterwards too! I can't wait...");
+
+    // Rare lines are recorded and tallied.
+    const rares = await import('../src/lib/timer/rares');
+    const { RARE_OPENERS } = await import('../src/lib/timer/openers');
+    check('specials: Matikanetannhauser is No. 1', RARE_OPENERS[0]?.name, 'Matikanetannhauser');
+    const RG = `test-rares-${Date.now()}`;
+    check('rares: a rare line is rare, a common one is not', [rares.isRareOpener(RARE_PING_OPENERS[2]!), rares.isRareOpener(PING_OPENERS[0]!)], [true, false]);
+    await rares.recordRareOpener(RG, 'u1', RARE_PING_OPENERS[1]!);
+    await rares.recordRareOpener(RG, 'u2', RARE_PING_OPENERS[1]!);
+    await rares.recordRareOpener(RG, 'u3', RARE_PING_OPENERS[4]!);
+    const tally = await rares.rareTally(RG);
+    check('rares: tally per line, first finder kept', [tally.length, tally[1]?.count, tally[1]?.firstUserId, tally[4]?.count, tally[0]?.count], [RARE_PING_OPENERS.length, 2, 'u1', 1, 0]);
+    const embed = rares.raresEmbed(tally).toJSON();
+    const col = (n: number) => embed.fields?.[n]?.value.split('\n') ?? [];
+    check('specials: three columns, one row per special', [embed.title, embed.fields?.map((f) => f.name), col(0).length, col(1).length, col(2).length], [
+        `Specials found: 2 of ${RARE_PING_OPENERS.length}`,
+        ['Special', 'Times', 'First found by'],
+        RARE_PING_OPENERS.length,
+        RARE_PING_OPENERS.length,
+        RARE_PING_OPENERS.length,
+    ]);
+    check('specials: unfound rows hide the name', [col(0)[0], col(1)[0], col(2)[0]], ['**1.** ???', '—', '—']);
+    check('specials: a found row shows name, count and finder', [col(0)[1], col(1)[1], col(2)[1]?.startsWith('<@u1> <t:')], [`**2.** ${RARE_OPENERS[1]!.name}`, '**×2**', true]);
+    check('specials: no line text is ever shown', RARE_PING_OPENERS.some((t) => JSON.stringify(embed).includes(t.replace('{user}', '').trim().slice(0, 20))), false);
+    const { buildPanel, BUTTON_SPECIALS } = await import('../src/lib/timer/panel');
+    const panelJson = JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never));
+    check('panel: has the Specials button', [panelJson.includes(BUTTON_SPECIALS), panelJson.includes('"label":"Specials"')], [true, true]);
+    const mine = rares.raresEmbed(await rares.rareTally(RG, 'u2'), true).toJSON();
+    const mcol = (n: number) => mine.fields?.[n]?.value.split('\n') ?? [];
+    check('specials: your own list counts only your finds', [mine.title, mcol(0)[1], mcol(1)[1], mcol(0)[4]], [`Your specials: 1 of ${RARE_PING_OPENERS.length}`, `**2.** ${RARE_OPENERS[1]!.name}`, '**×1**', '**5.** ???']);
+    check('specials: your own list shows when, not who', [mine.fields?.[2]?.name, mcol(2)[1]?.startsWith('<t:'), mine.footer?.text.startsWith('1 special ping for you')], ['First got', true, true]);
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
+    const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
+    check('ping: every celebration on its own bold-led line', full.split('\n'), [
+        '<@u1> Time! Your Independent Training is complete!',
+        '*Apologies! This run ended about 10 minutes ago while I was offline. It still counts!*',
+        '**Milestone!** That makes run #**25**!',
+        '**Record!** A new personal best: **7 days** in a row!',
+        '**Promotion!** **25 runs** reached, and <@&role-25> is yours!',
+    ]);
+    check('ping: a plain run is just the opener', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => 0.5), '<@u1> Excellent! Your run is done! Rest a moment, then go again!');
+    check('ping: an ongoing streak, first run of the day', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 4, firstOfDay: true, totalRuns: 9 } as never, 0, null, () => 0.5).split('\n')[1], '**Persistence!** **4 days** straight! Keep it going!');
 
     check('expired timer removed', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-a' } }), 0);
     check('in-progress timer untouched', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-b' } }), 1);

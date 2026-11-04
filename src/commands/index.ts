@@ -7,6 +7,11 @@ import * as fans from './fans';
 import * as umaId from './umaId';
 import * as post from './post';
 import * as help from './help';
+import * as resolve from './resolve';
+import * as close from './close';
+import * as scout from './scout';
+import * as applications from './applications';
+import * as welcome from './welcome';
 
 export interface Command {
     data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
@@ -24,6 +29,11 @@ commands.set(fans.data.name, fans as Command);
 commands.set(umaId.data.name, umaId as Command);
 commands.set(post.data.name, post as Command);
 commands.set(help.data.name, help as Command);
+commands.set(resolve.data.name, resolve as Command);
+commands.set(close.data.name, close as Command);
+commands.set(scout.data.name, scout as Command);
+commands.set(applications.data.name, applications as Command);
+commands.set(welcome.data.name, welcome as Command);
 
 // /help lists whatever is registered above.
 help.setHelpSource(() => [...commands.values()].map((c) => c.data.toJSON() as unknown as help.CommandJson));
