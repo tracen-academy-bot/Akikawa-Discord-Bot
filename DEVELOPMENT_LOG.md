@@ -5,6 +5,29 @@ Newest first. Each entry records what changed and, more importantly, why.
 ---
 
 
+
+## 2026-11-04 — "Days in" and Avg/day count finished days (non-MONTH)
+
+Fwoxie: Cosmos's day-2 report (Nov 3) showed "Days in 3". A report at the
+reset already has a snapshot for the new day (taken just after the reset,
+almost no fans), and `dataDays` counted through the latest snapshot, so
+Days in was 3 and Avg/day was divided by 3: Tylina's 38.32M showed
+12.77M/day instead of 19.16M.
+
+- Outside MONTH, `dataDays` and `avgPerDay` now count through the last
+  finished day, as the quota there already does. Before any day has
+  finished, today counts.
+- MONTH is unchanged: its quota and average count through the latest day,
+  as the reference report does (pinned by the reference replay).
+- Tests: day 2's report gives 2 days and the two-day average; day 1 in
+  progress still counts as 1.
+
+Also seen on that report: "To #100 (S): reached" at #199. Not this bug.
+uma.moe updates circles over several minutes after the reset (Cosmos at
+15:00:14 UTC, the #100 circle at 15:01:40), and the reset report compared
+Cosmos's new total with #100's old one. Fix pending Fwoxie's choice.
+
+---
 ## 2026-10-31 — Merge Mambo and /help; Nice Nature and Dream Journey held back
 
 Fwoxie: merge Mambo (with `/help`), not the two themes still waiting on
