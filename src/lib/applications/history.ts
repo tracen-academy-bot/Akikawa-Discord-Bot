@@ -18,7 +18,7 @@
  * `avg_daily` divides by days with a gain, which rewards skipping days.
  */
 
-import { circleSnapshots, monthGains } from '../fans/metrics';
+import { circleSnapshots, isCurrentMember, monthGains } from '../fans/metrics';
 
 /** Milliseconds in a day. */
 const DAY_MS = 86_400_000;
@@ -296,16 +296,22 @@ export interface ClubMonth {
     /** `gain / daysInClub`; null with no full day in the circle. */
     perDay: number | null;
     /**
-     * The trainer's share of the fans the circle's members earned on the days
-     * the trainer was in it; null when they earned none. Counting only those
-     * days keeps a mid-month joiner from reading as a tiny share of a month
-     * they were mostly not there for.
+     * The trainer's share of the fans earned, on the days the trainer was in
+     * the circle, by the members still in it at month end. Null when the
+     * trainer left before the end, or nobody earned anything.
      */
     share: number | null;
-    /** Place by fans earned on those days among the members in the circle then, 1 = most. */
+    /**
+     * `share` times the month-end headcount: 1 is an average member's
+     * weight, 2 is double. Null with `share`.
+     */
+    vsAverage: number | null;
+    /** Place by fans earned on those days among month-end members, 1 = most; 0 when the trainer left. */
     place: number;
-    /** Members in the circle on at least one of those days. */
+    /** Members in the circle at month end (its latest snapshot). */
     members: number;
+    /** The trainer was not in the circle at month end. */
+    leftBeforeEnd: boolean;
 }
 
 /** Fans earned on each game day (index d-1 is day d), from `monthGains`' running totals. */
@@ -316,30 +322,43 @@ function perDayGains(running: number[]): number[] {
 /**
  * The trainer's month in a circle, from the circle's `daily_fans` rows for
  * that month. Gains follow the fan reports' rules (`monthGains`): a member
- * earns only on days they were in the circle. Share and place compare the
- * trainer with the other members on the days the trainer was in the circle.
- * Null when the trainer is not in the rows.
+ * earns only on days they were in the circle.
+ *
+ * Only who is in the circle at month end counts, as in the fan reports
+ * (`isCurrentMember`): a member who left or was kicked is removed both from
+ * the total and from the headcount. Share and place compare the trainer with
+ * those members on the days the trainer was in the circle, so a mid-month
+ * joiner is measured over their own days. Null when the trainer is not in
+ * the rows.
  */
 export function clubMonthStats(rows: { viewerId: string; daily: number[] }[], viewerId: string): ClubMonth | null {
     const scraped = circleSnapshots(rows.map((r) => r.daily));
     const all = rows.map((r) => {
         const g = monthGains(r.daily, scraped);
-        return { viewerId: r.viewerId, present: g.firstDay > 0, days: perDayGains(g.gains), inCircle: g.inCircle };
+        return {
+            viewerId: r.viewerId,
+            present: g.firstDay > 0,
+            atEnd: g.firstDay > 0 && isCurrentMember(r.daily, scraped),
+            days: perDayGains(g.gains),
+            inCircle: g.inCircle,
+        };
     });
     const mine = all.find((r) => r.viewerId === viewerId && r.present);
     if (!mine) return null;
     const mineDays = mine.inCircle.map((inside, i) => (inside ? i : -1)).filter((i) => i >= 0);
     const over = (r: (typeof all)[number]) => mineDays.reduce((sum, i) => sum + (r.inCircle[i] ? (r.days[i] ?? 0) : 0), 0);
-    const peers = all.filter((r) => r.present && mineDays.some((i) => r.inCircle[i]));
-    const gains = peers.map((r) => ({ viewerId: r.viewerId, gain: over(r) }));
     const myGain = over(mine);
-    const total = gains.reduce((sum, r) => sum + r.gain, 0);
+    const members = all.filter((r) => r.atEnd);
+    const base = { gain: myGain, daysInClub: mineDays.length, perDay: mineDays.length > 0 ? myGain / mineDays.length : null, members: members.length };
+    if (!mine.atEnd) return { ...base, share: null, vsAverage: null, place: 0, leftBeforeEnd: true };
+    const gains = members.map((r) => over(r));
+    const total = gains.reduce((sum, g) => sum + g, 0);
+    const share = total > 0 ? myGain / total : null;
     return {
-        gain: myGain,
-        daysInClub: mineDays.length,
-        perDay: mineDays.length > 0 ? myGain / mineDays.length : null,
-        share: total > 0 ? myGain / total : null,
-        place: 1 + gains.filter((r) => r.gain > myGain).length,
-        members: Math.max(1, peers.length),
+        ...base,
+        share,
+        vsAverage: share === null ? null : share * members.length,
+        place: 1 + gains.filter((g) => g > myGain).length,
+        leftBeforeEnd: false,
     };
 }

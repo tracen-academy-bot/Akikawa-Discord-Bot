@@ -155,9 +155,14 @@ async function main() {
         { viewerId: 'B', daily: [0, 0, 200, 230] },
         { viewerId: 'C', daily: [50, 60, 0, 0] },
     ];
-    check('club month: joiner measured on their own days', h.clubMonthStats(circleRows, 'B'), { gain: 30, daysInClub: 1, perDay: 30, share: 0.75, place: 1, members: 2 });
+    check('club month: joiner on their own days; the leaver is out of total and headcount', h.clubMonthStats(circleRows, 'B'), {
+        gain: 30, daysInClub: 1, perDay: 30, members: 2, share: 0.75, vsAverage: 1.5, place: 1, leftBeforeEnd: false,
+    });
     const fullMonth = h.clubMonthStats(circleRows, 'A')!;
-    check('club month: full member against everyone, leaver included; a tie shares the better place', [fullMonth.gain, fullMonth.daysInClub, fullMonth.members, fullMonth.place, near(fullMonth.share, 30 / 70)], [30, 3, 3, 1, true]);
+    check('club month: full member is exactly average; a tie shares the better place', [fullMonth.gain, fullMonth.daysInClub, fullMonth.members, fullMonth.place, fullMonth.share, fullMonth.vsAverage], [30, 3, 2, 1, 0.5, 1]);
+    check('club month: trainer who left has no share', h.clubMonthStats(circleRows, 'C'), {
+        gain: 10, daysInClub: 1, perDay: 10, members: 2, share: null, vsAverage: null, place: 0, leftBeforeEnd: true,
+    });
     check('club month: not in the circle', h.clubMonthStats(circleRows, 'Z'), null);
     check('club month: carried into the summary', h.monthSummaries([{ year: 2026, month: 10, gain: 30, activeDays: 1, club: h.clubMonthStats(circleRows, 'B') }], now, 2)[1]!.club?.share, 0.75);
 

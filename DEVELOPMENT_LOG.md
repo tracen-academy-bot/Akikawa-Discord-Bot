@@ -24,8 +24,13 @@ daily view's requests: up to about 9 per applicant instead of 4.
 - A month in which the trainer was in two circles is measured in the circle
   the profile names. "Fans gained" still covers both circles.
 - Ties share the better place.
-- Follow-up: share is shown times 30 (100% is an even 1/30 share of a full
-  club, an average member's weight), since a raw 1.1% said little.
+- Follow-up: a raw 1.1% said little, so it was shown times 30. Then it was
+  changed to: only who is in the club at month end counts (as in the fan
+  reports, `isCurrentMember`). Leavers and kicked members are removed from
+  the fans and from the headcount, and the share is multiplied by that
+  month-end headcount ("vs avg member", 100% = an average member). A
+  trainer who themselves left before month end shows "left before month
+  end".
 
 ---
 
