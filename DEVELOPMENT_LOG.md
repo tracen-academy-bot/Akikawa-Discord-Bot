@@ -42,8 +42,8 @@ the profile does not say. Zix's October read 250K/day, but they were in a
 circle uma.moe tracks for only part of the month.
 
 - The bars are replaced by a table, newest first: month, club, the club's
-  rank tier that month (`club_rank_name`: D to SS), fans gained, and the
-  trainer's monthly fan ranking (`rank`).
+  rank tier that month (`club_rank_name`: D to SS) and fans gained. (A
+  fan-ranking column followed and was dropped the same day as noise.)
 - Rank flags use `src/assets/ranks/<stem>.png` (`B+` becomes `B_PLUS`).
   D, D+, C, C+, B and SS have no picture yet; they are drawn as outlined
   labels and will switch to pictures when their files are added.

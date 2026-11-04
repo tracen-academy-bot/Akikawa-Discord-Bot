@@ -144,8 +144,6 @@ export interface ProfileMonth {
     clubName?: string | null;
     /** That circle's rank tier that month: D, D+, C, C+, B, B+, A, A+, S, S+ or SS. */
     clubRank?: string | null;
-    /** The trainer's place in uma.moe's monthly fan ranking. */
-    fanRank?: number | null;
 }
 
 /** One month of the monthly view. */
@@ -161,7 +159,6 @@ export interface MonthSummary {
     activeDays: number | null;
     clubName: string | null;
     clubRank: string | null;
-    fanRank: number | null;
     /** The current game month, not finished yet. */
     inProgress: boolean;
     /**
@@ -204,7 +201,6 @@ export function monthSummaries(months: ProfileMonth[], now: { year: number; mont
             activeDays: record?.activeDays ?? null,
             clubName: record?.clubName ?? null,
             clubRank: record?.clubRank ?? null,
-            fanRank: record?.fanRank ?? null,
             inProgress,
             firstOnRecord: earliest !== null && key(year, month) === earliest,
         });

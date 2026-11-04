@@ -99,7 +99,6 @@ export async function scoutTrainer(viewerId: string, now = currentGameMonth()): 
                 activeDays: m.active_days ?? null,
                 clubName: m.circle_name ?? null,
                 clubRank: m.club_rank_name ?? null,
-                fanRank: m.rank ?? null,
             })),
         now,
         MONTHS_SHOWN,

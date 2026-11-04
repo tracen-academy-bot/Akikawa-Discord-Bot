@@ -142,18 +142,16 @@ function monthTableHeight(rows: number): number {
 
 /**
  * A row per month, newest first: the club the trainer was in, that club's
- * rank tier that month, fans gained, and the trainer's place in the month's
- * fan ranking. Plain totals, no per-day average: a month's per-day figure
+ * rank tier that month, and fans gained. Plain totals, no per-day average: a month's per-day figure
  * depends on how many of its days the trainer was tracked, which uma.moe
  * does not give.
  */
 async function drawMonthTable(ctx: SKRSContext2D, months: MonthSummary[], x: number, y: number, w: number) {
-    const cols = { month: x + 14, club: x + 190, rank: x + 480, gained: x + w - 260, fanRank: x + w - 14 };
+    const cols = { month: x + 14, club: x + 220, rank: x + 600, gained: x + w - 14 };
     drawLabel(ctx, 'Month', cols.month, y + 14, THEME.faint, 11);
     drawLabel(ctx, 'Club', cols.club, y + 14, THEME.faint, 11);
     drawLabel(ctx, 'Club rank', cols.rank, y + 14, THEME.faint, 11);
     drawLabel(ctx, 'Fans gained', cols.gained, y + 14, THEME.faint, 11, 'right');
-    drawLabel(ctx, 'Fan ranking', cols.fanRank, y + 14, THEME.faint, 11, 'right');
     drawRule(ctx, x, y + 24, w, THEME.line, 1);
 
     for (const [i, m] of months.entries()) {
@@ -174,11 +172,6 @@ async function drawMonthTable(ctx: SKRSContext2D, months: MonthSummary[], x: num
         if (m.clubRank) await drawRankFlag(ctx, m.clubRank, cols.rank, cy);
         else drawText(ctx, '—', cols.rank, cy + 5, { spec: '400 15px', color: THEME.faint });
         drawText(ctx, formatFans(m.gain), cols.gained, cy + 5, { spec: '600 15px', color: THEME.text, align: 'right' });
-        drawText(ctx, m.fanRank ? `#${m.fanRank.toLocaleString('en-US')}` : '—', cols.fanRank, cy + 5, {
-            spec: '400 15px',
-            color: m.fanRank ? THEME.muted : THEME.faint,
-            align: 'right',
-        });
     }
 }
 

@@ -129,8 +129,8 @@ digits) in the title or the body and scouts the trainer on uma.moe:
 
 - **In the post:** the trainer's card. It shows fans per day over the last
   30 days as a line, the 3- and 6-month averages, and a table of the last
-  months. The table lists the club, that club's rank that month, fans
-  gained and the trainer's fan ranking.
+  months. The table lists the club, that club's rank that month and fans
+  gained.
 - **In #recruitment** (`RECRUITMENT_CHANNEL_ID`): one entry per application,
   with status, destination club and pace. The entry is edited in place as
   the application moves on.
