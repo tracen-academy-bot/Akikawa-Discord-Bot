@@ -16,9 +16,11 @@ import { TRAINING_MINUTES, dayKey, getLeaderboard, type LeaderboardRow } from '.
  * one is recorded, and is claimed in the database so it happens once even
  * across restarts or two overlapping ticks.
  *
- * Milestone roles are kept for good: given the moment a run brings a
- * trainer's total to the milestone, and to everyone already past it when the
- * milestone is added.
+ * Milestone roles are given the moment a run brings a trainer's total to the
+ * milestone, and to everyone already past it when the milestone is added. By
+ * default they form a ladder: a trainer holds only the highest one reached,
+ * so reaching the next takes the lower ones off. With the ladder off they
+ * stack and are kept for good.
  */
 
 /** Places that take the weekly role. */
@@ -219,25 +221,105 @@ async function setRole(guild: Guild, userId: string, roleId: string, give: boole
 
 // ─── Milestones ───────────────────────────────────────────────────────────────
 
-/**
- * Gives the milestone role for exactly `totalRuns`, if there is one. Called
- * after each recorded run, which raises the total by one, so every milestone
- * is met exactly once. Returns the role given, or null.
- */
-export async function awardMilestone(guild: Guild, userId: string, totalRuns: number): Promise<string | null> {
-    const milestone = await prisma.timerMilestoneRole.findUnique({ where: { guildId_runs: { guildId: guild.id, runs: totalRuns } } });
-    if (!milestone) return null;
-    return (await setRole(guild, userId, milestone.roleId, true)) ? milestone.roleId : null;
+/** Whether a guild's milestone roles form a ladder (the default) or stack. */
+export async function milestoneLadder(guildId: string): Promise<boolean> {
+    return (await prisma.timerMilestoneSettings.findUnique({ where: { guildId } }))?.ladder ?? true;
 }
 
-/** Gives a milestone's role to everyone already at or past it. Returns how many got it. */
-export async function backfillMilestone(guild: Guild, runs: number, roleId: string): Promise<number> {
-    const totals = await prisma.trainingRun.groupBy({ by: ['discordUserId'], where: { guildId: guild.id }, _count: { _all: true } });
-    let given = 0;
-    for (const t of totals) {
-        if (t._count._all >= runs && (await setRole(guild, t.discordUserId, roleId, true))) given += 1;
+/** A milestone as the role rule reads it. */
+export interface MilestoneRole {
+    runs: number;
+    roleId: string;
+}
+
+/**
+ * The milestone roles a trainer with `total` runs should hold (`keep`) and
+ * should not (`drop`). On a ladder that is the highest milestone reached,
+ * and every other milestone role is dropped; stacked, every milestone
+ * reached is kept and nothing is dropped.
+ */
+export function milestoneRolesFor(total: number, milestones: MilestoneRole[], ladder: boolean): { keep: string[]; drop: string[] } {
+    const reached = milestones.filter((m) => m.runs <= total).sort((a, b) => a.runs - b.runs);
+    if (!ladder) return { keep: [...new Set(reached.map((m) => m.roleId))], drop: [] };
+    const top = reached.at(-1);
+    const keep = top ? [top.roleId] : [];
+    const drop = [...new Set(milestones.map((m) => m.roleId))].filter((r) => !keep.includes(r));
+    return { keep, drop };
+}
+
+/** What applying the rule to one trainer did. */
+interface RoleChange {
+    added: string[];
+    removed: string[];
+}
+
+/**
+ * Brings one trainer's milestone roles in line with `plan`: adds what they
+ * lack, removes what they hold and should not. Never throws; a member who
+ * left changes nothing.
+ */
+async function applyMilestoneRoles(guild: Guild, userId: string, plan: { keep: string[]; drop: string[] }): Promise<RoleChange> {
+    const change: RoleChange = { added: [], removed: [] };
+    try {
+        const member = await guild.members.fetch(userId);
+        const has = (roleId: string) => member.roles.cache?.has(roleId);
+        for (const roleId of plan.keep) {
+            if (has(roleId)) continue;
+            await member.roles.add(roleId, 'Timer milestone reached');
+            change.added.push(roleId);
+        }
+        for (const roleId of plan.drop) {
+            if (has(roleId) === false) continue;
+            await member.roles.remove(roleId, 'Timer milestone: a higher one replaces it');
+            change.removed.push(roleId);
+        }
+    } catch (e) {
+        console.error(`Timer milestone: could not update roles for ${userId}:`, e instanceof Error ? e.message : e);
     }
-    return given;
+    return change;
+}
+
+/**
+ * Gives the milestone role for exactly `totalRuns`, if there is one, and on
+ * a ladder takes the lower milestone roles off. Called after each recorded
+ * run, which raises the total by one, so every milestone is met exactly
+ * once. Returns the role given, or null.
+ */
+export async function awardMilestone(guild: Guild, userId: string, totalRuns: number): Promise<string | null> {
+    const milestones = await getMilestoneRoles(guild.id);
+    const milestone = milestones.find((m) => m.runs === totalRuns);
+    if (!milestone) return null;
+    const plan = milestoneRolesFor(totalRuns, milestones, await milestoneLadder(guild.id));
+    const change = await applyMilestoneRoles(guild, userId, plan);
+    return change.added.includes(milestone.roleId) ? milestone.roleId : null;
+}
+
+/** What syncing a guild's milestone roles did. */
+export interface MilestoneSync {
+    /** Trainers who gained a milestone role. */
+    given: number;
+    /** Milestone roles taken off (on a ladder, the lower ones). */
+    removed: number;
+}
+
+/**
+ * Brings every trainer's milestone roles in line with their run total: used
+ * when a milestone is added and when the ladder is turned on or off.
+ */
+export async function syncMilestones(guild: Guild): Promise<MilestoneSync> {
+    const milestones = await getMilestoneRoles(guild.id);
+    const ladder = await milestoneLadder(guild.id);
+    const totals = await prisma.trainingRun.groupBy({ by: ['discordUserId'], where: { guildId: guild.id }, _count: { _all: true } });
+    const sync: MilestoneSync = { given: 0, removed: 0 };
+    for (const t of totals) {
+        const plan = milestoneRolesFor(t._count._all, milestones, ladder);
+        // A trainer below every milestone holds none; only touch those who might.
+        if (plan.keep.length === 0 && !ladder) continue;
+        const change = await applyMilestoneRoles(guild, t.discordUserId, plan);
+        if (change.added.length > 0) sync.given += 1;
+        sync.removed += change.removed.length;
+    }
+    return sync;
 }
 
 // ─── Weekly award ─────────────────────────────────────────────────────────────

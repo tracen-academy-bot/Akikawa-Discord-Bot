@@ -149,6 +149,16 @@ model TimerMilestoneRole {
     @@unique([guildId, runs])
 }
 
+/// How a guild's milestone roles behave. Apart from `TimerSettings`, since a
+/// row there starts the weekly award. No row: the defaults.
+model TimerMilestoneSettings {
+    guildId   String   @id
+    /// A trainer holds only the highest milestone role reached: reaching the
+    /// next one takes the lower ones off. False: they stack, kept for good.
+    ladder    Boolean  @default(true)
+    updatedAt DateTime @updatedAt
+}
+
 /// Who placed 1st to 3rd in a week, so the role comes off exactly the people
 /// it was given to when the next week is awarded.
 model TimerWeeklyAward {

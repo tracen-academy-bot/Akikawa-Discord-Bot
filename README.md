@@ -71,9 +71,14 @@ Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
 - `/timer publish [channel] [ping]`: posts last week's final leaderboard
   once, now: in the given channel, else the rewards channel, else where it
   is used. It pings the top 3 unless `ping:false`. It does not change roles.
-- `/timer milestone add runs:<n> role:<role>`: a role kept for good at `n`
+- `/timer milestone add runs:<n> role:<role>`: a role earned at `n`
   completed runs, given the moment someone reaches it (and straight away to
   everyone already past it). `/timer milestone remove runs:<n>` stops it.
+  Milestones form a **ladder** by default: a trainer holds only the highest
+  milestone role they have reached, so reaching the next one (Veteran to
+  Ace) swaps the lower one off. `/timer milestone ladder on:false` makes
+  them stack instead, kept for good. Turning the ladder on or off re-sorts
+  everyone's roles straight away.
 
 The bot can only give roles below its own highest role.
 
