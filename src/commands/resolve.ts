@@ -9,13 +9,17 @@ import {
 import { prisma } from '../db/prisma';
 import { errorEmbed } from '../lib/embeds';
 import { canDecide } from '../lib/applications/permissions';
+import { giveClubRole } from '../lib/applications/clubRole';
+import { guildClubs } from '../lib/clubLinks';
 import { REJECTED, decisionMessage, ensureApplication, isApplicationThread, resolveApplication } from '../lib/applications/service';
 
 /**
  * `/resolve outcome:<club | Rejected> [note]`: decides an application. Used
  * in the post; accepting needs a trainer ID, rejecting does not. Tags it (Club App Accepted, or Rejected), locks it so only
  * staff can write in it, posts the decision with a Close button for the
- * applicant, and updates the recruitment entry. Running it again changes the
+ * applicant, and updates the recruitment board. Accepting also gives the
+ * applicant the club's role and takes off their other club roles (visas
+ * stay). Running it again changes the
  * decision.
  */
 export const data = new SlashCommandBuilder()
@@ -70,5 +74,23 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
     const note = interaction.options.getString('note')?.trim() || null;
     const app = await resolveApplication(thread as ThreadChannel, club, interaction.user.id, note);
-    await interaction.editReply(decisionMessage(app));
+
+    // Accepted: the applicant gets the club's role, and loses every other
+    // club role and Tracen Applicant. Visas and other roles stay.
+    let roleLine = '';
+    let roleProblem: string | null = null;
+    if (club) {
+        const member = await interaction.guild.members.fetch(app.applicantId).catch(() => null);
+        const result = member
+            ? await giveClubRole(member, club, await guildClubs(interaction.guildId))
+            : { ok: false as const, reason: 'they are not in the server, so no roles were changed.' };
+        if (result.ok) roleLine = `\nYou now have the **${result.role.name}** role.`;
+        else roleProblem = result.reason;
+    }
+
+    const message = decisionMessage(app);
+    await interaction.editReply({ ...message, content: message.content + roleLine });
+    if (roleProblem) {
+        await interaction.followUp({ embeds: [errorEmbed(`Accepted, but the club role was not given: ${roleProblem}`)], flags: MessageFlags.Ephemeral });
+    }
 }

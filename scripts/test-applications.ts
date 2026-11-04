@@ -193,6 +193,30 @@ async function main() {
     check('recruiting: no tier tags, no pings', svc.recruitingRolesFor(['Transfer'], serverRoles), []);
     check('recruiting: missing role is skipped', svc.recruitingRolesFor(['A'], [{ id: 'r-s', name: 'S recruiting' }]), []);
 
+    // ── Club member role on accept ────────────────────────────────────────────
+    const cr = await import('../src/lib/applications/clubRole');
+    const roleClubs = [
+        { id: 'rose', name: 'Rose', staffRoleIds: [] },
+        { id: 'prim', name: 'Primrose', staffRoleIds: [] },
+        { id: 'lily', name: '☆Lily☆', staffRoleIds: [] },
+    ];
+    const guildRoles = [
+        { id: 'g-rose', name: 'Rose' },
+        { id: 'g-rose-t', name: 'Rose Trainer' },
+        { id: 'g-rose-v', name: 'Rose Visa' },
+        { id: 'g-prim', name: 'Primrose' },
+        { id: 'g-lily', name: 'Lily' },
+        { id: 'g-other', name: 'Rose fan club' },
+    ];
+    const clubIds = new Set(['g-rose', 'g-rose-t', 'g-rose-v', 'g-prim', 'g-lily']);
+    const isClub = (id: string) => clubIds.has(id);
+    check('club role: Rose gets Rose, not its Trainer or Visa role', cr.clubMemberRole(roleClubs[0]!, roleClubs, guildRoles, isClub)?.id, 'g-rose');
+    check('club role: Primrose is not taken for Rose', cr.clubMemberRole(roleClubs[1]!, roleClubs, guildRoles, isClub)?.id, 'g-prim');
+    check('club role: decorated club name still matches', cr.clubMemberRole(roleClubs[2]!, roleClubs, guildRoles, isClub)?.id, 'g-lily');
+    check('club role: roles outside CLUB_ROLE_IDS are never used', cr.clubMemberRole(roleClubs[0]!, roleClubs, guildRoles, () => false), null);
+    check('club role: two matching roles means none, not a guess', cr.clubMemberRole(roleClubs[0]!, roleClubs, [...guildRoles, { id: 'g-rose2', name: 'Team Rose' }], (id) => isClub(id) || id === 'g-rose2'), null);
+    check('visa: named visas are recognised', [cr.isVisaRoleName('Rose Visa'), cr.isVisaRoleName('VISA - Cosmos'), cr.isVisaRoleName('Rose')], [true, true, false]);
+
     // ── Recruitment board ─────────────────────────────────────────────────────
     const base = {
         threadId: 't',

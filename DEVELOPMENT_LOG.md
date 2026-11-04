@@ -4,6 +4,30 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Accepting gives the club role
+
+Asked: on resolve, give the club role and remove every other club role;
+visas stay.
+
+- `clubMemberRole` (`applications/clubRole.ts`) picks the club's member
+  role. It must be one of `CLUB_ROLE_IDS`, its name must match the club by
+  `clubsForName` (the staff-role matching, so Primrose is not Rose), and it
+  must not be a Trainer, Assistant or Visa role. With none, or more than
+  one, it gives nothing rather than guess.
+- `giveClubRole` gives it through `assignRole`, the `/role` rule. Other
+  club roles and Tracen Applicant come off; everything else stays,
+  including visas, which are not club roles. It checks the bot's own role
+  is above the club role first.
+- `/resolve` does this on accept, before the decision is posted, so the
+  message can say "You now have the **Rose** role." On failure (no
+  matching role, role above the bot, applicant gone), staff get an
+  ephemeral note and nothing is changed.
+- Rejecting, or changing a decision afterwards, does not touch roles.
+- Tests: matching per club, Primrose vs Rose, decorated names, roles
+  outside `CLUB_ROLE_IDS` ignored, two matches giving none, visa names.
+
+---
+
 ## 2026-11-04 — Recruitment board; exact pings; sharper card
 
 Asked: #recruitment should show only who is available and where they are
