@@ -456,3 +456,13 @@ model ClubApplication {
 
     @@index([guildId, status])
 }
+
+/// The live recruitment board: one message in the recruitment channel,
+/// edited in place whenever an application changes. Lists who is available
+/// (open applications) and where accepted applicants are going.
+model RecruitmentBoard {
+    guildId   String   @id
+    channelId String
+    messageId String
+    updatedAt DateTime @updatedAt
+}

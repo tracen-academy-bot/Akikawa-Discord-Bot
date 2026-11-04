@@ -4,6 +4,38 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Recruitment board; exact pings; sharper card
+
+Asked: #recruitment should show only who is available and where they are
+going, as one live message. The staff notice should drop the quota line.
+An A+ post was pinging A. The card looked rough.
+
+- **Board** (`board.ts`, new `RecruitmentBoard` table): one message in
+  the recruitment channel, edited in place after every change. It has two
+  sections:
+  - **Available**: open applications, oldest first, one line each with
+    the applicant, 30-day pace, time open and the post.
+  - **Going to**: accepted applicants who have not closed their post,
+    grouped by club.
+
+  Refreshes are queued per guild. A deleted board, or a changed channel,
+  means a fresh post. On its first refresh it deletes the per-application
+  entries the previous version posted. The backfill's `post_open` option is
+  gone; it refreshes the board once at the end instead.
+- **Staff notice:** "Clears the quota of", "Highest tier cleared" and
+  "Judged on" are gone, and so is the same in `/scout` elsewhere. With them
+  went the dead code: `clubFits`, `fitsText`, `clubsWithQuota` and
+  `headlinePace`.
+- **Pings:** the A+ post pinged A because the old council roles were
+  grouped by tier (`SEMI_COMP_COUNCIL_ROLE_ID` stood for A+ and A). The
+  council pings and their `*_COUNCIL_ROLE_ID` variables are removed; the
+  notice now pings only the exact recruiting role of each tag.
+- **Card:** drawn at 2x, with high-quality smoothing for the rank badge
+  (now 30 tall). The badge files (310x360) were never the problem; the 1x
+  canvas was.
+
+---
+
 ## 2026-11-04 — Ask for the trainer ID; link Discord to trainer on close
 
 Asked:

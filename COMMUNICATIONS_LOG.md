@@ -4,6 +4,18 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-04 — #recruitment is a board; pings are per tier
+
+- #recruitment shows only who is available (30-day pace, time open, post)
+  and where accepted applicants are going (grouped by club), as one live
+  message.
+- The staff notice does not list clubs whose quota the applicant clears.
+  It was not wanted.
+- Pings go only to the recruiting role of each tier tag. The grouped
+  council roles are dropped.
+
+---
+
 ## 2026-11-04 — Applications tie Discord to the trainer
 
 Direction: the point of applications beyond deciding is to connect each

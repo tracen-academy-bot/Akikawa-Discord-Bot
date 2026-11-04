@@ -5,7 +5,7 @@ import { getProfile, isConfigured } from '../umamoe/client';
 import type { UmaProfileResponse } from '../umamoe/types';
 import { currentGameMonth } from '../fans/ingest';
 import { extractTrainerId, monthsAverage, monthSummaries } from './history';
-import { linkApplicant, syncRecruitmentEntry } from './service';
+import { linkApplicant, refreshBoard } from './service';
 
 /**
  * Backfill: every post already in the application forum, open or archived,
@@ -15,8 +15,8 @@ import { linkApplicant, syncRecruitmentEntry } from './service';
  * the trainer's uma.moe profile once (no daily data, to keep it to one
  * request per trainer), and works out from the post's tags and the profile
  * where the application ended up (`matchApplication`). It writes the row
- * without posting anything, unless asked to post entries for posts still
- * open, so hundreds of old posts do not flood the recruitment channel. For
+ * without posting anything per post; old posts still open show up on the
+ * recruitment board, which is refreshed once at the end. For
  * posts already done (not open) whose trainer uma.moe knows, it links the
  * applicant's Discord to the trainer, as `/uma-id` does, never overwriting a
  * link either side already has.
@@ -171,12 +171,11 @@ const UMA_GAP_MS = 300;
 /**
  * Imports every post in `forum` that has no application row yet.
  *
- * @param postOpen       Post recruitment entries for imported posts still open.
  * @param onProgress     Called now and then with posts done and total.
  */
 export async function backfillApplications(
     forum: ForumChannel,
-    { postOpen = false, onProgress }: { postOpen?: boolean; onProgress?: (done: number, total: number) => Promise<void> | void } = {},
+    { onProgress }: { onProgress?: (done: number, total: number) => Promise<void> | void } = {},
 ): Promise<BackfillReport> {
     const posts = await forumPosts(forum);
     const clubs = await prisma.trackedCircle.findMany({ where: { guildId: forum.guildId }, select: { id: true, name: true, circleId: true } });
@@ -258,7 +257,6 @@ export async function backfillApplications(
                 closedAt: match.status === 'OPEN' ? null : (thread.archivedAt ?? null),
             },
         });
-        if (postOpen && app.status === 'OPEN') await syncRecruitmentEntry(thread.client, app, thread.url);
         // As with new posts, the applicant is linked to their trainer only
         // once the post is done: not while it is still open.
         let linked = false;
@@ -291,6 +289,8 @@ export async function backfillApplications(
             linked,
         });
     }
+    // Old posts still open belong on the board.
+    if (report.imported > 0) await refreshBoard(forum.client, forum.guildId);
     await onProgress?.(posts.length, posts.length);
     return report;
 }

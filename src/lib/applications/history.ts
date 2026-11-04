@@ -241,31 +241,6 @@ export function monthsAverage(summaries: MonthSummary[], count: number): MonthsA
     return { perDay: gain / days, months: used.length, of: count };
 }
 
-/** A club as the fit check reads it. */
-export interface FitClub {
-    id: string;
-    name: string;
-    /** The club's quota per calendar day; zero or less means none is set. */
-    quotaPerDay: number;
-}
-
-/** A club and whether an applicant's pace clears its quota. */
-export interface ClubFit<C extends FitClub> {
-    club: C;
-    meets: boolean;
-}
-
-/**
- * Clubs with a quota, highest quota first, each marked by whether `perDay`
- * clears it. Clubs without a quota are left out: there is nothing to compare.
- */
-export function clubFits<C extends FitClub>(perDay: number | null, clubs: C[]): ClubFit<C>[] {
-    return clubs
-        .filter((c) => c.quotaPerDay > 0)
-        .sort((a, b) => b.quotaPerDay - a.quotaPerDay || a.name.localeCompare(b.name))
-        .map((club) => ({ club, meets: perDay !== null && perDay >= club.quotaPerDay }));
-}
-
 /**
  * The trainer ID in an application, or null.
  *

@@ -141,23 +141,24 @@ uma.moe:
   who left or was kicked is removed from both the fans and the headcount.
   The comparison covers only the days the trainer was in the club, so a
   mid-month joiner is compared fairly.
-- **In #recruitment** (`RECRUITMENT_CHANNEL_ID`): one entry per application,
-  with status, destination club and pace. The entry is edited in place as
-  the application moves on.
-- **In #serious-discussion-only** (`STAFF_DISCUSSION_CHANNEL_ID`): the card,
-  and the clubs whose quota the trainer's pace clears. The message pings the
-  council roles and the recruiting roles that match the post's tier tags.
-  These pings used to go in the post itself. The recruiting roles are found
-  by name: S+ and S ping "S recruiting", A+ pings "A+ recruiting", A pings
-  "A recruiting", and B+ and Casual ping "Casual recruiting". A role that
-  does not exist is skipped.
+- **In #recruitment** (`RECRUITMENT_CHANNEL_ID`): one live board, edited in
+  place on every change. **Available** lists open applications, oldest
+  first: the applicant, their 30-day pace, how long the post has been open,
+  and the post. **Going to** lists accepted applicants who have not closed
+  their post yet, grouped by club. Rejected, closed and joined applications
+  are not on it.
+- **In #serious-discussion-only** (`STAFF_DISCUSSION_CHANNEL_ID`): the card
+  and the pace, pinging the recruiting role of each tier tag the post has,
+  exactly. S+ and S ping "S recruiting", A+ pings "A+ recruiting", A pings
+  "A recruiting", and B+ and Casual ping "Casual recruiting". The roles are
+  found by name, and a role that does not exist is skipped.
 
 | Command | Who | Purpose |
 | --- | --- | --- |
 | `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
 | `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Accepting needs the trainer ID; rejecting does not. Staff accept into their own club only. |
 | `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined, and the applicant's Discord is linked to their trainer, as `/uma-id` does. |
-| `/applications backfill [post_open]` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
+| `/applications backfill` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
 
 The backfill uses one uma.moe profile request per trainer, about 3 per
 second, so a few hundred posts take a few minutes. It decides each post's
@@ -171,8 +172,9 @@ status in this order:
    outcome is unknown.
 5. **Open:** none of the above.
 
-It posts nothing unless `post_open:true` is set, and then only entries for
-posts still open. A second run imports only posts with no row yet. For
+It posts nothing per post. Old posts still open appear on the recruitment
+board, which it refreshes once at the end. A second run imports only posts
+with no row yet. For
 posts already done (any status except Open) whose trainer uma.moe knows, it
 links the applicant's Discord to the trainer.
 

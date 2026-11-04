@@ -13,12 +13,11 @@ import {
 import type { ClubApplication, TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured, UmaMoeError, getProfile } from '../umamoe/client';
-import { formatCompactFans, quotaPerDayFor, toSafeNumber } from '../fans/metrics';
-import { currentGameMonth } from '../fans/ingest';
-import { TIERS, TIER_ORDER } from '../clubDirectory';
+import { formatCompactFans, toSafeNumber } from '../fans/metrics';
 import { renderApplicantCard } from '../image/renderApplicant';
-import { clubFits, daysInMonth, extractTrainerId, type ClubFit, type FitClub } from './history';
-import { headlinePace, scoutTrainer, type ScoutReport } from './scout';
+import { refreshRecruitmentBoard } from './board';
+import { extractTrainerId } from './history';
+import { scoutTrainer, type ScoutReport } from './scout';
 
 /**
  * Club applications: the posts in the application forum.
@@ -28,11 +27,10 @@ import { headlinePace, scoutTrainer, type ScoutReport } from './scout';
  * Once it has an ID, it scouts the trainer on uma.moe, and then:
  *
  *   - posts the trainer's card (30 days, 3 and 6 months) in the post;
- *   - posts an entry in the recruitment channel (status, destination, pace),
- *     edited in place as the application moves on;
- *   - posts the card in the staff discussion channel with the clubs whose
- *     quota the trainer's pace clears, pinging the council and recruiting
- *     roles of the post's tier tags.
+ *   - updates the live board in the recruitment channel (`board.ts`): who
+ *     is available, and where accepted applicants are going;
+ *   - posts the card in the staff discussion channel, pinging the
+ *     recruiting role of each of the post's tier tags.
  *
  * Decisions are made with `/resolve` (a club, or Rejected), which tags the
  * post and locks it; it needs the trainer ID first. Once the applicant joins,
@@ -43,7 +41,7 @@ import { headlinePace, scoutTrainer, type ScoutReport } from './scout';
 /** The application forum. */
 export const FORUM_ID = process.env.FORUM_CHANNEL_ID ?? '';
 
-/** Where each application's entry is posted. Set to `off` to stop posting. */
+/** Where the live recruitment board is posted. Set to `off` to stop posting. */
 export const RECRUITMENT_CHANNEL_ID = channelSetting('RECRUITMENT_CHANNEL_ID', '1523241207600386188');
 
 /** Where staff are told about new applications. Set to `off` to stop posting. */
@@ -71,31 +69,24 @@ function channelSetting(name: string, fallback: string): string | null {
     return value || fallback;
 }
 
-/** Council roles pinged for a post's tier tags, as before applications moved here. */
-const TIER_ROLES: { tags: string[]; role: string | undefined; label: string }[] = [
-    { tags: ['s+', 's'], role: process.env.COMP_COUNCIL_ROLE_ID, label: 'competitive' },
-    { tags: ['a+', 'a'], role: process.env.SEMI_COMP_COUNCIL_ROLE_ID, label: 'semi-competitive' },
-    { tags: ['b+', 'casual'], role: process.env.CASUAL_COUNCIL_ROLE_ID, label: 'casual' },
+/** How the staff notice describes a post's tier tags. */
+const TIER_LABELS: { tags: string[]; label: string }[] = [
+    { tags: ['s+', 's'], label: 'competitive' },
+    { tags: ['a+', 'a'], label: 'semi-competitive' },
+    { tags: ['b+', 'casual'], label: 'casual' },
 ];
 
-/** The council roles and labels for a set of tag names. */
-export function tierRolesFor(tagNames: string[]): { roles: string[]; labels: string[] } {
+/** The labels for a set of tag names, e.g. ["competitive", "casual"]. */
+export function tierLabelsFor(tagNames: string[]): string[] {
     const lower = tagNames.map((t) => t.toLowerCase());
-    const roles: string[] = [];
-    const labels: string[] = [];
-    for (const tier of TIER_ROLES) {
-        if (!tier.tags.some((t) => lower.includes(t))) continue;
-        labels.push(tier.label);
-        if (tier.role && !roles.includes(tier.role)) roles.push(tier.role);
-    }
-    return { roles, labels };
+    return TIER_LABELS.filter((tier) => tier.tags.some((t) => lower.includes(t))).map((tier) => tier.label);
 }
 
 /**
  * Recruiting roles, held by the people who run clubs at each tier, found by
- * name in the server. Pinged with the council roles when an application
- * opens with a matching tier tag. S covers S+ (there is no S+ role); B+
- * goes with Casual, as the council pings do.
+ * name in the server. The staff notice pings the role of each tier tag the
+ * post has, and only those. S covers S+ (there is no S+ role); B+ goes with
+ * Casual.
  */
 const RECRUITING_ROLES: { tags: string[]; name: string }[] = [
     { tags: ['s+', 's'], name: 's recruiting' },
@@ -196,69 +187,11 @@ export async function linkApplicant(guildId: string, discordUserId: string, view
     return made.count > 0;
 }
 
-/** A guild's clubs with their quota per calendar day. */
-export async function clubsWithQuota(guildId: string): Promise<(FitClub & { tier: TrackedCircle['tier'] })[]> {
-    const now = currentGameMonth();
-    const days = daysInMonth(now.year, now.month);
-    const clubs = await prisma.trackedCircle.findMany({ where: { guildId }, orderBy: { name: 'asc' } });
-    return clubs.map((c) => ({ id: c.id, name: c.name, tier: c.tier, quotaPerDay: quotaPerDayFor(c.quotaPeriod, toSafeNumber(c.quota), days) }));
-}
-
-/** "First (12.0M/day), Rose (8.0M/day)" for the clubs a pace clears. */
-export function fitsText(fits: ClubFit<FitClub & { tier?: TrackedCircle['tier'] }>[]): { clears: string; highestTier: string | null } {
-    const met = fits.filter((f) => f.meets);
-    if (fits.length === 0) return { clears: 'No club has a quota set.', highestTier: null };
-    if (met.length === 0) return { clears: `None (lowest quota: ${fits.at(-1)!.club.name}, ${formatCompactFans(fits.at(-1)!.club.quotaPerDay)}/day)`, highestTier: null };
-    const tier = TIER_ORDER.find((t) => met.some((f) => f.club.tier === t)) ?? null;
-    return {
-        clears: met.map((f) => `${f.club.name} (${formatCompactFans(f.club.quotaPerDay)}/day)`).join(', '),
-        highestTier: tier ? TIERS[tier].title : null,
-    };
-}
-
 /** The pace line: "7.8M/day (30d) · 6.0M (3 mo) · 6.0M (6 mo)". */
 export function paceLine(app: Pick<ClubApplication, 'pace30' | 'pace3m' | 'pace6m'>): string {
     const f = (v: bigint | null) => (v === null ? '—' : formatCompactFans(toSafeNumber(v)));
     if (app.pace30 === null && app.pace3m === null && app.pace6m === null) return 'No uma.moe data';
     return `**${f(app.pace30)}/day** (30d) · ${f(app.pace3m)} (3 mo) · ${f(app.pace6m)} (6 mo)`;
-}
-
-/** Status line and colour of an application. */
-export function statusOf(app: Pick<ClubApplication, 'status' | 'clubName' | 'resolvedById'> & { viewerId?: bigint | null }): { text: string; color: number } {
-    const by = app.resolvedById ? ` by <@${app.resolvedById}>` : '';
-    switch (app.status) {
-        case 'OPEN':
-            return { text: app.viewerId === null ? 'Open, waiting for the trainer ID' : 'Open, waiting for a decision', color: 0x5865f2 };
-        case 'ACCEPTED':
-            return { text: `Accepted into **${app.clubName ?? 'a club'}**${by}, not joined yet`, color: 0x57f287 };
-        case 'JOINED':
-            return { text: `Joined **${app.clubName ?? 'a club'}**`, color: 0x2d7d46 };
-        case 'REJECTED':
-            return { text: `Rejected${by}`, color: 0xed4245 };
-        case 'WITHDRAWN':
-            return { text: 'Closed before a decision', color: 0x80848e };
-        case 'CLOSED':
-            return { text: 'Closed (from before the bot; outcome not recorded)', color: 0x80848e };
-    }
-}
-
-/** The application's entry in the recruitment channel. */
-export function recruitmentEmbed(app: ClubApplication, threadUrl: string): EmbedBuilder {
-    const status = statusOf(app);
-    const lines = [
-        `**Status**: ${status.text}`,
-        `**Applicant**: <@${app.applicantId}>`,
-        `**Looking for**: ${app.tags.length > 0 ? app.tags.join(' · ') : 'no tags'}`,
-        `**Pace**: ${paceLine(app)}`,
-        `**Post**: ${threadUrl}`,
-        `**Opened**: <t:${Math.floor(app.createdAt.getTime() / 1000)}:R>`,
-    ];
-    if (app.note) lines.push(`**Note**: ${app.note}`);
-    return new EmbedBuilder()
-        .setColor(status.color)
-        .setTitle(`${app.trainerName ?? 'Unknown trainer'} · ${app.viewerId !== null ? app.viewerId.toString() : 'no ID'}`)
-        .setURL(threadUrl)
-        .setDescription(lines.join('\n'));
 }
 
 /** A text channel the bot can post in, or null. */
@@ -268,29 +201,9 @@ async function textChannel(client: Client, id: string | null) {
     return channel?.isSendable() ? channel : null;
 }
 
-/** Posts the recruitment entry, or edits it in place. Never throws. */
-export async function syncRecruitmentEntry(client: Client, app: ClubApplication, threadUrl: string): Promise<void> {
-    try {
-        const embed = recruitmentEmbed(app, threadUrl);
-        const payload = { embeds: [embed], allowedMentions: { parse: [] as never[] } };
-        if (app.recruitmentChannelId && app.recruitmentMessageId) {
-            const channel = await textChannel(client, app.recruitmentChannelId);
-            const message = channel && 'messages' in channel ? await channel.messages.fetch(app.recruitmentMessageId).catch(() => null) : null;
-            if (message) {
-                await message.edit(payload);
-                return;
-            }
-        }
-        const channel = await textChannel(client, RECRUITMENT_CHANNEL_ID);
-        if (!channel) return;
-        const sent = await channel.send(payload);
-        await prisma.clubApplication.update({
-            where: { threadId: app.threadId },
-            data: { recruitmentChannelId: channel.id, recruitmentMessageId: sent.id },
-        });
-    } catch (e) {
-        console.error(`Recruitment entry for ${app.threadId} failed:`, e);
-    }
+/** Brings the guild's recruitment board up to date (see `board.ts`). Never throws. */
+export function refreshBoard(client: Client, guildId: string): Promise<void> {
+    return refreshRecruitmentBoard(client, guildId, RECRUITMENT_CHANNEL_ID);
 }
 
 /** Tells staff about a new application. Never throws. */
@@ -298,18 +211,11 @@ async function notifyStaff(client: Client, app: ClubApplication, thread: ThreadC
     try {
         const channel = await textChannel(client, STAFF_CHANNEL_ID);
         if (!channel) return;
-        const tier = tierRolesFor(app.tags);
-        const labels = tier.labels;
-        const roles = [...new Set([...tier.roles, ...recruitingRolesFor(app.tags, thread.guild.roles.cache.values())])];
-        const pace = outcome.report ? headlinePace(outcome.report) : null;
-        const fits = fitsText(clubFits(pace?.perDay ?? null, await clubsWithQuota(app.guildId)));
-        const lines = [
-            `**Looking for**: ${app.tags.length > 0 ? app.tags.join(' · ') : 'no tags'}`,
-            `**Pace**: ${paceLine(app)}`,
-            `**Clears the quota of**: ${pace ? fits.clears : 'unknown, no pace'}`,
-        ];
-        if (pace && fits.highestTier) lines.push(`**Highest tier cleared**: ${fits.highestTier}`);
-        if (pace) lines.push(`-# Judged on the ${pace.basis}, per calendar day.`);
+        const labels = tierLabelsFor(app.tags);
+        // Only the recruiting role of each tier tag, exactly: the grouped
+        // council roles (A+ with A, and so on) pinged the wrong tier.
+        const roles = recruitingRolesFor(app.tags, thread.guild.roles.cache.values());
+        const lines = [`**Looking for**: ${app.tags.length > 0 ? app.tags.join(' · ') : 'no tags'}`, `**Pace**: ${paceLine(app)}`];
         if (!outcome.report) lines.push(`-# ${outcome.reason}`);
         const embed = new EmbedBuilder()
             .setColor(0x5865f2)
@@ -390,7 +296,7 @@ export async function openApplication(thread: ThreadChannel): Promise<void> {
             // No ID yet: ask for it. Staff hear about the application when it
             // arrives (`takeIdFromMessage` or `/scout`).
             await fresh.send(askForIdMessage(app.applicantId)).catch((e) => console.error(`Asking ${app.threadId} for an ID failed:`, e));
-            await syncRecruitmentEntry(fresh.client, app, fresh.url);
+            await refreshBoard(fresh.client, app.guildId);
             return;
         }
         await announceWithId(fresh, app, app.viewerId.toString());
@@ -411,7 +317,7 @@ async function announceWithId(thread: ThreadChannel, app: ClubApplication, viewe
         data: { viewerId: BigInt(viewerId), ...paceFields(outcome.report) },
     });
     await postCardInThread(thread, outcome, updated.tags).catch((e) => console.error(`Card for ${app.threadId} failed:`, e));
-    await syncRecruitmentEntry(thread.client, updated, thread.url);
+    await refreshBoard(thread.client, updated.guildId);
     await notifyStaff(thread.client, updated, thread, outcome);
     return { app: updated, outcome };
 }
@@ -456,7 +362,7 @@ export async function rescoutApplication(thread: ThreadChannel, viewerId: string
         where: { threadId: app.threadId },
         data: { viewerId: id ? BigInt(id) : null, ...paceFields(outcome.report) },
     });
-    await syncRecruitmentEntry(thread.client, updated, thread.url);
+    await refreshBoard(thread.client, updated.guildId);
     return { app: updated, outcome };
 }
 
@@ -502,7 +408,7 @@ export async function resolveApplication(
     const reason = club ? `Accepted into ${club.name}` : 'Rejected';
     await thread.setAppliedTags(tags, reason).catch((e) => console.warn(`Tagging ${thread.id} failed:`, e instanceof Error ? e.message : e));
     await thread.setLocked(true, reason);
-    await syncRecruitmentEntry(thread.client, updated, thread.url);
+    await refreshBoard(thread.client, updated.guildId);
     return updated;
 }
 
@@ -557,7 +463,7 @@ export async function closeApplication(thread: ThreadChannel): Promise<{ app: Cl
     if (updated.viewerId !== null && updated.trainerName !== null) {
         await linkApplicant(updated.guildId, updated.applicantId, updated.viewerId, updated.trainerName).catch((e) => console.error(`Linking ${updated.threadId} failed:`, e));
     }
-    await syncRecruitmentEntry(thread.client, updated, thread.url);
+    await refreshBoard(thread.client, updated.guildId);
     return { app: updated, line };
 }
 
