@@ -45,6 +45,7 @@ export function backfillSummary(report: BackfillReport): EmbedBuilder {
         `**Imported**: ${report.imported}, ${report.withId} with a trainer ID, ${report.foundOnUma} found on uma.moe`,
         `**Outcome**: ${status || 'none'}`,
         `**Now in our clubs**: ${clubs || 'none'}`,
+        `**Discord linked to trainer**: ${report.linked} (closed posts only; existing links kept)`,
         '-# Every imported post is in the CSV, with the trainer, where they are now and any problem.',
     ];
     return new EmbedBuilder().setColor(0x5865f2).setTitle('Application backfill').setDescription(lines.join('\n'));

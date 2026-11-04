@@ -269,20 +269,34 @@ export function clubFits<C extends FitClub>(perDay: number | null, clubs: C[]): 
 /**
  * The trainer ID in an application, or null.
  *
- * Trainer IDs are 9 to 12 digits. Applicants write them bare, in brackets
- * ("[574910875032]"), or in groups split by spaces or dashes
- * ("574 910 875 032", "4674-9265-4277"). Longer digit runs (Discord IDs, 17+ digits) are not
- * IDs and are skipped. The title is checked before the body.
+ * Trainer IDs are 9 to 12 digits. Applicants write them:
+ *
+ *   - bare or wrapped: "574910875032", "[574910875032]", "ID:574910875032";
+ *   - in groups split by spaces or dashes: "574 910 875 032",
+ *     "[467 492 654 277]", "4674-9265-4277";
+ *   - in four groups of three split by commas or dots: "467,492,654,277",
+ *     "467.492.654.277". Only that exact shape, since commas and dots also
+ *     group fan counts ("1,234,567,890 fans" is not an ID);
+ *   - in full-width digits from a Japanese keyboard ("４６７４９２６５４２７７"),
+ *     which are read as ordinary digits.
+ *
+ * Longer digit runs (Discord IDs, 17+ digits) are not IDs and are skipped.
+ * Texts are checked in order (title before body), and within a text the
+ * forms above in that order.
  */
 export function extractTrainerId(...texts: (string | null | undefined)[]): string | null {
-    for (const text of texts) {
-        if (!text) continue;
+    for (const raw of texts) {
+        if (!raw) continue;
+        // NFKC turns full-width digits and separators into ASCII ones.
+        const text = raw.normalize('NFKC');
         const bare = /(?<!\d)(\d{9,12})(?!\d)/.exec(text);
         if (bare) return bare[1]!;
         for (const match of text.matchAll(/(?<!\d)\d{2,6}(?:[ -]\d{2,6}){1,5}(?!\d)/g)) {
             const digits = match[0].replace(/[ -]/g, '');
             if (digits.length >= 9 && digits.length <= 12) return digits;
         }
+        const punctuated = /(?<![\d.,])(\d{3})([.,])(\d{3})\2(\d{3})\2(\d{3})(?![\d]|[.,]\d)/.exec(text);
+        if (punctuated) return punctuated.slice(1).filter((p) => /^\d+$/.test(p)).join('');
     }
     return null;
 }

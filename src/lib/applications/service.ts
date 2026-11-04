@@ -23,8 +23,9 @@ import { headlinePace, scoutTrainer, type ScoutReport } from './scout';
 /**
  * Club applications: the posts in the application forum.
  *
- * When a post opens, the bot finds the trainer ID in it, scouts the trainer
- * on uma.moe, and then:
+ * When a post opens, the bot finds the trainer ID in it. With none, it pings
+ * the applicant to send it and picks it up from their reply in the post.
+ * Once it has an ID, it scouts the trainer on uma.moe, and then:
  *
  *   - posts the trainer's card (30 days, 3 and 6 months) in the post;
  *   - posts an entry in the recruitment channel (status, destination, pace),
@@ -34,8 +35,9 @@ import { headlinePace, scoutTrainer, type ScoutReport } from './scout';
  *     roles of the post's tier tags.
  *
  * Decisions are made with `/resolve` (a club, or Rejected), which tags the
- * post and locks it. Once the applicant joins, they (or staff) close it with
- * the Close button or `/close`, which archives it.
+ * post and locks it; it needs the trainer ID first. Once the applicant joins,
+ * they (or staff) close it with the Close button or `/close`, which archives
+ * it and links the applicant's Discord to their trainer (as `/uma-id` does).
  */
 
 /** The application forum. */
@@ -183,6 +185,17 @@ function paceFields(report: ScoutReport | null) {
     };
 }
 
+/**
+ * Links a Discord account to a trainer, the link `/uma-id` sets, unless
+ * either side is already linked: an existing link is never overwritten.
+ * Returns true when a link was made.
+ */
+export async function linkApplicant(guildId: string, discordUserId: string, viewerId: bigint, trainerName: string | null): Promise<boolean> {
+    if (!/^\d+$/.test(discordUserId)) return false;
+    const made = await prisma.trainerLink.createMany({ data: [{ guildId, discordUserId, viewerId, trainerName }], skipDuplicates: true });
+    return made.count > 0;
+}
+
 /** A guild's clubs with their quota per calendar day. */
 export async function clubsWithQuota(guildId: string): Promise<(FitClub & { tier: TrackedCircle['tier'] })[]> {
     const now = currentGameMonth();
@@ -211,11 +224,11 @@ export function paceLine(app: Pick<ClubApplication, 'pace30' | 'pace3m' | 'pace6
 }
 
 /** Status line and colour of an application. */
-export function statusOf(app: Pick<ClubApplication, 'status' | 'clubName' | 'resolvedById'>): { text: string; color: number } {
+export function statusOf(app: Pick<ClubApplication, 'status' | 'clubName' | 'resolvedById'> & { viewerId?: bigint | null }): { text: string; color: number } {
     const by = app.resolvedById ? ` by <@${app.resolvedById}>` : '';
     switch (app.status) {
         case 'OPEN':
-            return { text: 'Open, waiting for a decision', color: 0x5865f2 };
+            return { text: app.viewerId === null ? 'Open, waiting for the trainer ID' : 'Open, waiting for a decision', color: 0x5865f2 };
         case 'ACCEPTED':
             return { text: `Accepted into **${app.clubName ?? 'a club'}**${by}, not joined yet`, color: 0x57f287 };
         case 'JOINED':
@@ -328,9 +341,19 @@ async function postCardInThread(thread: ThreadChannel, outcome: ScoutOutcome, ta
         return;
     }
     await thread.send({
-        content: `${outcome.reason} Put your trainer ID (9 to 12 digits) in the post, or run \`/scout id:\` here with it, so staff can see your fan history.`,
+        content: `${outcome.reason} Check it and send your trainer ID (9 to 12 digits) here again, so staff can see your fan history.`,
         allowedMentions: { parse: [] },
     });
+}
+
+/** Asks the applicant, by ping, for their trainer ID. */
+export function askForIdMessage(applicantId: string): { content: string; allowedMentions: { users: string[] } } {
+    return {
+        content:
+            `<@${applicantId}>, please send your trainer ID here (the 9 to 12 digit number on your in-game profile). ` +
+            'Staff can decide on this application once it is in.',
+        allowedMentions: { users: [applicantId] },
+    };
 }
 
 /**
@@ -363,23 +386,71 @@ export async function openApplication(thread: ThreadChannel): Promise<void> {
         const fresh = await thread.fetch();
         const { app, created } = await ensureApplication(fresh);
         if (!created) return;
-        const outcome = await tryScout(app.viewerId?.toString() ?? null);
-        const updated = await prisma.clubApplication.update({ where: { threadId: app.threadId }, data: paceFields(outcome.report) });
-        await postCardInThread(fresh, outcome, updated.tags).catch((e) => console.error(`Card for ${app.threadId} failed:`, e));
-        await syncRecruitmentEntry(fresh.client, updated, fresh.url);
-        await notifyStaff(fresh.client, updated, fresh, outcome);
+        if (app.viewerId === null) {
+            // No ID yet: ask for it. Staff hear about the application when it
+            // arrives (`takeIdFromMessage` or `/scout`).
+            await fresh.send(askForIdMessage(app.applicantId)).catch((e) => console.error(`Asking ${app.threadId} for an ID failed:`, e));
+            await syncRecruitmentEntry(fresh.client, app, fresh.url);
+            return;
+        }
+        await announceWithId(fresh, app, app.viewerId.toString());
     } catch (e) {
         console.error(`Opening application ${thread.id} failed:`, e);
     }
 }
 
 /**
+ * Scouts an application's trainer, stores the pace, posts the card (or why
+ * there is none) in the post, updates the recruitment entry and tells staff.
+ * Used once per application, when its ID first becomes known.
+ */
+async function announceWithId(thread: ThreadChannel, app: ClubApplication, viewerId: string): Promise<{ app: ClubApplication; outcome: ScoutOutcome }> {
+    const outcome = await tryScout(viewerId);
+    const updated = await prisma.clubApplication.update({
+        where: { threadId: app.threadId },
+        data: { viewerId: BigInt(viewerId), ...paceFields(outcome.report) },
+    });
+    await postCardInThread(thread, outcome, updated.tags).catch((e) => console.error(`Card for ${app.threadId} failed:`, e));
+    await syncRecruitmentEntry(thread.client, updated, thread.url);
+    await notifyStaff(thread.client, updated, thread, outcome);
+    return { app: updated, outcome };
+}
+
+/**
+ * Picks up a trainer ID the applicant sends in their post after being asked.
+ * Only the applicant's own messages, and only while the application has no
+ * ID. Needs the Message Content intent; without it the content is empty and
+ * `/scout id:` in the post does the same. Never throws.
+ */
+export async function takeIdFromMessage(message: {
+    author: { id: string; bot: boolean };
+    content: string;
+    channel: unknown;
+}): Promise<void> {
+    try {
+        if (message.author.bot) return;
+        const thread = message.channel as ThreadChannel;
+        if (!thread || typeof (thread as { isThread?: () => boolean }).isThread !== 'function' || !thread.isThread() || !isApplicationThread(thread)) return;
+        const app = await prisma.clubApplication.findUnique({ where: { threadId: thread.id } });
+        if (!app || app.viewerId !== null || app.status !== 'OPEN' || message.author.id !== app.applicantId) return;
+        const id = extractTrainerId(message.content);
+        if (!id) return;
+        await announceWithId(thread, app, id);
+    } catch (e) {
+        console.error('Reading a trainer ID from a message failed:', e);
+    }
+}
+
+/**
  * Re-scouts an application, with a new trainer ID when given, and updates its
- * recruitment entry. Returns the outcome for the caller to show.
+ * recruitment entry. Returns the outcome for the caller to show. When this
+ * gives the application its first ID, staff are told, as when the ID comes
+ * in a message.
  */
 export async function rescoutApplication(thread: ThreadChannel, viewerId: string | null): Promise<{ app: ClubApplication; outcome: ScoutOutcome }> {
     const { app } = await ensureApplication(thread);
     const id = viewerId ?? app.viewerId?.toString() ?? null;
+    if (id && app.viewerId === null && app.status === 'OPEN') return announceWithId(thread, app, id);
     const outcome = await tryScout(id);
     const updated = await prisma.clubApplication.update({
         where: { threadId: app.threadId },
@@ -481,6 +552,11 @@ export async function closeApplication(thread: ThreadChannel): Promise<{ app: Cl
         if (joined === true) note = [app.note, 'Seen in the club on uma.moe.'].filter(Boolean).join('\n');
     }
     const updated = await prisma.clubApplication.update({ where: { threadId: app.threadId }, data: { status, note, closedAt: new Date() } });
+    // The applicant's Discord is tied to their trainer only once the post
+    // closes, and only to a trainer uma.moe knows (a name was found).
+    if (updated.viewerId !== null && updated.trainerName !== null) {
+        await linkApplicant(updated.guildId, updated.applicantId, updated.viewerId, updated.trainerName).catch((e) => console.error(`Linking ${updated.threadId} failed:`, e));
+    }
     await syncRecruitmentEntry(thread.client, updated, thread.url);
     return { app: updated, line };
 }

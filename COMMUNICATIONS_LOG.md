@@ -4,6 +4,20 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-04 — Applications tie Discord to the trainer
+
+Direction: the point of applications beyond deciding is to connect each
+Discord member to their trainer when possible. Decisions:
+
+- New applications link only when the post is closed.
+- Old posts (backfill) link when they are already done.
+- A post without an ID pings the applicant for it, and nothing is decided
+  until it is in, except a rejection, which needs no ID.
+- Of the ID-format gaps, comma/dot-grouped and full-width IDs are handled.
+  Trying every number in a post until one exists on uma.moe was not wanted.
+
+---
+
 ## 2026-11-04 — Applications move out of the forum
 
 Direction: forum posts in #apply-for-club now hold only the applicant's

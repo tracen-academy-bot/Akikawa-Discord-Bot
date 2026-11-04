@@ -23,7 +23,7 @@ import { handleProfileModal, isProfileModal } from './commands/clubProfile';
 import { handlePrefixMessage } from './prefix';
 import { handleHelpSelect, isHelpSelect } from './commands/help';
 import { handleCloseButton, isCloseButton } from './commands/close';
-import { openApplication } from './lib/applications/service';
+import { openApplication, takeIdFromMessage } from './lib/applications/service';
 
 /**
  * Builds a client with every handler attached.
@@ -98,6 +98,8 @@ client.on(Events.ThreadCreate, (thread: ThreadChannel, newlyCreated: boolean) =>
 
 client.on(Events.MessageCreate, (message) => {
     void handlePrefixMessage(message);
+    // An applicant replying with their trainer ID after being asked for it.
+    void takeIdFromMessage(message);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
