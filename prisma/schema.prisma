@@ -397,3 +397,62 @@ model ClubDirectory {
     signatures String[] @default([])
     updatedAt  DateTime @updatedAt
 }
+
+// ─── Club applications ────────────────────────────────────────────────────────
+
+/// Where an application stands.
+enum ApplicationStatus {
+    /// Waiting for a decision.
+    OPEN
+    /// Accepted into `clubId`; the post is locked until the applicant joins.
+    ACCEPTED
+    /// Not accepted; the post is locked.
+    REJECTED
+    /// Accepted, then closed by the applicant or staff once they joined.
+    JOINED
+    /// Closed by the applicant before a decision.
+    WITHDRAWN
+    /// A post from before the bot handled applications, archived or locked
+    /// with no decision tag: how it ended is not known.
+    CLOSED
+}
+
+/// One post in the club application forum (`FORUM_CHANNEL_ID`).
+///
+/// Made when the post opens, or the first time `/scout`, `/resolve` or
+/// `/close` is used in a post that predates the feature. Keeps the decision
+/// and the applicant's pace, and where their entry in the recruitment
+/// channel is, so it can be edited in place as the application moves on.
+model ClubApplication {
+    /// The forum post's thread ID.
+    threadId             String            @id
+    guildId              String
+    /// Discord user who opened the post.
+    applicantId          String
+    /// uma.moe trainer ID found in the post; null when none was found.
+    viewerId             BigInt?
+    trainerName          String?
+    /// The post's forum tags, by name, when it opened (e.g. "S+", "Casual").
+    tags                 String[]          @default([])
+    status               ApplicationStatus @default(OPEN)
+    /// The club accepted into (a `TrackedCircle` id). Not a foreign key, so
+    /// deleting a club keeps its applications; `clubName` keeps the name.
+    clubId               String?
+    clubName             String?
+    /// Staff note given with the decision.
+    note                 String?
+    /// Fans per day: last 30 days, last 3 and 6 finished months.
+    pace30               BigInt?
+    pace3m               BigInt?
+    pace6m               BigInt?
+    /// The applicant's entry in the recruitment channel.
+    recruitmentChannelId String?
+    recruitmentMessageId String?
+    resolvedById         String?
+    resolvedAt           DateTime?
+    closedAt             DateTime?
+    createdAt            DateTime          @default(now())
+    updatedAt            DateTime          @updatedAt
+
+    @@index([guildId, status])
+}

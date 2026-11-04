@@ -28,12 +28,12 @@ const VARIABLES: EnvVar[] = [
     { name: 'OFFICER_ROLE_IDS', required: false, purpose: 'Club Manager permission checks (nobody will be an officer)' },
     { name: 'CLUB_ROLE_IDS', required: false, purpose: '/role club-role swapping' },
     { name: 'DEFAULT_ROLE_ID', required: false, purpose: '/role fallback role assignment' },
-    { name: 'FORUM_CHANNEL_ID', required: false, purpose: 'tier-tag pings on new forum threads' },
+    { name: 'FORUM_CHANNEL_ID', required: false, purpose: 'club applications (scouting new posts, /resolve, /close)' },
     { name: 'COMP_COUNCIL_ROLE_ID', required: false, purpose: 'competitive tier pings' },
     { name: 'SEMI_COMP_COUNCIL_ROLE_ID', required: false, purpose: 'semi-competitive tier pings' },
     { name: 'CASUAL_COUNCIL_ROLE_ID', required: false, purpose: 'casual tier pings' },
     { name: 'TAG_TRANSFER_ID', required: false, purpose: 'the Transfer choice on /settag' },
-    { name: 'TAG_CLUB_APP_ACCEPTED_ID', required: false, purpose: 'the Club App Accepted choice on /settag' },
+    { name: 'TAG_CLUB_APP_ACCEPTED_ID', required: false, purpose: 'the Club App Accepted choice on /settag and the tag /resolve puts on accepted posts' },
     { name: 'EXTERNAL_API_KEY', required: false, purpose: 'uma.moe fan tracking (all /fans data commands)' },
 ];
 

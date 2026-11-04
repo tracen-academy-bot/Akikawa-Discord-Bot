@@ -1,4 +1,4 @@
-import type { UmaCircle, UmaCircleListResponse, UmaCircleResponse } from './types';
+import type { UmaCircle, UmaCircleListResponse, UmaCircleResponse, UmaProfileResponse } from './types';
 
 /**
  * Client for the uma.moe API.
@@ -123,6 +123,22 @@ async function get<T>(path: string, query: Record<string, string | number | unde
  */
 export function getCircle(circleId: number, month?: number, year?: number): Promise<UmaCircleResponse> {
     return get<UmaCircleResponse>('/api/v4/circles', { circle_id: circleId, month, year });
+}
+
+/**
+ * Fetches a trainer's public profile: name, current circle, the circle they
+ * were in each month, and monthly fan totals. Null when uma.moe has no
+ * trainer with that ID (404).
+ *
+ * @param viewerId Trainer ID, 9 to 12 digits.
+ */
+export async function getProfile(viewerId: string): Promise<UmaProfileResponse | null> {
+    try {
+        return await get<UmaProfileResponse>(`/api/v4/user/profile/${encodeURIComponent(viewerId)}`);
+    } catch (e) {
+        if (e instanceof UmaMoeError && e.status === 404) return null;
+        throw e;
+    }
 }
 
 /** Searches circles by name, for the add-circle autocomplete. */

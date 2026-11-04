@@ -121,6 +121,72 @@ channel can still be set with `/fans circle config alert_channel:` or on the
 dashboard.
 `scripts/palettes.ts` renders a preview of every theme and checks contrast.
 
+## Club applications
+
+Posts in the application forum (`FORUM_CHANNEL_ID`, #apply-for-club) are
+handled by the bot. When a post opens, it finds the trainer ID (9 to 12
+digits) in the title or the body and scouts the trainer on uma.moe:
+
+- **In the post:** the trainer's card. It shows fans per day over the last
+  30 days as a line, the 3- and 6-month averages, and a table of the last
+  months. The table lists the club, that club's rank that month, fans
+  gained, average fans per day while in the club (with the days), and how
+  they compare with an average member (with place). 100% means an average
+  member's share. Only members still in the club at month end count: anyone
+  who left or was kicked is removed from both the fans and the headcount.
+  The comparison covers only the days the trainer was in the club, so a
+  mid-month joiner is compared fairly.
+- **In #recruitment** (`RECRUITMENT_CHANNEL_ID`): one entry per application,
+  with status, destination club and pace. The entry is edited in place as
+  the application moves on.
+- **In #serious-discussion-only** (`STAFF_DISCUSSION_CHANNEL_ID`): the card,
+  and the clubs whose quota the trainer's pace clears. The message pings the
+  council roles and the recruiting roles that match the post's tier tags.
+  These pings used to go in the post itself. The recruiting roles are found
+  by name: S+ and S ping "S recruiting", A+ pings "A+ recruiting", A pings
+  "A recruiting", and B+ and Casual ping "Casual recruiting". A role that
+  does not exist is skipped.
+
+| Command | Who | Purpose |
+| --- | --- | --- |
+| `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
+| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Staff accept into their own club only. |
+| `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined. |
+| `/applications backfill [post_open]` | Club Managers | Imports every old post (open and archived) and matches each applicant to uma.moe and our clubs. Replies with a summary and a CSV. |
+
+The backfill uses one uma.moe profile request per trainer, about 3 per
+second, so a few hundred posts take a few minutes. It decides each post's
+status in this order:
+
+1. **Joined:** the trainer is in one of our clubs now.
+2. **Accepted:** the post has an accepted tag. The club recorded is the
+   latest of ours they were in since posting.
+3. **Rejected:** the post has a rejected tag.
+4. **Closed:** the post is archived or locked with no decision tag, so the
+   outcome is unknown.
+5. **Open:** none of the above.
+
+It posts nothing unless `post_open:true` is set, and then only entries for
+posts still open. A second run imports only posts with no row yet.
+
+A locked post has no message box for the applicant, so the decision comes
+with a **Close post** button. Applicants use that button, not `/close`.
+
+Averages are per calendar day. uma.moe's own `avg_daily` divides by days
+with a gain, which flatters trainers who skip days. Daily figures come from
+the `daily_fans` of each circle the trainer was in. Where uma.moe has a gap
+(no snapshot, often a circle it does not track), the rise across the gap is
+spread evenly over its days, and the card says which days. The month table
+shows totals, not per-day figures. Club rank badges come from
+`src/assets/ranks/<RANK>.png` (`B_PLUS.png`, `D_PLUS.png`, `SS.png`); a rank
+without a picture is drawn as an outlined label. Months uma.moe
+has no record of are left out of the averages, not counted as zero. The
+first month on record is also left out, because it may be partial.
+
+`/club poster [channel]` draws every club with a tier on one picture, for
+#club-bio. The picture shows tiers, avatars, expected ranks, quotas and open
+spots. It does not update itself; run it again after clubs change.
+
 ## Dashboard
 
 Runs inside the bot process — no second container. Set `DISCORD_CLIENT_SECRET`,
