@@ -4,7 +4,82 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Club applications: scouting, /resolve, /close; club poster
 
+Asked: show each applicant's last 30 days as a line and their last 3 to 6
+months, to sort them into club areas ahead of time; draw every club on one
+picture for #club-bio; add `/resolve` (a club, or Rejected) that locks the
+post, then `/close` once they join; put each applicant's status and average
+in #recruitment; and tell staff in #serious-discussion-only when someone
+applies.
+
+**Data (checked live against uma.moe on 2026-11-04).**
+
+- `/api/v4/user/profile/{id}` gives the name, current circle,
+  `circle_history` (one circle per month) and `fan_history.monthly`
+  (monthly gain across every circle). It has no daily series.
+- The daily series comes from each circle's `daily_fans` for that month.
+  The values are lifetime counts, so rows from different circles and months
+  merge into one timeline (`dailySeries`). `circle_history` names only one
+  circle per month, so a trainer who changed circle mid-month (Zix: Indomie
+  to TeamSirius in October) needs the previous month's circle as well.
+  `scoutTrainer` reads both.
+- `active_days` counts days with a gain, not days on record. In Zix's
+  September there were 30 days on record, 17 with a gain, and
+  `active_days` was 18. uma.moe's `avg_daily` is therefore per active day.
+  The bot divides by calendar days instead, to match how quotas are set.
+- A gap (no snapshot, often a circle uma.moe does not track): the rise
+  across the gap is exact, so it is spread evenly over the gap's days and
+  marked `estimated`. The card lists those days, and they do not count as
+  active days. Zix had 21 estimated days of 30.
+- Monthly averages leave out months uma.moe has no record of (not zero) and
+  the first month on record (it may be partial), unless that month is the
+  only one. The month in progress is shown but not averaged.
+- The headline pace for sorting is the last 30 days when at least 7 days
+  exist, else the last 3 months.
+
+**Flow** (`src/lib/applications/`).
+
+- `threadCreate` in `FORUM_CHANNEL_ID`: the bot finds the ID (title, then
+  body; bare, bracketed or grouped digits, 9 to 12), makes a
+  `ClubApplication` row, posts the card in the post, posts the
+  #recruitment entry and sends the staff notice. The staff notice carries
+  the card and the clubs whose per-day quota the pace clears.
+- This replaces the old in-post tier ping. The same `*_COUNCIL_ROLE_ID`
+  roles are now pinged in the staff channel, and Casual maps to the casual
+  council along with B+.
+- `/resolve`: a club's staff may accept into their own club only. Any
+  club's staff, or a Club Manager, or a member with Manage Threads may
+  reject. It tags the post (Club App Accepted or Rejected, the status tag
+  first, so the five-tag limit drops an applicant tag rather than the
+  decision), locks the post and replies with a Close post button. Running
+  it again changes the decision.
+- `/close` and the button: open by the applicant or club staff. An accepted
+  post becomes Joined, an open one becomes Withdrawn, and a rejected one
+  stays Rejected. For a tracked club, the bot checks whether uma.moe already
+  shows them in the circle and notes it on the entry. Then the post is
+  archived.
+- Posts from before this feature get their row the first time `/scout`,
+  `/resolve` or `/close` is used in them.
+- Recruitment and staff channels default to the IDs given and can be set,
+  or turned `off`, through `RECRUITMENT_CHANNEL_ID` and
+  `STAFF_DISCUSSION_CHANNEL_ID`.
+
+**Poster.** `/club poster [channel]`: a section per tier in directory
+order, then a card per club with its avatar, expected rank, quota, uma.moe
+rank and members with open spots. It is drawn at 2x scale. It is posted
+once, not kept up to date like the directory.
+
+**Not verified.** Clicking a button in a locked post was not tested against
+Discord itself. Applicants cannot type in a locked post, which is why the
+button exists. If the button is also refused, staff can still `/close`.
+
+**Tests.** `scripts/test-applications.ts` (59 assertions) covers ID
+parsing, the series (gaps, month boundaries, two circles), the averages,
+the fits, the tags, the entry text, both images, and resolve/close against
+Postgres with a fake post. `test-commands` now includes the new help page.
+
+---
 
 ## 2026-11-04 — "Days in" and Avg/day count finished days (non-MONTH)
 

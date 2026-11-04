@@ -76,3 +76,48 @@ export interface UmaCircleListResponse {
     limit?: number;
     total_pages?: number;
 }
+
+/**
+ * One month of a trainer's fan totals, from `fan_history.monthly` in the
+ * profile. Totals cover the whole month across every circle the trainer was
+ * in, unlike a circle's `daily_fans`, which covers only days in that circle.
+ *
+ * `active_days` counts days with a fan gain, not days on record (checked
+ * against `daily_fans` on 2026-11-04: 30 days on record, 17 with a gain,
+ * `active_days` 18). So `avg_daily` is per active day and flatters a trainer
+ * who skips days; the bot divides by calendar days instead.
+ */
+export interface UmaProfileMonth {
+    year?: number;
+    month?: number;
+    total_fans?: number | null;
+    monthly_gain?: number | null;
+    active_days?: number | null;
+    avg_daily?: number | null;
+    circle_id?: number | null;
+    circle_name?: string | null;
+}
+
+/** One month of `circle_history`: the circle the trainer was in that month. */
+export interface UmaProfileCircleMonth {
+    year?: number;
+    month?: number;
+    circle_id?: number | null;
+    circle_name?: string | null;
+}
+
+/** `GET /api/v4/user/profile/{account_id}`, the parts the bot reads. */
+export interface UmaProfileResponse {
+    trainer?: {
+        account_id?: string;
+        name?: string | null;
+    } | null;
+    /** The circle the trainer is in now; null when in none. */
+    circle?: UmaCircle | null;
+    /** Newest first. */
+    circle_history?: UmaProfileCircleMonth[] | null;
+    fan_history?: {
+        /** Newest first. */
+        monthly?: UmaProfileMonth[] | null;
+    } | null;
+}

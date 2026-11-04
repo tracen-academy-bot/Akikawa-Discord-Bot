@@ -121,6 +121,44 @@ channel can still be set with `/fans circle config alert_channel:` or on the
 dashboard.
 `scripts/palettes.ts` renders a preview of every theme and checks contrast.
 
+## Club applications
+
+Posts in the application forum (`FORUM_CHANNEL_ID`, #apply-for-club) are
+handled by the bot. When a post opens, it finds the trainer ID (9 to 12
+digits) in the title or the body and scouts the trainer on uma.moe:
+
+- **In the post:** the trainer's card. It shows fans per day over the last
+  30 days as a line, and over the last 3 and 6 finished months, with a bar
+  per month.
+- **In #recruitment** (`RECRUITMENT_CHANNEL_ID`): one entry per application,
+  with status, destination club and pace. The entry is edited in place as
+  the application moves on.
+- **In #serious-discussion-only** (`STAFF_DISCUSSION_CHANNEL_ID`): the card,
+  and the clubs whose quota the trainer's pace clears. The message pings the
+  council roles that match the post's tier tags. These pings used to go in
+  the post itself.
+
+| Command | Who | Purpose |
+| --- | --- | --- |
+| `/scout [id]` | Everyone | A trainer's card. In a post, it re-scouts the post or sets its ID. |
+| `/resolve outcome:<club or Rejected> [note]` | A club's staff, Club Managers | Decides the post: tags it, locks it and posts the decision. Staff accept into their own club only. |
+| `/close` | The applicant, club staff | Closes the post (archives it). An accepted post becomes Joined. |
+
+A locked post has no message box for the applicant, so the decision comes
+with a **Close post** button. Applicants use that button, not `/close`.
+
+Averages are per calendar day. uma.moe's own `avg_daily` divides by days
+with a gain, which flatters trainers who skip days. Daily figures come from
+the `daily_fans` of each circle the trainer was in. Where uma.moe has a gap
+(no snapshot, often a circle it does not track), the rise across the gap is
+spread evenly over its days, and the card says which days. Months uma.moe
+has no record of are left out of the averages, not counted as zero. The
+first month on record is also left out, because it may be partial.
+
+`/club poster [channel]` draws every club with a tier on one picture, for
+#club-bio. The picture shows tiers, avatars, expected ranks, quotas and open
+spots. It does not update itself; run it again after clubs change.
+
 ## Dashboard
 
 Runs inside the bot process — no second container. Set `DISCORD_CLIENT_SECRET`,

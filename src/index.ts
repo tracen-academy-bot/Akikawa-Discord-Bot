@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, ChannelType, ThreadChannel, ForumChannel, Events, MessageFlags } from 'discord.js';
+import { Client, GatewayIntentBits, ThreadChannel, Events, MessageFlags } from 'discord.js';
 import 'dotenv/config';
 // Imported before the command modules: several of them read configuration at
 // module load, so this must run first to report what is missing in plain
@@ -22,6 +22,8 @@ import { handleClubModal, isClubModal } from './commands/club';
 import { handleProfileModal, isProfileModal } from './commands/clubProfile';
 import { handlePrefixMessage } from './prefix';
 import { handleHelpSelect, isHelpSelect } from './commands/help';
+import { handleCloseButton, isCloseButton } from './commands/close';
+import { openApplication } from './lib/applications/service';
 
 /**
  * Builds a client with every handler attached.
@@ -32,12 +34,6 @@ import { handleHelpSelect, isHelpSelect } from './commands/help';
  */
 function buildClient(intents: GatewayIntentBits[]): Client {
 const client = new Client({ intents });
-
-const COMP_COUNCIL = process.env.COMP_COUNCIL_ROLE_ID!;
-const SEMI_COMP_COUNCIL = process.env.SEMI_COMP_COUNCIL_ROLE_ID!;
-const CASUAL_COUNCIL = process.env.CASUAL_COUNCIL_ROLE_ID!;
-
-const FORUM_ID = process.env.FORUM_CHANNEL_ID;
 
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Logged in as ${readyClient.user.tag}`);
@@ -92,55 +88,12 @@ client.once(Events.ClientReady, async (readyClient) => {
         process.exit(1);
     }
 });
-client.on('threadCreate', async (thread: ThreadChannel) => {
-    try {
-        if (thread.parent?.type != ChannelType.GuildForum) return;
-        if (thread.parentId !== FORUM_ID) return;
-
-        const parentForum = thread.parent as ForumChannel;
-        const threadRefresh = await thread.fetch();
-        const tagIds = threadRefresh.appliedTags; // string[]
-
-        const tagNames = tagIds
-            .map((tagId) => parentForum.availableTags.find((t) => t.id == tagId)?.name)
-            .filter((name): name is string => Boolean(name))
-            .map((name) => name.toLowerCase());
-        
-        const tierRoleMap: { tags: string[]; role: string; label: string }[] = [
-            { tags: ['s+', 's'], role: COMP_COUNCIL, label: 'competitive' },
-            { tags: ['a+', 'a'], role: SEMI_COMP_COUNCIL, label: 'semi-competitive' },
-            { tags: ['b+'], role: CASUAL_COUNCIL, label: 'casual' }
-        ];
-
-        const matchedRoles: string[] = [];
-        const matchedLabels: string[] = [];
-
-        for (const tier of tierRoleMap) {
-            const tag = tier.tags.some((t) => tagNames.includes(t));
-            if (tag && !matchedRoles.includes(tier.role)) {
-                matchedRoles.push(tier.role);
-                matchedLabels.push(tier.label);
-            }
-        }
-
-        if (matchedRoles.length === 0) {
-            console.log(`Thread "${threadRefresh.name}" has no matching tier tag — skipping ping.`);
-            return;
-        }
-
-        const role = matchedRoles.map((r) => `<@&${r}>`).join(' ');
-
-        const member = await thread.guild.members.fetch(threadRefresh.ownerId);
-        const ownerName = member.displayName;
-        const reason = `${ownerName} is looking for ${matchedLabels.join(' and ')} clubs!`;
-
-        await thread.send({
-            content: `**[${role}]**\n*${reason}*`,
-            allowedMentions: {roles: matchedRoles},
-        });
-    } catch (e) {
-        console.error('Error handling ping: ', e)
-    }
+// A new post in the application forum: scout the trainer, post their card,
+// add a recruitment entry and tell staff. The council pings that used to go
+// in the post itself now go to the staff channel (see applications/service).
+client.on(Events.ThreadCreate, (thread: ThreadChannel, newlyCreated: boolean) => {
+    if (!newlyCreated) return;
+    void openApplication(thread);
 });
 
 client.on(Events.MessageCreate, (message) => {
@@ -162,9 +115,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
     // Panel buttons are routed by custom ID rather than a component collector,
     // so panels posted before a restart keep working afterwards.
     if (interaction.isButton()) {
-        if (!isTimerButton(interaction.customId)) return;
+        const handler = isTimerButton(interaction.customId)
+            ? handleTimerButton
+            : isCloseButton(interaction.customId)
+              ? handleCloseButton
+              : null;
+        if (!handler) return;
         try {
-            await handleTimerButton(interaction);
+            await handler(interaction);
         } catch (e) {
             const classified = classifyError(e);
             const label = classified.incidentId ? `[incident ${classified.incidentId}] ` : '';

@@ -1037,7 +1037,7 @@ async function main() {
     check('subcommands in a group are listed', entries.some((e) => e.name === 'club member add'), true);
     type V2 = { type: number; content?: string; components?: V2[]; accessory?: V2 };
     const flat = (c: V2): V2[] => [c, ...(c.components ?? []).flatMap(flat), ...(c.accessory ? flat(c.accessory) : [])];
-    const pages = (['start', 'fans', 'clubs', 'timer', 'tools'] as const).map((t) => ({
+    const pages = (['start', 'fans', 'clubs', 'applications', 'timer', 'tools'] as const).map((t) => ({
         topic: t,
         parts: flat(help.buildHelp(helpJson, t, { manager: false, avatarUrl: 'https://cdn.example/a.png' }).toJSON() as unknown as V2),
     }));

@@ -4,6 +4,31 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-04 — Applications move out of the forum
+
+Direction: forum posts in #apply-for-club now hold only the applicant's
+info and staff's decision. Discussion and pings move to
+#serious-discussion-only, and the running list of applicants lives in
+#recruitment. Staff decide with `/resolve` (a club or Rejected), which
+locks the post. The applicant closes it once they have joined.
+
+Choices Claude made that are open to change:
+- The applicant's card in the post shows only their own numbers. Which
+  clubs' quota they clear is shown to staff only.
+- Accepting is limited to the club's own staff (and Club Managers).
+  Rejecting is open to any club's staff.
+- Casual maps to the casual council ping, beside B+.
+- The poster is a one-off post, not part of the auto-updating directory.
+
+Open:
+- The exact pings and roles: the user will set them later. For now they are
+  the existing `*_COUNCIL_ROLE_ID` variables, keyed by tier tags.
+- Whether the forum has a "Rejected" tag. Without one, or without
+  `TAG_REJECTED_ID`, rejected posts are locked but not tagged.
+- Whether the poster should replace or head the #club-bio directory.
+
+---
+
 ## 2026-10-30 — Still in Love theme; a private send for later
 
 Fwoxie shaped the Still in Love theme over many rounds (details in
