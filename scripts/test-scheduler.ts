@@ -114,6 +114,13 @@ async function main() {
     check('specials: unfound rows hide the name', [col(0)[0], col(1)[0], col(2)[0]], ['**1.** ???', '—', '—']);
     check('specials: a found row shows name, count and finder', [col(0)[1], col(1)[1], col(2)[1]?.startsWith('<@u1> <t:')], ['**2.** Agnes Tachyon', '**×2**', true]);
     check('specials: no line text is ever shown', RARE_PING_OPENERS.some((t) => JSON.stringify(embed).includes(t.replace('{user}', '').trim().slice(0, 20))), false);
+    const { buildPanel, BUTTON_SPECIALS } = await import('../src/lib/timer/panel');
+    const panelJson = JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never));
+    check('panel: has the Specials button', [panelJson.includes(BUTTON_SPECIALS), panelJson.includes('"label":"Specials"')], [true, true]);
+    const mine = rares.raresEmbed(await rares.rareTally(RG, 'u2'), true).toJSON();
+    const mcol = (n: number) => mine.fields?.[n]?.value.split('\n') ?? [];
+    check('specials: your own list counts only your finds', [mine.title, mcol(0)[1], mcol(1)[1], mcol(0)[4]], [`Your specials: 1 of ${RARE_PING_OPENERS.length}`, '**2.** Agnes Tachyon', '**×1**', '**5.** ???']);
+    check('specials: your own list shows when, not who', [mine.fields?.[2]?.name, mcol(2)[1]?.startsWith('<t:'), mine.footer?.text.startsWith('1 special ping for you')], ['First got', true, true]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [

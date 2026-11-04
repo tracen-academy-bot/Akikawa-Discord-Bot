@@ -33,9 +33,9 @@ export interface RareTally {
     firstAt: Date | null;
 }
 
-/** Every rare line, in list order, with its tally in a guild. */
-export async function rareTally(guildId: string): Promise<RareTally[]> {
-    const hits = await prisma.rareOpenerHit.findMany({ where: { guildId }, orderBy: { at: 'asc' } });
+/** Every rare line, in list order, with its tally in a guild, or for one trainer when `discordUserId` is given. */
+export async function rareTally(guildId: string, discordUserId?: string): Promise<RareTally[]> {
+    const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, ...(discordUserId ? { discordUserId } : {}) }, orderBy: { at: 'asc' } });
     return RARE_OPENERS.map(({ name, text: opener }) => {
         const mine = hits.filter((h) => h.opener === opener);
         return { name, opener, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null };
@@ -44,23 +44,28 @@ export async function rareTally(guildId: string): Promise<RareTally[]> {
 
 /**
  * The `/timer specials` embed: three columns (the special's name, how many
- * times it came up, who found it first), one row per special. A special
+ * times it came up, who found it first, or when for a trainer's own list),
+ * one row per special. A special
  * nobody has had yet shows as "???". Names are short, so the columns stay
  * lined up.
  */
-export function raresEmbed(tally: RareTally[]): EmbedBuilder {
+export function raresEmbed(tally: RareTally[], personal = false): EmbedBuilder {
     const found = tally.filter((t) => t.count > 0).length;
     const total = tally.reduce((sum, t) => sum + t.count, 0);
     const names = tally.map((t, i) => `**${i + 1}.** ${t.count > 0 ? t.name : '???'}`);
     const counts = tally.map((t) => (t.count > 0 ? `**×${t.count}**` : '—'));
-    const firsts = tally.map((t) => (t.count > 0 && t.firstUserId && t.firstAt ? `<@${t.firstUserId}> <t:${Math.floor(t.firstAt.getTime() / 1000)}:R>` : '—'));
+    const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
+    const firsts = tally.map((t) => (t.count > 0 && t.firstUserId && t.firstAt ? (personal ? when(t) : `<@${t.firstUserId}> ${when(t)}`) : '—'));
+    const pings = `${total} special ping${total === 1 ? '' : 's'}`;
     return new EmbedBuilder()
         .setColor(0xf2a87a)
-        .setTitle(`Specials found: ${found} of ${tally.length}`)
+        .setTitle(personal ? `Your specials: ${found} of ${tally.length}` : `Specials found: ${found} of ${tally.length}`)
         .addFields(
             { name: 'Special', value: names.join('\n').slice(0, 1024), inline: true },
             { name: 'Times', value: counts.join('\n').slice(0, 1024), inline: true },
-            { name: 'First found by', value: firsts.join('\n').slice(0, 1024), inline: true },
+            { name: personal ? 'First got' : 'First found by', value: firsts.join('\n').slice(0, 1024), inline: true },
         )
-        .setFooter({ text: `${total} special ping${total === 1 ? '' : 's'} so far. Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a special line.` });
+        .setFooter({
+            text: `${personal ? `${pings} for you so far` : `${pings} on the server so far`}. Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a special line.`,
+        });
 }

@@ -48,11 +48,14 @@ npm run dev                  # slash commands register themselves on start
 | **Stop** | Cancels your run; it does not count |
 | **My Stats** | Your statistics card |
 | **Leaderboard** | This week's standings, live |
+| **Specials** | The special lines you have found, only to you (same as `/timer specials`) |
 
 Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
 (this week live, last week final, last 30 days, all time). `/timer specials`
-lists the special (rare) ping lines found so far, by name, with how many
-times each came up and who found it first. Pings
+shows, only to you, the special (rare) ping lines you have found, by
+name, with how many times each came up and when you first got it.
+Club Managers can add `everyone:true` for the whole server's tally (also
+only to them), with who found each first. Pings
 are deleted 2 minutes after they post.
 
 ### Rewards
