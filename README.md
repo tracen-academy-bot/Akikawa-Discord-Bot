@@ -220,13 +220,18 @@ spots. It does not update itself; run it again after clubs change.
 
 When someone joins the server, the bot posts a welcome in the channel set
 with `/welcome channel`: a ping, then the text with their avatar. The
-default text speaks as Chairwoman Yayoi Akikawa. Bots are
+text is one of several greetings in Chairwoman Yayoi Akikawa's voice,
+picked at random. Under it, a **Say hi!** button lets members greet the
+newcomer, once each. When a member starts boosting, Yayoi thanks them in
+the same channel. Discord only tells bots about a member's first boost,
+not later ones, and bots cannot use Discord's own sticker prompt. Bots are
 not welcomed. Club Managers set it up:
 
 | Command | Purpose |
 | --- | --- |
 | `/welcome channel <channel>` | Turn welcomes on, posting there |
-| `/welcome message` | Edit the text in a form (it can span lines; empty goes back to the default) |
+| `/welcome message` | Edit the text in a form. A line of just `---` starts another variant; one is picked at random. Empty goes back to the built-in greetings. |
+| `/welcome options [wave] [boosts]` | Turn the "Say hi!" button and the boost thank-yous on or off (both on by default) |
 | `/welcome test` | See the welcome as a new member would, only to you |
 | `/welcome off` | Stop welcoming; the text is kept |
 

@@ -106,6 +106,7 @@ export const AUDIENCE: Record<string, Audience> = {
     'welcome channel': 'managers',
     'welcome message': 'managers',
     'welcome test': 'managers',
+    'welcome options': 'managers',
     'welcome off': 'managers',
     post: 'managers',
 

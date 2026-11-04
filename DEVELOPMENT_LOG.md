@@ -4,6 +4,34 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Welcome: random greetings, "Say hi!", boost thank-yous
+
+Asked: replace Discord's system messages (random welcome, sticker reply
+prompt, boost message) with the bot, as Yayoi.
+
+- **Random welcome:** four built-in greetings in Yayoi's voice, one
+  picked per join. A custom text can hold its own variants, split by
+  lines of just `---`.
+- **"Say hi!":** bots cannot use Discord's sticker prompt, so a button
+  under the welcome posts a line from the presser to the newcomer
+  ("**Friendship!** @a waves hello to @b!"). It pings nobody. Each member
+  can wave once per welcome; this is remembered in memory for the last
+  500 welcomes, so a restart forgets. The newcomer cannot wave at
+  themselves.
+- **Boosts:** `GuildMemberUpdate` from no `premiumSince` to one means a
+  member started boosting, and gets a thank-you in the welcome channel
+  that pings them. Discord sends no event when a member already boosting
+  adds another boost, so those are not thanked. An uncached `before` is
+  skipped, since its missing boost state would make any update look like
+  a new boost.
+- `WelcomeSettings` gains `wave` and `boosts` (both default on), set with
+  `/welcome options`. `/welcome test` shows a random variant, the button,
+  and an example boost line.
+- Tests: variant splitting and picking, the button, waving once, boost
+  detection and the thank-you, with boosts on and off.
+
+---
+
 ## 2026-11-04 — Welcome in Chairwoman Akikawa's voice
 
 Asked: the welcome should sound like Yayoi Akikawa. The default text is

@@ -24,8 +24,8 @@ import { handlePrefixMessage } from './prefix';
 import { handleHelpSelect, isHelpSelect } from './commands/help';
 import { handleCloseButton, isCloseButton } from './commands/close';
 import { openApplication, takeIdFromMessage } from './lib/applications/service';
-import { welcomeMember } from './lib/welcome';
-import { handleWelcomeModal, isWelcomeModal } from './commands/welcome';
+import { startedBoosting, thankBooster, welcomeMember } from './lib/welcome';
+import { handleWaveButton, handleWelcomeModal, isWaveButton, isWelcomeModal } from './commands/welcome';
 
 /**
  * Builds a client with every handler attached.
@@ -103,6 +103,13 @@ client.on(Events.GuildMemberAdd, (member) => {
     void welcomeMember(member);
 });
 
+// A member starting to boost: a thank-you in the welcome channel.
+client.on(Events.GuildMemberUpdate, (before, after) => {
+    // An uncached `before` has no boost state; it could make any update of
+    // a booster look like a new boost, so it is skipped.
+    if (!before.partial && startedBoosting(before, after)) void thankBooster(after);
+});
+
 client.on(Events.MessageCreate, (message) => {
     void handlePrefixMessage(message);
     // An applicant replying with their trainer ID after being asked for it.
@@ -128,7 +135,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
             ? handleTimerButton
             : isCloseButton(interaction.customId)
               ? handleCloseButton
-              : null;
+              : isWaveButton(interaction.customId)
+                ? handleWaveButton
+                : null;
         if (!handler) return;
         try {
             await handler(interaction);

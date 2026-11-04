@@ -24,7 +24,24 @@ async function main() {
     check('placeholders are not case-sensitive', w.renderWelcome('{USER} {Server}', ctx), '<@42> Tracen Academy');
     check('unknown placeholder left as written', w.renderWelcome('{user} {nope}', ctx), '<@42> {nope}');
     check('missing channels read as words', w.renderWelcome('{apply} / {clubs}', { ...ctx, applyChannelId: null, clubsChannelId: null }), 'the club application forum / the club list');
-    check('default text uses every channel placeholder', ['{user}', '{apply}', '{clubs}'].every((p) => w.DEFAULT_WELCOME.includes(p)), true);
+    check('every built-in welcome uses the member and both channels', w.DEFAULT_WELCOMES.every((t) => ['{user}', '{apply}', '{clubs}'].every((p) => t.includes(p))), true);
+    check('variants split at --- lines', w.welcomeVariants('one\n---\ntwo\n  ---  \n\n---\nthree'), ['one', 'two', 'three']);
+    check('the built-in text splits back into its variants', w.welcomeVariants(w.DEFAULT_WELCOME).length, w.DEFAULT_WELCOMES.length);
+    check('pick is spread over all items', [w.pick(['a', 'b', 'c'], () => 0), w.pick(['a', 'b', 'c'], () => 0.5), w.pick(['a', 'b', 'c'], () => 0.999)], ['a', 'b', 'c']);
+    check('one variant picked per welcome', w.welcomePayload('A {user}\n---\nB {user}', ctx, null, false, () => 0.9).embeds[0]!.toJSON().description, 'B <@42>');
+    check('empty text falls back to the built-in welcomes', w.welcomePayload('   ', ctx, null, false, () => 0).embeds[0]!.toJSON().description?.startsWith('**Welcome!** <@42>'), true);
+    const withWave = w.welcomePayload('x', ctx, null, true);
+    const waveButton = (withWave.components[0]!.toJSON() as { components: { custom_id?: string; label?: string }[] }).components[0];
+    check('"Say hi!" button carries the newcomer', [waveButton?.label, waveButton?.custom_id, w.isWaveButton(waveButton?.custom_id ?? ''), w.waveTarget(waveButton?.custom_id ?? '')], ['Say hi!', 'welcome:wave:42', true, '42']);
+    check('no button when wave is off', w.welcomePayload('x', ctx, null, false).components.length, 0);
+    check('wave line names both and pings nobody', [w.wavePayload('7', '42', () => 0).content, w.wavePayload('7', '42').allowedMentions], ['**Friendship!** <@7> waves hello to <@42>!', { parse: [] }]);
+    check('each member waves once per welcome', [w.recordWave('m1', '7'), w.recordWave('m1', '7'), w.recordWave('m1', '8'), w.recordWave('m2', '7')], [true, false, true, true]);
+    check('boost thank-you pings the booster', [w.boostPayload('9', 'Tracen Academy', () => 0).content, w.boostPayload('9', 'x').allowedMentions], ['**Gratitude!** <@9> has boosted **Tracen Academy**! The academy thanks you for your generous support!', { users: ['9'] }]);
+    check('starting to boost is seen; already boosting is not', [
+        w.startedBoosting({ premiumSinceTimestamp: null }, { premiumSinceTimestamp: 1 }),
+        w.startedBoosting({ premiumSinceTimestamp: 1 }, { premiumSinceTimestamp: 1 }),
+        w.startedBoosting({ premiumSinceTimestamp: 1 }, { premiumSinceTimestamp: null }),
+    ], [true, false, false]);
     const payload = w.welcomePayload('{user} @everyone', ctx, 'https://cdn.example/a.png');
     check('payload pings only the newcomer', [payload.content, payload.allowedMentions], ['<@42>', { users: ['42'] }]);
     check('payload has the avatar', payload.embeds[0]!.toJSON().thumbnail?.url, 'https://cdn.example/a.png');
@@ -47,13 +64,21 @@ async function main() {
         check('bots are not welcomed', sent.length, 0);
         await w.welcomeMember(member() as unknown as Member);
         const first = sent[0] as { embeds: { toJSON(): { description?: string } }[] };
-        check('member welcomed with the default text', first?.embeds[0]?.toJSON().description?.startsWith('**Welcome!** <@42>, I, Chairwoman Akikawa, welcome you to **Tracen Academy**! You are trainer #99!'), true);
+        const rendered = w.DEFAULT_WELCOMES.map((t) => w.renderWelcome(t, { userId: '42', serverName: 'Tracen Academy', memberCount: 99, applyChannelId: 'forum-1', clubsChannelId: null }));
+        check('member welcomed with one of the built-in welcomes', rendered.includes(first?.embeds[0]?.toJSON().description ?? ''), true);
+        check('welcome has the "Say hi!" button by default', (sent[0] as { components: unknown[] }).components.length, 1);
         await prisma.welcomeSettings.update({ where: { guildId }, data: { message: 'Yo {user}' } });
         await w.welcomeMember(member() as unknown as Member);
         check('custom text used', (sent[1] as typeof first).embeds[0]?.toJSON().description, 'Yo <@42>');
         await prisma.welcomeSettings.update({ where: { guildId }, data: { channelId: 'gone' } });
         await w.welcomeMember(member() as unknown as Member);
         check('a missing channel posts nothing and does not throw', sent.length, 2);
+        await prisma.welcomeSettings.update({ where: { guildId }, data: { channelId: 'welcome-1' } });
+        await w.thankBooster(member() as unknown as Member);
+        check('a new booster is thanked in the welcome channel', (sent[2] as { content: string })?.content.includes('<@42>'), true);
+        await prisma.welcomeSettings.update({ where: { guildId }, data: { boosts: false } });
+        await w.thankBooster(member() as unknown as Member);
+        check('no thank-you with boosts off', sent.length, 3);
     } finally {
         await prisma.welcomeSettings.deleteMany({ where: { guildId } });
         await prisma.$disconnect();
