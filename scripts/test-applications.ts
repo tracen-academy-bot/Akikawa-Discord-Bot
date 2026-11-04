@@ -190,6 +190,19 @@ async function main() {
     check('pings: S+ and Casual', svc.tierRolesFor(['S+', 'Casual']), { roles: ['role-comp', 'role-casual'], labels: ['competitive', 'casual'] });
     check('pings: unset role still labels', svc.tierRolesFor(['A']), { roles: [], labels: ['semi-competitive'] });
     check('pings: no tier tags', svc.tierRolesFor(['Transfer']), { roles: [], labels: [] });
+    const serverRoles = [
+        { id: 'r-s', name: 'S recruiting' },
+        { id: 'r-ap', name: 'A+ recruiting' },
+        { id: 'r-a', name: 'A recruiting' },
+        { id: 'r-c', name: 'Casual recruiting' },
+        { id: 'r-x', name: 'Rose Trainer' },
+    ];
+    check('recruiting: S+ and S ping S recruiting once', svc.recruitingRolesFor(['S+', 'S'], serverRoles), ['r-s']);
+    check('recruiting: A+ and A are separate roles', svc.recruitingRolesFor(['A'], serverRoles), ['r-a']);
+    check('recruiting: B+ and Casual ping Casual recruiting', svc.recruitingRolesFor(['B+'], serverRoles), ['r-c']);
+    check('recruiting: several tiers', svc.recruitingRolesFor(['S', 'A+', 'Casual'], serverRoles), ['r-s', 'r-ap', 'r-c']);
+    check('recruiting: no tier tags, no pings', svc.recruitingRolesFor(['Transfer'], serverRoles), []);
+    check('recruiting: missing role is skipped', svc.recruitingRolesFor(['A'], [{ id: 'r-s', name: 'S recruiting' }]), []);
 
     // ── Recruitment entry ─────────────────────────────────────────────────────
     const base = {

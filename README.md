@@ -141,8 +141,11 @@ digits) in the title or the body and scouts the trainer on uma.moe:
   the application moves on.
 - **In #serious-discussion-only** (`STAFF_DISCUSSION_CHANNEL_ID`): the card,
   and the clubs whose quota the trainer's pace clears. The message pings the
-  council roles that match the post's tier tags. These pings used to go in
-  the post itself.
+  council roles and the recruiting roles that match the post's tier tags.
+  These pings used to go in the post itself. The recruiting roles are found
+  by name: S+ and S ping "S recruiting", A+ pings "A+ recruiting", A pings
+  "A recruiting", and B+ and Casual ping "Casual recruiting". A role that
+  does not exist is skipped.
 
 | Command | Who | Purpose |
 | --- | --- | --- |

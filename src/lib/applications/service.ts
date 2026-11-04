@@ -30,8 +30,8 @@ import { headlinePace, scoutTrainer, type ScoutReport } from './scout';
  *   - posts an entry in the recruitment channel (status, destination, pace),
  *     edited in place as the application moves on;
  *   - posts the card in the staff discussion channel with the clubs whose
- *     quota the trainer's pace clears, pinging the council roles of the
- *     post's tier tags.
+ *     quota the trainer's pace clears, pinging the council and recruiting
+ *     roles of the post's tier tags.
  *
  * Decisions are made with `/resolve` (a club, or Rejected), which tags the
  * post and locks it. Once the applicant joins, they (or staff) close it with
@@ -87,6 +87,26 @@ export function tierRolesFor(tagNames: string[]): { roles: string[]; labels: str
         if (tier.role && !roles.includes(tier.role)) roles.push(tier.role);
     }
     return { roles, labels };
+}
+
+/**
+ * Recruiting roles, held by the people who run clubs at each tier, found by
+ * name in the server. Pinged with the council roles when an application
+ * opens with a matching tier tag. S covers S+ (there is no S+ role); B+
+ * goes with Casual, as the council pings do.
+ */
+const RECRUITING_ROLES: { tags: string[]; name: string }[] = [
+    { tags: ['s+', 's'], name: 's recruiting' },
+    { tags: ['a+'], name: 'a+ recruiting' },
+    { tags: ['a'], name: 'a recruiting' },
+    { tags: ['b+', 'casual'], name: 'casual recruiting' },
+];
+
+/** The IDs of the recruiting roles for a set of tag names, among `roles`. */
+export function recruitingRolesFor(tagNames: string[], roles: Iterable<{ id: string; name: string }>): string[] {
+    const lower = tagNames.map((t) => t.trim().toLowerCase());
+    const wanted = new Set(RECRUITING_ROLES.filter((r) => r.tags.some((t) => lower.includes(t))).map((r) => r.name));
+    return [...roles].filter((r) => wanted.has(r.name.trim().toLowerCase())).map((r) => r.id);
 }
 
 /** True when the thread is a post in the application forum. */
@@ -265,7 +285,9 @@ async function notifyStaff(client: Client, app: ClubApplication, thread: ThreadC
     try {
         const channel = await textChannel(client, STAFF_CHANNEL_ID);
         if (!channel) return;
-        const { roles, labels } = tierRolesFor(app.tags);
+        const tier = tierRolesFor(app.tags);
+        const labels = tier.labels;
+        const roles = [...new Set([...tier.roles, ...recruitingRolesFor(app.tags, thread.guild.roles.cache.values())])];
         const pace = outcome.report ? headlinePace(outcome.report) : null;
         const fits = fitsText(clubFits(pace?.perDay ?? null, await clubsWithQuota(app.guildId)));
         const lines = [

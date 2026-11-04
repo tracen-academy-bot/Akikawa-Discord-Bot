@@ -22,7 +22,11 @@ Choices Claude made that are open to change:
 
 Open:
 - The exact pings and roles: the user will set them later. For now they are
-  the existing `*_COUNCIL_ROLE_ID` variables, keyed by tier tags.
+  the existing `*_COUNCIL_ROLE_ID` variables, keyed by tier tags. The user
+  added the recruiting roles held by club runners ("S recruiting", "A+
+  recruiting", "A recruiting", "Casual recruiting"). They are pinged by tier
+  tag too, found by name: S covers S+, and B+ goes with Casual (Claude's
+  call).
 - Whether the forum has a "Rejected" tag. Without one, or without
   `TAG_REJECTED_ID`, rejected posts are locked but not tagged.
 - Whether the poster should replace or head the #club-bio directory.
