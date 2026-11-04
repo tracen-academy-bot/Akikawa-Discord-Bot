@@ -103,9 +103,17 @@ async function main() {
     const tally = await rares.rareTally(RG);
     check('rares: tally per line, first finder kept', [tally.length, tally[1]?.count, tally[1]?.firstUserId, tally[4]?.count, tally[0]?.count], [RARE_PING_OPENERS.length, 2, 'u1', 1, 0]);
     const embed = rares.raresEmbed(tally).toJSON();
-    check('rares: embed counts lines found and hides the rest', [embed.title, embed.description?.split('\n')[0]], [`Rare lines found: 2 of ${RARE_PING_OPENERS.length}`, '**1.** ???']);
-    check('rares: a found line shows its name, count and finder', embed.description?.split('\n')[1]?.startsWith('**2.** Agnes Tachyon · ×2 · first: <@u1>'), true);
-    check('rares: no line text is ever shown', RARE_PING_OPENERS.some((t) => embed.description?.includes(t.replace('{user}', '').trim().slice(0, 20))), false);
+    const col = (n: number) => embed.fields?.[n]?.value.split('\n') ?? [];
+    check('specials: three columns, one row per special', [embed.title, embed.fields?.map((f) => f.name), col(0).length, col(1).length, col(2).length], [
+        `Specials found: 2 of ${RARE_PING_OPENERS.length}`,
+        ['Special', 'Times', 'First found by'],
+        RARE_PING_OPENERS.length,
+        RARE_PING_OPENERS.length,
+        RARE_PING_OPENERS.length,
+    ]);
+    check('specials: unfound rows hide the name', [col(0)[0], col(1)[0], col(2)[0]], ['**1.** ???', '—', '—']);
+    check('specials: a found row shows name, count and finder', [col(0)[1], col(1)[1], col(2)[1]?.startsWith('<@u1> <t:')], ['**2.** Agnes Tachyon', '**×2**', true]);
+    check('specials: no line text is ever shown', RARE_PING_OPENERS.some((t) => JSON.stringify(embed).includes(t.replace('{user}', '').trim().slice(0, 20))), false);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [

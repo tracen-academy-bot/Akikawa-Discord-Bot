@@ -5,7 +5,7 @@ import { RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE } from './openers';
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
  * first. Recorded when a ping with a rare opener is posted; shown by
- * `/timer rares` by name (never the line itself), with lines nobody has had
+ * `/timer specials` by name (never the line itself), with lines nobody has had
  * yet as "???".
  */
 
@@ -42,18 +42,25 @@ export async function rareTally(guildId: string): Promise<RareTally[]> {
     });
 }
 
-/** The `/timer rares` embed. */
+/**
+ * The `/timer specials` embed: three columns (the special's name, how many
+ * times it came up, who found it first), one row per special. A special
+ * nobody has had yet shows as "???". Names are short, so the columns stay
+ * lined up.
+ */
 export function raresEmbed(tally: RareTally[]): EmbedBuilder {
     const found = tally.filter((t) => t.count > 0).length;
     const total = tally.reduce((sum, t) => sum + t.count, 0);
-    const lines = tally.map((t, i) =>
-        t.count > 0 && t.firstUserId && t.firstAt
-            ? `**${i + 1}.** ${t.name} · ×${t.count} · first: <@${t.firstUserId}> <t:${Math.floor(t.firstAt.getTime() / 1000)}:R>`
-            : `**${i + 1}.** ???`,
-    );
+    const names = tally.map((t, i) => `**${i + 1}.** ${t.count > 0 ? t.name : '???'}`);
+    const counts = tally.map((t) => (t.count > 0 ? `**×${t.count}**` : '—'));
+    const firsts = tally.map((t) => (t.count > 0 && t.firstUserId && t.firstAt ? `<@${t.firstUserId}> <t:${Math.floor(t.firstAt.getTime() / 1000)}:R>` : '—'));
     return new EmbedBuilder()
         .setColor(0xf2a87a)
-        .setTitle(`Rare lines found: ${found} of ${tally.length}`)
-        .setDescription(lines.join('\n').slice(0, 4096))
-        .setFooter({ text: `${total} rare ping${total === 1 ? '' : 's'} so far. Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a rare line.` });
+        .setTitle(`Specials found: ${found} of ${tally.length}`)
+        .addFields(
+            { name: 'Special', value: names.join('\n').slice(0, 1024), inline: true },
+            { name: 'Times', value: counts.join('\n').slice(0, 1024), inline: true },
+            { name: 'First found by', value: firsts.join('\n').slice(0, 1024), inline: true },
+        )
+        .setFooter({ text: `${total} special ping${total === 1 ? '' : 's'} so far. Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a special line.` });
 }

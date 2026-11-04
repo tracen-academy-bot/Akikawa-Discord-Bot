@@ -87,7 +87,7 @@ export const data = new SlashCommandBuilder()
                 opt.setName('trainer').setDescription('Whose stats to show (defaults to you)').setRequired(false),
             ),
     )
-    .addSubcommand((sub) => sub.setName('rares').setDescription('The rare timer lines found so far, and who found each first.'))
+    .addSubcommand((sub) => sub.setName('specials').setDescription('The special timer lines found so far, how often, and who found each first.'))
     .addSubcommand((sub) =>
         sub
             .setName('leaderboard')
@@ -177,7 +177,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         case 'leaderboard':
             await handleLeaderboard(interaction);
             break;
-        case 'rares':
+        case 'specials':
             await interaction.reply({ embeds: [raresEmbed(await rareTally(interaction.guildId))], allowedMentions: { parse: [] } });
             break;
     }

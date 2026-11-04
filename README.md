@@ -50,8 +50,9 @@ npm run dev                  # slash commands register themselves on start
 | **Leaderboard** | This week's standings, live |
 
 Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
-(this week live, last week final, last 30 days, all time). `/timer rares`
-lists the rare ping lines found so far and who found each first. Pings
+(this week live, last week final, last 30 days, all time). `/timer specials`
+lists the special (rare) ping lines found so far, by name, with how many
+times each came up and who found it first. Pings
 are deleted 2 minutes after they post.
 
 ### Rewards
