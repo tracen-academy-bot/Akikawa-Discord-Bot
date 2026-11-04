@@ -1,11 +1,12 @@
 import { EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { RARE_PING_OPENERS, RARE_OPENER_CHANCE } from './openers';
+import { RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
  * first. Recorded when a ping with a rare opener is posted; shown by
- * `/timer rares`, with lines nobody has had yet as "???".
+ * `/timer rares` by name (never the line itself), with lines nobody has had
+ * yet as "???".
  */
 
 /** True when `opener` (a template, with `{user}`) is one of the rare lines. */
@@ -24,6 +25,8 @@ export async function recordRareOpener(guildId: string, discordUserId: string, o
 
 /** One rare line's tally. */
 export interface RareTally {
+    /** The line's name, shown instead of the line itself. */
+    name: string;
     opener: string;
     count: number;
     firstUserId: string | null;
@@ -33,16 +36,10 @@ export interface RareTally {
 /** Every rare line, in list order, with its tally in a guild. */
 export async function rareTally(guildId: string): Promise<RareTally[]> {
     const hits = await prisma.rareOpenerHit.findMany({ where: { guildId }, orderBy: { at: 'asc' } });
-    return RARE_PING_OPENERS.map((opener) => {
+    return RARE_OPENERS.map(({ name, text: opener }) => {
         const mine = hits.filter((h) => h.opener === opener);
-        return { opener, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null };
+        return { name, opener, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null };
     });
-}
-
-/** A line shortened for the list, without its mention placeholder. */
-export function preview(opener: string, max = 70): string {
-    const text = opener.replace(/\s*\{user\}\s*/g, ' ').replace(/\s+/g, ' ').trim();
-    return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
 }
 
 /** The `/timer rares` embed. */
@@ -51,7 +48,7 @@ export function raresEmbed(tally: RareTally[]): EmbedBuilder {
     const total = tally.reduce((sum, t) => sum + t.count, 0);
     const lines = tally.map((t, i) =>
         t.count > 0 && t.firstUserId && t.firstAt
-            ? `**${i + 1}.** "${preview(t.opener)}"\n-# ×${t.count} · first: <@${t.firstUserId}> <t:${Math.floor(t.firstAt.getTime() / 1000)}:R>`
+            ? `**${i + 1}.** ${t.name} · ×${t.count} · first: <@${t.firstUserId}> <t:${Math.floor(t.firstAt.getTime() / 1000)}:R>`
             : `**${i + 1}.** ???`,
     );
     return new EmbedBuilder()

@@ -97,7 +97,6 @@ async function main() {
     const rares = await import('../src/lib/timer/rares');
     const RG = `test-rares-${Date.now()}`;
     check('rares: a rare line is rare, a common one is not', [rares.isRareOpener(RARE_PING_OPENERS[2]!), rares.isRareOpener(PING_OPENERS[0]!)], [true, false]);
-    check('rares: preview drops the mention and trims', rares.preview('{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food!', 30), 'Hayaku, はやく! Tachyon is hungr…');
     await rares.recordRareOpener(RG, 'u1', RARE_PING_OPENERS[1]!);
     await rares.recordRareOpener(RG, 'u2', RARE_PING_OPENERS[1]!);
     await rares.recordRareOpener(RG, 'u3', RARE_PING_OPENERS[4]!);
@@ -105,7 +104,8 @@ async function main() {
     check('rares: tally per line, first finder kept', [tally.length, tally[1]?.count, tally[1]?.firstUserId, tally[4]?.count, tally[0]?.count], [RARE_PING_OPENERS.length, 2, 'u1', 1, 0]);
     const embed = rares.raresEmbed(tally).toJSON();
     check('rares: embed counts lines found and hides the rest', [embed.title, embed.description?.split('\n')[0]], [`Rare lines found: 2 of ${RARE_PING_OPENERS.length}`, '**1.** ???']);
-    check('rares: a found line shows its count and finder', embed.description?.includes('×2 · first: <@u1>'), true);
+    check('rares: a found line shows its name, count and finder', embed.description?.split('\n')[1]?.startsWith('**2.** Agnes Tachyon · ×2 · first: <@u1>'), true);
+    check('rares: no line text is ever shown', RARE_PING_OPENERS.some((t) => embed.description?.includes(t.replace('{user}', '').trim().slice(0, 20))), false);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [
