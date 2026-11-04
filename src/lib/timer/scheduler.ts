@@ -65,6 +65,9 @@ export const RARE_PING_OPENERS: readonly string[] = [
     'The Mejiro Estate welcomes your return, {user}. Please attend to your trainee as soon as possible. We have provided detailed updates on her development.',
     "Wassho~ *trips* Oooooow!...  ooh- My nose? It's fine, {user}! You're here now! Please come take a look at your trainee!",
     "{user} Onii-samaaa~ I don't want to cause much trouble, but the independent run has finished! Will you come take a look with me?",
+    'Your trainer has declared her in-dependence from the pack. A mare-velous revolution. ...ehem. Anyways, please look into it, {user}.',
+    '...Teio probably heard one of her *horrible* jokes again, so you will have to excuse this da- *meeting*... as I cater to her, {user}. Want to come to my garden later?',
+    "I don't want to have to wait for my leg! I want to meet your trainee! Teio wants to runnnn >.< Can I meet her, please {user}?",
 ];
 
 /** Chance, across all of them, that a ping opens with a rare line. */
