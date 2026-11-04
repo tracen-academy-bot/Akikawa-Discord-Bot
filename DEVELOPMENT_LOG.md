@@ -4,6 +4,31 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-04 — Welcome in Chairwoman Akikawa's voice
+
+Asked: the welcome should sound like Yayoi Akikawa. The default text is
+rewritten as the chairwoman: short, emphatic lines, each opened by a bold
+word ("**Welcome!**", "**Instruction!**", "**Expectation!**"), greeting
+the newcomer as a trainer. A text saved with `/welcome message` is not
+touched.
+
+---
+
+## 2026-11-04 — Board survives a move to a new bot account
+
+The user is moving to their own bot application (they hold Railway but not
+the old app's developer portal). A bot cannot edit another bot's messages.
+The club directory already reposts when an edit fails, but the recruitment
+board only reposted when the message could not be *fetched*. An unedited
+foreign board would have thrown on every refresh and never moved on. Now a
+failed edit also posts a fresh board. Test: an edit that throws
+"authored by another user" leads to one new board, stored.
+
+Also reverted the unused `idStatus` columns (1de37fc): the retry work they
+were for was dropped, and they had broken the test fixtures.
+
+---
+
 ## 2026-11-04 — One ask per post; a clearer ID ask
 
 A new post got the "send your trainer ID" ping twice. `ensureApplication`

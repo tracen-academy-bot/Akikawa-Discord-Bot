@@ -219,7 +219,8 @@ spots. It does not update itself; run it again after clubs change.
 ## Welcome message
 
 When someone joins the server, the bot posts a welcome in the channel set
-with `/welcome channel`: a ping, then the text with their avatar. Bots are
+with `/welcome channel`: a ping, then the text with their avatar. The
+default text speaks as Chairwoman Yayoi Akikawa. Bots are
 not welcomed. Club Managers set it up:
 
 | Command | Purpose |
