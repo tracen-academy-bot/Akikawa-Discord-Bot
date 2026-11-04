@@ -230,6 +230,24 @@ export async function refreshCutoffs(now = new Date()): Promise<{ done: number[]
 }
 
 /**
+ * Re-reads just the points of the circle on each cutoff place, keeping the
+ * rest of the figures: four uma.moe requests (the ranking is paged by 100).
+ * Called right before scheduled reports, whose club points are synced fresh,
+ * so the rank band compares points from the same moment. The full figures
+ * are only redone every six hours, and early in a month a few hours is
+ * enough for a fresh club total to pass a stale cutoff.
+ */
+export async function refreshCutoffPoints(): Promise<void> {
+    const cutoffs = [...new Set(Object.values(CUTOFF_BY_RANK))];
+    const ranked = await getCirclesAtRanks(cutoffs);
+    for (const cutoff of cutoffs) {
+        const series = latest.get(cutoff);
+        const points = ranked.get(cutoff)?.monthly_point;
+        if (series && points !== undefined && points !== null) latest.set(cutoff, { ...series, points });
+    }
+}
+
+/**
  * Works the figures out again when the last attempt is older than
  * `CUTOFF_MAX_AGE_MS`. Timed from the attempt, not each cutoff's success, so
  * a cutoff that keeps failing is retried every six hours, not every hour.

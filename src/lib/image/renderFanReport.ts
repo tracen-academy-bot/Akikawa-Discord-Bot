@@ -556,6 +556,17 @@ function rankBandHeight(band: RankBand, inline: boolean): number {
     return bar ? 104 : 22 + (band.above ? 22 : 0) + (band.below ? 22 : 0);
 }
 
+/**
+ * The club's place between its band's edges by points, 0 to 1, kept short of
+ * the top: its rank is below the cutoff above (that is what puts it in this
+ * band), so it has not reached it, whatever the points say. They can briefly
+ * disagree when uma.moe has updated the club's points but not yet the
+ * cutoff's, just after the daily reset.
+ */
+function bandRatio(band: RankBand, ends: { low: number; high: number }): number {
+    return Math.max(0, Math.min(0.98, (band.points - ends.low) / (ends.high - ends.low)));
+}
+
 /** Both edges' points, when the bar can be drawn between them. */
 function bandEnds(band: RankBand): { low: number; high: number } | null {
     const low = band.below?.points ?? null;
@@ -584,7 +595,7 @@ export function sceneRace(band: RankBand | null): SceneRace | null {
     const ends = band ? bandEnds(band) : null;
     if (!band || !ends) return null;
     return {
-        progress: (band.points - ends.low) / (ends.high - ends.low),
+        progress: bandRatio(band, ends),
         start: `#${band.below!.rank} ${band.below!.tier}`,
         finish: `#${band.above!.rank} ${band.above!.tier}`,
     };
@@ -601,7 +612,11 @@ function drawRankBand(ctx: SKRSContext2D, band: RankBand, x: number, y: number, 
     const title = band.below ? `${band.tier} band · #${from}–${band.below.rank}` : `Past #${band.above?.rank ?? ''} · ${band.tier}`;
     label(ctx, title, x, y + 12, 13, p.muted, p);
 
-    const toAbove = band.above && band.above.points !== null ? band.above.points - band.points : null;
+    // By points; but a club ranked below the cutoff above has not reached it,
+    // so points that say otherwise (one side updated, not the other) show as
+    // unknown rather than "reached".
+    const pointsToAbove = band.above && band.above.points !== null ? band.above.points - band.points : null;
+    const toAbove = pointsToAbove !== null && pointsToAbove <= 0 && band.above && band.rank > band.above.rank ? null : pointsToAbove;
     const overBelow = band.below && band.below.points !== null ? band.points - band.below.points : null;
     const up = band.above
         ? {
@@ -622,7 +637,7 @@ function drawRankBand(ctx: SKRSContext2D, band: RankBand, x: number, y: number, 
     const ends = bandEnds(band);
     if (ends) {
         const barY = y + 24;
-        const ratio = Math.max(0, Math.min(1, (band.points - ends.low) / (ends.high - ends.low)));
+        const ratio = bandRatio(band, ends);
         fillRound(ctx, x, barY, w, 6, 3, p.line);
         fillRound(ctx, x, barY, Math.max(6, w * ratio), 6, 3, p.accent);
         ctx.beginPath();

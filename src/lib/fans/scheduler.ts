@@ -1,5 +1,5 @@
 import { AttachmentBuilder, type Client } from 'discord.js';
-import { refreshCutoffs, refreshCutoffsIfStale, rankBand } from './cutoff';
+import { refreshCutoffPoints, refreshCutoffs, refreshCutoffsIfStale, rankBand } from './cutoff';
 import type { AlertFrequency, TrackedCircle } from '@prisma/client';
 import { prisma } from '../../db/prisma';
 import { isConfigured } from '../umamoe/client';
@@ -264,9 +264,17 @@ export async function runDailySync(): Promise<string> {
 export async function postDueReports(client: Client, now: Date): Promise<number> {
     const circles = await prisma.trackedCircle.findMany({ where: { active: true, reportChannelId: { not: null }, ...TRACKED } });
     let posted = 0;
+    let cutoffsFresh = false;
     for (const circle of circles) {
         if (!isReportDue(reportTimeOf(circle), now, circle.lastReportAt)) continue;
         await prisma.trackedCircle.update({ where: { id: circle.id }, data: { lastReportAt: now } });
+        // The cutoffs' points from now, as the club's are about to be.
+        if (!cutoffsFresh) {
+            cutoffsFresh = true;
+            await refreshCutoffPoints().catch((e: unknown) =>
+                console.warn('Refreshing the rank cutoff points failed; using the last ones:', e instanceof Error ? e.message : e),
+            );
+        }
         try {
             if (!circle.lastSyncedAt || now.getTime() - circle.lastSyncedAt.getTime() > FRESH_SYNC_MS) {
                 await syncCircle(circle).catch((e: unknown) =>

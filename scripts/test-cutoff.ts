@@ -126,6 +126,10 @@ async function main() {
     check('the race runs from the band bottom to the next cutoff', [race?.start, race?.finish], ['#500 A+', '#100 S']);
     check('she stands 60% along', Math.round((race?.progress ?? 0) * 100), 60);
     check('no race in the top band or without points', [sceneRace(top), sceneRace(past), sceneRace(null)], [null, null, null]);
+    // Cosmos, 2026-11-03: #199 with fresh points above a stale #100 figure.
+    // Its rank says it has not reached #100, so it stays short of the top.
+    const stale = sceneRace(cutoff.rankBand(199, 6_500_000_000));
+    check('points past the cutoff above, rank still below it: short of the top', (stale?.progress ?? 1) < 1, true);
 
     // Still in Love's mood: calm under 5% behind, fully turned at half the club.
     const { sceneMood } = await import('../src/lib/image/renderFanReport');
