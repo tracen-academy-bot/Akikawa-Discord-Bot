@@ -30,6 +30,10 @@ An A+ post was pinging A. The card looked rough.
   grouped by tier (`SEMI_COMP_COUNCIL_ROLE_ID` stood for A+ and A). The
   council pings and their `*_COUNCIL_ROLE_ID` variables are removed; the
   notice now pings only the exact recruiting role of each tag.
+- **Badges:** the user supplied D, D+, C, C+, B and SS (310x360,
+  transparent, framed like the others), so every rank uma.moe reports now
+  has its picture. Their ribbon reads "CLUB RANK" where the older five read
+  "CIRCLE RANK"; at 30 px it does not show.
 - **Card:** drawn at 2x, with high-quality smoothing for the rank badge
   (now 30 tall). The badge files (310x360) were never the problem; the 1x
   canvas was.

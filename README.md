@@ -192,7 +192,8 @@ the `daily_fans` of each circle the trainer was in. Where uma.moe has a gap
 spread evenly over its days, and the card says which days. The month table
 shows totals, not per-day figures. Club rank badges come from
 `src/assets/ranks/<RANK>.png` (`B_PLUS.png`, `D_PLUS.png`, `SS.png`); a rank
-without a picture is drawn as an outlined label. Months uma.moe
+without a picture (none since 2026-11-04; all of D to SS have one) is drawn
+as an outlined label. Months uma.moe
 has no record of are left out of the averages, not counted as zero. The
 first month on record is also left out, because it may be partial.
 
