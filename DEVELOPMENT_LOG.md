@@ -24,6 +24,8 @@ daily view's requests: up to about 9 per applicant instead of 4.
 - A month in which the trainer was in two circles is measured in the circle
   the profile names. "Fans gained" still covers both circles.
 - Ties share the better place.
+- Follow-up: share is shown times 30 (100% is an even 1/30 share of a full
+  club, an average member's weight), since a raw 1.1% said little.
 
 ---
 

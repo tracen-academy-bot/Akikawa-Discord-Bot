@@ -131,7 +131,8 @@ digits) in the title or the body and scouts the trainer on uma.moe:
   30 days as a line, the 3- and 6-month averages, and a table of the last
   months. The table lists the club, that club's rank that month, fans
   gained, average fans per day while in the club (with the days), and share
-  of the club's fans (with place). Share and place count only the days the
+  of the club's fans times 30, so 100% is an even share of a full club
+  (with place). Share and place count only the days the
   trainer was in the club, so a mid-month joiner is compared fairly.
 - **In #recruitment** (`RECRUITMENT_CHANNEL_ID`): one entry per application,
   with status, destination club and pace. The entry is edited in place as
