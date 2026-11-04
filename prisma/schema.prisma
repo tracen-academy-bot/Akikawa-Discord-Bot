@@ -445,12 +445,6 @@ model ClubApplication {
     pace30               BigInt?
     pace3m               BigInt?
     pace6m               BigInt?
-    /// What became of the trainer ID's last lookup, when it did not plainly
-    /// work: "RETRYING" (uma.moe was down; retried every few minutes) or
-    /// "NOT_FOUND" (no such trainer; the applicant's next ID replaces it).
-    idStatus             String?
-    /// When `idStatus` was set; retries stop 48 hours after.
-    idStatusSince        DateTime?
     /// The applicant's entry in the recruitment channel.
     recruitmentChannelId String?
     recruitmentMessageId String?
