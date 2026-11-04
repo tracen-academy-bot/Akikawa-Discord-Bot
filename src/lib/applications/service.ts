@@ -256,7 +256,8 @@ async function postCardInThread(thread: ThreadChannel, outcome: ScoutOutcome, ta
 export function askForIdMessage(applicantId: string): { content: string; allowedMentions: { users: string[] } } {
     return {
         content:
-            `<@${applicantId}>, please send your trainer ID here (the 9 to 12 digit number on your in-game profile). ` +
+            `<@${applicantId}>, please reply here with your trainer ID: the ID number on your in-game Trainer Card, ` +
+            'for example `530 923 123 456`. Just the number is fine. A screenshot alone does not work, the bot cannot read images. ' +
             'Staff can decide on this application once it is in.',
         allowedMentions: { users: [applicantId] },
     };
@@ -271,22 +272,34 @@ export async function ensureApplication(thread: ThreadChannel): Promise<{ app: C
     if (existing) return { app: existing, created: false };
     const starter = await starterMessage(thread);
     const viewerId = extractTrainerId(thread.name, starter?.content);
-    const app = await prisma.clubApplication.upsert({
-        where: { threadId: thread.id },
-        create: {
-            threadId: thread.id,
-            guildId: thread.guildId,
-            applicantId: thread.ownerId ?? starter?.author.id ?? 'unknown',
-            viewerId: viewerId ? BigInt(viewerId) : null,
-            tags: tagNames(thread),
-        },
-        update: {},
-    });
-    return { app, created: true };
+    try {
+        // A plain create, so only one caller can make the row: two handlers
+        // for the same post (a repeated event, or two bot processes during a
+        // redeploy) used to both see "none yet" and both post.
+        const app = await prisma.clubApplication.create({
+            data: {
+                threadId: thread.id,
+                guildId: thread.guildId,
+                applicantId: thread.ownerId ?? starter?.author.id ?? 'unknown',
+                viewerId: viewerId ? BigInt(viewerId) : null,
+                tags: tagNames(thread),
+            },
+        });
+        return { app, created: true };
+    } catch (e) {
+        const other = await prisma.clubApplication.findUnique({ where: { threadId: thread.id } });
+        if (other) return { app: other, created: false };
+        throw e;
+    }
 }
+
+/** Posts being opened by this process, so a repeated event is dropped at once. */
+const opening = new Set<string>();
 
 /** Handles a new post in the application forum. Never throws. */
 export async function openApplication(thread: ThreadChannel): Promise<void> {
+    if (opening.has(thread.id)) return;
+    opening.add(thread.id);
     try {
         if (!isApplicationThread(thread)) return;
         const fresh = await thread.fetch();
@@ -302,6 +315,8 @@ export async function openApplication(thread: ThreadChannel): Promise<void> {
         await announceWithId(fresh, app, app.viewerId.toString());
     } catch (e) {
         console.error(`Opening application ${thread.id} failed:`, e);
+    } finally {
+        opening.delete(thread.id);
     }
 }
 
