@@ -68,6 +68,16 @@ twice, once as owed in $E_i$ and once as still to play. That spread the gap
 over one day too many, so a member 619 fans behind was asked for less than
 the pace rate $q$ (see `DEVELOPMENT_LOG.md`, 2026-10-24).
 
+**Only finished days are owed and averaged** (since 2026-11-04). $d_i$ in
+$E_i$ and $A_i$ counts the member's days in the circle through $f$, the last
+finished day, not through $e$: the day in progress has a snapshot from just
+after the reset but almost no fans yet, so counting it charged a full day
+nobody had played and cut the average (Primrose, day 4: 114.05M averaged
+over 4 days instead of 3). Before any day has finished ($f = 0$, day 1 in
+progress) today counts. The reference report did count today in $E_i$ and
+$A_i$; its replay in `scripts/test-metrics.ts` now checks those figures for
+13 finished days, worked out from the same rows.
+
 **Need per day**, shown only when the member is behind:
 
 $$N_i = \left\lfloor \frac{Q_{\text{eff}} - T_i}{r} \right\rfloor$$
@@ -193,7 +203,7 @@ and it was replaced by the checkpoint model below.
 
 | Period | Checkpoints (end of game day) | Due at checkpoint $c$ |
 | --- | --- | --- |
-| MONTH | none; judged every day | `floor(quota / D)` × days so far, today included |
+| MONTH | none; judged every day | `floor(quota / D)` × finished days so far |
 | DAY | every day | $\lfloor Q \cdot c / 1 \rfloor$ |
 | WEEK | 7, 14, 21, 28, month end | $\lfloor Q \cdot c / 7 \rfloor$ |
 | BIWEEKLY | 14, 28, month end | $\lfloor Q \cdot c / 14 \rfloor$ |

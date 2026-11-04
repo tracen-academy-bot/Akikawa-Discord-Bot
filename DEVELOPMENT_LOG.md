@@ -495,6 +495,26 @@ Postgres with a fake post. `test-commands` now includes the new help page.
 
 ---
 
+
+## 2026-11-04 — Monthly quotas count finished days too
+
+Fwoxie on Primrose's day-4 report (monthly quota): "avg is still off". The
+previous fix left MONTH counting through the latest snapshot, to keep the
+reference replay. So Days in was 4, Avg/day was 114.05M / 4, and Expected
+owed a whole day 4 that had only just begun, which put members like Auyo
+(−14K) on the behind list. Fwoxie: no special case, count only what has
+happened ("count less if necessary; better if so").
+
+- MONTH is judged on the last finished day like the other periods:
+  Expected, Behind, Days in and Avg/day count through it. Days remaining
+  already did (2026-10-24). On day 1, before any day finishes, today counts.
+- The reference replay keeps its 24 rows; expected, behind and avg/day are
+  now checked for 13 finished days, worked out from each row's total and
+  day-14 gain. Total, need/day and the gain still match it exactly.
+- Test: day 4's monthly reset report gives 3 days, a three-day average and
+  three days owed. `docs/quota-math.md` updated.
+
+---
 ## 2026-11-04 — "Days in" and Avg/day count finished days (non-MONTH)
 
 Fwoxie: Cosmos's day-2 report (Nov 3) showed "Days in 3". A report at the

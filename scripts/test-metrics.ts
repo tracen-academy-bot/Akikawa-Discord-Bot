@@ -241,6 +241,16 @@ function biweeklyChecks() {
     const atReset = computeCircleProgress([reset], { ...bOpts, currentDay: 3 }).members[0]!;
     check('day 2 report: 2 days in, not 3', atReset.dataDays, 2);
     check('day 2 report: average over the 2 finished days', atReset.avgPerDay, 19_000_000);
+    // The same for a monthly quota (Primrose, 2026-11-04: day 4's reset
+    // report said 4 days in, 114.05M / 4, and owed a whole day 4 that had
+    // only just begun).
+    const monthly = steady(1, 38_000_000, 3);
+    monthly.dailyFans[4] = monthly.dailyFans[3]! + 20_000;
+    const mOpts = { quota: 100_000_000, daysInMonth: 30, currentDay: 4 };
+    const m4 = computeCircleProgress([monthly], mOpts).members[0]!;
+    check('monthly reset report: 3 days in, not 4', m4.dataDays, 3);
+    check('monthly reset report: average over 3 days', m4.avgPerDay, 38_000_000);
+    check('monthly reset report: owes 3 days, not 4', m4.expected, Math.floor(100_000_000 / 30) * 3);
     const firstReport = computeCircleProgress([steady(1, 5_000_000, 1)], { ...bOpts, currentDay: 1 }).members[0]!;
     check('day 1 in progress still counts as 1 day', firstReport.dataDays, 1);
     const b29 = computeCircleProgress([steady(1, 2_000_000, 29)], { ...bOpts, currentDay: 30 });
@@ -404,11 +414,21 @@ function main() {
             console.log(`FAIL  ${name} missing from output`);
             continue;
         }
+        // The reference bot also charged and averaged day 14 while it was
+        // still in progress. Since 2026-11-04 only finished days are owed and
+        // averaged (Fwoxie: "count less if necessary"), so expected, behind
+        // and avg/day are worked out here from the row for 13 days. Total,
+        // need/day (day 14 is still left to play) and the gain are unchanged.
+        void expected;
+        void behind;
+        void avgPerDay;
+        const through13 = total - gain;
+        const expected13 = progress.quotaPerDay * (DAYS_ELAPSED - 1);
         const ok =
             check(`${name} total`, m.total, total) &&
-            check(`${name} expected`, m.expected, expected) &&
-            check(`${name} behind`, m.behind, behind) &&
-            check(`${name} avg/day`, m.avgPerDay, avgPerDay) &&
+            check(`${name} expected (13 finished days)`, m.expected, expected13) &&
+            check(`${name} behind`, m.behind, Math.max(0, expected13 - through13)) &&
+            check(`${name} avg/day (13 finished days)`, m.avgPerDay, Math.floor(through13 / (DAYS_ELAPSED - 1))) &&
             check(`${name} need/day`, m.needPerDay, needPerDay) &&
             check(`${name} day-14 gain`, m.latestDayGain, gain);
         if (ok) rowsOk += 1;
