@@ -12,7 +12,7 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { applySpecialLocks, isRareOpener, recordRareOpener } from './rares';
+import { chooseOpener, isRareOpener, recordRareOpener } from './rares';
 import { pickOpener, rarePoolFor } from './openers';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
@@ -142,8 +142,7 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // The opener is picked once, from the sets the trainer has on,
                 // so the line posted is the one recorded.
                 const settings = await getUserSettings(timer.guildId, timer.discordUserId);
-                const pool = rarePoolFor(settings.disabledSets);
-                const opener = await applySpecialLocks(timer.guildId, timer.discordUserId, pickOpener(Math.random(), pool), pool);
+                const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), rarePoolFor(settings.disabledSets));
                 const content = buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, Math.random, opener);
                 const message = await channel.send({ content, allowedMentions: { users: [timer.discordUserId] } });
                 await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));

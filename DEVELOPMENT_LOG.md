@@ -23,12 +23,16 @@ Newest first. Each entry records what changed and, more importantly, why.
 - **Special lock** (`SPECIAL_LOCKS`): Matikanetannhauser is locked to
   457773317739380738 until they have found it. Nobody else can get it:
   when anyone else rolls it, it becomes another of their specials. The owner
-  gets it at 2% per ping, on top of their normal roll. It went through two
+  gets it at 2% per ping, and the other 2% of their 4% is spread evenly over
+  the other specials; everyone else's 4% is spread evenly over those too, so
+  nobody's total changes. One roll picks the opener with the lock applied
+  (`chooseOpener`). It went through two
   readings first (95% per ping for the owner; then a 95% lock against
   others at normal owner odds) before the owner settled on "a higher rate,
   locked to me". The lock ends by itself once the owner has it.
-- Tests: sets and the empty-pool fallback, the lock (never to others, the
-  owner's 2%, over once the owner has it), each setting, run and ping times,
+- Tests: sets and the empty-pool fallback, the lock as exact sweeps of the
+  random range (owner 2% + 2% even, others 0% + 4% even, then 4% over all
+  12), each setting, run and ping times,
   the Settings button.
 
 ---

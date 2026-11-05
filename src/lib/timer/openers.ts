@@ -84,10 +84,11 @@ export function rarePoolFor(disabledSets: readonly string[]): string[] {
 /**
  * Specials locked to one trainer until that trainer has found them:
  *
- *   - nobody else can get it: when anyone else rolls it, it is swapped for
- *     another of their specials;
- *   - the owner gets it at `ownerChance` per ping (2%), on top of their
- *     normal roll.
+ *   - nobody else can get it: their special share (4%) is spread evenly
+ *     over the other specials;
+ *   - the owner gets it at `ownerChance` per ping (2%), and the rest of
+ *     their special share (the other 2%) is spread evenly over the other
+ *     specials. Their total special chance stays 4%.
  *
  * Once the owner has had it, the lock is over and it is a normal special for
  * everyone (the finds say so), so an entry can stay here harmlessly or be

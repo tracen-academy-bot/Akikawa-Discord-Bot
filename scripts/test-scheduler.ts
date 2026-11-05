@@ -138,25 +138,34 @@ async function main() {
     check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, RARE_PING_OPENERS.length - openers.SPECIAL_SETS[0]!.openers.length);
     check('sets: with no special on, a rare roll gives a common line', PING_OPENERS.includes(openers.pickOpener(0.001, [])), true);
 
-    // The lock: Matikanetannhauser is locked to its owner, who gets it at 2% a ping, until they have it.
+    // The lock: Matikanetannhauser is locked to its owner, 2% of their 4%, until they have it.
     const lock = openers.SPECIAL_LOCKS[0]!;
     const lockedText = RARE_OPENERS.find((o) => o.name === lock.name)!.text;
     const LG = `test-locks-${Date.now()}`;
     const pool = openers.rarePoolFor([]);
-    check('lock: the owner gets 2% a ping', lock.ownerChance, 0.02);
-    for (const r of [0, 0.5, 0.99]) {
-        const out = await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => r);
-        check(`lock: anyone else rolling it never gets it (r=${r})`, [out !== lockedText, rares.isRareOpener(out)], [true, true]);
-    }
-    check('lock: the owner gets it within the 2%', await rares.applySpecialLocks(LG, lock.owner, PING_OPENERS[0]!, pool, () => 0.019), lockedText);
-    check('lock: and not outside it', await rares.applySpecialLocks(LG, lock.owner, PING_OPENERS[0]!, pool, () => 0.021), PING_OPENERS[0]);
-    check('lock: the owner keeps it from a normal roll', await rares.applySpecialLocks(LG, lock.owner, lockedText, pool, () => 0.5), lockedText);
-    check('lock: other specials are untouched', await rares.applySpecialLocks(LG, 'someone-else', RARE_PING_OPENERS[3]!, pool, () => 0.5), RARE_PING_OPENERS[3]);
+    /** Picks across the whole random range in `steps` even steps; counts per opener. */
+    const sweep = async (user: string, steps = 20000) => {
+        const counts = new Map<string, number>();
+        for (let k = 0; k < steps; k += 1) {
+            const o = await rares.chooseOpener(LG, user, k / steps, pool);
+            counts.set(o, (counts.get(o) ?? 0) + 1);
+        }
+        const special = [...counts].filter(([o]) => rares.isRareOpener(o));
+        return { locked: counts.get(lockedText) ?? 0, specials: special.reduce((n, [, c]) => n + c, 0), others: special.filter(([o]) => o !== lockedText).map(([, c]) => c) };
+    };
+    const owner = await sweep(lock.owner);
+    check('lock: the owner gets it 2% of the time', owner.locked, 400);
+    check('lock: the owner\'s total special chance stays 4%', owner.specials, 800);
+    check('lock: the owner\'s other 2% is spread evenly over the other 11', [owner.others.length, Math.max(...owner.others) - Math.min(...owner.others) <= 1], [RARE_PING_OPENERS.length - 1, true]);
+    const other = await sweep('someone-else');
+    check('lock: nobody else gets it', other.locked, 0);
+    check('lock: everyone else keeps 4%, spread evenly over the 11', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 1], [800, RARE_PING_OPENERS.length - 1, true]);
     await rares.recordRareOpener(LG, 'someone-else', lockedText);
-    check('lock: still on while only someone else has it', (await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.5)) !== lockedText, true);
+    check('lock: still on while only someone else has it', (await sweep('someone-else', 2000)).locked, 0);
     await rares.recordRareOpener(LG, lock.owner, lockedText);
-    check('lock: over once the owner has it, for others', await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.5), lockedText);
-    check('lock: and the owner is back to normal odds', await rares.applySpecialLocks(LG, lock.owner, PING_OPENERS[0]!, pool, () => 0.001), PING_OPENERS[0]);
+    const afterOther = await sweep('someone-else');
+    const afterOwner = await sweep(lock.owner);
+    check('lock: over once the owner has it, 4% over all 12 for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked < 400], [800, true, 800, true]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: LG } });
 
     // Settings: DM me too, early riser, special sets.

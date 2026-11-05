@@ -1,6 +1,6 @@
 import { ActionRowBuilder, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS } from './openers';
+import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS, pickOpener } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -110,37 +110,41 @@ export function specialEmbed(special: { name: string; text: string }): EmbedBuil
     return new EmbedBuilder().setColor(0xf2a87a).setTitle(special.name).setDescription(special.text);
 }
 
-/**
- * Applies `SPECIAL_LOCKS` while the owner has not yet found the special:
- * for the owner, the special at `ownerChance` whatever the roll gave; for
- * anyone else who rolled it, another special from `pool` (the trainer's
- * enabled sets) instead. Otherwise the opener as it is. `random` is
- * injectable for tests.
- */
-export async function applySpecialLocks(
-    guildId: string,
-    discordUserId: string,
-    opener: string,
-    pool: readonly string[],
-    random: () => number = Math.random,
-): Promise<string> {
+/** The locks still on: their special, owner and owner's chance, while the owner has not found it. */
+async function activeLocks(guildId: string): Promise<{ text: string; owner: string; ownerChance: number }[]> {
+    const active: { text: string; owner: string; ownerChance: number }[] = [];
     for (const lock of SPECIAL_LOCKS) {
         const text = RARE_OPENERS.find((o) => o.name === lock.name)?.text;
         if (!text) continue;
-        const isOwner = lock.owner === discordUserId;
-        // Only a ping that could be affected looks the lock up.
-        if (!isOwner && opener !== text) continue;
         const ownerHasIt = await prisma.rareOpenerHit.findFirst({ where: { guildId, discordUserId: lock.owner, opener: text } });
-        if (ownerHasIt) continue;
-        if (isOwner) {
-            if (opener !== text && random() < lock.ownerChance) return text;
-            continue;
-        }
-        const others = pool.filter((t) => t !== text);
-        if (others.length === 0) return opener === text ? pickCommon(random) : opener;
-        return others[Math.min(others.length - 1, Math.floor(random() * others.length))]!;
+        if (!ownerHasIt) active.push({ text, owner: lock.owner, ownerChance: lock.ownerChance });
     }
-    return opener;
+    return active;
+}
+
+/**
+ * Picks a trainer's ping opener from one random number `r` and `pool` (the
+ * specials in their enabled sets), applying `SPECIAL_LOCKS`:
+ *
+ *   - a locked special is out of everyone's pool but its owner's, so the
+ *     special share (`RARE_OPENER_CHANCE`, 4%) is spread evenly over the
+ *     rest;
+ *   - the owner gets it below `ownerChance` (2%), and the rest of the
+ *     special share, up to 4%, is spread evenly over the other specials;
+ *   - above 4%, a common line, as always.
+ */
+export async function chooseOpener(guildId: string, discordUserId: string, r: number, pool: readonly string[]): Promise<string> {
+    const locks = await activeLocks(guildId);
+    const locked = locks.map((l) => l.text);
+    const others = pool.filter((t) => !locked.includes(t));
+    const mine = locks.find((l) => l.owner === discordUserId);
+    if (mine && r < RARE_OPENER_CHANCE) {
+        if (r < mine.ownerChance) return mine.text;
+        if (others.length === 0) return pickCommon(() => (r - mine.ownerChance) / (RARE_OPENER_CHANCE - mine.ownerChance));
+        const share = (r - mine.ownerChance) / (RARE_OPENER_CHANCE - mine.ownerChance);
+        return others[Math.min(others.length - 1, Math.floor(share * others.length))]!;
+    }
+    return pickOpener(r, others);
 }
 
 /** A common opener at random, for when a locked special has no other special to become. */
