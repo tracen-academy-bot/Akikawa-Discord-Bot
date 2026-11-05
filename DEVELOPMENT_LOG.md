@@ -2908,3 +2908,14 @@ nothing calls this module yet — but the same class of latent bug.
   and a role above the actor's or the bot's highest role.
 - Loads the full member list, so it needs the Server Members intent.
 - Selection logic: `membersToGrant` in `src/lib/roleAssignment.ts`; tests in `scripts/test-roles.ts`.
+
+## 2026-11-05: Member role sync; `/role give-club-members` removed
+
+- The bulk run gave Member to 448 club members, so the one-off command is gone.
+- `syncMemberRole` (`src/lib/roleAssignment.ts`) runs on every GuildMemberUpdate:
+  a club role means Member is added, no club role means it is removed. The change it makes fires
+  another update that needs nothing, so it does not loop.
+- `MEMBER_ROLE_ID` overrides the role (default 1567786901140807730); empty turns it off.
+  With `CLUB_ROLE_IDS` empty, nothing is removed.
+- Changes made while the bot is offline are fixed at the member's next update, not at startup.
+- `/help`: the timer page now lists the Specials and Settings buttons; the tools page explains the Member role.

@@ -27,6 +27,7 @@ const VARIABLES: EnvVar[] = [
     { name: 'DISCORD_CLIENT_ID', required: false, purpose: 'the standalone deploy-commands script and dashboard sign-in (the bot registers its own commands on start)' },
     { name: 'OFFICER_ROLE_IDS', required: false, purpose: 'Club Manager permission checks (nobody will be an officer)' },
     { name: 'CLUB_ROLE_IDS', required: false, purpose: '/role club-role swapping' },
+    { name: 'MEMBER_ROLE_ID', required: false, purpose: 'the Member role kept on everyone with a club role' },
     { name: 'DEFAULT_ROLE_ID', required: false, purpose: '/role fallback role assignment' },
     { name: 'FORUM_CHANNEL_ID', required: false, purpose: 'club applications (scouting new posts, /resolve, /close)' },
     { name: 'TAG_TRANSFER_ID', required: false, purpose: 'the Transfer choice on /settag' },
