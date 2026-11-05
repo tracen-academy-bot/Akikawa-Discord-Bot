@@ -2898,3 +2898,13 @@ After `prisma migrate deploy`, both originally failing queries succeed.
 `in: header, name: X-API-Key`. The old header would have been ignored and every
 call rejected with `403 browser_proof_required`. Not the cause of this outage —
 nothing calls this module yet — but the same class of latent bug.
+
+## 2026-11-05: `/role give-club-members`
+
+- New subcommand `/role give-club-members role:<role>`, Club Managers only.
+  It adds the role to every member who holds any club role (`CLUB_ROLE_IDS`).
+  It only adds: no role is removed, members who already have it and bots are skipped.
+- Refuses a club role or the default role (it would break the one-club-role rule),
+  and a role above the actor's or the bot's highest role.
+- Loads the full member list, so it needs the Server Members intent.
+- Selection logic: `membersToGrant` in `src/lib/roleAssignment.ts`; tests in `scripts/test-roles.ts`.
