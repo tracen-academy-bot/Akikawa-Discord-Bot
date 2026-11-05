@@ -82,13 +82,17 @@ export function rarePoolFor(disabledSets: readonly string[]): string[] {
 }
 
 /**
- * Specials locked to one trainer until someone has found them: when anyone
- * else rolls the special, it is swapped for another special `lock` of the
- * time (95%), so the owner is all but sure to find it first. The owner's own
- * odds are the normal roll. Once anyone has had it (the owner, or someone
- * through the 5%), the lock is over (the finds say so), so an entry can stay
- * here harmlessly or be removed.
+ * Specials locked to one trainer until that trainer has found them:
+ *
+ *   - nobody else can get it: when anyone else rolls it, it is swapped for
+ *     another of their specials;
+ *   - the owner gets it at `ownerChance` per ping (2%), on top of their
+ *     normal roll.
+ *
+ * Once the owner has had it, the lock is over and it is a normal special for
+ * everyone (the finds say so), so an entry can stay here harmlessly or be
+ * removed.
  */
-export const SPECIAL_LOCKS: readonly { name: string; owner: string; lock: number }[] = [
-    { name: 'Matikanetannhauser', owner: '457773317739380738', lock: 0.95 },
+export const SPECIAL_LOCKS: readonly { name: string; owner: string; ownerChance: number }[] = [
+    { name: 'Matikanetannhauser', owner: '457773317739380738', ownerChance: 0.02 },
 ];

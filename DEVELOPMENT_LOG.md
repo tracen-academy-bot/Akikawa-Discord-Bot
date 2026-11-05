@@ -20,14 +20,15 @@ Newest first. Each entry records what changed and, more importantly, why.
   trainer's enabled sets (`rarePoolFor`). With none enabled, a rare roll
   falls back to a common line; the first version read past the end of the
   common list there, and a test caught it.
-- **Special lock** (`SPECIAL_LOCKS`): Matikanetannhauser is 95% locked to
-  457773317739380738 until someone has found it. When anyone else rolls it,
-  it is swapped for another of their specials 95% of the time. The owner's
-  own odds are the normal roll. A first version instead gave the owner a
-  95% chance per ping; the user clarified that the point is to be first,
-  so it was rewritten. The lock ends by itself once anyone has it.
-- Tests: sets and the empty-pool fallback, the lock (swap, 5% through,
-  owner unaffected, over once found), each setting, run and ping times,
+- **Special lock** (`SPECIAL_LOCKS`): Matikanetannhauser is locked to
+  457773317739380738 until they have found it. Nobody else can get it:
+  when anyone else rolls it, it becomes another of their specials. The owner
+  gets it at 2% per ping, on top of their normal roll. It went through two
+  readings first (95% per ping for the owner; then a 95% lock against
+  others at normal owner odds) before the owner settled on "a higher rate,
+  locked to me". The lock ends by itself once the owner has it.
+- Tests: sets and the empty-pool fallback, the lock (never to others, the
+  owner's 2%, over once the owner has it), each setting, run and ping times,
   the Settings button.
 
 ---

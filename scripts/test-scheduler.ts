@@ -138,18 +138,25 @@ async function main() {
     check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, RARE_PING_OPENERS.length - openers.SPECIAL_SETS[0]!.openers.length);
     check('sets: with no special on, a rare roll gives a common line', PING_OPENERS.includes(openers.pickOpener(0.001, [])), true);
 
-    // The lock: Matikanetannhauser is 95% locked to its owner until someone has it.
+    // The lock: Matikanetannhauser is locked to its owner, who gets it at 2% a ping, until they have it.
     const lock = openers.SPECIAL_LOCKS[0]!;
     const lockedText = RARE_OPENERS.find((o) => o.name === lock.name)!.text;
     const LG = `test-locks-${Date.now()}`;
     const pool = openers.rarePoolFor([]);
-    const swapped = await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.5);
-    check('lock: someone else rolling it is swapped for another special', [swapped !== lockedText, rares.isRareOpener(swapped)], [true, true]);
-    check('lock: the 5% gets through', await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.96), lockedText);
-    check('lock: the owner keeps it', await rares.applySpecialLocks(LG, lock.owner, lockedText, pool, () => 0.5), lockedText);
+    check('lock: the owner gets 2% a ping', lock.ownerChance, 0.02);
+    for (const r of [0, 0.5, 0.99]) {
+        const out = await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => r);
+        check(`lock: anyone else rolling it never gets it (r=${r})`, [out !== lockedText, rares.isRareOpener(out)], [true, true]);
+    }
+    check('lock: the owner gets it within the 2%', await rares.applySpecialLocks(LG, lock.owner, PING_OPENERS[0]!, pool, () => 0.019), lockedText);
+    check('lock: and not outside it', await rares.applySpecialLocks(LG, lock.owner, PING_OPENERS[0]!, pool, () => 0.021), PING_OPENERS[0]);
+    check('lock: the owner keeps it from a normal roll', await rares.applySpecialLocks(LG, lock.owner, lockedText, pool, () => 0.5), lockedText);
     check('lock: other specials are untouched', await rares.applySpecialLocks(LG, 'someone-else', RARE_PING_OPENERS[3]!, pool, () => 0.5), RARE_PING_OPENERS[3]);
+    await rares.recordRareOpener(LG, 'someone-else', lockedText);
+    check('lock: still on while only someone else has it', (await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.5)) !== lockedText, true);
     await rares.recordRareOpener(LG, lock.owner, lockedText);
-    check('lock: over once anyone has had it', await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.5), lockedText);
+    check('lock: over once the owner has it, for others', await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.5), lockedText);
+    check('lock: and the owner is back to normal odds', await rares.applySpecialLocks(LG, lock.owner, PING_OPENERS[0]!, pool, () => 0.001), PING_OPENERS[0]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: LG } });
 
     // Settings: DM me too, early riser, special sets.
