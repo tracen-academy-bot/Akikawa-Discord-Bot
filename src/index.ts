@@ -16,7 +16,7 @@ import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
 import { connect } from './lib/startup';
 import { runMigrations } from './lib/migrate';
-import { handleTimerButton, isTimerButton } from './commands/timer';
+import { handleSpecialRead, handleTimerButton, isSpecialReadMenu, isTimerButton } from './commands/timer';
 import { handlePostModal, isPostModal } from './commands/post';
 import { handleClubModal, isClubModal } from './commands/club';
 import { handleProfileModal, isProfileModal } from './commands/clubProfile';
@@ -160,6 +160,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     // The /help topic menu, routed by custom ID like the panel buttons.
+    // A trainer reading one of the specials they unlocked.
+    if (interaction.isStringSelectMenu() && isSpecialReadMenu(interaction.customId)) {
+        try {
+            await handleSpecialRead(interaction);
+        } catch (e) {
+            console.error('Error handling the special read menu:', e);
+        }
+        return;
+    }
+
     if (interaction.isStringSelectMenu() && isHelpSelect(interaction.customId)) {
         try {
             await handleHelpSelect(interaction);

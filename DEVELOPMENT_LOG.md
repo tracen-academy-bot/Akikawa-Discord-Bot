@@ -4,6 +4,19 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-05 — Read the specials you unlocked
+
+Asked by a member: a way to read the actual text of the specials they have
+unlocked. The personal Specials list (panel button) now carries a "Read a
+special" menu of the specials that trainer has had. Picking one shows its
+full text, only to them, with the mention filled in as them (no ping).
+`readSpecial` checks the choice against their own recorded finds, so a
+forged choice cannot reveal a line they have not had. Only finds since
+recording began count. Tests: menu lists only unlocked, full text as you,
+another's special and forged choices stay locked.
+
+---
+
 ## 2026-11-05 — Re-read open posts that were stored with no ID
 
 Zix's post opens with `647176684566`, yet it read "no ID yet". The row was

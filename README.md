@@ -54,7 +54,8 @@ Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
 (this week live, last week final, last 30 days, all time). The panel's
 **Specials** button shows, only to you, the special (rare) ping lines you
 have found, by name, with how many times each came up and when you first
-got it. `/timer specials` (Club Managers) shows the whole server's tally,
+got it, and a menu to read any special you unlocked in full.
+`/timer specials` (Club Managers) shows the whole server's tally,
 only to them, with who found each first. Pings
 are deleted 2 minutes after they post.
 

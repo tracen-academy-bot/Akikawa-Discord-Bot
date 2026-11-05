@@ -123,6 +123,14 @@ async function main() {
     const mcol = (n: number) => mine.fields?.[n]?.value.split('\n') ?? [];
     check('specials: your own list counts only your finds', [mine.title, mcol(0)[1], mcol(1)[1], mcol(0)[4]], [`Your specials: 1 of ${RARE_PING_OPENERS.length}`, `**2.** ${RARE_OPENERS[1]!.name}`, '**×1**', '**5.** ???']);
     check('specials: your own list shows when, not who', [mine.fields?.[2]?.name, mcol(2)[1]?.startsWith('<t:'), mine.footer?.text.startsWith('1 special ping for you')], ['First got', true, true]);
+    // Reading an unlocked special in full. u2 found only special 2 (index 1); u3 found index 4.
+    const menuJson = rares.readMenuRow(await rares.rareTally(RG, 'u2'))?.toJSON() as { components: { custom_id: string; options: { label: string; value: string }[] }[] } | undefined;
+    check('read menu: only your unlocked specials', menuJson?.components[0]?.options.map((o) => [o.label, o.value]), [[`2. ${RARE_OPENERS[1]!.name}`, '1']]);
+    check('read menu: none when nothing is unlocked', rares.readMenuRow(await rares.rareTally(RG, 'nobody')), null);
+    const read = await rares.readSpecial(RG, 'u2', '1');
+    check('read: an unlocked special shows in full, as you', [read?.name, read?.text === RARE_OPENERS[1]!.text.replace('{user}', '<@u2>')], [RARE_OPENERS[1]!.name, true]);
+    check("read: someone else's special stays locked", await rares.readSpecial(RG, 'u2', '4'), null);
+    check('read: a forged choice reveals nothing', [await rares.readSpecial(RG, 'u2', 'x'), await rares.readSpecial(RG, 'u2', '99')], [null, null]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [

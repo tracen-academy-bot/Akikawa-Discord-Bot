@@ -1,4 +1,5 @@
-import { rareTally, raresEmbed } from '../lib/timer/rares';
+import type { StringSelectMenuInteraction } from 'discord.js';
+import { READ_MENU_ID, rareTally, raresEmbed, readMenuRow, readSpecial, specialEmbed } from '../lib/timer/rares';
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
@@ -459,7 +460,8 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
         case BUTTON_SPECIALS: {
             // The same hidden list as /timer specials: your own finds only.
             const tally = await rareTally(guildId, interaction.user.id);
-            await interaction.reply({ embeds: [raresEmbed(tally, true)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+            const menu = readMenuRow(tally);
+            await interaction.reply({ embeds: [raresEmbed(tally, true)], components: menu ? [menu] : [], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
             break;
         }
 
@@ -525,4 +527,20 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
 async function refreshFromInteraction(interaction: ButtonInteraction, guildId: string) {
     const [timers, context] = await Promise.all([listActiveTimers(guildId), getPanelContext(guildId)]);
     await refreshPanel(interaction.client, interaction.channelId, interaction.message.id, timers, context);
+}
+
+/** True for the "Read a special" menu under a trainer's Specials list. */
+export function isSpecialReadMenu(customId: string): boolean {
+    return customId === READ_MENU_ID;
+}
+
+/** Shows the chosen special in full, only to the trainer, if they unlocked it. */
+export async function handleSpecialRead(interaction: StringSelectMenuInteraction) {
+    if (!interaction.inGuild()) return;
+    const special = await readSpecial(interaction.guildId, interaction.user.id, interaction.values[0] ?? '');
+    await interaction.reply({
+        ...(special ? { embeds: [specialEmbed(special)] } : { content: 'You have not unlocked that special yet.' }),
+        allowedMentions: { parse: [] },
+        flags: MessageFlags.Ephemeral,
+    });
 }
