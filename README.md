@@ -48,15 +48,17 @@ npm run dev                  # slash commands register themselves on start
 | **Stop** | Cancels your run; it does not count |
 | **My Stats** | Your statistics card |
 | **Leaderboard** | This week's standings, live |
-| **Specials** | The special lines you have found, only to you |
+| **Specials** | The special lines you have found, only to you, with a menu to read them |
+| **Settings** | Your own settings, only to you: **DM me too** (the ping also comes to your DMs), **Early riser** (49-minute runs, pings cleared after 2 minutes), and each special set on or off |
 
 Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
 (this week live, last week final, last 30 days, all time). The panel's
 **Specials** button shows, only to you, the special (rare) ping lines you
 have found, by name, with how many times each came up and when you first
-got it. `/timer specials` (Club Managers) shows the whole server's tally,
+got it, and a menu to read any special you unlocked in full.
+`/timer specials` (Club Managers) shows the whole server's tally,
 only to them, with who found each first. Pings
-are deleted 2 minutes after they post.
+are deleted 3 minutes after they post (2 for early risers).
 
 ### Rewards
 

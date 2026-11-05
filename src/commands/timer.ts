@@ -1,4 +1,6 @@
-import { rareTally, raresEmbed } from '../lib/timer/rares';
+import type { StringSelectMenuInteraction } from 'discord.js';
+import { SETTINGS_PREFIX, getUserSettings, runMinutes, settingsView, toggleSetting } from '../lib/timer/userSettings';
+import { READ_MENU_ID, rareTally, raresEmbed, readMenuRow, readSpecial, specialEmbed } from '../lib/timer/rares';
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
@@ -13,6 +15,7 @@ import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
 import {
     BUTTON_LEADERBOARD,
     BUTTON_SPECIALS,
+    BUTTON_SETTINGS,
     BUTTON_START,
     BUTTON_STATS,
     BUTTON_STOP,
@@ -455,27 +458,42 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
 
     const guildId = interaction.guildId!;
 
+    // A setting flipped on the Settings screen: redraw it in place.
+    if (interaction.customId.startsWith(SETTINGS_PREFIX)) {
+        const settings = await toggleSetting(guildId, interaction.user.id, interaction.customId.slice(SETTINGS_PREFIX.length));
+        await interaction.update(settingsView(settings));
+        return;
+    }
+
     switch (interaction.customId) {
+        case BUTTON_SETTINGS: {
+            await interaction.reply({ ...settingsView(await getUserSettings(guildId, interaction.user.id)), flags: MessageFlags.Ephemeral });
+            break;
+        }
+
         case BUTTON_SPECIALS: {
             // The same hidden list as /timer specials: your own finds only.
             const tally = await rareTally(guildId, interaction.user.id);
-            await interaction.reply({ embeds: [raresEmbed(tally, true)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+            const menu = readMenuRow(tally);
+            await interaction.reply({ embeds: [raresEmbed(tally, true)], components: menu ? [menu] : [], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
             break;
         }
 
         case BUTTON_START: {
+            const minutes = runMinutes(await getUserSettings(guildId, interaction.user.id));
             const { timer, wasReset } = await startTimer(
                 guildId,
                 interaction.channelId,
                 interaction.message.id,
                 interaction.user.id,
+                minutes,
             );
 
             const endsAt = `<t:${Math.floor(timer.expiresAt.getTime() / 1000)}:R>`;
             await interaction.reply({
                 content: wasReset
-                    ? `Timer reset. Your ${TRAINING_MINUTES}-minute run now ends ${endsAt}.`
-                    : `Timer started. Your ${TRAINING_MINUTES}-minute run ends ${endsAt}.`,
+                    ? `Timer reset. Your ${minutes}-minute run now ends ${endsAt}.`
+                    : `Timer started. Your ${minutes}-minute run ends ${endsAt}.`,
                 flags: MessageFlags.Ephemeral,
             });
             await refreshFromInteraction(interaction, guildId);
@@ -525,4 +543,20 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
 async function refreshFromInteraction(interaction: ButtonInteraction, guildId: string) {
     const [timers, context] = await Promise.all([listActiveTimers(guildId), getPanelContext(guildId)]);
     await refreshPanel(interaction.client, interaction.channelId, interaction.message.id, timers, context);
+}
+
+/** True for the "Read a special" menu under a trainer's Specials list. */
+export function isSpecialReadMenu(customId: string): boolean {
+    return customId === READ_MENU_ID;
+}
+
+/** Shows the chosen special in full, only to the trainer, if they unlocked it. */
+export async function handleSpecialRead(interaction: StringSelectMenuInteraction) {
+    if (!interaction.inGuild()) return;
+    const special = await readSpecial(interaction.guildId, interaction.user.id, interaction.values[0] ?? '');
+    await interaction.reply({
+        ...(special ? { embeds: [specialEmbed(special)] } : { content: 'You have not unlocked that special yet.' }),
+        allowedMentions: { parse: [] },
+        flags: MessageFlags.Ephemeral,
+    });
 }
