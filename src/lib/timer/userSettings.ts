@@ -81,14 +81,14 @@ export function settingsView(settings: UserSettings) {
         .setTitle('Your Trainer Timer settings')
         .setDescription(
             [
-                `**DM me too**: the ping also comes to your DMs, as well as here.`,
-                `**Early riser**: ${EARLY_RISER_MINUTES}-minute runs instead of ${TRAINING_MINUTES}. Your pings clear after ${EARLY_RISER_NOTIFICATION_MINUTES} minutes instead of ${NOTIFICATION_LIFETIME_MINUTES}.`,
+                `**DM Me Too**: the pings arrive here *and* in your DMs. Double efficiency!`,
+                `**Early Riser**: You get notified after ${EARLY_RISER_MINUTES} minutes. To support your efforts, your pings clear after ${EARLY_RISER_NOTIFICATION_MINUTES} minutes instead of ${NOTIFICATION_LIFETIME_MINUTES}!`,
                 `**Special sets**: turn a set off and its specials never come up for you.`,
                 '-# Changes apply from your next run.',
             ].join('\n'),
         );
     const rows: ActionRowBuilder<ButtonBuilder>[] = [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(toggleButton('dm', 'DM me too', settings.dmPing), toggleButton('early', 'Early riser', settings.earlyRiser)),
+        new ActionRowBuilder<ButtonBuilder>().addComponents(toggleButton('dm', 'DM Me Too', settings.dmPing), toggleButton('early', 'Early Riser', settings.earlyRiser)),
     ];
     for (let i = 0; i < SPECIAL_SETS.length && rows.length < 5; i += 5) {
         rows.push(

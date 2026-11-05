@@ -181,7 +181,7 @@ async function main() {
     check('settings: an unknown set is ignored', (await us.toggleSetting(SG, 'u1', 'set:nope')).disabledSets, ['set1']);
     check('settings: a set flips back on', (await us.toggleSetting(SG, 'u1', 'set:set1')).disabledSets, []);
     const view = JSON.stringify(us.settingsView(on));
-    check('settings: the screen shows each setting\'s state', [view.includes('DM me too: On'), view.includes('Early riser: On'), view.includes('Set 1: Off')], [true, true, true]);
+    check('settings: the screen shows each setting\'s state', [view.includes('DM Me Too: On'), view.includes('Early Riser: On'), view.includes('Set 1: Off')], [true, true, true]);
     await prisma.timerUserSettings.deleteMany({ where: { guildId: SG } });
     const { BUTTON_SETTINGS } = await import('../src/lib/timer/panel');
     check('panel: has the Settings button', panelJson.includes(BUTTON_SETTINGS) || JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_SETTINGS), true);
