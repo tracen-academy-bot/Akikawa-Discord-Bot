@@ -82,7 +82,7 @@ export function settingsView(settings: UserSettings) {
         .setDescription(
             [
                 `**DM Me Too**: the pings arrive here *and* in your DMs. Double efficiency!`,
-                `**Early Riser**: You get notified after ${EARLY_RISER_MINUTES} minutes. To support your efforts, your pings clear after ${EARLY_RISER_NOTIFICATION_MINUTES} minutes instead of ${NOTIFICATION_LIFETIME_MINUTES}!`,
+                `**Early Riser**: You get notified after ${EARLY_RISER_MINUTES} minutes. To encourage your punctuality, your pings clear after ${EARLY_RISER_NOTIFICATION_MINUTES} minutes instead of ${NOTIFICATION_LIFETIME_MINUTES}!`,
                 `**Special sets**: turn a set off and its specials never come up for you.`,
                 '-# Changes apply from your next run.',
             ].join('\n'),
