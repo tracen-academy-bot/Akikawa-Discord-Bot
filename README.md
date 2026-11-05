@@ -49,7 +49,7 @@ npm run dev                  # slash commands register themselves on start
 | **My Stats** | Your statistics card |
 | **Leaderboard** | This week's standings, live |
 | **Specials** | The special lines you have found, only to you, with a menu to read them |
-| **Settings** | Your own settings, only to you: **DM me too** (the ping also comes to your DMs), **Early riser** (49-minute runs, pings cleared after 2 minutes), and each special set on or off |
+| **Settings** | Your own settings, only to you: **DM Me Too** (the pings arrive here and in your DMs), **Early Riser** (notified after 49 minutes, pings cleared after 2 minutes), and each special set on or off |
 
 Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
 (this week live, last week final, last 30 days, all time). The panel's
