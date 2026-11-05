@@ -4,6 +4,34 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-05 — Timer Settings, special sets, a special lock
+
+- **Settings button** on the panel (second row; a row holds five). It
+  shows the trainer's own settings, hidden, as buttons that flip in place
+  (`TimerUserSettings`):
+  - DM me too: the ping is also sent to their DMs. The DM pings nobody and
+    is not deleted; closed DMs are logged and skipped.
+  - Early riser: 49-minute runs (`startTimer` takes the length) and pings
+    cleared after 2 minutes instead of 3.
+  - Each special set on or off.
+- **Ping deletion:** 3 minutes, or 2 for early risers. Asked to be 3/2.
+- **Special sets** (`SPECIAL_SETS`): the 12 specials are Set 1. A new set
+  of umas is a new entry with its own id. The roll draws only from the
+  trainer's enabled sets (`rarePoolFor`). With none enabled, a rare roll
+  falls back to a common line; the first version read past the end of the
+  common list there, and a test caught it.
+- **Special lock** (`SPECIAL_LOCKS`): Matikanetannhauser is 95% locked to
+  457773317739380738 until someone has found it. When anyone else rolls it,
+  it is swapped for another of their specials 95% of the time. The owner's
+  own odds are the normal roll. A first version instead gave the owner a
+  95% chance per ping; the user clarified that the point is to be first,
+  so it was rewritten. The lock ends by itself once anyone has it.
+- Tests: sets and the empty-pool fallback, the lock (swap, 5% through,
+  owner unaffected, over once found), each setting, run and ping times,
+  the Settings button.
+
+---
+
 ## 2026-11-05 — Read the specials you unlocked
 
 Asked by a member: a way to read the actual text of the specials they have

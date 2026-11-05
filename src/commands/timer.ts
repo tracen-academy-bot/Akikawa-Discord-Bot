@@ -1,4 +1,5 @@
 import type { StringSelectMenuInteraction } from 'discord.js';
+import { SETTINGS_PREFIX, getUserSettings, runMinutes, settingsView, toggleSetting } from '../lib/timer/userSettings';
 import { READ_MENU_ID, rareTally, raresEmbed, readMenuRow, readSpecial, specialEmbed } from '../lib/timer/rares';
 import {
     SlashCommandBuilder,
@@ -14,6 +15,7 @@ import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
 import {
     BUTTON_LEADERBOARD,
     BUTTON_SPECIALS,
+    BUTTON_SETTINGS,
     BUTTON_START,
     BUTTON_STATS,
     BUTTON_STOP,
@@ -456,7 +458,19 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
 
     const guildId = interaction.guildId!;
 
+    // A setting flipped on the Settings screen: redraw it in place.
+    if (interaction.customId.startsWith(SETTINGS_PREFIX)) {
+        const settings = await toggleSetting(guildId, interaction.user.id, interaction.customId.slice(SETTINGS_PREFIX.length));
+        await interaction.update(settingsView(settings));
+        return;
+    }
+
     switch (interaction.customId) {
+        case BUTTON_SETTINGS: {
+            await interaction.reply({ ...settingsView(await getUserSettings(guildId, interaction.user.id)), flags: MessageFlags.Ephemeral });
+            break;
+        }
+
         case BUTTON_SPECIALS: {
             // The same hidden list as /timer specials: your own finds only.
             const tally = await rareTally(guildId, interaction.user.id);
@@ -466,18 +480,20 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
         }
 
         case BUTTON_START: {
+            const minutes = runMinutes(await getUserSettings(guildId, interaction.user.id));
             const { timer, wasReset } = await startTimer(
                 guildId,
                 interaction.channelId,
                 interaction.message.id,
                 interaction.user.id,
+                minutes,
             );
 
             const endsAt = `<t:${Math.floor(timer.expiresAt.getTime() / 1000)}:R>`;
             await interaction.reply({
                 content: wasReset
-                    ? `Timer reset. Your ${TRAINING_MINUTES}-minute run now ends ${endsAt}.`
-                    : `Timer started. Your ${TRAINING_MINUTES}-minute run ends ${endsAt}.`,
+                    ? `Timer reset. Your ${minutes}-minute run now ends ${endsAt}.`
+                    : `Timer started. Your ${minutes}-minute run ends ${endsAt}.`,
                 flags: MessageFlags.Ephemeral,
             });
             await refreshFromInteraction(interaction, guildId);

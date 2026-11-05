@@ -12,8 +12,9 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { isRareOpener, recordRareOpener } from './rares';
-import { pickOpener } from './openers';
+import { applySpecialLocks, isRareOpener, recordRareOpener } from './rares';
+import { pickOpener, rarePoolFor } from './openers';
+import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
 
 /**
@@ -57,8 +58,9 @@ export function buildPingContent(
     lagSeconds: number,
     milestoneRoleId: string | null = null,
     random: () => number = Math.random,
+    opener?: string,
 ): string {
-    const lines = [pickOpener(random()).replace('{user}', `<@${discordUserId}>`)];
+    const lines = [(opener ?? pickOpener(random())).replace('{user}', `<@${discordUserId}>`)];
 
     if (lagSeconds > LATE_DELIVERY_THRESHOLD_S) {
         const minutes = Math.round(lagSeconds / 60);
@@ -137,15 +139,22 @@ async function processExpiredTimers(client: Client): Promise<void> {
 
             const channel = await client.channels.fetch(timer.channelId);
             if (channel?.isTextBased() && 'send' in channel) {
-                // One draw picks the opener, so the line posted is the one recorded.
-                const draw = Math.random();
-                const message = await channel.send({
-                    content: buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, () => draw),
-                    allowedMentions: { users: [timer.discordUserId] },
-                });
-                await scheduleNotificationDeletion(timer.channelId, message.id);
-                const opener = pickOpener(draw);
+                // The opener is picked once, from the sets the trainer has on,
+                // so the line posted is the one recorded.
+                const settings = await getUserSettings(timer.guildId, timer.discordUserId);
+                const pool = rarePoolFor(settings.disabledSets);
+                const opener = await applySpecialLocks(timer.guildId, timer.discordUserId, pickOpener(Math.random(), pool), pool);
+                const content = buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, Math.random, opener);
+                const message = await channel.send({ content, allowedMentions: { users: [timer.discordUserId] } });
+                await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));
                 if (isRareOpener(opener)) await recordRareOpener(timer.guildId, timer.discordUserId, opener);
+                if (settings.dmPing) {
+                    // A copy in their DMs; it pings nobody else and is not deleted.
+                    await client.users
+                        .fetch(timer.discordUserId)
+                        .then((user) => user.send({ content, allowedMentions: { parse: [] } }))
+                        .catch((e) => console.warn(`Timer DM to ${timer.discordUserId} failed (DMs closed?):`, e instanceof Error ? e.message : e));
+                }
             }
 
             // The channel's current panel, which may have been reposted since

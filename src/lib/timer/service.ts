@@ -18,7 +18,7 @@ import { prisma } from '../../db/prisma';
 export const TRAINING_MINUTES = 50;
 
 /** How long an expiry ping stays in the channel before it is deleted. */
-export const NOTIFICATION_LIFETIME_MINUTES = 2;
+export const NOTIFICATION_LIFETIME_MINUTES = 3;
 
 /**
  * Timezone used to decide which calendar day a run belongs to, which in turn
@@ -150,9 +150,10 @@ export async function startTimer(
     channelId: string,
     panelMessageId: string | null,
     discordUserId: string,
+    minutes = TRAINING_MINUTES,
 ): Promise<StartResult> {
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + TRAINING_MINUTES * 60_000);
+    const expiresAt = new Date(now.getTime() + minutes * 60_000);
 
     const existing = await prisma.trainingTimer.findUnique({
         where: { guildId_discordUserId: { guildId, discordUserId } },
@@ -249,12 +250,12 @@ export async function recordRun(timer: TrainingTimer, deliveredAt: Date): Promis
 // ─── Notifications ────────────────────────────────────────────────────────────
 
 /** Schedules an expiry ping for automatic deletion. */
-export async function scheduleNotificationDeletion(channelId: string, messageId: string): Promise<void> {
+export async function scheduleNotificationDeletion(channelId: string, messageId: string, minutes = NOTIFICATION_LIFETIME_MINUTES): Promise<void> {
     await prisma.timerNotification.create({
         data: {
             channelId,
             messageId,
-            deleteAt: new Date(Date.now() + NOTIFICATION_LIFETIME_MINUTES * 60_000),
+            deleteAt: new Date(Date.now() + minutes * 60_000),
         },
     });
 }

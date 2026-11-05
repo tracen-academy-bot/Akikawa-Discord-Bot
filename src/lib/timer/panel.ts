@@ -25,6 +25,7 @@ export const BUTTON_STOP = 'timer:stop';
 export const BUTTON_STATS = 'timer:stats';
 export const BUTTON_LEADERBOARD = 'timer:leaderboard';
 export const BUTTON_SPECIALS = 'timer:specials';
+export const BUTTON_SETTINGS = 'timer:settings';
 
 /** Roster entries shown before the list is truncated. */
 const MAX_ROSTER_ROWS = 20;
@@ -49,7 +50,7 @@ export function buildPanel(timers: TrainingTimer[], context: PanelContext) {
         .setTitle('Trainer Timer')
         .setDescription(
             `Umamusume Global Independent Training timer.\n` +
-                `Press **Start** to begin a ${TRAINING_MINUTES}-minute run, or press it again to reset.`,
+                `Press **Start** to begin a ${TRAINING_MINUTES}-minute run (49 for early risers, in **Settings**), or press it again to reset.`,
         );
 
     if (timers.length === 0) {
@@ -82,7 +83,12 @@ export function buildPanel(timers: TrainingTimer[], context: PanelContext) {
         new ButtonBuilder().setCustomId(BUTTON_SPECIALS).setLabel('Specials').setStyle(ButtonStyle.Secondary),
     );
 
-    return { embeds: [embed], components: [buttons] };
+    // A row holds five buttons; Settings starts the second.
+    const more = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId(BUTTON_SETTINGS).setLabel('Settings').setStyle(ButtonStyle.Secondary),
+    );
+
+    return { embeds: [embed], components: [buttons, more] };
 }
 
 /**

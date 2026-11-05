@@ -1,6 +1,6 @@
 import { ActionRowBuilder, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE } from './openers';
+import { RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -108,4 +108,28 @@ export async function readSpecial(guildId: string, discordUserId: string, choice
 /** The embed showing one special in full. */
 export function specialEmbed(special: { name: string; text: string }): EmbedBuilder {
     return new EmbedBuilder().setColor(0xf2a87a).setTitle(special.name).setDescription(special.text);
+}
+
+/**
+ * Applies `SPECIAL_LOCKS`: when `opener` is a special locked to someone else
+ * that nobody in the guild has had yet, it is swapped `lock` of the time for
+ * another special from `pool` (the trainer's enabled sets), so they still
+ * get a special. Otherwise the opener is returned as it is. `random` is
+ * injectable for tests.
+ */
+export async function applySpecialLocks(
+    guildId: string,
+    discordUserId: string,
+    opener: string,
+    pool: readonly string[],
+    random: () => number = Math.random,
+): Promise<string> {
+    const locked = SPECIAL_LOCKS.map((l) => ({ ...l, text: RARE_OPENERS.find((o) => o.name === l.name)?.text })).find((l) => l.text === opener);
+    if (!locked || locked.owner === discordUserId) return opener;
+    const found = await prisma.rareOpenerHit.findFirst({ where: { guildId, opener: opener } });
+    if (found) return opener;
+    if (random() >= locked.lock) return opener;
+    const others = pool.filter((t) => t !== opener);
+    if (others.length === 0) return opener;
+    return others[Math.min(others.length - 1, Math.floor(random() * others.length))]!;
 }

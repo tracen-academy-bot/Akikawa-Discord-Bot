@@ -159,6 +159,21 @@ model TimerMilestoneSettings {
     updatedAt DateTime @updatedAt
 }
 
+/// A trainer's own timer settings, from the panel's Settings button.
+model TimerUserSettings {
+    guildId       String
+    discordUserId String
+    /// The expiry ping also goes to their DMs.
+    dmPing        Boolean  @default(false)
+    /// 49-minute runs instead of 50; their pings are cleared sooner.
+    earlyRiser    Boolean  @default(false)
+    /// Special sets they turned off (ids from `SPECIAL_SETS`).
+    disabledSets  String[] @default([])
+    updatedAt     DateTime @updatedAt
+
+    @@id([guildId, discordUserId])
+}
+
 /// A rare timer-ping opener that came up: who got it, which line, when.
 /// `/timer rares` tallies them. `opener` is the line's template text, so a
 /// line keeps its tally if the list is reordered.

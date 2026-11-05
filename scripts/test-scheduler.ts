@@ -131,6 +131,44 @@ async function main() {
     check('read: an unlocked special shows in full, as you', [read?.name, read?.text === RARE_OPENERS[1]!.text.replace('{user}', '<@u2>')], [RARE_OPENERS[1]!.name, true]);
     check("read: someone else's special stays locked", await rares.readSpecial(RG, 'u2', '4'), null);
     check('read: a forged choice reveals nothing', [await rares.readSpecial(RG, 'u2', 'x'), await rares.readSpecial(RG, 'u2', '99')], [null, null]);
+    // Sets: a set turned off never comes up.
+    const openers = await import('../src/lib/timer/openers');
+    check('sets: every special belongs to a set', openers.RARE_OPENERS.every((o) => openers.SPECIAL_SETS.some((set) => set.id === o.set)), true);
+    check('sets: all on gives every special', openers.rarePoolFor([]).length, RARE_PING_OPENERS.length);
+    check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, RARE_PING_OPENERS.length - openers.SPECIAL_SETS[0]!.openers.length);
+    check('sets: with no special on, a rare roll gives a common line', PING_OPENERS.includes(openers.pickOpener(0.001, [])), true);
+
+    // The lock: Matikanetannhauser is 95% locked to its owner until someone has it.
+    const lock = openers.SPECIAL_LOCKS[0]!;
+    const lockedText = RARE_OPENERS.find((o) => o.name === lock.name)!.text;
+    const LG = `test-locks-${Date.now()}`;
+    const pool = openers.rarePoolFor([]);
+    const swapped = await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.5);
+    check('lock: someone else rolling it is swapped for another special', [swapped !== lockedText, rares.isRareOpener(swapped)], [true, true]);
+    check('lock: the 5% gets through', await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.96), lockedText);
+    check('lock: the owner keeps it', await rares.applySpecialLocks(LG, lock.owner, lockedText, pool, () => 0.5), lockedText);
+    check('lock: other specials are untouched', await rares.applySpecialLocks(LG, 'someone-else', RARE_PING_OPENERS[3]!, pool, () => 0.5), RARE_PING_OPENERS[3]);
+    await rares.recordRareOpener(LG, lock.owner, lockedText);
+    check('lock: over once anyone has had it', await rares.applySpecialLocks(LG, 'someone-else', lockedText, pool, () => 0.5), lockedText);
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: LG } });
+
+    // Settings: DM me too, early riser, special sets.
+    const us = await import('../src/lib/timer/userSettings');
+    const SG = `test-usettings-${Date.now()}`;
+    check('settings: defaults', await us.getUserSettings(SG, 'u1'), { dmPing: false, earlyRiser: false, disabledSets: [] });
+    check('settings: default run and ping times', [us.runMinutes(await us.getUserSettings(SG, 'u1')), us.pingMinutes(await us.getUserSettings(SG, 'u1'))], [50, 3]);
+    await us.toggleSetting(SG, 'u1', 'dm');
+    await us.toggleSetting(SG, 'u1', 'early');
+    const on = await us.toggleSetting(SG, 'u1', 'set:set1');
+    check('settings: each toggle flips', on, { dmPing: true, earlyRiser: true, disabledSets: ['set1'] });
+    check('settings: early riser runs 49 and clears in 2', [us.runMinutes(on), us.pingMinutes(on)], [49, 2]);
+    check('settings: an unknown set is ignored', (await us.toggleSetting(SG, 'u1', 'set:nope')).disabledSets, ['set1']);
+    check('settings: a set flips back on', (await us.toggleSetting(SG, 'u1', 'set:set1')).disabledSets, []);
+    const view = JSON.stringify(us.settingsView(on));
+    check('settings: the screen shows each setting\'s state', [view.includes('DM me too: On'), view.includes('Early riser: On'), view.includes('Set 1: Off')], [true, true, true]);
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: SG } });
+    const { BUTTON_SETTINGS } = await import('../src/lib/timer/panel');
+    check('panel: has the Settings button', panelJson.includes(BUTTON_SETTINGS) || JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_SETTINGS), true);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [
