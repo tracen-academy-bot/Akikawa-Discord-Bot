@@ -291,3 +291,8 @@ club fan tracker plus a self-hosted dashboard.
    Shame Score) over a daily fan chart.
 3. `/benchmark` — Top 10/30/100 entry-vs-average fans/member/day, plus a
    14-day growth chart.
+
+## 2026-11-05: Role for every club member
+
+- Request: give a new role (1567786901140807730) to everyone holding any of the 15 club roles.
+- The cloud session has no bot token, so it ships `/role give-club-members` for a manager to run.

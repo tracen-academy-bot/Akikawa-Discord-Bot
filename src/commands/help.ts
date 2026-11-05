@@ -110,6 +110,7 @@ export const AUDIENCE: Record<string, Audience> = {
     'welcome test': 'managers',
     'welcome options': 'managers',
     'welcome off': 'managers',
+    'role give-club-members': 'managers',
     post: 'managers',
 
     'role add': 'moderators',

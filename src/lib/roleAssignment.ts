@@ -69,3 +69,34 @@ export async function unassignRole(member: GuildMember, role: Role, reason?: str
         if (otherClubRoles.size === 0) { await member.roles.add(DEFAULT_ROLE_ID, reason) }
     }
 }
+
+/** A member as `membersToGrant` reads them. */
+export interface RoleHolder {
+    id: string;
+    bot: boolean;
+    roleIds: string[];
+}
+
+/**
+ * The members who hold at least one club role but not `roleId`: the ones
+ * `/role give-club-members` adds `roleId` to. Bots are skipped.
+ *
+ * @param members     Every member of the server.
+ * @param roleId      The role to hand out.
+ * @param clubRoleIds The club roles; defaults to `CLUB_ROLE_IDS`.
+ */
+export function membersToGrant(members: RoleHolder[], roleId: string, clubRoleIds: readonly string[] = CLUB_ROLE_IDS): string[] {
+    return members
+        .filter((m) => !m.bot && !m.roleIds.includes(roleId) && m.roleIds.some((r) => clubRoleIds.includes(r)))
+        .map((m) => m.id);
+}
+
+/** True when `CLUB_ROLE_IDS` is set. */
+export function hasClubRoles(): boolean {
+    return CLUB_ROLE_IDS.length > 0;
+}
+
+/** True when `roleId` is the default "Tracen Applicant" role. */
+export function isDefaultRole(roleId: string): boolean {
+    return DEFAULT_ROLE_ID !== '' && roleId === DEFAULT_ROLE_ID;
+}
