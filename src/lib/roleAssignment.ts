@@ -70,33 +70,46 @@ export async function unassignRole(member: GuildMember, role: Role, reason?: str
     }
 }
 
-/** A member as `membersToGrant` reads them. */
-export interface RoleHolder {
-    id: string;
-    bot: boolean;
-    roleIds: string[];
+/**
+ * The Member role: held by exactly the members who hold a club role. The
+ * bot keeps it in sync on every role change (see `syncMemberRole`), so it
+ * cannot be given or taken by hand. Set MEMBER_ROLE_ID to change it; an
+ * empty value turns the sync off.
+ */
+const MEMBER_ROLE_ID = (process.env.MEMBER_ROLE_ID ?? '1567786901140807730').trim();
+
+/**
+ * What the Member role needs on someone with these roles: `add` when they
+ * hold a club role but not Member, `remove` when they hold Member but no
+ * club role, `null` when it is right already.
+ *
+ * @param roleIds      The member's roles.
+ * @param memberRoleId The Member role; empty means no sync.
+ * @param clubRoleIds  The club roles; defaults to `CLUB_ROLE_IDS`.
+ */
+export function memberRoleChange(roleIds: readonly string[], memberRoleId: string = MEMBER_ROLE_ID, clubRoleIds: readonly string[] = CLUB_ROLE_IDS): 'add' | 'remove' | null {
+    // With no club roles configured, everyone would lose Member.
+    if (!memberRoleId || clubRoleIds.length === 0) return null;
+    const inClub = roleIds.some((r) => clubRoleIds.includes(r));
+    const hasMember = roleIds.includes(memberRoleId);
+    if (inClub && !hasMember) return 'add';
+    if (!inClub && hasMember) return 'remove';
+    return null;
 }
 
 /**
- * The members who hold at least one club role but not `roleId`: the ones
- * `/role give-club-members` adds `roleId` to. Bots are skipped.
- *
- * @param members     Every member of the server.
- * @param roleId      The role to hand out.
- * @param clubRoleIds The club roles; defaults to `CLUB_ROLE_IDS`.
+ * Puts the Member role right on `member` after a role change. The change
+ * this makes fires another update, which then needs nothing, so it does
+ * not loop. Bots are skipped. Never throws.
  */
-export function membersToGrant(members: RoleHolder[], roleId: string, clubRoleIds: readonly string[] = CLUB_ROLE_IDS): string[] {
-    return members
-        .filter((m) => !m.bot && !m.roleIds.includes(roleId) && m.roleIds.some((r) => clubRoleIds.includes(r)))
-        .map((m) => m.id);
-}
-
-/** True when `CLUB_ROLE_IDS` is set. */
-export function hasClubRoles(): boolean {
-    return CLUB_ROLE_IDS.length > 0;
-}
-
-/** True when `roleId` is the default "Tracen Applicant" role. */
-export function isDefaultRole(roleId: string): boolean {
-    return DEFAULT_ROLE_ID !== '' && roleId === DEFAULT_ROLE_ID;
+export async function syncMemberRole(member: GuildMember): Promise<void> {
+    if (member.user.bot) return;
+    const change = memberRoleChange([...member.roles.cache.keys()]);
+    if (!change) return;
+    try {
+        if (change === 'add') await member.roles.add(MEMBER_ROLE_ID, 'Member role follows club roles');
+        else await member.roles.remove(MEMBER_ROLE_ID, 'Member role follows club roles: no club role left');
+    } catch (e) {
+        console.error(`Syncing the Member role on ${member.id} failed:`, e);
+    }
 }

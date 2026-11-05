@@ -14,6 +14,7 @@ import { startScheduler } from './lib/timer/scheduler';
 import { startFanScheduler } from './lib/fans/scheduler';
 import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
+import { syncMemberRole } from './lib/roleAssignment';
 import { connect } from './lib/startup';
 import { runMigrations } from './lib/migrate';
 import { handleSpecialRead, handleTimerButton, isSpecialReadMenu, isTimerButton } from './commands/timer';
@@ -108,6 +109,8 @@ client.on(Events.GuildMemberUpdate, (before, after) => {
     // An uncached `before` has no boost state; it could make any update of
     // a booster look like a new boost, so it is skipped.
     if (!before.partial && startedBoosting(before, after)) void thankBooster(after);
+    // The Member role follows the club roles, whoever changed them.
+    void syncMemberRole(after);
 });
 
 client.on(Events.MessageCreate, (message) => {

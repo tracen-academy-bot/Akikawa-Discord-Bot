@@ -296,3 +296,6 @@ club fan tracker plus a self-hosted dashboard.
 
 - Request: give a new role (1567786901140807730) to everyone holding any of the 15 club roles.
 - The cloud session has no bot token, so it ships `/role give-club-members` for a manager to run.
+- Follow-up: the bulk run worked (448 members). The staff asked to remove the command and to keep
+  Member synced live. Rule chosen: club roles drive Member. A hand change to Member is reverted;
+  removing Member never strips a club role.

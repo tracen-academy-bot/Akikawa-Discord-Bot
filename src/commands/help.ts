@@ -110,7 +110,6 @@ export const AUDIENCE: Record<string, Audience> = {
     'welcome test': 'managers',
     'welcome options': 'managers',
     'welcome off': 'managers',
-    'role give-club-members': 'managers',
     post: 'managers',
 
     'role add': 'moderators',
@@ -261,9 +260,12 @@ function topicPage(topic: Exclude<Topic, 'start'>, entries: HelpEntry[]): string
                 '**The panel’s buttons**',
                 '**Start** begins a run, or restarts yours. **Stop** cancels it, and a cancelled run does not count.',
                 "**My Stats** shows your runs, **Leaderboard** this week's board. Both only to you.",
+                '**Specials** shows the rare ping lines you have found, and lets you read them again.',
+                '**Settings**: **DM Me Too** sends your pings to your DMs as well; **Early Riser** pings you after 49 minutes and clears the ping after 2. You can also turn sets of special lines on or off.',
             ].join('\n'),
         );
     }
+    if (topic === 'tools') blocks.push('-# The **Member** role follows the club roles: anyone with a club role gets it, and it comes off with their last club role. The bot puts it right after any role change, including changes made by hand.');
     if (topic === 'applications') {
         blocks.push('-# A new application post is scouted by itself: its card goes in the post, the recruitment board updates, and staff are told. With no trainer ID in the post, the applicant is pinged for it and their reply is picked up. Accepting needs the ID; rejecting does not. Staff accept into their own club, which gives the applicant its role (other club roles come off; visas stay); any club\'s staff can reject. Applicants close a decided post with its **Close post** button, which links their Discord to their trainer.');
     }
