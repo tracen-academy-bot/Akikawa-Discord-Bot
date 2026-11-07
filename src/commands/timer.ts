@@ -529,10 +529,16 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
         }
 
         case BUTTON_LEADERBOARD: {
+            // This week is on the live board above the panel already, so the
+            // button shows the two it does not: last week's final standings
+            // and all time.
             await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-            const buffer = await renderBoardFor(interaction.guild!, 'thisweek');
+            const [lastWeek, allTime] = await Promise.all([renderBoardFor(interaction.guild!, 'lastweek'), renderBoardFor(interaction.guild!, 'all')]);
             await interaction.editReply({
-                files: [new AttachmentBuilder(buffer, { name: 'training-leaderboard.png' })],
+                files: [
+                    new AttachmentBuilder(lastWeek, { name: 'training-last-week.png' }),
+                    new AttachmentBuilder(allTime, { name: 'training-all-time.png' }),
+                ],
             });
             break;
         }

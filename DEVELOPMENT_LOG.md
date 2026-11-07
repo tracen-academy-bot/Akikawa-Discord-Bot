@@ -2919,3 +2919,11 @@ nothing calls this module yet — but the same class of latent bug.
   With `CLUB_ROLE_IDS` empty, nothing is removed.
 - Changes made while the bot is offline are fixed at the member's next update, not at startup.
 - `/help`: the timer page now lists the Specials and Settings buttons; the tools page explains the Member role.
+
+## 2026-11-07: Leaderboard button shows last week and all time
+
+- The timer panel's Leaderboard button now replies (only to the presser) with two images:
+  last week's final board and the all-time board. This week is already on the live board above the panel.
+- `/help` updated to match.
+- Note: one local run of `test:timer` failed "delivery lag recorded (~1800s)" twice; reruns on this
+  branch and on master passed 84/84. That test looks timing-sensitive; unrelated to this change.

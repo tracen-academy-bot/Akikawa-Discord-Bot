@@ -259,7 +259,7 @@ function topicPage(topic: Exclude<Topic, 'start'>, entries: HelpEntry[]): string
             [
                 '**The panel’s buttons**',
                 '**Start** begins a run, or restarts yours. **Stop** cancels it, and a cancelled run does not count.',
-                "**My Stats** shows your runs, **Leaderboard** this week's board. Both only to you.",
+                "**My Stats** shows your runs, **Leaderboard** last week's final board and the all-time board. Both only to you.",
                 '**Specials** shows the rare ping lines you have found, and lets you read them again.',
                 '**Settings**: **DM Me Too** sends your pings to your DMs as well; **Early Riser** pings you after 49 minutes and clears the ping after 2. You can also turn sets of special lines on or off.',
             ].join('\n'),
