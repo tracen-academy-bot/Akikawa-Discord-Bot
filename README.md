@@ -47,7 +47,7 @@ npm run dev                  # slash commands register themselves on start
 | **Start** | Begins a 50-minute run, or resets the one you have |
 | **Stop** | Cancels your run; it does not count |
 | **My Stats** | Your statistics card |
-| **Leaderboard** | Last week's final standings, all time, and the specials board (sets completed, then specials found, then pings) |
+| **Leaderboard** | Last week's final standings, all time, and the specials top 3 (points: 10 a new special, 1 a repeat, 50 a full set) |
 | **Specials** | Only to you, one set per page with Back and Next: Set 0 (the usual reminder lines), then each special set with the lines you have found, its On/Off button, and a menu to read them |
 | **Settings** | Your own settings, only to you: **DM Me Too** (the pings arrive here and in your DMs), **Early Riser** (notified after 49 minutes, pings cleared after 4 minutes), and **Boosts** (on or off) |
 | **Boosts** | Only to you: your base special chance (6%), each boost on your next ping (set boosts, early start, seasonal events), the total, and a Boosts on/off button |

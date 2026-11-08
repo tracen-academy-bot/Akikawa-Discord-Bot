@@ -1,6 +1,6 @@
 import { AttachmentBuilder, type Guild } from 'discord.js';
 import { renderTimerLeaderboard } from '../image/renderTimerLeaderboard';
-import { renderSpecialsLeaderboard } from '../image/renderSpecialsLeaderboard';
+import { SPECIALS_BOARD_PLACES, renderSpecialsLeaderboard } from '../image/renderSpecialsLeaderboard';
 import { specialsBoard } from './rares';
 import { TOP_PLACES, boardForWeek, getBoard, getTimerSettings, weekLabel, type Board, type BoardPeriod } from './rewards';
 
@@ -26,9 +26,9 @@ export async function renderBoardFor(guild: Guild, period: BoardPeriod, board?: 
     return renderTimerLeaderboard(shown, names, role?.name ?? null);
 }
 
-/** Renders the specials leaderboard for `guild` (all time), with display names. */
+/** Renders the specials leaderboard's top 3 for `guild` (all time), with display names. */
 export async function renderSpecialsBoardFor(guild: Guild): Promise<Buffer> {
-    const board = await specialsBoard(guild.id);
+    const board = await specialsBoard(guild.id, SPECIALS_BOARD_PLACES);
     const names = new Map<string, string>();
     for (const row of board.rows) names.set(row.discordUserId, await displayName(guild, row.discordUserId));
     return renderSpecialsLeaderboard(board, names);

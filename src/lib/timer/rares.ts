@@ -359,9 +359,18 @@ function pickCommon(random: () => number): string {
 
 // ─── Specials leaderboard ─────────────────────────────────────────────────────
 
+/**
+ * Specials leaderboard points: for each special found for the first time,
+ * for each repeat, and for each set completed (every special in it found).
+ * A full set is worth five more new finds; a repeat is a small nod.
+ */
+export const SPECIAL_POINTS = { found: 10, repeat: 1, set: 50 } as const;
+
 /** One trainer's row on the specials leaderboard. */
 export interface SpecialsBoardRow {
     discordUserId: string;
+    /** Their score: see `SPECIAL_POINTS`. */
+    points: number;
     /** Sets whose every special they have found. */
     setsComplete: number;
     /** Distinct specials they have found. */
@@ -384,17 +393,10 @@ export interface SpecialsBoard {
 }
 
 /**
- * Ranks trainers by their specials, all time, in order of:
- *
- *   1. sets completed (every special in the set found),
- *   2. distinct specials found,
- *   3. special pings, repeats included,
- *
- * and, when all three tie, whoever found their latest new special first. No
- * points: each step only breaks ties in the one before, so a completed set
- * always outranks any number of loose finds, and the board shows the three
- * numbers it is sorted by. Only finds of specials that still exist count.
- * `limit` caps the rows; the totals cover everyone.
+ * Ranks trainers by their specials points, all time (`SPECIAL_POINTS`: new
+ * finds, repeats, completed sets); a tie goes to whoever found their latest
+ * new special first. Only finds of specials that still exist count. `limit`
+ * caps the rows; the totals cover everyone.
  */
 export async function specialsBoard(guildId: string, limit = 15): Promise<SpecialsBoard> {
     const ids = new Set(RARE_OPENERS.map((o) => o.id));
@@ -411,13 +413,12 @@ export async function specialsBoard(guildId: string, limit = 15): Promise<Specia
         }
         byUser.set(h.discordUserId, u);
     }
-    const rows: SpecialsBoardRow[] = [...byUser].map(([discordUserId, u]) => ({
-        discordUserId,
-        setsComplete: SPECIAL_SETS.filter((s) => s.openers.length > 0 && s.openers.every((o) => u.found.has(o.id))).length,
-        found: u.found.size,
-        pings: u.pings,
-        reachedAt: u.reachedAt,
-    }));
-    rows.sort((a, b) => b.setsComplete - a.setsComplete || b.found - a.found || b.pings - a.pings || a.reachedAt.getTime() - b.reachedAt.getTime());
+    const rows: SpecialsBoardRow[] = [...byUser].map(([discordUserId, u]) => {
+        const setsComplete = SPECIAL_SETS.filter((s) => s.openers.length > 0 && s.openers.every((o) => u.found.has(o.id))).length;
+        const found = u.found.size;
+        const points = found * SPECIAL_POINTS.found + (u.pings - found) * SPECIAL_POINTS.repeat + setsComplete * SPECIAL_POINTS.set;
+        return { discordUserId, points, setsComplete, found, pings: u.pings, reachedAt: u.reachedAt };
+    });
+    rows.sort((a, b) => b.points - a.points || a.reachedAt.getTime() - b.reachedAt.getTime());
     return { rows: rows.slice(0, limit), specialCount: RARE_OPENERS.length, setCount: SPECIAL_SETS.length, totalPings: hits.length, trainers: rows.length };
 }

@@ -8,11 +8,12 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 - The Leaderboard button sends a third image: the specials board, all time
   (`specialsBoard` in rares.ts, `renderSpecialsLeaderboard`).
-- Ranked in order by sets completed, then distinct specials found, then
-  special pings (repeats included); a full tie goes to whoever found their
-  latest new special first. No points: weights would be arbitrary, and with
-  this order a completed set always outranks any number of loose finds. The
-  image prints all three numbers and says how it is ranked.
+- Ranked by points (`SPECIAL_POINTS`): 10 a new special, 1 a repeat, 50 a
+  completed set; a tie goes to whoever found their latest new special first.
+  (First drafted as a plain sort by sets, then found, then pings; the owner
+  preferred one points number.) The image shows only the top 3, with points
+  as the main number and found, sets and pings under it; the header says
+  how points are scored.
 - Only finds of specials that still exist count (by `specialId`).
 
 ---
