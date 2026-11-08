@@ -4,6 +4,25 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-08 — Boosts button, Curren Chan week, 6% base
+
+- **Base special chance is 6%** (`RARE_OPENER_CHANCE`, was 4%). Tests now
+  derive their expected counts from the constant.
+- **Seasonal buffs** (`SEASONAL_BUFFS` in openers.ts): a flat extra slice
+  that only draws one special, between `from` and `until`, for everyone.
+  They count as boosts (Boosts off turns them off) and skip a special whose
+  set is off or locked. First one: Curren Chan week, +1% Curren Chan,
+  2026-11-08 11:00 to 2026-11-15 11:00 UTC. Expired entries are ignored.
+- **Boosts button** on the panel (second row, next to Settings): only to
+  the trainer, the base chance, each boost on their next ping (set boosts
+  with runs left, early start on the current run, seasonal buffs with when
+  they end), the next ping's total, an early-start tip, and a Boosts On/Off
+  button. With Boosts off, boosts show as paused and the total is the base.
+- `extraChances` moved to `src/lib/timer/boosts.ts` (with the view), so the
+  view lists exactly what the ping uses; `scheduler.ts` re-exports it.
+
+---
+
 ## 2026-11-08 — Stable special ids; Set 0; real run lengths; ping lifetimes
 
 - **Every special has a stable id** (`Special.id`, `<set>.<slug>`, e.g.

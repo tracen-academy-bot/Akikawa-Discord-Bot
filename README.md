@@ -50,6 +50,7 @@ npm run dev                  # slash commands register themselves on start
 | **Leaderboard** | This week's standings, live |
 | **Specials** | Only to you, one set per page with Back and Next: Set 0 (the usual reminder lines), then each special set with the lines you have found, its On/Off button, and a menu to read them |
 | **Settings** | Your own settings, only to you: **DM Me Too** (the pings arrive here and in your DMs), **Early Riser** (notified after 49 minutes, pings cleared after 4 minutes), and **Boosts** (on or off) |
+| **Boosts** | Only to you: your base special chance (6%), each boost on your next ping (set boosts, early start, seasonal events), the total, and a Boosts on/off button |
 
 Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
 (this week live, last week final, last 30 days, all time). The panel's

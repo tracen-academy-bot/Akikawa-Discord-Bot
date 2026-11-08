@@ -12,9 +12,9 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { activeBoosts, chooseOpener, grantBoost, isRareOpener, lockedSetsFor, recordRareOpener, spendBoosts, type ExtraChance } from './rares';
-import { EARLY_START, SPECIAL_SETS, boostPool, fillOpener, pickOpener, rarePoolFor } from './openers';
-import type { UserSettings } from './userSettings';
+import { chooseOpener, grantBoost, isRareOpener, lockedSetsFor, recordRareOpener, spendBoosts } from './rares';
+import { extraChances } from './boosts';
+import { fillOpener, pickOpener, rarePoolFor } from './openers';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
 
@@ -44,9 +44,10 @@ const LATE_DELIVERY_THRESHOLD_S = 120;
 const AWARD_CHECK_MS = 60_000;
 
 export { PING_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, pickOpener } from './openers';
+export { extraChances } from './boosts';
 
 /**
- * Builds the message body for an expiry ping: an opener (a rare one 4% of
+ * Builds the message body for an expiry ping: an opener (a rare one 6% of
  * the time), then a bold-led line for each thing worth celebrating
  * (the run's number, a streak, a new milestone role). `milestoneRoleId` is
  * a role the run just earned; it is mentioned but, with only the user
@@ -83,33 +84,6 @@ export function buildPingContent(
     if (milestoneRoleId) lines.push(`**Promotion!** **${summary.totalRuns} runs** reached, and <@&${milestoneRoleId}> is yours!`);
 
     return lines.join('\n');
-}
-
-/**
- * The extra special chances on one trainer's ping, when their Boosts are on:
- *
- *   - each set boost they hold, for a set they have on and unlocked: its
- *     chance, drawn from that set's lines with the boost's tag;
- *   - early start, when the run was one: its chance, drawn from their usual
- *     special pool.
- */
-export async function extraChances(
-    guildId: string,
-    discordUserId: string,
-    settings: UserSettings,
-    lockedSets: readonly string[],
-    earlyStart: boolean,
-    pool: readonly string[],
-): Promise<ExtraChance[]> {
-    if (!settings.boosts) return [];
-    const extras: ExtraChance[] = [];
-    for (const held of await activeBoosts(guildId, discordUserId)) {
-        if (settings.disabledSets.includes(held.setId) || lockedSets.includes(held.setId)) continue;
-        const boost = SPECIAL_SETS.find((s) => s.id === held.setId)?.openers.find((o) => o.boost)?.boost;
-        if (boost) extras.push({ chance: boost.chance, pool: boostPool(held.setId, boost.tag) });
-    }
-    if (earlyStart) extras.push({ chance: EARLY_START.chance, pool });
-    return extras;
 }
 
 /** A guild the bot is in, from the cache or Discord; null when it is not. */
