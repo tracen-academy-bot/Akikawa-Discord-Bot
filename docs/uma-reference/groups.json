@@ -1,6 +1,114 @@
 {
  "groups": [
   {
+   "name": "Social media stars",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1038,
+     "name_en": "Curren Chan"
+    },
+    {
+     "id": 1132,
+     "name_en": "Loves Only You"
+    },
+    {
+     "id": 1048,
+     "name_en": "Tosen Jordan"
+    },
+    {
+     "id": 1065,
+     "name_en": "Daitaku Helios"
+    },
+    {
+     "id": 1113,
+     "name_en": "Fusaichi Pandora"
+    },
+    {
+     "id": 1098,
+     "name_en": "Copano Rickey"
+    },
+    {
+     "id": 1040,
+     "name_en": "Gold City"
+    },
+    {
+     "id": 1054,
+     "name_en": "Biko Pegasus"
+    },
+    {
+     "id": 1010,
+     "name_en": "Taiki Shuttle"
+    },
+    {
+     "id": 1028,
+     "name_en": "Hishi Akebono"
+    }
+   ],
+   "basis": "Game voice lines: Curren Chan (Umastagram/UmaTok x4, interview lines x6; Agnes Digital 91011 and Transcend fangirl over her posts), Loves Only You (streamer: 42 stream/social words, community members), Tosen Jordan (UmaTok/Umastagram x7, went viral 91229), Daitaku Helios (x5), Fusaichi Pandora (x4, UmaTok until the last minute), Copano Rickey (viral Umastagram photo 400006), Gold City (account run by her manager, 91022). Web only (umamusu.wiki Curren Chan page, unverified in game data): Biko Pegasus big on UmaTok, Hishi Akebono big on Umastagram, Taiki Shuttle big on UmaTube. Curren 3M Umastagram followers: launch coverage, Apr 2021.",
+   "set_pitch": "Notifications as the hook: your run is done and they want it on camera. Curren hashtags it, Jordan and Helios want an UmaTok, Loves Only You goes live, Gold City sighs that her manager wants content."
+  },
+  {
+   "name": "Social media regulars and fans",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1024,
+     "name_en": "Mayano Top Gun"
+    },
+    {
+     "id": 1087,
+     "name_en": "Aston Machan"
+    },
+    {
+     "id": 1029,
+     "name_en": "Yukino Bijin"
+    },
+    {
+     "id": 1019,
+     "name_en": "Agnes Digital"
+    },
+    {
+     "id": 1037,
+     "name_en": "Eishin Flash"
+    },
+    {
+     "id": 1099,
+     "name_en": "Hokko Tarumae"
+    },
+    {
+     "id": 1064,
+     "name_en": "Mejiro Palmer"
+    },
+    {
+     "id": 1133,
+     "name_en": "Chrono Genesis"
+    },
+    {
+     "id": 1131,
+     "name_en": "Gran Alegria"
+    },
+    {
+     "id": 1012,
+     "name_en": "Hishi Amazon"
+    },
+    {
+     "id": 1128,
+     "name_en": "Blast Onepiece"
+    },
+    {
+     "id": 1148,
+     "name_en": "Titleholder"
+    },
+    {
+     "id": 1103,
+     "name_en": "Royce and Royce"
+    }
+   ],
+   "basis": "Game data: Mayano (Umastagram 2-shot, 91020), Aston Machan (calendar from her Umastagram photos, 91019), Yukino Bijin (posts to Umastagram and home, 10014), Agnes Digital (Curren fan, 91011), Eishin Flash reads Hokko Tarumae on Umatter (91218), Mejiro Palmer reads Umatter (10008), Chrono Genesis checks camps' SNS (90006), Gran Alegria watches Loves Only You streams (91003), Royce and Royce analyses UmaTok memes (91011), Hokko Tarumae posts on Umatter about Tomakomai (per Flash 91218). Secrets: Hishi Amazon posts character bento, Blast Onepiece posts very stylish photos, Titleholder's news is on her sister's Umastagram.",
+   "set_pitch": "Lighter cameos for a social set: the fan, the lurker, the one whose sister posts for her."
+  },
+  {
    "name": "Mejiro family",
    "kind": "family",
    "members": [
