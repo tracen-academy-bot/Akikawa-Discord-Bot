@@ -159,7 +159,7 @@ async function main() {
     check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, RARE_PING_OPENERS.length - openers.SPECIAL_SETS[0]!.openers.length);
     check('sets: with no special on, a rare roll gives a common line', PING_OPENERS.includes(openers.pickOpener(0.001, [])), true);
 
-    // The lock: Matikanetannhauser is locked to its owner, 2% of their 4%, until they have it.
+    // The lock: Matikanetannhauser is locked to its owner, guaranteed on their next ping, until they have it.
     const lock = openers.SPECIAL_LOCKS[0]!;
     const lockedText = RARE_OPENERS.find((o) => o.name === lock.name)!.text;
     const LG = `test-locks-${Date.now()}`;
@@ -174,10 +174,8 @@ async function main() {
         const special = [...counts].filter(([o]) => rares.isRareOpener(o));
         return { locked: counts.get(lockedText) ?? 0, specials: special.reduce((n, [, c]) => n + c, 0), others: special.filter(([o]) => o !== lockedText).map(([, c]) => c) };
     };
-    const owner = await sweep(lock.owner);
-    check('lock: the owner gets it 2% of the time', owner.locked, 400);
-    check('lock: the owner\'s total special chance stays 4%', owner.specials, 800);
-    check('lock: the owner\'s other 2% is spread evenly over the other 11', [owner.others.length, Math.max(...owner.others) - Math.min(...owner.others) <= 1], [RARE_PING_OPENERS.length - 1, true]);
+    const owner = await sweep(lock.owner, 2000);
+    check('lock: guaranteed, the owner gets it on every roll', [lock.ownerChance >= 1, owner.locked], [true, 2000]);
     const other = await sweep('someone-else');
     check('lock: nobody else gets it', other.locked, 0);
     check('lock: everyone else keeps 4%, spread evenly over the 11', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 1], [800, RARE_PING_OPENERS.length - 1, true]);
@@ -186,7 +184,7 @@ async function main() {
     await rares.recordRareOpener(LG, lock.owner, lockedText);
     const afterOther = await sweep('someone-else');
     const afterOwner = await sweep(lock.owner);
-    check('lock: over once the owner has it, 4% over all 12 for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked < 400], [800, true, 800, true]);
+    check('lock: over once the owner has it, 4% over all 12 for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked > 0 && afterOwner.locked < 400], [800, true, 800, true]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: LG } });
 
     // #OnlineSensations: locked behind Curren Chan, a collab boost, and {set_name}.
@@ -230,6 +228,11 @@ async function main() {
     const specialCount = [...counts].filter(([o]) => rares.isRareOpener(o)).reduce((n, [, c]) => n + c, 0);
     const collabCount = [...counts].filter(([o]) => collabs.includes(o)).reduce((n, [, c]) => n + c, 0);
     const commonCounts = PING_OPENERS.map((o) => counts.get(o) ?? 0);
+    const guaranteed = openers.SPECIAL_LOCKS.find((l) => l.ownerChance >= 1);
+    if (guaranteed) {
+        const gText = RARE_OPENERS.find((o) => o.name === guaranteed.name)!.text;
+        check('lock: a guarantee beats the boosts too', await rares.chooseOpener(XG, guaranteed.owner, 0.001, fullPool, extras), gText);
+    }
     check('odds: special chance is 4% + 1% + 4% = 9%', Math.abs(specialCount - 1800) <= 1, true);
     // Collab lines: all of the 4% boost, plus their share of the 1% and 4%
     // (spread over every special but the locked Matikanetannhauser).

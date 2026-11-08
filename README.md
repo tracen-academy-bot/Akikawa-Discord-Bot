@@ -213,8 +213,10 @@ above the club roles.
 The **Member** role (`MEMBER_ROLE_ID`, default `1567786901140807730`) is
 kept on exactly the members who hold a club role. On every member update
 the bot adds it to anyone with a club role and removes it from anyone with
-none, so a change by hand is put right. Role changes made while the bot is
-offline are corrected at that member's next update. The bot's role must sit
+none, so a change by hand is put right. Deleting a club role (a club
+leaving) syncs every member, since Discord reports the deletion once rather
+than as a change on each member: its ex-members lose Member. Role changes
+made while the bot is offline are corrected at that member's next update. The bot's role must sit
 above the Member role.
 
 A locked post has no message box for the applicant, so the decision comes

@@ -169,11 +169,14 @@ export function boostPool(setId: string, tag: string): string[] {
  *   - the owner gets it at `ownerChance` per ping (2%), and the rest of
  *     their special share (the other 2%) is spread evenly over the other
  *     specials. Their total special chance stays 4%.
+ *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping
+ *     is that special, whatever the roll.
  *
  * Once the owner has had it, the lock is over and it is a normal special for
  * everyone (the finds say so), so an entry can stay here harmlessly or be
  * removed.
  */
 export const SPECIAL_LOCKS: readonly { name: string; owner: string; ownerChance: number }[] = [
-    { name: 'Matikanetannhauser', owner: '457773317739380738', ownerChance: 0.02 },
+    // Guaranteed (Fwoxie, 2026-11-08): Tylina's next ping is this line.
+    { name: 'Matikanetannhauser', owner: '457773317739380738', ownerChance: 1 },
 ];

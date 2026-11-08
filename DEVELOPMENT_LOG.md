@@ -3001,3 +3001,20 @@ nothing calls this module yet — but the same class of latent bug.
 - `/help` updated to match.
 - Note: one local run of `test:timer` failed "delivery lag recorded (~1800s)" twice; reruns on this
   branch and on master passed 84/84. That test looks timing-sensitive; unrelated to this change.
+
+## 2026-11-08: Matikanetannhauser guaranteed for Tylina
+
+- `SPECIAL_LOCKS` entry now has `ownerChance: 1`; `chooseOpener` treats 1 or more as a guarantee:
+  the owner's next ping is the locked special on any roll. Nobody else can get it meanwhile.
+- The find is recorded on that ping, which lifts the lock; then it is a normal special (4% over all 12).
+- Test-scheduler: the 2% sweep checks became one guarantee check; the other lock checks stand.
+
+## 2026-11-08: Member sync on club role deletion (Rigil leaving)
+
+- Deleting a role sends one GuildRoleDelete event, not a member update per holder, so the
+  per-member sync never ran for ex-members. `handleClubRoleDeleted` (`src/lib/roleAssignment.ts`)
+  now runs on GuildRoleDelete for a club role: it fetches every member fresh and syncs them all
+  (`syncMemberRoles`). Ex-members with no club role left lose Member.
+- No Tracen Applicant role is given (staff: not wanted).
+- Tests: `scripts/test-roles.ts`, fake guild and members.
+- Rigil's role is 1393416636136161340; staff should drop it from `CLUB_ROLE_IDS` in Railway after deleting it.

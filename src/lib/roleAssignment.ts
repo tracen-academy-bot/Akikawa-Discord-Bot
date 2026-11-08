@@ -101,15 +101,52 @@ export function memberRoleChange(roleIds: readonly string[], memberRoleId: strin
  * Puts the Member role right on `member` after a role change. The change
  * this makes fires another update, which then needs nothing, so it does
  * not loop. Bots are skipped. Never throws.
+ *
+ * @returns What it changed, or null when nothing (or when the change failed).
  */
-export async function syncMemberRole(member: GuildMember): Promise<void> {
-    if (member.user.bot) return;
+export async function syncMemberRole(member: GuildMember): Promise<'add' | 'remove' | null> {
+    if (member.user.bot) return null;
     const change = memberRoleChange([...member.roles.cache.keys()]);
-    if (!change) return;
+    if (!change) return null;
     try {
         if (change === 'add') await member.roles.add(MEMBER_ROLE_ID, 'Member role follows club roles');
         else await member.roles.remove(MEMBER_ROLE_ID, 'Member role follows club roles: no club role left');
+        return change;
     } catch (e) {
         console.error(`Syncing the Member role on ${member.id} failed:`, e);
+        return null;
+    }
+}
+
+/**
+ * Puts the Member role right on every member in `members`, one at a time
+ * (discord.js waits out rate limits). Never throws.
+ */
+export async function syncMemberRoles(members: Iterable<GuildMember>): Promise<{ added: number; removed: number }> {
+    const counts = { added: 0, removed: 0 };
+    for (const member of members) {
+        const change = await syncMemberRole(member);
+        if (change === 'add') counts.added += 1;
+        if (change === 'remove') counts.removed += 1;
+    }
+    return counts;
+}
+
+/**
+ * A deleted club role (a club leaving the server). Discord sends one "role
+ * deleted" event, not a role change for each member who held it, so the
+ * per-member sync never runs for them. This loads every member (needs the
+ * Server Members intent) and syncs them all: anyone left with no club role
+ * loses Member. Never throws.
+ */
+export async function handleClubRoleDeleted(role: Role): Promise<void> {
+    if (!isClubRole(role.id)) return;
+    try {
+        // Fresh from Discord, so the deleted role is gone from every member.
+        const members = await role.guild.members.fetch();
+        const { added, removed } = await syncMemberRoles(members.values());
+        console.log(`Club role ${role.name} (${role.id}) deleted in ${role.guild.name}: Member removed from ${removed}, added to ${added}.`);
+    } catch (e) {
+        console.error(`Syncing Member roles after ${role.name} (${role.id}) was deleted failed:`, e);
     }
 }

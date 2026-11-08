@@ -272,7 +272,9 @@ export interface ExtraChance {
  *   - a locked special is out of everyone's pool but its owner's, so the
  *     4% is spread evenly over the rest;
  *   - the owner gets it below `ownerChance` (2%), and the rest of the 4% is
- *     spread evenly over the other specials.
+ *     spread evenly over the other specials;
+ *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping is
+ *     that special, whatever the roll and before any extra.
  *
  * A locked special never comes up from an extra.
  */
@@ -285,6 +287,9 @@ export async function chooseOpener(
 ): Promise<string> {
     const locks = await activeLocks(guildId);
     const locked = locks.map((l) => l.text);
+    const mine = locks.find((l) => l.owner === discordUserId);
+    // A guarantee: the owner's next ping is theirs, whatever the roll.
+    if (mine && mine.ownerChance >= 1) return mine.text;
 
     const slices = extras.map((e) => ({ chance: e.chance, pool: e.pool.filter((t) => !locked.includes(t)) })).filter((e) => e.chance > 0 && e.pool.length > 0);
     let start = 0;
@@ -302,7 +307,6 @@ export async function chooseOpener(
     const rest = u < p ? u : p + ((u - p) * (1 - p)) / (1 - start - p);
 
     const others = pool.filter((t) => !locked.includes(t));
-    const mine = locks.find((l) => l.owner === discordUserId);
     if (mine && rest < p) {
         if (rest < mine.ownerChance) return mine.text;
         if (others.length === 0) return pickCommon(() => (rest - mine.ownerChance) / (p - mine.ownerChance));

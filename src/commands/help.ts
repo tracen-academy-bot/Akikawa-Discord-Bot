@@ -265,7 +265,7 @@ function topicPage(topic: Exclude<Topic, 'start'>, entries: HelpEntry[]): string
             ].join('\n'),
         );
     }
-    if (topic === 'tools') blocks.push('-# The **Member** role follows the club roles: anyone with a club role gets it, and it comes off with their last club role. The bot puts it right after any role change, including changes made by hand.');
+    if (topic === 'tools') blocks.push('-# The **Member** role follows the club roles: anyone with a club role gets it, and it comes off with their last club role. The bot puts it right after any role change, including changes made by hand, and when a club role is deleted.');
     if (topic === 'applications') {
         blocks.push('-# A new application post is scouted by itself: its card goes in the post, the recruitment board updates, and staff are told. With no trainer ID in the post, the applicant is pinged for it and their reply is picked up. Accepting needs the ID; rejecting does not. Staff accept into their own club, which gives the applicant its role (other club roles come off; visas stay); any club\'s staff can reject. Applicants close a decided post with its **Close post** button, which links their Discord to their trainer.');
     }
