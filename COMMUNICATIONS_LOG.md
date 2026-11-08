@@ -4,6 +4,14 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-08 — A specials leaderboard
+
+- Leaderboard now has a third image ranking trainers by specials: sets
+  completed first, then specials found, then pings. Chosen over a points
+  formula so the order is plain and a full set always wins.
+
+---
+
 ## 2026-11-08 — 6% specials, Curren Chan week, a Boosts button
 
 - The special chance is 6% (was 4%).

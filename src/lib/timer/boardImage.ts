@@ -1,5 +1,7 @@
 import { AttachmentBuilder, type Guild } from 'discord.js';
 import { renderTimerLeaderboard } from '../image/renderTimerLeaderboard';
+import { renderSpecialsLeaderboard } from '../image/renderSpecialsLeaderboard';
+import { specialsBoard } from './rares';
 import { TOP_PLACES, boardForWeek, getBoard, getTimerSettings, weekLabel, type Board, type BoardPeriod } from './rewards';
 
 /** A trainer's display name in the guild, or a fallback when they have left. */
@@ -22,6 +24,14 @@ export async function renderBoardFor(guild: Guild, period: BoardPeriod, board?: 
     const settings = await getTimerSettings(guild.id);
     const role = settings?.topRoleId ? guild.roles.cache.get(settings.topRoleId) : undefined;
     return renderTimerLeaderboard(shown, names, role?.name ?? null);
+}
+
+/** Renders the specials leaderboard for `guild` (all time), with display names. */
+export async function renderSpecialsBoardFor(guild: Guild): Promise<Buffer> {
+    const board = await specialsBoard(guild.id);
+    const names = new Map<string, string>();
+    for (const row of board.rows) names.set(row.discordUserId, await displayName(guild, row.discordUserId));
+    return renderSpecialsLeaderboard(board, names);
 }
 
 /**

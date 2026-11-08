@@ -4,6 +4,19 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-08 — Specials leaderboard
+
+- The Leaderboard button sends a third image: the specials board, all time
+  (`specialsBoard` in rares.ts, `renderSpecialsLeaderboard`).
+- Ranked in order by sets completed, then distinct specials found, then
+  special pings (repeats included); a full tie goes to whoever found their
+  latest new special first. No points: weights would be arbitrary, and with
+  this order a completed set always outranks any number of loose finds. The
+  image prints all three numbers and says how it is ranked.
+- Only finds of specials that still exist count (by `specialId`).
+
+---
+
 ## 2026-11-08 — Boosts button, Curren Chan week, 6% base
 
 - **Base special chance is 6%** (`RARE_OPENER_CHANCE`, was 4%). Tests now

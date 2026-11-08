@@ -50,7 +50,7 @@ import {
     weekLabel,
     type BoardPeriod,
 } from '../lib/timer/rewards';
-import { displayName, renderBoardFor, weekResultsPost } from '../lib/timer/boardImage';
+import { displayName, renderBoardFor, renderSpecialsBoardFor, weekResultsPost } from '../lib/timer/boardImage';
 import { keepPanelAtBottom, postPanelPair } from '../lib/timer/livePanel';
 import { prisma } from '../db/prisma';
 import { renderTimerStats } from '../lib/image/renderTimerStats';
@@ -574,14 +574,19 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
 
         case BUTTON_LEADERBOARD: {
             // This week is on the live board above the panel already, so the
-            // button shows the two it does not: last week's final standings
-            // and all time.
+            // button shows what it does not: last week's final standings, all
+            // time, and the specials board.
             await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-            const [lastWeek, allTime] = await Promise.all([renderBoardFor(interaction.guild!, 'lastweek'), renderBoardFor(interaction.guild!, 'all')]);
+            const [lastWeek, allTime, specials] = await Promise.all([
+                renderBoardFor(interaction.guild!, 'lastweek'),
+                renderBoardFor(interaction.guild!, 'all'),
+                renderSpecialsBoardFor(interaction.guild!),
+            ]);
             await interaction.editReply({
                 files: [
                     new AttachmentBuilder(lastWeek, { name: 'training-last-week.png' }),
                     new AttachmentBuilder(allTime, { name: 'training-all-time.png' }),
+                    new AttachmentBuilder(specials, { name: 'specials-leaderboard.png' }),
                 ],
             });
             break;
