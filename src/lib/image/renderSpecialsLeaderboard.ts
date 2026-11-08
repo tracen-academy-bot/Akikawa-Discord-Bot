@@ -7,10 +7,10 @@ import { SPECIAL_POINTS, type SpecialsBoard, type SpecialsBoardRow } from '../ti
  * The specials leaderboard, in the same card style as the runs board:
  *
  *   header   how points are scored, the server's special pings and trainers
- *   podium   the top 3, points as the main number; under it, specials
- *            found, sets completed and pings
+ *   podium   the top 3, points as the main number; under it, unique
+ *            specials, sets completed and total special pings
  *   rows     everyone else: a bar of points against the leader, sets,
- *            specials found, points
+ *            unique specials, total pings, points
  */
 
 const WIDTH = 900;
@@ -29,12 +29,7 @@ function sets(n: number): string {
     return `${n} set${n === 1 ? '' : 's'}`;
 }
 
-/** "1 ping", "31 pings". */
-function pings(n: number): string {
-    return `${n} ping${n === 1 ? '' : 's'}`;
-}
-
-/** One podium card: place and points on top, name, then found, sets and pings. */
+/** One podium card: place and points on top, name, then "17/25 unique" and "1 set, 31 total". */
 function drawPodiumCard(ctx: SKRSContext2D, row: SpecialsBoardRow, place: number, name: string, of: number, x: number, y: number, w: number, h: number, p: Palette) {
     fillRound(ctx, x, y, w, h, innerRadius(p) + 4, p.panel);
     const tint = p.place[place - 1] ?? p.accent;
@@ -43,8 +38,9 @@ function drawPodiumCard(ctx: SKRSContext2D, row: SpecialsBoardRow, place: number
     const ptsWidth = text(ctx, 'pts', x + w - 18, y + 44, { spec: '400 14px', color: p.muted, align: 'right' });
     text(ctx, `${row.points}`, x + w - 18 - ptsWidth - 6, y + 44, { spec: '700 30px', color: p.text, align: 'right' });
     text(ctx, fit(ctx, name, w - 36, '700 18px'), x + 18, y + 80, { spec: '700 18px', color: p.text });
-    text(ctx, `${row.found} of ${of} found`, x + 18, y + 110, { spec: '400 14px', color: p.muted });
-    text(ctx, `${sets(row.setsComplete)} complete · ${pings(row.pings)}`, x + 18, y + 134, { spec: '400 14px', color: p.muted });
+    // Two lines, so "0 sets, 127 total" never runs off a narrow card.
+    text(ctx, `${row.found}/${of} unique`, x + 18, y + 110, { spec: '400 14px', color: p.muted });
+    text(ctx, `${sets(row.setsComplete)}, ${row.pings} total`, x + 18, y + 134, { spec: '400 14px', color: p.muted });
 }
 
 /** Renders the specials leaderboard. `names` maps user IDs to display names (rows without one show the ID). */
@@ -97,10 +93,11 @@ export async function renderSpecialsLeaderboard(board: SpecialsBoard, names: Map
         card(ctx, cardX, y, cardW, restH, p);
         const leader = Math.max(1, board.rows[0]!.points);
         const colName = cardX + PAD + 44;
-        const colBar = cardX + 340;
-        const barW = 170;
-        const colSets = cardX + cardW - PAD - 230;
-        const colFound = cardX + cardW - PAD - 120;
+        const colBar = cardX + 300;
+        const barW = 150;
+        const colSets = cardX + cardW - PAD - 300;
+        const colFound = cardX + cardW - PAD - 220;
+        const colTotal = cardX + cardW - PAD - 110;
         const colPts = cardX + cardW - PAD;
         let ry = y + 12;
         rest.forEach((row, i) => {
@@ -113,6 +110,7 @@ export async function renderSpecialsLeaderboard(board: SpecialsBoard, names: Map
             fillRound(ctx, colBar, by - 9, Math.max(6, (barW * row.points) / leader), 6, 3, p.accent);
             text(ctx, sets(row.setsComplete), colSets, by, { spec: '400 14px', color: p.muted, align: 'right' });
             text(ctx, `${row.found}/${board.specialCount}`, colFound, by, { spec: '400 14px', color: p.muted, align: 'right' });
+            text(ctx, `${row.pings} total`, colTotal, by, { spec: '400 14px', color: p.muted, align: 'right' });
             const ptsW = text(ctx, 'pts', colPts, by, { spec: '400 14px', color: p.muted, align: 'right' });
             text(ctx, `${row.points}`, colPts - ptsW - 6, by, { spec: '700 17px', color: p.text, align: 'right' });
             ry += ROW;

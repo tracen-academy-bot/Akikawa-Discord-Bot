@@ -14,9 +14,10 @@ Newest first. Each entry records what changed and, more importantly, why.
   preferred one points number.) A full set is worth about 6.7 new finds;
   five repeats make one. A full Set 1 (295) still sits just under 20 loose
   finds (300), by choice: breadth counts too.
-- The image: the top 3 with points as the main number (found, sets and
-  pings under it), then everyone else up to 15 rows, with a bar of points
-  against the leader. The header says how points are scored.
+- The image: the top 3 with points as the main number ("17/25 unique",
+  then "1 set, 31 total" under it), then everyone else up to 15 rows: a bar
+  of points against the leader, "0 sets", "12/25", "15 total", points. The
+  header says how points are scored.
 - Only finds of specials that still exist count (by `specialId`).
 
 ---
