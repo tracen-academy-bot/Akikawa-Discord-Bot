@@ -4,6 +4,16 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-08 — 6% specials, Curren Chan week, a Boosts button
+
+- The special chance is 6% (was 4%).
+- Curren Chan week: +1% chance of Curren Chan for everyone for 7 days
+  (until 2026-11-15 11:00 UTC). Seasonal buffs like it are one line each.
+- A Boosts button shows a trainer what is raising their odds and the total
+  for their next ping.
+
+---
+
 ## 2026-11-08 — Specials get ids; Set 0; longer pings
 
 - Specials have stable ids, so a line can be reworded without losing finds.

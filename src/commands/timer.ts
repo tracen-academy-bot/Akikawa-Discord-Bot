@@ -13,7 +13,9 @@ import {
 } from 'discord.js';
 import { isOfficer } from '../lib/permissions';
 import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
+import { BOOSTS_TOGGLE_ID, boostsView } from '../lib/timer/boosts';
 import {
+    BUTTON_BOOSTS,
     BUTTON_LEADERBOARD,
     BUTTON_SPECIALS,
     BUTTON_SETTINGS,
@@ -466,6 +468,13 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
         return;
     }
 
+    // The Boosts view's On/Off: flip it and redraw the view in place.
+    if (interaction.customId === BOOSTS_TOGGLE_ID) {
+        await toggleSetting(guildId, interaction.user.id, 'boosts');
+        await interaction.update(await boostsView(guildId, interaction.user.id));
+        return;
+    }
+
     // Back/Next in a Specials list: the trainer's own (`mine`), or the
     // server's (`all`, Club Managers only, as for /timer specials).
     if (interaction.customId.startsWith(SPECIALS_PAGE_PREFIX)) {
@@ -494,6 +503,11 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
     switch (interaction.customId) {
         case BUTTON_SETTINGS: {
             await interaction.reply({ ...settingsView(await getUserSettings(guildId, interaction.user.id)), flags: MessageFlags.Ephemeral });
+            break;
+        }
+
+        case BUTTON_BOOSTS: {
+            await interaction.reply({ ...(await boostsView(guildId, interaction.user.id)), flags: MessageFlags.Ephemeral });
             break;
         }
 

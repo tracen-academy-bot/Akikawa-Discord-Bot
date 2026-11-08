@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, SPECIAL_SETS } from './openers';
+import { SPECIAL_SETS } from './openers';
 import { NOTIFICATION_LIFETIME_MINUTES, TRAINING_MINUTES } from './service';
 
 /**
@@ -91,7 +91,7 @@ export function settingsView(settings: UserSettings) {
             [
                 `**DM Me Too**: the pings arrive here *and* in your DMs. Double efficiency!`,
                 `**Early Riser**: You get notified after ${EARLY_RISER_MINUTES} minutes. To encourage your punctuality, your pings clear after ${EARLY_RISER_NOTIFICATION_MINUTES} minutes instead of ${NOTIFICATION_LIFETIME_MINUTES}!`,
-                `**Boosts**: some specials raise your special chance for a while. Start your next run within ${EARLY_START.windowMinutes} minutes of a ping (${EARLY_START.earlyRiserWindowMinutes} for early risers) for +${EARLY_START.chance * 100}% on it. Off pauses them.`,
+                `**Boosts**: extra special chance from specials, early starts and seasonal events. Off pauses them. See yours with **Boosts**.`,
                 `**Special sets**: turn them on or off in **Specials**.`,
                 '-# Changes apply from your next run.',
             ].join('\n'),

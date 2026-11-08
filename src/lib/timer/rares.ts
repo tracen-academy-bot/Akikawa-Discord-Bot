@@ -285,6 +285,8 @@ export async function grantBoost(guildId: string, discordUserId: string, opener:
 export interface ExtraChance {
     chance: number;
     pool: readonly string[];
+    /** What it is, for the Boosts view. */
+    label?: string;
 }
 
 /**
@@ -296,16 +298,16 @@ export interface ExtraChance {
  *
  *   - one slice per extra, of width `chance`, each picking evenly from its
  *     own pool (an extra whose pool is empty gets no slice);
- *   - then the usual special share, `RARE_OPENER_CHANCE` (4%);
+ *   - then the usual special share, `RARE_OPENER_CHANCE` (6%);
  *   - then the common lines.
  *
  * So the chances add: with extras $c_1, \dots, c_k$, a ping is special with
- * probability $c_1 + \dots + c_k + 0.04$. Within the usual 4%, the locks work
+ * probability $c_1 + \dots + c_k + 0.06$. Within the usual 6%, the locks work
  * as before:
  *
  *   - a locked special is out of everyone's pool but its owner's, so the
- *     4% is spread evenly over the rest;
- *   - the owner gets it below `ownerChance` (2%), and the rest of the 4% is
+ *     6% is spread evenly over the rest;
+ *   - the owner gets it below `ownerChance`, and the rest of the 6% is
  *     spread evenly over the other specials;
  *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping is
  *     that special, whatever the roll and before any extra.
@@ -335,7 +337,7 @@ export async function chooseOpener(
         start += slice.chance;
     }
     // Past the extras: map what is left back onto [0, 1), keeping the usual
-    // 4% exactly 4% wide and stretching only the common part.
+    // special share exactly its width and stretching only the common part.
     const p = RARE_OPENER_CHANCE;
     const u = r - start;
     const rest = u < p ? u : p + ((u - p) * (1 - p)) / (1 - start - p);

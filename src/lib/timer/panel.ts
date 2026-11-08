@@ -26,6 +26,7 @@ export const BUTTON_STATS = 'timer:stats';
 export const BUTTON_LEADERBOARD = 'timer:leaderboard';
 export const BUTTON_SPECIALS = 'timer:specials';
 export const BUTTON_SETTINGS = 'timer:settings';
+export const BUTTON_BOOSTS = 'timer:boosts';
 
 /** Roster entries shown before the list is truncated. */
 const MAX_ROSTER_ROWS = 20;
@@ -83,9 +84,10 @@ export function buildPanel(timers: TrainingTimer[], context: PanelContext) {
         new ButtonBuilder().setCustomId(BUTTON_SPECIALS).setLabel('Specials').setStyle(ButtonStyle.Secondary),
     );
 
-    // A row holds five buttons; Settings starts the second.
+    // A row holds five buttons; Settings and Boosts start the second.
     const more = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder().setCustomId(BUTTON_SETTINGS).setLabel('Settings').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId(BUTTON_BOOSTS).setLabel('Boosts').setStyle(ButtonStyle.Secondary),
     );
 
     return { embeds: [embed], components: [buttons, more] };

@@ -115,7 +115,33 @@ export const RARE_OPENERS: readonly (Special & { set: string })[] = SPECIAL_SETS
 export const RARE_PING_OPENERS: readonly string[] = RARE_OPENERS.map((o) => o.text);
 
 /** Chance, across all of them, that a ping opens with a rare line. */
-export const RARE_OPENER_CHANCE = 0.04;
+export const RARE_OPENER_CHANCE = 0.06;
+
+/**
+ * A seasonal buff: from `from` until `until`, every trainer's ping has an
+ * extra `chance` of the special `specialId` (a flat slice that only ever
+ * draws that line). It counts as a boost, so Boosts off turns it off, and
+ * it never comes up while the special's set is off or locked for them.
+ * Old entries can stay; they are ignored once `until` has passed.
+ */
+export interface SeasonalBuff {
+    /** Shown in the Boosts view. */
+    label: string;
+    specialId: string;
+    chance: number;
+    from: Date;
+    until: Date;
+}
+
+export const SEASONAL_BUFFS: readonly SeasonalBuff[] = [
+    // Curren Chan week (owner, 2026-11-08): +1% Curren Chan for 7 days.
+    { label: 'Curren Chan week', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-11-08T11:00:00Z'), until: new Date('2026-11-15T11:00:00Z') },
+];
+
+/** The seasonal buffs running at `now`. */
+export function activeSeasonals(now: Date): SeasonalBuff[] {
+    return SEASONAL_BUFFS.filter((b) => b.from.getTime() <= now.getTime() && now.getTime() < b.until.getTime());
+}
 
 /**
  * Early start: a trainer who starts their next run within the window after
@@ -170,11 +196,11 @@ export function boostPool(setId: string, tag: string): string[] {
 /**
  * Specials locked to one trainer until that trainer has found them:
  *
- *   - nobody else can get it: their special share (4%) is spread evenly
+ *   - nobody else can get it: their special share (6%) is spread evenly
  *     over the other specials;
  *   - the owner gets it at `ownerChance` per ping (2%), and the rest of
  *     their special share (the other 2%) is spread evenly over the other
- *     specials. Their total special chance stays 4%.
+ *     specials. Their total special chance stays 6%.
  *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping
  *     is that special, whatever the roll.
  *

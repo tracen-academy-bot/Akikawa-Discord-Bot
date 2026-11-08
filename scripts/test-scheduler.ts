@@ -8,7 +8,11 @@
  *   DATABASE_URL=postgresql://... npm run test:scheduler
  */
 import { prisma } from '../src/db/prisma';
-import { PING_OPENERS, RARE_PING_OPENERS, buildPingContent, pickOpener, startScheduler } from '../src/lib/timer/scheduler';
+import { PING_OPENERS, RARE_OPENER_CHANCE, RARE_PING_OPENERS, buildPingContent, pickOpener, startScheduler } from '../src/lib/timer/scheduler';
+
+/** The base special chance, and how many of `n` even steps it covers. */
+const P = RARE_OPENER_CHANCE;
+const stepsOf = (n: number, chance = P) => Math.round(n * chance);
 
 const G = 'test-guild-sched';
 const CHANNEL = 'chan-1';
@@ -86,12 +90,12 @@ async function main() {
     const allOpeners = [...PING_OPENERS, ...RARE_PING_OPENERS];
     check('ping opens with one of the openers', allOpeners.some((o) => sent[0]?.content.includes(o.replace('{user}', '').trim().slice(0, 30))), true);
     check('openers: every one names the trainer at least once', allOpeners.every((o) => o.split('{user}').length >= 2), true);
-    check('openers: below 4% a rare one, spread evenly', [pickOpener(0), pickOpener(0.0399999), pickOpener(0.02)], [RARE_PING_OPENERS[0], RARE_PING_OPENERS[RARE_PING_OPENERS.length - 1], RARE_PING_OPENERS[Math.floor(RARE_PING_OPENERS.length / 2)]]);
-    check('openers: from 4% up a common one, spread evenly', [pickOpener(0.04), pickOpener(0.52), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[3], PING_OPENERS[6]]);
+    check('openers: below the base chance a rare one, spread evenly', [pickOpener(0), pickOpener(P - 1e-7), pickOpener(P / 2)], [RARE_PING_OPENERS[0], RARE_PING_OPENERS[RARE_PING_OPENERS.length - 1], RARE_PING_OPENERS[Math.floor(RARE_PING_OPENERS.length / 2)]]);
+    check('openers: from the base chance up a common one, spread evenly', [pickOpener(P), pickOpener(P + (1 - P) * 0.5), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[3], PING_OPENERS[6]]);
     let rare = 0;
     for (let i = 0; i < 100000; i += 1) if (RARE_PING_OPENERS.includes(pickOpener(i / 100000))) rare += 1;
-    check('openers: rare ones are 4% of the range', rare, 4000);
-    check('openers: the mention can sit mid-sentence', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => (RARE_PING_OPENERS.findIndex((o) => o.startsWith('Torena')) + 0.5) / RARE_PING_OPENERS.length * 0.04), "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay <@u1>? We can host a party afterwards too! I can't wait...");
+    check('openers: the base chance is 6%, and rare ones are 6% of the range', [P, rare], [0.06, stepsOf(100000)]);
+    check('openers: the mention can sit mid-sentence', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => (RARE_PING_OPENERS.findIndex((o) => o.startsWith('Torena')) + 0.5) / RARE_PING_OPENERS.length * P), "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay <@u1>? We can host a party afterwards too! I can't wait...");
 
     // Rare lines are recorded and tallied.
     const rares = await import('../src/lib/timer/rares');
@@ -191,13 +195,13 @@ async function main() {
     check('lock: guaranteed, the owner gets it on every roll', [lock.ownerChance >= 1, owner.locked], [true, 2000]);
     const other = await sweep('someone-else');
     check('lock: nobody else gets it', other.locked, 0);
-    check('lock: everyone else keeps 4%, spread evenly over the 11', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 1], [800, RARE_PING_OPENERS.length - 1, true]);
+    check('lock: everyone else keeps the base chance, spread evenly over the rest', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 1], [stepsOf(20000), RARE_PING_OPENERS.length - 1, true]);
     await rares.recordRareOpener(LG, 'someone-else', lockedText);
     check('lock: still on while only someone else has it', (await sweep('someone-else', 2000)).locked, 0);
     await rares.recordRareOpener(LG, lock.owner, lockedText);
     const afterOther = await sweep('someone-else');
     const afterOwner = await sweep(lock.owner);
-    check('lock: over once the owner has it, 4% over all 12 for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked > 0 && afterOwner.locked < 400], [800, true, 800, true]);
+    check('lock: over once the owner has it, the base chance over all for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked > 0 && afterOwner.locked < 400], [stepsOf(20000), true, stepsOf(20000), true]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: LG } });
 
     // #OnlineSensations: locked behind Curren Chan, a collab boost, and {set_name}.
@@ -226,12 +230,14 @@ async function main() {
     const us0 = await import('../src/lib/timer/userSettings');
     const base = { dmPing: false, earlyRiser: true, boosts: true, disabledSets: [] as string[] };
     const fullPool = openers.rarePoolFor([]);
-    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool)).map((e) => [e.chance, e.pool.length]), [[0.04, 9], [0.01, fullPool.length]]);
-    check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool)).map((e) => e.chance), [0.04, 0.01]);
-    check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool), []);
-    check('extras: none for a set turned off', (await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool)).length, 0);
-    // The chances add: 4% boost + 1% early + the usual 4% = 9%, the usual 4% intact.
-    const extras = await extraChances(XG, 'u1', base, [], true, fullPool);
+    // A time with no seasonal buff running, so the checks below see only boosts.
+    const OFF_SEASON = new Date('2026-01-01T00:00:00Z');
+    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON)).map((e) => [e.chance, e.pool.length]), [[0.04, 9], [0.01, fullPool.length]]);
+    check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool, OFF_SEASON)).map((e) => e.chance), [0.04, 0.01]);
+    check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool, OFF_SEASON), []);
+    check('extras: none for a set turned off', (await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool, OFF_SEASON)).length, 0);
+    // The chances add: 4% boost + 1% early + the base 6% = 11%, the base intact.
+    const extras = await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON);
     const counts = new Map<string, number>();
     const STEPS = 20000;
     for (let k = 0; k < STEPS; k += 1) {
@@ -246,13 +252,14 @@ async function main() {
         const gText = RARE_OPENERS.find((o) => o.id === guaranteed.id)!.text;
         check('lock: a guarantee beats the boosts too', await rares.chooseOpener(XG, guaranteed.owner, 0.001, fullPool, extras), gText);
     }
-    check('odds: special chance is 4% + 1% + 4% = 9%', Math.abs(specialCount - 1800) <= 1, true);
-    // Collab lines: all of the 4% boost, plus their share of the 1% and 4%
+    check('odds: special chance is 4% + 1% + 6% = 11%', Math.abs(specialCount - stepsOf(STEPS, 0.04 + 0.01 + P)) <= 1, true);
+    // Collab lines: all of the 4% boost, plus their share of the 1% and 6%
     // (spread over every special but the locked Matikanetannhauser).
     const shareOf = (n: number, of: number) => Math.round((STEPS * n * 9) / of);
-    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (800 + shareOf(0.01, fullPool.length - 1) + shareOf(0.04, fullPool.length - 1))) <= 3, true);
+    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (stepsOf(STEPS, 0.04) + shareOf(0.01, fullPool.length - 1) + shareOf(P, fullPool.length - 1))) <= 3, true);
     // The sweep is discrete, so step boundaries can shift a count by one either way.
-    check('odds: common lines stay even (2600 each)', commonCounts.every((c) => Math.abs(c - 2600) <= 1), true);
+    const commonEach = (STEPS - stepsOf(STEPS, 0.04 + 0.01 + P)) / PING_OPENERS.length;
+    check('odds: common lines stay even', commonCounts.every((c) => Math.abs(c - commonEach) <= 1), true);
     const lockedPage = json(await rares.mySpecialsView(XG, 'u2', 2));
     check('pages: a locked set hides its rows, toggle greyed out', [lockedPage.embeds[0]!.description, lockedPage.embeds[0]!.fields ?? [], lockedPage.components[0]!.components[1]?.label, lockedPage.components[0]!.components[1]?.disabled], [
         '**Set 2: #OnlineSensations**: 0 of 12 found\nLocked: find **Curren Chan** to open it.',
@@ -292,6 +299,36 @@ async function main() {
     await prisma.trainingTimer.deleteMany({ where: { guildId: EG } });
     await prisma.trainingRun.deleteMany({ where: { guildId: EG } });
 
+    // Seasonal buff: Curren Chan week, +1% flat, only ever Curren Chan.
+    const buff = openers.SEASONAL_BUFFS[0]!;
+    const inSeason = new Date(buff.from.getTime() + 60_000);
+    const currenText = RARE_OPENERS.find((o) => o.id === buff.specialId)!.text;
+    const SN = `test-season-${Date.now()}`;
+    const plain = { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] as string[] };
+    check('season: Curren Chan week is +1% for 7 days', [buff.specialId, buff.chance, (buff.until.getTime() - buff.from.getTime()) / 86_400_000], ['set1.curren', 0.01, 7]);
+    const seasonal = await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason);
+    check('season: in the week, an extra 1% that only draws Curren Chan', seasonal.map((e) => [e.chance, e.pool]), [[0.01, [currenText]]]);
+    check('season: not before or after the week', [(await extraChances(SN, 's1', plain, [], false, [], new Date(buff.from.getTime() - 1))).length, (await extraChances(SN, 's1', plain, [], false, [], buff.until)).length], [0, 0]);
+    check('season: not with Set 1 off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, [], false, [], inSeason)).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, [], false, [], inSeason)).length], [0, 0]);
+
+    // The Boosts view: base, each boost, and the next ping's total.
+    const { boostsView, BOOSTS_TOGGLE_ID } = await import('../src/lib/timer/boosts');
+    await rares.grantBoost(SN, 's1', loves.text);
+    await rares.recordRareOpener(SN, 's1', curren.text);
+    const bv = (await boostsView(SN, 's1', inSeason)).embeds[0]!.toJSON().description ?? '';
+    check('boosts view: base, Loves, Curren Chan week, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left'), bv.includes('**+1%** Curren Chan week: Curren Chan only'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, true]);
+    await us0.toggleSetting(SN, 's1', 'boosts');
+    const off = await boostsView(SN, 's1', inSeason);
+    const offText = off.embeds[0]!.toJSON().description ?? '';
+    check('boosts view: off pauses them, total is the base', [offText.includes('(paused)'), offText.includes('**Your next ping: 6% chance of a special.**'), (off.components[0]!.toJSON().components[0] as { custom_id: string; label: string }).custom_id, (off.components[0]!.toJSON().components[0] as { label: string }).label], [true, true, BOOSTS_TOGGLE_ID, 'Boosts: Off']);
+    const quiet = (await boostsView(SN, 'nobody', OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
+    check('boosts view: nothing running, with the early-start tip', [quiet.includes('No boosts right now.'), quiet.includes('Early start:'), quiet.includes('**Your next ping: 6% chance')], [true, true, true]);
+    const { BUTTON_BOOSTS } = await import('../src/lib/timer/panel');
+    check('panel: has the Boosts button', JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_BOOSTS), true);
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: SN } });
+    await prisma.timerSpecialBoost.deleteMany({ where: { guildId: SN } });
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: SN } });
+
     // Settings: DM me too, early riser, boosts, special sets.
     const us = await import('../src/lib/timer/userSettings');
     const SG = `test-usettings-${Date.now()}`;
@@ -312,7 +349,7 @@ async function main() {
     const { BUTTON_SETTINGS } = await import('../src/lib/timer/panel');
     check('panel: has the Settings button', panelJson.includes(BUTTON_SETTINGS) || JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_SETTINGS), true);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
-    const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => 0.04);
+    const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => P);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [
         '<@u1> Time! Your Independent Training is complete!',
         '*Apologies! This run ended about 10 minutes ago while I was offline. It still counts!*',
