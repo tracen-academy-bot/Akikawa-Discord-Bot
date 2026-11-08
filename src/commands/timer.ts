@@ -1,6 +1,6 @@
 import type { StringSelectMenuInteraction } from 'discord.js';
 import { SETTINGS_PREFIX, getUserSettings, runMinutes, settingsView, toggleSetting } from '../lib/timer/userSettings';
-import { READ_MENU_ID, SPECIALS_PAGE_PREFIX, SPECIALS_SET_PREFIX, lockedSetsFor, mySpecialsView, pageOfSet, rareTally, readSpecial, specialEmbed, specialsView } from '../lib/timer/rares';
+import { READ_MENU_ID, SPECIALS_FIRST_PAGE, SPECIALS_PAGE_PREFIX, SPECIALS_SET_PREFIX, lockedSetsFor, mySpecialsView, pageOfSet, rareTally, readSpecial, specialEmbed, specialsView } from '../lib/timer/rares';
 import { EARLY_START } from '../lib/timer/openers';
 import {
     SlashCommandBuilder,
@@ -204,7 +204,7 @@ async function handleSpecials(interaction: ChatInputCommandInteraction) {
         return;
     }
     const tally = await rareTally(interaction.guildId!);
-    await interaction.reply({ ...specialsView(tally, 0), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+    await interaction.reply({ ...specialsView(tally, SPECIALS_FIRST_PAGE), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 /** Posts a fresh control panel. */
@@ -499,7 +499,7 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
 
         case BUTTON_SPECIALS: {
             // The same hidden list as /timer specials: your own finds only.
-            await interaction.reply({ ...(await mySpecialsView(guildId, interaction.user.id, 0)), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+            await interaction.reply({ ...(await mySpecialsView(guildId, interaction.user.id, SPECIALS_FIRST_PAGE)), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
             break;
         }
 

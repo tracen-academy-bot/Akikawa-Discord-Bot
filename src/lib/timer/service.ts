@@ -18,8 +18,16 @@ import { EARLY_START } from './openers';
 /** Length of one Independent Training run. Not configurable by design. */
 export const TRAINING_MINUTES = 50;
 
-/** How long an expiry ping stays in the channel before it is deleted. */
-export const NOTIFICATION_LIFETIME_MINUTES = 3;
+/**
+ * How long an expiry ping stays in the channel before it is deleted: time to
+ * finish picking in game and start the next run.
+ */
+export const NOTIFICATION_LIFETIME_MINUTES = 5;
+
+/** A run's real length in whole minutes: 50, or 49 for an early riser's. */
+function lengthMinutes(run: { startedAt: Date; completedAt: Date }): number {
+    return Math.max(0, Math.round((run.completedAt.getTime() - run.startedAt.getTime()) / 60_000));
+}
 
 /**
  * Timezone used to decide which calendar day a run belongs to, which in turn
@@ -314,7 +322,7 @@ export async function getTrainerStats(guildId: string, discordUserId: string): P
 
     const runs = await prisma.trainingRun.findMany({
         where: { guildId, discordUserId },
-        select: { completedAt: true },
+        select: { startedAt: true, completedAt: true },
         orderBy: { completedAt: 'asc' },
     });
 
@@ -338,7 +346,7 @@ export async function getTrainerStats(guildId: string, discordUserId: string): P
         runsThisWeek: runs.filter((r) => r.completedAt >= weekAgo).length,
         currentStreakDays: currentStreak(keys, now),
         longestStreakDays: longestStreak(keys),
-        totalMinutes: runs.length * TRAINING_MINUTES,
+        totalMinutes: runs.reduce((sum, r) => sum + lengthMinutes(r), 0),
         rank: index === -1 ? null : index + 1,
         trainerCount: totals.length,
         firstRunAt: runs[0]?.completedAt ?? null,
@@ -361,10 +369,19 @@ export async function getLeaderboard(
         take: limit,
     });
 
+    // Time trained is each run's real length (an early riser's are 49
+    // minutes), so it is summed from the runs, not runs times 50.
+    const lengths = await prisma.trainingRun.findMany({
+        where: { guildId, discordUserId: { in: grouped.map((g) => g.discordUserId) }, ...(since ? { completedAt: { gte: since } } : {}) },
+        select: { discordUserId: true, startedAt: true, completedAt: true },
+    });
+    const minutes = new Map<string, number>();
+    for (const r of lengths) minutes.set(r.discordUserId, (minutes.get(r.discordUserId) ?? 0) + lengthMinutes(r));
+
     return grouped.map((row) => ({
         discordUserId: row.discordUserId,
         runs: row._count._all,
-        minutes: row._count._all * TRAINING_MINUTES,
+        minutes: minutes.get(row.discordUserId) ?? 0,
     }));
 }
 

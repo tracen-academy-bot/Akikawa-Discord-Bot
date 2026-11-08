@@ -107,12 +107,12 @@ async function main() {
     type ViewJson = { embeds: { title?: string; description?: string; fields?: { name: string; value: string }[]; footer?: { text: string } }[]; components: { components: { custom_id: string; label?: string; disabled?: boolean; placeholder?: string; options?: { label: string; value: string }[] }[] }[] };
     const json = (v: { embeds: { toJSON(): unknown }[]; components: { toJSON(): unknown }[] }) => ({ embeds: v.embeds.map((e) => e.toJSON()), components: v.components.map((c) => c.toJSON()) }) as ViewJson;
     const { SPECIAL_SETS: SETS } = await import('../src/lib/timer/openers');
-    const page0 = json(rares.specialsView(tally, 0));
+    const page0 = json(rares.specialsView(tally, rares.SPECIALS_FIRST_PAGE));
     const embed = page0.embeds[0]!;
     const col = (n: number) => embed.fields?.[n]?.value.split('\n') ?? [];
     check('specials: one set per page, three columns', [embed.title, embed.description, embed.fields?.map((f) => f.name), col(0).length, col(2).length], [
         `Specials found: 2 of ${RARE_PING_OPENERS.length}`,
-        `**${SETS[0]!.name}**: 2 of ${SETS[0]!.openers.length} found`,
+        `**Set 1: ${SETS[0]!.name}**: 2 of ${SETS[0]!.openers.length} found`,
         ['Special', 'Times', 'First found by'],
         SETS[0]!.openers.length,
         SETS[0]!.openers.length,
@@ -121,39 +121,52 @@ async function main() {
     check('specials: a found row shows name, count and finder', [col(0)[1], col(1)[1], col(2)[1]?.startsWith('<@u1> <t:')], [`**2.** ${RARE_OPENERS[1]!.name}`, '**×2**', true]);
     check('specials: no line text is ever shown', RARE_PING_OPENERS.some((t) => JSON.stringify(page0).includes(t.replace('{user}', '').trim().slice(0, 20))), false);
     const nav0 = page0.components[0]!.components;
-    check('pages: the server list has Back and Next only, Back off on page 1', nav0.map((b) => [b.label, b.custom_id, b.disabled ?? false]), [
-        ['Back', `${rares.SPECIALS_PAGE_PREFIX}all:-1`, true],
-        ['Next', `${rares.SPECIALS_PAGE_PREFIX}all:1`, false],
+    check('pages: the server list opens on Set 1, Back to Set 0', nav0.map((b) => [b.label, b.custom_id, b.disabled ?? false]), [
+        ['Back', `${rares.SPECIALS_PAGE_PREFIX}all:0`, false],
+        ['Next', `${rares.SPECIALS_PAGE_PREFIX}all:2`, false],
     ]);
-    const last = json(rares.specialsView(tally, SETS.length - 1));
-    check('pages: the last page, numbered within its set, Next off', [last.embeds[0]!.description?.startsWith(`**${SETS.at(-1)!.name}**`), last.embeds[0]!.fields?.[0]?.value.split('\n')[0], last.components[0]!.components.at(-1)?.disabled, last.embeds[0]!.footer?.text.endsWith(`Page ${SETS.length} of ${SETS.length}`)], [true, '**1.** ???', true, true]);
-    check('pages: a page out of range is clamped', [json(rares.specialsView(tally, 99)).embeds[0]!.description, json(rares.specialsView(tally, -5)).embeds[0]!.description], [last.embeds[0]!.description, embed.description]);
+    const set0 = json(rares.specialsView(tally, 0));
+    check('set 0: the reminders, in full, Back off', [set0.embeds[0]!.title, PING_OPENERS.every((o) => set0.embeds[0]!.description?.includes(o.replaceAll('{user}', '@trainer'))), set0.components[0]!.components[0]!.disabled, set0.components.length], ['Set 0: Reminders', true, true, 1]);
+    check('set 0: the same for a trainer, no toggle', json(rares.specialsView(tally, 0, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).components[0]!.components.map((b) => b.label), ['Back', 'Next']);
+    const last = json(rares.specialsView(tally, SETS.length));
+    check('pages: the last page, numbered within its set, Next off', [last.embeds[0]!.description?.startsWith(`**Set ${SETS.length}: ${SETS.at(-1)!.name}**`), last.embeds[0]!.fields?.[0]?.value.split('\n')[0], last.components[0]!.components.at(-1)?.disabled, last.embeds[0]!.footer?.text.endsWith(`Page ${SETS.length + 1} of ${SETS.length + 1}`)], [true, '**1.** ???', true, true]);
+    check('pages: a page out of range is clamped', [json(rares.specialsView(tally, 99)).embeds[0]!.description, json(rares.specialsView(tally, -5)).embeds[0]!.title], [last.embeds[0]!.description, 'Set 0: Reminders']);
     const { buildPanel, BUTTON_SPECIALS } = await import('../src/lib/timer/panel');
     const panelJson = JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never));
     check('panel: has the Specials button', [panelJson.includes(BUTTON_SPECIALS), panelJson.includes('"label":"Specials"')], [true, true]);
     const noExtras = { lockedSets: [] as string[], disabledSets: [] as string[], boosts: [], boostsOn: true };
-    const mineView = json(rares.specialsView(await rares.rareTally(RG, 'u2'), 0, noExtras));
+    const mineView = json(rares.specialsView(await rares.rareTally(RG, 'u2'), 1, noExtras));
     const mine = mineView.embeds[0]!;
     const mcol = (n: number) => mine.fields?.[n]?.value.split('\n') ?? [];
     check('specials: your own list counts only your finds', [mine.title, mcol(0)[1], mcol(1)[1], mcol(0)[4]], [`Your specials: 1 of ${RARE_PING_OPENERS.length}`, `**2.** ${RARE_OPENERS[1]!.name}`, '**×1**', '**5.** ???']);
     check('specials: your own list shows when, not who', [mine.fields?.[2]?.name, mcol(2)[1]?.startsWith('<t:'), mine.footer?.text.startsWith('1 special ping for you')], ['First got', true, true]);
     check('pages: your page has Back, the set\'s toggle, Next', mineView.components[0]!.components.map((b) => [b.label, b.custom_id]), [
-        ['Back', `${rares.SPECIALS_PAGE_PREFIX}mine:-1`],
+        ['Back', `${rares.SPECIALS_PAGE_PREFIX}mine:0`],
         [`${SETS[0]!.name}: On`, `${rares.SPECIALS_SET_PREFIX}${SETS[0]!.id}`],
-        ['Next', `${rares.SPECIALS_PAGE_PREFIX}mine:1`],
+        ['Next', `${rares.SPECIALS_PAGE_PREFIX}mine:2`],
     ]);
-    check('pages: a set turned off says so', [json(rares.specialsView(await rares.rareTally(RG, 'u2'), 0, { ...noExtras, disabledSets: ['set1'] })).components[0]!.components[1]!.label, json(rares.specialsView(await rares.rareTally(RG, 'u2'), 0, { ...noExtras, disabledSets: ['set1'] })).embeds[0]!.description?.includes('Off:')], [`${SETS[0]!.name}: Off`, true]);
+    check('pages: a set turned off says so', [json(rares.specialsView(await rares.rareTally(RG, 'u2'), 1, { ...noExtras, disabledSets: ['set1'] })).components[0]!.components[1]!.label, json(rares.specialsView(await rares.rareTally(RG, 'u2'), 1, { ...noExtras, disabledSets: ['set1'] })).embeds[0]!.description?.includes('Off:')], [`${SETS[0]!.name}: Off`, true]);
     // Reading an unlocked special in full. u2 found only special 2 (index 1); u3 found index 4.
     const menu = mineView.components[1]?.components[0];
-    check('read menu: only your unlocked specials of this set', [menu?.custom_id, menu?.options?.map((o) => [o.label, o.value])], [rares.READ_MENU_ID, [[`2. ${RARE_OPENERS[1]!.name}`, '1']]]);
-    check('read menu: none when nothing is unlocked', json(rares.specialsView(await rares.rareTally(RG, 'nobody'), 0, noExtras)).components.length, 1);
+    check('read menu: only your unlocked specials of this set', [menu?.custom_id, menu?.options?.map((o) => [o.label, o.value])], [rares.READ_MENU_ID, [[`2. ${RARE_OPENERS[1]!.name}`, RARE_OPENERS[1]!.id]]]);
+    check('read menu: none when nothing is unlocked', json(rares.specialsView(await rares.rareTally(RG, 'nobody'), 1, noExtras)).components.length, 1);
     check('read menu: none on the server list', page0.components.length, 1);
-    const read = await rares.readSpecial(RG, 'u2', '1');
+    const read = await rares.readSpecial(RG, 'u2', RARE_OPENERS[1]!.id);
     check('read: an unlocked special shows in full, as you', [read?.name, read?.text === RARE_OPENERS[1]!.text.replace('{user}', '<@u2>')], [RARE_OPENERS[1]!.name, true]);
-    check("read: someone else's special stays locked", await rares.readSpecial(RG, 'u2', '4'), null);
-    check('read: a forged choice reveals nothing', [await rares.readSpecial(RG, 'u2', 'x'), await rares.readSpecial(RG, 'u2', '99')], [null, null]);
+    check("read: someone else's special stays locked", await rares.readSpecial(RG, 'u2', RARE_OPENERS[4]!.id), null);
+    check('read: a forged choice reveals nothing', [await rares.readSpecial(RG, 'u2', 'x'), await rares.readSpecial(RG, 'u2', '1')], [null, null]);
     // Sets: a set turned off never comes up.
     const openers = await import('../src/lib/timer/openers');
+    const allIds = openers.RARE_OPENERS.map((o) => o.id);
+    check('ids: every special has a unique id', new Set(allIds).size, allIds.length);
+    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id.startsWith(o.set === 'online-sensations' ? 'os.' : `${o.set}.`)), true);
+    check('ids: prerequisites and locks name real specials', [...openers.SPECIAL_SETS.flatMap((x) => (x.requires ? [x.requires] : [])), ...openers.SPECIAL_LOCKS.map((l) => l.id)].every((id) => openers.specialById(id) !== undefined), true);
+    // A reworded special keeps its finds: they follow the id, not the text.
+    const IG = `test-ids-${Date.now()}`;
+    await rares.recordRareOpener(IG, 'u1', RARE_OPENERS[2]!.text);
+    await prisma.rareOpenerHit.updateMany({ where: { guildId: IG }, data: { opener: 'the old wording of this line' } });
+    check('ids: a find survives rewording', [(await rares.rareTally(IG, 'u1'))[2]?.count, (await rares.readSpecial(IG, 'u1', RARE_OPENERS[2]!.id))?.name], [1, RARE_OPENERS[2]!.name]);
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: IG } });
     check('sets: every special belongs to a set', openers.RARE_OPENERS.every((o) => openers.SPECIAL_SETS.some((set) => set.id === o.set)), true);
     check('sets: all on gives every special', openers.rarePoolFor([]).length, RARE_PING_OPENERS.length);
     check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, RARE_PING_OPENERS.length - openers.SPECIAL_SETS[0]!.openers.length);
@@ -161,7 +174,7 @@ async function main() {
 
     // The lock: Matikanetannhauser is locked to its owner, guaranteed on their next ping, until they have it.
     const lock = openers.SPECIAL_LOCKS[0]!;
-    const lockedText = RARE_OPENERS.find((o) => o.name === lock.name)!.text;
+    const lockedText = RARE_OPENERS.find((o) => o.id === lock.id)!.text;
     const LG = `test-locks-${Date.now()}`;
     const pool = openers.rarePoolFor([]);
     /** Picks across the whole random range in `steps` even steps; counts per opener. */
@@ -230,7 +243,7 @@ async function main() {
     const commonCounts = PING_OPENERS.map((o) => counts.get(o) ?? 0);
     const guaranteed = openers.SPECIAL_LOCKS.find((l) => l.ownerChance >= 1);
     if (guaranteed) {
-        const gText = RARE_OPENERS.find((o) => o.name === guaranteed.name)!.text;
+        const gText = RARE_OPENERS.find((o) => o.id === guaranteed.id)!.text;
         check('lock: a guarantee beats the boosts too', await rares.chooseOpener(XG, guaranteed.owner, 0.001, fullPool, extras), gText);
     }
     check('odds: special chance is 4% + 1% + 4% = 9%', Math.abs(specialCount - 1800) <= 1, true);
@@ -240,15 +253,15 @@ async function main() {
     check('odds: the collab lines get the whole boost', Math.abs(collabCount - (800 + shareOf(0.01, fullPool.length - 1) + shareOf(0.04, fullPool.length - 1))) <= 3, true);
     // The sweep is discrete, so step boundaries can shift a count by one either way.
     check('odds: common lines stay even (2600 each)', commonCounts.every((c) => Math.abs(c - 2600) <= 1), true);
-    const lockedPage = json(await rares.mySpecialsView(XG, 'u2', 1));
+    const lockedPage = json(await rares.mySpecialsView(XG, 'u2', 2));
     check('pages: a locked set hides its rows, toggle greyed out', [lockedPage.embeds[0]!.description, lockedPage.embeds[0]!.fields ?? [], lockedPage.components[0]!.components[1]?.label, lockedPage.components[0]!.components[1]?.disabled], [
-        '**#OnlineSensations**: 0 of 12 found\nLocked: find **Curren Chan** to open it.',
+        '**Set 2: #OnlineSensations**: 0 of 12 found\nLocked: find **Curren Chan** to open it.',
         [],
         '#OnlineSensations: Locked',
         true,
     ]);
     await us0.toggleSetting(XG, 'u1', 'boosts');
-    const boostPage = json(await rares.mySpecialsView(XG, 'u1', 0));
+    const boostPage = json(await rares.mySpecialsView(XG, 'u1', 1));
     check('specials: your boost is in the footer', boostPage.embeds[0]!.footer?.text.split('\n')[1], 'Boost: +4% #OnlineSensations for 50 more runs (paused: Boosts are off).');
     await prisma.timerUserSettings.deleteMany({ where: { guildId: XG } });
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: XG } });
@@ -283,18 +296,18 @@ async function main() {
     const us = await import('../src/lib/timer/userSettings');
     const SG = `test-usettings-${Date.now()}`;
     check('settings: defaults', await us.getUserSettings(SG, 'u1'), { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] });
-    check('settings: default run and ping times', [us.runMinutes(await us.getUserSettings(SG, 'u1')), us.pingMinutes(await us.getUserSettings(SG, 'u1'))], [50, 3]);
+    check('settings: default run and ping times', [us.runMinutes(await us.getUserSettings(SG, 'u1')), us.pingMinutes(await us.getUserSettings(SG, 'u1'))], [50, 5]);
     await us.toggleSetting(SG, 'u1', 'dm');
     await us.toggleSetting(SG, 'u1', 'early');
     const on = await us.toggleSetting(SG, 'u1', 'set:set1');
     check('settings: each toggle flips', on, { dmPing: true, earlyRiser: true, boosts: true, disabledSets: ['set1'] });
     check('settings: boosts flip off and back', [(await us.toggleSetting(SG, 'u1', 'boosts')).boosts, (await us.toggleSetting(SG, 'u1', 'boosts')).boosts], [false, true]);
-    check('settings: early riser runs 49 and clears in 2', [us.runMinutes(on), us.pingMinutes(on)], [49, 2]);
+    check('settings: early riser runs 49 and clears in 4', [us.runMinutes(on), us.pingMinutes(on)], [49, 4]);
     check('settings: an unknown set is ignored', (await us.toggleSetting(SG, 'u1', 'set:nope')).disabledSets, ['set1']);
     check('settings: a set flips back on', (await us.toggleSetting(SG, 'u1', 'set:set1')).disabledSets, []);
     const view = JSON.stringify(us.settingsView(on));
     check('settings: the screen shows each setting\'s state', [view.includes('DM Me Too: On'), view.includes('Early Riser: On'), view.includes('Boosts: On')], [true, true, true]);
-    check('settings: sets are not on this screen any more', [view.includes('Set 1:'), us.settingsView(on).components.length], [false, 1]);
+    check('settings: sets are not on this screen any more', [view.includes('Lobby Loungers:'), us.settingsView(on).components.length], [false, 1]);
     await prisma.timerUserSettings.deleteMany({ where: { guildId: SG } });
     const { BUTTON_SETTINGS } = await import('../src/lib/timer/panel');
     check('panel: has the Settings button', panelJson.includes(BUTTON_SETTINGS) || JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_SETTINGS), true);

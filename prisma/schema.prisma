@@ -186,10 +186,15 @@ model RareOpenerHit {
     id            String   @id @default(cuid())
     guildId       String
     discordUserId String
+    /// The line's text as posted, for history. Lookups use `specialId`.
     opener        String
+    /// The special's stable id (`Special.id` in openers.ts). Null only for a
+    /// find of a line that no longer exists.
+    specialId     String?
     at            DateTime @default(now())
 
     @@index([guildId])
+    @@index([guildId, specialId])
 }
 
 /// A set boost a trainer holds: for `runsLeft` more pings, extra special

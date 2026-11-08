@@ -48,8 +48,8 @@ npm run dev                  # slash commands register themselves on start
 | **Stop** | Cancels your run; it does not count |
 | **My Stats** | Your statistics card |
 | **Leaderboard** | This week's standings, live |
-| **Specials** | The special lines you have found, only to you, with a menu to read them |
-| **Settings** | Your own settings, only to you: **DM Me Too** (the pings arrive here and in your DMs), **Early Riser** (notified after 49 minutes, pings cleared after 2 minutes), and each special set on or off |
+| **Specials** | Only to you, one set per page with Back and Next: Set 0 (the usual reminder lines), then each special set with the lines you have found, its On/Off button, and a menu to read them |
+| **Settings** | Your own settings, only to you: **DM Me Too** (the pings arrive here and in your DMs), **Early Riser** (notified after 49 minutes, pings cleared after 4 minutes), and **Boosts** (on or off) |
 
 Also available as `/timer stats [trainer]` and `/timer leaderboard [period]`
 (this week live, last week final, last 30 days, all time). The panel's
@@ -58,7 +58,7 @@ have found, by name, with how many times each came up and when you first
 got it, and a menu to read any special you unlocked in full.
 `/timer specials` (Club Managers) shows the whole server's tally,
 only to them, with who found each first. Pings
-are deleted 3 minutes after they post (2 for early risers).
+are deleted 5 minutes after they post (4 for early risers).
 
 ### Rewards
 

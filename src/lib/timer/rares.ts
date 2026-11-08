@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener } from './openers';
+import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -15,10 +15,14 @@ export function isRareOpener(opener: string): boolean {
     return RARE_PING_OPENERS.includes(opener);
 }
 
-/** Records that `discordUserId` got the rare `opener`. Never throws. */
+/**
+ * Records that `discordUserId` got the rare `opener` (its current text): the
+ * special's id, which every lookup uses, and the text as posted, for
+ * history. Never throws.
+ */
 export async function recordRareOpener(guildId: string, discordUserId: string, opener: string): Promise<void> {
     try {
-        await prisma.rareOpenerHit.create({ data: { guildId, discordUserId, opener } });
+        await prisma.rareOpenerHit.create({ data: { guildId, discordUserId, opener, specialId: specialIdOf(opener) ?? null } });
     } catch (e) {
         console.error('Recording a rare opener failed:', e);
     }
@@ -26,6 +30,8 @@ export async function recordRareOpener(guildId: string, discordUserId: string, o
 
 /** One rare line's tally. */
 export interface RareTally {
+    /** The special's stable id. */
+    id: string;
     /** The line's name, shown instead of the line itself. */
     name: string;
     opener: string;
@@ -39,9 +45,9 @@ export interface RareTally {
 /** Every rare line, in list order, with its tally in a guild, or for one trainer when `discordUserId` is given. */
 export async function rareTally(guildId: string, discordUserId?: string): Promise<RareTally[]> {
     const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, ...(discordUserId ? { discordUserId } : {}) }, orderBy: { at: 'asc' } });
-    return RARE_OPENERS.map(({ name, text: opener, set }) => {
-        const mine = hits.filter((h) => h.opener === opener);
-        return { name, opener, set, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null };
+    return RARE_OPENERS.map(({ id, name, text: opener, set }) => {
+        const mine = hits.filter((h) => h.specialId === id);
+        return { id, name, opener, set, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null };
     });
 }
 
@@ -63,8 +69,49 @@ export const SPECIALS_SET_PREFIX = 'timer:specials:set:';
 /** The "Read a special" menu's custom ID; `index.ts` routes it to `handleSpecialRead`. */
 export const READ_MENU_ID = 'timer:specials:read';
 
+/** The page the Specials list opens on: Set 1, the first special set. Page 0 is Set 0, the reminders. */
+export const SPECIALS_FIRST_PAGE = 1;
+
+/** How many pages the Specials list has: Set 0 (the reminders) and one per special set. */
+const PAGE_COUNT = SPECIAL_SETS.length + 1;
+
+/** A page's heading: "Set <n>: <name>". */
+function pageTitle(page: number): string {
+    return page === 0 ? 'Set 0: Reminders' : `Set ${page}: ${SPECIAL_SETS[page - 1]!.name}`;
+}
+
+/** The Back/Next row of a Specials page, with `middle` (the set's toggle) between them. */
+function navRow(mode: 'mine' | 'all', page: number, middle?: ButtonBuilder): ActionRowBuilder<ButtonBuilder> {
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId(`${SPECIALS_PAGE_PREFIX}${mode}:${page - 1}`).setLabel('Back').setStyle(ButtonStyle.Secondary).setDisabled(page === 0),
+    );
+    if (middle) row.addComponents(middle);
+    return row.addComponents(
+        new ButtonBuilder()
+            .setCustomId(`${SPECIALS_PAGE_PREFIX}${mode}:${page + 1}`)
+            .setLabel('Next')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(page >= PAGE_COUNT - 1),
+    );
+}
+
 /**
- * One page of the Specials list: one set per page, with Back and Next.
+ * Set 0: the usual ping lines, in full (they are not secret), with the
+ * mention shown as "@trainer". Always on; nothing to find or turn off.
+ */
+function remindersPage(mode: 'mine' | 'all', footerHead: string) {
+    const lines = PING_OPENERS.map((o, n) => `**${n + 1}.** ${o.replaceAll('{user}', '@trainer')}`);
+    const embed = new EmbedBuilder()
+        .setColor(0xf2a87a)
+        .setTitle(pageTitle(0))
+        .setDescription(['The usual ping lines. Always on.', '', ...lines].join('\n').slice(0, 4096))
+        .setFooter({ text: `${footerHead}\nPage 1 of ${PAGE_COUNT}` });
+    return { embeds: [embed], components: [navRow(mode, 0)] as ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] };
+}
+
+/**
+ * One page of the Specials list: Set 0 (the reminders), then one special
+ * set per page, with Back and Next.
  *
  *   - Three columns (the special's name, how many times it came up, who
  *     found it first, or when for a trainer's own list), one row per
@@ -75,24 +122,29 @@ export const READ_MENU_ID = 'timer:specials:read';
  *   - The footer has the ping count, the base chance, the trainer's boosts,
  *     and the page number.
  *
- * `page` is clamped to the sets there are. Never shows a line's text.
+ * `page` is clamped to the pages there are. Never shows a special's text.
  */
 export function specialsView(tally: RareTally[], page: number, extras?: PersonalExtras) {
     const personal = extras !== undefined;
-    const p = Math.max(0, Math.min(SPECIAL_SETS.length - 1, Number.isInteger(page) ? page : 0));
+    const mode = personal ? 'mine' : 'all';
+    const pg = Math.max(0, Math.min(PAGE_COUNT - 1, Number.isInteger(page) ? page : SPECIALS_FIRST_PAGE));
+    const total = tally.reduce((sum, t) => sum + t.count, 0);
+    const pings = `${total} special ping${total === 1 ? '' : 's'}`;
+    const tallyLine = `${personal ? `${pings} for you so far` : `${pings} on the server so far`}.`;
+    if (pg === 0) return remindersPage(mode, tallyLine);
+    const p = pg - 1;
     const set = SPECIAL_SETS[p]!;
     const rows = tally.map((t, i) => ({ t, i })).filter(({ t }) => t.set === set.id);
     const found = tally.filter((t) => t.count > 0).length;
     const foundHere = rows.filter(({ t }) => t.count > 0).length;
-    const total = tally.reduce((sum, t) => sum + t.count, 0);
     const locked = extras?.lockedSets.includes(set.id) ?? false;
     const off = extras?.disabledSets.includes(set.id) ?? false;
 
-    const status = locked ? `\nLocked: find **${set.requires ?? 'its special'}** to open it.` : off ? '\nOff: these never come up for you.' : '';
+    const status = locked ? `\nLocked: find **${(set.requires && specialById(set.requires)?.name) ?? 'its special'}** to open it.` : off ? '\nOff: these never come up for you.' : '';
     const embed = new EmbedBuilder()
         .setColor(0xf2a87a)
         .setTitle(personal ? `Your specials: ${found} of ${tally.length}` : `Specials found: ${found} of ${tally.length}`)
-        .setDescription(`**${set.name}**: ${foundHere} of ${rows.length} found${status}`);
+        .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${rows.length} found${status}`);
     if (!locked) {
         const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
         const names = rows.map(({ t }, n) => `**${n + 1}.** ${t.count > 0 ? t.name : '???'}`);
@@ -105,41 +157,28 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
         );
     }
 
-    const pings = `${total} special ping${total === 1 ? '' : 's'}`;
-    const footer = [`${personal ? `${pings} for you so far` : `${pings} on the server so far`}. Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a special line.`];
+    const footer = [`${tallyLine} Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a special line.`];
     for (const b of extras?.boosts ?? []) {
         const boostSet = SPECIAL_SETS.find((s) => s.id === b.setId);
         const boost = boostSet?.openers.find((o) => o.boost)?.boost;
         if (!boostSet || !boost) continue;
         footer.push(`Boost: +${Math.round(boost.chance * 100)}% ${boostSet.name} for ${b.runsLeft} more run${b.runsLeft === 1 ? '' : 's'}${extras!.boostsOn ? '' : ' (paused: Boosts are off)'}.`);
     }
-    footer.push(`Page ${p + 1} of ${SPECIAL_SETS.length}`);
+    footer.push(`Page ${pg + 1} of ${PAGE_COUNT}`);
     embed.setFooter({ text: footer.join('\n') });
 
-    const mode = personal ? 'mine' : 'all';
-    const nav = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId(`${SPECIALS_PAGE_PREFIX}${mode}:${p - 1}`).setLabel('Back').setStyle(ButtonStyle.Secondary).setDisabled(p === 0),
-    );
-    if (personal) {
-        nav.addComponents(
-            new ButtonBuilder()
-                .setCustomId(`${SPECIALS_SET_PREFIX}${set.id}`)
-                .setLabel(`${set.name}: ${locked ? 'Locked' : off ? 'Off' : 'On'}`)
-                .setStyle(!locked && !off ? ButtonStyle.Success : ButtonStyle.Secondary)
-                .setDisabled(locked),
-        );
-    }
-    nav.addComponents(
-        new ButtonBuilder()
-            .setCustomId(`${SPECIALS_PAGE_PREFIX}${mode}:${p + 1}`)
-            .setLabel('Next')
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(p >= SPECIAL_SETS.length - 1),
-    );
+    const toggle = personal
+        ? new ButtonBuilder()
+              .setCustomId(`${SPECIALS_SET_PREFIX}${set.id}`)
+              .setLabel(`${set.name}: ${locked ? 'Locked' : off ? 'Off' : 'On'}`)
+              .setStyle(!locked && !off ? ButtonStyle.Success : ButtonStyle.Secondary)
+              .setDisabled(locked)
+        : undefined;
+    const nav = navRow(mode, pg, toggle);
     const components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = [nav];
     // Reading in full is for a trainer's own finds, a set's worth at a time.
     const options = personal
-        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, i, n }) => ({ label: `${n + 1}. ${t.name}`.slice(0, 100), value: String(i) }))
+        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, n }) => ({ label: `${n + 1}. ${t.name}`.slice(0, 100), value: t.id }))
         : [];
     if (options.length > 0) {
         components.push(
@@ -162,9 +201,10 @@ export async function mySpecialsView(guildId: string, discordUserId: string, pag
     return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, boosts, boostsOn: settings.boosts });
 }
 
-/** The page of `setId` in the Specials list, or 0. */
+/** The page of `setId` in the Specials list (Set 1 is page 1), or the first page. */
 export function pageOfSet(setId: string): number {
-    return Math.max(0, SPECIAL_SETS.findIndex((s) => s.id === setId));
+    const i = SPECIAL_SETS.findIndex((s) => s.id === setId);
+    return i === -1 ? SPECIALS_FIRST_PAGE : i + 1;
 }
 
 /**
@@ -174,10 +214,9 @@ export function pageOfSet(setId: string): number {
  * reveal a line they have not had.
  */
 export async function readSpecial(guildId: string, discordUserId: string, choice: string): Promise<{ name: string; text: string } | null> {
-    const index = Number(choice);
-    const special = Number.isInteger(index) ? RARE_OPENERS[index] : undefined;
+    const special = specialById(choice);
     if (!special) return null;
-    const found = await prisma.rareOpenerHit.findFirst({ where: { guildId, discordUserId, opener: special.text } });
+    const found = await prisma.rareOpenerHit.findFirst({ where: { guildId, discordUserId, specialId: special.id } });
     if (!found) return null;
     return { name: special.name, text: fillOpener(special.text, discordUserId) };
 }
@@ -191,9 +230,9 @@ export function specialEmbed(special: { name: string; text: string }): EmbedBuil
 async function activeLocks(guildId: string): Promise<{ text: string; owner: string; ownerChance: number }[]> {
     const active: { text: string; owner: string; ownerChance: number }[] = [];
     for (const lock of SPECIAL_LOCKS) {
-        const text = RARE_OPENERS.find((o) => o.name === lock.name)?.text;
+        const text = specialById(lock.id)?.text;
         if (!text) continue;
-        const ownerHasIt = await prisma.rareOpenerHit.findFirst({ where: { guildId, discordUserId: lock.owner, opener: text } });
+        const ownerHasIt = await prisma.rareOpenerHit.findFirst({ where: { guildId, discordUserId: lock.owner, specialId: lock.id } });
         if (!ownerHasIt) active.push({ text, owner: lock.owner, ownerChance: lock.ownerChance });
     }
     return active;
@@ -206,14 +245,9 @@ async function activeLocks(guildId: string): Promise<{ text: string; owner: stri
 export async function lockedSetsFor(guildId: string, discordUserId: string): Promise<string[]> {
     const gated = SPECIAL_SETS.filter((s) => s.requires);
     if (gated.length === 0) return [];
-    const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, discordUserId }, select: { opener: true } });
-    const found = new Set(hits.map((h) => h.opener));
-    return gated
-        .filter((s) => {
-            const text = RARE_OPENERS.find((o) => o.name === s.requires)?.text;
-            return !text || !found.has(text);
-        })
-        .map((s) => s.id);
+    const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, discordUserId }, select: { specialId: true } });
+    const found = new Set(hits.map((h) => h.specialId));
+    return gated.filter((s) => !found.has(s.requires!)).map((s) => s.id);
 }
 
 /** A set boost a trainer holds. */

@@ -29,7 +29,13 @@ export interface SpecialBoost {
 
 /** One special line. `{user}` is the trainer's mention; `{set_name}` is its set's name. */
 export interface Special {
-    /** Shown in the Specials lists once found. Also the key a set's `requires` names. */
+    /**
+     * Stable id, `<set>.<slug>`, stored with every find. Never change or reuse
+     * one in use: finds, locks and set prerequisites follow it. The text and
+     * name can be reworded freely.
+     */
+    id: string;
+    /** Shown in the Specials lists once found. */
     name: string;
     text: string;
     /** Labels a boost can draw on, e.g. `collab`. */
@@ -44,9 +50,9 @@ export interface SpecialSet {
     /** Shown in Settings. */
     name: string;
     /**
-     * The name of a special in another set. Until a trainer has found it,
-     * this set is locked for them: its lines never come up and its toggle
-     * is greyed out.
+     * The id of a special in another set. Until a trainer has found it, this
+     * set is locked for them: its lines never come up and its toggle is
+     * greyed out.
      */
     requires?: string;
     openers: readonly Special[];
@@ -62,40 +68,40 @@ export interface SpecialSet {
 export const SPECIAL_SETS: readonly SpecialSet[] = [
     {
         id: 'set1',
-        name: 'Set 1',
+        name: 'Lobby Loungers',
         openers: [
-        { name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
-        { name: 'Overslept?!', text: '{user} zzzzzzzzz- OOOH AEUHHHH! Oh, right. Trainer, trainer, the timer!' },
-        { name: 'Agnes Tachyon', text: '{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food! And then some guinea pigging activities too...' },
-        { name: 'Mihono Bourbon', text: "{user} Master-san, I have been provided intel of your underling's completion. Please proceed at haste. I will provide chocolate afterwards." },
-        { name: 'Rulership', text: "{user} Yada yada yadaaaaaaaaaaa! Why are you ignoring me?! Didn't you promise you'd game with me after finishing the run?! Where are you at HAEH? Get back here, you gotta play with 「dominare」! YADAAAAAA! >.<" },
-        { name: 'Aston Machan', text: '{user} *tugs at shirt* Machan wants your attention...  can we hang out after you finish the run...' },
-        { name: 'Taiki Shuttle', text: "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay {user}? We can host a party afterwards too! I can't wait..." },
-        { name: 'Mejiro Family', text: 'The Mejiro Estate welcomes your return, {user}. Please attend to your trainee as soon as possible. We have provided detailed updates on her development.' },
-        { name: 'Rice Shower', text: "{user} Onii-samaaa~ I don't want to cause much trouble, but the independent run has finished! Will you come take a look with me?" },
-        { name: 'Symboli Rudolf', text: 'Your trainer has declared her in-dependence from the pack. A mare-velous revolution. ...ehem. Anyways, please look into it, {user}.' },
-        { name: 'Air Groove', text: '...Teio probably heard one of her *horrible* jokes again, so you will have to excuse this da- *meeting*... as I cater to her, {user}. Want to come to my garden later?' },
-        { name: 'Tokai Teio', text: "I don't want to have to wait for my leg! I want to meet your trainee! Teio wants to runnnn >.< Can I meet her, please {user}?" },
-        { name: "Curren Chan", text: "{user}-channnn~! Here you are! Heard you've been handling #Trainee runs, but see, Curren has #DefinitelyAccidentally leaked that you're #TheBestManager that Tracen has so... You're coming with me, #SpecialCollabs full week! #LookAtCurren #ManagerDebut" },
+        { id: 'set1.matikane', name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
+        { id: 'set1.overslept', name: 'Overslept?!', text: '{user} zzzzzzzzz- OOOH AEUHHHH! Oh, right. Trainer, trainer, the timer!' },
+        { id: 'set1.tachyon', name: 'Agnes Tachyon', text: '{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food! And then some guinea pigging activities too...' },
+        { id: 'set1.bourbon', name: 'Mihono Bourbon', text: "{user} Master-san, I have been provided intel of your underling's completion. Please proceed at haste. I will provide chocolate afterwards." },
+        { id: 'set1.rulership', name: 'Rulership', text: "{user} Yada yada yadaaaaaaaaaaa! Why are you ignoring me?! Didn't you promise you'd game with me after finishing the run?! Where are you at HAEH? Get back here, you gotta play with 「dominare」! YADAAAAAA! >.<" },
+        { id: 'set1.machan', name: 'Aston Machan', text: '{user} *tugs at shirt* Machan wants your attention...  can we hang out after you finish the run...' },
+        { id: 'set1.taiki', name: 'Taiki Shuttle', text: "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay {user}? We can host a party afterwards too! I can't wait..." },
+        { id: 'set1.mejiro', name: 'Mejiro Family', text: 'The Mejiro Estate welcomes your return, {user}. Please attend to your trainee as soon as possible. We have provided detailed updates on her development.' },
+        { id: 'set1.rice', name: 'Rice Shower', text: "{user} Onii-samaaa~ I don't want to cause much trouble, but the independent run has finished! Will you come take a look with me?" },
+        { id: 'set1.rudolf', name: 'Symboli Rudolf', text: 'Your trainer has declared her in-dependence from the pack. A mare-velous revolution. ...ehem. Anyways, please look into it, {user}.' },
+        { id: 'set1.groove', name: 'Air Groove', text: '...Teio probably heard one of her *horrible* jokes again, so you will have to excuse this da- *meeting*... as I cater to her, {user}. Want to come to my garden later?' },
+        { id: 'set1.teio', name: 'Tokai Teio', text: "I don't want to have to wait for my leg! I want to meet your trainee! Teio wants to runnnn >.< Can I meet her, please {user}?" },
+        { id: 'set1.curren', name: "Curren Chan", text: "{user}-channnn~! Here you are! Heard you've been handling #Trainee runs, but see, Curren has #DefinitelyAccidentally leaked that you're #TheBestManager that Tracen has so... You're coming with me, #SpecialCollabs full week! #LookAtCurren #ManagerDebut" },
         ],
     },
     {
         id: 'online-sensations',
         name: '#OnlineSensations',
-        requires: 'Curren Chan',
+        requires: 'set1.curren',
         openers: [
-            { name: "Celebrate", text: "{user}, it's time to #Celebrate! It took so much #Preparation but we finally got #ThreeMillionFollowers on release! Thank you for being my #FavoriteManager, and it's time to get a bazillion more! #WorkHard" },
-            { name: "For Your Eyes Only", text: "{user}, it's such a long dayyyy~ #SoTired It was fun but a #DozenDresses takes so long for the producers... So I just want to *closes door behind* show you something #ForYourEyesOnly~\n...ya like it, m'fated #BelovedManager? shh, it's only for you now... and maybe when we truly #BecomeAPair~" },
-            { name: "Copano Rickey", text: "Hey {user}, have you seen that #Viral Umastagram photo? The #Rickey☆Buzz one? She wanted to raise 15 million #ChristmasOrnies... Either way, that's why we're streaming with her to garner more support! Here comes the #FengShui train! #CurrenxRickey #RickeyLuckyHappy", tags: ['collab'] },
-            { name: "Loves Only You", text: "#Woah #Surprised Loves? What are you doing here?! I'm surprised you'd be #WalkingAround- oh my god you're #LiveStreaming! {user}, get in here! Introducing to everyone, #TheBestManager that Tracen can ask for! And also mine~ #CurrensManager #CurrenxLoves\n-# {user} became so famous that even Montjeu #L'ArcChampion requested a collaboration! For the next 50 runs, gain a 4% chance of getting a #SpecialCollab in {set_name}.", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 } },
-            { name: "Tosen Jordan", text: "You know Tosen right? Yeah, her #FancyNails are amazing! Look how that fits her #CircusCostume though! We *have* to make one- yes {user}-chan... #ComeOn have you not seen Gojo-kun?! You can do the same! #CurrenxTosen #IWantGojoKun #MakeMeMarin", tags: ['collab'] },
-            { name: "Gold City", text: "Ugh, I want to actually do a #RealCollab with Gold City but she's always busy... Last time she even asked if you'd be her #UmastaCameraman; when are you doing *my* photos huh {user}-chan? Come onnn, at least act like a #RealMan~ #CityWaitingRoom #SpoilYourPrincess", tags: ['collab'] },
-            { name: "Transcend", text: "Transcend said thanks for the collab, {user}-chan! Her followers went #Explosive overnight, and she called Curren a total #Charisma~ Now she's offering a whole jar of #Hachimi for intel on #TheBestManager... sorry Trans-chan, that scoop is #NotForSale! #CurrenxTranscend", tags: ['collab'] },
-            { name: "Smart Falcon", text: "#TwoTrillionFans has become so popular #OhMyFreakinGod! Smart Falcon is so #UmadolFamoussss it's insane! {user}, we have to come support one of her #GrandLive concerts, please please-please#PWEASE! I will even do #ProperTraining this time! #FalconConcertIncoming #MoodBoost", tags: ['collab'] },
-            { name: "Hishi Akebono", text: "{user}-chan, have you thought of #VarietyPosting? Yeah, Akebono is soooo good at it #Exasperated (It's a #FancyWord I just learned!) Yes {user}, we must do something #NewAndCool today- What do you mean we have #StaminaTraining?! Nooooo! #ReleaseCurren", tags: ['collab'] },
-            { name: "Taiki Shuttle", text: "Ugh, Taiki just doesn't #NoticeMyRivalry at all! She's so #PartyFun and her Texan burgers are so #Deliciousss... That's right! {user}, time to make some noise in UmaTube! Surely we can get a collab out of her! #MakeCurrenNoticeableAgain", tags: ['collab'] },
-            { name: "Biko Pegasus", text: "Biko's got a new #UmaTokPost? Oh my GAWDDD I love Biko! Have you seen her animations? Her #PowerRanger series is also soooo cool... wait... You got me a #RangerCollab?! No weiii! (#PalmerHelios taught me that!) Thank you shooo much {user}! Time to get my #DressUp ready! #CurrenxBiko #PinkRanger", tags: ['collab'] },
-            { name: "Daitaku Helios", text: "Wei weeeiiii! {user}, I've heard of how gyatdamnnn vibey you are! So here's the thing Torepiii *wink*: Gold City and I have been doing a pretty s'mexy looksmaxxing Zombie☆Makeover, and I think Curren be such a cutieee, frfr! I'll be looking for six or seven- HAHAH SIX SEVENNN- more ladies, so hook me up... and also ||teach me how to bag Daiichi-ojou too pweaseee!|| See ya, Helios☆Out! #LookAtHelios #ScaryCurren #DoveyVibey", tags: ['collab'] },
+            { id: 'os.celebrate', name: "Celebrate", text: "{user}, it's time to #Celebrate! It took so much #Preparation but we finally got #ThreeMillionFollowers on release! Thank you for being my #FavoriteManager, and it's time to get a bazillion more! #WorkHard" },
+            { id: 'os.eyes-only', name: "For Your Eyes Only", text: "{user}, it's such a long dayyyy~ #SoTired It was fun but a #DozenDresses takes so long for the producers... So I just want to *closes door behind* show you something #ForYourEyesOnly~\n...ya like it, m'fated #BelovedManager? shh, it's only for you now... and maybe when we truly #BecomeAPair~" },
+            { id: 'os.rickey', name: "Copano Rickey", text: "Hey {user}, have you seen that #Viral Umastagram photo? The #Rickey☆Buzz one? She wanted to raise 15 million #ChristmasOrnies... Either way, that's why we're streaming with her to garner more support! Here comes the #FengShui train! #CurrenxRickey #RickeyLuckyHappy", tags: ['collab'] },
+            { id: 'os.loves', name: "Loves Only You", text: "#Woah #Surprised Loves? What are you doing here?! I'm surprised you'd be #WalkingAround- oh my god you're #LiveStreaming! {user}, get in here! Introducing to everyone, #TheBestManager that Tracen can ask for! And also mine~ #CurrensManager #CurrenxLoves\n-# {user} became so famous that even Montjeu #L'ArcChampion requested a collaboration! For the next 50 runs, gain a 4% chance of getting a #SpecialCollab in {set_name}.", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 } },
+            { id: 'os.tosen', name: "Tosen Jordan", text: "You know Tosen right? Yeah, her #FancyNails are amazing! Look how that fits her #CircusCostume though! We *have* to make one- yes {user}-chan... #ComeOn have you not seen Gojo-kun?! You can do the same! #CurrenxTosen #IWantGojoKun #MakeMeMarin", tags: ['collab'] },
+            { id: 'os.gold-city', name: "Gold City", text: "Ugh, I want to actually do a #RealCollab with Gold City but she's always busy... Last time she even asked if you'd be her #UmastaCameraman; when are you doing *my* photos huh {user}-chan? Come onnn, at least act like a #RealMan~ #CityWaitingRoom #SpoilYourPrincess", tags: ['collab'] },
+            { id: 'os.transcend', name: "Transcend", text: "Transcend said thanks for the collab, {user}-chan! Her followers went #Explosive overnight, and she called Curren a total #Charisma~ Now she's offering a whole jar of #Hachimi for intel on #TheBestManager... sorry Trans-chan, that scoop is #NotForSale! #CurrenxTranscend", tags: ['collab'] },
+            { id: 'os.falcon', name: "Smart Falcon", text: "#TwoTrillionFans has become so popular #OhMyFreakinGod! Smart Falcon is so #UmadolFamoussss it's insane! {user}, we have to come support one of her #GrandLive concerts, please please-please#PWEASE! I will even do #ProperTraining this time! #FalconConcertIncoming #MoodBoost", tags: ['collab'] },
+            { id: 'os.akebono', name: "Hishi Akebono", text: "{user}-chan, have you thought of #VarietyPosting? Yeah, Akebono is soooo good at it #Exasperated (It's a #FancyWord I just learned!) Yes {user}, we must do something #NewAndCool today- What do you mean we have #StaminaTraining?! Nooooo! #ReleaseCurren", tags: ['collab'] },
+            { id: 'os.taiki', name: "Taiki Shuttle", text: "Ugh, Taiki just doesn't #NoticeMyRivalry at all! She's so #PartyFun and her Texan burgers are so #Deliciousss... That's right! {user}, time to make some noise in UmaTube! Surely we can get a collab out of her! #MakeCurrenNoticeableAgain", tags: ['collab'] },
+            { id: 'os.biko', name: "Biko Pegasus", text: "Biko's got a new #UmaTokPost? Oh my GAWDDD I love Biko! Have you seen her animations? Her #PowerRanger series is also soooo cool... wait... You got me a #RangerCollab?! No weiii! (#PalmerHelios taught me that!) Thank you shooo much {user}! Time to get my #DressUp ready! #CurrenxBiko #PinkRanger", tags: ['collab'] },
+            { id: 'os.helios', name: "Daitaku Helios", text: "Wei weeeiiii! {user}, I've heard of how gyatdamnnn vibey you are! So here's the thing Torepiii *wink*: Gold City and I have been doing a pretty s'mexy looksmaxxing Zombie☆Makeover, and I think Curren be such a cutieee, frfr! I'll be looking for six or seven- HAHAH SIX SEVENNN- more ladies, so hook me up... and also ||teach me how to bag Daiichi-ojou too pweaseee!|| See ya, Helios☆Out! #LookAtHelios #ScaryCurren #DoveyVibey", tags: ['collab'] },
         ],
     },
 ];
@@ -176,7 +182,17 @@ export function boostPool(setId: string, tag: string): string[] {
  * everyone (the finds say so), so an entry can stay here harmlessly or be
  * removed.
  */
-export const SPECIAL_LOCKS: readonly { name: string; owner: string; ownerChance: number }[] = [
+export const SPECIAL_LOCKS: readonly { id: string; owner: string; ownerChance: number }[] = [
     // Guaranteed (Fwoxie, 2026-11-08): Tylina's next ping is this line.
-    { name: 'Matikanetannhauser', owner: '457773317739380738', ownerChance: 1 },
+    { id: 'set1.matikane', owner: '457773317739380738', ownerChance: 1 },
 ];
+
+/** The special with id `id`, or undefined. */
+export function specialById(id: string): (Special & { set: string }) | undefined {
+    return RARE_OPENERS.find((o) => o.id === id);
+}
+
+/** The id of the special whose current text is `text`, or undefined. */
+export function specialIdOf(text: string): string | undefined {
+    return RARE_OPENERS.find((o) => o.text === text)?.id;
+}

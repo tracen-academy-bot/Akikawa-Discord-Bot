@@ -27,8 +27,9 @@ async function seed(user: string, daysAgo: number[]) {
     await prisma.trainingRun.deleteMany({ where: { guildId: G, discordUserId: user } });
     for (const d of daysAgo) {
         const at = new Date(now - d * DAY);
+        // A full 50-minute run, so time trained comes out at 50 a run.
         await prisma.trainingRun.create({
-            data: { guildId: G, discordUserId: user, startedAt: at, completedAt: at },
+            data: { guildId: G, discordUserId: user, startedAt: new Date(at.getTime() - 50 * 60_000), completedAt: at },
         });
     }
 }
@@ -53,6 +54,10 @@ async function main() {
     check('3 consecutive days -> streak', s.currentStreakDays, 3);
     check('3 consecutive days -> longest', s.longestStreakDays, 3);
     check('3 consecutive days -> minutes', s.totalMinutes, 150);
+    // An early riser's 49-minute run counts 49, not 50.
+    await prisma.trainingRun.create({ data: { guildId: G, discordUserId: 'u_early49', startedAt: new Date(Date.now() - 49 * 60_000), completedAt: new Date() } });
+    check('time trained uses the real run length (49)', (await getTrainerStats(G, 'u_early49')).totalMinutes, 49);
+    check('the leaderboard too', (await getLeaderboard(G, 'all')).find((r) => r.discordUserId === 'u_early49')?.minutes, 49);
 
     // Not yet trained today: yesterday must still anchor an unbroken streak.
     await seed('u_yesterday', [1, 2, 3]);
