@@ -4,6 +4,25 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-08 — Two weekly roles; Today shows 8
+
+- **Weekly roles in two tiers:** places 1-2 take the top role
+  (`topRoleId`), places 3-5 a new second role (`secondRoleId`, set with
+  `/timer rewards second_role:`). Constants `TOP_ROLE_PLACES = 2`,
+  `AWARD_PLACES = 5`; `TOP_PLACES = 3` now only means the boards' podium.
+  Each Monday a role comes off every last-week holder who is not in its
+  places now, whatever place they had, so the old top 3 (who all held the
+  top role) and anyone changing tier are handled. `setRole` no longer
+  counts removing a role the member does not hold.
+- The results post names the top 5, pings them, and says which places hold
+  which role. The boards' role line names both tiers ("1–2 take Abusers ·
+  3–5 take Enjoyers"). `/timer rewards` shows both roles and the live top 5.
+- **The live board's Today card shows 8 rows** (was 5); it fits beside the
+  week's 10 without making the image taller.
+- Migration `20261108150000_timer_second_role`.
+
+---
+
 ## 2026-11-08 — Specials leaderboard
 
 - The Leaderboard button sends a third image: the specials board, all time

@@ -4,6 +4,14 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-08 — Two weekly roles for more coverage
+
+- Places 1-2 each week get Autorun Abusers, places 3-5 the new Autorun
+  Enjoyers. Set the second role with `/timer rewards second_role:`.
+- The live board's Today list shows 8 instead of 5.
+
+---
+
 ## 2026-11-08 — A specials leaderboard
 
 - Leaderboard now has a third image: the specials board, by points. 15 a

@@ -65,10 +65,12 @@ are deleted 5 minutes after they post (4 for early risers).
 
 Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
 
-- `/timer rewards top_role:<role> channel:<channel>`: the week's top 3 by
-  runs get the role about 15 minutes after the week ends, and last week's
-  holders lose it. The week's final leaderboard posts in the channel, pinging
-  the winners. With no options it shows the setup and the live top 3;
+- `/timer rewards top_role:<role> second_role:<role> channel:<channel>`:
+  about 15 minutes after the week ends, places 1–2 by runs get the top role
+  and places 3–5 the second role, and last week's holders who are no longer
+  in a role's places lose it. The week's final leaderboard posts in the
+  channel, pinging the top 5. With no options it shows the setup and the
+  live top 5;
   `off:true` stops it. The first setup awards last week straight away and
   posts its board, so set the role and the channel in the same command.
 - `/timer panel`: posts the live leaderboard (this week on the left, today
@@ -79,7 +81,7 @@ Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
   channel, the pair is reposted under them.
 - `/timer publish [channel] [ping]`: posts last week's final leaderboard
   once, now: in the given channel, else the rewards channel, else where it
-  is used. It pings the top 3 unless `ping:false`. It does not change roles.
+  is used. It pings the top 5 unless `ping:false`. It does not change roles.
 - `/timer milestone add runs:<n> role:<role>`: a role earned at `n`
   completed runs, given the moment someone reaches it (and straight away to
   everyone already past it). `/timer milestone remove runs:<n>` stops it.

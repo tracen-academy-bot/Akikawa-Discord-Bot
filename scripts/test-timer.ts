@@ -223,7 +223,7 @@ async function rewardChecks() {
             fetch: async () => null,
         },
     } as never;
-    const created = await rewards.saveTimerSettings(G2, { topRoleId: 'r-top' }, new Date('2026-10-20T00:00:00Z'));
+    const created = await rewards.saveTimerSettings(G2, { topRoleId: 'r-top', secondRoleId: 'r-2nd' }, new Date('2026-10-20T00:00:00Z'));
     check('turning rewards on leaves last week to award', created.lastAwardedWeek, '2026-10-05');
     const guildOf = async () => guild;
     const first = await rewards.runWeeklyAwards(guildOf, new Date('2026-10-20T00:01:00Z'));
@@ -231,31 +231,43 @@ async function rewardChecks() {
     check('and only once', (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-20T01:00:00Z'))).length, 0);
     log.length = 0;
     // Stand-in holders for that week, to check the hand-off next Monday:
-    // zed loses the role, alice keeps it.
+    // zed loses the top role, alice keeps it; carol held the top role under
+    // the old top-3 rule and moves down to the second role.
     await prisma.timerWeeklyAward.deleteMany({ where: { guildId: G2, week: '2026-10-12' } });
     await prisma.timerWeeklyAward.createMany({
         data: [
             { guildId: G2, week: '2026-10-12', place: 1, discordUserId: 'zed', runs: 9 },
             { guildId: G2, week: '2026-10-12', place: 2, discordUserId: 'alice', runs: 8 },
+            { guildId: G2, week: '2026-10-12', place: 3, discordUserId: 'carol', runs: 7 },
         ],
     });
+    // The stand-ins replace that week's real result, so roles match them too.
+    heldRoles.clear();
+    for (const id of ['zed', 'alice', 'carol']) heldRoles.set(id, new Set(['r-top']));
     check('not awarded in the first quarter hour of the new week',
         (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T15:10:00Z'))).length, 0);
     const [award] = await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T15:20:00Z'));
-    check('the top 3 are awarded', award?.winners.map((w) => w.discordUserId), ['alice', 'bob', 'carol']);
-    check('the role leaves last week\'s holders who did not place', award?.removed, ['zed']);
-    check('and goes to this week\'s', log, ['-zed:r-top', '+alice:r-top', '+bob:r-top', '+carol:r-top']);
+    check('the top 5 are awarded (4 ran)', award?.winners.map((w) => w.discordUserId), ['alice', 'bob', 'carol', 'dave']);
+    check('a role leaves last week\'s holders not in its places now', award?.removed, ['zed', 'carol']);
+    check('places 1-2 get the top role, 3-5 the second role', log, ['-zed:r-top', '-carol:r-top', '+alice:r-top', '+bob:r-top', '+carol:r-2nd', '+dave:r-2nd']);
+    check('who holds what afterwards', ['zed', 'alice', 'bob', 'carol', 'dave'].map((id) => [...(heldRoles.get(id) ?? [])].sort().join(',')), ['', 'r-top', 'r-top', 'r-2nd', 'r-2nd']);
     check('the places are kept for next week',
         (await prisma.timerWeeklyAward.findMany({ where: { guildId: G2, week: '2026-10-19' }, orderBy: { place: 'asc' } })).map((a) => a.discordUserId),
-        ['alice', 'bob', 'carol']);
+        ['alice', 'bob', 'carol', 'dave']);
+    check('the roles line for the boards', [rewards.weeklyRolesLine('Abusers', 'Enjoyers', true), rewards.weeklyRolesLine('Abusers', null, false), rewards.weeklyRolesLine(null, null, true)], [
+        '1–2 take Abusers · 3–5 take Enjoyers',
+        '1–2 hold Abusers',
+        null,
+    ]);
     check('a week is awarded once', (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T16:00:00Z'))).length, 0);
     check('the week is marked done', (await rewards.getTimerSettings(G2))?.lastAwardedWeek, '2026-10-19');
 
     // ── The week's results post (Monday award and /timer publish) ─────────────
     const { weekResultsPost } = await import('../src/lib/timer/boardImage');
     const post = await weekResultsPost(guild, '2026-10-19', true);
-    check('the post names the week and its top 3', [post.content.split('\n')[0], post.content.includes('1. <@alice> · 3 runs')], ['**Top runners for Oct 19 – Oct 25**', true]);
-    check('it pings the top 3 when asked', post.allowedMentions.users, ['alice', 'bob', 'carol']);
+    check('the post names the week and its top 5', [post.content.split('\n')[0], post.content.includes('1. <@alice> · 3 runs'), post.content.includes('4. <@dave> · 1 run')], ['**Top runners for Oct 19 – Oct 25**', true, true]);
+    check('and who holds which role', post.content.split('\n').at(-1), "Places 1–2 hold <@&r-top>, places 3–5 hold <@&r-2nd> until next week's results.");
+    check('it pings the top 5 when asked', post.allowedMentions.users, ['alice', 'bob', 'carol', 'dave']);
     check('and attaches the final board', post.files.length, 1);
     check('a quiet publish pings nobody', (await weekResultsPost(guild, '2026-10-19', false)).allowedMentions.users, []);
 

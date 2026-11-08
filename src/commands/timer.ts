@@ -36,7 +36,8 @@ import {
     stopTimer,
 } from '../lib/timer/service';
 import {
-    TOP_PLACES,
+    AWARD_PLACES,
+    placesLabel,
     milestoneLadder,
     syncMilestones,
     getBoard,
@@ -112,8 +113,9 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('rewards')
-            .setDescription("Set the weekly top-runner role and where the week's final board posts. Club Managers only.")
-            .addRoleOption((opt) => opt.setName('top_role').setDescription(`Role for the week's top ${TOP_PLACES} by runs`).setRequired(false))
+            .setDescription("Set the weekly roles and where the week's final board posts. Club Managers only.")
+            .addRoleOption((opt) => opt.setName('top_role').setDescription(`Role for the week's ${placesLabel('top')} by runs`).setRequired(false))
+            .addRoleOption((opt) => opt.setName('second_role').setDescription(`Role for the week's ${placesLabel('second')} by runs`).setRequired(false))
             .addChannelOption((opt) =>
                 opt
                     .setName('channel')
@@ -136,7 +138,7 @@ export const data = new SlashCommandBuilder()
                     .setRequired(false)
                     .addChannelTypes(...ANNOUNCE_CHANNEL_TYPES),
             )
-            .addBooleanOption((opt) => opt.setName('ping').setDescription('Ping the top 3 (default yes)').setRequired(false)),
+            .addBooleanOption((opt) => opt.setName('ping').setDescription(`Ping the top ${AWARD_PLACES} (default yes)`).setRequired(false)),
     )
     .addSubcommandGroup((group) =>
         group
@@ -281,36 +283,43 @@ async function requireManager(interaction: ChatInputCommandInteraction): Promise
 
 /**
  * `/timer rewards`: sets the weekly role and the board's channel, or with no
- * options shows the setup, when the week ends, and the live top 3.
+ * options shows the setup, when the week ends, and the live top 5.
  */
 async function handleRewards(interaction: ChatInputCommandInteraction) {
     if (!(await requireManager(interaction))) return;
     const guild = interaction.guild!;
     const role = interaction.options.getRole('top_role');
+    const second = interaction.options.getRole('second_role');
     const channel = interaction.options.getChannel('channel');
     const off = interaction.options.getBoolean('off') ?? false;
 
-    if (role) {
-        const problem = await roleProblem(guild, role.id);
+    for (const r of [role, second]) {
+        if (!r) continue;
+        const problem = await roleProblem(guild, r.id);
         if (problem) {
             await interaction.reply({ embeds: [errorEmbed(problem)], flags: MessageFlags.Ephemeral });
             return;
         }
     }
-    const changed = off || role !== null || channel !== null;
+    const changed = off || role !== null || second !== null || channel !== null;
     // The first setup awards last week at the next minute's check.
     const firstSetup = changed && !off && (await getTimerSettings(guild.id)) === null;
     const settings = off
-        ? await saveTimerSettings(guild.id, { topRoleId: null, announceChannelId: null })
+        ? await saveTimerSettings(guild.id, { topRoleId: null, secondRoleId: null, announceChannelId: null })
         : changed
-          ? await saveTimerSettings(guild.id, { ...(role ? { topRoleId: role.id } : {}), ...(channel ? { announceChannelId: channel.id } : {}) })
+          ? await saveTimerSettings(guild.id, {
+                ...(role ? { topRoleId: role.id } : {}),
+                ...(second ? { secondRoleId: second.id } : {}),
+                ...(channel ? { announceChannelId: channel.id } : {}),
+            })
           : await getTimerSettings(guild.id);
 
     const milestones = await getMilestoneRoles(guild.id);
-    const live = (await getBoard(guild.id, 'thisweek', TOP_PLACES)).rows;
+    const live = (await getBoard(guild.id, 'thisweek', AWARD_PLACES)).rows;
     const ends = Math.floor(nextWeekStart().getTime() / 1000);
     const lines = [
-        `Weekly top ${TOP_PLACES} role: ${settings?.topRoleId ? `<@&${settings.topRoleId}>` : 'not set'}`,
+        `Weekly role, ${placesLabel('top')}: ${settings?.topRoleId ? `<@&${settings.topRoleId}>` : 'not set'}`,
+        `Weekly role, ${placesLabel('second')}: ${settings?.secondRoleId ? `<@&${settings.secondRoleId}>` : 'not set (`second_role`)'}`,
         `End-of-week board: ${settings?.announceChannelId ? `<#${settings.announceChannelId}>` : 'not posted'}`,
         `This week ends <t:${ends}:F> (<t:${ends}:R>); it is awarded about 15 minutes later.`,
         ...(firstSetup
@@ -321,7 +330,7 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
               ]
             : []),
         '',
-        `Live top ${TOP_PLACES}: ${live.length > 0 ? live.map((r, i) => `${i + 1}. <@${r.discordUserId}> (${r.runs})`).join(' · ') : 'no runs yet this week'}`,
+        `Live top ${AWARD_PLACES}: ${live.length > 0 ? live.map((r, i) => `${i + 1}. <@${r.discordUserId}> (${r.runs})`).join(' · ') : 'no runs yet this week'}`,
         '',
         `Milestones: ${milestones.length > 0 ? milestones.map((m) => `${m.runs} runs → <@&${m.roleId}>`).join(' · ') : 'none yet (`/timer milestone add`)'}`,
     ];
@@ -358,7 +367,7 @@ async function handlePublish(interaction: ChatInputCommandInteraction) {
     }
     // Keep the timer panel below the results when they share a channel.
     await keepPanelAtBottom(interaction.client, guild, channelId).catch((e) => console.error('Timer panel repost failed:', e));
-    await interaction.editReply({ embeds: [successEmbed('Published', `Posted the final board for ${weekLabel(week)} in <#${channelId}>${ping ? ', pinging the top 3' : ''}.`)] });
+    await interaction.editReply({ embeds: [successEmbed('Published', `Posted the final board for ${weekLabel(week)} in <#${channelId}>${ping ? `, pinging the top ${AWARD_PLACES}` : ''}.`)] });
 }
 
 /** The guild's milestones as one line: "50 → @Veteran · 150 → @Ace". */

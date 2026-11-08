@@ -118,8 +118,10 @@ model TrainingRun {
 /// end-of-week leaderboard posts. One row per guild, made by `/timer rewards`.
 model TimerSettings {
     guildId           String   @id
-    /// Role held by the week's top 3 runners until the next week is awarded.
+    /// Role held by the week's places 1-2 until the next week is awarded.
     topRoleId         String?
+    /// Role held by the week's places 3-5 until the next week is awarded.
+    secondRoleId      String?
     /// Channel or thread for the end-of-week leaderboard. Null: not posted.
     announceChannelId String?
     /// The last week awarded, as its Monday's `YYYY-MM-DD` (JST). A new row

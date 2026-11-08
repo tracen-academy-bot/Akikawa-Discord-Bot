@@ -1,7 +1,7 @@
 import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
 import { DEFAULT_PALETTE, PALETTES, type Palette } from './theme';
 import { RENDER_SCALE, card, drawFrame, fillRound, fit, innerRadius, label, text } from './cards';
-import { TOP_PLACES, weekLabel, type Board, type BoardPeriod } from '../timer/rewards';
+import { TOP_PLACES, weekLabel, weeklyRolesLine, type Board, type BoardPeriod } from '../timer/rewards';
 import type { LeaderboardRow } from '../timer/service';
 
 /**
@@ -57,17 +57,19 @@ export async function renderTimerLeaderboard(
     board: Board,
     names: Map<string, string>,
     topRoleName: string | null = null,
+    secondRoleName: string | null = null,
     palette: Palette = PALETTES[DEFAULT_PALETTE]!,
 ): Promise<Buffer> {
     const p = palette;
     const { rows } = board;
-    const info = { period: board.period, week: board.week, topRoleName };
+    const info = { period: board.period, week: board.week };
     const cardX = FRAME;
     const cardW = WIDTH - FRAME * 2;
     const podium = rows.slice(0, TOP_PLACES);
     const rest = rows.slice(TOP_PLACES);
     const weekly = info.week !== null;
-    const roleLine = weekly && info.topRoleName !== null && podium.length > 0;
+    const rolesText = weekly ? weeklyRolesLine(topRoleName, secondRoleName, info.period === 'thisweek') : null;
+    const roleLine = rolesText !== null && podium.length > 0;
 
     const headerH = 96;
     const podiumH = podium.length > 0 ? PAD + (roleLine ? 26 : 0) + PODIUM_HEIGHT + PAD : 0;
@@ -103,10 +105,7 @@ export async function renderTimerLeaderboard(
     card(ctx, cardX, y, cardW, podiumH, p);
     let py = y + PAD;
     if (roleLine) {
-        const line =
-            info.period === 'thisweek'
-                ? `On track for ${info.topRoleName}: the top ${TOP_PLACES} when the week ends`
-                : `Now holding ${info.topRoleName}`;
+        const line = info.period === 'thisweek' ? `On track: ${rolesText}` : rolesText!;
         label(ctx, line, cardX + PAD, py + 12, 14, p.muted, p);
         py += 26;
     }
@@ -148,13 +147,15 @@ export async function renderTimerLeaderboard(
 
 /** Rows of this week shown on the live board. */
 export const LIVE_WEEK_ROWS = 10;
-/** Rows of today shown on the live board. */
-export const LIVE_DAY_ROWS = 5;
+/** Rows of today shown on the live board. Fits beside the week's 10 rows. */
+export const LIVE_DAY_ROWS = 8;
 
 /** What the live board shows beside the two boards. */
 export interface LiveBoardInfo {
     /** The weekly role's name, for the line over the week. */
     topRoleName: string | null;
+    /** The second weekly role's name (places 3–5), or null. */
+    secondRoleName?: string | null;
     /** "Mon Oct 26": today in the timer's time zone. */
     dayLabel: string;
     /** "12:34 JST": when the image was drawn. */
@@ -164,7 +165,7 @@ export interface LiveBoardInfo {
 /**
  * The live leaderboard kept above the timer panel: this week so far on the
  * left (top 3 in their place colours, then the rest with a bar against the
- * leader), and today on the right (the day's runs, then its top 5).
+ * leader), and today on the right (the day's runs, then its top 8).
  * Rendered at `RENDER_SCALE`.
  */
 export async function renderLiveBoard(
@@ -184,7 +185,8 @@ export async function renderLiveBoard(
     const rowH = 34;
     const weekRows = week.rows.slice(0, LIVE_WEEK_ROWS);
     const dayRows = today.rows.slice(0, LIVE_DAY_ROWS);
-    const roleLine = info.topRoleName !== null && weekRows.length > 0;
+    const rolesText = weeklyRolesLine(info.topRoleName, info.secondRoleName ?? null, true);
+    const roleLine = rolesText !== null && weekRows.length > 0;
     const weekH = PAD + 18 + (roleLine ? 22 : 0) + 10 + Math.max(1, weekRows.length) * rowH + PAD - 6;
     const dayH = PAD + 18 + 12 + 56 + 10 + Math.max(1, dayRows.length) * rowH + PAD - 6;
     const bodyH = Math.max(weekH, dayH);
@@ -210,7 +212,7 @@ export async function renderLiveBoard(
     label(ctx, 'This week', cardX + PAD, wy + 12, 14, p.muted, p);
     wy += 18;
     if (roleLine) {
-        text(ctx, `Top ${TOP_PLACES} on Monday take ${info.topRoleName}`, cardX + PAD, wy + 14, { spec: '400 13px', color: p.faint });
+        text(ctx, fit(ctx, `On Monday: ${rolesText}`, weekW - PAD * 2, '400 13px'), cardX + PAD, wy + 14, { spec: '400 13px', color: p.faint });
         wy += 22;
     }
     wy += 10;
