@@ -4,19 +4,25 @@ import { card, drawFrame, fillRound, fit, innerRadius, text } from './cards';
 import { SPECIAL_POINTS, type SpecialsBoard, type SpecialsBoardRow } from '../timer/rares';
 
 /**
- * The specials leaderboard, in the same card style as the runs board: a
- * header (how points are scored, the server's special pings and trainers)
- * and the top 3, each with their points as the main number and, under it,
- * specials found, sets completed and pings.
+ * The specials leaderboard, in the same card style as the runs board:
+ *
+ *   header   how points are scored, the server's special pings and trainers
+ *   podium   the top 3, points as the main number; under it, specials
+ *            found, sets completed and pings
+ *   rows     everyone else: a bar of points against the leader, sets,
+ *            specials found, points
  */
 
 const WIDTH = 900;
 const FRAME = 16;
 const GAP = 12;
 const PAD = 24;
+const ROW = 40;
 const PODIUM_HEIGHT = 150;
-/** Places shown. */
-export const SPECIALS_BOARD_PLACES = 3;
+/** Places on the podium. */
+const TOP = 3;
+/** Trainers shown in all, podium included. */
+export const SPECIALS_BOARD_ROWS = 15;
 
 /** "1 set", "2 sets". */
 function sets(n: number): string {
@@ -41,16 +47,18 @@ function drawPodiumCard(ctx: SKRSContext2D, row: SpecialsBoardRow, place: number
     text(ctx, `${sets(row.setsComplete)} complete · ${pings(row.pings)}`, x + 18, y + 134, { spec: '400 14px', color: p.muted });
 }
 
-/** Renders the specials leaderboard's top 3. `names` maps user IDs to display names (rows without one show the ID). */
+/** Renders the specials leaderboard. `names` maps user IDs to display names (rows without one show the ID). */
 export async function renderSpecialsLeaderboard(board: SpecialsBoard, names: Map<string, string>, palette: Palette = PALETTES[DEFAULT_PALETTE]!): Promise<Buffer> {
     const p = palette;
-    const podium = board.rows.slice(0, SPECIALS_BOARD_PLACES);
+    const podium = board.rows.slice(0, TOP);
+    const rest = board.rows.slice(TOP);
     const cardX = FRAME;
     const cardW = WIDTH - FRAME * 2;
 
     const headerH = 96;
     const bodyH = podium.length > 0 ? PAD + PODIUM_HEIGHT + PAD : 80;
-    const height = FRAME + headerH + GAP + bodyH + FRAME;
+    const restH = rest.length > 0 ? 12 + rest.length * ROW + 12 : 0;
+    const height = FRAME + headerH + GAP + bodyH + (restH > 0 ? GAP + restH : 0) + FRAME;
 
     const canvas = createCanvas(WIDTH, height);
     const ctx = canvas.getContext('2d');
@@ -77,9 +85,38 @@ export async function renderSpecialsLeaderboard(board: SpecialsBoard, names: Map
         text(ctx, 'No specials found yet.', cardX + PAD, y + 46, { spec: '400 16px', color: p.faint });
         return canvas.encode('png');
     }
-    const slotW = (cardW - PAD * 2 - GAP * (SPECIALS_BOARD_PLACES - 1)) / SPECIALS_BOARD_PLACES;
+    const slotW = (cardW - PAD * 2 - GAP * (TOP - 1)) / TOP;
     podium.forEach((row, i) => {
         drawPodiumCard(ctx, row, i + 1, names.get(row.discordUserId) ?? row.discordUserId, board.specialCount, cardX + PAD + i * (slotW + GAP), y + PAD, slotW, PODIUM_HEIGHT, p);
     });
+    y += bodyH;
+
+    // Everyone else: name, a bar of points against the leader, sets, found, points.
+    if (rest.length > 0) {
+        y += GAP;
+        card(ctx, cardX, y, cardW, restH, p);
+        const leader = Math.max(1, board.rows[0]!.points);
+        const colName = cardX + PAD + 44;
+        const colBar = cardX + 340;
+        const barW = 170;
+        const colSets = cardX + cardW - PAD - 230;
+        const colFound = cardX + cardW - PAD - 120;
+        const colPts = cardX + cardW - PAD;
+        let ry = y + 12;
+        rest.forEach((row, i) => {
+            if (i % 2 === 1) fillRound(ctx, cardX + 8, ry, cardW - 16, ROW, innerRadius(p), p.stripe);
+            const by = ry + ROW / 2 + 6;
+            text(ctx, `${TOP + i + 1}`, cardX + PAD + 28, by, { spec: '400 16px', color: p.muted, align: 'right' });
+            const name = names.get(row.discordUserId) ?? row.discordUserId;
+            text(ctx, fit(ctx, name, colBar - colName - 20, '400 17px'), colName, by, { spec: '400 17px', color: p.text });
+            fillRound(ctx, colBar, by - 9, barW, 6, 3, p.line);
+            fillRound(ctx, colBar, by - 9, Math.max(6, (barW * row.points) / leader), 6, 3, p.accent);
+            text(ctx, sets(row.setsComplete), colSets, by, { spec: '400 14px', color: p.muted, align: 'right' });
+            text(ctx, `${row.found}/${board.specialCount}`, colFound, by, { spec: '400 14px', color: p.muted, align: 'right' });
+            const ptsW = text(ctx, 'pts', colPts, by, { spec: '400 14px', color: p.muted, align: 'right' });
+            text(ctx, `${row.points}`, colPts - ptsW - 6, by, { spec: '700 17px', color: p.text, align: 'right' });
+            ry += ROW;
+        });
+    }
     return canvas.encode('png');
 }

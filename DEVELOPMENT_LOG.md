@@ -8,12 +8,15 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 - The Leaderboard button sends a third image: the specials board, all time
   (`specialsBoard` in rares.ts, `renderSpecialsLeaderboard`).
-- Ranked by points (`SPECIAL_POINTS`): 10 a new special, 1 a repeat, 50 a
+- Ranked by points (`SPECIAL_POINTS`): 15 a new special, 3 a repeat, 100 a
   completed set; a tie goes to whoever found their latest new special first.
   (First drafted as a plain sort by sets, then found, then pings; the owner
-  preferred one points number.) The image shows only the top 3, with points
-  as the main number and found, sets and pings under it; the header says
-  how points are scored.
+  preferred one points number.) A full set is worth about 6.7 new finds;
+  five repeats make one. A full Set 1 (295) still sits just under 20 loose
+  finds (300), by choice: breadth counts too.
+- The image: the top 3 with points as the main number (found, sets and
+  pings under it), then everyone else up to 15 rows, with a bar of points
+  against the leader. The header says how points are scored.
 - Only finds of specials that still exist count (by `specialId`).
 
 ---

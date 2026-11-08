@@ -362,9 +362,9 @@ function pickCommon(random: () => number): string {
 /**
  * Specials leaderboard points: for each special found for the first time,
  * for each repeat, and for each set completed (every special in it found).
- * A full set is worth five more new finds; a repeat is a small nod.
+ * A full set is worth about 6.7 new finds; five repeats make one new find.
  */
-export const SPECIAL_POINTS = { found: 10, repeat: 1, set: 50 } as const;
+export const SPECIAL_POINTS = { found: 15, repeat: 3, set: 100 } as const;
 
 /** One trainer's row on the specials leaderboard. */
 export interface SpecialsBoardRow {

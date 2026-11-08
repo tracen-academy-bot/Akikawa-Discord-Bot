@@ -6,9 +6,9 @@ Decisions that changed project direction. Newest first.
 
 ## 2026-11-08 — A specials leaderboard
 
-- Leaderboard now has a third image: the specials top 3, by points. 10 a
-  new special, 1 a repeat, 50 a completed set. Top 3 only, points as the
-  main number (preferred over a three-way sort with every trainer listed).
+- Leaderboard now has a third image: the specials board, by points. 15 a
+  new special, 3 a repeat, 100 a completed set (owner's numbers). Points
+  are the main number; preferred over a three-way sort.
 
 ---
 

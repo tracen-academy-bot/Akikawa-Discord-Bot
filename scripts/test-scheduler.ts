@@ -342,13 +342,13 @@ async function main() {
     await seedHits('lb-wide-more', [...all.slice(1, 21), all[1]!], 200); // 20 found, one repeat
     await seedHits('lb-wide-late', all.slice(1, 21), 300); // ties lb-wide, but later
     const sb = await rares.specialsBoard(LB);
-    // Points: 10 a new special, 1 a repeat, 50 a full set.
-    check('specials board: points (10 new, 1 repeat, 50 a set)', rares.SPECIAL_POINTS, { found: 10, repeat: 1, set: 50 });
+    // Points: 15 a new special, 3 a repeat, 100 a full set.
+    check('specials board: points (15 new, 3 repeat, 100 a set)', rares.SPECIAL_POINTS, { found: 15, repeat: 3, set: 100 });
     check('specials board: ranked by points, a tie to who got there first', sb.rows.map((r) => [r.discordUserId, r.points, r.setsComplete, r.found, r.pings]), [
-        ['lb-wide-more', 201, 0, 20, 21],
-        ['lb-wide', 200, 0, 20, 20],
-        ['lb-wide-late', 200, 0, 20, 20],
-        ['lb-set', 180, 1, 13, 13],
+        ['lb-wide-more', 303, 0, 20, 21],
+        ['lb-wide', 300, 0, 20, 20],
+        ['lb-wide-late', 300, 0, 20, 20],
+        ['lb-set', 295, 1, 13, 13],
     ]);
     check('specials board: limit caps the rows, not the totals', [(await rares.specialsBoard(LB, 3)).rows.length, (await rares.specialsBoard(LB, 3)).trainers], [3, 4]);
     check('specials board: totals', [sb.totalPings, sb.trainers, sb.specialCount, sb.setCount], [13 + 20 + 21 + 20, 4, RARE_OPENERS.length, openers.SPECIAL_SETS.length]);
