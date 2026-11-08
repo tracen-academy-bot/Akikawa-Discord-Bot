@@ -8,7 +8,7 @@ import { NOTIFICATION_LIFETIME_MINUTES, TRAINING_MINUTES } from './service';
  *
  *   - DM me too: the expiry ping also goes to their DMs.
  *   - Early riser: 49-minute runs instead of 50, and their pings are cleared
- *     sooner (2 minutes instead of 3), to suit someone who is there on time.
+ *     sooner (4 minutes instead of 5), to suit someone who is there on time.
  *   - Boosts: on by default. Off, no boost applies (a set's boost, early
  *     start) and a set boost's remaining runs are paused.
  *   - Special sets: each can be turned off, on its page of the Specials
@@ -20,8 +20,11 @@ import { NOTIFICATION_LIFETIME_MINUTES, TRAINING_MINUTES } from './service';
 /** Run length for an early riser, in minutes. */
 export const EARLY_RISER_MINUTES = 49;
 
-/** How long an early riser's ping stays before it is deleted, in minutes. */
-export const EARLY_RISER_NOTIFICATION_MINUTES = 2;
+/**
+ * How long an early riser's ping stays before it is deleted, in minutes. Their
+ * run is a minute shorter, so this is 3 minutes past a normal run's end.
+ */
+export const EARLY_RISER_NOTIFICATION_MINUTES = 4;
 
 /** A trainer's settings, with the defaults filled in. */
 export interface UserSettings {

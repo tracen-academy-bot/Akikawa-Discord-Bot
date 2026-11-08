@@ -4,6 +4,17 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-08 — Specials get ids; Set 0; longer pings
+
+- Specials have stable ids, so a line can be reworded without losing finds.
+- Specials starts with Set 0, the usual reminder lines, before the special
+  sets. Set 1 is renamed "Lobby Loungers".
+- Pings stay 5 minutes (4 for early risers), to finish picking in game.
+  The early-start window stays 3 minutes (4 for early risers).
+- Time trained counts real run lengths.
+
+---
+
 ## 2026-11-08 — #OnlineSensations set; specials redesigned
 
 - The Curren Chan collab set is final: `docs/special-sets/online-sensations.md`,
