@@ -21,6 +21,10 @@ Newest first. Each entry records what changed and, more importantly, why.
   fit beside the week's card (`liveDayFit`), at least 5. Beside a full week
   of 10 rows that is 8 (was a fixed 5), without making the image taller.
 - Migration `20261108150000_timer_second_role`.
+- **Set unlocks are announced:** when a ping's special is a locked set's
+  prerequisite (Curren Chan for #OnlineSensations), the ping adds
+  "**Congrats!** #OnlineSensations unlocked!" under the line, once
+  (`setsUnlockedBy`, from the trainer's locked sets before the ping).
 
 ---
 

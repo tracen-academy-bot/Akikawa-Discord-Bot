@@ -10,6 +10,7 @@ Decisions that changed project direction. Newest first.
   Enjoyers. Set the second role with `/timer rewards second_role:`.
 - The live board's Today list fills the space beside the week: 8 when the
   week has 10 rows, never fewer than 5.
+- The ping that unlocks a set says "Congrats! <set> unlocked!".
 
 ---
 

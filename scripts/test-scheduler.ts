@@ -358,6 +358,12 @@ async function main() {
     check('specials board: empty renders too', (await renderSpecialsLeaderboard(await rares.specialsBoard('nobody-here'), new Map())).subarray(1, 4).toString(), 'PNG');
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: LB } });
 
+    // Unlocking a set: the first time the prerequisite comes up, the ping says so.
+    const currenLine = RARE_OPENERS.find((o) => o.id === 'set1.curren')!.text;
+    check('unlock: Curren Chan opens #OnlineSensations while it is locked, not after', [openers.setsUnlockedBy(currenLine, ['online-sensations']).map((x) => x.name), openers.setsUnlockedBy(currenLine, []).length, openers.setsUnlockedBy(PING_OPENERS[0]!, ['online-sensations']).length], [['#OnlineSensations'], 0, 0]);
+    const plainRun = { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never;
+    check('unlock: the ping says Congrats right under the line', buildPingContent('u1', plainRun, 0, null, Math.random, currenLine, ['#OnlineSensations']).split('\n')[1], '**Congrats!** #OnlineSensations unlocked!');
+
     // The live board's Today card shows as many trainers as fit beside the week.
     const live = await import('../src/lib/image/renderTimerLeaderboard');
     check('today: 8 fit beside a full week, at least 5 beside a short one', [live.liveDayFit(10, true), live.liveDayFit(10, false), live.liveDayFit(3, true), live.liveDayFit(0, false)], [8, 8, 5, 5]);
