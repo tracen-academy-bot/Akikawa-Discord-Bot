@@ -356,3 +356,69 @@ export async function chooseOpener(
 function pickCommon(random: () => number): string {
     return PING_OPENERS[Math.min(PING_OPENERS.length - 1, Math.floor(random() * PING_OPENERS.length))]!;
 }
+
+// ─── Specials leaderboard ─────────────────────────────────────────────────────
+
+/**
+ * Specials leaderboard points: for each special found for the first time,
+ * for each repeat, and for each set completed (every special in it found).
+ * A full set is worth about 6.7 new finds; five repeats make one new find.
+ */
+export const SPECIAL_POINTS = { found: 15, repeat: 3, set: 100 } as const;
+
+/** One trainer's row on the specials leaderboard. */
+export interface SpecialsBoardRow {
+    discordUserId: string;
+    /** Their score: see `SPECIAL_POINTS`. */
+    points: number;
+    /** Sets whose every special they have found. */
+    setsComplete: number;
+    /** Distinct specials they have found. */
+    found: number;
+    /** Special pings they have had, repeats included. */
+    pings: number;
+    /** When they found their latest new special; earlier wins a tie. */
+    reachedAt: Date;
+}
+
+/** The specials leaderboard: ranked rows and the server's totals. */
+export interface SpecialsBoard {
+    rows: SpecialsBoardRow[];
+    /** How many specials and sets exist, for "12 of 25". */
+    specialCount: number;
+    setCount: number;
+    /** Special pings on the server, and trainers with at least one. */
+    totalPings: number;
+    trainers: number;
+}
+
+/**
+ * Ranks trainers by their specials points, all time (`SPECIAL_POINTS`: new
+ * finds, repeats, completed sets); a tie goes to whoever found their latest
+ * new special first. Only finds of specials that still exist count. `limit`
+ * caps the rows; the totals cover everyone.
+ */
+export async function specialsBoard(guildId: string, limit = 15): Promise<SpecialsBoard> {
+    const ids = new Set(RARE_OPENERS.map((o) => o.id));
+    const hits = (await prisma.rareOpenerHit.findMany({ where: { guildId, specialId: { not: null } }, orderBy: { at: 'asc' }, select: { discordUserId: true, specialId: true, at: true } })).filter(
+        (h) => ids.has(h.specialId!),
+    );
+    const byUser = new Map<string, { found: Set<string>; pings: number; reachedAt: Date }>();
+    for (const h of hits) {
+        const u = byUser.get(h.discordUserId) ?? { found: new Set<string>(), pings: 0, reachedAt: h.at };
+        u.pings += 1;
+        if (!u.found.has(h.specialId!)) {
+            u.found.add(h.specialId!);
+            u.reachedAt = h.at;
+        }
+        byUser.set(h.discordUserId, u);
+    }
+    const rows: SpecialsBoardRow[] = [...byUser].map(([discordUserId, u]) => {
+        const setsComplete = SPECIAL_SETS.filter((s) => s.openers.length > 0 && s.openers.every((o) => u.found.has(o.id))).length;
+        const found = u.found.size;
+        const points = found * SPECIAL_POINTS.found + (u.pings - found) * SPECIAL_POINTS.repeat + setsComplete * SPECIAL_POINTS.set;
+        return { discordUserId, points, setsComplete, found, pings: u.pings, reachedAt: u.reachedAt };
+    });
+    rows.sort((a, b) => b.points - a.points || a.reachedAt.getTime() - b.reachedAt.getTime());
+    return { rows: rows.slice(0, limit), specialCount: RARE_OPENERS.length, setCount: SPECIAL_SETS.length, totalPings: hits.length, trainers: rows.length };
+}

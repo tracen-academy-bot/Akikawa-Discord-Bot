@@ -4,14 +4,15 @@ import { prisma } from '../../db/prisma';
 import { TRAINING_MINUTES, dayKey, getLeaderboard, type LeaderboardRow } from './service';
 
 /**
- * Timer rewards: the weekly top-runner role and milestone roles.
+ * Timer rewards: the weekly roles and milestone roles.
  *
  * Weeks run Monday 00:00 to Sunday 24:00 in the timer's day timezone (JST by
  * default, `TIMER_STREAK_TIMEZONE`), the same day boundaries as streaks. A run
  * belongs to the week its 50 minutes ended in (`completedAt`).
  *
- * After a week ends, its top 3 by runs take the guild's top role, and last
- * week's holders lose it. Ties go to whoever reached their final count first.
+ * After a week ends, its places 1-2 by runs take the guild's top role and
+ * places 3-5 its second role, and last week's holders who are no longer in
+ * a role's places lose it. Ties go to whoever reached their final count first.
  * The award waits `AWARD_GRACE_MS` into the new week so every run of the old
  * one is recorded, and is claimed in the database so it happens once even
  * across restarts or two overlapping ticks.
@@ -23,8 +24,36 @@ import { TRAINING_MINUTES, dayKey, getLeaderboard, type LeaderboardRow } from '.
  * stack and are kept for good.
  */
 
-/** Places that take the weekly role. */
+/** Places on the boards' podium (shown in their place colours). */
 export const TOP_PLACES = 3;
+
+/**
+ * The weekly roles, by place: places 1 to `TOP_ROLE_PLACES` take the top role
+ * (`topRoleId`), and the places after it up to `AWARD_PLACES` take the second
+ * role (`secondRoleId`). Two tiers spread the reward over more trainers.
+ */
+export const TOP_ROLE_PLACES = 2;
+export const AWARD_PLACES = 5;
+
+/** "places 1–2", "places 3–5": a weekly role's places, for the text. */
+export function placesLabel(tier: 'top' | 'second'): string {
+    return tier === 'top' ? `places 1–${TOP_ROLE_PLACES}` : `places ${TOP_ROLE_PLACES + 1}–${AWARD_PLACES}`;
+}
+
+/**
+ * One line naming the weekly roles and their places, for the boards, or
+ * null when neither role is set. `upcoming`: the week is still running
+ * ("1–2 take Abusers · 3–5 take Enjoyers"); otherwise it is awarded
+ * ("1–2 hold Abusers · 3–5 hold Enjoyers").
+ */
+export function weeklyRolesLine(topRoleName: string | null, secondRoleName: string | null, upcoming: boolean): string | null {
+    const verb = upcoming ? 'take' : 'hold';
+    const parts = [
+        ...(topRoleName ? [`1–${TOP_ROLE_PLACES} ${verb} ${topRoleName}`] : []),
+        ...(secondRoleName ? [`${TOP_ROLE_PLACES + 1}–${AWARD_PLACES} ${verb} ${secondRoleName}`] : []),
+    ];
+    return parts.length > 0 ? parts.join(' · ') : null;
+}
 
 /** How long into a new week the old one is awarded. */
 const AWARD_GRACE_MS = 15 * 60_000;
@@ -173,7 +202,7 @@ export function getTimerSettings(guildId: string): Promise<TimerSettings | null>
  */
 export function saveTimerSettings(
     guildId: string,
-    change: { topRoleId?: string | null; announceChannelId?: string | null },
+    change: { topRoleId?: string | null; secondRoleId?: string | null; announceChannelId?: string | null },
     now = new Date(),
 ): Promise<TimerSettings> {
     return prisma.timerSettings.upsert({
@@ -210,6 +239,8 @@ export async function roleProblem(guild: Guild, roleId: string): Promise<string 
 async function setRole(guild: Guild, userId: string, roleId: string, give: boolean): Promise<boolean> {
     try {
         const member = await guild.members.fetch(userId);
+        // Only a real change counts: removing a role they do not hold is not one.
+        if (!give && !member.roles.cache.has(roleId)) return false;
         if (give) await member.roles.add(roleId, 'Timer reward');
         else await member.roles.remove(roleId, 'Timer reward: next week awarded');
         return true;
@@ -328,8 +359,9 @@ export async function syncMilestones(guild: Guild): Promise<MilestoneSync> {
 export interface WeeklyAward {
     guildId: string;
     week: string;
+    /** The week's top `AWARD_PLACES`, in order. */
     winners: WeekRow[];
-    /** Last week's holders who lost the role. */
+    /** Last week's holders who lost a weekly role. */
     removed: string[];
 }
 
@@ -353,7 +385,7 @@ export async function runWeeklyAwards(guildOf: (guildId: string) => Promise<Guil
         });
         if (claimed.count === 0) continue;
 
-        const winners = (await getWeekStandings(settings.guildId, due)).slice(0, TOP_PLACES);
+        const winners = (await getWeekStandings(settings.guildId, due)).slice(0, AWARD_PLACES);
         if (winners.length > 0) {
             await prisma.timerWeeklyAward.createMany({
                 data: winners.map((w, i) => ({ guildId: settings.guildId, week: due, place: i + 1, discordUserId: w.discordUserId, runs: w.runs })),
@@ -362,17 +394,26 @@ export async function runWeeklyAwards(guildOf: (guildId: string) => Promise<Guil
         }
 
         const removed: string[] = [];
-        const guild = settings.topRoleId ? await guildOf(settings.guildId) : null;
-        if (guild && settings.topRoleId) {
+        // Each role goes to its places; it comes off everyone from last week
+        // who is not in those places now (whatever place they had, so a
+        // holder from before the tiers, or one who moved tier, is covered).
+        const tiers = [
+            { roleId: settings.topRoleId, holders: winners.slice(0, TOP_ROLE_PLACES) },
+            { roleId: settings.secondRoleId, holders: winners.slice(TOP_ROLE_PLACES, AWARD_PLACES) },
+        ].filter((t): t is { roleId: string; holders: WeekRow[] } => t.roleId !== null);
+        const guild = tiers.length > 0 ? await guildOf(settings.guildId) : null;
+        if (guild) {
             const previous = settings.lastAwardedWeek
                 ? await prisma.timerWeeklyAward.findMany({ where: { guildId: settings.guildId, week: settings.lastAwardedWeek } })
                 : [];
-            const keep = new Set(winners.map((w) => w.discordUserId));
-            for (const holder of previous) {
-                if (keep.has(holder.discordUserId)) continue;
-                if (await setRole(guild, holder.discordUserId, settings.topRoleId, false)) removed.push(holder.discordUserId);
+            for (const tier of tiers) {
+                const keep = new Set(tier.holders.map((w) => w.discordUserId));
+                for (const holder of previous) {
+                    if (keep.has(holder.discordUserId)) continue;
+                    if ((await setRole(guild, holder.discordUserId, tier.roleId, false)) && !removed.includes(holder.discordUserId)) removed.push(holder.discordUserId);
+                }
             }
-            for (const w of winners) await setRole(guild, w.discordUserId, settings.topRoleId, true);
+            for (const tier of tiers) for (const w of tier.holders) await setRole(guild, w.discordUserId, tier.roleId, true);
         }
         done.push({ guildId: settings.guildId, week: due, winners, removed });
     }

@@ -4,6 +4,48 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-08 — Two weekly roles; Today shows 8
+
+- **Weekly roles in two tiers:** places 1-2 take the top role
+  (`topRoleId`), places 3-5 a new second role (`secondRoleId`, set with
+  `/timer rewards second_role:`). Constants `TOP_ROLE_PLACES = 2`,
+  `AWARD_PLACES = 5`; `TOP_PLACES = 3` now only means the boards' podium.
+  Each Monday a role comes off every last-week holder who is not in its
+  places now, whatever place they had, so the old top 3 (who all held the
+  top role) and anyone changing tier are handled. `setRole` no longer
+  counts removing a role the member does not hold.
+- The results post names the top 5, pings them, and says which places hold
+  which role. The boards' role line names both tiers ("1–2 take Abusers ·
+  3–5 take Enjoyers"). `/timer rewards` shows both roles and the live top 5.
+- **The live board's Today card is adaptive:** it shows as many trainers as
+  fit beside the week's card (`liveDayFit`), at least 5. Beside a full week
+  of 10 rows that is 8 (was a fixed 5), without making the image taller.
+- Migration `20261108150000_timer_second_role`.
+- **Set unlocks are announced:** when a ping's special is a locked set's
+  prerequisite (Curren Chan for #OnlineSensations), the ping adds
+  "**Congrats!** #OnlineSensations unlocked!" under the line, once
+  (`setsUnlockedBy`, from the trainer's locked sets before the ping).
+
+---
+
+## 2026-11-08 — Specials leaderboard
+
+- The Leaderboard button sends a third image: the specials board, all time
+  (`specialsBoard` in rares.ts, `renderSpecialsLeaderboard`).
+- Ranked by points (`SPECIAL_POINTS`): 15 a new special, 3 a repeat, 100 a
+  completed set; a tie goes to whoever found their latest new special first.
+  (First drafted as a plain sort by sets, then found, then pings; the owner
+  preferred one points number.) A full set is worth about 6.7 new finds;
+  five repeats make one. A full Set 1 (295) still sits just under 20 loose
+  finds (300), by choice: breadth counts too.
+- The image: the top 3 with points as the main number ("17/25 unique",
+  then "1 set, 31 total" under it), then everyone else up to 15 rows: a bar
+  of points against the leader, "0 sets", "12/25", "15 total", points. The
+  header says how points are scored.
+- Only finds of specials that still exist count (by `specialId`).
+
+---
+
 ## 2026-11-08 — Boosts button, Curren Chan week, 6% base
 
 - **Base special chance is 6%** (`RARE_OPENER_CHANCE`, was 4%). Tests now

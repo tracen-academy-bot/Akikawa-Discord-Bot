@@ -14,7 +14,7 @@ import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } f
 import { weekResultsPost } from './boardImage';
 import { chooseOpener, grantBoost, isRareOpener, lockedSetsFor, recordRareOpener, spendBoosts } from './rares';
 import { extraChances } from './boosts';
-import { fillOpener, pickOpener, rarePoolFor } from './openers';
+import { fillOpener, pickOpener, rarePoolFor, setsUnlockedBy } from './openers';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
 
@@ -49,10 +49,11 @@ export { extraChances } from './boosts';
 /**
  * Builds the message body for an expiry ping: an opener (a rare one 6% of
  * the time), then a bold-led line for each thing worth celebrating
- * (the run's number, a streak, a new milestone role). `milestoneRoleId` is
- * a role the run just earned; it is mentioned but, with only the user
- * allowed to be pinged, does not notify the role. `random` is injectable
- * for tests.
+ * (a special set it unlocked, the run's number, a streak, a new milestone
+ * role). `milestoneRoleId` is a role the run just earned; it is mentioned
+ * but, with only the user allowed to be pinged, does not notify the role.
+ * `unlockedSets` are the names of sets this ping's special just unlocked.
+ * `random` is injectable for tests.
  */
 export function buildPingContent(
     discordUserId: string,
@@ -61,8 +62,10 @@ export function buildPingContent(
     milestoneRoleId: string | null = null,
     random: () => number = Math.random,
     opener?: string,
+    unlockedSets: readonly string[] = [],
 ): string {
     const lines = [fillOpener(opener ?? pickOpener(random()), discordUserId)];
+    for (const name of unlockedSets) lines.push(`**Congrats!** ${name} unlocked!`);
 
     if (lagSeconds > LATE_DELIVERY_THRESHOLD_S) {
         const minutes = Math.round(lagSeconds / 60);
@@ -148,7 +151,9 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 const pool = rarePoolFor(settings.disabledSets, lockedSets);
                 const extras = await extraChances(timer.guildId, timer.discordUserId, settings, lockedSets, timer.earlyStart, pool);
                 const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras);
-                const content = buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, Math.random, opener);
+                // The first time a trainer gets a set's prerequisite, the ping says the set opened.
+                const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
+                const content = buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, Math.random, opener, unlocked);
                 const message = await channel.send({ content, allowedMentions: { users: [timer.discordUserId] } });
                 await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));
                 // Boosts tick down only while on (off pauses them). A boost

@@ -218,6 +218,16 @@ export function specialById(id: string): (Special & { set: string }) | undefined
     return RARE_OPENERS.find((o) => o.id === id);
 }
 
+/**
+ * The sets that `opener` unlocks for a trainer whose locked sets are
+ * `lockedSets`: those still locked whose prerequisite is this special. Empty
+ * for a common line, or when the trainer already had it.
+ */
+export function setsUnlockedBy(opener: string, lockedSets: readonly string[]): SpecialSet[] {
+    const id = specialIdOf(opener);
+    return id ? SPECIAL_SETS.filter((s) => s.requires === id && lockedSets.includes(s.id)) : [];
+}
+
 /** The id of the special whose current text is `text`, or undefined. */
 export function specialIdOf(text: string): string | undefined {
     return RARE_OPENERS.find((o) => o.text === text)?.id;

@@ -4,6 +4,24 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-08 — Two weekly roles for more coverage
+
+- Places 1-2 each week get Autorun Abusers, places 3-5 the new Autorun
+  Enjoyers. Set the second role with `/timer rewards second_role:`.
+- The live board's Today list fills the space beside the week: 8 when the
+  week has 10 rows, never fewer than 5.
+- The ping that unlocks a set says "Congrats! <set> unlocked!".
+
+---
+
+## 2026-11-08 — A specials leaderboard
+
+- Leaderboard now has a third image: the specials board, by points. 15 a
+  new special, 3 a repeat, 100 a completed set (owner's numbers). Points
+  are the main number; preferred over a three-way sort.
+
+---
+
 ## 2026-11-08 — 6% specials, Curren Chan week, a Boosts button
 
 - The special chance is 6% (was 4%).

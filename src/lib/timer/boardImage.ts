@@ -1,6 +1,8 @@
 import { AttachmentBuilder, type Guild } from 'discord.js';
 import { renderTimerLeaderboard } from '../image/renderTimerLeaderboard';
-import { TOP_PLACES, boardForWeek, getBoard, getTimerSettings, weekLabel, type Board, type BoardPeriod } from './rewards';
+import { SPECIALS_BOARD_ROWS, renderSpecialsLeaderboard } from '../image/renderSpecialsLeaderboard';
+import { specialsBoard } from './rares';
+import { AWARD_PLACES, TOP_ROLE_PLACES, boardForWeek, getBoard, getTimerSettings, placesLabel, weekLabel, type Board, type BoardPeriod } from './rewards';
 
 /** A trainer's display name in the guild, or a fallback when they have left. */
 export async function displayName(guild: Guild, userId: string, fallback = 'Unknown Trainer'): Promise<string> {
@@ -20,26 +22,38 @@ export async function renderBoardFor(guild: Guild, period: BoardPeriod, board?: 
     const names = new Map<string, string>();
     for (const row of shown.rows) names.set(row.discordUserId, await displayName(guild, row.discordUserId));
     const settings = await getTimerSettings(guild.id);
-    const role = settings?.topRoleId ? guild.roles.cache.get(settings.topRoleId) : undefined;
-    return renderTimerLeaderboard(shown, names, role?.name ?? null);
+    const top = settings?.topRoleId ? guild.roles.cache.get(settings.topRoleId) : undefined;
+    const second = settings?.secondRoleId ? guild.roles.cache.get(settings.secondRoleId) : undefined;
+    return renderTimerLeaderboard(shown, names, top?.name ?? null, second?.name ?? null);
+}
+
+/** Renders the specials leaderboard for `guild` (all time), with display names. */
+export async function renderSpecialsBoardFor(guild: Guild): Promise<Buffer> {
+    const board = await specialsBoard(guild.id, SPECIALS_BOARD_ROWS);
+    const names = new Map<string, string>();
+    for (const row of board.rows) names.set(row.discordUserId, await displayName(guild, row.discordUserId));
+    return renderSpecialsLeaderboard(board, names);
 }
 
 /**
- * The post for a finished week: its final board, the top places named and
+ * The post for a finished week: its final board, the top 5 named and
  * pinged (when `ping`), and which role they hold. Used by the weekly award
  * and by `/timer publish`.
  */
 export async function weekResultsPost(guild: Guild, week: string, ping: boolean) {
     const board = await boardForWeek(guild.id, week, 'lastweek');
     const settings = await getTimerSettings(guild.id);
-    const winners = board.rows.slice(0, TOP_PLACES);
+    const winners = board.rows.slice(0, AWARD_PLACES);
     const image = await renderBoardFor(guild, 'lastweek', board);
     const lines = [`**Top runners for ${weekLabel(week)}**`];
     if (winners.length === 0) lines.push('No runs were recorded that week.');
     winners.forEach((w, i) => lines.push(`${i + 1}. <@${w.discordUserId}> · ${w.runs} run${w.runs === 1 ? '' : 's'}`));
-    if (settings?.topRoleId && winners.length > 0) {
-        lines.push(`${winners.length === 1 ? 'They hold' : `The top ${winners.length} hold`} <@&${settings.topRoleId}> until next week's results.`);
-    }
+    // Who holds which weekly role until next week's results.
+    const holds = [
+        ...(settings?.topRoleId && winners.length > 0 ? [`${placesLabel('top')} hold <@&${settings.topRoleId}>`] : []),
+        ...(settings?.secondRoleId && winners.length > TOP_ROLE_PLACES ? [`${placesLabel('second')} hold <@&${settings.secondRoleId}>`] : []),
+    ];
+    if (holds.length > 0) lines.push(`${holds.join(', ')} until next week's results.`.replace(/^p/, 'P'));
     return {
         content: lines.join('\n'),
         files: [new AttachmentBuilder(image, { name: `training-week-${week}.png` })],

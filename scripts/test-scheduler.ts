@@ -329,6 +329,51 @@ async function main() {
     await prisma.timerSpecialBoost.deleteMany({ where: { guildId: SN } });
     await prisma.timerUserSettings.deleteMany({ where: { guildId: SN } });
 
+    // Specials leaderboard: sets completed, then specials found, then pings.
+    const LB = `test-sboard-${Date.now()}`;
+    const set1 = openers.SPECIAL_SETS[0]!.openers.map((o) => o.text);
+    const all = RARE_OPENERS.map((o) => o.text);
+    const at = (k: number) => new Date(Date.UTC(2026, 10, 1, 0, k));
+    const seedHits = async (user: string, texts: string[], from: number) => {
+        for (const [k, t] of texts.entries()) await prisma.rareOpenerHit.create({ data: { guildId: LB, discordUserId: user, opener: t, specialId: openers.specialIdOf(t)!, at: at(from + k) } });
+    };
+    await seedHits('lb-set', set1, 0); // 13 found, Set 1 complete
+    await seedHits('lb-wide', all.slice(1, 21), 100); // 20 found, no set complete
+    await seedHits('lb-wide-more', [...all.slice(1, 21), all[1]!], 200); // 20 found, one repeat
+    await seedHits('lb-wide-late', all.slice(1, 21), 300); // ties lb-wide, but later
+    const sb = await rares.specialsBoard(LB);
+    // Points: 15 a new special, 3 a repeat, 100 a full set.
+    check('specials board: points (15 new, 3 repeat, 100 a set)', rares.SPECIAL_POINTS, { found: 15, repeat: 3, set: 100 });
+    check('specials board: ranked by points, a tie to who got there first', sb.rows.map((r) => [r.discordUserId, r.points, r.setsComplete, r.found, r.pings]), [
+        ['lb-wide-more', 303, 0, 20, 21],
+        ['lb-wide', 300, 0, 20, 20],
+        ['lb-wide-late', 300, 0, 20, 20],
+        ['lb-set', 295, 1, 13, 13],
+    ]);
+    check('specials board: limit caps the rows, not the totals', [(await rares.specialsBoard(LB, 3)).rows.length, (await rares.specialsBoard(LB, 3)).trainers], [3, 4]);
+    check('specials board: totals', [sb.totalPings, sb.trainers, sb.specialCount, sb.setCount], [13 + 20 + 21 + 20, 4, RARE_OPENERS.length, openers.SPECIAL_SETS.length]);
+    const { renderSpecialsLeaderboard } = await import('../src/lib/image/renderSpecialsLeaderboard');
+    const png = await renderSpecialsLeaderboard(sb, new Map([['lb-set', 'Tylina']]));
+    check('specials board: renders a PNG', [png.subarray(1, 4).toString(), png.length > 1000], ['PNG', true]);
+    check('specials board: empty renders too', (await renderSpecialsLeaderboard(await rares.specialsBoard('nobody-here'), new Map())).subarray(1, 4).toString(), 'PNG');
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: LB } });
+
+    // Unlocking a set: the first time the prerequisite comes up, the ping says so.
+    const currenLine = RARE_OPENERS.find((o) => o.id === 'set1.curren')!.text;
+    check('unlock: Curren Chan opens #OnlineSensations while it is locked, not after', [openers.setsUnlockedBy(currenLine, ['online-sensations']).map((x) => x.name), openers.setsUnlockedBy(currenLine, []).length, openers.setsUnlockedBy(PING_OPENERS[0]!, ['online-sensations']).length], [['#OnlineSensations'], 0, 0]);
+    const plainRun = { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never;
+    check('unlock: the ping says Congrats right under the line', buildPingContent('u1', plainRun, 0, null, Math.random, currenLine, ['#OnlineSensations']).split('\n')[1], '**Congrats!** #OnlineSensations unlocked!');
+
+    // The live board's Today card shows as many trainers as fit beside the week.
+    const live = await import('../src/lib/image/renderTimerLeaderboard');
+    check('today: 8 fit beside a full week, at least 5 beside a short one', [live.liveDayFit(10, true), live.liveDayFit(10, false), live.liveDayFit(3, true), live.liveDayFit(0, false)], [8, 8, 5, 5]);
+    const mkBoard = (n: number) => ({ period: 'thisweek' as const, week: '2026-11-02', rows: Array.from({ length: n }, (_, i) => ({ discordUserId: `t${i}`, runs: 50 - i, minutes: 0 })), totalRuns: 100, trainers: n });
+    const liveInfo = { topRoleName: 'A', secondRoleName: 'B', dayLabel: 'Sun Nov 8', updatedLabel: '12:00 JST' };
+    const sizeOf = (png: Buffer) => [png.readUInt32BE(16), png.readUInt32BE(20)];
+    const withFive = await live.renderLiveBoard(mkBoard(10), mkBoard(5), new Map(), liveInfo);
+    const withTwelve = await live.renderLiveBoard(mkBoard(10), mkBoard(12), new Map(), liveInfo);
+    check('today: filling to 8 does not make the image taller', sizeOf(withTwelve), sizeOf(withFive));
+
     // Settings: DM me too, early riser, boosts, special sets.
     const us = await import('../src/lib/timer/userSettings');
     const SG = `test-usettings-${Date.now()}`;
