@@ -138,7 +138,7 @@ async function main() {
     check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, RARE_PING_OPENERS.length - openers.SPECIAL_SETS[0]!.openers.length);
     check('sets: with no special on, a rare roll gives a common line', PING_OPENERS.includes(openers.pickOpener(0.001, [])), true);
 
-    // The lock: Matikanetannhauser is locked to its owner, 2% of their 4%, until they have it.
+    // The lock: Matikanetannhauser is locked to its owner, guaranteed on their next ping, until they have it.
     const lock = openers.SPECIAL_LOCKS[0]!;
     const lockedText = RARE_OPENERS.find((o) => o.name === lock.name)!.text;
     const LG = `test-locks-${Date.now()}`;
@@ -153,10 +153,8 @@ async function main() {
         const special = [...counts].filter(([o]) => rares.isRareOpener(o));
         return { locked: counts.get(lockedText) ?? 0, specials: special.reduce((n, [, c]) => n + c, 0), others: special.filter(([o]) => o !== lockedText).map(([, c]) => c) };
     };
-    const owner = await sweep(lock.owner);
-    check('lock: the owner gets it 2% of the time', owner.locked, 400);
-    check('lock: the owner\'s total special chance stays 4%', owner.specials, 800);
-    check('lock: the owner\'s other 2% is spread evenly over the other 11', [owner.others.length, Math.max(...owner.others) - Math.min(...owner.others) <= 1], [RARE_PING_OPENERS.length - 1, true]);
+    const owner = await sweep(lock.owner, 2000);
+    check('lock: guaranteed, the owner gets it on every roll', [lock.ownerChance >= 1, owner.locked], [true, 2000]);
     const other = await sweep('someone-else');
     check('lock: nobody else gets it', other.locked, 0);
     check('lock: everyone else keeps 4%, spread evenly over the 11', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 1], [800, RARE_PING_OPENERS.length - 1, true]);
@@ -165,7 +163,7 @@ async function main() {
     await rares.recordRareOpener(LG, lock.owner, lockedText);
     const afterOther = await sweep('someone-else');
     const afterOwner = await sweep(lock.owner);
-    check('lock: over once the owner has it, 4% over all 12 for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked < 400], [800, true, 800, true]);
+    check('lock: over once the owner has it, 4% over all 12 for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked > 0 && afterOwner.locked < 400], [800, true, 800, true]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: LG } });
 
     // Settings: DM me too, early riser, special sets.
