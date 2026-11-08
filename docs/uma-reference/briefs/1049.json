@@ -1,0 +1,211 @@
+{
+  "id": 1049,
+  "name_en": "Nakayama Festa",
+  "name_jp": "ナカヤマフェスタ",
+  "kind": "uma",
+  "one_liner": "Hat-wearing outlaw gambler who lives for knife-edge thrills and bets everything on one shot.",
+  "personality": "A cool, rough-spoken thrill-seeker who frames everything as a bet, a hand or a wager and is bored by anything 'lukewarm'. Behind the outlaw act she cares for plants, cats and her little siblings, writes back to her old teacher, and treats her trainer as a partner-in-crime who rekindled her fire. Her ideal is the moment where she might win everything or lose everything.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anta (アンタ); also 'aibou' partner (相棒さん, voice 92007)",
+    "register": "rough masculine casual (べらんめえ-ish: ねえ/ねぇ, やがる, ちまう), gambling jargon",
+    "tics": [
+      {
+        "jp": "ヒリつく",
+        "romaji": "hiritsuku",
+        "meaning": "tingling/burning tension - her favourite word for thrill"
+      },
+      {
+        "jp": "一か八か",
+        "romaji": "ichika bachika",
+        "meaning": "all or nothing"
+      },
+      {
+        "jp": "勝負",
+        "romaji": "shoubu",
+        "meaning": "contest/bet"
+      },
+      {
+        "jp": "さァ",
+        "romaji": "saa",
+        "meaning": "come on, now then"
+      },
+      {
+        "jp": "ねえ",
+        "romaji": "~nee",
+        "meaning": "rough negation/ending (ねえ instead of ない; ~45 occurrences, plus ねぇ)"
+      },
+      {
+        "jp": "やがる",
+        "romaji": "~yagaru",
+        "meaning": "contemptuous verb ending"
+      },
+      {
+        "jp": "バカ",
+        "romaji": "baka",
+        "meaning": "'idiocy' - their reckless stunts together"
+      },
+      {
+        "jp": "ベット",
+        "romaji": "betto",
+        "meaning": "bet"
+      },
+      {
+        "jp": "レイズ",
+        "romaji": "reizu",
+        "meaning": "raise (poker)"
+      },
+      {
+        "jp": "流れ",
+        "romaji": "nagare",
+        "meaning": "the flow of luck"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "gambling, dice, roulette, coin tosses, poker terms",
+    "motsu-ni (simmered offal), izakayas",
+    "caring for plants and small animals; stray cats",
+    "her hat",
+    "the violet in her room, tied to memories of her teacher (91012)",
+    "'hit-or-miss' gamble foods: lucky/unlucky chocolates (10004), sweet-or-astringent persimmons (90018)",
+    "cooking without recipes"
+  ],
+  "weak_spots": [
+    "surume (dried squid) - profile weakness",
+    "lukewarm, safe races and routine",
+    "crowds/morning bustle ('can't blend in')",
+    "formal clothes"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 5 (4月5日)",
+    "height": "159 cm (159cm)",
+    "voice_actor": "Shino Shimoji (下地紫野)"
+  },
+  "relationships": [
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Partner in pranks; ongoing bet to sneak karintou into each other's hats",
+      "evidence": "home scenes x6; mentions in voice x3 (voice_id 91000)"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "Shares many home scenes",
+      "evidence": "home scenes x5"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "Fellow outlaw type; fans squealed seeing them together",
+      "evidence": "home scenes x4; voice_id 91022"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "Asks her for test predictions",
+      "evidence": "home scenes x4; voice_id 91001"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "Drags her into whims she enjoys",
+      "evidence": "home scenes x4; voice_id 91019"
+    },
+    {
+      "id": 1119,
+      "name_en": "Dream Journey",
+      "nature": "Smiling rival at the card table",
+      "evidence": "home scenes x3; voice_id 91017"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "Her opposite: overcautious planner",
+      "evidence": "home scenes x2; voice_id 91002"
+    },
+    {
+      "id": 1135,
+      "name_en": "Stay Gold",
+      "nature": "Free spirit Festa calls crazy (イカレてやがんな); recommended Festa's own hometown chazuke back to her",
+      "evidence": "home scenes x1; voice_id 91016, 400010"
+    },
+    {
+      "id": 1014,
+      "name_en": "El Condor Pasa",
+      "nature": "Lent her hot sauce for a Russian-roulette choux",
+      "evidence": "home scenes x2; voice_id 90012"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "'Meno' comes flying over whenever Festa starts messing around; Festa enjoys the thrill of being caught",
+      "evidence": "Fenomeno mentions her x1 (mentioned_by); Festa calls her 'Meno' (メノ) in voice_id 91018"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "Recommended a cat detective game",
+      "evidence": "voice_id 91020"
+    },
+    {
+      "id": null,
+      "name_en": "Her elementary school teacher (先生)",
+      "nature": "Mentor who inspired her; sends letters, loves an opera and violets",
+      "evidence": "voice_id 91003, 91012, 91023; web: https://umamusu.wiki/Nakayama_Festa"
+    }
+  ],
+  "groups": [
+    "Miho Dorm",
+    "Expedition committee room (遠征委員部屋, voice 90013) - membership unverified"
+  ],
+  "story_arc": {
+    "summary": "Once aimless, Festa only feels alive in high-risk bets; a trainer reckless enough to gamble with her rekindles her fire. Her goals include Keisei Hai, Satsuki Sho, Japan Derby, Kikuka Sho, Chunichi Shimbun Hai, Takarazuka Kinen and Japan Cup, and her story reaches toward an overseas challenge, with her childhood teacher (inspired by the real horse's late owner) as an emotional anchor.",
+    "source": "event titles (その遠吠えは群れから離れ, 遠く遠く、はるか遠くへ, パリの街にて); web: https://umamusu.wiki/Nakayama_Festa , https://gametora.com/umamusume/characters/nakayama-festa"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "覚えてるか。私とアンタで、最高\nサイアクのバカをやってのけた日。\n…あれから、全部始まったんだぜ。",
+      "en": "Remember? The day you and I pulled off the best, worst stunt. ...Everything started there."
+    },
+    {
+      "voice_id": 92016,
+      "jp": "とっくにベットは済んでるさ。\n…私の全部、アンタに賭けたぜ？",
+      "en": "My bet's long been placed. ...I've wagered all of me on you."
+    },
+    {
+      "voice_id": 20032,
+      "jp": "どうやら分の悪い賭けに\nなりそうだ。…そそる状況だぜ。",
+      "en": "Looks like this'll be a bad-odds bet. ...Just the kind of situation I like."
+    },
+    {
+      "voice_id": 90019,
+      "jp": "白い息吐いて、手ぇこするとよ…\nほんの少しだけ実感するんだよな。\n“ああ、今生きてるんだな”って。",
+      "en": "Breathing white and rubbing my hands... it hits me just a little. 'Ah, I'm alive right now.'"
+    },
+    {
+      "voice_id": 91012,
+      "jp": "部屋のすみれが今年も咲いたよ。\n…いつ見ても、面白みのねえ普通の\n花だ。ったく、なんで先生は――",
+      "en": "The violet in my room bloomed again this year. ...Always such a dull, ordinary flower. Geez, why did Teacher--"
+    },
+    {
+      "voice_id": 10007,
+      "jp": "イタズラの対策は打ってあるさ。\n柿ピー、スルメ、酢イカ…まァ\nこんだけありゃ盤石ってもんだ。",
+      "en": "I've got prank countermeasures ready. Kakipi, surume, vinegared squid... with this much, I'm rock solid."
+    }
+  ],
+  "timer_line_ideas": [
+    "Time's up, {user}. Fifty minutes of Independent Training, all chips on the table. Win or bust, let's flip the cards and see. Hiritsuku, ain't it?",
+    "Sa, the run's over. {user}, go check the results... whether the dice came up gold or snake eyes, that's the thrill of it."
+  ],
+  "data_gaps": [
+    "Teacher identity/illness from web summary, not from mdb",
+    "Roommate unnamed (voice 90011 mentions her roommate's random alarm)",
+    "Expedition committee status unconfirmed",
+    "Surume listed as weakness yet she stocks it for Halloween; nature of the dislike unknown"
+  ]
+}

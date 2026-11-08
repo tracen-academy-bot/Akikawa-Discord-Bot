@@ -1,0 +1,200 @@
+{
+  "id": 1031,
+  "name_en": "Ines Fujin",
+  "name_jp": "アイネスフウジン",
+  "kind": "uma",
+  "one_liner": "Cheerful, hard-working big sister who juggles endless part-time jobs and front-running races to make her family happy.",
+  "personality": "Bright, bubbly and endlessly busy: she ends sentences with a sing-song 'nano', greets people with 'harohoro~' and constantly talks about her part-time jobs (cafes, deliveries, stalls, moving work) and her little sisters. Underneath the energy she is a natural caretaker who fusses over the trainer's meals, sleep and clothes, and can't say no to requests. Before races her lines show real pressure about living up to her family's support ('I have to answer them with my running').",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer (トレーナー, no honorific) and kimi (キミ)",
+    "register": "casual, upbeat; customer-service phrasing from her jobs ('ご注文は…', 'いらっしゃいませ')",
+    "tics": [
+      {
+        "jp": "なの",
+        "romaji": "~nano",
+        "meaning": "signature cute sentence ending ('...is what it is!')"
+      },
+      {
+        "jp": "はろはろ",
+        "romaji": "harohoro",
+        "meaning": "her 'hello hello' greeting"
+      },
+      {
+        "jp": "よろよろ",
+        "romaji": "yoroyoro",
+        "meaning": "her shortening of yoroshiku ('nice to meet you / count on me')"
+      },
+      {
+        "jp": "おはおは",
+        "romaji": "ohaoha",
+        "meaning": "playful 'good morning'"
+      },
+      {
+        "jp": "お姉ちゃん",
+        "romaji": "onee-chan",
+        "meaning": "she refers to herself as 'big sis'"
+      },
+      {
+        "jp": "いらっしゃいませ",
+        "romaji": "irasshaimase",
+        "meaning": "'welcome!', shop greeting she slips into"
+      },
+      {
+        "jp": "ご注文",
+        "romaji": "go-chuumon",
+        "meaning": "'your order', she frames training requests as cafe orders"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "part-time jobs of every kind (cafe, delivery, food stalls, pool instructor, moving)",
+    "her younger sisters and family",
+    "quick, time-saving cooking (profile strength)",
+    "Toughness Bars (chocolate/energy bars)",
+    "bargain sales and discount coupons",
+    "her sun visor",
+    "freckles (her mother calls them a sign of good health)",
+    "wind imagery ('I'll be a gust', 'Kimi ga Kaze')",
+    "her home island (ostriches, foraging) in alt outfit lines",
+    "100-yen-shop masking tape (trivia)"
+  ],
+  "weak_spots": [
+    "luxury / extravagance (profile)",
+    "can't turn down requests (profile)",
+    "overwork and short sleep: training lines worry about collapsing from too many shifts",
+    "outfits that feel 'too cute' embarrass her (voice 91005)",
+    "her sisters scare her back when she tries to spook them (voice 90005)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 10 (4月10日)",
+    "height": "167 cm",
+    "voice_actor": "Rika Nagae (長江里加)"
+  },
+  "relationships": [
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "roommate, training partner and friendly rival; Ines admires her",
+      "evidence": "home scenes x4; mentions in voice x7 (voice_id 10004: ライアンちゃんとがんばろっと; 400011: ライアンちゃんっていっつもそう。本当…素敵なんだからさ); roommate per web: https://umamusu.wiki/Ines_Fujin"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "party-loving friend she hangs out and goes to festivals with",
+      "evidence": "mentions in voice x3 (voice_id 91002: ヘリオスちゃんと遊ぶ時って/とにかく勢いが大事なの！; 91225 summer fes); home scenes x1"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "fellow front-runner; recruited Ines into the 'Runaway Sisters'",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Ines_Fujin"
+    },
+    {
+      "id": 1026,
+      "name_en": "Mihono Bourbon",
+      "nature": "fellow Runaway Sisters member",
+      "evidence": "highest affinity score (37); group per web: https://umamusu.wiki/Ines_Fujin"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "friend / rival",
+      "evidence": "home scenes x2; affinity 29; web: https://umamusu.wiki/Ines_Fujin"
+    },
+    {
+      "id": 1021,
+      "name_en": "Tamamo Cross",
+      "nature": "fellow big sister; they swap sibling-bragging over okonomiyaki",
+      "evidence": "mentions in voice x1 (voice_id 91217: タマモさんとお好み焼きを/食べに行くの！お姉ちゃん同士)"
+    },
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "asks her for makeup advice",
+      "evidence": "mentions in voice x1 (voice_id 91218: またシチーちゃんに聞いちゃお！)"
+    },
+    {
+      "id": 1069,
+      "name_en": "Sakura Chiyono O",
+      "nature": "junior-like friend Ines wants to take care of",
+      "evidence": "mentions in voice x1 (voice_id 91219: …うう～っ、お世話したぁ～い！)"
+    },
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "beach-flags opponent",
+      "evidence": "mentions in voice x1 (voice_id 91220)"
+    },
+    {
+      "id": 1054,
+      "name_en": "Biko Pegasus",
+      "nature": "treats her like a little sister (accidentally called her by a sister's name)",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1055,
+      "name_en": "Marvelous Sunday",
+      "nature": "customer at Ines' job who calls everything 'marvelous'",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": null,
+      "name_en": "her younger sisters / family",
+      "nature": "the core motivation for everything she does",
+      "evidence": "profile tagline 家族思いの働き者; many voice lines (e.g. voice_id 20037)"
+    }
+  ],
+  "groups": [
+    "Runaway Sisters (front-runner group with Smart Falcon, Mihono Bourbon, Silence Suzuka, Maruzensky) - web: https://umamusu.wiki/Ines_Fujin",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "Ines comes to Tracen to make her family proud while working many part-time jobs to support them; the trainer meets her while she is busy helping others (story title はろはろ！出会いは突然に、なの). A front-runner who 'won't give up the lead', her career centres on the Japanese Derby, after which the crowd chants her name (event title: 日本ダービーの後に・アイネスコール). The wiki links an injury after the Derby to the real horse's tendon trouble; her arc is about learning to rely on the trainer instead of carrying everything alone.",
+    "source": "event titles + web: https://umamusu.wiki/Ines_Fujin"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "はろはろ！アイネスフウジンなの！",
+      "en": "Harohoro! I'm Ines Fujin, nano!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "あたしのことを支えたいキミと、\nキミを支えたいあたし！\nなかなかいいコンビだと思わない？",
+      "en": "You, who want to support me, and me, who wants to support you! Don't you think we make a pretty good combo?"
+    },
+    {
+      "voice_id": 90014,
+      "jp": "遅くまでお疲れ様なの。\n机にサンドウィッチを置いて\nおいたから、夜食にしてね♪",
+      "en": "Thanks for working so late, nano. I left a sandwich on your desk, so have it as a late-night snack♪"
+    },
+    {
+      "voice_id": 92015,
+      "jp": "今日はなにから始める？\nいつものメニューでも特別なのでも\nお好きなご注文をどうぞ～♪",
+      "en": "What shall we start with today? The usual menu or something special, go ahead and place your order~♪"
+    },
+    {
+      "voice_id": 20037,
+      "jp": "お父さんも、お母さんも、妹たちも\n…みんな、応援してくれてるんだ。\n応えたい…応えなきゃ、走りで…！",
+      "en": "Dad, Mom, my sisters... everyone's cheering for me. I want to answer them... I have to, with my running...!"
+    },
+    {
+      "voice_id": 1068,
+      "jp": "ライアンちゃんよろよろー☆",
+      "en": "Ryan-chan, yoroyoro~☆"
+    }
+  ],
+  "timer_line_ideas": [
+    "Harohoro, {user}! Your independent run just wrapped up, nano! Come check the results with me, okay? Big sis kept an eye on the clock the whole time!",
+    "Order up~! One finished Independent Training, served fresh for {user}! Come take a look before it gets cold, nano. Yoroyoro~!"
+  ],
+  "data_gaps": [
+    "mdb lists Manhattan Cafe x3 in her voice mentions, but those are false positives on the word カフェ (cafe) in voice_ids 90013, 90015, 91025",
+    "Exact details of the post-Derby injury in her story come from the wiki, not the mdb",
+    "'スーちゃん' (voice 91221) is unidentified - likely a sister or friend",
+    "Mihono Bourbon link rests on the mdb affinity score (37) plus the wiki's Runaway Sisters membership; no voice line of Ines names her"
+  ]
+}

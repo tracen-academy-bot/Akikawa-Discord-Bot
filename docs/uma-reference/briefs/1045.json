@@ -1,0 +1,186 @@
+{
+  "id": 1045,
+  "name_en": "Super Creek",
+  "name_jp": "スーパークリーク",
+  "kind": "uma",
+  "one_liner": "Gentle, motherly big sister who lives to pamper everyone, especially her trainer: 'ii ko, ii ko~'.",
+  "personality": "Soft-spoken, unhurried and endlessly nurturing; she grew up helping at her family's daycare and treats everyone - trainer included - like a child to be fed, tucked in and patted on the head. She openly wants to spoil the trainer, but her profile says she won't indulge someone in a way that isn't good for them, and she firmly tells the trainer to rest when races pile up. Behind the calm she is a tenacious stayer who promises to repay the trainer's effort on the track.",
+  "speech": {
+    "first_person": "watashi (私); 'Mommy' (マミー) in her Halloween outfit lines",
+    "calls_trainer": "Trainer-san (トレーナーさん); anata (あなた)",
+    "register": "Gentle polite desu/masu with long drawn-out vowels (～), motherly; ninja-flavored in her ninja outfit (にんにん)",
+    "tics": [
+      {
+        "jp": "いいこいいこ",
+        "romaji": "ii ko ii ko",
+        "meaning": "'Good child, good child' - head-patting praise"
+      },
+      {
+        "jp": "うふふ",
+        "romaji": "ufufu",
+        "meaning": "Soft laugh"
+      },
+      {
+        "jp": "まあまあ",
+        "romaji": "maa maa",
+        "meaning": "'My my'"
+      },
+      {
+        "jp": "あらあら",
+        "romaji": "ara ara",
+        "meaning": "'Oh my, oh my'"
+      },
+      {
+        "jp": "甘やかし",
+        "romaji": "amayakashi",
+        "meaning": "'Spoiling/pampering' - her stated goal"
+      },
+      {
+        "jp": "よしよし",
+        "romaji": "yoshi yoshi",
+        "meaning": "'There, there'"
+      },
+      {
+        "jp": "めっ",
+        "romaji": "meh!",
+        "meaning": "Mild scolding as to a toddler (夜更かしは、めっ、ですよ～？)"
+      },
+      {
+        "jp": "にんにん",
+        "romaji": "nin nin",
+        "meaning": "Ninja-outfit catchphrase"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Taking care of others (profile strength); her family daycare (託児所)",
+    "Lullabies, picture books, knitting, homemade bentos",
+    "Candy, plasters and sewing kit always in her bag (profile trivia)",
+    "Knows a bit about insects (profile trivia)",
+    "Checking the trainer is somewhere safe (profile trivia)",
+    "Halloween 'Mummy/Mommy' and ninja costumes (curse of making you want to be pampered)"
+  ],
+  "weak_spots": [
+    "Drawing - her cute animals look like horror (profile weakness; voice 10026)",
+    "Being given ear-cleaning (good at giving it, bad at receiving - profile)",
+    "Short/Mile G: a pure stayer (Medium/Long A)",
+    "Can't hold back from fussing even when she means to (voice 400007)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "May 27 (5月27日)",
+    "height": "168cm",
+    "voice_actor": "Kana Yuuki (優木かな)"
+  },
+  "relationships": [
+    {
+      "id": 1034,
+      "name_en": "Inari One",
+      "nature": "Close friend; most shared home scenes; real-horse rival era",
+      "evidence": "home scenes x7; affinity 33"
+    },
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "Friend she leads by the hand because Oguri gets lost",
+      "evidence": "home scenes x6; mentions in voice x1 (voice_id 91001: オグリちゃん、初めての場所だと よく迷うから); Oguri mentions her x5"
+    },
+    {
+      "id": 1021,
+      "name_en": "Tamamo Cross",
+      "nature": "Friend she looks after ('Tama-chan'); Tamamo tsukkomis her; senior rival in her story",
+      "evidence": "home scenes x4; voice_id 91017: タマちゃんに言われちゃいました♪; event title: 大阪杯の後に・タマモクロスの予告; top affinity 38"
+    },
+    {
+      "id": 1050,
+      "name_en": "Narita Taishin",
+      "nature": "She dotes on Taishin, who gets annoyed",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 10027: タイシンちゃんをこっそり 撮ったら…怒られちゃいました); Taishin mentions her x4"
+    },
+    {
+      "id": 1072,
+      "name_en": "Yaeno Muteki",
+      "nature": "Daycare-show partner; Creek believes in her growth",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91217: ヤエノちゃんと託児所で戦国 ショーをする)"
+    },
+    {
+      "id": 1026,
+      "name_en": "Mihono Bourbon",
+      "nature": "Wants to pat her for being earnest",
+      "evidence": "voice_id 91019: いつも真面目なブルボンちゃんは"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Gives her sweets",
+      "evidence": "voice_id 91020: ライスちゃんにお菓子をあげると"
+    },
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "Researched material for her costume",
+      "evidence": "voice_id 91018"
+    },
+    {
+      "id": 1096,
+      "name_en": "No Reason",
+      "nature": "Creek groomed her tail",
+      "evidence": "voice_id 91218"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "Sometimes calls Creek 'Mom'",
+      "evidence": "voice_id 91219: 私のことも、たまに『お母さん』 って呼んでくれます; (ミラ子ちゃん = Hishi Miracle is general knowledge, unverified)"
+    }
+  ],
+  "groups": [
+    "'Heisei Big Three' era with Oguri Cap and Inari One (real-horse history; general knowledge, unverified as an in-game group)"
+  ],
+  "story_arc": {
+    "summary": "Creek, who wants to pamper her trainer as much as be trained, pursues the long-distance crowns: Sumire S, Kikuka Sho, Arima Kinen, Osaka Hai, Tenno Sho (Spring) and (Autumn). Titles show a stumbling spring ('Spring without fruit', 'reason for losing breath'), a bonded Kikuka Sho win ('victory of our bond'), then rivals stepping up - Tamamo Cross's challenge after the Osaka Hai, 'the demon big sister standing in the way' and 'the reigning villain' - and end with 'the ultimate ii-ko ii-ko' after the Arima. Her real namesake won the 1988 Kikuka Sho and the 1989 Tenno Sho (Autumn) and 1990 Tenno Sho (Spring), rivaling Oguri Cap and Inari One.",
+    "source": "event titles (trainee_event_titles); real-horse record is general knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10002,
+      "jp": "ふふっ、トレーナーさんが\n甘えてくれること…それが、\n私を甘やかすことになるんですよ。",
+      "en": "Hehe, Trainer-san, letting yourself lean on me... that's what spoils ME, you know."
+    },
+    {
+      "voice_id": 20022,
+      "jp": "このところレースが続いていますし\n…休むことも必要ですよ～。\n焦らずにいきましょう、ね？",
+      "en": "Races have been piling up lately... resting is necessary too~. Let's not rush, okay?"
+    },
+    {
+      "voice_id": 90004,
+      "jp": "今日も1日、お疲れさまでした～。\n頑張ったご褒美に、いいこいいこ♪",
+      "en": "Thank you for your hard work today~. As a reward for doing your best: good child, good child~♪"
+    },
+    {
+      "voice_id": 90011,
+      "jp": "朝食の前に顔を洗いましょうか。\nはい、タオルをどうぞ…あっ、\nこれ包帯でした！うふっ。",
+      "en": "Let's wash your face before breakfast. Here, a towel... oh, this was a bandage! Ufu."
+    },
+    {
+      "voice_id": 91001,
+      "jp": "オグリちゃん、初めての場所だと\nよく迷うから…案内する時、\nいつも手を繋いで歩くんです～。",
+      "en": "Oguri-chan often gets lost in new places... so when I guide her, I always hold her hand~."
+    },
+    {
+      "voice_id": 90215,
+      "jp": "夜更かしは、めっ、ですよ～？\n子守唄を歌ってあげますね。\nりん、ぴょう、とお～、しゃ～♪",
+      "en": "Staying up late is a no-no~? I'll sing you a lullaby. Rin, pyou, tooo, shaaa~"
+    }
+  ],
+  "timer_line_ideas": [
+    "Ufufu, {user}, the 50-minute independent run is all done~. You worked so hard. Come check the results, and then let me give you a good-child, good-child pat~",
+    "My my, {user}~ the run has finished. No need to hurry, but do come take a look, okay? Afterwards, let's have some sweets and a little rest together~."
+  ],
+  "data_gaps": [
+    "Hishi Miracle identification of 'ミラ子' is general knowledge (unverified)",
+    "Story arc beyond event titles is general knowledge (unverified)",
+    "Voice 71016 in source has a stray '】' character (data quirk)"
+  ]
+}

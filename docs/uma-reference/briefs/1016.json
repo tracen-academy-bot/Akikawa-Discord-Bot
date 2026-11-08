@@ -1,0 +1,186 @@
+{
+  "id": 1016,
+  "name_en": "Narita Brian",
+  "name_jp": "ナリタブライアン",
+  "kind": "uma",
+  "one_liner": "Taciturn lone-wolf 'monster' who lives to hunt strong rivals, eats meat, and secretly gets fussed over by her sister.",
+  "personality": "Brusque, terse and predatory: she talks about races as hunts, says her blood boils (血が滾る) at fanfares, and only wants opponents strong enough to slake her 'thirst' (渇き). She shows grudging respect to a trainer who keeps up with her (\"Not bad... keep following me\") and hates fuss, frills and paperwork. Underneath she is a younger sister who is nagged by and quietly fond of Biwa Hayahide; her profile says her family calls her silence 'proof of kindness'.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anta (アンタ); no name or honorific seen in her lines",
+    "register": "blunt, rough masculine-leaning plain form; clipped sentences, negative -n endings (できん, かなわん), lots of ellipses",
+    "tics": [
+      {
+        "jp": "血が滾る / 滾る",
+        "romaji": "chi ga tagiru / tagiru",
+        "meaning": "my blood boils / it's heating up (her go-to excitement phrase)"
+      },
+      {
+        "jp": "ブッちぎる",
+        "romaji": "bucchigiru",
+        "meaning": "to leave everyone in the dust / blow past (also in her self-intro)"
+      },
+      {
+        "jp": "狩り",
+        "romaji": "kari",
+        "meaning": "hunt; races and rivals framed as prey"
+      },
+      {
+        "jp": "渇き",
+        "romaji": "kawaki",
+        "meaning": "thirst/craving for a real fight"
+      },
+      {
+        "jp": "フン",
+        "romaji": "fun",
+        "meaning": "hmph"
+      },
+      {
+        "jp": "チッ",
+        "romaji": "chi'",
+        "meaning": "tch"
+      },
+      {
+        "jp": "ふっ",
+        "romaji": "fu'",
+        "meaning": "short smirking laugh"
+      },
+      {
+        "jp": "姉貴",
+        "romaji": "aneki",
+        "meaning": "sis (her older sister Biwa Hayahide)"
+      },
+      {
+        "jp": "アマさん",
+        "romaji": "Ama-san",
+        "meaning": "what she calls Hishi Amazon"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "meat above all (91022: 'I eat things besides meat, but I don't get as much power... so I eat meat')",
+    "cracking walnuts (profile strength)",
+    "kyudo / archery on days off (10027) and yabusame at the Shundaisai (91026)",
+    "night running and early-morning runs",
+    "raptors' claws and beaks (91003)",
+    "her nose tape, which helps her focus (91000)",
+    "predator / beast / wolf / darkness imagery",
+    "trousers over skirts (70021)"
+  ],
+  "weak_spots": [
+    "touching small animals (profile weakness)",
+    "frilly, decorated outfits (70010, 70014, 91005)",
+    "desk study (90013) and student council paperwork (400002, 400139)",
+    "kotatsu - she admits she sometimes 'gives in' to it (91015)",
+    "an avalanche of Valentine chocolate from her shoe locker (10004)",
+    "her sister's vegetable juice and nagging (91021, 91002)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 3 (5月3日)",
+    "height": "160cm (160cm)",
+    "voice_actor": "Rika Kinugawa (衣川里佳)"
+  },
+  "relationships": [
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "older sister ('姉貴'); fussy and caring, Brian grumbles but is fond of her",
+      "evidence": "home scenes x6; mentioned by her x8; voice 91002: 姉貴の奴、『飯は食っているか。きちんと寝ているか』だと。; voice 91021 (vegetable juice); sister status also web: https://umamusu.wiki/Narita_Brian"
+    },
+    {
+      "id": 1012,
+      "name_en": "Hishi Amazon",
+      "nature": "Ritto dorm senpai who feeds her (bento, flower-viewing jubako); friend and rival",
+      "evidence": "home scenes x7 (her top partner); voice 91010: …またアマさんに弁当を渡された。; voice 91024; rival/friend per web: https://umamusu.wiki/Narita_Brian"
+    },
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "student council president; Brian wants to see what lies under the 'Emperor's' dignity",
+      "evidence": "home scenes x3; voice 91004: “皇帝”の品格の下に何があるのか…いずれ、暴いてみたいものだ。; voice 400007"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "fellow student council member who scolds her constantly; Brian finds Groove scolding Rudolf funny",
+      "evidence": "home scenes x3; voice 91019; voice 400004 (avoiding Groove at food stalls); Groove's own voice 91003: ええいっ、ブライアンめ。生徒会の仕事をほっぽってまた…！"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "rival; Brian senses fangs behind her smile",
+      "evidence": "home scenes x3; voice 91016: ローレルか…おかしなヤツだ。あの笑顔の裏に隠れた牙…ふっ。; voice 400008; rival per web: https://umamusu.wiki/Narita_Brian"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "roommate whose speech Brian can't follow",
+      "evidence": "voice 91017: ギムレット…日々同じ部屋で過ごしてはいるが、ヤツが何を言っているかは…よくわからん。; home scenes x2"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "junior who praises her outfit; Mayano wants to beat her",
+      "evidence": "voice 91018; home scenes x2; rivalry per web: https://umamusu.wiki/Narita_Brian"
+    },
+    {
+      "id": 1149,
+      "name_en": "Phalaenopsis",
+      "nature": "cousin who looks up to her",
+      "evidence": "home scenes x1; mentioned by her x2; cousin per web: https://umamusu.wiki/Narita_Brian"
+    }
+  ],
+  "groups": [
+    "Tracen Student Council (officer; support event title: 生徒会役員！; vice president per web: https://umamusu.wiki/Narita_Brian)",
+    "Team Sirius (game-only team, per web: https://umamusu.wiki/Narita_Brian)",
+    "Team Rigil (anime-only, per web: https://umamusu.wiki/Narita_Brian)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Her career event titles run the Triple Crown route (Satsuki Sho, Japan Derby, Kikka Sho) and then senior races (Hanshin Daishoten, Tenno Sho Spring and Autumn, Japan Cup, Arima Kinen). The titles are single kanji like 'Storm', 'Hunger', 'Peak' and 'Sister'. Her lines frame it as a hunt driven by a thirst for opponents strong enough to set her on fire. The '姉' (Sister) event and many voice lines point to Biwa Hayahide as an important part of the story. The detailed plot, such as whether she has a post-Triple-Crown slump, is not in the data and could not be verified.",
+    "source": "event titles; web: https://umamusu.wiki/Narita_Brian"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 91022,
+      "jp": "肉以外も食う。\nが、肉を食った時ほど力が出ない。\nよって肉を食う。文句あるか。",
+      "en": "I eat things besides meat. But I don't get as much power as when I eat meat. So I eat meat. Got a problem with that?"
+    },
+    {
+      "voice_id": 91010,
+      "jp": "…またアマさんに弁当を渡された。\n味は悪くないが、時折キャラ弁\nなのがな…。",
+      "en": "...Ama-san handed me a bento again. It doesn't taste bad, but sometimes it's a character bento, so..."
+    },
+    {
+      "voice_id": 91002,
+      "jp": "姉貴の奴、『飯は食っているか。\nきちんと寝ているか』だと。\n…相変わらずだ。",
+      "en": "My sis goes, 'Are you eating? Are you sleeping properly?' ...Same as always."
+    },
+    {
+      "voice_id": 10005,
+      "jp": "…チョコを片付けるのを手伝え。\n今日ばかりはみな忙しいようでな…\n――アンタの力が必要だ。",
+      "en": "...Help me get rid of these chocolates. Everyone seems busy today... I need your strength."
+    },
+    {
+      "voice_id": 20023,
+      "jp": "狩りの時が来た。\n…ふっ、血が滾る…！",
+      "en": "The time for the hunt has come. ...Heh, my blood is boiling...!"
+    },
+    {
+      "voice_id": 93004,
+      "jp": "1度しか言わんぞ。…これからもついてこい。",
+      "en": "I'll only say this once. ...Keep following me from here on."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}. The independent run is over. ...Not bad. Now go check the results, and don't drag your feet about it.",
+    "Fifty minutes of hunting, done. Heh... my blood's still boiling. Take a look at the results, {user}, then give me something tougher. I'm not satisfied yet."
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Mejiro Ryan (1027), but every hit is a false positive: 'ライアン' is a substring of 'ブライアン' (Narita Brian). Ignore that entry.",
+    "voice 91001 mentions a 'junior with a black hair ornament' who keeps picking fights; her identity is not named in the data.",
+    "Detailed career plot is unknown: the mdb has event titles only, and the wiki page fetched gave no plot summary."
+  ]
+}

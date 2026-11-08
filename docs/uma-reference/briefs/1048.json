@@ -1,0 +1,207 @@
+{
+  "id": 1048,
+  "name_en": "Tosen Jordan",
+  "name_jp": "トーセンジョーダン",
+  "kind": "uma",
+  "one_liner": "Lazy, trend-chasing gyaru who lives for nails, burgers and selfies but secretly wants to prove she can win.",
+  "personality": "A carefree modern gyaru who talks in slang, hates 'serious talk', flunks tests and makes up for it in retests, and acts like she can't be bothered. She is proud of her nail art and the racing outfit she designed herself, adores her friends, and quietly admits gratitude to her trainer. Under the 'whatever' attitude is someone who wants to show she can do it too.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "anta (アンタ) mostly (~40 lines); plain 'Trainer' (トレーナー) without -san in a few (birthday/Valentine lines)",
+    "register": "casual gyaru slang (rough, abbreviations, -shi / -ssho endings)",
+    "tics": [
+      {
+        "jp": "とりま",
+        "romaji": "torima",
+        "meaning": "'for now / anyway' (gyaru abbreviation of toriaezu)"
+      },
+      {
+        "jp": "テンアゲ",
+        "romaji": "ten-age",
+        "meaning": "hyped up, tension up"
+      },
+      {
+        "jp": "テンサゲ",
+        "romaji": "ten-sage",
+        "meaning": "bummed out"
+      },
+      {
+        "jp": "ウケる",
+        "romaji": "ukeru",
+        "meaning": "LOL, that's hilarious"
+      },
+      {
+        "jp": "しか勝たん",
+        "romaji": "~shika katan",
+        "meaning": "'nothing beats ~' (店しか勝たん, ダチしか勝たん, ケアしか勝たん)"
+      },
+      {
+        "jp": "っしょ",
+        "romaji": "ssho",
+        "meaning": "contraction of deshou, 'right?'"
+      },
+      {
+        "jp": "見とけし",
+        "romaji": "mitokeshi",
+        "meaning": "rough imperative + し, 'watch, will ya' (also 言えし, 始めろし)"
+      },
+      {
+        "jp": "マジ",
+        "romaji": "maji",
+        "meaning": "seriously"
+      },
+      {
+        "jp": "ヤバ",
+        "romaji": "yaba",
+        "meaning": "crazy/wow"
+      },
+      {
+        "jp": "よろ～",
+        "romaji": "yoro~",
+        "meaning": "'thanks in advance' (yoroshiku)"
+      },
+      {
+        "jp": "ガチ",
+        "romaji": "gachi",
+        "meaning": "for real, serious"
+      },
+      {
+        "jp": "ジョーダン",
+        "romaji": "joodan",
+        "meaning": "pun on her name / 'just kidding' (冗談)"
+      },
+      {
+        "jp": "盛って",
+        "romaji": "motte",
+        "meaning": "'pile it on', glam it up"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "nail art (strength; redoes nails to get fired up)",
+    "burgers and fries (always a set)",
+    "basketball (strength)",
+    "cocoa, parfaits, drink bars, cheap-chic fashion",
+    "grapes (but not grape seeds)",
+    "Umatok / Umasta selfies and 'bazuru' posts",
+    "festivals, illuminations, hanging out with her 'itsumen' crew"
+  ],
+  "weak_spots": [
+    "health-food and vegetables; grape seeds (profile)",
+    "studying - constant retests/remedial classes",
+    "chipped nails ruin her mood",
+    "early mornings/bed hair",
+    "being stared at off-stage (voice 91006)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "February 4 (2月4日)",
+    "height": "157 cm (157cm)",
+    "voice_actor": "Eri Suzuki (鈴木絵理)"
+  },
+  "relationships": [
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "Best friend ('dachi'); matching hair oil, eats lunch together, inspires her to try harder",
+      "evidence": "home scenes x6; mentions in voice x7 (voice_id 92018: シチー、最近めちゃガチってんな…; 91022: ヘアオイルシチーとおそろ; 91010: 一緒にメシ食お; 400002: ダチしか勝たん)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Annoying pest who chases her; taught her sword-swallowing",
+      "evidence": "home scenes x5; mentions x4 (voice_id 91000, 91024, 91220)"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "Jordan asks Festa to predict test questions; even when Festa's picks hit, Jordan still fails (per Festa)",
+      "evidence": "home scenes x4; Festa mentions her x1 (Festa's voice_id 91001 in 1049.json: ジョーダンのヤツ、またテストのヤマを聞きに来やがった…結局落第点); Jordan never names Festa in her own lines"
+    },
+    {
+      "id": 1035,
+      "name_en": "Winning Ticket",
+      "nature": "'Chikezo-san', loud and energetic; Jordan finds her uplifting",
+      "evidence": "home scenes x2; Ticket mentions her x2; Jordan calls her 'Chikezo-san' (チケゾーさん) in voice_id 90211, 91004, 91021, 400005 (nickname not counted in mentions_in_voice)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Fellow party gal",
+      "evidence": "home scenes x3; voice_id 91020"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Teaches her to eat burgers elegantly",
+      "evidence": "home scenes x1; voice_id 91019"
+    },
+    {
+      "id": 1028,
+      "name_en": "Hishi Akebono",
+      "nature": "Parfait buddy",
+      "evidence": "voice_id 91218"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Jordan relates to her negativity",
+      "evidence": "voice_id 91003"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "Trusted Jordan with cookie decorating",
+      "evidence": "home scenes x2; voice_id 91216"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Gyaru friend group with Gold City, Daitaku Helios etc. (inferred from home scenes, unofficial)"
+  ],
+  "story_arc": {
+    "summary": "A self-described not-so-bright gyaru whose trainer, by her own account, kept their job thanks to being assigned to her (voice 10000). Her story events titled 'cracked' (われた) and 'it hurts' (いたい) appear to draw on the real horse's chronic cracked hoof, which the web ties to her nail obsession. Goals run Hopeful Stakes, Satsuki Sho, Argentina Kyowakoku Hai, Arima Kinen, Osaka Hai, Tenno Sho (Spring), Takarazuka Kinen and Tenno Sho (Autumn), ending with 'あたし、バカだけど' (I'm dumb, but...).",
+    "source": "event titles (われた, いたい, あたし、バカだけど, race goals); voice 10000; web: https://umamusu.wiki/Tosen_Jordan (cracked hoof / nail link); plot beats otherwise unverified"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "あたしの担当になれたおかげで\nクビにならずに済んだんだし？\n遠慮なく感謝よろ～。",
+      "en": "You got to be my trainer, and that's how you dodged getting fired, right? So go ahead and thank me~."
+    },
+    {
+      "voice_id": 20036,
+      "jp": "もーサイアクッ。\nネイルちょっと剝がれてるしっ。\nこの怒りレースにぶつけるしか…！",
+      "en": "Ugh, the WORST. My nail's a bit chipped. Guess I gotta take this rage out on the race...!"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "テキトーでいいっしょ？…ジョーダン～。",
+      "en": "Just winging it's fine, right? ...Jo~dan (just kidding)."
+    },
+    {
+      "voice_id": 91001,
+      "jp": "妹、割とシュミ大人しめなのに、\n服とかあたしとお揃いがいいとか\n言ったりすんの、かわいくね？",
+      "en": "My little sister has pretty tame taste, but she says she wants to match clothes with me. Cute, right?"
+    },
+    {
+      "voice_id": 20049,
+      "jp": "…ありがと。これでも感謝してっからさ。",
+      "en": "...Thanks. I'm grateful, y'know, in my own way."
+    },
+    {
+      "voice_id": 93000,
+      "jp": "アンタをトレーナーにした\nあたしの見る目、すごくない？",
+      "en": "Picking you as my trainer? My eye's amazing, right?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Yo {user}, the Independent run's done~ fifty minutes, maji? Torima go check it, I'm redoing my nails. ...Jo~dan, I'm looking too, so hurry up!",
+    "Uwee~i, {user}! Training's over, ten-age! Results lookin' kinda bazuru-worthy ngl. Check it, then burgers? Your treat. ...Jo~dan."
+  ],
+  "data_gaps": [
+    "Younger sister and father mentioned in voice but unnamed",
+    "Previous brief claimed she was nearly expelled and saved by a trainer; voice 10000 actually says the TRAINER avoided being fired - claim removed, real story premise unverified (web search found no summary)"
+  ]
+}

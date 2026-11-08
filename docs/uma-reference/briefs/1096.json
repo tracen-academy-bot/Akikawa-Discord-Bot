@@ -1,0 +1,188 @@
+{
+  "id": 1096,
+  "name_en": "No Reason",
+  "name_jp": "ノーリーズン",
+  "kind": "uma",
+  "one_liner": "A self-styled Sengoku warlord who schemes to 'unify the realm' of racing, cackling 'nya-ha-ha' and toasting victories with cola.",
+  "personality": "No Reason plays a bold, theatrical Warring States general: she talks of conquest, gekokujo (the underdog overthrowing her betters), war councils and banquets, and treats her trainer as her trusted strategist. Under the bluster she is shrewd and well-read in history and the Chinese classics, values cunning over brute force, and openly respects rivals she plans to defeat. She is also a sleepy, fun-loving glutton for cola and festivities who hates missing anything interesting.",
+  "speech": {
+    "first_person": "washi (ワシ)",
+    "calls_trainer": "onushi (お主), 'gunshi-dono (軍師殿)' / 'waga gunshi (我が軍師)' = my strategist; once 'waga Trainer (我がトレーナー)'",
+    "register": "archaic samurai/warlord speech (Sengoku-era roleplay), boisterous",
+    "tics": [
+      {
+        "jp": "にゃーっはっは",
+        "romaji": "nyaa-hhahha",
+        "meaning": "her signature cat-like warlord laugh (also にゃっはっは / にゃーはっはっは)"
+      },
+      {
+        "jp": "じゃ",
+        "romaji": "ja",
+        "meaning": "archaic copula ending, like 'tis / it is'"
+      },
+      {
+        "jp": "のう",
+        "romaji": "nou",
+        "meaning": "old-fashioned sentence-ending particle, like 'eh' / 'I say'"
+      },
+      {
+        "jp": "お主",
+        "romaji": "onushi",
+        "meaning": "archaic 'you', how she addresses the trainer"
+      },
+      {
+        "jp": "軍師殿",
+        "romaji": "gunshi-dono",
+        "meaning": "'Lord Strategist', her title for the trainer"
+      },
+      {
+        "jp": "いざ出陣じゃ",
+        "romaji": "iza shutsujin ja",
+        "meaning": "'Now, we march to battle!'"
+      },
+      {
+        "jp": "天下",
+        "romaji": "tenka",
+        "meaning": "'the realm', as in conquering/unifying it (天下統一, 天下取り)"
+      },
+      {
+        "jp": "下剋上",
+        "romaji": "gekokujou",
+        "meaning": "the lowly overthrowing the mighty; her underdog creed"
+      },
+      {
+        "jp": "せい",
+        "romaji": "sei",
+        "meaning": "archaic imperative ending (受けとれい, 見せい, 持てい)"
+      },
+      {
+        "jp": "天晴",
+        "romaji": "appare",
+        "meaning": "'Splendid!' praise"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Cola (birthday 'all-you-can-drink cola', victory toasts, homemade cola bonbons)",
+    "Sengoku warlords, armour and military strategy",
+    "Appraising tea utensils and reading classical Chinese (profile strengths)",
+    "Dancing the 'Atsumori' and victory banquets",
+    "Kabuki (event title: 歌舞伎はワシの楽しみじゃ！！)",
+    "Ninjas and historical anecdotes (Hideyoshi, the cuckoo haiku, Zhang Liang/Zhuge Liang)",
+    "Her father, who cheers her races with a war drum and fights in a New Year's Eve combat-sports event"
+  ],
+  "weak_spots": [
+    "Very thin pillows (profile)",
+    "The scent of flower nectar (profile)",
+    "Sleepiness: wakes at the last minute, drowsy after lunch, wants a body double to attend class",
+    "Her own over-elaborate schemes (event titles 騙し討ちならず, よもやの仲違い！？ suggest plots backfiring)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Senior Division / high school (高等部)",
+    "birthday": "June 4 (6月4日)",
+    "height": "160cm",
+    "voice_actor": "Hiyori Kono (河野ひより)"
+  },
+  "relationships": [
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "Classmate and fellow underdog she calls 'Mirako' and refuses to underestimate",
+      "evidence": "home scenes x4; she names her by the nickname ミラ子 in voice x2 (voice_id 91001: とぼけておるが、ミラ子を軽んじてはならぬ; 1229: であえミラ子ォ！) - not counted in the mdb's mentions_in_voice, which only matches full names; event title 菊花賞の後に・ミラクルガール！; classmate per web: https://umamusu.wiki/No_Reason"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "Classmate and rival whose stiff face she loves trying to loosen",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91002: クリスエス殿の面をほぐしてやるのは我が楽しみよ); web: https://umamusu.wiki/No_Reason"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "Classmate and rival; she respects Gimlet's odd, classical-sounding speech as a sign of wisdom",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91003: ギムレット殿の珍妙なる言葉遣いも伊達ではない); web: https://umamusu.wiki/No_Reason"
+    },
+    {
+      "id": 1072,
+      "name_en": "Yaeno Muteki",
+      "nature": "Roommate and friend",
+      "evidence": "home scenes x2; Yaeno Muteki mentions her in voice x2 (mentioned_by); roommate per web: https://umamusu.wiki/No_Reason (consistent with event title 華麗に咲くは同室の桜)"
+    },
+    {
+      "id": 1079,
+      "name_en": "Furioso",
+      "nature": "Frequent home-screen partner; nature of bond not stated in the data",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1121,
+      "name_en": "Durandal",
+      "nature": "Friend; they bond over eccentric roleplay (warlord and knight)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/No_Reason"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "Acquaintance; specifics unknown",
+      "evidence": "home scenes x1; Fine Motion mentions her in voice x1 (mentioned_by)"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "Upperclassman and friend despite clashing personalities",
+      "evidence": "web: https://umamusu.wiki/No_Reason ('Friend and upperclassman'; Brian sees strength in her despite clashing personalities). No home scenes or voice mentions in the mdb; top_affinity 31 is a game compatibility score, not evidence of a bond"
+    }
+  ],
+  "groups": [
+    "2002 Classic generation rivals with Tanino Gimlet, Symboli Kris S and Hishi Miracle (real-life racing; web: umamusu.wiki)"
+  ],
+  "story_arc": {
+    "summary": "A 'warlord' who believes no reason is needed to chase a dream, No Reason recruits the trainer as her strategist and campaigns through the Classics (Satsuki Sho, Japanese Derby, Kikuka Sho) and on to the Arima Kinen, Tenno Sho and Japan Cup, aiming to 'unify the realm' as the underdog. Event titles chart a rivalry-heavy run against Tanino Gimlet, Symboli Kris S and Hishi Miracle, a falling-out with the trainer, failed schemes and comebacks. Per umamusu.wiki her career story is framed as resisting a 'Silent Clan' (an allusion to Sunday Silence's bloodline dominating Japanese racing). In real life No Reason won the 2002 Satsuki Sho as a longshot (model knowledge).",
+    "source": "event titles; web: https://umamusu.wiki/No_Reason; model knowledge (unverified) for the real-horse note"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10001,
+      "jp": "お主こそ我が張良！我が諸葛亮よ！\nともに百計を巡らし、レースの\n天下をごろりと転がそうぞ！",
+      "en": "You are my Zhang Liang! My Zhuge Liang! Together we'll devise a hundred schemes and roll the racing realm right over!"
+    },
+    {
+      "voice_id": 20024,
+      "jp": "勝利の美酒を用意しておけい！\n…むろんコーラじゃぞ！\nダイエットじゃないやつ！",
+      "en": "Prepare the wine of victory! ...Cola, of course! Not the diet kind!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "己を凡と見切ること、それ自体が\n非凡なことよ。とぼけておるが、\nミラ子を軽んじてはならぬ。",
+      "en": "Judging oneself ordinary is in itself extraordinary. She plays dumb, but you must never take Mirako lightly."
+    },
+    {
+      "voice_id": 90005,
+      "jp": "うにゃ…まだ寝ぬ…まだ寝ぬわ！\nワシが寝ておる間に面白いことが\n起きては口惜しいじゃろうが！",
+      "en": "Mnya... I'm not sleeping yet... not yet, I say! It would be vexing if something interesting happened while I slept!"
+    },
+    {
+      "voice_id": 70001,
+      "jp": "ワシはゆるりと待っておったのよ。\n我が意を見抜き、ともに天下を\n駆けられる軍師が現れるときをな！",
+      "en": "I was waiting at my leisure, you see. For a strategist who could see through my intent and ride with me across the realm!"
+    },
+    {
+      "voice_id": 30004,
+      "jp": "天下よ瞠目せい！我が名はノーリーズンなり！",
+      "en": "Behold, O realm! My name is No Reason!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Nya-ha-ha! {user}, my strategist! Fifty minutes of independent training, conquered! Report to the war camp at once and inspect the spoils, I say!",
+    "Hear me, Gunshi-dono {user}! The independent run has ended. A warlord awaits her strategist's verdict... and a victory cola. Not the diet kind!"
+  ],
+  "data_gaps": [
+    "No dialogue for her career story in the mdb; summary relies on event titles and umamusu.wiki",
+    "Roommate (Yaeno Muteki) comes from the web, not the mdb; event title 華麗に咲くは同室の桜 refers to a roommate but does not name her",
+    "Event title 真心で仕えるは可憐な主君 ('the lovely lord she serves sincerely') likely refers to another character, but the data doesn't say who",
+    "Furioso's and Fine Motion's relationship to her is unknown beyond shared home scenes",
+    "Voice actor romanisation (Hiyori Kono) is standard reading, not from the mdb",
+    "Classmate status of Hishi Miracle / Kris S / Gimlet comes from umamusu.wiki, not the mdb"
+  ]
+}

@@ -1,0 +1,1268 @@
+{
+ "groups": [
+  {
+   "name": "Mejiro family",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1013,
+     "name_en": "Mejiro McQueen"
+    },
+    {
+     "id": 1027,
+     "name_en": "Mejiro Ryan"
+    },
+    {
+     "id": 1059,
+     "name_en": "Mejiro Dober"
+    },
+    {
+     "id": 1064,
+     "name_en": "Mejiro Palmer"
+    },
+    {
+     "id": 1071,
+     "name_en": "Mejiro Ardan"
+    },
+    {
+     "id": 1074,
+     "name_en": "Mejiro Bright"
+    },
+    {
+     "id": 1086,
+     "name_en": "Mejiro Ramonu"
+    }
+   ],
+   "basis": "name prefix (all 7 Mejiro-named umas in data); every brief lists 'Mejiro family'; home scenes Ryan-Dober x7, McQueen-Ryan x7, Ryan/Dober/Bright triangle x>=3 each; Ramonu named in voice 95003/91006",
+   "set_pitch": "Old-money ojou household with a family name to live up to: tea time, etiquette, mansion life, and each girl's own way of carrying (or escaping) the Mejiro weight."
+  },
+  {
+   "name": "Sakura name group",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1041,
+     "name_en": "Sakura Bakushin O"
+    },
+    {
+     "id": 1069,
+     "name_en": "Sakura Chiyono O"
+    },
+    {
+     "id": 1076,
+     "name_en": "Sakura Laurel"
+    },
+    {
+     "id": 1126,
+     "name_en": "Sakura Chitose O"
+    }
+   ],
+   "basis": "name prefix; Chiyono O voice 91020 'サクラはサクラ、メジロはメジロ'; Victory Club voice lines; blood/family relation unverified (real-horse owner naming)",
+   "set_pitch": "The Sakura girls as a proud crown-name house, cheerful counterweight to the Mejiro: cherry-blossom season, 'Bakushin!' energy, Chiyono O's big-sister fussing."
+  },
+  {
+   "name": "Symboli family",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1017,
+     "name_en": "Symboli Rudolf"
+    },
+    {
+     "id": 1070,
+     "name_en": "Sirius Symboli"
+    },
+    {
+     "id": 1083,
+     "name_en": "Symboli Kris S"
+    },
+    {
+     "id": 9047,
+     "name_en": "Speed Symboli"
+    }
+   ],
+   "basis": "name prefix; Sirius Symboli voice 91007 names シンボリ家; Rudolf-Sirius home scenes x6; Speed Symboli is a non-playable legend (5 voice lines); exact kinship unverified",
+   "set_pitch": "One house, opposite temperaments: the Emperor's dignity, Sirius's outlaw pack, Kris S's foreign polish, plus a legendary elder watching over them."
+  },
+  {
+   "name": "Satono family / group",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1067,
+     "name_en": "Satono Diamond"
+    },
+    {
+     "id": 1088,
+     "name_en": "Satono Crown"
+    }
+   ],
+   "basis": "name prefix; Diamond lines say 我がグループ / 一族のみなさん; Crown self-intro 'サトノに栄冠を', event '私たちはサトノのウマ娘だから'",
+   "set_pitch": "Two heiresses carrying the Satono name's 'first G1' wish: corporate-group glamour plus earnest promises to the family."
+  },
+  {
+   "name": "Machikane (Matikane) name pair",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1056,
+     "name_en": "Matikanefukukitaru"
+    },
+    {
+     "id": 1062,
+     "name_en": "Matikanetannhauser"
+    }
+   ],
+   "basis": "name prefix only (Matikanefukukitaru, Matikanetannhauser); Tannhauser brief notes the shared crown; no in-game kinship evidenced",
+   "set_pitch": "Shrine-maiden fortune-telling meets the ever-optimistic 'Mambo' girl: lucky charms and 'today's fortune' gags for the timer."
+  },
+  {
+   "name": "Hishi name group",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1012,
+     "name_en": "Hishi Amazon"
+    },
+    {
+     "id": 1028,
+     "name_en": "Hishi Akebono"
+    },
+    {
+     "id": 1106,
+     "name_en": "Hishi Miracle"
+    }
+   ],
+   "basis": "name prefix only; Hishi Akebono brief: family relation unverified",
+   "set_pitch": "Big-sister dorm head Amazon, gentle giant Akebono and quiet Miracle: food-sharing, strength and 'taiman' challenges."
+  },
+  {
+   "name": "Narita name group",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1016,
+     "name_en": "Narita Brian"
+    },
+    {
+     "id": 1050,
+     "name_en": "Narita Taishin"
+    },
+    {
+     "id": 1077,
+     "name_en": "Narita Top Road"
+    }
+   ],
+   "basis": "name prefix only; Top Road brief: no in-game family relation evidenced (Biwa Hayahide is Brian's actual sister, not a Narita)",
+   "set_pitch": "Three Naritas with nothing in common but the name: lone wolf Brian, scrappy Taishin, class-president Top Road - a 'we are NOT related' running gag."
+  },
+  {
+   "name": "Admire name pair",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1033,
+     "name_en": "Admire Vega"
+    },
+    {
+     "id": 1118,
+     "name_en": "Admire Groove"
+    }
+   ],
+   "basis": "name prefix only; no shared home scenes or kinship found",
+   "set_pitch": "Two aloof, self-contained umas who both resist being drafted into groups (Vega's vow, Groove dodging the Student Council)."
+  },
+  {
+   "name": "Agnes name pair",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1019,
+     "name_en": "Agnes Digital"
+    },
+    {
+     "id": 1032,
+     "name_en": "Agnes Tachyon"
+    }
+   ],
+   "basis": "name prefix; Tachyon profile: from a racing family she is the black sheep of; Digital-Tachyon kinship unverified",
+   "set_pitch": "Mad-scientist experiments vs. otaku fangirling: both are obsessive researchers of umas, just with very different lab notes."
+  },
+  {
+   "name": "Air name group",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1018,
+     "name_en": "Air Groove"
+    },
+    {
+     "id": 1036,
+     "name_en": "Air Shakur"
+    },
+    {
+     "id": 1111,
+     "name_en": "Air Messiah"
+    }
+   ],
+   "basis": "name prefix only; no in-game family link sourced (Duramente/Rulership briefs tie Air Groove's bloodline, not the prefix)",
+   "set_pitch": "Strict 'Empress' Air Groove, logic-and-jinx Air Shakur and bright junior Air Messiah: discipline, data and duty."
+  },
+  {
+   "name": "Verxina / Cheval Grand / Vivlos sisters",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1089,
+     "name_en": "Cheval Grand"
+    },
+    {
+     "id": 1090,
+     "name_en": "Verxina"
+    },
+    {
+     "id": 1091,
+     "name_en": "Vivlos"
+    }
+   ],
+   "basis": "event titles '我ら長女、次女、三女！', 'Superb Sisters', 'Dear Sisters'; home scenes Verxina-Vivlos x8, triangle min x5; Vivlos names Verxina x9 in voice; counts as a top-25 home-scene trio (Cheval-Verxina x5, Cheval-Vivlos x5, Verxina-Vivlos x8)",
+   "set_pitch": "Eldest, middle, youngest: sibling bickering, hand-me-downs and 'nee-san' worship in short timer quips."
+  },
+  {
+   "name": "Orfevre & Dream Journey (sisters)",
+   "kind": "family",
+   "members": [
+    {
+     "id": 1115,
+     "name_en": "Orfevre"
+    },
+    {
+     "id": 1119,
+     "name_en": "Dream Journey"
+    }
+   ],
+   "basis": "home scenes x11 (joint top pair); briefs: Dream Journey is Orfevre's older sister and roommate ('Ane-ue'); counts as a top-25 home-scene pair",
+   "set_pitch": "A tyrant-princess and the composed older sister who brews her tea and wakes her up: royal-court sibling comedy."
+  },
+  {
+   "name": "Tracen Student Council",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1017,
+     "name_en": "Symboli Rudolf"
+    },
+    {
+     "id": 1018,
+     "name_en": "Air Groove"
+    },
+    {
+     "id": 1016,
+     "name_en": "Narita Brian"
+    }
+   ],
+   "basis": "Rudolf president (voice 91000, 70010), Air Groove vice president (voice 400009), Narita Brian officer (support event 生徒会役員！); Teio is close but not a member; Admire Groove dodges recruitment (voice 91010)",
+   "set_pitch": "The three who run the school: Rudolf's puns, Groove's scolding, Brian skipping paperwork. Rudolf and Groove are already in Set 1, so Brian is the new face."
+  },
+  {
+   "name": "Tetra Mystics (dirt idol unit)",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1098,
+     "name_en": "Copano Rickey"
+    },
+    {
+     "id": 1099,
+     "name_en": "Hokko Tarumae"
+    },
+    {
+     "id": 1100,
+     "name_en": "Wonder Acute"
+    }
+   ],
+   "basis": "web only (umamusu.wiki Wonder Acute page), not in the mdb; fourth member not confirmed; home scenes Rickey-Tarumae x9, Tarumae-Acute x5, triangle min x3",
+   "set_pitch": "Feng-shui luck, Tomakomai tourism and Acute's ginger tea: a dirt-track idol unit doing 'lucky direction' timer announcements."
+  },
+  {
+   "name": "Dirt racers circle",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1046,
+     "name_en": "Smart Falcon"
+    },
+    {
+     "id": 1079,
+     "name_en": "Furioso"
+    },
+    {
+     "id": 1080,
+     "name_en": "Transcend"
+    },
+    {
+     "id": 1081,
+     "name_en": "Espoir City"
+    },
+    {
+     "id": 1098,
+     "name_en": "Copano Rickey"
+    },
+    {
+     "id": 1099,
+     "name_en": "Hokko Tarumae"
+    },
+    {
+     "id": 1100,
+     "name_en": "Wonder Acute"
+    }
+   ],
+   "basis": "inferred from home scenes (Furioso-Espoir x8, Transcend-Acute x8, Rickey-Tarumae x9) and briefs; not an official group name",
+   "set_pitch": "JRA vs. local (Funabashi/NAR) pride on the sand: Falcon's idol act, Espoir's leftovers, Transcend's gadgets."
+  },
+  {
+   "name": "Victory Club",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1041,
+     "name_en": "Sakura Bakushin O"
+    },
+    {
+     "id": 1069,
+     "name_en": "Sakura Chiyono O"
+    },
+    {
+     "id": 1076,
+     "name_en": "Sakura Laurel"
+    },
+    {
+     "id": 1126,
+     "name_en": "Sakura Chitose O"
+    }
+   ],
+   "basis": "voice 91016, 10026 (Chiyono O), 91000/91008/90002 (Laurel), event title + voice 91029 (Bakushin O); Chitose O per web; Mejiro Ardan mentioned in voice 91025 but membership unverified, so excluded",
+   "set_pitch": "A club of Sakura girls chasing victory together: club meetings, matching earrings, and Bakushin O's speed-solves-everything logic."
+  },
+  {
+   "name": "BNW",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1023,
+     "name_en": "Biwa Hayahide"
+    },
+    {
+     "id": 1035,
+     "name_en": "Winning Ticket"
+    },
+    {
+     "id": 1050,
+     "name_en": "Narita Taishin"
+    }
+   ],
+   "basis": "event title 天皇賞（秋）の後に・BNW、激走; Winning Ticket voice 92220; home-scene triangle min x4 (Ticket-Taishin x6)",
+   "set_pitch": "Biwa's calculations, Ticket's tears and Taishin's chip on her shoulder: the B-N-W rivalry as a running scoreboard."
+  },
+  {
+   "name": "Hanagumi (LANE)",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1064,
+     "name_en": "Mejiro Palmer"
+    },
+    {
+     "id": 1013,
+     "name_en": "Mejiro McQueen"
+    },
+    {
+     "id": 1027,
+     "name_en": "Mejiro Ryan"
+    }
+   ],
+   "basis": "Mejiro Palmer voice 90006 only",
+   "set_pitch": "Three Mejiro racing as a 'flower troupe' squad; a ready-made sub-unit for the Mejiro set."
+  },
+  {
+   "name": "Heisei Big Three",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1006,
+     "name_en": "Oguri Cap"
+    },
+    {
+     "id": 1045,
+     "name_en": "Super Creek"
+    },
+    {
+     "id": 1034,
+     "name_en": "Inari One"
+    }
+   ],
+   "basis": "web (umamusu.wiki Inari One/Oguri Cap); home scenes Inari-Creek x7, Oguri-Creek x6, triangle min x3",
+   "set_pitch": "Bottomless-stomach Oguri, motherly Creek and Edo-kko Inari One: food, coddling and local-racing grit."
+  },
+  {
+   "name": "Golden Generation (1998 Classic class)",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1001,
+     "name_en": "Special Week"
+    },
+    {
+     "id": 1011,
+     "name_en": "Grass Wonder"
+    },
+    {
+     "id": 1014,
+     "name_en": "El Condor Pasa"
+    },
+    {
+     "id": 1020,
+     "name_en": "Seiun Sky"
+    },
+    {
+     "id": 1061,
+     "name_en": "King Halo"
+    }
+   ],
+   "basis": "Seiun Sky event title '最強世代' + web; home scenes Grass-El x10, Sky-King x8, Spe-Grass-El triangle min x3; Tsurumaru Tsuyoshi listed by web only (not included)",
+   "set_pitch": "The 'strongest generation' of classmates: Spe's appetite, El's wrestling, Grass's Yamato-nadeshiko, Sky's naps, King's 'Oh-hohoho'."
+  },
+  {
+   "name": "1999 Classic trio (ROAD TO THE TOP)",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1015,
+     "name_en": "T.M. Opera O"
+    },
+    {
+     "id": 1033,
+     "name_en": "Admire Vega"
+    },
+    {
+     "id": 1077,
+     "name_en": "Narita Top Road"
+    }
+   ],
+   "basis": "OVA 'ROAD TO THE TOP' per web; Vega voice 91008 refuses to crown Opera O; Vega-Top Road home x6 with mentions 4/8; named-group status unverified",
+   "set_pitch": "The self-proclaimed King, the aloof Vega and class rep Top Road: three-way rivalry banter. Meisho Doto tags along as Opera O's shadow."
+  },
+  {
+   "name": "JAMD quartet",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1094,
+     "name_en": "Jungle Pocket"
+    },
+    {
+     "id": 1032,
+     "name_en": "Agnes Tachyon"
+    },
+    {
+     "id": 1025,
+     "name_en": "Manhattan Cafe"
+    },
+    {
+     "id": 1092,
+     "name_en": "Dantsu Flame"
+    }
+   ],
+   "basis": "web (umamusu.wiki Dantsu Flame) only; home triangle Cafe/Tachyon/Pocket min x3",
+   "set_pitch": "The 2001 Classic year as a quartet: Pocket's gang-boss swagger, Tachyon's lab, Cafe's 'friend', Dantsu's flame."
+  },
+  {
+   "name": "Fastest trio (最速トリオ)",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1095,
+     "name_en": "Believe"
+    },
+    {
+     "id": 1120,
+     "name_en": "Calstone Light O"
+    },
+    {
+     "id": 1121,
+     "name_en": "Durandal"
+    }
+   ],
+   "basis": "Durandal names it in voice 92000; Believe/Calstone membership inferred; home triangle min x4 (Believe-Calstone x7); counts as a top-25 home-scene trio (Believe-Calstone x7, Believe-Durandal x4, Calstone-Durandal x5)",
+   "set_pitch": "Sprinters with no patience: 'the timer is too slow for us' lines."
+  },
+  {
+   "name": "Team Ascella",
+   "kind": "team",
+   "members": [
+    {
+     "id": 1061,
+     "name_en": "King Halo"
+    },
+    {
+     "id": 1109,
+     "name_en": "Rhein Kraft"
+    },
+    {
+     "id": 1110,
+     "name_en": "Cesario"
+    }
+   ],
+   "basis": "web (umamusu.wiki King Halo, Rhein Kraft, Cesario); game team; Fusaichi Pandora also listed on King Halo's brief from web but not on her own, so excluded; Rhein-Cesario home x5",
+   "set_pitch": "King Halo as the senpai to a new-gen team: first-class training, stylish juniors."
+  },
+  {
+   "name": "Team Sirius",
+   "kind": "team",
+   "members": [
+    {
+     "id": 1007,
+     "name_en": "Gold Ship"
+    },
+    {
+     "id": 1016,
+     "name_en": "Narita Brian"
+    }
+   ],
+   "basis": "web (umamusu.wiki Gold Ship, Narita Brian); game main story team; full roster not sourced",
+   "set_pitch": "Main-story team with Gold Ship's chaos and Brian's stoicism; thin data, better as a cameo."
+  },
+  {
+   "name": "Itsumen gyaru crew",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1064,
+     "name_en": "Mejiro Palmer"
+    },
+    {
+     "id": 1065,
+     "name_en": "Daitaku Helios"
+    }
+   ],
+   "basis": "Palmer profile trivia + voice 91010, Helios voice lines; Gold City / Tosen Jordan / Fusaichi Pandora only inferred from home scenes, so excluded",
+   "set_pitch": "'Zuttomo' gyaru energy: matching hair, festival plans, slang-heavy timer pings."
+  },
+  {
+   "name": "Chanchan Alliance",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1038,
+     "name_en": "Curren Chan"
+    },
+    {
+     "id": 1087,
+     "name_en": "Aston Machan"
+    }
+   ],
+   "basis": "web (umamusu.wiki) only, unverified in mdb",
+   "set_pitch": "Two 'chan' idols allied for kawaii supremacy; Aston Machan is in Set 1, Curren Chan is not."
+  },
+  {
+   "name": "Committee members (school committees)",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1053,
+     "name_en": "Bamboo Memory"
+    },
+    {
+     "id": 1127,
+     "name_en": "Fenomeno"
+    },
+    {
+     "id": 1071,
+     "name_en": "Mejiro Ardan"
+    },
+    {
+     "id": 1076,
+     "name_en": "Sakura Laurel"
+    },
+    {
+     "id": 1111,
+     "name_en": "Air Messiah"
+    },
+    {
+     "id": 1134,
+     "name_en": "Curren Bouquetd'or"
+    },
+    {
+     "id": 1047,
+     "name_en": "Zenno Rob Roy"
+    },
+    {
+     "id": 1133,
+     "name_en": "Chrono Genesis"
+    },
+    {
+     "id": 1119,
+     "name_en": "Dream Journey"
+    },
+    {
+     "id": 1063,
+     "name_en": "Ikuno Dictus"
+    }
+   ],
+   "basis": "per briefs: Bamboo Memory Disciplinary chair (tagline), Fenomeno Discipline (web); Ardan & Laurel Health (Laurel voice 90017); Air Messiah & Curren Bouquetd'or Beautification (event titles); Rob Roy Library (voice 92002); Chrono Genesis PR (voice 91012); Dream Journey Expedition Support (voice 91026); Ikuno Dictus General Affairs (voice 90008)",
+   "set_pitch": "School-life admin set: hall-monitor warnings, library-quiet reminders, 'clean up' notices; each committee gets a line."
+  },
+  {
+   "name": "Three Goddesses",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 9040,
+     "name_en": "Darley Arabian"
+    },
+    {
+     "id": 9041,
+     "name_en": "Godolphin Barb"
+    },
+    {
+     "id": 9042,
+     "name_en": "Byerley Turk"
+    }
+   ],
+   "basis": "briefs (Grand Masters scenario); NPCs with 2-4 voice lines each",
+   "set_pitch": "Mythic founders; too little voice data, only usable for one ultra-rare line."
+  },
+  {
+   "name": "Twinkle Legends",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 9046,
+     "name_en": "Saint Lite"
+    },
+    {
+     "id": 9047,
+     "name_en": "Speed Symboli"
+    },
+    {
+     "id": 9048,
+     "name_en": "Haiseiko"
+    }
+   ],
+   "basis": "briefs (scenario legends trio); non-playable, 3-5 voice lines each",
+   "set_pitch": "Legendary elders; thin data, better as rare cameos."
+  },
+  {
+   "name": "Team Spica (anime only)",
+   "kind": "team",
+   "members": [
+    {
+     "id": 1001,
+     "name_en": "Special Week"
+    },
+    {
+     "id": 1002,
+     "name_en": "Silence Suzuka"
+    },
+    {
+     "id": 1003,
+     "name_en": "Tokai Teio"
+    },
+    {
+     "id": 1007,
+     "name_en": "Gold Ship"
+    },
+    {
+     "id": 1008,
+     "name_en": "Vodka"
+    },
+    {
+     "id": 1009,
+     "name_en": "Daiwa Scarlet"
+    },
+    {
+     "id": 1013,
+     "name_en": "Mejiro McQueen"
+    },
+    {
+     "id": 1068,
+     "name_en": "Kitasan Black"
+    }
+   ],
+   "basis": "anime-only; listed in briefs (Kitasan Black per web for Season 3)",
+   "set_pitch": "Anime team chaos: Gold Ship's dropkicks, Vodka vs. Scarlet, Spe's appetite."
+  },
+  {
+   "name": "Team Rigil (anime only)",
+   "kind": "team",
+   "members": [
+    {
+     "id": 1004,
+     "name_en": "Maruzensky"
+    },
+    {
+     "id": 1010,
+     "name_en": "Taiki Shuttle"
+    },
+    {
+     "id": 1016,
+     "name_en": "Narita Brian"
+    },
+    {
+     "id": 1002,
+     "name_en": "Silence Suzuka"
+    }
+   ],
+   "basis": "anime-only; Suzuka (before transfer) and Maruzensky marked general knowledge/unverified; Narita Brian per web",
+   "set_pitch": "The elite team: Taiki's Howdy, Maruzensky's 'choberiba' slang, Brian's silence."
+  },
+  {
+   "name": "Team Canopus (anime only)",
+   "kind": "team",
+   "members": [
+    {
+     "id": 1060,
+     "name_en": "Nice Nature"
+    },
+    {
+     "id": 1062,
+     "name_en": "Matikanetannhauser"
+    },
+    {
+     "id": 1063,
+     "name_en": "Ikuno Dictus"
+    },
+    {
+     "id": 1066,
+     "name_en": "Twin Turbo"
+    },
+    {
+     "id": 1102,
+     "name_en": "Sounds of Earth"
+    },
+    {
+     "id": 1103,
+     "name_en": "Royce and Royce"
+    }
+   ],
+   "basis": "anime-only (S2: Nature, Turbo, Dictus, Tannhauser; S3: Sounds of Earth, Royce and Royce per web)",
+   "set_pitch": "The underdog team: Turbo's front-running, Nature's 'I'm just average', Dictus's planning."
+  },
+  {
+   "name": "Team Capella (anime only)",
+   "kind": "team",
+   "members": [
+    {
+     "id": 1067,
+     "name_en": "Satono Diamond"
+    },
+    {
+     "id": 1088,
+     "name_en": "Satono Crown"
+    }
+   ],
+   "basis": "anime-only (Season 3) per web",
+   "set_pitch": "Two Satono girls on one team; overlaps the Satono family entry."
+  },
+  {
+   "name": "Team Alkes (manga only)",
+   "kind": "team",
+   "members": [
+    {
+     "id": 1069,
+     "name_en": "Sakura Chiyono O"
+    },
+    {
+     "id": 1076,
+     "name_en": "Sakura Laurel"
+    },
+    {
+     "id": 1126,
+     "name_en": "Sakura Chitose O"
+    }
+   ],
+   "basis": "manga-only (Star Blossom) per web",
+   "set_pitch": "Same trio as the Victory Club core; use the club angle instead."
+  },
+  {
+   "name": "Dorm leaders",
+   "kind": "dorm-cluster",
+   "members": [
+    {
+     "id": 1005,
+     "name_en": "Fuji Kiseki"
+    },
+    {
+     "id": 1012,
+     "name_en": "Hishi Amazon"
+    }
+   ],
+   "basis": "Hishi Amazon is Miho dorm head (tagline, voice 91011); Fuji Kiseki Ritto leader strongly implied by curfew/patrol lines (voices 90004, 91011, 10010), title itself unverified",
+   "set_pitch": "Curfew calls and lights-out patrols from the two dorm heads: natural late-night timer lines."
+  },
+  {
+   "name": "Off-campus residents (一人暮らし)",
+   "kind": "dorm-cluster",
+   "members": [
+    {
+     "id": 1004,
+     "name_en": "Maruzensky"
+    },
+    {
+     "id": 1057,
+     "name_en": "Mr. C.B."
+    },
+    {
+     "id": 1079,
+     "name_en": "Furioso"
+    }
+   ],
+   "basis": "profile dorm field = 一人暮らし for all three",
+   "set_pitch": "The three who live on their own: Maruzensky's supercar, Mr. C.B.'s coolness, Furioso's exchange-student commute."
+  },
+  {
+   "name": "Mejiro Palmer & Daitaku Helios",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1064,
+     "name_en": "Mejiro Palmer"
+    },
+    {
+     "id": 1065,
+     "name_en": "Daitaku Helios"
+    }
+   ],
+   "basis": "home scenes x11 (graph.json)",
+   "set_pitch": "Best friends ('zuttomo'), matching hair and double-runaway partners: gyaru hype in stereo."
+  },
+  {
+   "name": "Grass Wonder & El Condor Pasa",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1011,
+     "name_en": "Grass Wonder"
+    },
+    {
+     "id": 1014,
+     "name_en": "El Condor Pasa"
+    }
+   ],
+   "basis": "home scenes x10 (graph.json)",
+   "set_pitch": "Roommates and rivals: Grass scolds El over homework, El teases back."
+  },
+  {
+   "name": "T.M. Opera O & Meisho Doto",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1015,
+     "name_en": "T.M. Opera O"
+    },
+    {
+     "id": 1058,
+     "name_en": "Meisho Doto"
+    }
+   ],
+   "basis": "home scenes x10 (graph.json)",
+   "set_pitch": "The self-crowned King and her devoted, clumsy shadow: Opera O monologues, Doto apologises."
+  },
+  {
+   "name": "Manhattan Cafe & Agnes Tachyon",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1025,
+     "name_en": "Manhattan Cafe"
+    },
+    {
+     "id": 1032,
+     "name_en": "Agnes Tachyon"
+    }
+   ],
+   "basis": "home scenes x9 (graph.json)",
+   "set_pitch": "Shared abandoned-classroom lab: Tachyon's experiments vs. Cafe's coffee and her unseen 'friend'. Tachyon is in Set 1, Cafe is not."
+  },
+  {
+   "name": "Mayano Top Gun & Marvelous Sunday",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1024,
+     "name_en": "Mayano Top Gun"
+    },
+    {
+     "id": 1055,
+     "name_en": "Marvelous Sunday"
+    }
+   ],
+   "basis": "home scenes x9 (graph.json)",
+   "set_pitch": "Partners in mischief inventing catchphrases: 'Mabe-chin' marvelous + Top Gun 'take-off'."
+  },
+  {
+   "name": "Symboli Kris S & Tanino Gimlet",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1083,
+     "name_en": "Symboli Kris S"
+    },
+    {
+     "id": 1084,
+     "name_en": "Tanino Gimlet"
+    }
+   ],
+   "basis": "home scenes x9 (graph.json)",
+   "set_pitch": "Erudite classmate rivals who play opposite roles on stage: philosophical sparring."
+  },
+  {
+   "name": "Vodka & Daiwa Scarlet",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1008,
+     "name_en": "Vodka"
+    },
+    {
+     "id": 1009,
+     "name_en": "Daiwa Scarlet"
+    }
+   ],
+   "basis": "home scenes x8 (graph.json)",
+   "set_pitch": "Roommate rivals: every timer line is a competition."
+  },
+  {
+   "name": "Seiun Sky & King Halo",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1020,
+     "name_en": "Seiun Sky"
+    },
+    {
+     "id": 1061,
+     "name_en": "King Halo"
+    }
+   ],
+   "basis": "home scenes x8 (graph.json)",
+   "set_pitch": "Sky teases, King insists on joint practice: lazy genius vs. stubborn first-class."
+  },
+  {
+   "name": "Transcend & Wonder Acute",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1080,
+     "name_en": "Transcend"
+    },
+    {
+     "id": 1100,
+     "name_en": "Wonder Acute"
+    }
+   ],
+   "basis": "home scenes x8 (graph.json)",
+   "set_pitch": "Roommates: gadget-loving Transcend and ginger-tea Acute ('an oasis')."
+  },
+  {
+   "name": "Furioso & Espoir City",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1079,
+     "name_en": "Furioso"
+    },
+    {
+     "id": 1081,
+     "name_en": "Espoir City"
+    }
+   ],
+   "basis": "home scenes x8 (graph.json)",
+   "set_pitch": "Funabashi pride vs. JRA dirt; Espoir keeps feeding Furioso leftovers."
+  },
+  {
+   "name": "Satono Diamond & Kitasan Black",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1067,
+     "name_en": "Satono Diamond"
+    },
+    {
+     "id": 1068,
+     "name_en": "Kitasan Black"
+    }
+   ],
+   "basis": "home scenes x7 (graph.json)",
+   "set_pitch": "Childhood best friends and roommates 'Dia-chan' / 'Kita-chan'; Kitasan names Diamond x12 in voice."
+  },
+  {
+   "name": "Hishi Amazon & Narita Brian",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1012,
+     "name_en": "Hishi Amazon"
+    },
+    {
+     "id": 1016,
+     "name_en": "Narita Brian"
+    }
+   ],
+   "basis": "home scenes x7 (graph.json)",
+   "set_pitch": "Amazon's chosen 'taiman' rival, who also makes Brian eat her vegetables."
+  },
+  {
+   "name": "Mejiro Ryan & Mejiro Dober",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1027,
+     "name_en": "Mejiro Ryan"
+    },
+    {
+     "id": 1059,
+     "name_en": "Mejiro Dober"
+    }
+   ],
+   "basis": "home scenes x7 (graph.json)",
+   "set_pitch": "Ryan looks after shy Dober and picks her clothes; Mejiro sub-pair."
+  },
+  {
+   "name": "Kitasan Black & Cheval Grand",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1068,
+     "name_en": "Kitasan Black"
+    },
+    {
+     "id": 1089,
+     "name_en": "Cheval Grand"
+    }
+   ],
+   "basis": "home scenes x7 (graph.json)",
+   "set_pitch": "Popular Kitasan trying to coax shy Cheval Grand to a quiet festival."
+  },
+  {
+   "name": "Inari One & Super Creek",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1034,
+     "name_en": "Inari One"
+    },
+    {
+     "id": 1045,
+     "name_en": "Super Creek"
+    }
+   ],
+   "basis": "home scenes x7 (graph.json)",
+   "set_pitch": "Inari One and Super Creek, Heisei Big Three companions."
+  },
+  {
+   "name": "Oguri Cap & Tamamo Cross",
+   "kind": "duo",
+   "members": [
+    {
+     "id": 1006,
+     "name_en": "Oguri Cap"
+    },
+    {
+     "id": 1021,
+     "name_en": "Tamamo Cross"
+    }
+   ],
+   "basis": "home scenes x6 (graph.json)",
+   "set_pitch": "Oguri and 'Tama': food arguments, hair-tying and borrowed shirts."
+  },
+  {
+   "name": "Gran Alegria / Loves Only You / Chrono Genesis",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1131,
+     "name_en": "Gran Alegria"
+    },
+    {
+     "id": 1132,
+     "name_en": "Loves Only You"
+    },
+    {
+     "id": 1133,
+     "name_en": "Chrono Genesis"
+    }
+   ],
+   "basis": "home scenes Gran Alegria-Loves Only You x5, Gran Alegria-Chrono Genesis x5, Loves Only You-Chrono Genesis x7 (graph.json)",
+   "set_pitch": "MiRules, streams and salads: Gran Alegria, Loves Only You and PR-committee Chrono Genesis."
+  },
+  {
+   "name": "Daitaku Helios / Daiichi Ruby / K.S.Miracle",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1065,
+     "name_en": "Daitaku Helios"
+    },
+    {
+     "id": 1085,
+     "name_en": "Daiichi Ruby"
+    },
+    {
+     "id": 1093,
+     "name_en": "K.S.Miracle"
+    }
+   ],
+   "basis": "home scenes Daitaku Helios-Daiichi Ruby x5, Daitaku Helios-K.S.Miracle x5, Daiichi Ruby-K.S.Miracle x6 (graph.json)",
+   "set_pitch": "Helios's one-sided crush on ojou Ruby, with K.S.Miracle as the sprinter third wheel."
+  },
+  {
+   "name": "Symboli Rudolf / Mr. C.B. / Katsuragi Ace",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1017,
+     "name_en": "Symboli Rudolf"
+    },
+    {
+     "id": 1057,
+     "name_en": "Mr. C.B."
+    },
+    {
+     "id": 1104,
+     "name_en": "Katsuragi Ace"
+    }
+   ],
+   "basis": "home scenes Symboli Rudolf-Mr. C.B. x4, Symboli Rudolf-Katsuragi Ace x4, Mr. C.B.-Katsuragi Ace x8 (graph.json)",
+   "set_pitch": "Showa-era seniors: Rudolf, Mr. C.B. and Katsuragi Ace trading respect across different philosophies."
+  },
+  {
+   "name": "Gold Ship / Nakayama Festa / Orfevre",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1007,
+     "name_en": "Gold Ship"
+    },
+    {
+     "id": 1049,
+     "name_en": "Nakayama Festa"
+    },
+    {
+     "id": 1115,
+     "name_en": "Orfevre"
+    }
+   ],
+   "basis": "home scenes Gold Ship-Nakayama Festa x6, Gold Ship-Orfevre x6, Nakayama Festa-Orfevre x4 (graph.json)",
+   "set_pitch": "Gold Ship, Nakayama Festa and Orfevre: gamblers and a tyrant princess - chaos with stakes."
+  },
+  {
+   "name": "Oguri Cap / Tamamo Cross / Super Creek",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1006,
+     "name_en": "Oguri Cap"
+    },
+    {
+     "id": 1021,
+     "name_en": "Tamamo Cross"
+    },
+    {
+     "id": 1045,
+     "name_en": "Super Creek"
+    }
+   ],
+   "basis": "home scenes Oguri Cap-Tamamo Cross x6, Oguri Cap-Super Creek x6, Tamamo Cross-Super Creek x4 (graph.json)",
+   "set_pitch": "Oguri, Tamamo and Creek: food, banter and motherly coddling."
+  },
+  {
+   "name": "Sakura Chiyono O / Mejiro Ardan / Yaeno Muteki",
+   "kind": "trio",
+   "members": [
+    {
+     "id": 1069,
+     "name_en": "Sakura Chiyono O"
+    },
+    {
+     "id": 1071,
+     "name_en": "Mejiro Ardan"
+    },
+    {
+     "id": 1072,
+     "name_en": "Yaeno Muteki"
+    }
+   ],
+   "basis": "home scenes Sakura Chiyono O-Mejiro Ardan x6, Sakura Chiyono O-Yaeno Muteki x5, Mejiro Ardan-Yaeno Muteki x4 (graph.json)",
+   "set_pitch": "1988 generation: Chiyono O wants Ardan and Yaeno Muteki in her matching-earrings set."
+  }
+ ],
+ "suggested_next_sets": [
+  {
+   "name": "Golden Generation",
+   "member_ids": [
+    1001,
+    1011,
+    1014,
+    1020,
+    1061
+   ],
+   "why": "None in Set 1; all playable with ~200-280 voice lines; strong home-scene web (Grass-El x10, Sky-King x8) and the '最強世代' event title gives an easy shared hook."
+  },
+  {
+   "name": "Dirt Crew / Tetra Mystics",
+   "member_ids": [
+    1098,
+    1099,
+    1100,
+    1046,
+    1080,
+    1079,
+    1081
+   ],
+   "why": "Entirely outside Set 1 and little-known to staff; dense home-scene cluster (x5-x9 pairs) and distinctive tics (feng shui, Tomakomai, gadgets, Funabashi pride). Tetra Mystics name is web-only, so pitch it as the dirt crew."
+  },
+  {
+   "name": "Victory Club (Sakura)",
+   "member_ids": [
+    1041,
+    1069,
+    1076,
+    1072
+   ],
+   "why": "Voice-confirmed club; Bakushin O, Chiyono O and Laurel are playable with rich voice data; Yaeno Muteki joins via Chiyono O (home x5). Sakura Chitose O has only 3 voice lines, so leave her as an optional cameo. Mirrors the Mejiro set ('サクラはサクラ、メジロはメジロ')."
+  },
+  {
+   "name": "BNW + Narita Brian",
+   "member_ids": [
+    1023,
+    1035,
+    1050,
+    1016
+   ],
+   "why": "Event-title-confirmed trio plus Biwa's sister Brian (Biwa-Brian home x6); none in Set 1; adds the third Student Council member Set 1 lacks."
+  },
+  {
+   "name": "Opera O's Court (1999 generation)",
+   "member_ids": [
+    1015,
+    1058,
+    1033,
+    1077
+   ],
+   "why": "Opera O-Doto home x10, Vega-Top Road x6 with heavy mutual voice mentions; theatrical, quotable personalities; none in Set 1."
+  },
+  {
+   "name": "Stay Gold clan",
+   "member_ids": [
+    1007,
+    1049,
+    1115,
+    1119,
+    1135
+   ],
+   "why": "Orfevre-Dream Journey home x11 (joint top), Gold Ship-Festa x6, Gold Ship-Orfevre x6; chaos/gambling/royalty mix. 'Stay Gold family' is real-life sire line, unverified as an in-game group, so frame it as Gold Ship's gang plus the sisters."
+  }
+ ],
+ "coverage_note": "Briefs: 173 (incl. NPCs). Set 1 covers 1062,1032,1026,1145,1087,1010,1030,1017,1018,1003 + a generic Mejiro line; the planned Mejiro set covers 1013,1027,1059,1064,1071,1074,1086. The 6 suggested sets add 29 umas, none of them in Set 1 or the Mejiro set, bringing coverage to 46 of 135 playable umas. Name families with only one member in the data (Daitaku Helios, Tanino Gimlet, Yamanin Zephyr, Eishin Flash, Daiichi Ruby, Zenno Rob Roy, Nishino Flower) have no family entry; Gold (Ship/City), Curren (Chan/Bouquetd'or) and Daring (Tact/Heart) share only a word and were not treated as families. Top-25 home-scene list = 17 pairs (home x6-x11, incl. the Orfevre & Dream Journey family entry; McQueen-Ryan x7 left to the Mejiro entry; Verxina-Vivlos, Loves Only You-Chrono Genesis, Believe-Calstone, C.B.-Katsuragi and Gold Ship-Festa folded into their trios) + 8 trios ranked by weakest edge (x4-x5), two of which are the sisters and Fastest-trio entries. Anime/manga-only teams are marked; web-only claims (Tetra Mystics, JAMD, Team Sirius, Ascella, Chanchan Alliance, Heisei Big Three) are labelled as such. Still uncovered and worth a later set: the 2002 cohort (Kris S, Tanino Gimlet, No Reason, Hishi Miracle), the new-gen Tiara cohort (Air Messiah, Daring Heart, Rhein Kraft, Cesario), the sprinters (Helios, Ruby, K.S.Miracle, Yamanin Zephyr), and Rose Kingdom / Victoire Pisa / Eishin Flash."
+}

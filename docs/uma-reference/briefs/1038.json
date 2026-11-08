@@ -1,0 +1,200 @@
+{
+  "id": 1038,
+  "name_en": "Curren Chan",
+  "name_jp": "カレンチャン",
+  "kind": "uma",
+  "one_liner": "Self-made 'cutest girl in the universe' sprinter and social-media idol who calls her trainer big brother.",
+  "personality": "Curren Chan is a confident, flirty, image-savvy sprinter who refers to herself in the third person and treats 'kawaii' as both brand and battle plan, constantly posting to Umastagram with hashtags. She teases the trainer as 'Onii-chan/Onee-chan', demanding attention and promising never to let go, but she is also calculating and hard-working ('cuteness isn't built in a day'). Glimpses of a sincere, serious side show through: she guards her dislikes as secrets, hides nerves before races, and quietly thanks the trainer for meeting her.",
+  "speech": {
+    "first_person": "Curren (カレン) in third person; occasionally watashi (私)",
+    "calls_trainer": "Onii-chan (お兄ちゃん) for a male trainer / Onee-chan (お姉ちゃん) for a female trainer; also おにーちゃん",
+    "register": "sweet, casual, playful little-sister idol speech with ♪ and ☆, drawn-out vowels",
+    "tics": [
+      {
+        "jp": "カワイイ",
+        "romaji": "kawaii",
+        "meaning": "'cute' - her everything word, in katakana"
+      },
+      {
+        "jp": "お兄ちゃん",
+        "romaji": "onii-chan",
+        "meaning": "'big brother' - how she addresses a male trainer"
+      },
+      {
+        "jp": "お姉ちゃん",
+        "romaji": "onee-chan",
+        "meaning": "'big sister' - female-trainer variant"
+      },
+      {
+        "jp": "めっ",
+        "romaji": "me'",
+        "meaning": "'no-no!' scolding (よそ見はめっ - no looking away)"
+      },
+      {
+        "jp": "『#",
+        "romaji": "hashtag",
+        "meaning": "speaks in Umastagram hashtag posts"
+      },
+      {
+        "jp": "宇宙一カワイイ",
+        "romaji": "uchuu-ichi kawaii",
+        "meaning": "'cutest in the universe'"
+      },
+      {
+        "jp": "がんばりまぁす",
+        "romaji": "ganbarimaasu",
+        "meaning": "drawn-out 'I'll do my best'"
+      },
+      {
+        "jp": "運命",
+        "romaji": "unmei",
+        "meaning": "'destiny' - recurring romantic motif"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Selfies and Umastagram/SNS posting (profile strength; 91003)",
+    "Piano (profile strength)",
+    "Sweets: macarons, cake, parfait; sweets-sharing with Fine Motion (90002, 91020)",
+    "Spring songs, inherited from her brother (90006)",
+    "Fashion and coordinates (#カレンのこーで, 10027)",
+    "Being looked at and loved; 'destiny' and wedding imagery (40003, 92015, 93005)"
+  ],
+  "weak_spots": [
+    "Yum cha / dim sum (飲茶) is her listed weakness (profile)",
+    "Hates looking tired - split ends and a worn face are 'not cute' (20000, 20010)",
+    "Hard, gruelling training doesn't suit her personality (92005, 20009)",
+    "Hides nerves before races (20036)",
+    "Keeps what she dislikes secret on purpose (91004)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "March 31 (3月31日)",
+    "height": "155 cm",
+    "voice_actor": "Yu Sasahara (篠原侑)"
+  },
+  "relationships": [
+    {
+      "id": 1033,
+      "name_en": "Admire Vega",
+      "nature": "Roommate (web); most frequent home-scene partner and close friend",
+      "evidence": "home scenes x4; Admire Vega mentions her x4; web: https://umamusu.wiki/Curren_Chan"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Home-scene partner",
+      "evidence": "home scenes x3; Falcon mentions her x1"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "Home-scene partner; wiki says she supports Flash before big races (unverified)",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Curren_Chan"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "Shopping buddy with good sense",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91002: 最近マヤちゃんとお買い物したの！)"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "Sweets-sharing cafe friend; 'we might be a bit alike'",
+      "evidence": "mentions in voice x2 (voice_id 91020: カレンとファインさんって、 ちょっぴり似てるのかも？)"
+    },
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "Respects her purity",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Shares her wish to bring happiness",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Admires her equipment care",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "Fellow 'cute' idol type; event partner",
+      "evidence": "home scenes x2; Aston Machan mentions her x1; voice_id 400104: マーちゃんたちも、ファンも…みーんな幸せそうだったな。"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Name-twin; home-scene partner",
+      "evidence": "home scenes x2; Curren Bouquetd'or mentions her x2"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "Wiki: Curren is jealous of Flower's easy popularity",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Curren_Chan"
+    },
+    {
+      "id": null,
+      "name_en": "Curren's older brother (unnamed)",
+      "nature": "Her older brother (兄さん), whom she speaks of in the past tense as having loved spring songs; the wiki says he has passed away (unverified)",
+      "evidence": "voice_id 90006: 兄さんは、春にまつわる曲が 大好きだったの; web: https://umamusu.wiki/Curren_Chan"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Curren aims to make the whole world (and universe) fall for her 'kawaii', and treats sprint racing as the stage for it; her career events are all titled カワイイの… and her goals include the Summer Sprint Series, Sprinters Stakes and Takamatsunomiya Kinen. Per the wiki (unverified), her trainer first met her as a child at an amusement park, and hidden events (Curren's Black) show the serious 'true' side behind her cute act. The real horse won the 2011 Takamatsunomiya Kinen and the 2010 Summer Sprint Series (general knowledge, unverified in mdb).",
+    "source": "event titles; web: https://umamusu.wiki/Curren_Chan; model knowledge (unverified) for real-horse results"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "世界中…ううん、宇宙中から\n愛されて、1番カワイくなるの。\nお兄ちゃんも、愛してね♪",
+      "en": "I'll be loved by the whole world... no, the whole universe, and become the cutest one of all. Love me too, Onii-chan."
+    },
+    {
+      "voice_id": 92017,
+      "jp": "カレン、やらなきゃいけないことは\nちゃ～んとわかってるつもり。\nカワイイは1日にして成らずだよ♪",
+      "en": "Curren knows exactly what she has to do. Cuteness isn't built in a day!"
+    },
+    {
+      "voice_id": 10012,
+      "jp": "私と出会ってくれて…ありがとう。\nすごく、すごく嬉しかったんだよ。\nお誕生日おめでとう、お兄ちゃん！",
+      "en": "Thank you... for meeting me. I was really, really happy. Happy birthday, Onii-chan!"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "嫌いなものってヒトが見える。\nだからカレンはヒミツにするの。\nそのほうが知りたくなるでしょ♪",
+      "en": "What you dislike shows who you are. So Curren keeps hers a secret. That makes you want to know more, right?"
+    },
+    {
+      "voice_id": 20036,
+      "jp": "あのね、カレン本当はすごく…\nううん、なんでもないっ。\nそれじゃ、がんばってきまぁす♪",
+      "en": "You know, Curren is actually really... no, never mind. Okay, I'll go do my best!"
+    },
+    {
+      "voice_id": 90006,
+      "jp": "兄さんは、春にまつわる曲が\n大好きだったの。だからカレンの\nレパートリーも、春が多め！",
+      "en": "My big brother loved songs about spring. That's why Curren's repertoire is mostly spring songs, too!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Onii-chan~! The independent run is all done! Curren finished it super cutely, so come look right now, {user}. Looking away is a no-no, okay?",
+    "#IndependentRun #AllDone #CurrenDidHerBest ...posted! {user}, the timer's finished, so come praise Curren, Onii-chan~"
+  ],
+  "data_gaps": [
+    "Groups: none confirmed beyond dorm",
+    "Brother's death is a web claim referencing the real horse's sibling; the mdb lines only reference him in past tense",
+    "Voice actor romanisation is from general knowledge",
+    "Mentions of Lucky Lilac (1130, x1 per mdb) not covered in relationships"
+  ]
+}

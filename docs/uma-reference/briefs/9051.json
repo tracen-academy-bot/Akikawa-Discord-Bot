@@ -1,0 +1,60 @@
+{
+  "id": 9051,
+  "name_en": "Yunohana Bloom",
+  "name_jp": "ユノハナブルーム",
+  "kind": "npc",
+  "one_liner": "Laid-back, playful young proprietress-in-training at Yukoma Inn, apprenticed to her former trainer Kiyoko.",
+  "personality": "Per the wiki, she seems laid back but has a playful side, livening up the mood or goofing around, and her hospitality is gentle and considerate. The source file has no lines or profile text, so none of this is verifiable from the mdb.",
+  "speech": {
+    "first_person": "watashi (私) - web only",
+    "calls_trainer": "Trainer-sama (トレーナー様) - web only",
+    "register": "unknown (no voice lines in source); likely polite hostess speech given 'Trainer-sama', unverified",
+    "tics": []
+  },
+  "likes_and_motifs": [
+    "hot springs hospitality (web)",
+    "the year-end comedy contest she anticipates for months (web)"
+  ],
+  "weak_spots": [
+    "unknown"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "June 26 (6月26日) - web only",
+    "height": "162 cm - web only",
+    "voice_actor": "Aki Toyosaki (豊崎愛生)"
+  },
+  "relationships": [
+    {
+      "id": 9050,
+      "name_en": "Hoshina Kiyoko",
+      "nature": "her former racing trainer and senior/mentor at Yukoma Inn",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Yunohana_Bloom"
+    },
+    {
+      "id": 9045,
+      "name_en": "Sugar Lights",
+      "nature": "shares a home conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Yukoma Inn (ゆこま旅館) / Paradise Yukoma Hot Springs scenario (web)"
+  ],
+  "story_arc": {
+    "summary": "Apprentice at Yukoma Inn working to become its proprietress, appearing with Kiyoko Hoshina in the 'Paradise Yukoma Hot Springs' scenario (JP, Oct 29 2025). Kiyoko was her trainer during her racing career. Kiyoko's event title '若女将見守り記' ('Watching over the young proprietress') likely refers to her.",
+    "source": "web: https://umamusu.wiki/Yunohana_Bloom; event titles (Kiyoko's)"
+  },
+  "sample_lines": [],
+  "timer_line_ideas": [
+    "Trainer-sama {user}, your independent run has finished! Please come see how it went - and afterwards, perhaps a nice warm soak?",
+    "Welcome back from the run! The fifty minutes are up, so if you'd kindly check on it, {user}... the bath will be ready when you are."
+  ],
+  "data_gaps": [
+    "No voice lines, self-intro, birthday or height in source; everything beyond VA and partners is from umamusu.wiki",
+    "Speech tics unknown; timer drafts use only 'Trainer-sama' (wiki) and the onsen setting",
+    "kind 'npc' per chara_category 1 / non-playable; she is an Umamusume by species",
+    "Scenario 'Paradise Yukoma Hot Springs' JP release Oct 29 2025 confirmed via news (gamespark.jp 2025/10/29); wiki gives no date"
+  ]
+}

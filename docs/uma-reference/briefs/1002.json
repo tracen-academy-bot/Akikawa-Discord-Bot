@@ -1,0 +1,165 @@
+{
+  "id": 1002,
+  "name_en": "Silence Suzuka",
+  "name_jp": "サイレンススズカ",
+  "kind": "uma",
+  "one_liner": "Quiet, single-minded front-runner who lives to see the empty view from the lead.",
+  "personality": "Reserved, soft-spoken and a little awkward socially (her self-intro trails off into 'um... that's all'), she lights up only when talking about running. She is almost comically single-minded: she jogs back to the dorm because she has not run enough and tunes out conversation when thinking about races. Gentle and kind with friends like Spe, she gradually learns that the special view she chases can be shared with her trainer.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "Quiet, polite desu/masu with the trainer; soft feminine casual with friends (…わ, …かしら)",
+    "tics": [
+      {
+        "jp": "先頭の景色",
+        "romaji": "sentou no keshiki",
+        "meaning": "'the view from the front' - her goal and refrain"
+      },
+      {
+        "jp": "景色",
+        "romaji": "keshiki",
+        "meaning": "'scenery/view'; recurs in a huge share of her lines"
+      },
+      {
+        "jp": "かしら",
+        "romaji": "kashira",
+        "meaning": "soft feminine 'I wonder'"
+      },
+      {
+        "jp": "ふふっ",
+        "romaji": "fufu",
+        "meaning": "small, quiet laugh, usually when happy about running"
+      },
+      {
+        "jp": "スペちゃん",
+        "romaji": "Supe-chan",
+        "meaning": "what she calls Special Week"
+      },
+      {
+        "jp": "…",
+        "romaji": "(trailing ellipsis)",
+        "meaning": "she often trails off mid-sentence"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Running, anywhere, anytime (turf, dirt, slopes, snow, starlit nights)",
+    "The empty view from the lead / beyond speed",
+    "Snow and quiet; grew up in snow country (voice 91026)",
+    "Hot milk with a spoonful of honey",
+    "Cat-character phone wallpaper",
+    "Alarm set to a race fanfare (voice 91009)",
+    "Caring for her tail to cut air resistance",
+    "Remembering how good it felt to run for the first time"
+  ],
+  "weak_spots": [
+    "Crowded places (listed weakness)",
+    "Not hearing anything when she is thinking about running (about_ears)",
+    "Lives/dancing: 'maybe more nervous than racing' (voices 60000, 70014)",
+    "Shy, short self-introductions",
+    "Small embarrassments like petals in her hair (voice 90006)",
+    "Worries about getting a cold stomach (voices 91005, 10027)",
+    "Dorm rules that stop her running as much as she likes (voice 400002)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "May 1 (5月1日)",
+    "height": "161 cm (161㎝)",
+    "voice_actor": "Marika Kouno (高野麻里佳)"
+  },
+  "relationships": [
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "Kouhai and (implied) roommate; Spe helps braid her hair and makes her eat more than usual",
+      "evidence": "home scenes x4; mentioned by Spe x6; voice 91010: スペちゃんと一緒だと、いつもより多くご飯を食べてしまうんです; 91019; 1011: いきましょう、スペちゃん"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Close friend/rival ('the Empress'); fixes Suzuka's ribbon and gives her health tips",
+      "evidence": "mentions in voice x5 (voice_id 10026: リボンが曲がっていると、エアグルーヴが直してくれるんです; 90007; 90015; 400008); home scenes x4; event title: “女帝”の眼差し"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "Friend who keeps giving her giant lucky charms and lucky-food advice",
+      "evidence": "home scenes x5; mentions in voice x3 (voice_id 91002: フクキタルにもらったお守り…あんなに大きな金色の鯛; 10003; 91020)"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "Friend whose advice ('Enjoy spirits desu!') baffles her; recommends midriff-baring clothes",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 91000: 短距離のコツをタイキに聞いたら『エンジョイスピリッツデース☆』って…何もわからない; 10027; 91018)"
+    },
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "Senpai ('パール先輩') who appeared in her dream teaching samba",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91016: パール先輩が浜辺でサンバを教えてくれる夢を…)"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Shares home scenes; nature not shown in her lines",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1026,
+      "name_en": "Mihono Bourbon",
+      "nature": "Shares home scenes; nature not shown in her lines",
+      "evidence": "home scenes x3"
+    }
+  ],
+  "groups": [
+    "Team Spica (anime only)",
+    "Team Rigil (anime only, before transferring to Spica - general knowledge, unverified)"
+  ],
+  "story_arc": {
+    "summary": "A gifted runner who only wants to run in front, she stumbles early (Yayoi Sho 'confusion') when forced into a conventional style, then regains herself and goes on a front-running tear through the Kinko Sho, Takarazuka Kinen and Mainichi Okan, with Air Groove as a rival. The climax is the Autumn Tenno Sho, 'beyond the limit' - in reality the race where the horse Silence Suzuka suffered a fatal injury, which the game career lets her overcome.",
+    "source": "event titles (弥生賞の後に・生まれた戸惑い, 神戸新聞杯の後に・取り戻したもの, 金鯱賞の後に・再起、躍進, 毎日王冠の後に・そして“光”へ, 天皇賞（秋）の後に・限界の先へ, “女帝”の眼差し); real-life context from model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 2034,
+      "jp": "先頭の景色…\n必ずこの目で見てきます！",
+      "en": "The view from the front... I'll see it with my own eyes, without fail!"
+    },
+    {
+      "voice_id": 90005,
+      "jp": "まだ走り足りない…。\n寮まで走って帰ろうかしら。\n…すごく短い距離だけど。",
+      "en": "I still haven't run enough... Maybe I'll run back to the dorm. ...It's a really short distance, though."
+    },
+    {
+      "voice_id": 91000,
+      "jp": "短距離のコツをタイキに聞いたら\n『エンジョイスピリッツデース☆』\nって…何もわからない…。",
+      "en": "I asked Taiki for tips on sprinting and she said 'Enjoy spirits desu!'... I learned nothing..."
+    },
+    {
+      "voice_id": 10007,
+      "jp": "『トリックオアトリート。\nお菓子くれなきゃ追いかけます』\nっていうのは…どうでしょう？",
+      "en": "'Trick or treat. No sweets, and I'll chase you.' ...How's that?"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "…やっと見えた！\nスピードの向こう側…静かでどこまでも綺麗な…\n私が見たかったもの…！",
+      "en": "...At last I can see it! The other side of speed... quiet and beautiful forever... what I wanted to see!"
+    },
+    {
+      "voice_id": 10002,
+      "jp": "誰もいない景色こそが特別だと\n思っていました。でも、今は…。",
+      "en": "I used to think only a view with no one in it was special. But now..."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run is finished. ...The view at the end was lovely, I think. Shall we go look at the results together, Trainer-san? Then, maybe, one more lap...",
+    "Fifty minutes, done. Fufu... I barely noticed the time. {user}, please come check it, Trainer-san. I'd like to see that view with you."
+  ],
+  "data_gaps": [
+    "Story arc beyond event titles is from model knowledge (unverified); the mdb has no event dialogue",
+    "Roommate relationship with Spe is implied (Spe's voice 400005), not stated in Suzuka's own lines",
+    "Smart Falcon and Mihono Bourbon home-scene partnerships have no supporting lines in her file",
+    "Anime team membership not in the data"
+  ]
+}

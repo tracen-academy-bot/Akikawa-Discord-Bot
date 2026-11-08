@@ -4,6 +4,31 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-08 — Uma reference from the JP master data
+
+- `scripts/uma-reference/extract_umas.py` reads a JP `master.mdb` into one
+  JSON per character (173: 145 umas, 135 playable, plus 28 NPCs): profile
+  text categories, voice lines (`character_system_text`), cards and
+  aptitudes, event titles, home-screen scene casts, voice-line mentions,
+  affinity. Event dialogue is not in the mdb (asset bundles), only titles.
+- Mentions first matched short names as plain substrings. The checking
+  agents found false hits (グランマ as Gran Alegria, カフェテリア as
+  Manhattan Cafe, サングラス as Grass Wonder). Short names now count only
+  before an honorific or punctuation, and the speaker's own name is removed
+  first (シュヴァル、グラン). Edges fell from 1,285 to 1,105.
+- Briefs in `docs/uma-reference/briefs/`: written per batch, then checked
+  by a separate refuting agent per batch (455 corrections), then
+  `validate_briefs.py`. One batch (1056-1060) was written by its checker
+  because the writer left no files, so it got a third, independent check.
+  One checker wrongly removed Sakura Chitose O (1126) as "not in the data";
+  restored by hand.
+- `groups.json`: families, units, teams, top home-scene pairs and trios,
+  and 6 suggested next sets after Mejiro.
+- Viewer page source in `docs/uma-reference/index.html`, published as a
+  private artifact. Dark by default, as asked.
+
+---
+
 ## 2026-11-05 — Timer Settings, special sets, a special lock
 
 - **Settings button** on the panel (second row; a row holds five). It

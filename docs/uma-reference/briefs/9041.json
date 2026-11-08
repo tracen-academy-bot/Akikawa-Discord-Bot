@@ -1,0 +1,96 @@
+{
+  "id": 9041,
+  "name_en": "Godolphin Barb",
+  "name_jp": "ゴドルフィンバルブ",
+  "kind": "npc",
+  "one_liner": "Gentle, refined goddess-AI of 'love', a kind teacher who believes bonds are what make Uma Musume run.",
+  "personality": "Soft-spoken and nurturing; her tagline calls her 'an elegant teacher overflowing with enveloping kindness'. Both of her lines are gentle questions about whether the trainer can keep going and what they are thinking, showing she leads by listening. Her self-introduction says Uma Musume run because of many bonds and existences, and she offers to lend her strength.",
+  "speech": {
+    "first_person": "watashi (わたし, written in hiragana)",
+    "calls_trainer": "Trainer-san (トレーナーさん) per web; not seen in mdb lines",
+    "register": "soft, gentle feminine, teacherly",
+    "tics": [
+      {
+        "jp": "〜わね",
+        "romaji": "~wa ne",
+        "meaning": "soft feminine ending (わたしも力になるわね)"
+      },
+      {
+        "jp": "〜の？",
+        "romaji": "~no?",
+        "meaning": "gentle question (どんなことを考えているの？)"
+      },
+      {
+        "jp": "〜というの",
+        "romaji": "~to iu no",
+        "meaning": "soft 'I am called ~' (self_intro)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "bonds between people (self_intro: いろいろな絆)",
+    "cats / animal therapy (web, unverified)",
+    "keeps her eyes closed (web, unverified)"
+  ],
+  "weak_spots": [
+    "the cats she uses for therapy end up healing her more than the patients (web, unverified)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "February 24, the day the AI took the Three Goddesses' name (2月24日（AIが三女神の名を名乗った日）)",
+    "height": "unknown",
+    "voice_actor": "Satomi Sato (佐藤聡美)"
+  },
+  "relationships": [
+    {
+      "id": 9040,
+      "name_en": "Darley Arabian",
+      "nature": "fellow Three Goddesses AI",
+      "evidence": "web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters"
+    },
+    {
+      "id": 9042,
+      "name_en": "Byerley Turk",
+      "nature": "fellow Three Goddesses AI",
+      "evidence": "web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters"
+    },
+    {
+      "id": 1120,
+      "name_en": "Calstone Light O",
+      "nature": "friend she watches over, building VR simulations for Light O's 'fastest' dream",
+      "evidence": "web: https://umamusu.wiki/Godolphin_Barb (web only; not in mdb)"
+    }
+  ],
+  "groups": [
+    "Three Goddesses (三女神)",
+    "Grand Masters scenario"
+  ],
+  "story_arc": {
+    "summary": "Not a trainee. One of the three AIs that took the Three Goddesses' names in the Grand Masters scenario, embodying 'love'. She supports training (her bonus boosts after-training and hint events) and appears as a final opponent in the Grand Masters race.",
+    "source": "web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters , https://umamusu.wiki/Godolphin_Barb"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "一緒にがんばれる？",
+      "en": "Can you keep at it with me?"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "どんなことを考えているの？",
+      "en": "What are you thinking about?"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run has finished. She ran thinking of you, I'm sure. Won't you go and welcome her back?",
+    "Well done, both of you. The run is over now, {user}. Shall we see how she did? I'll be right here with you."
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Godolphin Barb' is the Global / EN-wiki name",
+    "Only 2 voice lines; 'Trainer-san' address is from web only",
+    "Dorm, grade, height null (AI being)",
+    "No home scenes or mentions in mdb",
+    "Virtue 'love' and the Calstone Light O friendship are from umamusu.wiki only; not in mdb"
+  ]
+}

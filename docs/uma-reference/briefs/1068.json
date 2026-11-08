@@ -1,0 +1,220 @@
+{
+  "id": 1068,
+  "name_en": "Kitasan Black",
+  "name_jp": "キタサンブラック",
+  "kind": "uma",
+  "one_liner": "Big-hearted festival girl who can't ignore anyone in trouble and wants every race to be a matsuri.",
+  "personality": "Cheerful, earnest and sturdy, she sees herself as 'Otasuke Kita-chan' (Helper Kita-chan) and helps everyone, even when it makes her nearly late. She grew up in a lively 30-person household with her father's disciples, sings to show gratitude like her father, and drops into festival chants (wasshoi, seiya soiya) when she gets fired up. She idolises Tokai Teio and is inseparable from her childhood friend Satono Diamond. When she's off form she still refuses to lose in spirit.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん); anata (あなた) in emotional lines",
+    "register": "energetic polite speech (desu/masu with ~っ！), casual with friends; festival barker and kabuki-style declamations",
+    "tics": [
+      {
+        "jp": "ワッショイ / わーっしょい",
+        "romaji": "wasshoi",
+        "meaning": "festival portable-shrine chant: 'heave-ho!'"
+      },
+      {
+        "jp": "セイヤッ、ソイヤッ",
+        "romaji": "seiya, soiya",
+        "meaning": "mikoshi-carrying shouts"
+      },
+      {
+        "jp": "どどん！",
+        "romaji": "dodon!",
+        "meaning": "drum-boom emphasis: 'boom!' or 'with confidence!'"
+      },
+      {
+        "jp": "どんとこい / どーんとこい",
+        "romaji": "donto koi",
+        "meaning": "'bring it on!'"
+      },
+      {
+        "jp": "サアサ",
+        "romaji": "saasa",
+        "meaning": "barker's 'come on, come on' (サアサお待たせ、お祭り娘っ！)"
+      },
+      {
+        "jp": "お助け",
+        "romaji": "otasuke",
+        "meaning": "helping out; she calls herself お助けキタちゃん / お助け大将"
+      },
+      {
+        "jp": "お祭り娘",
+        "romaji": "omatsuri musume",
+        "meaning": "festival girl, her self-title"
+      },
+      {
+        "jp": "ハァア～ン！",
+        "romaji": "haaan!",
+        "meaning": "singer's vocal warm-up (enka-style), used to check her voice"
+      },
+      {
+        "jp": "いよっ、アンタが大将っ！！",
+        "romaji": "iyo', anta ga taishō!",
+        "meaning": "festive cheer: 'you're the boss!'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Festivals, mikoshi, fireworks, lanterns",
+    "Singing to show gratitude, karaoke, lullabies",
+    "Massage (profile strength; taught by her mother)",
+    "Konpeito and chochin lanterns (trivia); wagashi sugar sweets (落雁, 和三盆, 琥珀糖)",
+    "Helping people",
+    "Tokai Teio as her idol",
+    "Satono Diamond",
+    "Hiking and mountain climbing, big onigiri",
+    "Training until she's exhausted (trivia)",
+    "Eats bony fish cleanly with chopsticks (trivia)",
+    "Shrine maiden (uma-miko) duties in her New Year outfit lines"
+  ],
+  "weak_spots": [
+    "Can't turn a blind eye (profile 'weakness')",
+    "Long plane flights (voice 91225)",
+    "Knife and fork, Western breakfasts (voice 91221)",
+    "Ghosts and test-of-courage events (voice 90217)",
+    "Gets a little homesick at dinnertime (voice 91011)",
+    "Nearly late because she stops to help people (voice 90001)",
+    "Childhood memory of eating too much of her mother's konpeito and getting scolded (voice 91224)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "March 10 (3月10日)",
+    "height": "162 cm (162cm)",
+    "voice_actor": "Hinaki Yano (矢野妃菜喜)"
+  },
+  "relationships": [
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "Childhood best friend and roommate; she calls her 'Dia-chan'",
+      "evidence": "home scenes x7; mentions in voice x12 (voice_id 91024: ダイヤちゃんと 親友なのは、ずっと変わりません！; 91021: 起きたら隣にダイヤちゃんが いるのって); trivia: 入学式に撮ったダイヤちゃんとの1枚"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Her idol and the star she wants to become",
+      "evidence": "home scenes x2; mentions in voice x5 (voice_id 91228: 1番憧れるあたしのスター… テイオーさんとお揃いです！; 400009: テイオーさん、待っててください)"
+    },
+    {
+      "id": 1089,
+      "name_en": "Cheval Grand",
+      "nature": "Friend; Kitasan tries to find a quiet festival she'd enjoy ('Cheval-chan')",
+      "evidence": "home scenes x7; voice_id 91217: シュヴァルちゃんと楽しめる お祭りないかなぁ。静かな場所が 好きだから"
+    },
+    {
+      "id": 1088,
+      "name_en": "Satono Crown",
+      "nature": "Friend and rival (shogi), 'Kura-chan'",
+      "evidence": "home scenes x3; voice_id 91216: 次の将棋は勝たせて もらうからね、クラちゃんっ！"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "Rival whose strong legs she admires",
+      "evidence": "home scenes x3; voice_id 91218: ドゥラさんの 逞しい脚！あたしも負けられない！; web: https://umamusu.wiki/Kitasan_Black"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "Plays along with Sweep's magical-girl games as 'Magical Black'",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91002: 魔法少女 マジカルブラック！…この口上なら スイープさん、合格くれるかな…？)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Chaotic senior who drags her into odd activities ('Golshi-san')",
+      "evidence": "home scenes x1; mentions in voice x3 (voice_id 91014: なんで浮き輪と 泡立て器が必要なのかな…？)"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Senior who helps her into kimono and beats her at spinning tops",
+      "evidence": "mentions in voice x2 (voice_id 91018: グラスさんが着付けをしてくれると)"
+    },
+    {
+      "id": 1034,
+      "name_en": "Inari One",
+      "nature": "Mikoshi-carrying partner",
+      "evidence": "voice_id 90007: 今度イナリさんと お神輿担ぐんです！"
+    },
+    {
+      "id": 1021,
+      "name_en": "Tamamo Cross",
+      "nature": "Karaoke buddy",
+      "evidence": "voice_id 91016: タマモさんとカラオケに行くと、 合いの手が気持ちいいんです！"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Senior who gave her sakura mochi",
+      "evidence": "home scenes x1; voice_id 91012: バクシンオーさんに 桜餅をいただきました！"
+    },
+    {
+      "id": 1102,
+      "name_en": "Sounds of Earth",
+      "nature": "Her music makes Kitasan want to sing",
+      "evidence": "home scenes x2; voice_id 91220: アースさんの演奏を聴いた後って、 つい歌いたくなっちゃって"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "Senior she caught eating midnight snacks",
+      "evidence": "voice_id 91019: 夜食を頬張るスペさんが！ (mention not counted by the mdb mention table)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Kitasan household: father's disciples live with them, 30 people (profile about_family)",
+    "Team Spica with Tokai Teio and others (anime-only; web: https://umamusu.wiki/Kitasan_Black)"
+  ],
+  "story_arc": {
+    "summary": "Kitasan joins Tracen dreaming of being a star like Tokai Teio, and her trainer scouts her (the detail that she had lost a mock race first is not on the cited page; model knowledge, unverified). Her early events cover bonds with Diamond and Cheval, and 'the Empress's bloodline' (a rival who, per the web, is Brusquement, a Duramente stand-in). After that rival's Satsuki shock, Kitasan wins her first big festival at the Kikuka Sho. Her senior year covers the Osaka Hai, Tenno Sho (Spring and a muddy Autumn), Takarazuka and Japan Cup, and ends with an Arima Kinen of 'smile fireworks' and going beyond her idol.",
+    "source": "event titles; web: https://umamusu.wiki/Kitasan_Black (Brusquement as Duramente stand-in, Team Spica); model knowledge (unverified) for the scouting detail"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 40001,
+      "jp": "サアサお待たせ、お祭り娘っ！\n先駆けごめんだ、ワッショイワッショイ！！",
+      "en": "Come one, come all, here's your festival girl! Pardon me for taking the lead, wasshoi wasshoi!!"
+    },
+    {
+      "voice_id": 92005,
+      "jp": "あたしは『お助けキタちゃん』\nですから！トレーナーさんも\nどどん！と頼ってください！",
+      "en": "I'm 'Helper Kita-chan', after all! So you can lean on me too, Trainer-san, boom!"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "人助けなのか余計なお節介か…\n迷っても、結局やっちゃうんです。\nそのほうが後悔しない気がして！",
+      "en": "Is it helping, or just being nosy... Even when I'm unsure, I end up doing it anyway. I feel like I'd regret it less that way!"
+    },
+    {
+      "voice_id": 20024,
+      "jp": "逃げて魅せます、お祭り娘ッ！\nどなたもこなたもご照覧あれっ！",
+      "en": "I'll run away in front and dazzle you, the festival girl! Everyone, one and all, behold!"
+    },
+    {
+      "voice_id": 10011,
+      "jp": "ハッピーバースデーです、\nトレーナーさん！\nいよっ、アンタが大将っ！！",
+      "en": "Happy birthday, Trainer-san! Iyo, you're the boss!!"
+    },
+    {
+      "voice_id": 91024,
+      "jp": "入学した頃から、走り方も考え方も\n色々変わったけど…ダイヤちゃんと\n親友なのは、ずっと変わりません！",
+      "en": "Since we started school, the way I run and think have changed a lot... but Dia-chan being my best friend never will!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Wasshoi, wasshoi! {user}, the independent run is all wrapped up! Fifty minutes of hard work deserves a little festival, so let's go check it together, Trainer-san!",
+    "Dodon! Helper Kita-chan reporting: the independent run's finished! Come take a look, {user}, and then let's start the next one with a seiya, soiya!"
+  ],
+  "data_gaps": [
+    "King Halo voice mention (x1) looks like a false positive (ハイキング contains キング); no King Halo line found",
+    "Her father being an enka singer is implied (singing, disciples, 'like father'), not stated in the mdb; the real-horse owner Kitajima Saburo is an enka singer (web)",
+    "The Brusquement rival comes from the web; event titles only say “女帝”の血族",
+    "Whether Kitasan lost a selection/mock race before being scouted could not be confirmed on umamusu.wiki"
+  ]
+}

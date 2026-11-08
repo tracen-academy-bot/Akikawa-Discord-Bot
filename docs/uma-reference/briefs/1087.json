@@ -1,0 +1,181 @@
+{
+  "id": 1087,
+  "name_en": "Aston Machan",
+  "name_jp": "アストンマーチャン",
+  "kind": "uma",
+  "one_liner": "Deadpan, mysterious would-be 'world mascot' who desperately wants to be remembered.",
+  "personality": "Machan is a spacey, deadpan self-promoter who refers to herself in the third person and treats everything as merchandising, marketing or a photo op. Beneath the jokes runs a quiet fear of being forgotten: she keeps asking the trainer to 'keep me in your eyes' and 'remember me', and talks about wanting to leave a mark. She is playful, likes sweets and cute things, and is fond of friends like Daiwa Scarlet, Vodka and Curren Chan.",
+  "speech": {
+    "first_person": "Maa-chan (マーちゃん), speaking of herself in third person; occasionally watashi (わたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん); sometimes anata (あなた)",
+    "register": "polite desu/masu with childish, deadpan quirks",
+    "tics": [
+      {
+        "jp": "なのです",
+        "romaji": "na no desu",
+        "meaning": "cute emphatic sentence ending"
+      },
+      {
+        "jp": "ふむ",
+        "romaji": "fumu",
+        "meaning": "'hmm' musing"
+      },
+      {
+        "jp": "むむ",
+        "romaji": "mumu",
+        "meaning": "'hmmm!' when puzzled or frustrated"
+      },
+      {
+        "jp": "ターイム",
+        "romaji": "taaimu",
+        "meaning": "'...Time!' as in 'Dress-up Machan Time'"
+      },
+      {
+        "jp": "もちふわ",
+        "romaji": "mochifuwa",
+        "meaning": "'squishy-fluffy', her self-branding"
+      },
+      {
+        "jp": "覚えていてね",
+        "romaji": "oboete ite ne",
+        "meaning": "'please remember me'"
+      },
+      {
+        "jp": "ばばーん",
+        "romaji": "babaan",
+        "meaning": "'ta-daa!'"
+      },
+      {
+        "jp": "じゃじゃん",
+        "romaji": "jajan",
+        "meaning": "'ta-da'"
+      },
+      {
+        "jp": "マーちゃんアラート",
+        "romaji": "Maa-chan arāto",
+        "meaning": "'Machan Alert' (used when tired)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "becoming the world's mascot; merchandise, Machan dolls, crowns",
+    "observing living things (profile)",
+    "darts (profile)",
+    "sweets: marron glace, marshmallow cocoa, cookies like her mother's",
+    "photos, photobombing, Umastagram posts, memories and albums",
+    "dried flowers, pressed-flower bookmarks, dandelions",
+    "snow and the wish to be remembered"
+  ],
+  "weak_spots": [
+    "whistling (profile)",
+    "keeps losing earrings - on her 9th pair (profile)",
+    "pure white and the smell of disinfectant (voice 91004)",
+    "dancing despite being athletic (voice 91005)",
+    "fear of being forgotten (many lines)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "March 5 (3月5日)",
+    "height": "152 cm (152cm)",
+    "voice_actor": "Honoka Inoue (井上ほの花)"
+  },
+  "relationships": [
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "friend and rival; they swap tops",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 10027: 「スカーレットと次は」, voice_id 1150: 「スカーレット、お覚悟！」)"
+    },
+    {
+      "id": 1008,
+      "name_en": "Vodka",
+      "nature": "friend and rival",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91000: 「ウオッカよりも」)"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "fellow cute self-promoter; always catches Machan photobombing and takes a 2-shot",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91001: 「カレンチャンさんは隙がないです」)"
+    },
+    {
+      "id": 1082,
+      "name_en": "North Flight",
+      "nature": "coordinates her outfits; wiki says roommate",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91017: 「フライトさん流コーディネート」); web: https://umamusu.wiki/Aston_Machan"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "gave her flowers she pressed into bookmarks",
+      "evidence": "mentions in voice x2 (voice_id 91018: 「フラワーさんからもらったお花」)"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "'Turbo-san shishou' (master); wiki says video-editing partner",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91003: 「ターボさん師匠の足音です」); web: https://umamusu.wiki/Aston_Machan"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "friend; wiki says Sweep thinks Machan is a witch",
+      "evidence": "home scenes x3; web: https://umamusu.wiki/Aston_Machan"
+    },
+    {
+      "id": null,
+      "name_en": "her younger sister",
+      "nature": "'wild little sister' who messages her at night; wiki names her Jaja Machan",
+      "evidence": "voice_id 91011: 「家のあばれ妹から」; web: https://umamusu.wiki/Aston_Machan"
+    }
+  ],
+  "groups": [
+    "Chanchan Alliance with Curren Chan (web: umamusu.wiki, unverified in mdb)"
+  ],
+  "story_arc": {
+    "summary": "A sprint/mile runner who wants fame so she'll never be forgotten, Machan races the Fantasy Stakes, Hanshin JF, Oka Sho, Sprinters Stakes and Takamatsunomiya Kinen; after the Fantasy S she starts a blog. Event titles about wanting to 'get along with spring' and 'Will you reflect me again?' foreshadow fragility, and per the wiki, after the Takamatsunomiya Kinen she walks toward the sea believing she's been forgotten. Her real-life model died young in 2008, which the story treats gently.",
+    "source": "event titles; web: https://umamusu.wiki/Aston_Machan"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "どんなマーちゃんであっても、\nその瞳に映していてください。\n…忘れないでくださいね。",
+      "en": "Whatever kind of Machan I am, please keep me reflected in your eyes. ...Don't forget me, okay?"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "一家に一体、マーちゃん人形。\nトレーナーさんのお宅には2体以上\n在庫も含め、管理をお願いします。",
+      "en": "One Machan doll per household. Your home needs two or more, Trainer-san - please manage the stock, too."
+    },
+    {
+      "voice_id": 20001,
+      "jp": "マーちゃんアラートを発動します！\nマーちゃんはもう『ひへー』です。\nわかります？『ひへー』なんです！",
+      "en": "Activating Machan Alert! Machan is now 'hihee'. Do you understand? I'm 'hihee'!"
+    },
+    {
+      "voice_id": 95004,
+      "jp": "アストンマーチャンです。\nウマ娘です。…覚えていてね。",
+      "en": "I'm Aston Machan. An Umamusume. ...Please remember me."
+    },
+    {
+      "voice_id": 92003,
+      "jp": "がんばるぞっ、えい。がんばるぞ！\n…以上、『がんばるぞ』の歌です。\n来年こそミリオンヒットさせます。",
+      "en": "I'll do my best, ei. I'll do my best! ...That was the 'I'll Do My Best' song. Next year it'll be a million-seller."
+    },
+    {
+      "voice_id": 93000,
+      "jp": "ずっとずっと、覚えていてくださいね。",
+      "en": "Please remember me forever and ever."
+    }
+  ],
+  "timer_line_ideas": [
+    "Machan Alert! The independent run is over, {user}. Please look at the results with those eyes of yours... and remember this Machan, okay?",
+    "Ba-baan. An even prettier Machan has finished the run, fumu. {user}, please come check it out. Results-checking Time, it is."
+  ],
+  "data_gaps": [
+    "Career story dialogue not in the mdb; sea-walk scene comes from umamusu.wiki only",
+    "Sister's name (Jaja Machan) from wiki, not the mdb",
+    "Twin Turbo 'video-editing partner' and Sweep Tosho 'thinks she is a witch' are wiki-only claims (unverified in mdb)"
+  ]
+}

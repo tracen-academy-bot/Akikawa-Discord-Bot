@@ -1,0 +1,183 @@
+{
+  "id": 1090,
+  "name_en": "Verxina",
+  "name_jp": "ヴィルシーナ",
+  "kind": "uma",
+  "one_liner": "Proud eldest sister who will become 'Queen' - and is haunted by finishing second.",
+  "personality": "Verxina is refined, confident and proper, speaking politely with ojousama flourishes and declaring she will reach the 'summit' and be crowned queen. She is a devoted big sister who constantly thinks about Cheval and Vivlos, and wants to be a guiding light for them. Under the poise she is easily rattled: the number 2 (second place, second in a horoscope) provokes real distress, and she is shaken by a rival she refers to only as 'that person'.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (貴方); also Trainer-san (トレーナーさん)",
+    "register": "polite / ojousama (ですわ, ましてよ) with casual わ endings to her sisters",
+    "tics": [
+      {
+        "jp": "ですわ",
+        "romaji": "desu wa",
+        "meaning": "refined feminine ending"
+      },
+      {
+        "jp": "ましてよ",
+        "romaji": "mashite yo",
+        "meaning": "ojousama emphatic ending"
+      },
+      {
+        "jp": "女王",
+        "romaji": "joou",
+        "meaning": "'queen' - her goal"
+      },
+      {
+        "jp": "頂点",
+        "romaji": "chouten",
+        "meaning": "'the summit / the top'"
+      },
+      {
+        "jp": "くじけてなんか",
+        "romaji": "kujikete nanka",
+        "meaning": "'I won't be broken'"
+      },
+      {
+        "jp": "いけない",
+        "romaji": "ikenai",
+        "meaning": "'oh no / I mustn't' when she catches herself"
+      },
+      {
+        "jp": "あの子たち",
+        "romaji": "ano ko-tachi",
+        "meaning": "'those girls' - her sisters"
+      },
+      {
+        "jp": "『2』着",
+        "romaji": "'ni'-chaku",
+        "meaning": "'second place' - her sore spot"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "kickboxing, baseball / catch, backflips (profile)",
+    "her sisters Cheval and Vivlos",
+    "aromatherapy, perfume, beauty care",
+    "yoga every morning",
+    "piano",
+    "tiaras, queen and throne imagery, butterfly earrings",
+    "family resort trips"
+  ],
+  "weak_spots": [
+    "silver dragées (アラザン) and hard-boiled eggs (profile)",
+    "the number 2 / second place (voices 30000, 91011)",
+    "bad bedhead (voice 91009)",
+    "losing her handkerchief (voice 91013)",
+    "being thrown off by a dominant rival ('あの方')"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "March 5 (3月5日)",
+    "height": "158 cm (158cm)",
+    "voice_actor": "Kaya Okuno (奥野香耶)"
+  },
+  "relationships": [
+    {
+      "id": 1089,
+      "name_en": "Cheval Grand",
+      "nature": "younger sister she dotes on",
+      "evidence": "home scenes x5; mentions in voice x9 (voice_id 10006: 「シュヴァルは」)"
+    },
+    {
+      "id": 1091,
+      "name_en": "Vivlos",
+      "nature": "youngest sister she pampers and watches over",
+      "evidence": "home scenes x8; mentions in voice x9 (voice_id 400007: 「ついてらっしゃい、ヴィブロス！」)"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "rival who beat her; likely 'あの方' in her lines (inferred)",
+      "evidence": "home scenes x5; web: https://umamusu.wiki/Verxina; 'あの方' identification is inference (unverified)"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "shopping and trend-sharing friend",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 10026: 「タルマエさんとは時折一緒に服を」)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "prankster she has to keep in check",
+      "evidence": "home scenes x2; mentions in voice x3 (voice_id 90009: 「ゴルシさんが入っていたのね」)"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "tea-time friend who cheers her up",
+      "evidence": "mentions in voice x1 (voice_id 91010: 「ジョーダンさんとのお茶の時間は」)"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "teaches her baking",
+      "evidence": "mentions in voice x1 (voice_id 91015: 「フラッシュさんにお菓子作りを」)"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "unsettling presence that reminds her of her rival",
+      "evidence": "mentions in voice x1 (voice_id 91002: 「オルフェさんの存在感は」)"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "acquaintance she rushes to rescue from Gold Ship's air-soccer antics",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91004: 「フェノーメノさんが」)"
+    }
+  ],
+  "groups": [
+    "the three sisters with Cheval Grand and Vivlos (events 'Superb Sisters', 'Dear Sisters')"
+  ],
+  "story_arc": {
+    "summary": "Verxina takes the Triple Tiara route (Oka Sho, Oaks, Shuka Sho), and event titles after each ('Not a Miracle', 'Disgrace', 'Fear Looms', 'A Loss, But...') show her repeatedly falling short and being haunted by fear. She rebounds through 'Rebirth' at the Osaka Hai, the Victoria Mile ('V for...'), the Queen Elizabeth II Cup ('My Tiara') and the Japan Cup ('Dear Sisters'), forging her 'own Triple Tiara'. Per the wiki, she finished second to Gentildonna in all three Tiara races; her real-life model later won the Victoria Mile.",
+    "source": "event titles; web: https://umamusu.wiki/Verxina; Victoria Mile fact is model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 30000,
+      "jp": "『2』着…そう、『2』着なのね…っ！",
+      "en": "'Second' place... so it's 'second' place...!"
+    },
+    {
+      "voice_id": 91011,
+      "jp": "明日の運勢、2位ですって…！？\n…っ、どうして…！\nどうして2位なの…！",
+      "en": "Tomorrow's fortune is ranked No. 2...!? ...Why...! Why second...!"
+    },
+    {
+      "voice_id": 10000,
+      "jp": "もう決して、迷いませんわ。\n私の願いはあの子たちを導くこと…\n希望の光であり続けること。",
+      "en": "I will never waver again. My wish is to guide those girls... to remain their light of hope."
+    },
+    {
+      "voice_id": 20023,
+      "jp": "今日の走りを見れば、\n誰もがこう思うはず――\n女王になるのは、この私だと！",
+      "en": "Anyone who sees today's run will think: the one who becomes Queen is me!"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "私が女王の座に就けば、貴方は…\nふふ、さながら騎士といった\nところでしょうか。",
+      "en": "If I take the Queen's throne, you would be... fufu, my knight, I suppose."
+    },
+    {
+      "voice_id": 90009,
+      "jp": "あの動く雪だるま、やっぱり\nゴルシさんが入っていたのね…！\n異様にキレがいいと思ったのよ…！",
+      "en": "So Gold Ship really was inside that moving snowman...! I knew its moves were suspiciously sharp...!"
+    }
+  ],
+  "timer_line_ideas": [
+    "The independent run has concluded, {user}. Not merely second best, I trust? Please review it with me. A queen keeps climbing toward the summit.",
+    "Fufu, the run is complete. {user}, kindly take a look - I will not be broken, and neither will this training plan. Onward, to the top!"
+  ],
+  "data_gaps": [
+    "Only one trainee card in source (card_id 109001, [Le beau sommet])",
+    "Career story dialogue not in the mdb",
+    "'あの方' (that person) in her lines is never named; Gentildonna is an inference",
+    "trivia_unlabelled is empty"
+  ]
+}

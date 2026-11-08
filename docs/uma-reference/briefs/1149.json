@@ -1,0 +1,187 @@
+{
+  "id": 1149,
+  "name_en": "Phalaenopsis",
+  "name_jp": "ファレノプシス",
+  "kind": "uma",
+  "one_liner": "Stern, samurai-spoken martial artist who takes the trainer as her disciple and blooms fiercely to repay an old debt.",
+  "personality": "A small but commanding warrior who speaks in archaic, samurai-like Japanese and treats the trainer as her disciple (弟子), lecturing them like a strict but caring master. She is harsh on herself, scolding herself as a 'weakling' over any slump, and never wants to show weakness, yet she is warm and teasing with friends: she makes ohagi for Narita Brian, gives moth orchids instead of sweets, and cannot stay angry at Samson Big's sleep-talking. Everything she does is framed in flower and battle imagery, and she runs to repay the kindness of those who helped her grow.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "sonata (そなた); 'Trainer' (トレーナー); 'disciple' (弟子); kisama (貴様) when cold/angry (voice 20022)",
+    "register": "archaic samurai / martial-artist speech (～ぞ, ～よな, ～せん, ～なさい, 疾く, 努々, 笑止千万)",
+    "tics": [
+      {
+        "jp": "ふっ",
+        "romaji": "fu",
+        "meaning": "short, knowing laugh"
+      },
+      {
+        "jp": "そなた",
+        "romaji": "sonata",
+        "meaning": "archaic 'you' for the trainer"
+      },
+      {
+        "jp": "～よな",
+        "romaji": "~yo na",
+        "meaning": "archaic sentence ending, 'isn't it so'"
+      },
+      {
+        "jp": "この軟弱者が",
+        "romaji": "kono nanjakumono ga",
+        "meaning": "'you weakling!' - aimed at herself after a slump or loss"
+      },
+      {
+        "jp": "往くぞ / 往くか",
+        "romaji": "yuku zo / yuku ka",
+        "meaning": "'let's go' (archaic spelling)"
+      },
+      {
+        "jp": "咲かせよう / 大輪",
+        "romaji": "sakaseyou / tairin",
+        "meaning": "'let it bloom' / 'a great bloom' - her flower imagery for winning"
+      },
+      {
+        "jp": "愛い",
+        "romaji": "ui",
+        "meaning": "archaic 'adorable/endearing'"
+      },
+      {
+        "jp": "精進",
+        "romaji": "shoujin",
+        "meaning": "'devotion to training/improvement'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "hanafuda and finding hidden-gem shops (profile strengths)",
+    "moth orchids (胡蝶蘭 = her name) and flowers in general",
+    "bamboo swords, naginata, sword dance, sparring with Grass Wonder",
+    "making ohagi; tea; shogi with Seiun Sky",
+    "waka-style poetry (voice 90001), meditation (瞑想, voice 20009), waterfall training",
+    "Tsurumaru Tsuyoshi's special morning drink",
+    "her old club (倶楽部) and its children, who made her ear covers",
+    "battle and blooming imagery: armour, blades, flower gardens"
+  ],
+  "weak_spots": [
+    "enclosed rooms (密室) - profile weakness",
+    "showing weakness; she berates herself harshly when out of form",
+    "has few material wants and struggles to name a gift (voices 10008, 10014)",
+    "asks King Halo to help choose clothes (voice 91014)",
+    "Tsuyoshi's drink makes her tongue go numb (voice 91009)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "April 4 (4月4日)",
+    "height": "151 cm (151cm)",
+    "voice_actor": "Haruna Asami (浅見春那)"
+  },
+  "relationships": [
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "friend who begs her for ohagi and won't eat Hayahide's vegetable dishes; real-life cousin (web: https://jra-van.jp/fun/memorial/1995105092.html)",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91001: ブライアンに時折ねだられる故、 おはぎの腕前には自信がある。; voice_id 91000)"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "friend whose vegetable-conquering cooking she praises; real-life cousin (web: https://jra-van.jp/fun/memorial/1995105092.html)",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91000: ハヤヒデの野菜克服料理は、 げに優秀だな。)"
+    },
+    {
+      "id": 1101,
+      "name_en": "Samson Big",
+      "nature": "close companion who sleep-talks and wakes her at night; likely roommate (unverified)",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91002: ビッグ殿は寝言もビッグでな。)"
+    },
+    {
+      "id": 1073,
+      "name_en": "Tsurumaru Tsuyoshi",
+      "nature": "friend whose special drink she has every morning; highest affinity",
+      "evidence": "mentions in voice x1 (voice_id 91009: 朝はツヨシの特製ドリンクに限る。); top affinity 31"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "sparring partner in near-'duels' with practice weapons",
+      "evidence": "mentions in voice x1 (voice_id 91004: グラスとの稽古は、宛ら『死合い』)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "shogi opponent",
+      "evidence": "mentions in voice x1 (voice_id 91010: むぅ…やはりスカイと将棋を指す には、昼休みでは時間が足りぬか。)"
+    },
+    {
+      "id": 1014,
+      "name_en": "El Condor Pasa",
+      "nature": "acquaintance; she whistles El's escaped bird back",
+      "evidence": "voice_id 91011: …あれはエルの鳥か？"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "friend she trusts for fashion advice",
+      "evidence": "mentions in voice x1 (voice_id 91014: どれ、近くキングを誘うか。一流の 慧眼で、よき品を見定めてもらおう)"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "home-screen partner; probably the '総大将' (commander-in-chief) with a bottomless stomach in voice 91003 - Special Week's real-life nickname is 日本総大将 (general knowledge, unverified)",
+      "evidence": "home scenes x1; voice_id 91003: …器量のみならず、胃の腑も 底なしとは…はは、総大将め！ (identity of 総大将 is general knowledge, unverified)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "'Golden Seven' (黄金七人衆) - from an event title; likely her 1998-generation peers (Special Week, Grass Wonder, El Condor Pasa, King Halo, Seiun Sky, Tsurumaru Tsuyoshi), membership unverified",
+    "her former club (出身倶楽部) - a club with children, from profile; details unknown",
+    "martial-arts family (bamboo swords in every room, profile)"
+  ],
+  "story_arc": {
+    "summary": "She races to repay a past kindness and 'cut through' the shackles of misfortune (self-intro, tagline), and the trainer unexpectedly becomes her disciple (voice 70001). Event titles follow seasonal flower imagery: new shoots (萌え出る新芽), the moth orchid (胡蝶蘭), a winter retreat (冬籠り), dawn breaking through clouds (雲間から東雲) and full bloom (百花繚乱). Race events cover the Oka Sho, Oaks, Shuka Sho and Queen Elizabeth II Cup; in real life Phalaenopsis won the 1998 Oka Sho and Shuka Sho and the 2000 Queen Elizabeth II Cup; she is the real-life cousin of Biwa Hayahide and Narita Brian.",
+    "source": "event titles + profile/voice lines; real-life wins and cousin link: web: https://jra-van.jp/fun/memorial/1995105092.html , https://keibachannel.jp/column/13031/4/ (search snippets)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 40001,
+      "jp": "報いよう。芽吹かせてくれた大恩に。\n胡蝶の夢では終わらせん――\nこれがその、覚悟だ！",
+      "en": "I shall repay it - the great debt to those who let me bud. This will not end as a butterfly's dream. This is my resolve!"
+    },
+    {
+      "voice_id": 20011,
+      "jp": "ファレノプシス…この軟弱者が！\nこれしきの不調で揺らぐなど、\n笑止千万！",
+      "en": "Phalaenopsis... you weakling! Wavering over a slump this small - utterly ridiculous!"
+    },
+    {
+      "voice_id": 91002,
+      "jp": "ビッグ殿は寝言もビッグでな。\n起こされる夜もままあるが…\nあの寝顔を見ては、怒るに怒れん。",
+      "en": "Lady Big is big even in her sleep-talk. It wakes me some nights... but one look at that sleeping face and I cannot stay angry."
+    },
+    {
+      "voice_id": 91000,
+      "jp": "ハヤヒデの野菜克服料理は、\nげに優秀だな。皆余さず快食よ。\n…ブライアン以外は、だがな。",
+      "en": "Hayahide's vegetable-conquering cooking is truly excellent. Everyone eats every bite. ...Except Brian, that is."
+    },
+    {
+      "voice_id": 70001,
+      "jp": "…ふっ。まさか、トレーナーを\n弟子に取ることになるとはな。\n師の期待、裏切ってくれるなよ。",
+      "en": "...Heh. To think I would take a trainer as my disciple. Do not betray your master's expectations."
+    },
+    {
+      "voice_id": 10005,
+      "jp": "菓子とも思ったが…花であれば\nより長く、そなたを癒せるだろう？\n…胡蝶蘭は、特に枯れにくいしな。",
+      "en": "I thought of sweets... but flowers would soothe you longer, would they not? ...Moth orchids, especially, are slow to wither."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your independent run is done. Heh... not bad, my disciple. Come, review it with me - and no slacking. An untended flower does not bloom.",
+    "The run has ended, {user}. Look to the results at once. Hesitate and you will lose your way. Now - let us see how far you have bloomed."
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Mejiro Ryan x2, but these are false positives from ライアン inside ブライアン (Narita Brian); no real Mejiro Ryan mention.",
+    "Who 総大将 refers to (likely Special Week) and whether Samson Big is her roommate are unverified.",
+    "Membership of the 'Golden Seven' (黄金七人衆) is inferred, not confirmed.",
+    "Details of the 'past kindness' and the club she came from are not in the data; story beyond event titles not verified on the web."
+  ]
+}

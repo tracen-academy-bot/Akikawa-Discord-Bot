@@ -1,0 +1,172 @@
+{
+  "id": 1118,
+  "name_en": "Admire Groove",
+  "name_jp": "アドマイヤグルーヴ",
+  "kind": "uma",
+  "one_liner": "An icy, solitary prodigy who rejects sweetness and affection, insisting she only needs to be strong alone.",
+  "personality": "Admire Groove is curt, guarded and proud, telling the trainer that sweetness and kindness are unnecessary and that the trainer exists only to make her stronger. She pushes people away ('離れていてください', 'お気遣いは、不要です') and drives herself with almost frantic intensity before races. Yet she keeps noticing others - untied shoelaces, Still in Love cleaning the board alone, a lonely Neo Universe on the roof - and quietly does small kindnesses while denying any warmth. Hints of her upbringing in a care facility (施設) and slips about dogs show a softer side she will not admit to.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (貴方); no 'Trainer-san' address found",
+    "register": "cold, clipped polite speech (desu/masu) with long pauses '…'; slips into plain feminine monologue (〜わ, 〜かしら) when talking to herself",
+    "tics": [
+      {
+        "jp": "…結構です",
+        "romaji": "...kekkou desu",
+        "meaning": "'No thank you' - curt refusal"
+      },
+      {
+        "jp": "……なにか？",
+        "romaji": "...nanika?",
+        "meaning": "'...What is it?' - cold reply"
+      },
+      {
+        "jp": "かしら",
+        "romaji": "kashira",
+        "meaning": "feminine 'I wonder' in her muttered monologues"
+      },
+      {
+        "jp": "ので",
+        "romaji": "node",
+        "meaning": "trailing 'so...' as she cuts off an explanation"
+      },
+      {
+        "jp": "ふぅん",
+        "romaji": "fuun",
+        "meaning": "'Hmm' - noncommittal"
+      },
+      {
+        "jp": "堕落",
+        "romaji": "daraku",
+        "meaning": "'depravity / being corrupted' - why she refuses chocolate"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Origami (profile strength)",
+    "Black clothing ('黒はいい…揺るぎないから')",
+    "Earphones and music to shut out noise; noise-cancelling is a must (profile)",
+    "Running alone before dawn when it is quiet",
+    "Skincare products (toner, body milk, face packs)",
+    "Vintage/second-hand shops and accessories with history; shops that leave her alone",
+    "Dogs (slips about dogs in the trainer's room, worries about dogs in summer heat)",
+    "Snow Queen / ice imagery: 'frozen strength', glacial flowers",
+    "Tail trimming at a professional level (profile)"
+  ],
+  "weak_spots": [
+    "Press scrums and physical contact of any kind (profile weaknesses)",
+    "Sweets and chocolate, which she refuses as 'corrupting' (voice 10004/10005)",
+    "Noise: cheering crowds, Christmas commotion (voice 20033, 10008)",
+    "Black coffee when it is the only option (voice 90001)",
+    "Itchy laundry tags, sunburn, stuffy heating",
+    "Being shown affection or birthday attention (voice 10014)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 30 (4月30日)",
+    "height": "165cm",
+    "voice_actor": "Hina Suzuki (鈴木日菜)"
+  },
+  "relationships": [
+    {
+      "id": 1097,
+      "name_en": "Still in Love",
+      "nature": "Rival and opposite whom she watches closely and silently worries about",
+      "evidence": "home scenes x5; mentions in voice x3 (voice_id 90002: スティルさん、またカフェテリアの隅で食べていたわ; 91003; 20007); web: https://umamusu.wiki/Admire_Groove (lost all three Tiara legs to her)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Senior who looks after her; Admire finds the attention bewildering but notes her beautiful flowers",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 91002: エアグルーヴさん…私に構っている暇など、ない方でしょうに; 90006; 400001); web: https://umamusu.wiki/Admire_Groove (IRL her dam)"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "Junior she reluctantly takes under her wing and races with",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91001: 引き受けてしまった…ドゥラメンテさんとの併走; 400146); mentioned_by x3; web: https://umamusu.wiki/Admire_Groove (IRL Duramente (a colt) was her son)"
+    },
+    {
+      "id": 1136,
+      "name_en": "Red Desire",
+      "nature": "Talkative roommate who prays for her every night, much to her annoyance",
+      "evidence": "mentions in voice x2 (voice_id 91000: ディザイアさん、…愛とか救うとか大きなお世話; 90004); roommate per web: https://umamusu.wiki/Admire_Groove"
+    },
+    {
+      "id": 1105,
+      "name_en": "Neo Universe",
+      "nature": "Someone she notices gazing at the sky alone on the roof",
+      "evidence": "mentions in voice x1 (voice_id 91004)"
+    },
+    {
+      "id": 1145,
+      "name_en": "Rulership",
+      "nature": "Classmate introduced through Air Groove; they irritate each other (IRL half-siblings via Air Groove, unconfirmed in game)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Admire_Groove"
+    },
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "Shares a home scene",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1033,
+      "name_en": "Admire Vega",
+      "nature": "Shares a home scene",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Not a member of any confirmed group; the Student Council tries to recruit her and she avoids it (voice 91010)"
+  ],
+  "story_arc": {
+    "summary": "A prodigy raised in a care facility who believes she needs no love, she enters as 'the girl with icy eyes' and treats the trainer as a mere contract. She is favoured throughout the Triple Tiara but the Oka Sho, Oaks and Shuka Sho branch into wins or bitter losses (titles such as '零れ落ちる勝利', '“慟哭”', '“喪失”'); per the wiki her rival Still in Love beats her in all three. She recovers at the Queen Elizabeth II Cup ('想いに触れて'), then in her senior year becomes a senior figure to Duramente ('先輩として') and aims at the Tenno Sho (Autumn), learning that warmth can be part of strength.",
+    "source": "event titles; web: https://umamusu.wiki/Admire_Groove"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10005,
+      "jp": "…チョコは受け取れません。堕落\nしますので。…ええ、本当に。\n…決めていますので。",
+      "en": "...I can't accept chocolate. It would corrupt me. ...Yes, really. ...I've decided."
+    },
+    {
+      "voice_id": 20022,
+      "jp": "…話しかけないでください。\n…軽蔑しそうなので。",
+      "en": "...Please don't talk to me. ...I think I'd come to despise you."
+    },
+    {
+      "voice_id": 91002,
+      "jp": "エアグルーヴさん…\n私に構っている暇など、\nない方でしょうに…はあ。",
+      "en": "Air Groove-san... Surely she's someone with no time to waste on me... sigh."
+    },
+    {
+      "voice_id": 10002,
+      "jp": "…トレーナー室。最近、物が\n増えてきているんじゃないですか？\n特に…犬――いえ。貴方の私物が。",
+      "en": "...The trainer's room. Isn't it getting more and more cluttered lately? Especially with dog- I mean, with your personal things."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "吹雪く道で、温もりに甘んじることなく――\n私は選ぶ。凍てつく強さを！",
+      "en": "On a road swept by blizzards, I will not settle for warmth - I choose a frozen strength!"
+    },
+    {
+      "voice_id": 20004,
+      "jp": "…靴紐、ほどけていますよ。\n…気づきそうになかったので。",
+      "en": "...Your shoelace is untied. ...You didn't seem likely to notice."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}. The independent run has ended. ...The results are on your desk, so look at them if you like. No need to fuss over me.",
+    "It's finished. Fifty minutes, nothing wasted. {user}, please check it... quickly. ...And no, I don't need praise. That's all."
+  ],
+  "data_gaps": [
+    "She never says 'Trainer-san' in the extracted lines; address is anata",
+    "mentions_in_voice for Manhattan Cafe are false positives (カフェテリア, voice 10012/90002)",
+    "Story dialogue not in mdb; which Tiara races she can win depends on branching titles",
+    "Rulership kinship unconfirmed in game",
+    "Voice actor romanisation is not in the source; taken from umamusu.wiki/web search where available, otherwise general knowledge (unverified)",
+    "Orphanage/care-facility upbringing is hinted in voice 10007/70010 (施設) and stated on umamusu.wiki; details not in mdb"
+  ]
+}

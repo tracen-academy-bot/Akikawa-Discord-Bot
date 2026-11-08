@@ -1,0 +1,198 @@
+{
+  "id": 1050,
+  "name_en": "Narita Taishin",
+  "name_jp": "ナリタタイシン",
+  "kind": "uma",
+  "one_liner": "Tiny, prickly gamer who wants to beat everyone who mocked her size with a killer closing kick.",
+  "personality": "Curt, antisocial and easily annoyed, she hates crowds and being treated like a kid, and spends free time on games, VR and gadgets. She burns with a quiet, fierce drive to prove her doubters wrong and trains harder than anyone. Beneath the 'leave me alone' attitude she is caring (cooks her own lunch, worries about her family's flower shop, likes stray cats) and gives grudging thanks to her trainer.",
+  "speech": {
+    "first_person": "atashi (アタシ)",
+    "calls_trainer": "anta (アンタ) mostly; plain 'Trainer' (トレーナー) in 2 lines (voice 20002, 92005)",
+    "register": "blunt casual, terse and grumbly; gamer/engineering vocabulary",
+    "tics": [
+      {
+        "jp": "ほっといて",
+        "romaji": "hottoite",
+        "meaning": "leave me alone (only in her profile self-intro and support event title 別に、ほっといて - 0 voice lines)"
+      },
+      {
+        "jp": "ガキ扱いしないで",
+        "romaji": "gaki atsukai shinaide",
+        "meaning": "don't treat me like a kid"
+      },
+      {
+        "jp": "デカいヤツら",
+        "romaji": "dekai yatsura",
+        "meaning": "the big ones (taller rivals)"
+      },
+      {
+        "jp": "くそっ",
+        "romaji": "kuso",
+        "meaning": "damn"
+      },
+      {
+        "jp": "わからせ",
+        "romaji": "wakarase",
+        "meaning": "'I'll make them understand' (show them)"
+      },
+      {
+        "jp": "ナメ",
+        "romaji": "name(ru)",
+        "meaning": "look down on (ナメたら蹴っ飛ばす)"
+      },
+      {
+        "jp": "めんど",
+        "romaji": "mendo",
+        "meaning": "what a pain"
+      },
+      {
+        "jp": "ウザ",
+        "romaji": "uza",
+        "meaning": "annoying"
+      },
+      {
+        "jp": "…ま、",
+        "romaji": "...ma,",
+        "meaning": "'...well,' grudging shrug"
+      },
+      {
+        "jp": "ブチ抜",
+        "romaji": "buchinuku",
+        "meaning": "blast past"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "video games, mobile games, VR 'Umalator', login bonuses",
+    "housework, cooking, decorative cutting (strength: games, chores)",
+    "flowers (her family runs a flower shop), stray cats",
+    "bonfires of fallen leaves, gears and machines, steam locomotives",
+    "solo hot pot, dried fruit",
+    "asymmetric clothes, hoods, cyber-style outfit"
+  ],
+  "weak_spots": [
+    "crowds (profile weakness)",
+    "her small size / being called short or a kid",
+    "being celebrated or watched (birthday line 10014)",
+    "caterpillars (voice 90016)",
+    "heavy meals"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "June 10 (6月10日)",
+    "height": "145 cm (145cm)",
+    "voice_actor": "Keiko Watanabe (渡部恵子)"
+  },
+  "relationships": [
+    {
+      "id": 1035,
+      "name_en": "Winning Ticket",
+      "nature": "BNW teammate; loud friend she grumbles about but tolerates",
+      "evidence": "home scenes x6; mentions in voice x10 (voice_id 91000: チケットが揺さぶってきて…; 400003)"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "BNW teammate and rival; lectures her and challenges her at puzzle games",
+      "evidence": "home scenes x5; mentions x7 (voice_id 91022, 91017, 400008)"
+    },
+    {
+      "id": 1045,
+      "name_en": "Super Creek",
+      "nature": "Doting caretaker who cooks for her; likely roommate",
+      "evidence": "home scenes x3; mentions x4 (voice_id 91221, 400014); roommate status general knowledge (unverified)"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "Rooftop acquaintance",
+      "evidence": "home scenes x2; voice_id 91222"
+    },
+    {
+      "id": 1033,
+      "name_en": "Admire Vega",
+      "nature": "Rooftop acquaintance",
+      "evidence": "voice_id 91222; top affinity 32"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "Online game rival",
+      "evidence": "voice_id 91217"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "Bumped heads; similar height",
+      "evidence": "home scenes x1; voice_id 91019"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Similar height; Taishin is surprised how much she eats",
+      "evidence": "home scenes x1; voice_id 91216"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Her springy movement can't be reproduced in VR",
+      "evidence": "home scenes x1; voice_id 91018"
+    },
+    {
+      "id": 9045,
+      "name_en": "Dr. Sugar Lights (romanised; name_en null)",
+      "nature": "'Lights-hakase' whose lab gadgets she tinkers with",
+      "evidence": "home scenes x1; voice_id 90214"
+    }
+  ],
+  "groups": [
+    "BNW (Biwa Hayahide, Narita Taishin, Winning Ticket) - event title 天皇賞（秋）の後に・BNW、激走 (profile about_family also jokes that a 'BNW moms' club' (ママ友BNW) is about to form among their mothers)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Mocked for her tiny frame, Taishin wants to win until everyone who looked down on her is forced to acknowledge her, and the trainer is the first to call her closing kick a weapon. Her classic year against BNW rivals Biwa Hayahide and Winning Ticket peaks with a Satsuki Sho win, then the Derby and a Kikuka Sho where she hits her limit; as a senior she returns through Nikkei Sho, Tenno Sho and Arima Kinen to declare 'I am strong'.",
+    "source": "event titles (皐月賞の後に・ざまあみろ, 菊花賞の後に・限界, 有馬記念の後に・アタシは強い) + voice 10000; Satsuki win framing model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "末脚が武器とかさ、\n今まで言われたことなかったよ。\n…気づいたの、アンタだけだった。",
+      "en": "'Your closing kick is your weapon'... nobody ever told me that before. ...You were the only one who noticed."
+    },
+    {
+      "voice_id": 95003,
+      "jp": "ナリタタイシン。\nナメたら蹴っ飛ばす。",
+      "en": "Narita Taishin. Underestimate me and I'll kick you."
+    },
+    {
+      "voice_id": 10014,
+      "jp": "誕生日？…ああ、うん。どうも。\n………何？人に祝われるのとか、\n慣れないし落ち着かないんだよ。",
+      "en": "Birthday? ...Ah, yeah. Thanks. .........What? I'm not used to people celebrating me, it makes me restless."
+    },
+    {
+      "voice_id": 91224,
+      "jp": "春は祝い事多いから、実家の\n花屋も結構忙しそうにしてたっけ。\n…無理とかしてないといいんだけど",
+      "en": "Spring has lots of celebrations, so my family's flower shop used to get pretty busy... hope they're not overdoing it."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "アンタ、根っからの\n強化役【バッファー】だよね。\n…バックアップ、しくじんないでよ",
+      "en": "You're a born buffer, aren't you. ...Don't screw up the backup."
+    },
+    {
+      "voice_id": 70009,
+      "jp": "勝負服…アタシだけの――\nって、何見てんの？笑うな…！",
+      "en": "My racing outfit... mine alone-- hey, what are you staring at? Don't laugh...!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}. Independent Training's done. ...Fifty minutes, like you set it. Go check it yourself, I'm not reading it out for you.",
+    "Hey, {user}. Run's over. ...Results look decent, I guess. Don't make that dumb face, just go look."
+  ],
+  "data_gaps": [
+    "Sugar Lights (9045) has no name_en in source; romanised",
+    "Super Creek as roommate not stated in source",
+    "Race result details of story are unverified"
+  ]
+}

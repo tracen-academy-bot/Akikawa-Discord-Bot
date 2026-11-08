@@ -1,0 +1,173 @@
+{
+  "id": 1052,
+  "name_en": "Haru Urara",
+  "name_jp": "ハルウララ",
+  "kind": "uma",
+  "one_liner": "Sunny, carrot-loving dirt sprinter from Kochi who never wins and never stops having fun.",
+  "personality": "Boundlessly cheerful and childlike: she runs because it's fun, loves carrots above all, and turns every chore or loss into a game. She's not book-smart (red-mark tests, mangled big words like 'こんでぃしょん') but is proud of small victories and treats everyone as a friend. Even when tired she says 'I'm fine, I can do it', and she wants to share New Year's sunrise in her hometown Kochi with her trainer.",
+  "speech": {
+    "first_person": "watashi (わたし, hiragana); also refers to herself as 'Urara (ウララ)'",
+    "calls_trainer": "Trainer (トレーナー), no honorific",
+    "register": "very casual, childlike; drawn-out vowels, ～だよ/～ね, mispronounced loanwords and kanji words in hiragana",
+    "tics": [
+      {
+        "jp": "うっらら～ / うらら～",
+        "romaji": "urrara~ / urara~",
+        "meaning": "her name as a happy-go-lucky exclamation ('let's be all Urara~')"
+      },
+      {
+        "jp": "えっへん",
+        "romaji": "ehhen",
+        "meaning": "'ahem!' — proud boast"
+      },
+      {
+        "jp": "わくわく",
+        "romaji": "wakuwaku",
+        "meaning": "'so excited'"
+      },
+      {
+        "jp": "にんじん",
+        "romaji": "ninjin",
+        "meaning": "carrot — wants carrots as rewards, carrot pudding, carrot bread"
+      },
+      {
+        "jp": "えへへ",
+        "romaji": "ehehe",
+        "meaning": "giggle"
+      },
+      {
+        "jp": "ありゃりゃー",
+        "romaji": "aryaryā",
+        "meaning": "'oopsie'"
+      },
+      {
+        "jp": "～ちゃん",
+        "romaji": "-chan",
+        "meaning": "how she calls friends: キングちゃん, ライスちゃん, スペちゃん, フクちゃん, オペちゃん"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "carrots in every form (carrot rice from mom, carrot pudding, carrot bread, carrot ice)",
+    "running because it's fun (self intro)",
+    "games: karuta, kite flying, hanetsuki, sugoroku",
+    "New Year's / kimono motifs",
+    "the shopping-street greengrocer (voice 90008)",
+    "her hometown Kochi (voice 92022)",
+    "band-aids — 'Urara is a genki kid, falls don't bother her' (voice 91008)"
+  ],
+  "weak_spots": [
+    "difficult kanji (profile weakness)",
+    "studying — scored a red mark on a test (voice 91003)",
+    "hard words 'go in the right ear and out the left' (profile, ears)",
+    "winning races (long losing streak; web)",
+    "getting heavy-legged from too many races (voice 20022)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "February 27 (2月27日)",
+    "height": "140 cm (140cm)",
+    "voice_actor": "Shina Shuto (首藤志奈)"
+  },
+  "relationships": [
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "roommate who looks after her hair, studies and training",
+      "evidence": "mentions in voice x2 (voice_id 91017: キングちゃんの手は魔法の手なの！; 91009); home scenes x2; profile trivia: carrot photo 'King set it for her'; roommate per web: https://umamusu.wiki/Haru_Urara"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "close friend; plays hanetsuki with her, wants to race her",
+      "evidence": "home scenes x6; mentions in voice x2 (voice_id 92016: ライスちゃんと羽根つきでたーくさん遊んだんだー！; 400005)"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "friend whose theatrical advice she copies",
+      "evidence": "home scenes x3; voice_id 91001: オペちゃんがね、笑うと強くなれるって言ってたの！ (name not in the mention counts)"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "eating buddy (carrot sweets buffet); 'final boss' in an event",
+      "evidence": "voice_id 91004: 今度、スペちゃんとにんじんスイーツの食べ放題に行くんだ！; event title: ラスボスはスぺ"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "friend who teaches her odd lore",
+      "evidence": "voice_id 90015 / 91022 (フクちゃん)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "covers for Sky's 'sick day' skipping",
+      "evidence": "voice_id 91002: …セイちゃんは具合が悪いからお休みなんだよ！"
+    },
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "friend",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91027)"
+    },
+    {
+      "id": 1039,
+      "name_en": "Kawakami Princess",
+      "nature": "grip-strength training buddy",
+      "evidence": "voice_id 400007: カワカミちゃんと握力修行～！"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "gave her animal sticky notes",
+      "evidence": "mentions in voice x1 (voice_id 400003)"
+    }
+  ],
+  "groups": [
+    "none confirmed in data"
+  ],
+  "story_arc": {
+    "summary": "A local-racing girl from Kochi known for losing again and again, Urara just wants to run, have fun and someday take 1st. Her career goals are dirt sprints (Negishi S, February S, Elm S, JBC Sprint) while she keeps dreaming of the Arima Kinen; a fan support club and the shopping street rally around her. The arc is about whether she can stay smiling through frustration — titles like 'Frustrated?' and 'Beyond the tears, someday' — and finally learning what it means to really try to win.",
+    "source": "event titles; web: https://umamusu.wiki/Haru_Urara (losing streak, Kochi background)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10002,
+      "jp": "ねーねー、雑誌の特集見たっ？\nわたし、“勇気をもらえるウマ娘”\nなんだって！えっへん！",
+      "en": "Hey, hey, did you see the magazine feature? It says I'm 'the Uma Musume who gives people courage'! Ahem!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "今日のテスト、赤点だったんだ～。\nけどね、『全部答えてえらいぞ』\nって花丸もらえたの！えへへっ♪",
+      "en": "I got a red mark on today's test~. But they gave me a flower stamp for 'answering everything, good job'! Ehehe♪"
+    },
+    {
+      "voice_id": 20033,
+      "jp": "楽しいこと思い出して、\nうらら～な気分になるぞー！\nなれなれー！",
+      "en": "I'll think of fun stuff and get into an Urara~ mood! Come on, mood, come on!"
+    },
+    {
+      "voice_id": 93004,
+      "jp": "来年も、ずぅーっと先も！\n一緒にうっらら～♪しよ！",
+      "en": "Next year, and way, way after that! Let's keep going Urara~♪ together!"
+    },
+    {
+      "voice_id": 92022,
+      "jp": "今度のお正月、トレーナーも\n高知においでよ！1番キレイに\n初日の出が見えるとこ、教えるね！",
+      "en": "Next New Year's, come to Kochi too, Trainer! I'll show you where the first sunrise looks prettiest!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer, Trainer! {user}! The independent run is all done! Ehehe, I waited the whole time~ Can I have a carrot as a reward now?",
+    "{user}, guess what? Your run finished! Uraraaa~♪ Let's go look at it together, and then let's play, okay?"
+  ],
+  "data_gaps": [
+    "No family/team group in data; anime team membership not checked",
+    "Real-life losing streak and Kochi background from wiki, not mdb",
+    "Story arc details beyond titles not verified",
+    "Timer idea 2 uses ♪ (a text symbol, not an emoji); drop it if the bot strips symbols"
+  ]
+}

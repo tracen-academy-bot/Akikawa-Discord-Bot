@@ -1,0 +1,69 @@
+{
+ "id": 2001,
+ "name_en": "Happy Meek",
+ "name_jp": "ハッピーミーク",
+ "kind": "npc",
+ "one_liner": "Quiet, spacey, laid-back rival trained by Aoi Kiryuin; a late bloomer whose happiness takes time to arrive.",
+ "personality": "The mdb tagline calls her 'the laid-back Umamusume' and says her happiness blooms late (ザ・おっとりなウマ娘。幸せは大器晩成！). Per umamusu.wiki she is gentle and absent-minded, spaces out often, says little, and is hard to read. Lines should be short, slow and understated.",
+ "speech": {
+  "first_person": "watashi (私) - web: umamusu.wiki, not in mdb",
+  "calls_trainer": "Trainer (トレーナー) - web: umamusu.wiki, refers to her own trainer Kiryuin",
+  "register": "quiet, terse, flat/understated (web; no lines in mdb)",
+  "tics": []
+ },
+ "likes_and_motifs": [
+  "late-blooming happiness (tagline: 幸せは大器晩成)",
+  "tongue twisters (web: umamusu.wiki secret - she is very good at them)"
+ ],
+ "weak_spots": [
+  "unknown - nothing in the source; web describes her as absent-minded and prone to spacing out"
+ ],
+ "profile": {
+  "dorm": "unknown",
+  "grade": "unknown",
+  "birthday": "unknown",
+  "height": "unknown",
+  "voice_actor": "Miyu Yoshizaki (吉咲みゆ)"
+ },
+ "relationships": [
+  {
+   "id": 9004,
+   "name_en": "Aoi Kiryuin",
+   "nature": "her trainer",
+   "evidence": "home scenes x2; web: https://umamusu.wiki/Happy_Meek (EN name of Kiryuin from web; name_en null in source)"
+  },
+  {
+   "id": 2003,
+   "name_en": "Little Cocon",
+   "nature": "shares a home conversation; no stated relationship",
+   "evidence": "home scenes x1 (name_en null in source; EN from web: https://umamusu.wiki/Little_Cocon)"
+  },
+  {
+   "id": 2002,
+   "name_en": "Bitter Glasse",
+   "nature": "shares a home conversation; no stated relationship",
+   "evidence": "home scenes x1 (name_en null in source; EN from web: https://umamusu.wiki/Bitter_Glasse)"
+  }
+ ],
+ "groups": [
+  "Trainee of Aoi Kiryuin (web)",
+  "URA Finale scenario rival (web)"
+ ],
+ "story_arc": {
+  "summary": "She has no training story or events in the mdb. Per umamusu.wiki she is the rival the player meets in the URA Finale scenario: Aoi Kiryuin trains her, and she aims to make a name for herself in the Twinkle Series.",
+  "source": "web: https://umamusu.wiki/Happy_Meek"
+ },
+ "sample_lines": [],
+ "timer_line_ideas": [
+  "...{user}. The independent run... is done. Finished. ...Yay.",
+  "{user}... the run ended. Fifty minutes... went by. ...Come look? Slowly is fine."
+ ],
+ "data_gaps": [
+  "name_en is null in the source; the EN name used is the one on umamusu.wiki (web), not from the mdb.",
+  "No voice lines in the source file (voice_lines empty); sample_lines left empty and speech details are from the web, not the mdb.",
+  "dorm, grade, birthday and height are null in the source and were not filled from the web.",
+  "No cards, events, mentions or affinity data.",
+  "Timer drafts use only the quiet, clipped style the web describes; no tics are confirmed.",
+  "calls_trainer 'Trainer' is from the web and describes how she addresses her own trainer Kiryuin, not the player."
+ ]
+}

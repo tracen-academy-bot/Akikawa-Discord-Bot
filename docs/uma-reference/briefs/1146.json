@@ -1,0 +1,89 @@
+{
+  "id": 1146,
+  "name_en": "Efforia",
+  "name_jp": "エフフォーリア",
+  "kind": "uma",
+  "one_liner": "Composed young lady of a distinguished house who vows to win every race because fate demands it.",
+  "personality": "Her profile calls her a lady of a distinguished family who runs as fate commands, and her self-introduction promises to win any race 'if that is the destiny I must follow'. Her few lines are short, formal and polite, with a sense of solemn vows and contracts. Little else is in the data; she is not playable, and appears only through support cards.",
+  "speech": {
+    "first_person": "watashi (私) - from her self-introduction",
+    "calls_trainer": "unknown",
+    "register": "polite, formal humble speech (いたします)",
+    "tics": [
+      {
+        "jp": "いたします / いたしました",
+        "romaji": "itashimasu / itashimashita",
+        "meaning": "humble-polite 'I will do / I have done'"
+      },
+      {
+        "jp": "運命",
+        "romaji": "unmei",
+        "meaning": "'fate/destiny' - her key motif; NOT in her 3 voice lines, only in her self-introduction text, tagline and support event titles"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "fate and destiny (tagline, self-intro, support events 運命と共同体な淑女 / 運命共同体な僕ら)",
+    "vows and contracts (voices 70000, 95006)",
+    "kyudo / Japanese archery - web: https://gametora.com/umamusume/characters/efforia (trivia: good enough to shoot falling leaves); not in mdb"
+  ],
+  "weak_spots": [
+    "unknown - no data in the mdb"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "March 10 (3月10日)",
+    "height": "unknown in mdb; 164 cm per web: https://gametora.com/umamusume/characters/efforia (verified on page)",
+    "voice_actor": "Arisa Kori (香里有佐)"
+  },
+  "relationships": [
+    {
+      "id": 1141,
+      "name_en": "Epiphaneia",
+      "nature": "real-life sire (father) of Efforia; in-game relationship unknown",
+      "evidence": "web: https://gametora.com/umamusume/characters/efforia (pedigree lists Epiphaneia as sire, verified)"
+    },
+    {
+      "id": 1148,
+      "name_en": "Titleholder",
+      "nature": "real-life same-generation rival (2021 Satsuki Sho: Efforia 1st, Titleholder 2nd; 2022 Takarazuka Kinen: Titleholder won)",
+      "evidence": "general knowledge (unverified); gametora pages do not show race results in fetched text"
+    }
+  ],
+  "groups": [
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "No training story: she is not playable and has no trainee event titles. Her support card events are 'A Lady Bound in Common Destiny' (運命と共同体な淑女) and 'We Who Share One Fate' (運命共同体な僕ら). In real life Efforia won the 2021 Satsuki Sho, Tenno Sho (Autumn) and Arima Kinen.",
+    "source": "event titles (support); real-life record: model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "お供いたします。",
+      "en": "I shall accompany you."
+    },
+    {
+      "voice_id": 70000,
+      "jp": "…揺るぎなき誓いのもとに。",
+      "en": "...Under an unwavering vow."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "契約内容を追加いたしました。",
+      "en": "I have added to the terms of our contract."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your independent run has concluded. I have added the result to the terms of our contract. Shall I accompany you to review it?",
+    "The run is complete, {user}, as destiny decreed. Please come and confirm the outcome. I shall accompany you."
+  ],
+  "data_gaps": [
+    "Only 3 voice lines; how she addresses the trainer is unknown.",
+    "No height, strengths, weaknesses or family trivia in the mdb; height from gametora only.",
+    "No home scenes, mentions or affinity data; relationships come only from web pedigree and race history.",
+    "Only 3 sample lines exist (fewer than the 4-6 requested).",
+    "'運命' is listed as a tic but does not occur in any of her 3 voice lines; it comes from her self-introduction and tagline only."
+  ]
+}

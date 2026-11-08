@@ -1,0 +1,70 @@
+{
+ "id": 2007,
+ "name_en": "Sonon Elfie",
+ "name_jp": "ソノンエルフィー",
+ "kind": "npc",
+ "one_liner": "Upbeat athlete Umatuber and U.A.F. mascot who wants the whole world fired up about sports.",
+ "personality": "The source has no profile text. Per web sources she is an athlete 'Umatuber' who streams daily to spread the joy of sports, with videos built on Umamusume physical ability. She is the image character of the U.A.F. sports festival. She is enthusiastic, upbeat and very athletic, and her tagline is 'Shining sweat connects the world! Come on! Let's get fired up about sports together!'",
+ "speech": {
+  "first_person": "watashi (私) - web: umamusu.wiki",
+  "calls_trainer": "unknown",
+  "register": "energetic streamer / sports-hype (web)",
+  "tics": []
+ },
+ "likes_and_motifs": [
+  "all sports (web)",
+  "streaming / videos (web)",
+  "shining sweat (web tagline)",
+  "going out with Ryoka Tsurugi as a reward (web secret)"
+ ],
+ "weak_spots": [
+  "unknown"
+ ],
+ "profile": {
+  "dorm": "unknown",
+  "grade": "unknown",
+  "birthday": "unknown",
+  "height": "unknown",
+  "voice_actor": "Ami Koshimizu (小清水亜美)"
+ },
+ "relationships": [
+  {
+   "id": 9044,
+   "name_en": "Ryoka Tsurugi",
+   "nature": "U.A.F. scenario partner, an entertainment producer",
+   "evidence": "home scenes x2; web: https://umamusu.wiki/Sonon_Elfie (EN name from web; name_en null in source)"
+  },
+  {
+   "id": 1038,
+   "name_en": "Curren Chan",
+   "nature": "shares a home conversation; no stated relationship",
+   "evidence": "home scenes x1"
+  },
+  {
+   "id": 1132,
+   "name_en": "Loves Only You",
+   "nature": "shares a home conversation; no stated relationship",
+   "evidence": "home scenes x1"
+  }
+ ],
+ "groups": [
+  "U.A.F. (U.A.F. Ready GO! scenario) mascot - web"
+ ],
+ "story_arc": {
+  "summary": "She has no training story in the mdb. She is the image character of the U.A.F. multi-sport festival in the U.A.F. Ready GO! scenario, where she appears with producer Ryoka Tsurugi.",
+  "source": "web: https://umamusu.wiki/Sonon_Elfie, https://gamewith.jp/uma-musume/article/show/438024"
+ },
+ "sample_lines": [],
+ "timer_line_ideas": [
+  "And that's a wrap on the independent run! {user}, fifty minutes of shining sweat! Come on, let's check the results together!",
+  "Shining sweat connects the world! {user}, your run just finished, so let's get fired up and go take a look!"
+ ],
+ "data_gaps": [
+  "name_en is null in the source; the EN name used is the one on umamusu.wiki (web), not from the mdb.",
+  "No voice lines in the source file (voice_lines empty); sample_lines left empty and speech details are from the web, not the mdb.",
+  "dorm, grade, birthday and height are null in the source and were not filled from the web.",
+  "How she addresses the trainer is unknown.",
+  "The second timer draft reuses her web EN tagline.",
+  "Earlier draft guessed Curren Chan / Loves Only You were 'fellow influencer/streamer' types; removed, no source supports it."
+ ]
+}

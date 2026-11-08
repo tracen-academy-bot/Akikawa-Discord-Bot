@@ -1,0 +1,90 @@
+{
+  "id": 9042,
+  "name_en": "Byerley Turk",
+  "name_jp": "バイアリーターク",
+  "kind": "npc",
+  "one_liner": "Stern, military-style goddess-AI who preaches strength above all, hiding a deep love for Uma Musume.",
+  "personality": "A drill-sergeant mentor: her self-introduction declares strength is what an Uma Musume needs most and promises to forge strength enough to 'carve your name into the earth'. Her lines are curt commands ('Don't fall behind!', 'Show me your strength'). Her tagline says a deep love for Uma Musume sits behind the strictness.",
+  "speech": {
+    "first_person": "watashi (私) (self_intro: 私の名はバイアリーターク)",
+    "calls_trainer": "omae (お前) in voice 70000 (may be aimed at the trainee)",
+    "register": "stern, commanding, military",
+    "tics": [
+      {
+        "jp": "〜なよ！",
+        "romaji": "~na yo!",
+        "meaning": "blunt prohibition, 'don't ~!' (後れを取るなよ！)"
+      },
+      {
+        "jp": "〜てみろ",
+        "romaji": "~te miro",
+        "meaning": "challenge, 'go on, ~' (見せてみろ)"
+      },
+      {
+        "jp": "〜てやろう",
+        "romaji": "~te yarou",
+        "meaning": "lofty 'I shall ~ for you' (鍛えてやろう)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "strength and discipline (self_intro)",
+    "leaving one's name on the earth (self_intro)",
+    "bird feather / wing accessories (web, unverified)"
+  ],
+  "weak_spots": [
+    "unknown"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "February 24, the day the AI took the Three Goddesses' name (2月24日（AIが三女神の名を名乗った日）)",
+    "height": "unknown",
+    "voice_actor": "Mitsuki Saiga (斎賀みつき)"
+  },
+  "relationships": [
+    {
+      "id": 9040,
+      "name_en": "Darley Arabian",
+      "nature": "fellow Three Goddesses AI",
+      "evidence": "web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters"
+    },
+    {
+      "id": 9041,
+      "name_en": "Godolphin Barb",
+      "nature": "fellow Three Goddesses AI",
+      "evidence": "web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters"
+    }
+  ],
+  "groups": [
+    "Three Goddesses (三女神)",
+    "Grand Masters scenario"
+  ],
+  "story_arc": {
+    "summary": "Not a trainee. The Three Goddesses AI built around discipline and strength in the Grand Masters scenario. Her effect lets every support card in the chosen facility trigger friendship training regardless of type, and she races as a final opponent in the Grand Masters race.",
+    "source": "web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters , https://umamusu.wiki/Byerley_Turk"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "後れを取るなよ！",
+      "en": "Don't fall behind!"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "お前の力、見せてみろ。",
+      "en": "Show me what you've got."
+    }
+  ],
+  "timer_line_ideas": [
+    "Halt! The independent run is over, {user}. Report to your Uma Musume and assess the results. Don't fall behind.",
+    "{user}. The run is complete. Strength is built one session at a time, so check her condition and prepare for the next. Move out."
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Byerley Turk' is the Global / EN-wiki name",
+    "Only 2 voice lines; how she addresses the trainer is uncertain (お前 could be aimed at the trainee)",
+    "Dorm, grade, height null (AI being)",
+    "No weak spots documented in source or web",
+    "Her theme (strength/discipline) is inferred from the self_intro and tagline; umamusu.wiki Darley/Godolphin pages do not name her virtue"
+  ]
+}

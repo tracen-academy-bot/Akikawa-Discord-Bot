@@ -1,0 +1,178 @@
+{
+  "id": 1027,
+  "name_en": "Mejiro Ryan",
+  "name_jp": "メジロライアン",
+  "kind": "uma",
+  "one_liner": "Muscle-loving, sporty Mejiro girl who secretly adores shoujo manga and cute clothes but thinks they don't suit her.",
+  "personality": "Cheerful, energetic and polite, she turns everything into training talk: 'Let's Muscle!', protein, and naming individual muscles (hamstrings, soleus, quads). Underneath she is shy and insecure about her femininity; she gets flustered by romance, short skirts and 'cute' outfits, and swoons over shoujo manga lines. She looks up to and feels distant from her cousin McQueen, and wants to become a 'smart', grown-up woman who can support others. Big-sisterly toward Dober and Bright.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "polite-casual (desu/masu with the trainer, casual with friends); sporty and upbeat",
+    "tics": [
+      {
+        "jp": "レッツ・マッスル！",
+        "romaji": "rettsu massuru!",
+        "meaning": "'Let's Muscle!' - her signature catchphrase"
+      },
+      {
+        "jp": "マッスル！ハッスル！",
+        "romaji": "massuru! hassuru!",
+        "meaning": "'Muscle! Hustle!'"
+      },
+      {
+        "jp": "筋肉は裏切りません",
+        "romaji": "kinniku wa uragirimasen",
+        "meaning": "'Muscles never betray you'"
+      },
+      {
+        "jp": "くぅ～っ",
+        "romaji": "kuu~",
+        "meaning": "excited/flustered squeal (manga lines, hamstrings itching to run)"
+      },
+      {
+        "jp": "えへへ",
+        "romaji": "ehehe",
+        "meaning": "bashful laugh"
+      },
+      {
+        "jp": "あはは",
+        "romaji": "ahaha",
+        "meaning": "awkward laugh when embarrassed about clothes"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "strength training (profile strength: 筋トレ), protein, chocolate bars she makes herself",
+    "naming specific muscles",
+    "shoujo manga (rereads the whole series when a new volume comes out)",
+    "baseball (watching and playing)",
+    "playing a cafe 'master' in her alt outfit (she suggests a chicken-breast salad as the manga master would, voice_id 90012)",
+    "short hair; secretly wants cute clothes",
+    "heavy (wet) going (voice_id 91013)"
+  ],
+  "weak_spots": [
+    "cholesterol (profile weakness)",
+    "cute/feminine clothes and short skirts make her self-conscious",
+    "acting out romantic shoujo-manga lines embarrasses her (voice_id 10005)",
+    "feels she lags behind McQueen"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 11 (4月11日)",
+    "height": "163 cm (163㎝)",
+    "voice_actor": "Ayaka Hashi (土師亜文)"
+  },
+  "relationships": [
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Mejiro cousin she grew up with; close birthdays, but McQueen's growth makes her feel 'close yet far'. A rival in her story.",
+      "evidence": "home scenes x7; mentions in voice x5 (voice_id 91000: マックイーンは見るたび成長してて、近いのに遠く見えて…); event title: マックイーンの異変"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "Younger Mejiro she looks after; says Dober is just clumsy, not cold.",
+      "evidence": "home scenes x7; mentions in voice x3 (voice_id 91003: ドーベルってクールに見えますけど実は不器用なだけっていうか); mentioned by Dober x6"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "Younger Mejiro; childhood photo of the three of them; slow-paced jogging partner.",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91021); profile trivia: ドーベルとブライト、3人での幼い頃の写真"
+    },
+    {
+      "id": 1031,
+      "name_en": "Ines Fujin",
+      "nature": "Friend who recommends her training wear; Ryan picks shoes for her in return. Same-generation rival (1990 Derby) is general knowledge (unverified).",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91001); mentioned by Ines x7; affinity 29; voice_id 1061: アイネス、気合い入れてくよ！; rival framing: general knowledge (unverified)"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Mejiro friend; driving-range outings, recommended a perfume.",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91024, 10027)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Ryan brought her coffee while she worked.",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 90015)"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "Ryan sees her as a manga-heroine type.",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1028,
+      "name_en": "Hishi Akebono",
+      "nature": "Workout buddy who lifted a barbell one-handed.",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Pranked her with makeup at Halloween.",
+      "evidence": "mentions in voice x1 (voice_id 10007)"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "Mentions Ryan often.",
+      "evidence": "mentioned by Biwa Hayahide x8 (her voice lines)"
+    }
+  ],
+  "groups": [
+    "Mejiro family"
+  ],
+  "story_arc": {
+    "summary": "A Mejiro who feels plain next to her elegant cousins, Ryan trusts in muscle and effort to win, and her scenario asks why she runs ('『貴方は、なぜ』', '『あたしは、なぜ』'). Her Classic races carry ambiguous titles ('皐月賞の後に・ただ燃え尽きて……', '日本ダービーの後に・525mの青春'; the real horse placed in both) while McQueen pulls ahead ('マックイーンの異変', '好敵手の猛追'). Her senior year builds to the Tenno Sho (Spring) and a Takarazuka Kinen win ('宝塚記念の後に・春のグランプリ制覇！'), which matches the real horse's 1991 Takarazuka victory. Along the way she learns to accept her own charm.",
+    "source": "event titles; model knowledge (unverified) for the real horse's Classic placings and 1991 Takarazuka win"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20005,
+      "jp": "レッツ・マッスル！\nうん、今日はしっかりお腹から\n声が出せていい感じです！",
+      "en": "Let's Muscle! Yep, today I'm projecting from the gut nicely, feels good!"
+    },
+    {
+      "voice_id": 2034,
+      "jp": "くぅ～っ…！！\nハムストリングスが今にも\n走り出しそう…っ！！",
+      "en": "Kuuu~...!! My hamstrings look like they're about to start running on their own...!!"
+    },
+    {
+      "voice_id": 91015,
+      "jp": "『寒いんだろ？…手、出せよ』\nくぅ～っ…！やっぱりあのセリフ、\nグッとくる～～…っ！！",
+      "en": "'You're cold, right? ...Give me your hand.' Kuuu~...! That line really gets me every time~...!!"
+    },
+    {
+      "voice_id": 10005,
+      "jp": "『甘いもの好きだよね？1個余った\nからあげる』…や、やっぱり今の\nナシで…！恥ずかしすぎる…っ！！",
+      "en": "'You like sweets, right? I had one left over, so here.' ...W-wait, forget I said that...! That's way too embarrassing...!!"
+    },
+    {
+      "voice_id": 90006,
+      "jp": "いいなあ、春色のワンピース…。\nマックイーンやドーベルなら\n似合うんだろうけど…う～ん。",
+      "en": "So nice, a spring-colored dress... McQueen or Dober would look great in it, but me... hmm."
+    },
+    {
+      "voice_id": 92005,
+      "jp": "筋肉は裏切りません！\nトレーニングを重ねればもっと\nもっと強くなれるって信じてます！",
+      "en": "Muscles never betray you! I believe that if I keep training, I can get stronger and stronger!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, Trainer-san! Independent Training's done, a full 50 minutes! My quads are burning in the best way. Let's go check the results together, Let's Muscle!",
+    "Time's up, {user}! Muscles never betray you, and neither does a good timer! Come see how the run went... ehehe, then maybe a protein break?"
+  ],
+  "data_gaps": [
+    "Story arc pieced together from event titles; race outcomes in the game script not verified",
+    "Cards' title translations not given",
+    "mentions_in_voice for Biwa Hayahide etc. are counts from other characters' files; their content not checked here",
+    "Whether she loses the Satsuki Sho / Derby in the game script is not confirmed by titles alone"
+  ]
+}

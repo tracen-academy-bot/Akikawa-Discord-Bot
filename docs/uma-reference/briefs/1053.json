@@ -1,0 +1,176 @@
+{
+  "id": 1053,
+  "name_en": "Bamboo Memory",
+  "name_jp": "バンブーメモリー",
+  "kind": "uma",
+  "one_liner": "Loud, hot-blooded head of the Disciplinary Committee who ends everything in '-ssu' and lives for a true rival.",
+  "personality": "A shonen-manga heroine in human form: endlessly fired up, sincere, and obsessed with 'blood-boiling' head-on battles and finding a worthy rival. As Disciplinary Committee chair she polices dress, curfews and cafeteria manners, but turns rules into earnest pep talks rather than nagging. Raised by a hot-blooded PE-teacher father, she trains with kendo shouts and zazen, and is bashful and out of her depth with fashion.",
+  "speech": {
+    "first_person": "atashi (アタシ, x14); no first-person 私 found (the two 私 hits are 私服 'casual clothes', voice_id 10026/70020)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "sporty junior-to-senior 'taiikukai' speech: casual -ssu (っス) in place of desu, shouted, many exclamation marks",
+    "tics": [
+      {
+        "jp": "～っス / ～っスよ",
+        "romaji": "-ssu / -ssu yo",
+        "meaning": "clipped 'desu' of athletic juniors; on almost every line"
+      },
+      {
+        "jp": "押忍",
+        "romaji": "osu",
+        "meaning": "martial-arts 'yes sir!' greeting"
+      },
+      {
+        "jp": "うおおおお",
+        "romaji": "uooooo",
+        "meaning": "battle roar"
+      },
+      {
+        "jp": "ヨッシャア",
+        "romaji": "yosshaa",
+        "meaning": "'Alright!!'"
+      },
+      {
+        "jp": "風紀",
+        "romaji": "fūki",
+        "meaning": "'public morals/discipline' — her committee's watchword (風紀の乱れはレースの乱れ)"
+      },
+      {
+        "jp": "サイコー",
+        "romaji": "saikō",
+        "meaning": "'the best!'"
+      },
+      {
+        "jp": "ビシッと / バシッと",
+        "romaji": "bishitto / bashitto",
+        "meaning": "'sharp, snappy, properly'"
+      },
+      {
+        "jp": "熱い / 血潮",
+        "romaji": "atsui / chishio",
+        "meaning": "'hot/passionate', 'surging blood'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "shonen manga — friendship, growth, rival clashes (voice 91002)",
+    "rivals; head-on serious battles (tagline 求ム真剣勝負)",
+    "running toward the red sunset (voice 90002)",
+    "kendo and martial arts (残心, 小手！面！胴！)",
+    "her headband/hachimaki (ears droop without it)",
+    "early to bed, early to rise (profile strength)",
+    "summer sweat; dry-towel rubbing in the snow"
+  ],
+  "weak_spots": [
+    "chewing food properly — she wolfs it down (profile weakness; voice 91010)",
+    "fashion and 'cute' things (voice 91017, 70010)",
+    "Daitaku Helios's slang (voice 91020)",
+    "being treated like a dress-up doll by Gold City and Tosen Jordan (voice 91019)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Senior Division / high school (高等部)",
+    "birthday": "May 14 (5月14日)",
+    "height": "157 cm (157cm)",
+    "voice_actor": "Kotomi Aihara (藍原ことみ)"
+  },
+  "relationships": [
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "roommate; got her to buy casual clothes, does her hair",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 10026: …シチーと同室になってから、私服も買うようになったっスね！; 400003)"
+    },
+    {
+      "id": 1072,
+      "name_en": "Yaeno Muteki",
+      "nature": "friend and training partner — they do zazen together; same dorm",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 91001: ヤエノとは一緒に坐禅したりする仲なんス！; 10027); same dorm stated in 10027: ヤエノも同じ寮なんスけど…; Yaeno's voice_id 90012 says they get mistaken for each other"
+    },
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "the senior she wants to clash with as a rival",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91003: …オグリ先輩とは、ライバルとして堂々とぶつかり合いたいっス！！)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "friend and rival; per web Helios calls her 'Ban-chan' (in-game text: バンちゃむ, Helios voice_id 91026); per web they raced nine times in real life (unverified)",
+      "evidence": "mentions in voice x2 (voice_id 91020, 400074: ヘリオスの熱さ、見届けたっス！！); home scenes x1; web: https://umamusu.wiki/Bamboo_Memory; Helios's own voice_id 91015/91026 mention her"
+    },
+    {
+      "id": 1034,
+      "name_en": "Inari One",
+      "nature": "friend and upperclassman",
+      "evidence": "home scenes x4; nature from web (unverified): https://umamusu.wiki/Bamboo_Memory"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "helps with committee duties",
+      "evidence": "home scenes x3; nature from web (unverified): https://umamusu.wiki/Bamboo_Memory"
+    },
+    {
+      "id": 1093,
+      "name_en": "K.S.Miracle",
+      "nature": "friend",
+      "evidence": "home scenes x3; Helios voice_id 400009 names them together; web: https://umamusu.wiki/Bamboo_Memory"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "drags her clothes shopping with Gold City",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "cheers her on in races",
+      "evidence": "mentions in voice x1 (voice_id 1111: ライアン！ファイトー…。)"
+    }
+  ],
+  "groups": [
+    "Disciplinary Committee, chairwoman (profile tagline: 熱血・風紀委員長)"
+  ],
+  "story_arc": {
+    "summary": "Inspired by her PE-teacher father, who once had a fierce rival, Bamboo comes to Tracen hunting for 'the strongest, best' rival of her own while running the Disciplinary Committee. Her goals run through the Swan S, Takamatsunomiya Kinen, Yasuda Kinen, Sprinters S and Mile CS, with titles about passing the heat to others, regrets, and 'dreams again and again'. It closes at the Arima Kinen with 'not the end, but the beginning'.",
+    "source": "event titles; web: https://umamusu.wiki/Bamboo_Memory"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 2033,
+      "jp": "風紀の乱れはレースの乱れッ！\nバシッと決めていくっスよー！！",
+      "en": "A breach of discipline is a breach of racing! Let's nail this sharp-ssu!!"
+    },
+    {
+      "voice_id": 10026,
+      "jp": "昔は休日も学園ジャージでした！\nけどシチーと同室になってから、\n私服も買うようになったっスね！",
+      "en": "I used to wear the academy jersey even on days off! But after I started rooming with City, I began buying normal clothes too-ssu!"
+    },
+    {
+      "voice_id": 91010,
+      "jp": "ご飯はよく噛む、よく噛むっ…！\nうう…お腹が空いてると、つい\nがっついて飲み込んじゃうっス…。",
+      "en": "Chew well, chew well...! Ugh... when I'm hungry I end up wolfing it down-ssu..."
+    },
+    {
+      "voice_id": 90003,
+      "jp": "カフェテリアは綺麗に\n使うっスよ！食べ終わった後は\nテーブルをきちんと拭くことっ！",
+      "en": "Use the cafeteria cleanly-ssu! After eating, wipe the table properly!"
+    },
+    {
+      "voice_id": 95003,
+      "jp": "押忍ッ！！バンブーメモリーっス！！\nよろしくお願いしますッ！！",
+      "en": "Osu!! I'm Bamboo Memory-ssu!! Pleased to work with you!!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Osu! {user}, your independent training run is complete-ssu! Checking results right away is basic discipline! Let's go, Trainer-san!",
+    "Uoooooh! The run's done-ssu, {user}! Leaving it unchecked would be a breach of discipline! Inspection time, let's goooo!"
+  ],
+  "data_gaps": [
+    "Paris events (パリの街にて etc.) appear in her and Marvelous Sunday's lists; likely a shared scenario, not her own story (unverified)",
+    "Committee member list beyond herself not in mdb",
+    "Father's 'fierce rival' detail in story_arc comes from the wiki, not the mdb"
+  ]
+}

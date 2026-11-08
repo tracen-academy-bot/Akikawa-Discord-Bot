@@ -1,0 +1,173 @@
+{
+  "id": 1136,
+  "name_en": "Red Desire",
+  "name_jp": "レッドディザイア",
+  "kind": "uma",
+  "one_liner": "Self-proclaimed saint who treats every hardship as a holy trial on her road to an 'isekai'.",
+  "personality": "Earnest, dramatic and chuunibyou-flavored: she narrates daily life as scripture, praying, blessing, gathering 'mana' and fighting 'evil aura'. Beneath the theatrics she is genuinely kind and caring (first aid, praying for friends, worrying about a sad fan at a live). She is an isekai-novel otaku, swoons over Vodka, and her composure cracks comically when something startles her.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); usually 'anata (貴方)'",
+    "register": "elevated, archaic/religious polite speech with occasional ojousama '～ですわ / ～わ'",
+    "tics": [
+      {
+        "jp": "嗚呼",
+        "romaji": "aa",
+        "meaning": "'Ah/Oh' - archaic exclamation"
+      },
+      {
+        "jp": "試練",
+        "romaji": "shiren",
+        "meaning": "'trial' - every hardship is one"
+      },
+      {
+        "jp": "祝福あれ",
+        "romaji": "shukufuku are",
+        "meaning": "'blessings be upon you'"
+      },
+      {
+        "jp": "恵みに感謝を",
+        "romaji": "megumi ni kansha wo",
+        "meaning": "'thanks for this grace'"
+      },
+      {
+        "jp": "マナ",
+        "romaji": "mana",
+        "meaning": "fantasy 'mana' she gathers"
+      },
+      {
+        "jp": "異セカイ",
+        "romaji": "i-sekai",
+        "meaning": "'other world' (written with katakana セカイ) she aims to reach"
+      },
+      {
+        "jp": "～ますわ",
+        "romaji": "~masu wa",
+        "meaning": "ojousama ending ('乗り越えてみせますわ！')"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "first aid, baking cookies, laundry (strengths)",
+    "isekai/reincarnation novels, manga and anime",
+    "Manhattan Cafe's coffee (cinnamon coffee)",
+    "carrot dishes (pot-au-feu, stew)",
+    "spicy curry challenges at the cafeteria",
+    "praying to the stars on the rooftop",
+    "white ribbons, gold ribbon accessories"
+  ],
+  "weak_spots": [
+    "scratchy tissue paper (weaknesses: ゴワゴワのティッシュペーパー)",
+    "math (sole attendee of remedial math, voice 91000)",
+    "jumpy: shrieks at a leaf on her back (voice 20010)",
+    "left her room messy and feels 'fallen into darkness' (voice 20011)",
+    "fails at melting chocolate (voice 10004)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 19 (4月19日)",
+    "height": "160 cm",
+    "voice_actor": "Hitomi Sekine (関根瞳)"
+  },
+  "relationships": [
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "revered mentor; learns coffee from her, hears her voice 'clearly'",
+      "evidence": "home scenes x1; mentions in voice: 3 genuine (voice_id 10008, 90009, 91004: 声やコーヒーに滲む、カフェさんの優しい深み…私も身につけたいわ) - mdb count 5 includes false matches on カフェテリア (90002) and カフェ (70021); profile about_ears; real-life sire: web https://umamusu.wiki/Red_Desire"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "friend/rival; shares carrot restaurants, Desire evangelizes isekai to her",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 91001: ブエナさんに転生モノを布教して、成功しました); rival: web https://umamusu.wiki/Red_Desire"
+    },
+    {
+      "id": 1008,
+      "name_en": "Vodka",
+      "nature": "idol she fangirls over",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91003: BDC勝負服のウオッカさん、眼福だったわ…)"
+    },
+    {
+      "id": 1118,
+      "name_en": "Admire Groove",
+      "nature": "friend she prays for (roommate per web)",
+      "evidence": "mentions in voice x1 (voice_id 90005: アルヴさんが、目標のレースで想いを遂げられるよう…); roommate: web https://umamusu.wiki/Red_Desire (unverified)"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "trades snacks for Vodka info with her",
+      "evidence": "mentions in voice x1 (voice_id 91010: トランさんにお届けするおやつは…ウオッカさんの新情報に見合うわ！)"
+    },
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "admires her saint-like graceful manners",
+      "evidence": "voice_id 91002 'ララさん' (matched via Lucky Lilac's short_name ララ)"
+    },
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "shares home conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "shares home conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Manhattan Cafe lineage (real-life daughter of Manhattan Cafe) - web: https://umamusu.wiki/Red_Desire"
+  ],
+  "story_arc": {
+    "summary": "Goals: Hanshin JF, Oka Sho, Oaks, Shuka Sho, Japan Cup, Osaka Hai, Victoria Mile, Sapporo Kinen. Titles frame her career as a saint's pilgrimage toward a far-off 'that land' ('“かの地”は遠く', '宿縁の聖域'), with a noble rival ('嗚呼、気高き好敵手', '桜花の輝きを手に'), a fellow outsider's oath ('はぐれ者たちの誓い') and a shared thorny path with her trainer ('ひとつの願い、ふたりのいばら道'). Per web, she believes she is fated to reach an otherworld and be revered as a saint, with Buena Vista as rival; the real Red Desire raced abroad (international champion).",
+    "source": "event titles; web: https://umamusu.wiki/Red_Desire, https://essential-japan.com/news/international-champion-red-desire-is-the-next-horse-girl-to-join-umamusume"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "はい、聖女レッドディザイアです。",
+      "en": "Yes, I am the Saint Red Desire."
+    },
+    {
+      "voice_id": 10000,
+      "jp": "誓いは固く結ばれました。\nどうぞ全力でご指導下さいませ。\nすべて乗り越えてみせますわ！",
+      "en": "Our vow has been firmly sealed. Please guide me with all your might. I shall overcome everything!"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "人々にとっての救済は私。\n私にとっての救済は…貴方です。\nこの出会いに感謝を。",
+      "en": "For people, salvation is me. For me, salvation... is you. I give thanks for this meeting."
+    },
+    {
+      "voice_id": 20010,
+      "jp": "ひぃっ！邪気が背中を這って…！\n…あれ、ただの葉っぱ…はあ…。",
+      "en": "Eek! Evil aura is crawling up my back...! ...Huh, it's just a leaf... phew..."
+    },
+    {
+      "voice_id": 91015,
+      "jp": "おお、なんと罪深い季節…！\nポトフ…シチュー…私はいったい、\nどのにんじんから食せばいいの！？",
+      "en": "Oh, what a sinful season...! Pot-au-feu... stew... which carrot am I supposed to eat first!?"
+    },
+    {
+      "voice_id": 13,
+      "jp": "ログインボーナスです。\n恵みに感謝を。",
+      "en": "Your login bonus. Give thanks for this grace."
+    }
+  ],
+  "timer_line_ideas": [
+    "Ahh, {user}! The trial of independent training has been completed! Come, let us receive its blessings together. Thanks be for this grace!",
+    "Hark, {user}... a revelation: your independent run has ended. The path is lit - go forth and behold its fruits. Blessings upon you!"
+  ],
+  "data_gaps": [
+    "Story plot details beyond titles rely on a web search summary, not a fetched page",
+    "Admire Groove as roommate is web-only, unverified",
+    "Lucky Lilac identification via short_name ララ",
+    "Manhattan Cafe mentions count in mdb (5) is inflated by 'カフェ' substring matches; 3 genuine"
+  ]
+}

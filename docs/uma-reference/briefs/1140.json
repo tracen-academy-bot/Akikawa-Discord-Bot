@@ -1,0 +1,113 @@
+{
+  "id": 1140,
+  "name_en": "Marche Lorraine",
+  "name_jp": "マルシュロレーヌ",
+  "kind": "npc",
+  "one_liner": "Painfully shy girl who speaks through a cheerful puppet persona, 'Maru-chan'.",
+  "personality": "Very shy: her self-intro starts with a stammer ('え、えっと…その――') before switching to a bubbly puppet voice. Almost all her lines are quoted in 『』 as the puppet 'Maru-chan', who is perky and full of ☆. She is a childhood friend of Loves Only You and, per Loves Only You's lines, a talented designer.",
+  "speech": {
+    "first_person": "Maru-chan (マルちゃん) - third person, via the puppet",
+    "calls_trainer": "unknown",
+    "register": "puppet voice: cute, casual, sing-song; own voice: hesitant",
+    "tics": [
+      {
+        "jp": "マルちゃん",
+        "romaji": "Maru-chan",
+        "meaning": "refers to herself/the puppet as Maru-chan; lines wrapped in 『』 brackets"
+      },
+      {
+        "jp": "☆ / ♪",
+        "romaji": "-",
+        "meaning": "star/note flourishes at line ends"
+      },
+      {
+        "jp": "え、えっと…その――",
+        "romaji": "e, etto... sono--",
+        "meaning": "shy stammer before the puppet takes over (self-intro)"
+      },
+      {
+        "jp": "レッツゴー☆",
+        "romaji": "rettsu goo",
+        "meaning": "'Let's go!'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "her puppet / doll (パペット, お人形)",
+    "her childhood friend Loves Only You",
+    "design - she designed Loves Only You's outfit pattern (per Loves Only You's lines)",
+    "'a new world' (新たな世界へ)"
+  ],
+  "weak_spots": [
+    "shyness - hides behind her puppet (tagline: 'From behind the puppet, gazing at the world')"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "February 4 (2月4日)",
+    "height": "unknown",
+    "voice_actor": "Tsukino Chikasada (近貞月乃)"
+  },
+  "relationships": [
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "childhood friend ('Rav-chan'); warms up together, designed her outfit",
+      "evidence": "home scenes x2; self-intro: 幼馴染のラヴちゃん; Loves Only You voice 91016/91028/92017 mention マルちゃん"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "friendly; gave a clover crown to her puppet",
+      "evidence": "mentioned by Curren voice 90006: マルシュさんのお人形さんに、シロツメクサの冠を贈ったんです"
+    },
+    {
+      "id": 1139,
+      "name_en": "Casino Drive",
+      "nature": "fellow Beyond Dreams cast",
+      "evidence": "home scenes x1; web: https://www.gamespark.jp/article/2026/02/23/163119.html"
+    },
+    {
+      "id": 1138,
+      "name_en": "Forever Young",
+      "nature": "shares a home scene",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "DREAMS project member - 'Beyond Dreams' scenario (web)"
+  ],
+  "story_arc": {
+    "summary": "Not a trainee; support-card character. She appears as a member of the 'Beyond Dreams' (America / Breeders' Cup) scenario cast; her namesake horse won the BC Distaff. Support events 隠れている心 ('The Hidden Heart') and 溢れている愛 ('Overflowing Love') suggest her arc is about the real self behind the puppet and her bond with Loves Only You.",
+    "source": "web: https://www.gamespark.jp/article/2026/02/23/163119.html ; event titles (interpretation of titles unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "『マルちゃんお手伝いしまーす☆』",
+      "en": "'Maru-chan's here to help~☆'"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "『マルちゃんです☆よろしくねっ』",
+      "en": "'It's Maru-chan☆ Nice to meet you!'"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "『新たな世界へレッツゴー☆』",
+      "en": "'Let's go to a new world☆'"
+    }
+  ],
+  "timer_line_ideas": [
+    "U-um... th-that is... 'Maru-chan here, {user}! Your Independent Training run is all done☆ Come take a look, okay?'",
+    "'Ding ding! Maru-chan reporting☆ The run is finished, {user}! Let's go check it out together~♪' ...p-please."
+  ],
+  "data_gaps": [
+    "Only 3 voice lines (all puppet voice); self-intro used for her own voice",
+    "No height, strengths/weaknesses",
+    "How she addresses the trainer is unknown",
+    "Puppet's name assumed to be the 'Maru-chan' persona; whether puppet and self are the same 'character' is unverified",
+    "Not playable (support card only)",
+    "Loves Only You also calls her マルちゃん (voice 91016/91028/92017), so 'Maru-chan' is likely Marche's own nickname spoken through the puppet, not a separate puppet name"
+  ]
+}

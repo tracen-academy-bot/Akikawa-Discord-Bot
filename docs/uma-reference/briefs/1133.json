@@ -1,0 +1,174 @@
+{
+  "id": 1133,
+  "name_en": "Chrono Genesis",
+  "name_jp": "クロノジェネシス",
+  "kind": "uma",
+  "one_liner": "Soft-spoken racing-history nerd with a bazooka lens who wants to write her own page in that history.",
+  "personality": "Shy and halting (lots of trailing ellipses), but she lights up the moment race history, predictions or rival camps come up, and can drift into analysis mid-sentence until she catches herself. She frames everything as history and drama: a slump is just a future comeback story, her trainer meeting was \"a fateful encounter\". She follows a self-made \"Genesis Method\", cooks her own bento and training snacks, and quietly hopes she and her trainer will be remembered as a legendary duo.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); occasionally anata (貴方)",
+    "register": "Polite, soft and hesitant keigo with many ellipses; racing-press jargon",
+    "tics": [
+      {
+        "jp": "歴史",
+        "romaji": "rekishi",
+        "meaning": "\"history\" - her core word"
+      },
+      {
+        "jp": "蹄跡",
+        "romaji": "teiseki",
+        "meaning": "\"hoofprints/track record\" - legacy"
+      },
+      {
+        "jp": "浪漫",
+        "romaji": "roman",
+        "meaning": "\"romance (of the drama)\""
+      },
+      {
+        "jp": "ジェネシスメソッド",
+        "romaji": "jeneshisu mesoddo",
+        "meaning": "\"Genesis Method\", her own training system"
+      },
+      {
+        "jp": "陣営",
+        "romaji": "jin'ei",
+        "meaning": "\"camp\" (a horse's connections) - racing jargon"
+      },
+      {
+        "jp": "名勝負",
+        "romaji": "meishoubu",
+        "meaning": "\"classic match\""
+      },
+      {
+        "jp": "…ですね",
+        "romaji": "...desu ne",
+        "meaning": "soft trailing confirmation"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "racing history and race prediction",
+    "photography; huge \"bazooka\" lens, dehumidifier cabinet for lenses (90009, 91003)",
+    "racecourse ramen shop that knows her order (10026)",
+    "Kyoto Racecourse finish-post keychain (10025)",
+    "sports newspapers and Monthly Twinkle (90001, 20031)",
+    "homemade bento and training snacks (90003, 92003)",
+    "her grandfather's ribbon hair clip (10027)",
+    "father's Christmas pintade (10008)",
+    "scribbling notes and time-schedule management (profile)"
+  ],
+  "weak_spots": [
+    "excessive humidity (profile)",
+    "snow, because races might be cancelled (91015)",
+    "not into fashion; worries she looks plain (70021)",
+    "loses track of time researching; desk becomes a mountain of documents (90004, 90008)",
+    "drifts into race analysis mid-conversation (20008, 110001)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior High Division (中等部)",
+    "birthday": "March 6 (3月6日)",
+    "height": "152 cm (152cm)",
+    "voice_actor": "Hiyori Manase (真名瀬日和)"
+  },
+  "relationships": [
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "Roommate (per wiki) and close friend; Chrono admires how seriously she plans streams",
+      "evidence": "home scenes x7; voice_id 91000 (配信の企画を練る時のラヴちゃん…); Loves mentions her x4 (1132.json)"
+    },
+    {
+      "id": 1131,
+      "name_en": "Gran Alegria",
+      "nature": "Close friend; futsal together, cheered by her \"oha-mile\"",
+      "evidence": "home scenes x5; mentions in voice x2 (voice_id 91002, 91009)"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Gentle friend and classmate (shares anpan, gives potpourri); rival who wants to catch up to her per wiki",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91001, 91014); rival per web: https://umamusu.wiki/Chrono_Genesis"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Upperclassman and friend whose guidance she appreciates (wiki); invited her to a joint yakisoba party",
+      "evidence": "mentions in voice x1 (voice_id 10013: ゴルシさんから『合同焼きそばパーティー招待状』); guidance per web: https://umamusu.wiki/Chrono_Genesis"
+    },
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "Friend",
+      "evidence": "home scenes x1; Lilac voice_id 91001 (1130.json) about her camera"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "Shares her love of racing history",
+      "evidence": "home scenes x1; nature per web: https://umamusu.wiki/Chrono_Genesis"
+    },
+    {
+      "id": 9003,
+      "name_en": "Reporter Otonashi (乙名史記者)",
+      "nature": "Racing reporter (NPC) she shares a home scene with",
+      "evidence": "home scenes x1; name_en null in source, romanised"
+    },
+    {
+      "id": null,
+      "name_en": "Mother, father, grandfather",
+      "nature": "Mother is a researcher who still watches her races live; father cooks Christmas pintade; grandfather gave her hair ribbon",
+      "evidence": "voice_id 91004, 10008, 10027"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Public Relations Committee (広報委員, voice 91012)"
+  ],
+  "story_arc": {
+    "summary": "Framed as chapters of race history, her career runs through the Hanshin JF, Triple Tiara (Oka Sho, Oaks, Shuka Sho), a painful Osaka Hai (\"Out of reach, the weight of time\"), then the Takarazuka Kinen, Tenno Sho (Autumn) and Arima Kinen (\"History was made\"). Per the wiki, her junior and classic years focus on Schon Lilie (the wiki does not call her a rival), and in her senior year her trainer is hit by a car saving a child and is hospitalised until well enough to watch her Arima Kinen. Her arc is about going from a historian to someone who makes history.",
+    "source": "event titles + web: https://umamusu.wiki/Chrono_Genesis"
+  },
+  "timer_line_ideas": [
+    "Um, {user}... the independent run has concluded. I recorded the time, of course. Shall we review it together? Each session is one more line in our history...",
+    "According to the Genesis Method, now is the time for review... Ah, sorry. {user}, your run is over. A small step today, but history is built from steps like these."
+  ],
+  "data_gaps": [
+    "Mentions extractor flagged Curren Chan x1; the match is バズーカレンズ ('bazooka lens', voice 90009) - false positive, dropped.",
+    "Reporter Otonashi has no name_en in source; romanised.",
+    "Schon Lilie and the car accident come from the wiki, not the mdb."
+  ],
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "クロノジェネシスです。\nれ、歴史を創ります…！",
+      "en": "I'm Chrono Genesis. I-I will make history...!"
+    },
+    {
+      "voice_id": 10000,
+      "jp": "運命的な出会い…レース史の中では\n常套句ですが…私にとっては、\nトレーナーさんとのあの日、ですね",
+      "en": "A fateful encounter... a cliche in race history, but for me, it's that day I met you, Trainer-san."
+    },
+    {
+      "voice_id": 20008,
+      "jp": "あのレース…6番の能力なら…\n先行したまま…――あ！\nす、すみません…。",
+      "en": "In that race... with No. 6's ability, if she'd stayed up front... ah! S-sorry..."
+    },
+    {
+      "voice_id": 20009,
+      "jp": "週末になればレース場に行ける…。\n週末になればレース場に行ける…。\n週末になればレース場に行ける…。",
+      "en": "If I make it to the weekend I can go to the racecourse. If I make it to the weekend I can go to the racecourse. If I make it to the weekend..."
+    },
+    {
+      "voice_id": 20024,
+      "jp": "自分で自分に印をつけるなら…◎！\n…その、それくらいの自信で…\n挑んでまいります…！",
+      "en": "If I had to mark myself... a double circle! ...That's, um, the confidence I'll take in with me...!"
+    },
+    {
+      "voice_id": 92006,
+      "jp": "いつか、私とトレーナーさんも…\n『歴史に残る名コンビ』として、\n誰かに語ってもらえるように…。",
+      "en": "Someday, I hope you and I will be talked about as a legendary duo in history..."
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "id": 1010,
+  "name_en": "Taiki Shuttle",
+  "name_jp": "タイキシャトル",
+  "kind": "uma",
+  "one_liner": "Huggy, party-loving American cowgirl from Kentucky who speaks katakana-English and wants to make everyone happy.",
+  "personality": "Taiki is bright, friendly and affectionate, always proposing hugs, barbecues and parties and calling everyone friends. She mixes English words into heavily katakana Japanese and plays up a cowgirl gunslinger image ('BANG!'). She hates being alone, gets homesick for her family in America, and slacks on schoolwork, but she sincerely wants to repay her trainer with happiness.",
+  "speech": {
+    "first_person": "watashi (ワタシ, katakana)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "polite desu/masu with katakana foreign-accent endings (デス, マース, クダサーイ) and English loanwords",
+    "tics": [
+      {
+        "jp": "デース",
+        "romaji": "dēsu",
+        "meaning": "stretched 'desu' with a foreign accent"
+      },
+      {
+        "jp": "マース",
+        "romaji": "māsu",
+        "meaning": "stretched '-masu' ending"
+      },
+      {
+        "jp": "BANG",
+        "romaji": "ban",
+        "meaning": "finger-gun gunslinger pose ('BANG！')"
+      },
+      {
+        "jp": "ハウディ",
+        "romaji": "haudi",
+        "meaning": "'Howdy!'"
+      },
+      {
+        "jp": "イピカイエー",
+        "romaji": "ipikaiē",
+        "meaning": "'Yippee-ki-yay!'"
+      },
+      {
+        "jp": "ウェル～",
+        "romaji": "weru~",
+        "meaning": "'Well...' when deflated"
+      },
+      {
+        "jp": "ハグ",
+        "romaji": "hagu",
+        "meaning": "'hug' - she offers them constantly"
+      },
+      {
+        "jp": "レッツ",
+        "romaji": "rettsu",
+        "meaning": "'Let's...' (レッツパーティー, レッツエンジョーイ)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "hugs and parties; BBQ, steak, burgers",
+    "cowboy/western movies, gunslinger poses, shooting galleries",
+    "her family, ranch, sheep and sheepdogs in Kentucky",
+    "baking with her mom's recipes (trivia)",
+    "positive thinking (profile strength)",
+    "Japanese seasonal events and food"
+  ],
+  "weak_spots": [
+    "being alone (profile weakness; voice 91006)",
+    "homesickness for Papa and Mama (voice 20011)",
+    "schoolwork, Japanese, make-up classes (voice 91004, 91013, 91220)",
+    "concentrating (voice 91003)",
+    "caterpillars in summer cherry trees (voice 91025)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School division (高等部)",
+    "birthday": "March 23 (3月23日)",
+    "height": "172 cm (172㎝)",
+    "voice_actor": "Yuka Otsubo (大坪由佳)"
+  },
+  "relationships": [
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "friend she wants to catch and hug; part of Suzuka 'awakening' event chain",
+      "evidence": "home scenes x3; mentioned_by x3; mentions in voice x4 (voice_id 91000: スズカ、逃げ足速すぎデス！; 91219); event titles サイレンススズカ、覚醒①-④"
+    },
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "friend/rival in radio-dance battles",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91001: パールさんには、まだ負けマセン！)"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "friend; made fortune cookies together",
+      "evidence": "home scenes x4; mentioned_by x2; mentions in voice x1 (voice_id 91222)"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "friend who does her hair and helps with homework (roommate per wiki)",
+      "evidence": "home scenes x2; mentioned_by x3; mentions in voice x3 (voice_id 91004: ドーベル、今夜も/手伝ってくれるでショウカー; 90210; 91018); roommate per web: https://umamusu.wiki/Taiki_Shuttle"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "friend who taught her enka and matcha",
+      "evidence": "home scenes x1; mentions in voice x4 (voice_id 10027; 90014: グラス直伝！; 91224; 1027)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "home-screen partner",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91226)"
+    },
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "friend she borrows pens from",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91010; 10026)"
+    },
+    {
+      "id": 1131,
+      "name_en": "Gran Alegria",
+      "nature": "fellow miler she hugs",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91217; 91221)"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "long-time Japanese study partner",
+      "evidence": "mentions in voice x1 (voice_id 91218)"
+    },
+    {
+      "id": 1012,
+      "name_en": "Hishi Amazon",
+      "nature": "dorm leader she hides late nights from",
+      "evidence": "mentions in voice x1 (voice_id 90005: …ヒシアマさんには秘密デス。)"
+    }
+  ],
+  "groups": [
+    "Team Rigil (anime only)",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "A sprinter-miler from America, Taiki races on both turf and dirt through the Shinzan Kinen, NHK Mile Cup, Unicorn Stakes, Yasuda Kinen, Sprinters Stakes and Mile CS, aiming at Horse of the Year. Her story explores a 'frontier spirit' and what lies beyond the mile, with a side chain about Silence Suzuka's awakening.",
+    "source": "event titles (フロンティア・スピリッツ, マイルの先にあるもの, NHKマイルCの後に・芝でも砂でも, マイルCSの後に・年度代表なるか？, サイレンススズカ、覚醒①) + model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10002,
+      "jp": "ニホン来た時、少～し不安デシタ。\nけど今は…毎日がハッピーデスヨ♪\nトレーナーさんがいますカラ！",
+      "en": "When I came to Japan I was a little anxious. But now... every day is happy! Because I have you, Trainer-san!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "BANG！！\nトレーナーさんのハートも\n狙い撃ちデース♪",
+      "en": "BANG!! I'm shooting for your heart too, Trainer-san!"
+    },
+    {
+      "voice_id": 91006,
+      "jp": "…ヘーイ。\nウェルぅ～…。\nもっとかまってクダサーイ。",
+      "en": "...Heeey. Wellll... Pay more attention to me, pleeease."
+    },
+    {
+      "voice_id": 20011,
+      "jp": "うぅ～…。パパ…ママ…。",
+      "en": "Uuu... Papa... Mama..."
+    },
+    {
+      "voice_id": 90214,
+      "jp": "目の下、ベアーいマスヨ？頑張り\nすぎはノーノー！帰りまショウ！\nトゥモロー・イズ・アナザー・デイ",
+      "en": "You've got bears under your eyes! Working too hard is a no-no! Let's go home! Tomorrow is another day."
+    },
+    {
+      "voice_id": 92222,
+      "jp": "見ててクダサイ、トレーナーさん！\nたくさん勝って、ハッピーあげマス\n…アナタが、ワタシにくれたブン。",
+      "en": "Watch me, Trainer-san! I'll win lots and give you happiness... as much as you gave me."
+    }
+  ],
+  "timer_line_ideas": [
+    "Howdy, {user}! The independent run is finished, desu! Perfect timing! Come check it, then let's celebrate with a big hug! Let's party!",
+    "BANG! Bullseye, {user}! The training timer is done-desu! Please come look, Trainer-san - Taiki is waiting for a hug~!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice counts for Daring Heart x5 and Katsuragi Ace x4 are false matches (ハート 'heart' and イエース 'yes'); not relationships",
+    "Roommate with Mejiro Dober is from umamusu.wiki (checked 2026-11), not the mdb",
+    "Story arc beyond titles is model knowledge, unverified"
+  ]
+}

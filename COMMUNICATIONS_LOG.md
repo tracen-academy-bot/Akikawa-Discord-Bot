@@ -4,6 +4,20 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-08 — Special sets will grow; a reference to write them from
+
+- More special sets are planned. Mejiro Family is next; others follow.
+- Set 1 leans on well-known umas because the staff know few of the
+  others. The JP `master.mdb` (supplied by the owner) is the source for a
+  reference covering every character, so later sets can cover more of the
+  roster.
+- The Global mdb is not needed: JP data already has English names for all
+  but 22 (mostly NPCs).
+- The mdb and the full voice dump stay out of git; the English briefs and
+  the scripts are in. The viewer is dark by default.
+
+---
+
 ## 2026-11-04 — #recruitment is a board; pings are per tier
 
 - #recruitment shows only who is available (30-day pace, time open, post)

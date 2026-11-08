@@ -1,0 +1,71 @@
+{
+  "id": 2008,
+  "name_en": "ST-2",
+  "name_jp": "ST-2",
+  "kind": "npc",
+  "one_liner": "A robot 'Mecha Umamusume' built by Sugar Lights, upgraded across the Run! Mecha Umamusume scenario.",
+  "personality": "Unknown from the mdb: she has no profile text and no voice lines in the source. The wiki describes only her role and appearance (a mecha that is upgraded through three forms), not her personality.",
+  "speech": {
+    "first_person": "unknown",
+    "calls_trainer": "unknown",
+    "register": "unknown",
+    "tics": []
+  },
+  "likes_and_motifs": [
+    "robot / mecha body with jet boosters and antenna (web: https://umamusu.wiki/ST-2)",
+    "upgrades across three forms (web: https://umamusu.wiki/ST-2)"
+  ],
+  "weak_spots": [],
+  "profile": {
+    "dorm": "n/a (NPC)",
+    "grade": "n/a (NPC)",
+    "birthday": "August 2 (web: umamusu.wiki; not in mdb)",
+    "height": "157 cm (web: umamusu.wiki; not in mdb)",
+    "voice_actor": "Yui Ishikawa (石川由依)"
+  },
+  "relationships": [
+    {
+      "id": 9045,
+      "name_en": "Sugar Lights (シュガーライツ; no EN name in source)",
+      "nature": "her creator/designer",
+      "evidence": "web: https://umamusu.wiki/ST-2"
+    },
+    {
+      "id": 1026,
+      "name_en": "Mihono Bourbon",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Run! Mecha Umamusume scenario cast (web: https://umamusu.wiki/ST-2)"
+  ],
+  "story_arc": {
+    "summary": "She is the central NPC of the Run! Mecha Umamusume (走れ！メカウマ娘) scenario. She trains alongside the player's Umamusume and gets upgraded from a blocky first form to a humanoid final form as the scenario goes on.",
+    "source": "web: https://umamusu.wiki/ST-2"
+  },
+  "sample_lines": [],
+  "timer_line_ideas": [
+    "Independent Training run: complete. Results ready for review, {user}.",
+    "{user}, the 50-minute run has ended. Please come check the data."
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'ST-2' is name_jp as-is. Wiki gives the kana reading サティ (Sati).",
+    "No voice lines, profile text, or event titles in the mdb, so personality, speech, first person and how she addresses the trainer are all unknown.",
+    "The timer lines are generic placeholders written in a terse robotic tone, NOT based on her real speech. Rewrite them once her scenario dialogue is checked.",
+    "The source gives voice actor 石川由依, who also voices Sugar Lights (9045). Whether ST-2 has any spoken voice or shares her creator's VA in this entry is unverified.",
+    "Birthday and height come only from the wiki."
+  ]
+}

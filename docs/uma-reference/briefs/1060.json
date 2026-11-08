@@ -1,0 +1,199 @@
+{
+  "id": 1060,
+  "name_en": "Nice Nature",
+  "name_jp": "ナイスネイチャ",
+  "kind": "uma",
+  "one_liner": "Self-deprecating 'supporting-role' girl from a shopping street who quietly yearns to shine.",
+  "personality": "Laid-back and cynical about herself, she calls herself a perennial 'also-ran' and shrugs off expectations with jokes, then gets embarrassed whenever she accidentally sounds earnest. She is a caretaker at heart, offering snacks, stretches and a listening ear, and meddling to help King Halo and tidying up after her roommate Marvelous Sunday (per Marvelous). Her family runs a snack bar and the close-knit shopping street cheers her on. She has old-auntie tastes (umekobu tea, oden daikon, eihire/dried ray fin) but still dreams of the sparkle she thinks is out of reach.",
+  "speech": {
+    "first_person": "atashi (アタシ) — x32; also refers to herself as 'Nature-san (ネイチャさん)' x5",
+    "calls_trainer": "Trainer-san (トレーナーさん) x10; also Anta (アンタ) x3",
+    "register": "casual, laid-back, slightly old-fashioned/uncle-ish phrasing (〜ですな, 〜ますか), self-mocking",
+    "tics": [
+      {
+        "jp": "ぼちぼち",
+        "romaji": "bochibochi",
+        "meaning": "'so-so / at a leisurely pace' (x4 in lines; also in self_intro)"
+      },
+      {
+        "jp": "そこそこ",
+        "romaji": "sokosoko",
+        "meaning": "'reasonably, moderately' (x5)"
+      },
+      {
+        "jp": "なんちゃって / なーんてね",
+        "romaji": "nanchatte / nāntene",
+        "meaning": "'just kidding' after saying something earnest (なんちゃって x2, なーんてね x1; also 'なんてね' 20023)"
+      },
+      {
+        "jp": "〜ますか / やりますか",
+        "romaji": "~masu ka / yarimasu ka",
+        "meaning": "'shall I, then' self-motivating ending (ますか x16, やりますか x4)"
+      },
+      {
+        "jp": "〜じゃん",
+        "romaji": "~jan",
+        "meaning": "casual 'isn't it' (x14)"
+      },
+      {
+        "jp": "〜ですな / 〜ますな",
+        "romaji": "~desu na / ~masu na",
+        "meaning": "old-fashioned folksy ending (ですな x2, ますな x5)"
+      },
+      {
+        "jp": "はっず",
+        "romaji": "hazzu",
+        "meaning": "'so embarrassing' (x2: 20002, 70008)"
+      },
+      {
+        "jp": "ネイチャさん",
+        "romaji": "Neicha-san",
+        "meaning": "third-person self-reference (x5)"
+      },
+      {
+        "jp": "あはは / たはは",
+        "romaji": "ahaha / tahaha",
+        "meaning": "sheepish laugh (あはは x5, たはは x1; あはは also in self_intro)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "table tennis; hunting tasty snacks/otsumami (profile strengths)",
+    "oden daikon, umekobu tea, eihire / dried ray fin (voice 91023), sunagimo with cola (trivia; voice 90015, 90217)",
+    "cats — patting them, cat videos (voice 91003, 91004)",
+    "the shopping street and its people (voice 91026, 90216)",
+    "her little brother (voice 91019, 91220)",
+    "onsen and saunas (voice 91013, 91015)",
+    "3rd place as a running joke (voice 30001, 90002)"
+  ],
+  "weak_spots": [
+    "social media (profile weakness)",
+    "being expected of / attention (voice 92002)",
+    "frilly, cute outfits on herself (voice 70004, 91005, 91006)",
+    "summer heat (voice 90007)",
+    "reacts whenever she hears 'ネーチャン' (profile, about_ears)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "April 16 (4月16日)",
+    "height": "157 cm (157cm)",
+    "voice_actor": "Kaori Maeda (前田佳織里)"
+  },
+  "relationships": [
+    {
+      "id": 1055,
+      "name_en": "Marvelous Sunday",
+      "nature": "roommate who wakes up shouting 'Marvelous!'",
+      "evidence": "mentions in voice x4 (voice_id 91002: 部屋にさ、いい目覚ましがあんの。『マーベラス！』って言って起きるウマ娘; 91020; 91218; 1126) — all via the 'マーベラス' catchphrase/name; home scenes x3; Marvelous mentions her x5 (e.g. 91011 waits for her in the dorm lobby)"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "the sparkling rival she feels she can't match",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91000: テイオー、今日もキラキラしてるなぁー); real-life rivalry general knowledge (unverified)"
+    },
+    {
+      "id": 1062,
+      "name_en": "Matikanetannhauser",
+      "nature": "close friend ('おマチ')",
+      "evidence": "home scenes x5; voice_id 1136: ほ～い、おマチ～。; Tannhauser mentions her x4"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "friend; energetic teammate",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91021; 91221); Turbo mentions her x4 (karaoke, hanami, kamakura nabe, arcade)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "friend",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91219; 91221)"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "younger friend she handles easily",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 91011: …即就寝！…チョロかわ。; 1125; 91021)"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "she can't help meddling to help her",
+      "evidence": "mentions in voice x2 (voice_id 91017: キングって、しっかりしてるけど不器用なとこあるからさー; 400003)"
+    },
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "respected 'senior in life'",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "spotted napping with cats",
+      "evidence": "mentions in voice x1 (voice_id 90003)"
+    },
+    {
+      "id": 1117,
+      "name_en": "Win Variation",
+      "nature": "junior who admires her quiet hard work",
+      "evidence": "home scenes x3; Win Variation mentions her x2 (91001: 見えない所で地道に努力してるんすよね; 400010)"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "fan who lists her 'oshi' qualities",
+      "evidence": "home scenes x3; Royce mentions her x1 (91002: 庶民派、努力家、ツッコミ気質――推し要素の三拍子)"
+    }
+  ],
+  "groups": [
+    "Team Canopus with Twin Turbo, Ikuno Dictus, Matikanetannhauser (anime season 2; general knowledge, unverified)"
+  ],
+  "story_arc": {
+    "summary": "A self-styled background character who thinks the 'sparkle' belongs to others like Tokai Teio, Nature is scouted by a trainer who believes in her. She races the Wakakoma Stakes, Kokura Kinen and Kikka Sho, watches the Satsuki and Derby spotlight go elsewhere, and keeps finishing on the podium ('even if plated') through the Arima Kinen, Takarazuka Kinen, Tenno Sho (Autumn) and Chunichi Shimbun Hai toward a final Arima. Her real namesake famously placed 3rd in three straight Arima Kinen (general knowledge, unverified).",
+    "source": "event titles; model knowledge (unverified) for real-horse notes"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70001,
+      "jp": "今でも不思議なんだよね。どうして\nよくて善戦、脇役ポジなアタシに…\n声かけてくれたんだろうって。",
+      "en": "I still wonder about it. Why'd you call out to someone like me — at best a good runner-up, a side character...?"
+    },
+    {
+      "voice_id": 30001,
+      "jp": "おなじみ3着！なんちゃって。",
+      "en": "My usual 3rd place! Just kidding."
+    },
+    {
+      "voice_id": 20002,
+      "jp": "おっし、やったりますか！\n…あー…ごめん、やっぱ今のなし。\nやる気出しすぎた。はっず。",
+      "en": "Alright, let's do this! ...Ah, sorry, scratch that. Got too fired up. So embarrassing."
+    },
+    {
+      "voice_id": 90015,
+      "jp": "放課後の1杯、たまんないわ～。\nトレーナーさんもどう？\n梅昆布茶。",
+      "en": "That after-school cup is the best~. Want some too, Trainer-san? Umekobu tea."
+    },
+    {
+      "voice_id": 10000,
+      "jp": "こんな青臭いこと言うなんて、\nアタシのキャラじゃないけどさ。\n…頑張るよ。アンタと一緒に。",
+      "en": "Saying something this corny isn't really my style, but... I'll do my best. Together with you."
+    },
+    {
+      "voice_id": 91002,
+      "jp": "部屋にさ、いい目覚ましがあんの。\n『マーベラス！』って言って起きる\nウマ娘なんだけど。ははっ…はぁ。",
+      "en": "I've got a great alarm clock in my room, see. A girl who wakes up yelling 'Marvelous!'. Haha... sigh."
+    }
+  ],
+  "timer_line_ideas": [
+    "Ohh, the independent run's done. Nice work, nice work~. {user}, come check the results? Don't expect too much though... ahaha, just kidding.",
+    "Alright, the timer's up. {user}, go take a look at how the run went. Nature-san'll put the umekobu tea on in the meantime~"
+  ],
+  "data_gaps": [
+    "Team Canopus is anime-only/general knowledge, unverified",
+    "Real-horse notes unverified",
+    "Some lines (902xx/912xx) are from her kimono alt outfit"
+  ]
+}

@@ -1,0 +1,167 @@
+{
+ "id": 1109,
+ "name_en": "Rhein Kraft",
+ "name_jp": "ラインクラフト",
+ "kind": "uma",
+ "one_liner": "A sunny, sunbathing-obsessed Triple Tiara fangirl who wants to carve a path and pass her dreams on.",
+ "personality": "Bright, earnest and energetic, she adores the Tiara races and the senpai who ran them, and talks constantly about 'carving open the future' and 'passing the baton' to whoever comes next. She is a dedicated crafter and photographer, a bit of a dreamy bookworm (fantasy novels about demon lords), and easily distracted by a sunny spot to nap in. She is stubborn about what she cares about and gets spooked by bugs and her own over-made jack-o'-lanterns.",
+ "speech": {
+  "first_person": "watashi (わたし)",
+  "calls_trainer": "Trainer-san (トレーナーさん)",
+  "register": "Cheerful polite (desu/masu) with bubbly onomatopoeia and ♪",
+  "tics": [
+   {
+    "jp": "切り拓く",
+    "romaji": "kirihiraku",
+    "meaning": "'carve open (a path / the future)' - her key verb"
+   },
+   {
+    "jp": "お日さま",
+    "romaji": "ohisama",
+    "meaning": "'Mr. Sun' - sun/sunlight motif"
+   },
+   {
+    "jp": "ティアラ",
+    "romaji": "tiara",
+    "meaning": "the Triple Tiara (fillies' crown) she dreams of"
+   },
+   {
+    "jp": "繋",
+    "romaji": "tsunagu",
+    "meaning": "'connect/pass on' (想いを繋げる, 未来へのバトン)"
+   },
+   {
+    "jp": "えへへ",
+    "romaji": "ehehe",
+    "meaning": "shy giggle"
+   },
+   {
+    "jp": "ぽっかぽか",
+    "romaji": "pokkapoka",
+    "meaning": "warm and toasty (voice_id 90001; ぽかぽか itself appears only in event titles)"
+   },
+   {
+    "jp": "日向ぼっこ",
+    "romaji": "hinatabokko",
+    "meaning": "sunbathing; she invented 'bokkatsu' (ぼっ活)"
+   }
+  ]
+ },
+ "likes_and_motifs": [
+  "sunbathing / the sun (sunflower seeds in her chocolate)",
+  "Triple Tiara history; scrapbook of Tiara articles",
+  "handmade crafts: jewelry, tiaras, sewing, knitting (profile strength)",
+  "rock climbing (profile strength)",
+  "photography; wants a photo that is 'so me'",
+  "thunder and lightning (finds it cool); touches her lightning-bolt hair when unsure on tests",
+  "fantasy novels",
+  "family picnics",
+  "Cesario's cooking and lap"
+ ],
+ "weak_spots": [
+  "bugs, especially flies (profile)",
+  "acting (profile)",
+  "spooky things (her room full of jack-o'-lanterns scares her)",
+  "running out of steam ('動けわたしぃ～', voice_id 20011)"
+ ],
+ "profile": {
+  "dorm": "Ritto Dorm (栗東寮)",
+  "grade": "Middle School Division (中等部)",
+  "birthday": "April 4 (4月4日)",
+  "height": "157 cm (157cm)",
+  "voice_actor": "Nanae Kojima (小島菜々恵)"
+ },
+ "relationships": [
+  {
+   "id": 1110,
+   "name_en": "Cesario",
+   "nature": "Roommate (per web: https://umamusu.wiki/Cesario) and best friend; dries her hair, cooks for her, lends her lap; real-life Oka Sho rival (general knowledge)",
+   "evidence": "home scenes x5; mentions in voice x4 (voice_id 90005: シーザリオの手、あったかくて気持ちよかったな～。今夜も髪乾かしてもらっちゃお♪); profile trivia: photo from Hokkaido trip with Cesario"
+  },
+  {
+   "id": 1112,
+   "name_en": "Daring Heart",
+   "nature": "Friend who helps her English",
+   "evidence": "home scenes x5; mentions in voice x2 (voice_id 91019: ハートさんとお喋りしてるおかげで英語は自信ついてきましたよ！)"
+  },
+  {
+   "id": 1111,
+   "name_en": "Air Messiah",
+   "nature": "Friend she taught sewing; sunglasses buddy",
+   "evidence": "home scenes x3; mentions in voice x2 (voice_id 91020)"
+  },
+  {
+   "id": 1113,
+   "name_en": "Fusaichi Pandora",
+   "nature": "Friend who charms her into giving away her lunch side dishes",
+   "evidence": "home scenes x3; mentions in voice x3 (voice_id 90012: パンドラさんはプロですよ…)"
+  },
+  {
+   "id": 1044,
+   "name_en": "Sweep Tosho",
+   "nature": "Asked her to find a 'legendary broom'; taught her 'training magic'",
+   "evidence": "home scenes x2; mentions in voice x3 (voice_id 91001; 92001)"
+  },
+  {
+   "id": 1061,
+   "name_en": "King Halo",
+   "nature": "Senpai she quotes; covered her with a blanket while she napped",
+   "evidence": "home scenes x2; mentions in voice x2 (voice_id 91018; 90014)"
+  },
+  {
+   "id": 1086,
+   "name_en": "Mejiro Ramonu",
+   "nature": "Tiara idol; fellow 'Muse' in an event",
+   "evidence": "mentions in voice x2 (voice_id 400002: ラモーヌさんの桜花賞、何度見てもきれいで、完璧…)"
+  }
+ ],
+ "groups": [
+  "Ritto Dorm",
+  "Team Ascella (with Cesario; per web: https://umamusu.wiki/Rhein_Kraft)"
+ ],
+ "story_arc": {
+  "summary": "A Tiara-loving girl who wants to inherit the dreams of past Tiara runners and pass them forward. Her goals include the Hanshin JF, Fillies' Revue, Oka Sho, NHK Mile Cup, Oaks and Shuka Sho, then the Takamatsunomiya Kinen, Victoria Mile, Sprinters S. and Queen Elizabeth II Cup; one branch is titled 'irregular double crown' after the NHK Mile, matching her real-life Oka Sho + NHK Mile wins. Chapter titles like 'Fate of Blood' and 'I Was Here' and a senior-year hospital visit allude to the real horse's early death in 2006.",
+  "source": "event titles; web: https://umamusu.wiki/Rhein_Kraft"
+ },
+ "sample_lines": [
+  {
+   "voice_id": 20002,
+   "jp": "お日さまパワー、充電完了っ！\nいつでも行けますよ！",
+   "en": "Sun power, fully charged! I'm ready to go anytime!"
+  },
+  {
+   "voice_id": 40001,
+   "jp": "いつか、誰かが示したように。\nわたしは、わたしの新しい道を――\n未来を、切り拓く！",
+   "en": "Just as someone once showed the way, I'll carve open my own new path, my future!"
+  },
+  {
+   "voice_id": 91013,
+   "jp": "夏のお日さまを10分浴びて、\n10分涼む。わたしが考えた\n『ぼっ活』、一緒にどうですか？",
+   "en": "Ten minutes in the summer sun, ten minutes cooling off. My own 'bask-tivity' plan. Want to join me?"
+  },
+  {
+   "voice_id": 91002,
+   "jp": "トレーナーさん！肩に虫っ！！\n虫が～！！…え？糸くず？？\nあ、あはは、お騒がせしました～。",
+   "en": "Trainer-san! A bug on your shoulder! A buuug! ...Huh? Lint?? Ah, ahaha, sorry for the fuss~."
+  },
+  {
+   "voice_id": 10007,
+   "jp": "カボチャのランタン作り過ぎて、\n部屋がホラー仕様に…うぅ、\n帰るの怖いよぉ～～！",
+   "en": "I made too many jack-o'-lanterns and now my room is a horror set... ugh, I'm scared to go back!"
+  },
+  {
+   "voice_id": 93001,
+   "jp": "ゴ～～ル！\nわたしの走った証、残せましたね！",
+   "en": "Goooal! I left proof of my run, didn't I!"
+  }
+ ],
+ "timer_line_ideas": [
+  "Trainer-san, {user}! The independent run is done, sun power fully charged! Come see it with me? I think we carved open a little more of the future!",
+  "Ehehe, goal! {user}, Trainer-san, the run is over. Can we look at the results together, and then... maybe a little sunbathing break?"
+ ],
+ "data_gaps": [
+  "No dialogue for career events (titles only)",
+  "Real-horse death reference inferred from titles and wiki; tone in-game unknown",
+  "Fact-check: 'over-training until her body won't move' was an over-reading of 20011 (a low-energy line); replaced"
+ ]
+}

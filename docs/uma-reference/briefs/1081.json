@@ -1,0 +1,212 @@
+{
+  "id": 1081,
+  "name_en": "Espoir City",
+  "name_jp": "エスポワールシチー",
+  "kind": "uma",
+  "one_liner": "Loud, punk-styled dirt sprinter-miler in a rebellious phase who hides a devoted, home-cooking family girl under constant bluster.",
+  "personality": "A self-described 'yapping rebellious-phase girl' (profile tagline) who barks threats, insults and 'Oraa!' at everyone, especially her trainer, and insists she is the strongest. Under the act she is plainly kind and domestic: she cooks osechi with her mother, makes chocolate for her family every year, brings the trainer a birthday bento, and helps slow friends carry luggage, then furiously denies any of it is nice. She constantly overcompensates when caught being sleepy, scared or nervous ('I'm not scared!'), and quietly asks the trainer to tell her she'll be okay before races.",
+  "speech": {
+    "first_person": "aashi (あーし)",
+    "calls_trainer": "temee (テメェ) / omae (お前), occasionally anta (アンタ); never addresses them as 'Trainer' in her lines",
+    "register": "rough gyaru/delinquent casual: slurred contractions (ねー, じゃねーし, ンだよ), yankii threats, 'Oraa'",
+    "tics": [
+      {
+        "jp": "オラァ",
+        "romaji": "oraa",
+        "meaning": "tough-guy shout, 'Come on!/Take that!' (also オラオラァ)"
+      },
+      {
+        "jp": "ナメんな",
+        "romaji": "namen na",
+        "meaning": "'Don't underestimate me / don't mess with me' (her tagline あーしをナメんな！)"
+      },
+      {
+        "jp": "ヨユー",
+        "romaji": "yoyuu",
+        "meaning": "'Easy / no sweat' (ヨユーだヨユー！)"
+      },
+      {
+        "jp": "ブチのめす",
+        "romaji": "buchinomesu",
+        "meaning": "'I'll beat the crap out of them'"
+      },
+      {
+        "jp": "カマす",
+        "romaji": "kamasu",
+        "meaning": "'Let 'em have it / go all out' (ぶっカマす, カマすぞ)"
+      },
+      {
+        "jp": "ビビったか",
+        "romaji": "bibitta ka",
+        "meaning": "\"Scared ya?\" (from ビビる, to be scared); she also denies it herself: ビビってなんかねーしっ"
+      },
+      {
+        "jp": "ンだよ、なんか文句あっか",
+        "romaji": "n da yo, nanka monku akka",
+        "meaning": "'What? Got a problem?' - her go-to deflection when flustered"
+      },
+      {
+        "jp": "ピヨッピヨにしてやんよ",
+        "romaji": "piyoppiyo ni shite yan yo",
+        "meaning": "'I'll leave you seeing stars / turn you into chicks' (dazed)"
+      },
+      {
+        "jp": "ねーし！",
+        "romaji": "nee shi!",
+        "meaning": "defensive \"...or anything!\" ending in denials, e.g. 眠くなんかねーし！"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "black and black-gold accessories (chokers, 'gyaru' bling) - 'strong colour is black'",
+    "chunky shoes and red jackets; wants a bigger ribbon to look more intimidating",
+    "candy (chews it to stay awake; keeps a stock)",
+    "spicy ramen",
+    "cooking: osechi with her mother, chocolate cake, bento",
+    "family: mother, father (teased), a younger brother she brags about",
+    "karaoke with Daitaku Helios and friends",
+    "tidying rooms and dice stacking (profile strengths)",
+    "bargain hunting (cheap store accessories, textbook sales)",
+    "earrings/piercings (took a month to decide on her first piercing)"
+  ],
+  "weak_spots": [
+    "psychological/personality tests and static electricity (profile weaknesses)",
+    "being seen as nice or a good kid - gets embarrassed and angry",
+    "pre-race nerves she loudly denies (20031, 20035, 20036)",
+    "cold and snow (sneezes after eating ice cream outside; fears slipping)",
+    "believed in Santa longer than she admits (10009)",
+    "spooked by the flickering dorm toilet light (90005)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 22 (4月22日)",
+    "height": "153 cm (153cm)",
+    "voice_actor": "Asaka (亜咲花)"
+  },
+  "relationships": [
+    {
+      "id": 1079,
+      "name_en": "Furioso",
+      "nature": "closest rival/friend; fellow dirt racer whose Funabashi pride she grudgingly resists",
+      "evidence": "home scenes x8; mentions in voice x1 (voice_id 90007: 駅前の梨パフェ確かにうめーけど… あンのフリオーソのドヤ顔…っ！); web: https://umamusu.wiki/Espoir_City (rival, lunch together)"
+    },
+    {
+      "id": 1098,
+      "name_en": "Copano Rickey",
+      "nature": "roommate (per wiki); feng-shui fan who rearranges their room",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91001: リッキー、また風水とか言って 模様替えしやがって…); profile about_tail mentions Rickey's comb; roommate per web: https://umamusu.wiki/Espoir_City"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "friend; Falco teases her about live performances",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 10007: ファル子にライブ・オア・トリート て言われてよ。)"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "friend she trades fashion items with",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 90008: トランと取引するしかねぇのか…！)"
+    },
+    {
+      "id": 1100,
+      "name_en": "Wonder Acute",
+      "nature": "senior who treats her like a good kid, to her annoyance",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91000: アキュートのやつ、あーしをいい子 扱いしやがって…)"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "training partner who sends her haskap berries",
+      "evidence": "mentions in voice x1 (voice_id 91002: タルマエが大量のハスカップ寄越し てきてよ…); top affinity 34"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "party friend; karaoke endurance sessions, Espoir helps with Helios's homework",
+      "evidence": "mentions in voice x2 (voice_id 10026: ヘリオスたちとのカラオケ歌いっぱ 耐久レース; voice_id 91010: 世話かかんだよな、 ヘリオスは。)"
+    },
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "fellow 'City'; Espoir covets her flashy accessories",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91011: やっぱゴールドの『ぶりんぶりん』 ほしーよな…)"
+    },
+    {
+      "id": 1107,
+      "name_en": "Tap Dance City",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x2"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "mentioned as someone whose work Espoir doesn't want to add to (event context)",
+      "evidence": "mentions in voice x1 (voice_id 400013: 散らかすとブエナの仕事増やし ちまうだろ。)"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "Ritto dorm leader (dorm-leader role is general knowledge) whose scary face she wants to avoid",
+      "evidence": "voice_id 400001: これなら寮で練習してもフジに怖え 顔されねーだろ。"
+    },
+    {
+      "id": null,
+      "name_en": "Her mother",
+      "nature": "beloved; cooks with her, sends photos; career story has her mother hospitalised and Espoir running for her",
+      "evidence": "voice_id 20024: 母さんも見てくれてるし。; event title: 母との通話; hospital plot per web: https://umamusu.wiki/Espoir_City"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Local/NAR & JRA dirt racers circle (Furioso, Transcend, Copano Rickey, Smart Falcon, Wonder Acute, Hokko Tarumae) - informal grouping, unverified as an official team",
+    "'City' name group with Gold City / Tap Dance City (naming only, unverified as a group)"
+  ],
+  "story_arc": {
+    "summary": "A defiant girl who distrusts adults and leadership takes on a trainer and the dirt circuit, aiming at the Mile CS Nanbu Hai, Champions Cup, February Stakes, Kashiwa Kinen, Teio Sho and JBC Sprint. Event titles ('Lump of Defiance', 'Writing Hope in the Textbook', 'Call with Mother', 'Hope Shines with Pride') trace her bluster softening into trust. Per the wiki, her mother is in hospital and she races for her, and after the Teio Sho her trainer is badly hurt in a car accident; 'Espoir' (hope) is the recurring theme.",
+    "source": "event titles; web: https://umamusu.wiki/Espoir_City"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 13,
+      "jp": "ログインボーナスだとよ。 オラ、早く受け取れ。",
+      "en": "Says it's a login bonus. Oi, hurry up and take it."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "テメェは…他の大人とは、 たぶんちげー…んだと、思う。 …っ、ちょっとだけだけどな！",
+      "en": "You're... prob'ly different from other adults... I think. ...Just a little, though!"
+    },
+    {
+      "voice_id": 10012,
+      "jp": "オイ、トレーナー室見たかよ。 …あの弁当は！差し入れだオラァ！ 誕生日だろが、文句あっかコラァ！",
+      "en": "Oi, you see the trainer's room? ...That bento is a gift, damn it! It's your birthday, ain't it? Got a problem with that?!"
+    },
+    {
+      "voice_id": 20035,
+      "jp": "…ダイジョーブだよな、あーし…。 ～～っ、言えよダイジョーブって！ そしたら…っ、カマせっから…！",
+      "en": "...I'm gonna be okay, right...? Ngh, say it! Say I'll be okay! Then I... I can go all out...!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "あーしをナメたら、痛い目見んぞ！ 全員まとめて、ピヨッピヨにしてやんよ！",
+      "en": "Underestimate me and you'll get hurt! I'll leave every last one of you seeing stars!"
+    },
+    {
+      "voice_id": 90004,
+      "jp": "はふ…――はっ！ べっ、別に眠くなんかねーし！ ヨユーでオールできっし！",
+      "en": "Hafu... -- huh! I-I'm not sleepy or nothin'! I could pull an all-nighter, easy!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Oi, {user}! Your independent run's done, y'hear? Get over here and check it already! ...N-not like I was waitin' on you or nothin'! Oraa!",
+    "Fifty minutes, done. Yoyuu! ...Hah? What's with that face? Go look at your results, {user}, before I make ya see stars!"
+  ],
+  "data_gaps": [
+    "Career story dialogue not in mdb; plot points (hospitalised mother, trainer's car accident) come only from umamusu.wiki and are not verified against the game text",
+    "Copano Rickey as roommate is from the wiki, not the mdb",
+    "No 'Trainer' form of address appears in her lines; she uses テメェ/お前/アンタ",
+    "Only one trainee card (Red Devil Gear); recent character, so English-wiki coverage is thin"
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "id": 1102,
+  "name_en": "Sounds of Earth",
+  "name_jp": "サウンズオブアース",
+  "kind": "uma",
+  "one_liner": "A flamboyant violinist who treats every race as a concert and sprinkles Italian music terms everywhere.",
+  "personality": "A romantic, theatrical musician who hears music in everything (chalk on a blackboard is a waltz, a winter morning is a sonata) and sees races as ensemble sessions with rivals as fellow musicisti. She is warm, gallant and openly flirtatious with the trainer, calling them \"amore\" and offering to escort them to dinner. Under the flourish she is diligent and proud as a performer: she will 'play' even if it comes out as a dissonance, and when tired she worries about letting the trainer hear 'noise'.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "kimi (君) and amore (アモーレ / アモーレ・ミオ); no instance of トレーナー in her lines",
+    "register": "gallant, theatrical prince-like speech (～さ, ～だよ, ～じゃないか) mixed with Italian musical vocabulary",
+    "tics": [
+      {
+        "jp": "アモーレ",
+        "romaji": "amōre",
+        "meaning": "Italian 'love' - how she addresses the trainer"
+      },
+      {
+        "jp": "グラッツェ",
+        "romaji": "grattse",
+        "meaning": "Italian 'grazie', thank you"
+      },
+      {
+        "jp": "ベネ",
+        "romaji": "bene",
+        "meaning": "Italian 'good'"
+      },
+      {
+        "jp": "ムジカ",
+        "romaji": "mujika",
+        "meaning": "Italian 'musica', music"
+      },
+      {
+        "jp": "メロディーア",
+        "romaji": "merodīa",
+        "meaning": "Italian 'melodia', melody"
+      },
+      {
+        "jp": "ムジチスタ",
+        "romaji": "mujichisuta",
+        "meaning": "her word for fellow musicians/racers (from self-intro)"
+      },
+      {
+        "jp": "セッション",
+        "romaji": "sesshon",
+        "meaning": "'session' - what she calls races and jam play"
+      },
+      {
+        "jp": "ドルチェ",
+        "romaji": "doruche",
+        "meaning": "'dolce', sweet - used for sweetness and feelings"
+      },
+      {
+        "jp": "ブオン・アッペティート",
+        "romaji": "buon appetito",
+        "meaning": "'enjoy your meal' - her finishing flourish"
+      },
+      {
+        "jp": "アンサンボゥ",
+        "romaji": "ansanbō",
+        "meaning": "stylised 'ensemble' (tagline: レースはアンサンボゥ！)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "violin and all music; composing while spinning a globe",
+    "soy milk (豆乳) and soy-milk somen",
+    "gelato, tiramisu, maritozzo and chocolate-mint sweetness",
+    "three red roses (profile trivia)",
+    "escorting others, polishing silverware (profile strengths)",
+    "Planet Earth as the source of music (brooch)",
+    "family jam sessions; her mother's orchestra",
+    "tail colognes changed with her outfit (vanilla base)",
+    "paintings and art exhibitions"
+  ],
+  "weak_spots": [
+    "wasabi (profile; voice 91003 sushi meltdown)",
+    "artificial sweeteners",
+    "taking notes - she ends up writing sheet music instead (voice 90012)",
+    "candy-making goes wrong (voice 91022)",
+    "when sad she plays Beethoven's 'Fate' to reset (profile trivia)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior/Middle School Division (中等部)",
+    "birthday": "April 12 (4月12日)",
+    "height": "161 cm (161cm)",
+    "voice_actor": "MAKIKO"
+  },
+  "relationships": [
+    {
+      "id": 1105,
+      "name_en": "Neo Universe",
+      "nature": "close friend; weekend cafe 'dates' hunting soy-milk menus, matching three-piece accessory; she plays nocturnes when with her. Real-life sire.",
+      "evidence": "home scenes x6; mentions in voice x3 (voice_id 91016: 休日はユニヴァースさんとデートさ; 70016; 400006); sire relationship per web: https://umamusu.wiki/Sounds_of_Earth"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "frequent home-scene partner; teammate in anime Team Canopus",
+      "evidence": "home scenes x6; Team Canopus per web: https://umamusu.wiki/Sounds_of_Earth"
+    },
+    {
+      "id": 1143,
+      "name_en": "Victoire Pisa",
+      "nature": "roommate; they trade concert and art-exhibition invitations and sing while caring for tails",
+      "evidence": "home scenes x2; Victoire Pisa voice 90008, 91000, 20011; roommate per web: https://umamusu.wiki/Sounds_of_Earth"
+    },
+    {
+      "id": 1068,
+      "name_en": "Kitasan Black",
+      "nature": "friend/rival; Earth wants to master Kitasan's 'soiya' rhythm",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91000: ソイヤソイヤ…これがキタサンの音色)"
+    },
+    {
+      "id": 1089,
+      "name_en": "Cheval Grand",
+      "nature": "friend who shyly listens to her play from afar",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91001); Cheval voice 91010"
+    },
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "friend she goes on walks and odd-shop hunts with",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1088,
+      "name_en": "Satono Crown",
+      "nature": "friend",
+      "evidence": "home scenes x3; Satono Crown voice 90006"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "spends rainy days with her in the cafeteria",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "admires her fortissimo expressiveness",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "wants a session with her as a 'passionate drummer'",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "sees Turbo as a living rock song",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 400003)"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "performed an opera with her and T.M. Opera O at the school festival",
+      "evidence": "Fuji Kiseki voice 91226"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Team Canopus (anime-only, Season 3; per web: https://umamusu.wiki/Sounds_of_Earth)"
+  ],
+  "story_arc": {
+    "summary": "Her career events are titled with Italian musical terms (Suoni di..., Musicisti brillanti, Ricercare l'eccellenza, Una cosa sola, Compimento), and her race-goal events run Kyoto Shimbun Hai, Japanese Derby, Kikuka Sho, Nikkei Sho, Spring Tenno Sho, Sapporo Kinen, Japan Cup and Arima Kinen. The title of her finale event, 大地と宙と、夜と、星と、君たちと (\"Earth and sky, night and stars, and all of you\"), suggests a story about making music together with rivals and with the planet. Her real-life namesake was famous for many second-place finishes; whether the game story is built around that is unverified.",
+    "source": "event titles; real-horse note from model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "私たちは志を同じくするデュオ。\n肩を並べ、奏でよう…2人の、\n胸躍るメロディーアを！",
+      "en": "We are a duo of shared ambition. Side by side, let's play... our heart-pounding melodia, for two!"
+    },
+    {
+      "voice_id": 20006,
+      "jp": "さあ、始めよう！\n指揮者がバケッタを振るように、\n私を導いてくれるかい？",
+      "en": "Now, let's begin! Will you guide me, the way a conductor waves the baton?"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "ああ…あああぁ～～！！\nお寿司、ワサビ抜きで頼んだのに！\nツーンが取れないよ、ツーンが！",
+      "en": "Ah... aaaah~~!! I ordered my sushi without wasabi! The sting won't go away, the sting!"
+    },
+    {
+      "voice_id": 90012,
+      "jp": "チョークが黒板を刻む音は、まるで\nワルツだね。ノートを取るつもりが\nつい譜面に起こしてしまうよ。",
+      "en": "Chalk scratching on the blackboard is just like a waltz. I mean to take notes, but I end up writing a score instead."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "君に約束するよ、アモーレ…！\nどんなドルチェよりも甘く、\n胸を震わす勝利のメロディーアを！",
+      "en": "I promise you, amore...! A victory melodia sweeter than any dolce, one that makes your heart tremble!"
+    },
+    {
+      "voice_id": 40003,
+      "jp": "さあ、ブオン・アッペティート！",
+      "en": "Now then, buon appetito!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Bravo, amore! {user}, the independent run has reached its finale. Come, let us listen to the coda together and hear what melodia was played. Grazie!",
+    "The last note has rung out, {user} - your independent run is complete! Shall we review the score side by side? A true session deserves an audience, amore."
+  ],
+  "data_gaps": [
+    "No full career-story text; arc summary is inferred from event titles.",
+    "mentions_in_voice entries for Manhattan Cafe (x2), Winning Ticket and Gran Alegria look like false positives (カフェ = cafe, チケット = tickets, グランディオーソ), not real references.",
+    "Real-life 'eternal runner-up' framing is unverified for the game story."
+  ]
+}

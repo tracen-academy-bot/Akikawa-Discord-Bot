@@ -1,0 +1,196 @@
+{
+  "id": 1067,
+  "name_en": "Satono Diamond",
+  "name_jp": "サトノダイヤモンド",
+  "kind": "uma",
+  "one_liner": "Gracious, endlessly curious Satono heiress with diamond-hard resolve, set on breaking every jinx through her running.",
+  "personality": "A polite, warm young lady from a very rich, well-connected family. She is cheerfully naive about money (offering resort vouchers, asking whether to rent a warehouse for her parents' gifts) and loves anything new or difficult. Under the gentle manners she is fiercely determined: she does not believe in fate and treats jinxes as things to break, even calling her day '1 jinx-break'. She is devoted to her childhood friend Kitasan Black, and her later outfits bring in France, the Arc and a knightly 'noblesse oblige' side.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also anata (あなた), and 'taisetsu na anata' (大切なあなた) in one line",
+    "register": "polite keigo, gentle ojousama (どうぞ♪, 参りましょう, いたします); switches to casual with Kitasan (キタちゃん); sprinkles in French",
+    "tics": [
+      {
+        "jp": "ジンクス",
+        "romaji": "jinkusu",
+        "meaning": "jinx; she talks about breaking them (今日も1日 1ジンクス破りといきましょう！)"
+      },
+      {
+        "jp": "輝き / 輝いてみせます",
+        "romaji": "kagayaki / kagayaite misemasu",
+        "meaning": "shine / I'll show you my shine (diamond motif in most race lines)"
+      },
+      {
+        "jp": "ふふっ♪",
+        "romaji": "fufu♪",
+        "meaning": "soft, pleased giggle; ♪ marks are everywhere in her lines"
+      },
+      {
+        "jp": "ふむふむ",
+        "romaji": "fumu fumu",
+        "meaning": "'I see, I see' while studying something"
+      },
+      {
+        "jp": "参りましょう / 参ります",
+        "romaji": "mairimashō / mairimasu",
+        "meaning": "humble 'let's go' / 'here I go'"
+      },
+      {
+        "jp": "我がグループ",
+        "romaji": "waga gurūpu",
+        "meaning": "'our group', meaning her family's conglomerate"
+      },
+      {
+        "jp": "さあ、さあさあ！",
+        "romaji": "saa, saa saa!",
+        "meaning": "eager 'come on, come on!'"
+      },
+      {
+        "jp": "Bonjour！ / Oui ! / Bonsoir !",
+        "romaji": "(French)",
+        "meaning": "French greetings, mostly in her France-themed outfit lines"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Diamonds, jewels and stars",
+    "Breaking jinxes",
+    "Crane games (profile strength)",
+    "Keeping promises (profile strength)",
+    "New and difficult things (support event titles: 新しいもの、大好きです！ / 難しいこと、大好きです！)",
+    "Tea parties with Mejiro McQueen",
+    "Learning to cook and make chocolate",
+    "Frills and ribbons",
+    "France: Paris, Provence, Chantilly, the Arc (凱旋門賞)",
+    "Golf with her father; family villas and gardens",
+    "Has a secret tofu recipe (trivia)",
+    "Wants to try the cafeteria's extra-spicy whole cake (voice 10014)"
+  ],
+  "weak_spots": [
+    "Rain (profile; voice 91013: on rainy days the course feels heavy, so she makes teru teru bozu while planning)",
+    "Walking in crowds (profile; event title 人混みの先に……)",
+    "Burning her croissants (voice 90210)",
+    "Jet lag: she overslept on a France trip (voice 90211)",
+    "Naive about ordinary life: Kitasan says she tried to buy a whole dagashi candy shop (Kitasan voice 91020)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "January 30 (1月30日)",
+    "height": "158 cm (158cm)",
+    "voice_actor": "Hina Tachibana (立花日菜)"
+  },
+  "relationships": [
+    {
+      "id": 1068,
+      "name_en": "Kitasan Black",
+      "nature": "Childhood best friend, roommate and rival; she calls her 'Kita-chan'",
+      "evidence": "home scenes x7; Kitasan mentions her x12; voice_id 90001: 朝はキタちゃんと一緒に発声練習を するんです; voice_id 400010: 『ダイヤはキタちゃんと 頑張ります』; trivia: 入学式に撮ったキタちゃんとの1枚; web: https://umamusu.wiki/Satono_Diamond"
+    },
+    {
+      "id": 1088,
+      "name_en": "Satono Crown",
+      "nature": "Fellow Satono",
+      "evidence": "home scenes x5; Crown mentions her x2; web: https://umamusu.wiki/Satono_Diamond (friend, teammate)"
+    },
+    {
+      "id": 1091,
+      "name_en": "Vivlos",
+      "nature": "Frequent home-scene partner (nature not shown in her own lines)",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Senior she holds regular tea parties with; mentor and inspiration per web",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91010: さあ！マックイーンさんとのお茶の お時間です！); web: https://umamusu.wiki/Satono_Diamond"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Senior whose unpredictable training ideas she admires ('Golshi-san')",
+      "evidence": "mentions in voice x2 (voice_id 400005: ゴルシさんはいつも思いもよらない 練習を提案してくれるのです！)"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Senior she admires as the image of a refined Japanese lady",
+      "evidence": "mentions in voice x2 (voice_id 91017: 大和撫子そのもので)"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "Promised to dance with her someday",
+      "evidence": "mentions in voice x1 (voice_id 91218: シリウスさんに、いつか踊ろうと 言っていただいたんです！)"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "Someone she'd ask about rain rituals",
+      "evidence": "voice_id 92218: 雨ごいの流儀、フクキタルさんなら 知っているでしょうか？"
+    },
+    {
+      "id": 1089,
+      "name_en": "Cheval Grand",
+      "nature": "Friend; highest affinity score",
+      "evidence": "top affinity 34; home scenes x1; web: https://umamusu.wiki/Satono_Diamond"
+    },
+    {
+      "id": 1131,
+      "name_en": "Gran Alegria",
+      "nature": "Home-scene partner (nature unknown)",
+      "evidence": "home scenes x2"
+    }
+  ],
+  "groups": [
+    "Satono family / Satono group (her lines say 我がグループ and 一族のみなさん)",
+    "Ritto Dorm",
+    "Team Capella with Satono Crown (anime-only; web: https://umamusu.wiki/Satono_Diamond)"
+  ],
+  "story_arc": {
+    "summary": "Diamond carries her clan's hopes and a family jinx (in real life Satono horses had never won a G1, per general knowledge) into a career built on proving that fate isn't fixed. Her career runs through the Satsuki Sho and Derby (event titles '数奇' fate and '慙愧' shame), then the Kikuka Sho ('克己' self-mastery), the Arima Kinen ('昂揚' exaltation), and a senior year of the Osaka Hai, Tenno Sho (Spring, with a 'two greats' clash), Takarazuka, Kyoto Daishoten, Tenno Sho (Autumn) and Japan Cup, ending with a final Arima ('至宝', supreme treasure). Kitasan Black is her rival and partner throughout. Her France outfit lines aim at the Arc de Triomphe.",
+    "source": "event titles; web: https://umamusu.wiki/Satono_Diamond; model knowledge (unverified) for the jinx background"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 91021,
+      "jp": "神社にでも行きませんか？\n朝の神社で心を清めて、今日も1日\n1ジンクス破りといきましょう！",
+      "en": "Shall we go to the shrine? Purify our hearts at the morning shrine, and then today too, let's break one jinx!"
+    },
+    {
+      "voice_id": 20033,
+      "jp": "不調の際に勝てないという\nジンクスがあるのなら、\n私が打ち破ってみせます…！",
+      "en": "If there's a jinx that says you can't win when you're off form, then I shall break it...!"
+    },
+    {
+      "voice_id": 10007,
+      "jp": "…がおー！ふふ、キタちゃんに\n教わった狼男さんのマネです。\n驚きましたかっ？どうでしたかっ？",
+      "en": "...Grr! Fufu, it's the werewolf impression Kita-chan taught me. Did I surprise you? How was it?"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "両親から定期的に贈り物が届くの\nですが、お部屋に入りきらず…\n倉庫をお借りするべきでしょうか？",
+      "en": "My parents send me gifts regularly, but they won't fit in my room... Should I rent a warehouse?"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "私が記録を打ち立てれば、\nあなたの記録にもなります。\n…素敵なことだと思いませんか？",
+      "en": "If I set a record, it becomes your record too. ...Don't you think that's wonderful?"
+    },
+    {
+      "voice_id": 95210,
+      "jp": "Oui ! サトノダイヤモンド、参ります！",
+      "en": "Oui! Satono Diamond, here I come!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Pardon me, Trainer-san! The independent run has concluded. Fufu, fifty minutes of polishing, and I believe it shines a little brighter. Shall we review it together, {user}?",
+    "{user}, the independent training is complete! Another jinx broken, I'd say. Please come take a look, and then... saa, saa saa, on to the next challenge!"
+  ],
+  "data_gaps": [
+    "Relationship with Vivlos and Gran Alegria not explained by any of her own lines",
+    "Mention of Matikanetannhauser (voice 400007) is vague: タンホイザさんって、もしかして 私たちが思うよりずっと…",
+    "Team Capella membership comes only from the web, not the mdb",
+    "Story event dialogue isn't in the mdb; the jinx background is general knowledge"
+  ]
+}

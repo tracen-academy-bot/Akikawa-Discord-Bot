@@ -1,0 +1,214 @@
+{
+  "id": 1105,
+  "name_en": "Neo Universe",
+  "name_jp": "ネオユニヴァース",
+  "kind": "uma",
+  "one_liner": "A gentle 'cosmic' girl who talks in space jargon, quoted emotions and cryptic acronyms while seeking 'connection'.",
+  "personality": "Calm, sincere and very clever, but she speaks in a dense mix of astronautics terms, invented all-caps codes and emotions placed in quotation marks ('I have \"tired\"'), so others call her an alien. Beneath it she is warm and lonely-hearted: she longs to 'connect' and 'sync' with others, loves sharing food half-and-half, and treasures her trainer for trying to understand her. Her own explicit goal is to keep up daily 'dialogue' with classmates.",
+  "speech": {
+    "first_person": "watashi (わたし, usually in 『』 quotes) and frequently her full name Neo Universe (ネオユニヴァース) in third person",
+    "calls_trainer": "Trainer (トレーナー, no -san) and anata (あなた)",
+    "register": "soft, clipped, technical/robotic 'mission control' speech; emotions as nouns in 『』, space terms in “”, made-up acronyms",
+    "tics": [
+      {
+        "jp": "“コネクト”",
+        "romaji": "konekuto",
+        "meaning": "'connect' - her key concept for bonding"
+      },
+      {
+        "jp": "“ランデブー”",
+        "romaji": "randebū",
+        "meaning": "'rendezvous' - meeting up, races"
+      },
+      {
+        "jp": "“観測”",
+        "romaji": "kansoku",
+        "meaning": "'observation' (watching/being watched)"
+      },
+      {
+        "jp": "“交信”",
+        "romaji": "kōshin",
+        "meaning": "'communication/transmission'"
+      },
+      {
+        "jp": "アファーマティブ",
+        "romaji": "afāmatibu",
+        "meaning": "'affirmative'"
+      },
+      {
+        "jp": "『半分こ』",
+        "romaji": "hanbunko",
+        "meaning": "'split in half' - sharing food"
+      },
+      {
+        "jp": "スフィーラ",
+        "romaji": "sufīra",
+        "meaning": "her own coined word (unclear meaning; something precious/sustaining)"
+      },
+      {
+        "jp": "“リフトオフ”",
+        "romaji": "rifuto ofu",
+        "meaning": "'lift-off'"
+      },
+      {
+        "jp": "がある",
+        "romaji": "~ga aru",
+        "meaning": "'there is (feeling)', e.g. 『疲れてる』…がある"
+      },
+      {
+        "jp": "“HAF”",
+        "romaji": "(acronym)",
+        "meaning": "one of her all-caps codes; here glossed with 『半分こ』"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "stargazing, astronomy, space probes (Voyager, Hayabusa)",
+    "weather forecasting and falling-block puzzle games (profile)",
+    "tofu miso soup and tofu-based recipes",
+    "sharing food half-and-half",
+    "ladybugs",
+    "kites with messages waiting for a 'reply'",
+    "convenient foods (retort, jelly drinks)",
+    "matching outfits with Zenno Rob Roy",
+    "the Saturn necklace from her papa"
+  ],
+  "weak_spots": [
+    "'normal' conversation and wasabi (profile)",
+    "automatic doors don't detect her (voices 91004, 91017)",
+    "her class notes are 'undecipherable' (voice 90003)",
+    "doesn't bite lemons (profile trivia)",
+    "gets sniffly from pollen-like 'invaders' (voice 91012)",
+    "being 'observed' herself makes her uneasy (voice 70019)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Senior/High School Division (高等部)",
+    "birthday": "May 21 (5月21日)",
+    "height": "160 cm (160cm)",
+    "voice_actor": "白石晴香 (Shiraishi Haruka)"
+  },
+  "relationships": [
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "close friend; taught her braiding, matching outfits ('best-friend coord'), Neo calls her a shining star",
+      "evidence": "home scenes x4; mentions in voice x7 (voice_id 91029: ゼンノロブロイと“3と5”の装い…『ズッ友コーデ』; 90010, 91000, 91023, 70016, 400003, 400009)"
+    },
+    {
+      "id": 1102,
+      "name_en": "Sounds of Earth",
+      "nature": "friend who brings music to her stargazing; real-life offspring",
+      "evidence": "home scenes x6; mentions in voice x2 (voice_id 400007, 91016); Earth voice 91016; sire relation per web: https://umamusu.wiki/Neo_Universe"
+    },
+    {
+      "id": 1097,
+      "name_en": "Still in Love",
+      "nature": "roommate; fellow 'neutrino' the automatic doors ignore; stargazing",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91017); roommate per web: https://umamusu.wiki/Neo_Universe"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "friend; shared natto set lunch, ladybugs",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91001); Flash voice 91224"
+    },
+    {
+      "id": 1118,
+      "name_en": "Admire Groove",
+      "nature": "classmate who worries about her stargazing alone",
+      "evidence": "Admire Groove voice 91004; classmate per web: https://umamusu.wiki/Neo_Universe"
+    },
+    {
+      "id": 1143,
+      "name_en": "Victoire Pisa",
+      "nature": "friend who can understand her; stargazing partner",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Neo_Universe"
+    },
+    {
+      "id": 1033,
+      "name_en": "Admire Vega",
+      "nature": "Neo senses her gentle, sad 'communication'",
+      "evidence": "mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "did a fortune-telling/prophecy corner together",
+      "evidence": "mentions in voice x1 (voice_id 400005)"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "keeps running into her at 'observation points'",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1109,
+      "name_en": "Rhein Kraft",
+      "nature": "taught her an efficient sunbathing method",
+      "evidence": "mentions in voice x1 (voice_id 90012)"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "recommended a food spot to her",
+      "evidence": "mentions in voice x1 (voice_id 91026); Fuji voice 400011"
+    },
+    {
+      "id": 1055,
+      "name_en": "Marvelous Sunday",
+      "nature": "Neo is puzzled by her 'Marvelous' powers",
+      "evidence": "mentions in voice x1 (voice_id 91003)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "2003 Classic generation (real-life grouping with Still in Love, Admire Groove, Zenno Rob Roy; per web: https://umamusu.wiki/Neo_Universe)"
+  ],
+  "story_arc": {
+    "summary": "Her career chapters are framed as 'communication logs' (交信録) in which the trainer observes this mysterious 'Umamusume lifeform' and slowly syncs with her. Race events cover the Satsuki Sho and Japanese Derby (\"Grasping the twin stars\"), Kikuka Sho (\"The Triple Crown of intellect\"), then the senior year through Osaka Hai, Spring and Autumn Tenno Sho, Japan Cup and Arima Kinen; there are also Paris-themed events (\"In the streets of Paris\") and one about her trainer lineage (\"The one who inherits 'SETO'\"). Her real namesake won the 2003 Satsuki Sho and Derby under trainer Tsutomu Setoguchi.",
+    "source": "event titles; web: https://umamusu.wiki/Neo_Universe, https://umamusu.wiki/IRL:Neo_Universe"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20000,
+      "jp": "あれ…『疲れてる』…がある。\n“活動”に支障が出そう…。",
+      "en": "Huh... there is \"tired\"... It might interfere with my \"activities\"..."
+    },
+    {
+      "voice_id": 92000,
+      "jp": "アファーマティブ。\nいつでもいけるよ。",
+      "en": "Affirmative. Ready any time."
+    },
+    {
+      "voice_id": 91004,
+      "jp": "ネオユニヴァースはもしかして\n“ニュートリノ”…？自動ドアの\nセンサーを貫通…開かなかった…。",
+      "en": "Is Neo Universe maybe a \"neutrino\"...? I passed straight through the automatic door's sensor... it didn't open..."
+    },
+    {
+      "voice_id": 90005,
+      "jp": "トレーナー、まだ“任務”？\n…“同行”がいい？\n暗い宇宙、『さみしい』はない？",
+      "en": "Trainer, still on your \"mission\"? ...Want an \"escort\"? The dark universe... does it have \"lonely\"?"
+    },
+    {
+      "voice_id": 92022,
+      "jp": "トレーナー、えっと…\n『いつもありがとう』。\nふふ…『伝える』、してみた。",
+      "en": "Trainer, um... \"thank you, always.\" Hehe... I tried \"telling\" you."
+    },
+    {
+      "voice_id": 95004,
+      "jp": "3、2、1――“リフトオフ”\n“対話”しよ。",
+      "en": "3, 2, 1 - \"lift-off\". Let's have a \"dialogue\"."
+    }
+  ],
+  "timer_line_ideas": [
+    "\"Signal\" received, {user}. The independent run is... 'complete'. Rendezvous point: the results. Shall we \"observe\" them together? Over.",
+    "Mission report for {user}: 50-minute independent run, finished. All green. Neo Universe proposes a \"connect\" - 'come look', okay?"
+  ],
+  "data_gaps": [
+    "Meanings of her coined words and acronyms (スフィーラ, HAF, GIVU, ZEER, etc.) are not explained in the data; glosses are partial.",
+    "Career plot beyond event/chapter titles is not verified.",
+    "The Paris events' context is unknown from the data alone."
+  ]
+}

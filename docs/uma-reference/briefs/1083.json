@@ -1,0 +1,212 @@
+{
+  "id": 1083,
+  "name_en": "Symboli Kris S",
+  "name_jp": "シンボリクリスエス",
+  "kind": "uma",
+  "one_liner": "Taciturn, overseas-born 'mission executor' who speaks in halting dashes and English, repaying her debt to the Symboli family.",
+  "personality": "Laconic and soldier-like, she treats training, races and even New Year chores as 'missions' and talks about repaying her debt of gratitude (恩義) to the Symboli family and her mentor. Her pauses and flat delivery hide a sincere, quietly warm person who remembers birthdays, prepares Halloween sweets 'like Rudolf', and admits the trainer makes her 'richer'. She is earnestly literal and a little oblivious: she is bemused when children call her 'a strong-looking robot' ('that is not the premise', 91029), and is puzzled when a stag beetle lands on her ear ('Why?').",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "omae (お前); 'Trainer (トレーナー)' when giving/asking orders; jokingly 'master (主よ)' in her machine-doll role",
+    "register": "terse, military/mission jargon, broken by long dashes (――), heavy English code-switching (Mission, All right, No problem); plain form",
+    "tics": [
+      {
+        "jp": "――",
+        "romaji": "(pause)",
+        "meaning": "long dashes: halting, clipped delivery in almost every line"
+      },
+      {
+        "jp": "Mission Accomplished.",
+        "romaji": "(English)",
+        "meaning": "her victory / task-complete phrase"
+      },
+      {
+        "jp": "All right.",
+        "romaji": "(English)",
+        "meaning": "acknowledgement; also No problem., Let's go., Yes."
+      },
+      {
+        "jp": "恩義",
+        "romaji": "ongi",
+        "meaning": "'debt of gratitude' she must repay (恩義に報いる)"
+      },
+      {
+        "jp": "使命",
+        "romaji": "shimei",
+        "meaning": "'mission / calling'; also 任務 (ninmu, duty/assignment)"
+      },
+      {
+        "jp": "遂行する",
+        "romaji": "suikou suru",
+        "meaning": "'to carry out (a mission)'"
+      },
+      {
+        "jp": "了解した",
+        "romaji": "ryoukai shita",
+        "meaning": "'Roger / understood'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "making protein drinks (profile strength)",
+    "routine: same wake time without alarm, morning runs, To-do lists",
+    "room-temperature water only; soft water/hot water before bed; hard water in summer",
+    "black coffee (whole family drinks it in the morning)",
+    "furikake on rice (plain rice still tastes bland to her)",
+    "kotatsu (introduced by Fine Motion)",
+    "Japanese cherry blossoms, as her mentor described",
+    "machine-doll / automaton role (Jetblack Automaton card)",
+    "practising kanji she got wrong"
+  ],
+  "weak_spots": [
+    "being barefoot (profile weakness)",
+    "kanji balance on tanabata strips (10006)",
+    "frilly clothes ('not used to them', 70014)",
+    "mosquitoes ('extermination operation', 91013)",
+    "over-buying discount bread and cooling goods",
+    "being seen as intimidating: new students watch her from afar and she overhears 'Boss' (90006); she takes the nickname 'Sergeant' in stride (400001)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "January 21 (1月21日)",
+    "height": "170 cm (170cm)",
+    "voice_actor": "Mei Harukawa (春川芽生)"
+  },
+  "relationships": [
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "classmate rival and friend; she respects Gimlet's erudition and philosophy",
+      "evidence": "home scenes x9; mentions in voice x3 (voice_id 91001: ギムレットは――博識だ。 それに…独自の哲学を、感じる。); web: https://umamusu.wiki/Symboli_Kris_S"
+    },
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "Symboli family senior she admires (even her puns)",
+      "evidence": "home scenes x2; mentions in voice x3 (voice_id 91003: ルドルフは――さすがだ。 jokeまで――完璧とは。)"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "fellow Symboli family member",
+      "evidence": "home scenes x2; family per web: https://umamusu.wiki/Symboli_Kris_S"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "roommate who never interferes, which she finds comfortable",
+      "evidence": "mentions in voice x1 (voice_id 91000: 同室のラモーヌは――誰にも―― 私にも――干渉しない。)"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "friend who shares Japanese culture (kotatsu) with her",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91015: ファインが体験させてくれた―― KOTATSU.)"
+    },
+    {
+      "id": 1107,
+      "name_en": "Tap Dance City",
+      "nature": "rival/friend; Kris understands Tap's big dream",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91018: タップは ――大きな夢。); rival per web"
+    },
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "junior who admires her; got excited when Kris read a novel in the original",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91002: ロブロイが――読んでいた小説。)"
+    },
+    {
+      "id": 1110,
+      "name_en": "Cesario",
+      "nature": "friend who sees through her (sent her to talk to Tap and Gimlet)",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 400011: シーザリオに――送り出された。)"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "gave her opinions on machine design",
+      "evidence": "mentions in voice x1 (voice_id 91020: シャカール曰く――機械の形態は ――simpleで――あるべきと。)"
+    },
+    {
+      "id": 1096,
+      "name_en": "No Reason",
+      "nature": "rival who sees her as formidable",
+      "evidence": "home scenes x2; top affinity 30; web: https://umamusu.wiki/Symboli_Kris_S"
+    },
+    {
+      "id": 1141,
+      "name_en": "Epiphaneia",
+      "nature": "junior she mentors (real-life daughter of Kris S and Cesario)",
+      "evidence": "home scenes x1; mentioned_by x3; web: https://umamusu.wiki/Symboli_Kris_S"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "classmate/rival",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Symboli_Kris_S"
+    },
+    {
+      "id": 1077,
+      "name_en": "Narita Top Road",
+      "nature": "event co-star",
+      "evidence": "event title: 監督クリスエス・主演トップロード"
+    },
+    {
+      "id": null,
+      "name_en": "Her mentor (師匠)",
+      "nature": "unnamed teacher from her past whose debt she repays alongside the Symboli family's",
+      "evidence": "voice_id 92002: シンボリ家、そして師匠の恩に―― 報いてみせる。"
+    }
+  ],
+  "groups": [
+    "Symboli family",
+    "Miho Dorm",
+    "Class of 2002 Derby generation with Tanino Gimlet, No Reason, Hishi Miracle (real-life cohort; in-game classmates per wiki)"
+  ],
+  "story_arc": {
+    "summary": "Born abroad and brought to Japan under the Symboli family's care, Kris S runs to repay that debt by 'revolutionising' Japanese racing, treating every race as a mission. Her career targets the Aoba Sho, Japanese Derby, Tenno Sho (Autumn), Arima Kinen, Takarazuka Kinen and Japan Cup, with Paris memories and events titled Premonitions, Fatalism, Discord, Challenger and Oath. Through her trainer she discovers feelings beyond duty ('Raison d'etre', 'New Dawn'). Real-life Kris S won the Tenno Sho (Autumn) and Arima Kinen twice (general knowledge).",
+    "source": "event titles; web: https://umamusu.wiki/Symboli_Kris_S; model knowledge (unverified) for real-life results"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95004,
+      "jp": "Mission――開始。 全ては、恩義に報いるために。",
+      "en": "Mission -- start. All of it, to repay my debt."
+    },
+    {
+      "voice_id": 10002,
+      "jp": "お前がいると―― 『私』が、豊かになる…。 そう、感じる。",
+      "en": "When you are here -- 'I' become richer... That is what I feel."
+    },
+    {
+      "voice_id": 20000,
+      "jp": "体力――低下。集中力――減少。 ――休息を提案する。",
+      "en": "Stamina -- low. Focus -- decreasing. -- I propose rest."
+    },
+    {
+      "voice_id": 90007,
+      "jp": "先ほど――クワガタが 私の耳に、止まった…。 ――Why？",
+      "en": "Just now -- a stag beetle landed on my ear... -- Why?"
+    },
+    {
+      "voice_id": 10010,
+      "jp": "――容赦は――しない。 チリ1つ残さず――始末する…！ あぁ――…大掃除の、話だ。",
+      "en": "-- No mercy. Not a speck will remain -- I will eliminate it all...! Ah -- I mean the year-end cleaning."
+    },
+    {
+      "voice_id": 400013,
+      "jp": "Mission Accomplished. 報酬を――得た。 ――受け取れ。",
+      "en": "Mission Accomplished. Reward -- obtained. -- Take it."
+    }
+  ],
+  "timer_line_ideas": [
+    "Independent training -- complete. Mission Accomplished. {user}... the results await your confirmation. All right. Proceed.",
+    "Report. Fifty minutes elapsed -- run, finished. No problem. {user} -- the next mission is yours to give."
+  ],
+  "data_gaps": [
+    "Identity of her mentor (師匠) unknown; Paris event titles hint at an overseas past but details unverified",
+    "Real-life race results are model knowledge",
+    "Event title 'End of the World' context unknown"
+  ]
+}

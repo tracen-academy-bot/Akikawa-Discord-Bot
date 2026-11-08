@@ -1,0 +1,183 @@
+{
+  "id": 1080,
+  "name_en": "Transcend",
+  "name_jp": "トランセンド",
+  "kind": "uma",
+  "one_liner": "Laid-back gadget-loving info broker who hates predictability and lives for 'zoku-zoku' thrills of the unknown.",
+  "personality": "A chill, playful 'informant' who collects trends, gossip, gadgets and B-movie trivia, and trades information like currency. She is lazy about anything boring ('ダルいし後にしよ') but lights up for anything unknown or thrilling (ゾクゾク・ワクワク), and enjoys teasing her trainer. Under the jokes she is perceptive and affectionate - she reads people well, half-seriously thanks her trainer, and treasures her friends in the dirt circle.",
+  "speech": {
+    "first_person": "uchi (ウチ)",
+    "calls_trainer": "Tore-chan (トレちゃん); also kimi (キミ); 'Trainer-san' only once as a surprise (voice 92007)",
+    "register": "Very casual, slangy gal-ish speech with drawn-out vowels (～), internet slang (ヤバ、エグい、ウケる)",
+    "tics": [
+      {
+        "jp": "だよん",
+        "romaji": "da yon",
+        "meaning": "playful sentence ending ('it is~')"
+      },
+      {
+        "jp": "ゾクゾク",
+        "romaji": "zoku-zoku",
+        "meaning": "'thrills/shivers' - what she seeks"
+      },
+      {
+        "jp": "ワクワク",
+        "romaji": "waku-waku",
+        "meaning": "'excitement'"
+      },
+      {
+        "jp": "情報",
+        "romaji": "jouhou",
+        "meaning": "'information/intel' - constant reference"
+      },
+      {
+        "jp": "ぜい",
+        "romaji": "zei",
+        "meaning": "rough-cute ending ('～しようぜい', 'let's~!')"
+      },
+      {
+        "jp": "っしょ",
+        "romaji": "ssho",
+        "meaning": "casual 'right?' (役に立ったっしょ？)"
+      },
+      {
+        "jp": "よろ",
+        "romaji": "yoro",
+        "meaning": "short for yoroshiku ('thanks/please')"
+      },
+      {
+        "jp": "特ダネ",
+        "romaji": "tokudane",
+        "meaning": "'scoop'"
+      },
+      {
+        "jp": "あはっ",
+        "romaji": "aha",
+        "meaning": "laugh"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "information gathering, gadgets, crowdfunding oddities, speakers (owns many), late-night infomercials",
+    "B-movies and film discussion; video editing, chopsticks skill, cat's cradle (profile)",
+    "onsen: onsen manju, scouting little-known onsen inns, rare bath salts (voice 90012, 90015, 92015)",
+    "hidden spots and secret shops",
+    "fashion experiments: quirky ties (voice 10025), hints she also has lolita / visual-kei outfits (voice 10027)",
+    "hachimi (honey drink) as payment"
+  ],
+  "weak_spots": [
+    "predictable outcomes and bubble gum (profile)",
+    "static electricity (hunts for anti-static inner wear; brushes her outfit)",
+    "electronics surviving summer heat (voice 91026)",
+    "the cold - 'not the zoku-zoku I wanted' (voice 90009, 91027)",
+    "gets lazy and demotivated easily (voice 20008, 20010)",
+    "shopping budgets (keeps to them only ~20% of the time - profile trivia)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 9 (3月9日)",
+    "height": "164 cm (164cm)",
+    "voice_actor": "Yui Tsukada (塚田悠衣)"
+  },
+  "relationships": [
+    {
+      "id": 1100,
+      "name_en": "Wonder Acute",
+      "nature": "Roommate (per web) and close friend ('Acu-san'); 'an oasis'; drinks Acute's ginger tea before bed; Acute borrowed her glasses",
+      "evidence": "home scenes x8; voice_id 91018 (アキュさんといるとさー…何もしなくても最高の癒し時間), 91011, 91021; web: https://umamusu.wiki/Transcend"
+    },
+    {
+      "id": 1079,
+      "name_en": "Furioso",
+      "nature": "Friend; finds Furioso's hometown-talk face adorable; trades info for souvenirs",
+      "evidence": "home scenes x4; voice_id 91000 (フリオ、地元の話してるとすんごいかわいい顔すんの)"
+    },
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "Friend she keeps trying to feed 'aaahn' (always refused)",
+      "evidence": "home scenes x3; voice_id 91002"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "Collab partner; Curren's collab blew up Transcend's followers",
+      "evidence": "home scenes x2; voice_id 91001; web: https://umamusu.wiki/Transcend"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Admires Falcon's fan-service as hard work",
+      "evidence": "home scenes x1; voice_id 91017; top affinity 32"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "Took her to an onsen as a break; it turned into an inspection",
+      "evidence": "voice_id 91016"
+    },
+    {
+      "id": 1098,
+      "name_en": "Copano Rickey",
+      "nature": "Curious about what Rickey sees",
+      "evidence": "home scenes x1; voice_id 400004"
+    },
+    {
+      "id": null,
+      "name_en": "Her parents",
+      "nature": "Film/special-effects professionals (mother does special makeup; father on shoots); deliberately doesn't follow their SNS",
+      "evidence": "voice_id 10007, 91004, 91019; profile about_family"
+    }
+  ],
+  "groups": [
+    "Dirt division circle with Wonder Acute, Furioso, Espoir City, Smart Falcon, Copano Rickey, Hokko Tarumae - home scenes/affinity"
+  ],
+  "story_arc": {
+    "summary": "Transcend starts as an info-gathering 'behind the scenes' type who becomes a lead (『裏方から主役へ』), racing dirt: Leopard Stakes, Miyako Stakes, Champions Cup, February Stakes, Teio Sho, Nambu Hai and JBC Classic, with a trip abroad (『砂漠行きのチケット』, likely Dubai). A mid-career event (『その日、世界は色を失くした』) references the 2011 Tohoku earthquake per the wiki, followed by recovery titles (『リスタート！』, 『前人未踏へ』, 『Never End』). Real-life Transcend won the Japan Cup Dirt twice and was 2nd in the 2011 Dubai World Cup (model knowledge).",
+    "source": "event titles; web: https://umamusu.wiki/Transcend; real-horse details model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "どもども、トランセンドだよん。",
+      "en": "Yo yo, it's Transcend~"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "ヤバイ相手、読めない展開。\nもっとゾクゾクするレース、\nキミとなら味わえるっしょ？",
+      "en": "Dangerous opponents, unreadable races. With you I get to taste even more zoku-zoku races, right?"
+    },
+    {
+      "voice_id": 20008,
+      "jp": "仕入れた情報、メモってないな…\nいや、ダルいし後にしよ。",
+      "en": "I didn't jot down the intel I got... eh, too much hassle, later."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "知りたい…もっと知りたい。\n激やば情報、未知の世界…！\nあはっ、最高～。",
+      "en": "I want to know... I want to know more. Crazy intel, unknown worlds...! Aha, the best~"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "トレーナーさん、いつもありがと…\nってビックリした～？\n…ま、半分は本音。",
+      "en": "Trainer-san, thanks for always... surprised~? ...Well, half of it's for real."
+    },
+    {
+      "voice_id": 91000,
+      "jp": "フリオ、地元の話してると\nすんごいかわいい顔すんの。\nあの笑顔、ずるいよね～。",
+      "en": "Furio makes the cutest face when she talks about her hometown. That smile is so unfair~"
+    }
+  ],
+  "timer_line_ideas": [
+    "Scoop for {user}~ Tore-chan's independent run just wrapped up, fresh intel. Freshness is everything, so come check it out, yo~n.",
+    "{user}, fifty minutes done~ Wonder what came out of it? Not knowing gives me the zoku-zoku. Let's go peek together, aha~"
+  ],
+  "data_gaps": [
+    "Second card title is JP only ([宵闇ネオカグラ]).",
+    "Hoshina Kiyoko (NPC id 9050) shares 1 home scene; nature unknown.",
+    "mentions_in_voice Manhattan Cafe x1 and Agnes Digital x1 not found as real references in lines (Cafe likely from 'カフェテリア'; Digital likely from 'デジタル望遠鏡').",
+    "Earthquake reference is from umamusu.wiki; the Dubai reading of 『砂漠行きのチケット』 is inference from the real horse's 2011 Dubai World Cup run (model knowledge), not confirmed in-game.",
+    "Removed claim that onsen is her outfit theme: the wiki describes her outfit as techwear."
+  ]
+}

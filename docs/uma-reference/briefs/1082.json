@@ -1,0 +1,202 @@
+{
+  "id": 1082,
+  "name_en": "North Flight",
+  "name_jp": "ノースフライト",
+  "kind": "uma",
+  "one_liner": "Sparkling, gentle fashionista miler who polishes 'the me I can love' through outfits, effort, and her 'Onee-chan's' encouragement.",
+  "personality": "A warm, polite fashion lover who sees every outfit, scent and hairstyle as a way to make 'watashi' shine, and who happily styles friends, roommates and her trainer. Her core theme is self-love earned by effort: 'so that I can love myself' recurs across her lines, and she credits her beloved 'Onee-chan' (a big-sister figure) for telling her she can stay as she is. She stays upbeat and encouraging even when down ('wake up, my heart!'), but she is a fierce competitor who openly refuses to lose to Sakura Bakushin O.",
+  "speech": {
+    "first_person": "watashi (わたし, hiragana); sometimes quotes herself as 『わたし』",
+    "calls_trainer": "Trainer-san (トレーナーさん); also anata (あなた)",
+    "register": "polite (desu/masu), soft and cheerful, frequent ♪ and fashion vocabulary",
+    "tics": [
+      {
+        "jp": "『わたし』",
+        "romaji": "'watashi'",
+        "meaning": "'Me' in quote marks - her ideal, self-loved self (わたしが『わたし』を愛せるように)"
+      },
+      {
+        "jp": "ときめき",
+        "romaji": "tokimeki",
+        "meaning": "'heart-flutter / thrill', her favourite feeling word (ときめきを胸に！)"
+      },
+      {
+        "jp": "輝き",
+        "romaji": "kagayaki",
+        "meaning": "'radiance / shine' - constantly paired with 煌めき (kirameki) and 磨く (to polish)"
+      },
+      {
+        "jp": "キラッと",
+        "romaji": "kira tto",
+        "meaning": "'with a sparkle!' (キラッと行ってきます♪)"
+      },
+      {
+        "jp": "コーデ",
+        "romaji": "koode",
+        "meaning": "'outfit coordination'"
+      },
+      {
+        "jp": "お姉ちゃん",
+        "romaji": "onee-chan",
+        "meaning": "'big sis' - a big-sister figure (family friend per profile, not clearly a blood sister) she quotes for advice"
+      },
+      {
+        "jp": "ダメダメ",
+        "romaji": "dame dame",
+        "meaning": "\"No, no!\" - self-scolding pep talk when unfocused (ダメダメ、しっかりしなくちゃ)"
+      },
+      {
+        "jp": "ちゃん",
+        "romaji": "-chan",
+        "meaning": "affectionate suffix for friends: バクシンオーちゃん, ビコーちゃん, ユキノちゃん, マーちゃん, ブーケちゃん"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "fashion coordination, accessories, makeup and hair arrangements",
+    "perfume and fragrance (matches a perfume to each new outfit; 'last note')",
+    "yoga and the card game Concentration (profile strengths)",
+    "dancing, ballroom/party dresses (her alt card is ballroom-themed)",
+    "fashion magazines and maison lookbooks before bed",
+    "flying imagery: imagines flying through a ring of clouds (profile trivia); 'my wings' (92016)",
+    "strong coffee on hair-and-makeup mornings; trying kanpo herbal tea",
+    "her father's Italian cooking; her stylist mother"
+  ],
+  "weak_spots": [
+    "foot-sole massages (profile weakness)",
+    "not used to the taste of kanpo tea (91009)",
+    "nervous about spicy food challenges (90007)",
+    "low days when her 'tokimeki falls asleep' (20010)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 12 (4月12日)",
+    "height": "156 cm (156cm)",
+    "voice_actor": "Maria Sashide (指出毬亜)"
+  },
+  "relationships": [
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "classmate, close friend and rival (sprint vs mile); she vows not to lose",
+      "evidence": "home scenes x5; mentions in voice x2 (voice_id 91002: バクシンオーちゃんの迷いのない 走り、スピード…圧巻ですが、 負けるつもりはありませんよ！); event titles: あなたとわたしは以心バクシン, 高松宮記念の後に・ライバル; web: https://umamusu.wiki/North_Flight"
+    },
+    {
+      "id": null,
+      "name_en": "'Onee-chan' (big-sister figure)",
+      "nature": "beloved big-sister figure who taught her she can stay herself; profile says the families are close (家族ぐるみで、お姉さんと付き合いがある), implying a family friend rather than a blood sister; per wiki based on North Flight's real-life groom Mikiko Ishikura",
+      "evidence": "voice_id 91003: お姉ちゃんは、わたしは『わたし』のままでいいと教えてくれました。; 'お姉ちゃん' x4 in voice; profile about_family + trivia (matching name-embroidered hat photo); web: https://umamusu.wiki/North_Flight"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "roommate (per wiki); they play models together in their room",
+      "evidence": "home scenes x2; mentions in voice (voice_id 91000: 時々部屋でマーちゃんとモデルに なりきって撮影をするんです。); roommate status per web: https://umamusu.wiki/North_Flight"
+    },
+    {
+      "id": 1029,
+      "name_en": "Yukino Bijin",
+      "nature": "friend; wants to style her into the city girl she dreams of",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91001: ユキノちゃんが望むシティガール になったら…)"
+    },
+    {
+      "id": 1054,
+      "name_en": "Biko Pegasus",
+      "nature": "friend; wants to help the busy 'hero'",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 90003: ビコーちゃん、お昼にも人助けを…)"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "friend whose likability-focused style she admires",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91019: ロイスちゃんのコーデは、とにかく 『好感度』重視だとか。)"
+    },
+    {
+      "id": 1112,
+      "name_en": "Daring Heart",
+      "nature": "friend; gave her matching accessories with Daring Tact",
+      "evidence": "mentions in voice x2 (voice_id 91017: ハートちゃんとタクトちゃんに、 おそろいのアクセを贈ったんです。)"
+    },
+    {
+      "id": 1075,
+      "name_en": "Daring Tact",
+      "nature": "friend; received matching accessories",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "friend whose racewear skirt she grilled her about; gave her a sachet",
+      "evidence": "mentions in voice x2 (voice_id 91018: ブーケちゃんの勝負服のスカート、; voice_id 400128: ブーケちゃんが別れ際にくれた サシェ)"
+    },
+    {
+      "id": 1035,
+      "name_en": "Winning Ticket",
+      "nature": "friend; North Flight picks playful items to match Ticket's style",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 400002: チケットさんのファッションは 遊び心があるんですよね。)"
+    },
+    {
+      "id": 1126,
+      "name_en": "Sakura Chitose O",
+      "nature": "gave her kanpo health advice",
+      "evidence": "mentions in voice x1 (voice_id 92015: チトセオーさんが 『未病は腑を冷やさぬように』と…)"
+    },
+    {
+      "id": null,
+      "name_en": "Her parents",
+      "nature": "stylist mother she admires; father great at Italian cooking",
+      "evidence": "voice_id 91004: ママはスタイリストなんですよ。; voice_id 91020: パパはお料理が大得意で、"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Mile/sprint racers circle with Sakura Bakushin O (informal, unverified as a group)"
+  ],
+  "story_arc": {
+    "summary": "North Flight starts out wanting to find 'a style for me' and grows into the school's go-to fashion coordinator, learning to love the self she polishes through effort. Her career runs through the Oka Sho, Shuka Sho, Sprinters Stakes, Takamatsunomiya Kinen, Yasuda Kinen and a final 'runway' at the Mile Championship, with Sakura Bakushin O as her rival. The wiki notes her bond with her 'Onee-chan', a big-sister figure inspired by her real-life groom.",
+    "source": "event titles; web: https://umamusu.wiki/North_Flight, https://anibase.net/de/character/1GEJ3/North-Flight"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "わたしが『わたし』を愛せる ように。最高のコーディネートを これからも探し続けます！",
+      "en": "So that I can love 'me'... I'll keep searching for the very best coordinate!"
+    },
+    {
+      "voice_id": 20010,
+      "jp": "ときめきが眠ってしまった みたい…うう、起きて、 わたしの心…！",
+      "en": "It's like my tokimeki has fallen asleep... Ugh, wake up, my heart...!"
+    },
+    {
+      "voice_id": 20029,
+      "jp": "いつも通りのわたしで、 キラッと行ってきます♪",
+      "en": "Just being my usual self - I'm off, with a sparkle!"
+    },
+    {
+      "voice_id": 91002,
+      "jp": "バクシンオーちゃんの迷いのない 走り、スピード…圧巻ですが、 負けるつもりはありませんよ！",
+      "en": "Bakushin O-chan's run, without a shred of hesitation, that speed... it's overwhelming, but I have no intention of losing!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "お姉ちゃんは、わたしは『わたし』 のままでいいと教えてくれました。 …今も昔も変わらずに大好きです。",
+      "en": "My big sister taught me it's fine for me to stay 'me'. ...I love her just as much now as I always have."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "わたし、今の自分が好きです。 ほら、こんなにステキでしょう？ あなたと磨いた『わたし』です。",
+      "en": "I like who I am now. See? Isn't she lovely? This is the 'me' I polished with you."
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer-san, your independent run is finished! Polished to a shine, just like a brand-new coordinate. {user}, shall we go check it together?",
+    "The run is done, {user}! Every step polished to a sparkle... now let's look at the results together and find your next tokimeki."
+  ],
+  "data_gaps": [
+    "Career story dialogue not in mdb; arc summary built from event titles plus fan-wiki pages",
+    "Aston Machan as roommate is from the wiki only",
+    "Second card [水縹の一閃] title left untranslated (approx. 'pale-blue flash')",
+    "'Onee-chan' is never stated to be a blood sister; the profile ('家族ぐるみで、お姉さんと付き合いがある') suggests a close family friend. Groom inspiration (Mikiko Ishikura) is wiki trivia, unverified against game text"
+  ]
+}

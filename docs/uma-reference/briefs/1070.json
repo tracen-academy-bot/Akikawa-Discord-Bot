@@ -1,0 +1,207 @@
+{
+  "id": 1070,
+  "name_en": "Sirius Symboli",
+  "name_jp": "シリウスシンボリ",
+  "kind": "uma",
+  "one_liner": "Charismatic, domineering Symboli rebel who calls her trainer 'puppy' and means to outshine Rudolf on the world stage.",
+  "personality": "Proud, blunt and ambitious, Sirius believes she should decide her own path and wants to break every cage and chain to become the brightest star in the world. She treats her trainer like a pet puppy she is training: teasing, ordering and petting by turns, though she does praise real effort. She is very analytical about training and conditioning, reads academic papers and poetry, and keeps a gang of admiring juniors she pretends to find annoying. She resents Symboli Rudolf, the 'Emperor', whose shadow she wants to escape, and the feeling clearly runs deep.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "puppy (子犬 / 子犬ちゃん), anta (アンタ); rarely 'Trainer' (トレーナー), and a mocking 'Trainer-san' (“トレーナーさん”)",
+    "register": "rough, masculine casual (ねぇ for ない, テメエ, クソ) mixed with cool, commanding speech; dog-owner metaphors",
+    "tics": [
+      {
+        "jp": "子犬ちゃん",
+        "romaji": "koinu-chan",
+        "meaning": "'little puppy', how she addresses the trainer"
+      },
+      {
+        "jp": "尻尾を振れ / おすわり / 躾",
+        "romaji": "shippo wo fure / osuwari / shitsuke",
+        "meaning": "'wag your tail' / 'sit' / 'discipline, training a pet'"
+      },
+      {
+        "jp": "チッ / フン / ハッ / クッ",
+        "romaji": "chi' / fun / ha' / ku'",
+        "meaning": "tch / hmph / hah / heh: dismissive noises"
+      },
+      {
+        "jp": "一等星",
+        "romaji": "ittōsei",
+        "meaning": "first-magnitude star; Sirius as the brightest star"
+      },
+      {
+        "jp": "シリウスが昇る",
+        "romaji": "Shiriusu ga noboru",
+        "meaning": "'Sirius rises' (さあ、シリウスが昇るぞ！)"
+      },
+      {
+        "jp": "焼き焦がす / 焼き付けな",
+        "romaji": "yakikogasu / yakitsukena",
+        "meaning": "scorch / burn it into your eyes"
+      },
+      {
+        "jp": "アイツ",
+        "romaji": "aitsu",
+        "meaning": "'that one/that guy'; she uses it for others (e.g. Oguri Cap in 91016), and for Rudolf without naming her (10003)"
+      },
+      {
+        "jp": "わからせてやる",
+        "romaji": "wakarasete yaru",
+        "meaning": "'I'll make them understand' (by force); also an event title"
+      },
+      {
+        "jp": "～ねぇ / ～じゃねぇか",
+        "romaji": "~nee / ~ja nee ka",
+        "meaning": "rough contracted negatives"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Stars: Sirius, the brightest star",
+    "Wolves and dogs: chapter titles are all wolf-themed (渇望の狼牙 etc.); dog training (profile strength)",
+    "Savate (profile strength)",
+    "Billiards; conquering billiard halls",
+    "Card bets and wagers with Nakayama Festa",
+    "Poetry, literature, academic papers",
+    "Spicy soups and spiced hotpot",
+    "Custom-tailored clothes chosen by herself",
+    "Overseas: France, Italy, world-class racing",
+    "Music of any genre as an alarm"
+  ],
+  "weak_spots": [
+    "Pointless discussions, flattery, puns (profile weakness)",
+    "Can't sleep without earplugs (profile about_ears)",
+    "Messes up her tail when irritated (profile about_tail)",
+    "Authority being wielded over her (voice 20022)",
+    "Stiff New Year dinners, and seeing 'that one' (アイツ, presumably Rudolf) outside school (voice 10003)",
+    "Clothes or choices made by others (voice 10026, 91020)",
+    "Childhood nostalgia (making snow sculptures with 'those guys', アイツら) slips out and annoys her (voice 91027)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "March 26 (3月26日)",
+    "height": "167 cm (167cm)",
+    "voice_actor": "Fairouz Ai (ファイルーズあい)"
+  },
+  "relationships": [
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "Childhood friend turned resented rival; Sirius wants to overwrite the idea that 'Symboli means Rudolf'",
+      "evidence": "home scenes x6; top affinity 35; mentions in voice x3 (voice_id 91000: ルドルフ、お前は私が…; 91007: シンボリ家と言えばルドルフ…そう 思ってるヤツらの記憶を塗り替えて やる; 400005); event title: 落ちゆく誓い; web: https://umamusu.wiki/Sirius"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "Childhood friend and rival she finds hard to read",
+      "evidence": "home scenes x5; voice_id 91002: ラモーヌ…食えねぇヤツだ; web: https://umamusu.wiki/Sirius"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "Friend and gambling partner (roommate per web)",
+      "evidence": "home scenes x4; voice_id 90001: ナカヤマも妙な賭けを思いつく。 私は余裕だが、ヤツは負け通しだ; web: https://umamusu.wiki/Sirius"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "Symboli junior she approves of",
+      "evidence": "home scenes x2; voice_id 91001: クリスエスはいい。海外の実体験を 学べる…実にいい子だ"
+    },
+    {
+      "id": 9047,
+      "name_en": "Speed Symboli",
+      "nature": "Elder of the Symboli family who sent her old-fashioned pajamas",
+      "evidence": "home scenes x1; voice_id 91018: スピードシンボリに『ハイカラな 寝巻』とやらを贈られたんだが"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "Ramonu's younger sister",
+      "evidence": "voice_id 91002: アルダンの大事な姉様を取るのもな"
+    },
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "Respects her for being honest about her own appetites",
+      "evidence": "voice_id 91016: アイツは見ていて気分がいい。 テメエの欲に真っすぐだからな"
+    },
+    {
+      "id": 1021,
+      "name_en": "Tamamo Cross",
+      "nature": "Sees her as unfathomable",
+      "evidence": "voice_id 91017: まったく底知れねぇヤツだ"
+    },
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "Promised her a dance someday",
+      "evidence": "Diamond voice_id 91218: シリウスさんに、いつか踊ろうと 言っていただいたんです！"
+    },
+    {
+      "id": null,
+      "name_en": "Her juniors/followers",
+      "nature": "Self-styled kouhai who follow her everywhere and save her lunch spot",
+      "evidence": "voice_id 90016: 後輩を名乗る連中が 増えたな; 90003; 91022"
+    },
+    {
+      "id": null,
+      "name_en": "Her parents",
+      "nature": "Father gives precise, efficient coaching and she means to surpass him; mother is inquisitive",
+      "evidence": "voice_id 91003, 91019; profile about_family: 父の意向で家庭教師が日替わりだった"
+    }
+  ],
+  "groups": [
+    "Symboli family (シンボリ家; voice 91007)",
+    "Miho Dorm",
+    "Leader of an informal pack of admiring juniors (voice lines; event titles like アウトローの流儀)"
+  ],
+  "story_arc": {
+    "summary": "Sirius wants to prove herself the strongest by conquering the world, and refuses to let anyone, especially Symboli Rudolf, set her path. Her career races include the Saudi Arabia Royal Cup, Satsuki Sho, Derby, Kikuka Sho, Arima Kinen, Osaka Hai, Takarazuka Kinen and Japan Cup. Her events trace her growing apart from Rudolf: as she prepares to go overseas, Rudolf suffers a sudden injury ('落ちゆく誓い', a falling oath), which matches real life, where Rudolf was meant to go to Europe with Sirius (web). It ends with a 'farewell' after the Arima and 'going beyond the oath' in her final Arima.",
+    "source": "event titles; web: https://umamusu.wiki/Sirius"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "私の道は全て私が決める。檻も\n鎖も、全部ぶっ壊す。目指すべき\n“世界”で一等輝くのは――私だ。",
+      "en": "I decide my own path, all of it. Cages, chains, I'll smash them all. The one who shines brightest in the 'world' I'm aiming for... is me."
+    },
+    {
+      "voice_id": 20024,
+      "jp": "期待しておすわりしていろ、\n子犬ちゃん。\n私が栄冠を持ち帰ってやる。",
+      "en": "Sit and wait with high hopes, puppy. I'll bring the crown home for you."
+    },
+    {
+      "voice_id": 91007,
+      "jp": "シンボリ家と言えばルドルフ…そう\n思ってるヤツらの記憶を塗り替えて\nやる。緑はシリウスの色だってな！",
+      "en": "People think 'Symboli' means Rudolf... I'll overwrite their memories. Green is Sirius's color!"
+    },
+    {
+      "voice_id": 90004,
+      "jp": "やるべきことを済ませたら、\n明日の支度をしてさっさと寝ろ。\n…すやすや眠れよ、子犬ちゃん。",
+      "en": "Once you've done what needs doing, get ready for tomorrow and go to bed. ...Sleep tight, puppy."
+    },
+    {
+      "voice_id": 40000,
+      "jp": "さあ、シリウスが昇るぞ！",
+      "en": "Now, watch Sirius rise!"
+    },
+    {
+      "voice_id": 92022,
+      "jp": "準備はいいか、“トレーナー”？\n…クッ、そんなに意外だったか？\nだったら戻してやるよ、子犬。",
+      "en": "Ready, 'Trainer'? ...Heh, that surprised you? Then I'll switch back, puppy."
+    }
+  ],
+  "timer_line_ideas": [
+    "Tch. The independent run's over, {user}. Fifty minutes, and you didn't take your eyes off it, right? Good puppy. Come look, and wag your tail while you're at it.",
+    "Hey, puppy. The independent run's done. Sit down, check the results, and burn the brightest star into your eyes. Don't make me wait, {user}."
+  ],
+  "data_gaps": [
+    "Manhattan Cafe voice mentions (x2) are false positives from カフェテリア",
+    "Followers' names/identities are not given in the mdb",
+    "Story event dialogue is not in the mdb; the Rudolf injury event is described from the web",
+    "Exact childhood history with Rudolf comes from the web"
+  ]
+}

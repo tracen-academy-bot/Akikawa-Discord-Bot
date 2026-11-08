@@ -1,0 +1,209 @@
+{
+  "id": 1130,
+  "name_en": "Lucky Lilac",
+  "name_jp": "ラッキーライラック",
+  "kind": "uma",
+  "one_liner": "Graceful Kansai \"flower of the turf\" whose poise hides a relentless inner tsukkomi comedian.",
+  "personality": "Outwardly she is elegant, patient and dignified, always \"standing straight under the sun\" and enduring like the lilac that blooms after winter. Inside (her parenthesised inner-voice lines) she is a loud Kansai comedian who can't stop retorting, gets spooked by stains and wood patterns, and agonises over radio-show submissions and ego-searching. With her trainer she plays the straight man (tsukkomi) to their gags and openly enjoys it, calling them her best comedy partner.",
+  "speech": {
+    "first_person": "uchi (うち)",
+    "calls_trainer": "anta (あんた) in her lines; wiki says she addresses them as Trainer-san (トレーナーさん) (web, not seen in source lines)",
+    "register": "Kansai-ben (Kansai dialect): polite and refined on the surface (~desu/~masu, ~mashoka), blunt fast Kansai in inner monologue and retorts",
+    "tics": [
+      {
+        "jp": "ほな",
+        "romaji": "hona",
+        "meaning": "\"well then / right, let's\" (Kansai)"
+      },
+      {
+        "jp": "ほんま",
+        "romaji": "honma",
+        "meaning": "\"really / seriously\" (Kansai)"
+      },
+      {
+        "jp": "よろしゅう",
+        "romaji": "yoroshuu",
+        "meaning": "Kansai \"please treat me well\""
+      },
+      {
+        "jp": "おおきに",
+        "romaji": "ookini",
+        "meaning": "Kansai \"thank you\""
+      },
+      {
+        "jp": "あかん",
+        "romaji": "akan",
+        "meaning": "\"no good / can't\" (Kansai)"
+      },
+      {
+        "jp": "なんやねん",
+        "romaji": "nan ya nen",
+        "meaning": "\"what the heck!?\" tsukkomi"
+      },
+      {
+        "jp": "やってもうた",
+        "romaji": "yatte moota",
+        "meaning": "\"I've done it now\" (Kansai)"
+      },
+      {
+        "jp": "おはようさん",
+        "romaji": "ohayou-san",
+        "meaning": "folksy Kansai \"good morning\""
+      },
+      {
+        "jp": "お天道さん",
+        "romaji": "otentou-san",
+        "meaning": "\"the sun above\" - her image of staying upright"
+      },
+      {
+        "jp": "千紫万紅",
+        "romaji": "senshi bankou",
+        "meaning": "\"a thousand purples, ten thousand reds\" - her blossoming victory phrase"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "flowers, especially lilac (紫丁香花) and its winter-enduring symbolism",
+    "making original cleaning goods (profile); tidiness, window-cleaning",
+    "comedy theatre with family (profile); boke/tsukkomi, radio \"craftsman\" submissions (20011)",
+    "perfume (osmanthus, 91008), aroma pots, fabric softener",
+    "hojicha, autumn leaves with tea, yukata and geta in summer, winter boots",
+    "Hanshin Racecourse, where she feels most at ease (91004)",
+    "bargains (70% off sale, 10026)",
+    "fortune telling (event title 本日の占い結果)",
+    "camellia oil for her tail (profile)"
+  ],
+  "weak_spots": [
+    "slugs, abandoned ruins, human-horror ghost stories (profile)",
+    "rain and humidity (90007)",
+    "spooky shapes: wall stains, wood grain that looks like faces (20009, 20037)",
+    "cannot resist retorting even in public (92003, 92005)",
+    "ego-searching late at night (90005)",
+    "cafeteria oden without potatoes (90009)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior High Division (中等部)",
+    "birthday": "April 3 (4月3日)",
+    "height": "162 cm (162cm)",
+    "voice_actor": "Yuki Nakajima (中島由貴)"
+  },
+  "relationships": [
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "Upperclassman she idolises and imitates; admires her sitting posture and fashion",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 90003: 麗しいなぁ、オルフェさんの座り姿…！); Orfevre mentions her (1115.json voice_id 91003)"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "Friend and rival; Lilac is amazed how early she gets up",
+      "evidence": "home scenes x3; voice_id 91009 (アイさん、いくらなんでも朝早すぎやろ…); rival per web: https://umamusu.wiki/Lucky_Lilac"
+    },
+    {
+      "id": 1128,
+      "name_en": "Blast Onepiece",
+      "nature": "Friend who invites her to play at her dorm",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91011)"
+    },
+    {
+      "id": 1135,
+      "name_en": "Stay Gold",
+      "nature": "Upperclassman who randomly gives her candy; party invite",
+      "evidence": "mentions in voice x2 (voice_id 91010, 10008)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Upperclassman; Lilac is baffled to see Golshi and co. eyeing her in suits (wonders if it's a dance-party invite)",
+      "evidence": "mentions in voice x1 (voice_id 10013: ゴルシさんらがスーツ着て…)"
+    },
+    {
+      "id": 1095,
+      "name_en": "Believe",
+      "nature": "Keeps beating her to cleaning the dorm windows; roommate per wiki",
+      "evidence": "mentions in voice x1 (voice_id 91002); roommate per web: https://umamusu.wiki/Lucky_Lilac"
+    },
+    {
+      "id": 1133,
+      "name_en": "Chrono Genesis",
+      "nature": "Friend; startled by her huge bazooka camera",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91001)"
+    },
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "Friend whose perfume sense she admires; gives Loves tsukkomi lessons",
+      "evidence": "mentions in voice x1 (voice_id 91003); Loves voice_id 91022 (1132.json)"
+    },
+    {
+      "id": 1021,
+      "name_en": "Tamamo Cross",
+      "nature": "Fellow Kansai speaker and fellow \"straight man\"",
+      "evidence": "home scenes x1; nature per web: https://umamusu.wiki/Lucky_Lilac (wiki: friend who trains with her; both Kansai speakers who see themselves as the academy's straight men)"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Friend; they deliver chocolate bouquets together",
+      "evidence": "home scenes x2; Bouquet voice_id 10004 (1134.json)"
+    },
+    {
+      "id": null,
+      "name_en": "Younger sister(s) and brother",
+      "nature": "Her siblings at home; she cleaned up after them",
+      "evidence": "voice_id 90004, 10010"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Orfevre / Stay Gold circle (her idol and the candy-giving upperclassman; real-life sire line per wiki, unverified as an in-game faction)"
+  ],
+  "story_arc": {
+    "summary": "Her titles trace a flower budding, wilting and reblooming: she wins early (Hanshin JF), runs the Triple Tiara (Oka Sho, Oaks, Shuka Sho), stalls as a \"bud\" again, and returns through the Nakayama Kinen, Osaka Hai and Victoria Mile to reclaim a crown at the Queen Elizabeth II Cup (\"The crown revived\") before the Japan Cup. Arcs like \"Beside the Queen\" and \"Even though the sky looked high\" set her as the one chasing a dazzling star (Almond Eye) while enduring like a lilac through winter. The wiki notes she trains alongside Almond Eye and plays straight man to a gag-prone trainer.",
+    "source": "event titles + web: https://umamusu.wiki/Lucky_Lilac"
+  },
+  "timer_line_ideas": [
+    "Ahem. {user}, the independent run has finished. Please do take a look. (Fifty whole minutes and not one gag? Who are you and what've you done with my partner!?)",
+    "Hona, {user}, your independent run's done. Endured and polished, like a lilac through winter. ...And no, you don't get to do a bit first. Go check it, honestly!"
+  ],
+  "data_gaps": [
+    "Her lines address the trainer as あんた; the \"Trainer-san\" form comes only from the wiki.",
+    "Exact Kansai sub-dialect (Kyoto vs Osaka) not stated in source; listed as Kansai-ben.",
+    "Mentions extractor flagged Manhattan Cafe x1, but the match is カフェテリア (voice 90009): false positive, dropped.",
+    "Story arc beyond event titles from umamusu.wiki; no dialogue in mdb."
+  ],
+  "sample_lines": [
+    {
+      "voice_id": 20024,
+      "jp": "紫丁香花は冬を耐えて咲く花。\n…この身も同じです。耐えた分\nより鮮やかに咲き誇ってみせます。",
+      "en": "The lilac is a flower that endures the winter to bloom. ...I am the same. I'll bloom all the more vividly for what I endured."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "…気負わんでええ。思いついたまま\nボケてくれたら、うちのツッコミで\nあんたを面白くしたるから。",
+      "en": "...Don't overthink it. Just do whatever gag comes to mind, and my tsukkomi will make you funny."
+    },
+    {
+      "voice_id": 92006,
+      "jp": "…待って。それ、ただの小物入れや\n思ってたんやけど――よう見たら\nタライやないかいっ！！",
+      "en": "...Wait. I thought that was just a little storage box, but look closer, it's a washtub!!"
+    },
+    {
+      "voice_id": 20005,
+      "jp": "（ラベンダー咲き誇るベランダ～…\n――って、あっはっは！あかん、\nしょうもなすぎて逆にツボった！）",
+      "en": "(Lavender blooming on the veranda~ ...ahahaha! No, no, that's so lame I cracked myself up!)"
+    },
+    {
+      "voice_id": 91010,
+      "jp": "（ステゴさん、フラッと来て\n飴ちゃんくれたけど…なんで？うち\n子どもかなんかやと思われてる？）",
+      "en": "(Stay-san wandered over and gave me a candy... why? Does she think I'm a little kid or something?)"
+    },
+    {
+      "voice_id": 95004,
+      "jp": "冬を忍ぶる紫丁香花――\n絢爛の花嵐、吹かせましょ。",
+      "en": "The lilac that endures the winter... let's raise a storm of resplendent petals."
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "id": 1113,
+  "name_en": "Fusaichi Pandora",
+  "name_jp": "フサイチパンドラ",
+  "kind": "uma",
+  "one_liner": "Spoiled rich gyaru 'genius' who dodges hard work, yet quietly gives her all once she trusts her trainer.",
+  "personality": "Pandora is a lazy, whiny, extravagantly rich gyaru who calls herself a genius every other sentence, bargains for rewards, and tries to swap training for shopping, cafes or the beach. Under the bravado she gets anxious (repeating 'it's fine, I'm a genius' to herself) and she is honestly affectionate, insisting she trusts the trainer more than anyone. When the trainer designs the menu, she will push even through hard training - her 'marshmallow heart' can turn into 'iron mental'.",
+  "speech": {
+    "first_person": "atashi (あたし); also refers to herself as Pandora-chan (パンドラちゃん)",
+    "calls_trainer": "anta (アンタ) mostly; also Trainer (トレーナー); once jokingly Sensei (センセー, voice 20009)",
+    "register": "gyaru slang - stretched vowels, heart marks, abbreviations, very casual",
+    "tics": [
+      {
+        "jp": "天才",
+        "romaji": "tensai",
+        "meaning": "genius - her constant self-description, 31 occurrences (voice 30004; stretched as 天っ才 in 95001)"
+      },
+      {
+        "jp": "っしょ",
+        "romaji": "~ssho",
+        "meaning": "'right?/surely' (voice 20029: フツーにいけるっしょ～！)"
+      },
+      {
+        "jp": "し / なし",
+        "romaji": "~shi / ~nashi",
+        "meaning": "gyaru emphatic ending (voice 20038 まかせろしぃ, 91004 見惚れんなし)"
+      },
+      {
+        "jp": "とりま",
+        "romaji": "torima",
+        "meaning": "'for now, anyway' (voice 70001, 92016)"
+      },
+      {
+        "jp": "ガチ / ガチで",
+        "romaji": "gachi / gachi de",
+        "meaning": "'for real' (voice 95004, 120000, 91014 ガチで風邪ひく)"
+      },
+      {
+        "jp": "にひ♡ / いっひっひ",
+        "romaji": "nihi / ihhihhi",
+        "meaning": "mischievous giggle (voice 92006, 10000)"
+      },
+      {
+        "jp": "おつおつ～ / おっつ～",
+        "romaji": "otsu-otsu / ottsu",
+        "meaning": "'good work' (voice 400013, 80000)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Pink, flashy sparkly things (voice 10025, 91002)",
+    "Princess Fighter (プリファイ) anime and collab cosmetics (voice 91002, 91019)",
+    "Fashion; designed her own racewear (voice 91007); nails, selfies, UmaTok/Umasta",
+    "Being pampered; rewards, vacations, her family's private beach, resort and cruiser (voice 90017, 91013)",
+    "Sweets, pancakes, loco moco, fancy melon soda (voice 90010, 91022, 91025)",
+    "Collecting dog plushies (voice 91027); board games, karaoke, delinquent manga (voice 91018, 10027, 91026)",
+    "Quick changes and whistling (profile strengths)"
+  ],
+  "weak_spots": [
+    "Anything too tough (profile: キツすぎちゃうのはイヤ)",
+    "Heat and cold - begs for indoor training (voice 90007, 90009)",
+    "Waking up early; Heart's early mornings (voice 91021, 91009)",
+    "Tidying her room / homework (voice 10010, 90015)",
+    "Her tail thrashes wildly when asleep (profile about_tail)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "February 27 (2月27日)",
+    "height": "165 cm (165cm)",
+    "voice_actor": "Moe Kahara (佳原萌枝) - romanisation unverified"
+  },
+  "relationships": [
+    {
+      "id": 1112,
+      "name_en": "Daring Heart",
+      "nature": "Roommate who mothers her, assigns homework and drags her mountain climbing",
+      "evidence": "home scenes x1; mentions in voice x4 (voice_id 90002: ハートちゃんに山連れてかれる～！服ぬぎっぱにしただけなのにぃ～！; 90015 宿題; 91021 early mornings); web: https://umamusu.wiki/Fusaichi_Pandora (roommate)"
+    },
+    {
+      "id": 1109,
+      "name_en": "Rhein Kraft",
+      "nature": "'Kuu-chan-senpai' - admired senior she naps and sunbathes with",
+      "evidence": "home scenes x3; voice_id 91023: くーちゃんセンパイのぱかプチ、抱いて寝るとね、ぐっすりなんだ！; web: https://umamusu.wiki/Fusaichi_Pandora (Kuu-chan-senpai = Rhein Kraft)"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "'Ai-chan' - close friend who makes her bento; Pandora spoils her. Real-life Pandora is Almond Eye's dam (general knowledge)",
+      "evidence": "home scenes x2; voice_id 91001: アイちゃんのお弁当げっちゅ～♡; event title: エリザベス女王杯の後に・アイちゃん; web: https://umamusu.wiki/Fusaichi_Pandora"
+    },
+    {
+      "id": 1039,
+      "name_en": "Kawakami Princess",
+      "nature": "Upperclassman and Princess Fighter (プリファイ) buddy; rivalry only per web",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91019: カワカミ先輩とプリファイショー見に行って超楽しかったの♪); web: https://umamusu.wiki/Fusaichi_Pandora"
+    },
+    {
+      "id": 1094,
+      "name_en": "Jungle Pocket",
+      "nature": "'Pokke-senpai' - senior who lends her delinquent manga and taught her shouting for guts; per web strict with her carefree attitude and a former teammate",
+      "evidence": "mentions in voice x3 (voice_id 91026: ポッケ先輩から借りて読んだらもーね…本気愛羅武勇って感じ…！; 91000 hug complaint; 92017 大声出すと気合い入る); web: https://umamusu.wiki/Fusaichi_Pandora (strict; former teammate)"
+    },
+    {
+      "id": 1118,
+      "name_en": "Admire Groove",
+      "nature": "'Aruvu-senpai' (mentions count links this name to Admire Groove)",
+      "evidence": "mentions in voice x1 (voice_id 91027: アルヴ先輩もこれで来てほし～な)"
+    },
+    {
+      "id": 1145,
+      "name_en": "Rulership",
+      "nature": "Board game partner who sulked after losing",
+      "evidence": "mentions in voice x1 (voice_id 91018: ルーラー先輩とボドゲで遊ぶの超～楽しいの！)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Fellow gyaru senpai she does karaoke with",
+      "evidence": "mentions in voice x1 (voice_id 10027: ヘリオス先輩たちとカラオケ一緒してもらっちゃった♡)"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "She wishes Sweep would teach her room-cleaning magic",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91020)"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "Pandora holds Buena's warm hands like a heat pack (from Buena's side only)",
+      "evidence": "not in Pandora's own lines; Buena Vista's voice_id 90009 (source 1114.json): 最近よく、パンドラちゃんに手をぎゅっとされるの。温かいからカイロになるんだって"
+    }
+  ],
+  "groups": [
+    "Gyaru circle with Daitaku Helios and friends (voice 10027: ギャル引力?) - loose, unverified",
+    "Protagonist of the main story's Act 2 Final Chapter - 'Seeds to You, Hope Comes Around' (web: https://umamusu.wiki/Fusaichi_Pandora; not in mdb)"
+  ],
+  "story_arc": {
+    "summary": "Pandora coasts on talent and wants to skip effort ('no guts-type stuff, please'), with goals across Hanshin JF, Oka Sho, Oaks, Shuka Sho, Queen Elizabeth II Cup, Victoria Mile and Sapporo Kinen. Event titles such as the character-story title 'I Have a Dream! I Did, Probably', 'I Realised' and 'Things I Don't Want to Lose' hint at growth; per the fan wiki, Rhein Kraft (who once picked her up when she was down) is hospitalised during Pandora's Classic year, and Pandora's serious training is tied to Kraft's mentorship. Her scenario also opens with events in Paris ('In the Streets of Paris').",
+    "source": "event titles + character story titles + web: https://umamusu.wiki/Fusaichi_Pandora (spot-checked)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "いっひっひ♪勝ちまくるぞぉ♡\nま、そもそも天才だし？アンタを\n見つけた時点で勝ち確ですけど♡",
+      "en": "Ihhihhi! I'm gonna win and win! I mean, I'm a genius anyway? The moment I found you it was a guaranteed win."
+    },
+    {
+      "voice_id": 20037,
+      "jp": "…ダイジョーブ！あたし天才だし！\nダイジョーブ！ダイジョーブ！\n…ダイジョーブ。ダイジョーブ…。",
+      "en": "...It's fine! I'm a genius! It's fine! It's fine! ...It's fine. It's fine..."
+    },
+    {
+      "voice_id": 92007,
+      "jp": "キツくてもいいよ～。アンタが\n考えたメニューっしょ？なら…\nホント、ちゃんと、がんばるから。",
+      "en": "It can be tough, that's okay. It's a menu you came up with, right? Then... really, properly, I'll try hard."
+    },
+    {
+      "voice_id": 20010,
+      "jp": "ムリ。\nできない。\nおんぶ。",
+      "en": "Can't. Won't. Piggyback."
+    },
+    {
+      "voice_id": 91021,
+      "jp": "ハートちゃん、まじ…朝、早すぎ…\n眠い、ムリ、限界…！…ねぇ～枕。\n座って。そこ。…座って～！今～！",
+      "en": "Heart-chan is seriously... too early in the morning... sleepy, can't, limit...! ...Hey, pillow. Sit. There. ...Sit~! Now~!"
+    },
+    {
+      "voice_id": 30004,
+      "jp": "あったりまえじゃーん！\nだってあたし、天才だしぃ♡",
+      "en": "Well duh! 'Cause I'm a genius!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Ne~ {user}! The independent run's done, like, totally. Genius me finished it, sooo come check it, 'kay? And then it's reward time, right? Nihi.",
+    "Otsu-otsu~! The 50 minutes are uuup! Super-genius Pandora-chan ran the whole thing, sooo... praise me, {user}. For real. Gachi de!"
+  ],
+  "data_gaps": [
+    "Voice actor romanisation unverified",
+    "Identity of 'Aruvu-senpai' as Admire Groove rests on the source's mention matching only",
+    "No story dialogue in the mdb; arc details are fan-wiki summaries",
+    "Has three unlabelled trivia strings (10分がんばったら15分休憩！, 最近の中で一番盛れた自撮り♪, 時間ギリギリまでウマトック) - field meaning unknown",
+    "Exact course of Kraft's hospitalisation and Pandora's turn to serious training is fan-wiki only; wiki does not say she admits not being a genius"
+  ]
+}

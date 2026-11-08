@@ -1,0 +1,186 @@
+{
+  "id": 1134,
+  "name_en": "Curren Bouquetd'or",
+  "name_jp": "カレンブーケドール",
+  "kind": "uma",
+  "one_liner": "Gentle, conflict-averse florist girl who vows to hand her trainer a 'golden bouquet' of victory.",
+  "personality": "Soft-spoken, courteous and self-effacing; she frames everything in terms of flowers, harmony (調和) and 'arranging/putting things in order' (整える). Her profile admits she is not good with conflict, and her lines show her slowly accepting that competing need not break harmony. Underneath the gentleness is a firm, almost stubborn resolve to repay her trainer's kindness with a win, even when she is in poor form.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); most often simply 'anata (あなた)'",
+    "register": "soft, polite keigo (desu/masu, kudasai, itashimasu); frequent dashes and trailing pauses",
+    "tics": [
+      {
+        "jp": "――",
+        "romaji": "(long dash pauses)",
+        "meaning": "She constantly breaks sentences with pauses: 'みなさんと、共に――'"
+      },
+      {
+        "jp": "調和",
+        "romaji": "chouwa",
+        "meaning": "'harmony' - her keyword, incl. 'negative harmony' (負の調和) for things going wrong"
+      },
+      {
+        "jp": "整える",
+        "romaji": "totonoeru",
+        "meaning": "'to arrange / put in order / condition' - used for body, flowers and race flow"
+      },
+      {
+        "jp": "花束を、捧げます",
+        "romaji": "hanataba wo, sasagemasu",
+        "meaning": "'I offer (you) a bouquet' - her signature promise of victory"
+      },
+      {
+        "jp": "黄金の花束",
+        "romaji": "ougon no hanataba",
+        "meaning": "'golden bouquet' - her goal image for glory"
+      },
+      {
+        "jp": "ふふ",
+        "romaji": "fufu",
+        "meaning": "quiet giggle"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "arranging flowers / flower arrangements and bouquets (self-intro)",
+    "making balm; braiding tails and hair (strengths)",
+    "flower language and specific flowers: sweet pea, peony (shakuyaku), carnation, lavender",
+    "bento making",
+    "flower tea, potpourri",
+    "hiking autumn mountains with Yamanin Zephyr"
+  ],
+  "weak_spots": [
+    "conflict / fighting (self-intro: 争いごとは少し苦手)",
+    "crunchy potato chips and audio feedback howl (weaknesses: ぱりぱりのポテトチップス、ハウリング)",
+    "shiitake (eats stuffed shiitake but 'not scary if I don't look at the underside', voice 90003)",
+    "revealing outfits make her uneasy (voice 91006)",
+    "embarrassed about sleep-talking flower names (voice 91011)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 23 (4月23日)",
+    "height": "153 cm",
+    "voice_actor": "Anju Oda (小田杏樹)"
+  },
+  "relationships": [
+    {
+      "id": 1133,
+      "name_en": "Chrono Genesis",
+      "nature": "close friend; in sync, decide things by rock-paper-scissors because both keep deferring",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 91000: クロノさんとなにかを決める時――じゃんけんで、決めるんです)"
+    },
+    {
+      "id": 1078,
+      "name_en": "Yamanin Zephyr",
+      "nature": "apparent roommate (shared room full of bouquets, wake to nature sounds together); weekly mountain walks",
+      "evidence": "home scenes x1; mentions in voice x3 (voice_id 10013: お部屋にお花の香りが漂い――私もゼファーさんも、幸せです; 91009; 91014). Roommate status inferred, not stated"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "longtime friend she used to go clothes shopping with; consulted her on her racing-outfit design",
+      "evidence": "home scenes x2; mentions in voice x3 (voice_id 10026: 昔はよく――カレンちゃんとお洋服を見に行きました; voice_id 91008: 衣装デザイン――カレンちゃんにも相談に乗ってもらったんです)"
+    },
+    {
+      "id": 1131,
+      "name_en": "Gran Alegria",
+      "nature": "friend/peer; she draws energy from Gran's 'ohamile' greeting",
+      "evidence": "home scenes x1; mentions in voice x3 (voice_id 90000: グランさんのおはマイルも一段と元気で)"
+    },
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "friend; Curren gives her bouquets, Loves invited her flower picking",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91012: ラヴズさんが、花摘み会に誘ってくれて)"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "dorm-mate she admires and learns from ('アイさん直伝のアップ')",
+      "evidence": "home scenes x2; voice_id 20002 and 10010 refer to 'アイさん' (matched via Almond Eye's short_name アイ; not counted in mentions list)"
+    },
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "friend; made chocolate mini-bouquets together",
+      "evidence": "home scenes x2; voice_id 10004 'ララさん' (matched via Lucky Lilac's short_name ララ)"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "made a New Year kadomatsu arrangement together",
+      "evidence": "mentions in voice x1 (voice_id 10003: グラスさんと門松のアレンジメントに挑戦したんです)"
+    },
+    {
+      "id": 1137,
+      "name_en": "Kiseki",
+      "nature": "Kiseki draws Curren's arrangements into her manga",
+      "evidence": "mentions in voice x1 (voice_id 91003: キセキさんの漫画には――私のアレンジメントが登場することがありまして)"
+    },
+    {
+      "id": 1140,
+      "name_en": "Marche Lorraine",
+      "nature": "friendly; gave Marche's doll a clover crown",
+      "evidence": "mentions in voice x1 (voice_id 90006)"
+    },
+    {
+      "id": 1141,
+      "name_en": "Epiphaneia",
+      "nature": "Epi drags her along to places, talking about 'fate'",
+      "evidence": "voice_id 91004 'エピさん' (matched via Epiphaneia's short_name エピ)"
+    }
+  ],
+  "groups": [
+    "Miho Dorm",
+    "Beautification Committee (美化委員) - event title '美化委員のお仕事' (role inferred from title only, unverified)"
+  ],
+  "story_arc": {
+    "summary": "Her career runs Sweet Pea S -> Oaks -> Shuka Sho, then into the senior year with Nikkei Sho, Tenno Sho (Spring), Takarazuka Kinen, All Comers and Japan Cup. Event titles build a flower motif ('三冠は、彩りを変えて', '憧憬の花束', 'あなたへ捧ぐ、エーデルワイス', 'ジャパンCの後に・黄金の花束'): the girl who dislikes conflict learns to compete in order to deliver a 'golden bouquet' of victory to her trainer. Several post-race titles have alternate endings (e.g. Tenno Sho Spring '“特別”な春の菊' vs '淡く咲く、春の菊'). Detailed dialogue not available.",
+    "source": "event titles"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "カレンブーケドール――花束を、捧げます。",
+      "en": "Curren Bouquetd'or. I offer you a bouquet."
+    },
+    {
+      "voice_id": 10000,
+      "jp": "今は、至らずとも――いつか、\n黄金の花束を。あなたの優しさに\n祝福を――私が、必ず届けますから",
+      "en": "I may fall short for now, but someday - a golden bouquet. A blessing for your kindness... I will deliver it, without fail."
+    },
+    {
+      "voice_id": 92005,
+      "jp": "争うのは、まだ躊躇います。\nそれでも――踏み出したいと。\n今はそう、思えます。",
+      "en": "I still hesitate to fight. Even so... I want to step forward. That is how I feel now."
+    },
+    {
+      "voice_id": 20035,
+      "jp": "――勝たなければ。\nどんなに不調であろうと、\n花束を――捧げるんだから…！",
+      "en": "...I have to win. No matter how bad my condition, I will offer that bouquet...!"
+    },
+    {
+      "voice_id": 90003,
+      "jp": "今日のおかずは、しいたけの肉詰め\nです。…ええ。栄養満点ですし、\n裏を見なければ…怖く、ありません",
+      "en": "Today's side dish is stuffed shiitake. ...Yes. It's very nutritious, and as long as I don't look at the underside... it isn't scary."
+    },
+    {
+      "voice_id": 30004,
+      "jp": "この喝采の花束を――あなたへ捧げます。",
+      "en": "This bouquet of cheers - I offer it to you."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run has drawn to a close. Shall we look over the results together? I hope your efforts have bloomed into a lovely bouquet.",
+    "Forgive me for interrupting, {user}... your independent training is complete. Everything is in order - please come and see how it blossomed."
+  ],
+  "data_gaps": [
+    "Story arc built only from event titles; no dialogue or web summary found (web search returned only race-goal info, game8.jp/umamusume/791608)",
+    "'アイさん', 'ララさん', 'エピさん' identified via other characters' short_name fields, not via the mentions list",
+    "Beautification Committee membership inferred from one event title",
+    "Removed Nishino Flower: the mdb 'mentions x2' were false matches on フラワーティー (90005) and エディブルフラワー (91002); no line names her",
+    "Removed 'flower-patterned clothes' motif: no supporting line found"
+  ]
+}

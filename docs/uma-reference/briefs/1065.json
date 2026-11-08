@@ -1,0 +1,194 @@
+{
+  "id": 1065,
+  "name_en": "Daitaku Helios",
+  "name_jp": "ダイタクヘリオス",
+  "kind": "uma",
+  "one_liner": "Hyper party-gyaru who speaks almost pure slang, lives for 'fests', and adores her bestie Palmer and 'Ojou' Ruby.",
+  "personality": "Relentlessly loud, sunny and social: everything is a 'fest', she wants every newcomer's LANE contact, and she racks up reflection essays for partying too hard. Her slang is so dense friends wonder where she learned it, but she is genuinely kind, cheering up gloomy people with hugs and 'take my hand'. She is head over heels for the reserved Daiichi Ruby and sees Mejiro Palmer as her ride-or-die bestie.",
+  "speech": {
+    "first_person": "uchi (ウチ); also 'Uchi-chan' / 'Chan-Heli' (ちゃんヘリ)",
+    "calls_trainer": "Tore-pi (トレぴ), also トレぴっぴ / トレぽよ / トレぴよ; occasionally トレーナー",
+    "register": "heavy gyaru slang, casual, neologisms and puns (much heavier than Palmer)",
+    "tics": [
+      {
+        "jp": "うぇーい",
+        "romaji": "weei",
+        "meaning": "party cheer 'woo!'"
+      },
+      {
+        "jp": "アゲ",
+        "romaji": "age",
+        "meaning": "'hype' (テンアゲ, 爆アゲ, 神アゲ)"
+      },
+      {
+        "jp": "フェス",
+        "romaji": "fesu(ru)",
+        "meaning": "'fest' - partying, also as verb フェスる"
+      },
+      {
+        "jp": "ぴえん",
+        "romaji": "pien",
+        "meaning": "'boo-hoo' (sad); escalates to ぱおん / ぎゃおん"
+      },
+      {
+        "jp": "よいちょまる",
+        "romaji": "yoichomaru",
+        "meaning": "gyaru 'alright!/yay'"
+      },
+      {
+        "jp": "っしょ",
+        "romaji": "~ssho",
+        "meaning": "'right?'"
+      },
+      {
+        "jp": "ズッ友",
+        "romaji": "zuttomo",
+        "meaning": "'friends forever' (about Palmer)"
+      },
+      {
+        "jp": "おつピコ",
+        "romaji": "otsupiko",
+        "meaning": "slangy 'good work / thanks'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "parties, festivals, karaoke, DJing and dancing",
+    "flashy colours, nails, mirror balls",
+    "Old Maid card game (profile strength)",
+    "LANE/Umastagram social media",
+    "fruit sandwiches (event title)",
+    "the sun / sunshine ('太陽')",
+    "hugging friends"
+  ],
+  "weak_spots": [
+    "silence ('静かなのはぴえん') and polite keigo (profile)",
+    "forgetting to eat because she partied",
+    "getting her mirror ball confiscated by the dorm mother",
+    "being told off by teachers / writing reflection essays (voice 91021)",
+    "getting thrown by Ruby at the dojo (voice 91019)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 10 (4月10日)",
+    "height": "156cm",
+    "voice_actor": "Aya Yamane (山根綺)"
+  },
+  "relationships": [
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Best friend ('Pama-chin'); zuttomo, matching colours, double-runaway partner",
+      "evidence": "home scenes x11; mentioned_by x6; voice_id 91000: パマちんってウチのことめーっちゃ好きじゃん？; event title: ズッ友爆走アゲ道中☆"
+    },
+    {
+      "id": 1085,
+      "name_en": "Daiichi Ruby",
+      "nature": "'Ojou' she is smitten with; mostly one-sided crush, also rival",
+      "evidence": "home scenes x5; mentions in voice x2 (voice_id 91001: ルビーはさ、“お嬢”！って感じが超ラビュいよねっ。); web: https://umamusu.wiki/Daitaku_Helios"
+    },
+    {
+      "id": 1093,
+      "name_en": "K.S.Miracle",
+      "nature": "Friend she hugs from behind ('Kei-chan/Mira-chan')",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91020)"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "Gyaru friend; plans countdown party",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91004: ジョーダンってまぁじウケんの！)"
+    },
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "Friend; did zombie makeup with her",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 10007)"
+    },
+    {
+      "id": 1107,
+      "name_en": "Tap Dance City",
+      "nature": "Roommate per wiki; fellow party animal",
+      "evidence": "home scenes x1; mentioned_by x4; Tap Dance City's own voice (1107 voice_id 91000: ヘリオスは最高のRoommateさ！ミラーボールとDJ機材持ち込んで…) confirms roommate"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "Snowball-fight rival she worries about",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91015: バンブーと雪合戦フェス燃える～！)"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "Partners in over-hyping",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91010)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Admires her toughness",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 90005: イクノってまぁじ頑丈じゃん？)"
+    },
+    {
+      "id": 1078,
+      "name_en": "Yamanin Zephyr",
+      "nature": "Friend ('Zephatchi')",
+      "evidence": "home scenes x2; voice_id 91024: ゼファっちとか"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "Made zouni together ('Flowa-cchi')",
+      "evidence": "voice_id 10003: ウチ、フラワっちと作ったんよ！"
+    }
+  ],
+  "groups": [
+    "gyaru crew 'itsumen' (いつメン) (voice lines, unverified membership)"
+  ],
+  "story_arc": {
+    "summary": "Helios treats racing like one endless party, aiming to win in her own fun way as a sprinter-miler (events 'ウチらの人生スプリント', 'パリピれマイル王☆'). Her route runs through the Mile CS, Takamatsunomiya Kinen and Yasuda Kinen, with a story beat around the Sprinters Stakes and her bond with Palmer ('ズッ友爆走アゲ道中☆') and Daiichi Ruby ('“私の太陽”'). It ends with a run of 'miracles' at the Arima Kinen ('有馬記念の後に・奇跡は起きた').",
+    "source": "event titles + web: https://umamusu.wiki/Daitaku_Helios (no plot detail); model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "ウチさー毎日MAXたのぴくて！\nケドまだ上あったとかビビるわ！\nやっぱトレぴ神よな～！",
+      "en": "I have MAX fun every day! But turns out there was even more - shook! Tore-pi's a god after all~!"
+    },
+    {
+      "voice_id": 20022,
+      "jp": "マ～！？レース出すぎじゃね！？\nぴえん超えてぱおん超えて\nぎゃおんなんだが～！",
+      "en": "Whaaat!? Aren't I racing way too much!? Past pien, past paon, it's gyaon now~!"
+    },
+    {
+      "voice_id": 91000,
+      "jp": "パマちんってウチのことめーっちゃ\n好きじゃん？ゆーて愛じゃん？\nノリとかじゃないんだなもはや！",
+      "en": "Pama-chin totally loves me, right? Like, it's love, y'know? It's not even just vibes anymore!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "ルビーはさ、“お嬢”！って感じが\n超ラビュいよねっ。高嶺の花でも、\nいつか鬼ジャンプで届くっしょ～！",
+      "en": "Ruby is so 'Ojou', it's super lovable. Even if she's a flower on a high peak, I'll reach her someday with a monster jump~!"
+    },
+    {
+      "voice_id": 95009,
+      "jp": "なぁに暗い顔してんの！\n…とりまウチの手、取ってみ？",
+      "en": "Why the gloomy face! ...For now, just take my hand?"
+    },
+    {
+      "voice_id": 90015,
+      "jp": "トレぴおか＆おつー！\nこの時間までとかマジえら！\n偉すぎ謙信！よすよすザウルス☆",
+      "en": "Tore-pi, good work! Till this late, so admirable! Admirable-Kenshin! There-there-saurus☆"
+    }
+  ],
+  "timer_line_ideas": [
+    "Weeei! {user}, Tore-pi! The independent run is DONE! Hype level maxed, so go check it out ASAP, yoichomaru~!",
+    "Torepoyo! {user}! Run's over, otsupiko~! Check the results and then we fest, 'kay? No pien faces allowed!"
+  ],
+  "data_gaps": [
+    "Career plot details beyond event titles not verified",
+    "Her slang is often untranslatable; EN renderings are approximate",
+    "Grade listed as high school (高等部) in the mdb"
+  ]
+}

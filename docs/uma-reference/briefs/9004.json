@@ -1,0 +1,102 @@
+{
+  "id": 9004,
+  "name_en": "Aoi Kiryuin",
+  "name_jp": "桐生院トレーナー",
+  "kind": "npc",
+  "one_liner": "Your earnest rookie rival trainer from a famous trainer family, and Happy Meek's trainer.",
+  "personality": "Earnest, modest and eager: she calls herself still green ('まだまだ未熟者ですが') but promises to do her best for the Umamusume. Her few lines show she sees the player as a peer to grow with ('お互い頑張りましょうね', 'これでもっと高めあえますね！'). The wiki describes her as athletic but short on experience and confidence.",
+  "speech": {
+    "first_person": "unknown (none in her voice lines)",
+    "calls_trainer": "unknown (no direct address in her lines; event title calls her '同期' (same-year colleague))",
+    "register": "polite (desu/masu), bright and earnest",
+    "tics": [
+      {
+        "jp": "お互い頑張りましょうね",
+        "romaji": "otagai ganbarimashou ne",
+        "meaning": "'Let's both do our best'"
+      },
+      {
+        "jp": "精一杯、努めて参ります！",
+        "romaji": "seiippai, tsutomete mairimasu!",
+        "meaning": "'I'll work as hard as I can!' (profile)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "the Kiryuin family's trainer handbook (event title 'トレーナー心得『指導は常に改良せよ』'; web)",
+    "looking for a hobby ('趣味を探して')",
+    "learning by doing ('身をもって学ぶべし！')"
+  ],
+  "weak_spots": [
+    "inexperienced, self-described '未熟者' (profile)",
+    "event title '暴走トレーニング' (runaway training) suggests she overdoes it",
+    "lacks confidence despite a sharp mind; people around her hold high hopes for her (web: umamusu.wiki)"
+  ],
+  "profile": {
+    "dorm": "n/a (staff; trainer)",
+    "grade": "n/a (rookie trainer)",
+    "birthday": "October 13 (10月13日)",
+    "height": "155 cm (web: umamusu.wiki; not in mdb)",
+    "voice_actor": "Miho Okasaki (岡咲美保)"
+  },
+  "relationships": [
+    {
+      "id": 2001,
+      "name_en": "Happy Meek (ハッピーミーク; no EN name in source)",
+      "nature": "the Umamusume she trains",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Aoi_Kiryuin"
+    },
+    {
+      "id": 9006,
+      "name_en": "Riko Kashimoto",
+      "nature": "colleague and opposite (athletic, unconfident rookie vs. seasoned but very unathletic trainer)",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Riko_Kashimoto"
+    },
+    {
+      "id": 9003,
+      "name_en": "Etsuko Otonashi",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": null,
+      "name_en": "the player trainer",
+      "nature": "same-year colleague and friendly rival",
+      "evidence": "event title: 同期の桐生院トレーナー"
+    }
+  ],
+  "groups": [
+    "Kiryuin trainer family (web: https://umamusu.wiki/Aoi_Kiryuin)",
+    "Tracen Academy trainers"
+  ],
+  "story_arc": {
+    "summary": "She has no career story; she is a support-card NPC and Happy Meek's trainer in the URA Finale scenario (web). Her support events follow her as the player's same-year colleague ('同期の桐生院トレーナー'), with family training maxims ('トレーナー心得『指導は常に改良せよ』'), a search for a hobby, a runaway training episode, and a bond event about being a good leader ('葵との絆・よき指導者たれ').",
+    "source": "event titles; web: https://umamusu.wiki/Aoi_Kiryuin"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "お互い頑張りましょうね。",
+      "en": "Let's both do our best."
+    },
+    {
+      "voice_id": 95005,
+      "jp": "また力になれたら嬉しいです！",
+      "en": "I'd be glad if I could help you again!"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "これでもっと高めあえますね！",
+      "en": "Now we can push each other even higher!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your Independent Training run has finished! Great work! Let's both do our best on the next one, okay?",
+    "The 50-minute run is over, {user}! I'm still green, but I'd be glad to look over the results with you. Let's keep pushing each other higher!"
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Aoi Kiryuin' is the standard EN name. Given name 葵 is from her self_intro.",
+    "Only 3 voice lines; first person and how she addresses the player are not in them.",
+    "Height is from the wiki."
+  ]
+}

@@ -1,0 +1,218 @@
+{
+ "id": 1041,
+ "name_en": "Sakura Bakushin O",
+ "name_jp": "サクラバクシンオー",
+ "kind": "uma",
+ "one_liner": "Self-proclaimed model class president who solves everything by charging at full speed: 'Bakushin!'",
+ "personality": "Relentlessly upbeat, loud and proud; she praises herself constantly ('Clever? Yes, aren't I, aren't I!') and treats being class rep as the answer to everything. She is sincerely kind and helpful but famously scatterbrained: her profile says she only half-hears what people say and can't handle tasks with three or more steps, and her lines are full of exploding chocolate, unread homework questions and lost instructions. She is a pure sprinter who insists she can win at any distance, and she trusts her trainer without reservation.",
+ "speech": {
+  "first_person": "watashi (私)",
+  "calls_trainer": "Trainer-san (トレーナーさん); also anata (貴方)",
+  "register": "Polite desu/masu, very loud and exclamatory, with self-praise and stiff 'model student' phrasing",
+  "tics": [
+   {
+    "jp": "バクシーン！",
+    "romaji": "Bakushiin!",
+    "meaning": "Her battle cry (from 爆進, 'charging forward'); also バクシン as a verb/adjective for anything done at full speed"
+   },
+   {
+    "jp": "学級委員長",
+    "romaji": "gakkyuu iinchou",
+    "meaning": "'Class president' - her identity and justification for everything"
+   },
+   {
+    "jp": "ちょわ",
+    "romaji": "chowa",
+    "meaning": "Signature yelp/kiai, e.g. ちょわーーっ！"
+   },
+   {
+    "jp": "エッヘン！",
+    "romaji": "ehhen!",
+    "meaning": "'Ahem!' - proud chest-puffing"
+   },
+   {
+    "jp": "花丸",
+    "romaji": "hanamaru",
+    "meaning": "'Gold star/flower stamp' - her way of praising others"
+   },
+   {
+    "jp": "ハァハッハッハッハッハッハッハーーッ！",
+    "romaji": "haa-ha-ha-ha-ha!",
+    "meaning": "Triumphant laugh"
+   },
+   {
+    "jp": "優等生",
+    "romaji": "yuutousei",
+    "meaning": "'Honor student' - frequent self-description"
+   }
+  ]
+ },
+ "likes_and_motifs": [
+  "Cherry blossoms / sakura (her name; sakura patches on her shoes)",
+  "Being relied on and helping people (profile strengths)",
+  "Her mother's sakura-mochi; chocolate-chip sakura-mochi",
+  "Notebooks, gold-star stickers and a plain sash (profile trivia)",
+  "Sunny days 'because they're easy to run in'",
+  "Speed in everything - fastest bather in the dorm, 2-minute homework",
+  "Dodgeball at the Victory Club (ヴィクトリー倶楽部)",
+  "Writing down her daily 'Bakushin level' before bed"
+ ],
+ "weak_spots": [
+  "Tasks with many steps (3 or more) - profile weakness",
+  "Only half-listens to people (profile: ears)",
+  "Cooking: her Valentine chocolate exploded (voice 10004)",
+  "Forgets how to put on outfits; braids her hair with difficulty",
+  "Distance: a pure sprinter (Short A, Mile B, Medium/Long G) who insists she can do long races",
+  "Being stared at in silence makes her fidgety (voice 91004)"
+ ],
+ "profile": {
+  "dorm": "Miho Dorm (美浦寮)",
+  "grade": "High school division (高等部)",
+  "birthday": "April 14 (4月14日)",
+  "height": "158cm",
+  "voice_actor": "Sachika Misawa (三澤紗千香)"
+ },
+ "relationships": [
+  {
+   "id": 1082,
+   "name_en": "North Flight",
+   "nature": "Close friend; adjusts her outfit and taught her to wear her hair down",
+   "evidence": "home scenes x5; mentions in voice x2 (voice_id 91216: 実は髪をおろすのがいいと言ってく れたのはフライトさんでして！)"
+  },
+  {
+   "id": 1054,
+   "name_en": "Biko Pegasus",
+   "nature": "Patrol partner; hero-talk buddy",
+   "evidence": "home scenes x4; mentions in voice x2 (voice_id 91000: ビコーさんと一緒にパトロール)"
+  },
+  {
+   "id": 1069,
+   "name_en": "Sakura Chiyono O",
+   "nature": "Fellow 'Sakura'; she shares her maxims with her and invites her to the club",
+   "evidence": "home scenes x4; mentions in voice x2 (voice_id 90012: チヨノオーさんに伝えなければ！)"
+  },
+  {
+   "id": 1051,
+   "name_en": "Nishino Flower",
+   "nature": "Fellow 'responsible type' she meets on the way to school",
+   "evidence": "home scenes x4; mentions in voice x1 (voice_id 91009: しっかり者同士、 ひかれ合ってしまうのでしょうか！); Flower mentions her x3"
+  },
+  {
+   "id": 1078,
+   "name_en": "Yamanin Zephyr",
+   "nature": "Frequent home-screen partner (sprinter/miler peer)",
+   "evidence": "home scenes x4"
+  },
+  {
+   "id": 1026,
+   "name_en": "Mihono Bourbon",
+   "nature": "Classmate/friend she is proud of; vending-machine buddy",
+   "evidence": "home scenes x3; mentions in voice x2 (voice_id 91017: ブルボンさんが好きなジュースは 私、よく知っているのです！)"
+  },
+  {
+   "id": 1030,
+   "name_en": "Rice Shower",
+   "nature": "Friend she is proud of; tried to match her giant 'Rice' portion",
+   "evidence": "home scenes x1; mentions in voice (voice_id 91003: ブルボンさんもライスさんも毎日 頑張ってて; voice_id 90013: ライス爆盛)"
+  },
+  {
+   "id": 1076,
+   "name_en": "Sakura Laurel",
+   "nature": "Matching sakura shoe patches",
+   "evidence": "home scenes x3; mentions in voice x1 (voice_id 91016: ローレルさんとお揃いなのです！)"
+  },
+  {
+   "id": 1120,
+   "name_en": "Calstone Light O",
+   "nature": "Fellow sprinter; did a 'saury impression' together",
+   "evidence": "home scenes x3; mentions in voice x1 (voice_id 91226: ライトオさんとしてみたんです！)"
+  },
+  {
+   "id": 1075,
+   "name_en": "Daring Tact",
+   "nature": "She is studying Tact's bold-yet-elegant manner",
+   "evidence": "mentions in voice x2 (voice_id 91217: タクトさんの持つ 豪快さと上品さを研究中なのです！)"
+  },
+  {
+   "id": 1112,
+   "name_en": "Daring Heart",
+   "nature": "Teaches her English",
+   "evidence": "mentions in voice x2 (voice_id 91218: ハートさんに 英語を教えてもらったんですよ！)"
+  },
+  {
+   "id": 1048,
+   "name_en": "Tosen Jordan",
+   "nature": "Admires Jordan's fashion, wants matching outfits",
+   "evidence": "mentions in voice x1 (voice_id 10027: ジョーダンさんの私服も素敵です！)"
+  },
+  {
+   "id": 1032,
+   "name_en": "Agnes Tachyon",
+   "nature": "Tachyon got away from her this morning and it still bothers her (context not stated in the line)",
+   "evidence": "mentions in voice x1 (voice_id 92218: 今朝タキオンさんに逃げられ たのがまだ心に)"
+  },
+  {
+   "id": 1010,
+   "name_en": "Taiki Shuttle",
+   "nature": "Highest affinity score (sprint/mile peer)",
+   "evidence": "affinity score 29 (top); no shared home scenes or voice mentions"
+  },
+  {
+   "id": 1126,
+   "name_en": "Sakura Chitose O",
+   "nature": "fellow Sakura-named uma; they share a home-screen scene",
+   "evidence": "home scenes x1 (game data)"
+  }
+ ],
+ "groups": [
+  "Class representative of her class (self-described, all over her lines)",
+  "Victory Club (ヴィクトリー倶楽部) - appears in an event title and voice 91029; exact membership unverified",
+  "'Sakura' crown-name characters with Sakura Chiyono O / Sakura Laurel / Sakura Chitose O (real-horse owner naming; in-game grouping unverified)"
+ ],
+ "story_arc": {
+  "summary": "A short-distance specialist with boundless confidence, she sets out to be the 'model Uma Musume' and the strongest class president. Her career runs through sprint races (Keio Hai Junior S, Spring S, Aoi S, Sprinters S, Takamatsunomiya Kinen); along the way she keeps declaring she will win at ever longer distances (event titles '...1200!', '...2400!!', '...3600!!!', 'Bakushin-style Arima Kinen!') while the trainer channels that energy. Late titles include defending the Sprinters S ('連覇！！'), winning the Mile CS ('the birth of a Bakushin legend') and an event called 'The Fastest King' (最速の王).",
+  "source": "event titles (trainee_event_titles); real-horse context (Sprinters S x2 winner) is general knowledge (unverified)"
+ },
+ "sample_lines": [
+  {
+   "voice_id": 10001,
+   "jp": "トレーナーさんのご指導に間違いは\nありませんとも！なぜなら…\n私のトレーナーさんですから！！",
+   "en": "There's no mistake in Trainer-san's coaching! Why? Because... it's MY Trainer-san!!"
+  },
+  {
+   "voice_id": 20036,
+   "jp": "どんな苦境に立ったとしても、\n私には1着になる秘訣があります。\nそれは…スピードですッッッ！！",
+   "en": "No matter how tough things get, I have a secret to finishing first. And that secret is... SPEED!!!"
+  },
+  {
+   "voice_id": 90001,
+   "jp": "黒板掃除に、花瓶の水替え…\n学級委員長は朝から大忙しです！\nまったく…エラいですね、私はッ！",
+   "en": "Wiping the blackboard, changing the vase water... a class president is busy from morning! Honestly... aren't I just admirable!"
+  },
+  {
+   "voice_id": 91011,
+   "jp": "宿題は2分で終わらせてきました！\n問題文など見なくとも、私には\n朝飯前なのです！今は夜ですが！",
+   "en": "I finished my homework in 2 minutes! I don't even need to read the questions - it's a breakfast-level task for me! Even though it's night now!"
+  },
+  {
+   "voice_id": 10004,
+   "jp": "調理中にチョコが…爆発しました。\n私の熱い感謝の気持ちに、\n耐え切れなかったのでしょうね！",
+   "en": "While I was cooking, the chocolate... exploded. It must not have been able to withstand my burning gratitude!"
+  },
+  {
+   "voice_id": 92021,
+   "jp": "結び目が緩んできてしまいました！\nトレーナーさん、1度解きますので\n三つ編みをお願いします！！",
+   "en": "My braid's coming loose! Trainer-san, I'll undo it, so please braid it for me!!"
+  }
+ ],
+ "timer_line_ideas": [
+  "Bakushiiin! {user}, the independent run is complete - finished faster than anyone, naturally! As class president I award it a gold star! Now, Trainer-san, please come check the results!",
+  "{user}! Report from your class president: the 50-minute run has ended! I didn't read the instructions, but I'm certain it went splendidly! Ehhen! Shall we look together?"
+ ],
+ "data_gaps": [
+  "Story arc built from event titles; event dialogue not in the mdb",
+  "Victory Club membership/nature not confirmed from source",
+  "Mention count for Rice Shower (x3) includes a false match on ケチャップライス (voice 91022)",
+  "Whether '最速の王' is her true-ending event is not stated in the source (event order/type unknown)"
+ ]
+}

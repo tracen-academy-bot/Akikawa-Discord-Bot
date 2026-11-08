@@ -1,0 +1,134 @@
+{
+  "id": 9049,
+  "name_en": "Tucker Bryne",
+  "name_jp": "タッカーブライン",
+  "kind": "npc",
+  "one_liner": "Fiery, shouting chief of the Deserted Island Project who wants Umamusume to unleash their instincts.",
+  "personality": "Loud, hot-blooded and relentless: she launched the Deserted Island Project so Umamusume can leap higher, and her catchphrase is to 'unleash your instincts'. Almost every line is a battle cry ('Burn, burn!', 'Not done yet!'). Gold City notes her heat sweeps everyone along; event titles ('Things better left unsaid', 'Secrets kept even when drunk') hint at a quieter hidden side, which the wiki also mentions.",
+  "speech": {
+    "first_person": "watashi (私) (self-intro)",
+    "calls_trainer": "unknown in source (wiki: Trainer-san トレーナーさん); addresses Umamusume as 諸君",
+    "register": "shouty hot-blooded, commanding, katakana-stretched vowels",
+    "tics": [
+      {
+        "jp": "さァ",
+        "romaji": "saa",
+        "meaning": "'come on!' with katakana small ァ (self-intro, voice 23019 さァさァさァ！)"
+      },
+      {
+        "jp": "〜なァ！",
+        "romaji": "~naa!",
+        "meaning": "stretched exclamatory ending (voice 20051)"
+      },
+      {
+        "jp": "オラァ",
+        "romaji": "oraa",
+        "meaning": "rough battle cry 'hraah!' (voice 95006)"
+      },
+      {
+        "jp": "燃えろ燃えろ、滾らせろォ！",
+        "romaji": "moero moero, tagirasero!",
+        "meaning": "'Burn, burn, let it boil!' (voice 70000)"
+      },
+      {
+        "jp": "まだまだァ",
+        "romaji": "madamadaa",
+        "meaning": "'not yet, not done!' (voice 95005)"
+      },
+      {
+        "jp": "本能を解放だーッ",
+        "romaji": "honnou wo kaihou daa",
+        "meaning": "'Unleash your instincts!' (self-intro; event title 本能的トレーニング)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "the Deserted Island Project (無人島PJ)",
+    "instinct, fire, souls, 'jumbo dreams' (event title ドリームはジャンボにッ！)",
+    "summer island training facilities (web)"
+  ],
+  "weak_spots": [
+    "tried contact lenses and gave up (web)",
+    "has secrets she keeps (event titles 言わなくていいこと, 酔えど秘めごと)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown (adult project chief)",
+    "birthday": "June 21 (6月21日)",
+    "height": "168 cm - web only",
+    "voice_actor": "Yuu Kobayashi (小林ゆう)"
+  },
+  "relationships": [
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "overwhelmed by Tucker's infectious heat",
+      "evidence": "mentioned in City's voice x1 (voice_id 91216: タッカーブラインさんの 熱量には圧倒されるよ。)"
+    },
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "shares a home conversation (fellow muscle/fitness enthusiast; unverified)",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1075,
+      "name_en": "Daring Tact",
+      "nature": "shares a home conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1112,
+      "name_en": "Daring Heart",
+      "nature": "shares a home conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Deserted Island Project (無人島PJ) / Design Your Island scenario"
+  ],
+  "story_arc": {
+    "summary": "Chief and field supervisor of the Deserted Island Project in the 'Design Your Island' scenario, building the strongest training facilities on an island where summer never ends. Her support events run from 'Warmth through the speaker' ('スピーカー越しのぬくもり') through 'Dreams should be jumbo!' and private moments ('言わなくていいこと', '酔えど秘めごと') to 'Bond with Tucker Bryne: Into the great wilderness' and 'One who points the way'.",
+    "source": "event titles; web: https://umamusu.wiki/Tucker_Bryne"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "助けが必要なようだなァ！",
+      "en": "Looks like you need some help, huh!"
+    },
+    {
+      "voice_id": 23019,
+      "jp": "さァさァさァ！",
+      "en": "Come on, come on, come on!"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "燃えろ燃えろ、滾らせろォ！",
+      "en": "Burn, burn, let it boil over!"
+    },
+    {
+      "voice_id": 95005,
+      "jp": "ぬぁああああまだまだァ！",
+      "en": "Nuaaaargh, not done yet!"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "魂の声を聴け、オラァ！",
+      "en": "Hear the voice of your soul - HRAAH!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Come on, come on, come on! The independent run is DONE! Burn, burn, and get over here to see the results, {user}! HRAAH!",
+    "{user}! Fifty minutes of instinct unleashed - the run is finished! Not done yet though! Go check on your Umamusume, and let it boil!"
+  ],
+  "data_gaps": [
+    "How she addresses the Trainer is not in source lines (wiki: Trainer-san)",
+    "Height from wiki only",
+    "Event titles only, no event text",
+    "name_en 'Tucker Bryne' is from source",
+    "kind 'npc' per chara_category 1 / non-playable; she is an Umamusume by species",
+    "Support events 連絡が届いた！ / 労いのエール / スピーカー越しのぬくもり also appear in Hoshina Kiyoko's list, so they are likely generic scenario-link events, not hers specifically",
+    "umamusu.wiki's relationships section is empty; all relationships are from home scenes / Gold City's voice line only"
+  ]
+}

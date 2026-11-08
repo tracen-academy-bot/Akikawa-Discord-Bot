@@ -1,0 +1,113 @@
+{
+  "id": 9007,
+  "name_en": "Beauty Anshinzawa",
+  "name_jp": "ビューティー安心沢",
+  "kind": "npc",
+  "one_liner": "World-famous racewear designer and flamboyant host of the Beauty Dream Cup; Sasami Anshinzawa's more successful younger sister.",
+  "personality": "No profile text or voice lines exist for her in the mdb. Other characters' lines frame her as an eccentric, larger-than-life designer: Air Groove calls her someone with 'more than one or two quirks' and muses that her word 'Beauty' may be philosophical. Web sources describe her as upbeat and confident, treating each outfit as 'a date with destiny' with its wearer.",
+  "speech": {
+    "first_person": "unknown",
+    "calls_trainer": "unknown",
+    "register": "unknown from source (web: flashy, opens her intro with 'Bonjour!' - unverified in mdb)",
+    "tics": []
+  },
+  "likes_and_motifs": [
+    "racewear / shoubufuku design (Air Groove voice 400011, Curren Chan voice 91025, Haru Urara voice 400008)",
+    "the 'Beauty Dream Cup' race she hosts (Haru Urara voice 400005)",
+    "wedding-dress racewear (web: umamusu.wiki Racing Hearts: Beauty in Bloom!)",
+    "Celtic knot motif, 'eternity' (Fine Motion voice 91029)"
+  ],
+  "weak_spots": [
+    "strained, rivalrous relationship with her older sister Sasami (web: umamusu.wiki/Beauty_Anshinzawa)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "unknown",
+    "height": "unknown",
+    "voice_actor": "Kikuko Inoue (井上喜久子)"
+  },
+  "relationships": [
+    {
+      "id": 9005,
+      "name_en": "Sasami Anshinzawa",
+      "nature": "older sister; Sasami is jealous of Beauty's success and they do not get along",
+      "evidence": "home scenes x1; Mayano Top Gun voice_id 400001: ビューティーさんのお姉さん、どんな人なんだろ？; web: https://umamusu.wiki/Beauty_Anshinzawa (full line continues: 保健室で似てる人を見たよーな…, i.e. Sasami works in the infirmary)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "muse candidate / model in the Beauty Dream Cup story event; finds Beauty eccentric",
+      "evidence": "home scenes x1; Air Groove voice_id 400014: …ビューティー安心沢、一癖も二癖もある人だったな。; voice_id 400011: これが私の勝負服、ビューティー氏から見た私か。"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "muse candidate in the Beauty Dream Cup event, friendly with her",
+      "evidence": "Mayano Top Gun voice_id 400010: 記念にみんなで写真撮ろうよっ♪ビューティーさんも、ほら早く～！; web: umamusu.wiki Racing Hearts: Beauty in Bloom!"
+    },
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "wants to run the Beauty Dream Cup in Beauty's racewear",
+      "evidence": "Haru Urara voice_id 400008: ビューティーさんの勝負服と一緒に走って、ぜったい1着とっちゃうよっ！"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "admires her design work",
+      "evidence": "Fine Motion voice_id 91029: ケルティック・ノットにはね、『永遠』の意味があるんだって。ビューティーさんには敵わないね。; voice_id 400001: なぜ、みなさんはあれほどまでにビューティーさんの勝負服を…？"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "admires her functional-yet-cute designs",
+      "evidence": "Curren Chan voice_id 91025: さすがビューティーさんって感じだよね♪"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "worries about Beauty's peace of mind (story-event context)",
+      "evidence": "Nishino Flower voice_id 400005: ビューティーさんの心が少しでも安らぐように、見守りたいです。"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "shares a home scene (context unknown)",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "shares a home scene (context unknown)",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "calls herself a 'Beauty' muse in the Beauty Dream Cup event",
+      "evidence": "Satono Diamond voice_id 400001: 私も“ビューティー”なミューズです♪"
+    }
+  ],
+  "groups": [
+    "Anshinzawa family (with Sasami)"
+  ],
+  "story_arc": {
+    "summary": "Not a trainee; she has no training story. She debuts in the story event 'Racing Hearts: Beauty in Bloom!' (JP May 2021), where she brings her Beauty Dream Cup to Japan and auditions 'muses' (Mayano Top Gun, Air Groove and others) to race in wedding-dress racewear she designs. She later hosts the Beauty Dream Cup again in 'The Promised Hour: Silks & Three Riddles', judging muses on intellect.",
+    "source": "web: https://umamusu.wiki/Racing_Hearts:_Beauty_in_Bloom! , https://umamusu.wiki/Beauty_Anshinzawa , https://umamusu.wiki/The_Promised_Hour:_Silks_%26_Three_Riddles"
+  },
+  "sample_lines": [],
+  "timer_line_ideas": [
+    "Magnifique! Your independent run is finished, {user}. A runner's form is the finest outfit there is, so come see how this one turned out.",
+    "{user}, the run is over and the last stitch is in! Come and look at your Uma Musume, darling. Every finish is a fitting."
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Beauty Anshinzawa' is the EN-wiki / Global name",
+    "No voice lines of her own in the mdb, so no verified first person, trainer address, register or tics; personality is inferred from other characters' lines and web",
+    "Profile fields (dorm, grade, birthday, height, tagline, self_intro) all null; she is human and not a student",
+    "Real name Isami Anshinzawa and 'Bonjour!' intro come only from umamusu.wiki (unverified)",
+    "Timer drafts use a French-flavoured flamboyance taken from web descriptions, not from mdb lines; treat as tentative",
+    "Contexts of the King Halo and Mejiro Ramonu home scenes are unknown",
+    "mentioned_by in source counts only Air Groove x1, but other characters (Mayano, Urara, Fine Motion, Curren Chan, Nishino Flower, Satono Diamond) refer to her as ビューティーさん; quoted evidence lines are excerpts with line breaks removed"
+  ]
+}

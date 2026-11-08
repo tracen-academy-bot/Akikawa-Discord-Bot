@@ -1,0 +1,176 @@
+{
+  "id": 1008,
+  "name_en": "Vodka",
+  "name_jp": "ウオッカ",
+  "kind": "uma",
+  "one_liner": "Wannabe-delinquent tomboy obsessed with being cool and with bikes; secretly a flustered softie, and Scarlet's eternal rival.",
+  "personality": "Vodka is a hot-blooded, boyish girl whose single policy is to be the coolest Umamusume there is, and who hates anything 'lame' (ダッセェ). She talks big about bikes, rebellion and lone-wolf vibes, but she is easily embarrassed by romance talk, cute outfits and being thanked. She is warm and loyal underneath, calling her trainer her partner (相棒), and her rivalry with Daiwa Scarlet drives her.",
+  "speech": {
+    "first_person": "ore (俺)",
+    "calls_trainer": "Trainer (トレーナー); also Aibou (相棒, 'partner') and Omae (お前)",
+    "register": "rough boyish casual, delinquent-flavoured (～ぜ, ～じゃねーか, ねぇ contractions)",
+    "tics": [
+      {
+        "jp": "カッケー",
+        "romaji": "kakkee",
+        "meaning": "slangy 'cool!' - her core value"
+      },
+      {
+        "jp": "ダッセェ",
+        "romaji": "dasse",
+        "meaning": "'lame' - what she refuses to be"
+      },
+      {
+        "jp": "相棒",
+        "romaji": "aibou",
+        "meaning": "'partner', how she addresses the trainer"
+      },
+      {
+        "jp": "アクセル",
+        "romaji": "akuseru",
+        "meaning": "'accelerator' - bike metaphors for effort"
+      },
+      {
+        "jp": "フルスロットル",
+        "romaji": "furu surottoru",
+        "meaning": "'full throttle'"
+      },
+      {
+        "jp": "ぶっちぎ",
+        "romaji": "bucchigi(ru)",
+        "meaning": "'leave everyone in the dust'"
+      },
+      {
+        "jp": "っかぁー！",
+        "romaji": "kkaa!",
+        "meaning": "excited exclamation"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "motorbikes (wants her own; dad's bike photo; engine noises)",
+    "air bike (profile strength)",
+    "leather jackets, denim, sunglasses, black coffee",
+    "being cool / hard-boiled poses",
+    "her dad, with whom she gets into mischief",
+    "Santa-rider imagery (Christmas outfit)"
+  ],
+  "weak_spots": [
+    "romance talk (profile weakness; voice 91003)",
+    "being called cute / frilly outfits (voice 91005, 91006)",
+    "receiving chocolates or birthday fuss (voice 10004, 10014)",
+    "studying and homework (voice 90001, 110001)",
+    "black coffee is actually too bitter (voice 91010)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School division (中等部)",
+    "birthday": "April 4 (4月4日)",
+    "height": "165 cm (165cm)",
+    "voice_actor": "Ayaka Ohashi (大橋彩香)"
+  },
+  "relationships": [
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "rival and roommate; they bicker but she notices Scarlet's every move",
+      "evidence": "home scenes x8; mentioned_by x3; mentions in voice x4 (voice_id 91009: 今朝のスカーレットの寝癖; 91011: スカーレット/のヤツ、どんな顔すっかな; 91021); roommate per web: https://umamusu.wiki/Vodka"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "senior she admires ('Gimu-senpai')",
+      "evidence": "home scenes x3; voice_id 400002: ギム先輩と、ベスデ獲りてーのに！"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "friend/classmate who says their outfits look alike",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91020)"
+    },
+    {
+      "id": 1136,
+      "name_en": "Red Desire",
+      "nature": "admires Vodka",
+      "evidence": "home scenes x3; mentioned_by x2; web: https://umamusu.wiki/Vodka"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "senior she thinks is cool",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91004: ブライアン先輩、やっぱカッケ～！; 91018)"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "senior who keeps out-posing her",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91000)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "senior who fixes her tie",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "told her a racy love story",
+      "evidence": "mentions in voice x1 (voice_id 91003)"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "senior who gives her chills",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    }
+  ],
+  "groups": [
+    "Team Spica (anime only)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Vodka chases 'coolness' her own way, entering the Tulip Sho and Oka Sho and then, unusually for a filly, the Japanese Derby, which she can win as a historic feat. Her rivalry with Daiwa Scarlet runs through the Shuka Sho and Queen Elizabeth Cup. After a slump around the Arima Kinen she finds a new shine at the Victoria Mile, Yasuda Kinen and Tenno Sho (Autumn), learning that living as herself is what's cool.",
+    "source": "event titles (日本ダービーの後に・快挙達成！, 有馬記念の後に・迷走の始まり, ヴィクトリアマイルの後に・新たな輝き, 天皇賞（秋）の後に・自分を生きてこそ, カッコいいと、1番) + model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10001,
+      "jp": "これからも、俺は俺らしく\nカッコよくなってやる。\nしっかりついて来いよな、相棒！",
+      "en": "From now on I'll keep getting cooler, my way. Keep up with me, partner!"
+    },
+    {
+      "voice_id": 20003,
+      "jp": "ギュルルンギュルルーン！\n俺のハートのエンジン、\nサイッコーにあったまってるぜ～！",
+      "en": "Vroom-vroom! My heart's engine is warmed up like crazy!"
+    },
+    {
+      "voice_id": 91006,
+      "jp": "ジ、ジロジロ見んな！あ、あとっ！\n間違っても言うんじゃねーぞ！\nか、か、かわいいとか！いいな！？",
+      "en": "D-don't stare! And, and! Don't you dare say it! C-c-cute or whatever! Got it!?"
+    },
+    {
+      "voice_id": 91010,
+      "jp": "いやぁ～昼メシあとの眠気覚ましは\nブラックコーヒーに限るよな～！\n苦さで目が覚めてホント…にげぇ。",
+      "en": "Nothing beats black coffee to wake up after lunch! The bitterness really wakes you... it's bitter."
+    },
+    {
+      "voice_id": 93001,
+      "jp": "俺、カッコよかっただろ？",
+      "en": "I was cool, right?"
+    },
+    {
+      "voice_id": 400005,
+      "jp": "いいって思ったなら、突き進む！\nカッコよくなりたいなら、なる！\n俺も、そういうふうに生きてぇ！",
+      "en": "If you think it's good, charge ahead! If you want to be cool, be cool! That's how I wanna live!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Yo, {user}! The independent run's done - full throttle all the way. Pretty cool, right? Come check the results, partner!",
+    "Oi, {user}, training's finished! Leaving it unchecked would be lame, y'know. Hit the accelerator and come take a look!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Mejiro Ryan x2 and Daring Heart x1, but no matching lines were found (likely false matches)",
+    "Story arc beyond titles is model knowledge, unverified"
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "id": 1056,
+  "name_en": "Matikanefukukitaru",
+  "name_jp": "マチカネフクキタル",
+  "kind": "uma",
+  "one_liner": "Fortune-telling shrine daughter who trusts Shiraoki-sama's oracles and chases good luck with all her might.",
+  "personality": "Excitable, earnest and superstitious, she reads omens in everything (tea stalks, chopsticks, black cats) and her mood swings wildly with her daily fortune, from 'super-lucky, I'm invincible!' to despair over a bad omikuji. She is the daughter of a shrine and does purification and kagura 'self-taught', and she showers friends with lucky charms and figurines. Under the hype she is a little insecure ('someone like me who relies only on fortune-telling'), and she firmly believes her trainer is her destined person.",
+  "speech": {
+    "first_person": "watashi (私) — x16 in her lines",
+    "calls_trainer": "Trainer-san (トレーナーさん) x18; also 'Anata (アナタ)' x5 in warmer lines",
+    "register": "polite desu/masu, very energetic and exclamatory, peppered with shrine/fortune-telling vocabulary",
+    "tics": [
+      {
+        "jp": "シラオキ様",
+        "romaji": "Shiraoki-sama",
+        "meaning": "the guardian deity whose oracles she follows (x11 in her lines)"
+      },
+      {
+        "jp": "大吉 / 超吉",
+        "romaji": "daikichi / chōkichi",
+        "meaning": "'great blessing' fortune, and her invented 'super blessing' (大吉 x16, 超吉 x2)"
+      },
+      {
+        "jp": "スピリチュアルパワー",
+        "romaji": "supirichuaru pawā",
+        "meaning": "'spiritual power' that she charges up (x6)"
+      },
+      {
+        "jp": "開運",
+        "romaji": "kaiun",
+        "meaning": "'luck-opening' — 開運ダッシュ, 開運グッズ, 開運装備 (x15)"
+      },
+      {
+        "jp": "なむ、なむ！ / なむ、ほうれん草！",
+        "romaji": "namu, namu! / namu, hōrensō!",
+        "meaning": "prayer chant; 'namu, hōrensō' (spinach) is a pun (each x1; Mejiro Bright notes she often shouts 'ほうれん草')"
+      },
+      {
+        "jp": "福を掴み〜",
+        "romaji": "fuku wo tsukami~",
+        "meaning": "'grab good fortune' (福を掴み x4)"
+      },
+      {
+        "jp": "むむっ… / ふっふっふ",
+        "romaji": "mumu... / fufufu",
+        "meaning": "sensing an omen / smug laugh (むむっ x2, ふっふっふ x4)"
+      },
+      {
+        "jp": "お守り軍団さん",
+        "romaji": "omamori gundan-san",
+        "meaning": "'Mr. Charm Army' — she calls on her lucky charms in races (x2)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "fortune-telling of every kind: omikuji, fortune cookies, crystal ball, flower and seed divination (profile strength; voice 10004, 90001, 91013)",
+    "Shiraoki-sama and her oracles",
+    "lucky charms, lucky colours, lucky items, feng shui",
+    "power spots and shrines (trivia: daily photos of power spots)",
+    "'nyaa-san' — the cat-shaped helper of Shiraoki-sama (voice 70015, 91008)",
+    "her family shrine: kagura dance, miko clothes, festival drums (voice 91000, 91005, 400004)",
+    "taiyaki with gold leaf, carrot hamburg steak (voice 10012, 90012)"
+  ],
+  "weak_spots": [
+    "unlucky things / bad omens (profile weakness) — black cats crossing her path (voice 20010; trivia)",
+    "bad omikuji results wreck her focus (voice 20008)",
+    "spicy food (voice 90005)",
+    "clumsy: trips while dancing kagura and steps on her hakama hem (voice 91005, 91006)",
+    "dry skin (voice 91015)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Senior Division / high school (高等部)",
+    "birthday": "May 22 (5月22日)",
+    "height": "158 cm (158cm)",
+    "voice_actor": "Hiyori Nitta (新田ひより)"
+  },
+  "relationships": [
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "friend she worries about and prays for",
+      "evidence": "home scenes x5; mentions in voice x2 (voice_id 1117: スズカさんの分も祈祷済みです！; 91001: gave her a big sea-bream figurine); Suzuka mentions her x3 in Suzuka's lines (kadomatsu, golden sea bream charm, lucky food)"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "friend; invites her on outings",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91002: wants to tell Taiki her fortune is daikichi; 91020: タイキさんからお出かけに誘われてまして); Taiki mentions making fortune cookies with her"
+    },
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "friend she hands lucky charms to",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91018: ドトウさんが紐でわちゃわちゃになってたので…); Doto's trivia: carries Fukukitaru's lucky items"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "senior whose praise moved her",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91004: gave her a Shigaraki tanuki)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "friend she jokingly suspects is a maneki-neko incarnation (cats love Sky)",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1062,
+      "name_en": "Matikanetannhauser",
+      "nature": "fellow 'Matikane' — no family link stated in source",
+      "evidence": "home scenes x3; nature of tie unverified"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "same-year acquaintance; real-life 1997 classmates (general knowledge, unverified)",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "possibly the subject of her training event 'マンハッタンの夢' (Manhattan's dream); could also be unrelated",
+      "evidence": "event title: マンハッタンの夢; relationship details unverified"
+    },
+    {
+      "id": 1057,
+      "name_en": "Mr. C.B.",
+      "nature": "gave C.B. a charm when north was unlucky",
+      "evidence": "mentioned by C.B. (voice_id 91024 in 1057: フクキタルの花占い…お守りをくれたんだ)"
+    }
+  ],
+  "groups": [
+    "shrine family (her parents' shrine, voice 91000; an elder sister per profile)"
+  ],
+  "story_arc": {
+    "summary": "A fortune-obsessed girl who believes the oracle that a 'destined person' will come, she meets her trainer and is steered from early races (Yayoi Sho / Spring S / Mainichi Hai) toward the Derby and an 'awakening' at the Kikka Sho. After a Kinko Sho she fears her luck has 'run out' ('運の尽き') before resolving to 'run all the way to destiny' ('運命まで走れ！') through Takarazuka Kinen and a summer race, to an Arima Kinen where 'fortune has come'. Her real namesake won the 1997 Kikka Sho (general knowledge, unverified).",
+    "source": "event titles; model knowledge (unverified) for the real-horse note"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20003,
+      "jp": "聞いてください！今日の運勢は\n大吉を超えて超吉だそうです！！\nふっふっふ、今だけは無敵ですっ！",
+      "en": "Listen! Today's fortune is beyond 'great blessing' — it's a SUPER blessing!! Fufufu, just for now I'm invincible!"
+    },
+    {
+      "voice_id": 20010,
+      "jp": "占いは最下位…おみくじは大凶…\n果ては黒猫まで目の前を横切り――\nも、もうダメです～～～…っ！！",
+      "en": "Last place in the horoscope... great curse on my omikuji... and then a black cat crossed right in front of me — I-it's hopeless~~~...!!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "やはりトレーナーさんこそが\n運命の人っ！占いも私の直感も\nそう告げています！",
+      "en": "Just as I thought, Trainer-san, you are my destined person! Both fortune-telling and my intuition say so!"
+    },
+    {
+      "voice_id": 91000,
+      "jp": "お祓い厄除け、なんでもお任せを！\n私、これでも神社の娘なので。\n今のところは…全て自己流ですが。",
+      "en": "Purification, warding off bad luck, leave it all to me! I am a shrine's daughter, after all. ...Though so far it's all self-taught."
+    },
+    {
+      "voice_id": 91010,
+      "jp": "聞いてくださいトレーナーさん…！\nさっき茶柱が3本も立ち、そして…\n3本とも…沈みました…。",
+      "en": "Listen, Trainer-san...! Earlier three tea stalks stood up in my cup, and then... all three... sank..."
+    },
+    {
+      "voice_id": 40004,
+      "jp": "福をもたらす精鋭たちよ～私に力を…ってわたたっ！？\nお、お守り軍団さんっ！お願いしますっ！",
+      "en": "Elite bringers of fortune, lend me your power... whoa-whoa!? M-Mr. Charm Army! Please help me!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Mumu...! Shiraoki-sama's oracle says your independent run is over! {user}, the fortune reads 'great blessing', so let's go check it before the luck escapes!",
+    "Namu, namu! {user}, the independent run has finished! My crystal ball says looking at the results right now is lucky. Trust the fortune, Trainer-san!"
+  ],
+  "data_gaps": [
+    "name_en in source is 'Matikanefukukitaru' (official spelling)",
+    "Elder sister is only mentioned in profile (about_family); no name",
+    "Tannhauser relationship (both 'Matikane') not explained by source",
+    "Story arc details beyond event titles are unverified",
+    "Manhattan Cafe tie rests only on the event title 'マンハッタンの夢' (unique to her event list); Cafe's lines never mention her — unverified"
+  ]
+}

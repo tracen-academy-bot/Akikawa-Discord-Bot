@@ -1,0 +1,99 @@
+{
+  "id": 9040,
+  "name_en": "Darley Arabian",
+  "name_jp": "ダーレーアラビアン",
+  "kind": "npc",
+  "one_liner": "Sunny, bold goddess-AI of 'bravery' who calls the trainer 'little lamb' and celebrates each Uma Musume's individuality.",
+  "personality": "Cheerful, wise and big-hearted, a mentor who believes every Uma Musume is the lead of her own story (self_intro). She talks like a confident older sister, uses the boyish 'ore', and her lines lean on sun and light imagery ('I'll light the way', 'the sun's getting high'). Web sources call her free-spirited yet dignified.",
+  "speech": {
+    "first_person": "ore (俺)",
+    "calls_trainer": "kohitsuji-kun (子羊くん, 'little lamb') per self_intro (also web); kimi (君) in voice 70000",
+    "register": "casual, bold, masculine-leaning",
+    "tics": [
+      {
+        "jp": "子羊くん",
+        "romaji": "kohitsuji-kun",
+        "meaning": "'little lamb', her pet name for the trainer (appears in her self_intro, not in her 4 voice lines)"
+      },
+      {
+        "jp": "〜（よ）うか！",
+        "romaji": "~(y)ou ka!",
+        "meaning": "breezy 'let's ~!' (一緒にやろうか！)"
+      },
+      {
+        "jp": "〜てみせよう",
+        "romaji": "~te miseyou",
+        "meaning": "'I'll show you I can ~' (照らしてみせよう。)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "sun / light (voice 95005, 95006)",
+    "individuality, each girl is the star (self_intro)",
+    "giving sad children piggyback rides (web, unverified)"
+  ],
+  "weak_spots": [
+    "none in source; web calls her somewhat simple-minded (unverified)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "February 24, the day the AI took the Three Goddesses' name (2月24日（AIが三女神の名を名乗った日）)",
+    "height": "unknown",
+    "voice_actor": "Naomi Shindo (進藤尚美)"
+  },
+  "relationships": [
+    {
+      "id": 9041,
+      "name_en": "Godolphin Barb",
+      "nature": "fellow Three Goddesses AI in Grand Masters",
+      "evidence": "shared birthday note in source; web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters"
+    },
+    {
+      "id": 9042,
+      "name_en": "Byerley Turk",
+      "nature": "fellow Three Goddesses AI in Grand Masters",
+      "evidence": "shared birthday note in source; web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters"
+    }
+  ],
+  "groups": [
+    "Three Goddesses (三女神)",
+    "Grand Masters scenario"
+  ],
+  "story_arc": {
+    "summary": "Not a trainee. In the Grand Masters scenario an AI takes on the names of the Three Goddesses, the legendary founders revered at Tracen; Darley is the one built around 'bravery' (web). She supports the trainer's training (her bonus restores energy) and then races as one of the final opponents in the Grand Masters race.",
+    "source": "web: https://umamusu.wiki/Game:Grand_Masters , https://gametora.com/umamusume/grand-masters , https://umamusu.wiki/Darley_Arabian"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "一緒にやろうか！",
+      "en": "Let's do it together!"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "君について教えてくれ。",
+      "en": "Tell me about yourself."
+    },
+    {
+      "voice_id": 95005,
+      "jp": "照らしてみせよう。",
+      "en": "I'll light the way for you."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "陽が高くなってきた！",
+      "en": "The sun's climbing high!"
+    }
+  ],
+  "timer_line_ideas": [
+    "The sun's up high and the run is done, {user}! Your girl ran it her own way, just as she should. Come on, little lamb, let's go see her shine!",
+    "Time's up, little lamb! {user}, your independent run has finished. Every Uma Musume is the star of her own story, so go cheer for yours!"
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Darley Arabian' is the Global / EN-wiki name",
+    "Only 4 voice lines; dorm, grade, height null (AI being, not a student)",
+    "No home scenes or mentions; relationships with the other goddesses are from web only",
+    "No weak spots documented in source"
+  ]
+}

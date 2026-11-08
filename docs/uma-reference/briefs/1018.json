@@ -1,0 +1,203 @@
+{
+  "id": 1018,
+  "name_en": "Air Groove",
+  "name_jp": "エアグルーヴ",
+  "kind": "uma",
+  "one_liner": "The strict 'Empress' vice president: proud, perfectionist, mother-worshipping, and secretly a gentle flower-gardener.",
+  "personality": "Severe and commanding. She calls the trainer 貴様, barks orders ('Check it immediately and report') and polices everyone's posture, curfews and paperwork. The sternness covers real care: she worries about Suzuka, makes hot pot for juniors, tells the overworked trainer to go to sleep, and gets flustered when someone wants to celebrate her birthday. Her driving force is living up to her mother, and she glows when that mother visits.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "kisama (貴様); a commanding 'you', not hostile here",
+    "register": "stern, commanding plain form with imperatives (〜しろ, 〜するなよ); formal keigo only toward her mother and Rudolf (会長)",
+    "tics": [
+      {
+        "jp": "貴様",
+        "romaji": "kisama",
+        "meaning": "'you' (bossy), her way of addressing the trainer"
+      },
+      {
+        "jp": "ええい",
+        "romaji": "eei",
+        "meaning": "argh! / enough! (exasperated outburst)"
+      },
+      {
+        "jp": "まったく",
+        "romaji": "mattaku",
+        "meaning": "honestly... / good grief"
+      },
+      {
+        "jp": "ふっ",
+        "romaji": "fu'",
+        "meaning": "small proud laugh"
+      },
+      {
+        "jp": "〜ねばな",
+        "romaji": "-neba na",
+        "meaning": "'I must...' (精進せねばな)"
+      },
+      {
+        "jp": "“女帝”",
+        "romaji": "jotei",
+        "meaning": "'the Empress', her title"
+      },
+      {
+        "jp": "会長",
+        "romaji": "kaichou",
+        "meaning": "'President', how she refers to Rudolf"
+      },
+      {
+        "jp": "ブライアンめ",
+        "romaji": "Burian-me",
+        "meaning": "'that Brian...' (scolding)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "growing flowers; container gardening award (profile); purple roses (91016, 91024)",
+    "her mother: matching eyeshadow (91001), same tail oil, birthday-party planning (profile)",
+    "eyeshadow touch-ups to get fired up (profile trivia)",
+    "swimming, trained by her mother (90017)",
+    "bell crickets' song (90008), night cherry blossoms (91224)",
+    "eating everything, even failed dishes (profile trivia)",
+    "an 'ideal' that 'blossoms' (self-intro)"
+  ],
+  "weak_spots": [
+    "things that suddenly flash or suddenly move (profile weakness)",
+    "bugs in general (90008)",
+    "static electricity in winter (91015)",
+    "the cold, though she denies it and refuses scarves (90019)",
+    "Hishi Akebono's huge lunches (91022)",
+    "being teased; getting flustered when someone wants to celebrate her birthday (10014)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 6 (4月6日)",
+    "height": "165cm (165cm)",
+    "voice_actor": "Ruriko Aoki (青木瑠璃子)"
+  },
+  "relationships": [
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "the President she serves and deeply respects; puzzled by her puns",
+      "evidence": "home scenes x5; voice 91004: …そうか！会長のダジャレの意味がわかったぞ！; voice 400007; voice 91216"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "fellow council member she is always chasing down and scolding",
+      "evidence": "voice 91003, 91019, 91219 (napping in the council room); home scenes x3"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "close friend she worries about",
+      "evidence": "home scenes x4; voice 91000: スズカは悩みを口に出すタイプではないんだ。…友人としては、もう少し頼って欲しいんだがな。; voice 91013"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "roommate (per web) whose ramen pushing and endless tea leaves wear her out",
+      "evidence": "home scenes x4; voice 91002, 90211, 91023, 400121; roommate per web: https://umamusu.wiki/Air_Groove"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "childhood friend / junior who copies her makeup",
+      "evidence": "home scenes x5; voice 91217: ドゥラめ、あれは私の化粧の仕方を真似ていたな…; childhood friend per web: https://umamusu.wiki/Air_Groove"
+    },
+    {
+      "id": 1118,
+      "name_en": "Admire Groove",
+      "nature": "treated like a little sister; Groove keeps trying to invite her",
+      "evidence": "home scenes x3; mentions in voice x2 (voice 90219 and 91218 address 'アルヴ', which is likely her nickname; that reading is unverified); web: https://umamusu.wiki/Air_Groove"
+    },
+    {
+      "id": 1124,
+      "name_en": "Bubble Gum Fellow",
+      "nature": "rival and inspiration",
+      "evidence": "home scenes x5; nature per web: https://umamusu.wiki/Air_Groove"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "junior turned rival",
+      "evidence": "home scenes x2; voice 91018 (Dober offers to be her veil girl); web: https://umamusu.wiki/Air_Groove"
+    },
+    {
+      "id": 1145,
+      "name_en": "Rulership",
+      "nature": "junior who refused front-of-house duty and invites her to games",
+      "evidence": "home scenes x2; voice 91222, 400000"
+    },
+    {
+      "id": 1137,
+      "name_en": "Kiseki",
+      "nature": "junior she catches drawing manga after lights-out",
+      "evidence": "voice 91223"
+    },
+    {
+      "id": 9007,
+      "name_en": "Beauty Anshinzawa (NPC; no official EN name in source)",
+      "nature": "eccentric beautician from an event",
+      "evidence": "home scenes x1; voice 400011, 400014: …ビューティー安心沢、一癖も二癖もある人だったな。"
+    },
+    {
+      "id": null,
+      "name_en": "her mother (unnamed in data)",
+      "nature": "idol and role model; a 'Queen'-titled racer",
+      "evidence": "profile about_family/trivia; voice 10013, 10026, 91001, 93004: この功績…母に紹介しよう！"
+    }
+  ],
+  "groups": [
+    "Tracen Student Council (vice president; voice 400009 and others; web: https://umamusu.wiki/Air_Groove)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "She aims to embody the ideal 'Empress' and to surpass the mother whose crowning photo she treasures. Event titles such as 母娘 (Mother and Daughter), 誰が為の理想 (Whose Ideal Is It For?), 杖となりて (Becoming a Staff/Support) and 君よ立ち上がれ (Rise Up) suggest she has to rethink what her ideal really means. Head-to-head events with Teio and Rudolf (“女帝”と“帝王”, “女帝”と“皇帝”) are also listed. The wiki notes she missed the Oka Sho to illness and lost the Shuka Sho.",
+    "source": "event titles; web: https://umamusu.wiki/Air_Groove"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "『信頼を置いてやってもいい』とは\n言ったが『置いた』とはまだ言って\nいない。…ふっ、精進しろよ。",
+      "en": "I said I 'might place my trust in you', but I never said I 'had placed' it. ...Heh. Keep working at it."
+    },
+    {
+      "voice_id": 91003,
+      "jp": "ええいっ、ブライアンめ。\n生徒会の仕事をほっぽってまた…！\nおい、発見次第即刻私に知らせろ。",
+      "en": "Argh, that Brian! Skipping out on council work again...! You there, tell me immediately if you find her."
+    },
+    {
+      "voice_id": 10014,
+      "jp": "誕生日を祝いたい？…こ、こほん。\n私も暇ではないのだが…仕方ない。\n待ってろ、今時間を空けてやる。",
+      "en": "You want to celebrate my birthday? ...Ahem. I'm not exactly free, but... fine. Wait there, I'll make time."
+    },
+    {
+      "voice_id": 90019,
+      "jp": "ええい、寒くないと言っている！\nマフラーも手袋もいらん。\n防寒具を押しつけてくるな…！",
+      "en": "Argh, I said I'm not cold! I don't need a scarf or gloves. Stop pushing winter gear on me...!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "私のアイシャドウは、\n母とお揃いでな。\nどうだ、気品あるいい色だろう。",
+      "en": "My eyeshadow matches my mother's. Well? A graceful, elegant colour, isn't it?"
+    },
+    {
+      "voice_id": 93004,
+      "jp": "この功績…母に紹介しよう！",
+      "en": "This achievement... I'll introduce it to my mother!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your independent run has ended. Check the results immediately and report back. ...And straighten your back while you're at it.",
+    "The run is finished, {user}. I trust you didn't spend fifty minutes idling? Review it now. ...Hmph. Good work, I suppose. Keep at it."
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Mejiro Ryan (1027), but every hit is a false positive: 'ライアン' is a substring of 'ブライアン' (Narita Brian). Ignore that entry.",
+    "Her mother's name is not in the data (profile only says she won a 'Queen' title).",
+    "Who 'タイホ' (voice 91220) is, is not stated in the data.",
+    "Detailed career plot not in the mdb; based on titles plus the wiki."
+  ]
+}

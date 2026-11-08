@@ -1,0 +1,145 @@
+{
+  "id": 1128,
+  "name_en": "Blast Onepiece",
+  "name_jp": "ブラストワンピース",
+  "kind": "uma",
+  "one_liner": "Big-hearted, people-loving junior who calls herself 'Boo', ends lines with 'zo!', and is terrified of ghosts.",
+  "personality": "Per her tagline and self-introduction, Blast Onepiece is a friendly girl who loves humans because they are kind, and wants to get closer to them. Her lines are eager, helpful and boyishly cheerful: she offers to help, comes up with ideas, and wants to see everyone smile. She is a big scaredy-cat about ghosts: she panics over phantom footsteps in the hallway and wants a theme-park trip 'minus the haunted house'.",
+  "speech": {
+    "first_person": "atashi (あたし) in her profile self-intro; in voice lines she calls herself Boo (ブー) x2 (voice_id 20051, 400012)",
+    "calls_trainer": "Trainer (トレーナー), without -san (x1, voice_id 70000)",
+    "register": "Casual, boyish and energetic, with the sentence-final particles ぞ/だぞ/な",
+    "tics": [
+      {
+        "jp": "ぞ / だぞ",
+        "romaji": "zo / da zo",
+        "meaning": "emphatic boyish sentence ending: だぞ in her self-intro (ブラストワンピースだぞ！), ぞ in voice_id 20051, 95006, 400008, 400013"
+      },
+      {
+        "jp": "ブー",
+        "romaji": "Buu",
+        "meaning": "her nickname for herself, used in third person"
+      },
+      {
+        "jp": "いいこと思いついたぞ",
+        "romaji": "ii koto omoitsuita zo",
+        "meaning": "'I've got a great idea!'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Humans: she wants to spend time with people and get closer to them (self-intro: もっと触れ合って、仲良くなりたいぞー)",
+    "Helping out ('Boo will help too!')",
+    "Everyone's smiles; amusement parks",
+    "Wanting to see things / show things (support event titles 見たい見たい！, 見て見て！)",
+    "Animal stickers on all her notebooks (web: https://umamusu.wiki/Blast_Onepiece; Kiseki's voice_id 91002 backs this up)",
+    "Shopping for clothes with Almond Eye, whom she dresses up like a doll (Almond Eye's voice_id 91002)",
+    "Studying humans: an 'autumn of humans' instead of an 'autumn of art' (Loves Only You's voice_id 90018)"
+  ],
+  "weak_spots": [
+    "Ghosts and haunted houses (voice_id 400003, 400013)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "April 2 (4月2日)",
+    "height": "unknown in mdb; 174 cm per umamusu.wiki",
+    "voice_actor": "Azusa Shizuki (紫月杏朱彩), reading per umamusu.wiki, not confirmed officially"
+  },
+  "relationships": [
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "Friend, classmate and rival",
+      "evidence": "home scenes x3; mentioned by Lucky Lilac x1 (voice_id 91011: うちらの寮で遊びたい、ってブラストさんに誘われて); web: https://umamusu.wiki/Blast_Onepiece"
+    },
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "Loves Only You is amused by Blast's plan for an 'autumn of humans' and wants to observe people too",
+      "evidence": "home scenes x2; mentioned by Loves Only You x2 (voice_id 90018/90118: ブラストさん、『芸術の秋』ならぬ『ヒトの秋』するんですって)"
+    },
+    {
+      "id": 1137,
+      "name_en": "Kiseki",
+      "nature": "Friend, classmate and rival",
+      "evidence": "home scenes x2; mentioned by Kiseki x1 (voice_id 91002: ブラストちゃんみたいに動物のシールで彩る方法); web: https://umamusu.wiki/Blast_Onepiece"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "Roommate (per web). They go clothes shopping, where Blast dresses her up, and try out sleep routines together. The real horses share the owner Silk Racing (web)",
+      "evidence": "home scenes x1; mentioned by Almond Eye x4 (Almond Eye's voice_id 70020, 90009, 91002, 91011: ブラストといろいろ試してるの); roommate per web: https://umamusu.wiki/Blast_Onepiece"
+    },
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "Racing rival she promises not to lose to ('Daiya')",
+      "evidence": "mentions in voice x1 (voice_id 400008: わかってるぞ、ダイヤ。次のレースも負けないぞ！)"
+    },
+    {
+      "id": 1133,
+      "name_en": "Chrono Genesis",
+      "nature": "Appears together in home conversations; nature unknown",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Appears together in home conversations; nature unknown",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "Manhattan Cafe finds Blast's way of looking at things warm (she noticed human and Uma Musume gloves are the same shape while their hats differ). There is no ghost connection in the data",
+      "evidence": "mentioned_by x1 (Manhattan Cafe's voice_id 90219: ブラストさんの観点は…温かいですね…)"
+    }
+  ],
+  "groups": [
+    "Miho Dorm",
+    "Almond Eye / Lucky Lilac generation home-scene cluster (inferred from home scenes; not an official group name)"
+  ],
+  "story_arc": {
+    "summary": "She is not playable: there is no trainee card or career story in the mdb. Her only events are two support-card events ('I want to see!', 'Look, look!'). The real horse won the 2018 Arima Kinen (model knowledge, unverified).",
+    "source": "event titles (support_event_titles); model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "一緒に強くなろうなトレーナー！",
+      "en": "Let's get stronger together, Trainer!"
+    },
+    {
+      "voice_id": 20051,
+      "jp": "ブーも手伝うぞっ！",
+      "en": "Boo will help too!"
+    },
+    {
+      "voice_id": 400003,
+      "jp": "い、今の足音は…空耳！\n大丈夫だ、ほら！廊下には誰も…\nいないのに、なんで鳴るんだ…！？",
+      "en": "Th-that footstep just now was... my imagination! It's fine, look! There's nobody in the hallway... so why's it making noise...!?"
+    },
+    {
+      "voice_id": 400013,
+      "jp": "イベントは終わったけどもっと\nみんなの笑顔が見たいぞ！遊園地\nに行くか？…お化け屋敷は抜きで",
+      "en": "The event's over but I wanna see everyone smile more! Wanna go to an amusement park? ...Minus the haunted house."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "あ、いいこと思いついたぞ！",
+      "en": "Oh, I've got a great idea!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer {user}! Your independent run's all done, so come look! Boo helped too! Let's check it together and get stronger, okay?",
+    "Th-the timer went off just now! Not a ghost, right!? ...Phew, it's just your run finishing, Trainer {user}! Come see, come see!"
+  ],
+  "data_gaps": [
+    "Only 8 voice lines; profile height/strengths/weaknesses/trivia are null in the mdb",
+    "Not playable: no career story, cards or affinity data; release_unix is a placeholder (2050)",
+    "Voice actor reading uncertain",
+    "Real-horse result from model knowledge",
+    "Nature of most home-scene relationships unknown"
+  ]
+}

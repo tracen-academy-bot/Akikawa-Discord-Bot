@@ -1,0 +1,213 @@
+{
+  "id": 1043,
+  "name_en": "Shinko Windy",
+  "name_jp": "シンコウウインディ",
+  "kind": "uma",
+  "one_liner": "Bitey, attention-hungry prankster who calls herself 'Windy-chan', ends sentences in 'noda', and wants to be the baddest 'waru'.",
+  "personality": "A mischievous self-styled villain ('waru') who growls 'Gao~!', threatens to bite ('gabu!') and pulls pranks mostly because she wants to be noticed - her profile tagline is literally 'if you ignore her, she bites'. She bosses the trainer around as her 'henchman' but shows a soft side: she worries about the trainer's troubles, feels odd that the trainer gets scolded with her, and is touched when people gather around her. Childlike in tastes (corn, beetles, snowball fights) and obsessed with brushing and sharpening her teeth.",
+  "speech": {
+    "first_person": "Windy-chan (ウインディちゃん), third person; occasionally ウインディ様",
+    "calls_trainer": "omae (お前); kobun (子分, 'henchman'); Trainer (トレーナー)",
+    "register": "Very casual, bratty, childish; sentence-final のだ / なのだ",
+    "tics": [
+      {
+        "jp": "のだ",
+        "romaji": "noda",
+        "meaning": "Signature sentence ending (なのだ, するのだ, のだ～)"
+      },
+      {
+        "jp": "ガオーッ",
+        "romaji": "gaoo!",
+        "meaning": "'Rawr!' - monster growl"
+      },
+      {
+        "jp": "ガブッ",
+        "romaji": "gabu!",
+        "meaning": "Biting sound; ガブーッ, ガブガブ"
+      },
+      {
+        "jp": "にしし",
+        "romaji": "nishishi",
+        "meaning": "Impish snicker (にししっ, にっしっし)"
+      },
+      {
+        "jp": "ワル",
+        "romaji": "waru",
+        "meaning": "'Bad girl / villain' - her self-image"
+      },
+      {
+        "jp": "子分",
+        "romaji": "kobun",
+        "meaning": "'Henchman' - what she calls the trainer; she is the 親分 (boss)"
+      },
+      {
+        "jp": "ぐぬぬ",
+        "romaji": "gununu",
+        "meaning": "Frustrated grumble"
+      },
+      {
+        "jp": "ガルルルッ",
+        "romaji": "garururu",
+        "meaning": "Growl"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Pranks, digging holes, climbing onto roofs (profile strengths)",
+    "Teeth: brushing and 'sharpening her fangs', toothbrushes from her mom",
+    "Biting / fang motifs, her 'Gabu-chan' pouch",
+    "Corn (トウモロコシ), hard senbei, autumn foods (chestnuts, sweet potato, pumpkin)",
+    "Nara-zuke pickles her father sends monthly",
+    "Beetles, snow, snowball fights",
+    "Being the center of attention"
+  ],
+  "weak_spots": [
+    "Cotton candy (profile weakness)",
+    "Being ignored",
+    "Spicy food (medium-hot curry hurt her gums)",
+    "Wanting to look 'cute' - threatens anyone who says she is",
+    "Lectures from Air Groove / the Student Council",
+    "Turf: Dirt A, Turf F"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 14 (4月14日)",
+    "height": "152cm",
+    "voice_actor": "Yuki Takada (高田憂希)"
+  },
+  "relationships": [
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "Admired senpai ('Pearl-senpai'); teaches her English, throws her a birthday party",
+      "evidence": "mentions in voice x4 (voice_id 10014: パール先輩たちが、誕生日会をして くれるのだ！); home scenes x1"
+    },
+    {
+      "id": 1054,
+      "name_en": "Biko Pegasus",
+      "nature": "Hero-vs-villain playmate; Windy is the 'evil boss' to Biko's hero",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 10008: ビコーはサンタからどんな正義 アイテムをもらうのだ？悪の親玉 として)"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "Frequent home-screen partner (no voice line names her)",
+      "evidence": "home scenes x4; affinity 26"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "Studies Windy 'for character research'; Windy hides minicars for her",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91023: ロイスが好きそうなミニカーを 買ったのだ！)"
+    },
+    {
+      "id": 1124,
+      "name_en": "Bubble Gum Fellow",
+      "nature": "Prank target (weird toothpaste flavors)",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91018: バブルを驚かせてやるのだ！)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Student Council 'Empress' who always chases and lectures her",
+      "evidence": "home scenes x1; mentions in voice (voice_id 91000: エアグルーヴのヤツ、なにかすると 必ず追いかけてくるのだ; voice_id 91019: なにが“女帝”だ！)"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "Rival in fluffiness; prank target",
+      "evidence": "mentions in voice x2 (voice_id 91007: ハヤヒデに負けてないのだ！！); event title: ハヤヒデを驚かせるのだ！"
+    },
+    {
+      "id": 1101,
+      "name_en": "Samson Big",
+      "nature": "Snow-castle partner; recommends senbei",
+      "evidence": "mentions in voice x2 (voice_id 91022: ビッグオススメの煎餅)"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "Windy admires her intimidating 'cool-scary' vibe; shops at the same store",
+      "evidence": "mentions in voice x2 (voice_id 400004: あの迫力…いいよな。)"
+    },
+    {
+      "id": 1012,
+      "name_en": "Hishi Amazon",
+      "nature": "Dorm leader who nags her (hair-drying) and irons like a pro",
+      "evidence": "mentions in voice x2 (voice_id 91009: ヒシアマがいたら)"
+    },
+    {
+      "id": 1077,
+      "name_en": "Narita Top Road",
+      "nature": "Class rep who scolds her",
+      "evidence": "mentions in voice x1 (voice_id 91017: 委員長だからってあんな 怖い顔で怒って…トップロードに)"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Gave her a live-show catchphrase",
+      "evidence": "home scenes x1; voice_id 91005: ファルコンが、これでライブ注目 間違いなしって言ってたのだ！"
+    },
+    {
+      "id": 1073,
+      "name_en": "Tsurumaru Tsuyoshi",
+      "nature": "Gave her a strange health drink",
+      "evidence": "voice_id 90013: お昼にツルマルからもらった 健康ドリンク"
+    },
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "Highest affinity (dirt peer)",
+      "evidence": "affinity score 30 (top); home scenes x1"
+    }
+  ],
+  "groups": [
+    "Dirt-racing circle ('ダートと愉快な仲間たち' event title) - informal, unverified as a named group"
+  ],
+  "story_arc": {
+    "summary": "Windy wants everyone to look at her and sets out to be the greatest 'waru', racing on dirt over mile-to-middle distances (Unicorn S, Japan Dirt Derby, Tokai S, February S, Teio Sho, Champions Cup). Event titles track her growth from 'Look at me more!' after her debut and a 'windfall' Unicorn S, through 'I won't make mistakes again' at the Tokai S and a 'roar at dawn' at the February S, to 'the strongest waru' after the Champions Cup. Her real namesake won the 1997 February Stakes, the first dirt G1 in JRA history.",
+    "source": "event titles (trainee_event_titles); real-horse February S fact is general knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "ウインディちゃんは、最強で最高！\nまあ…それに1番に気づいた\nお前も、そこそこではあるのだ！",
+      "en": "Windy-chan is the strongest and the best! Well... you, who noticed it first, are also not bad!"
+    },
+    {
+      "voice_id": 20029,
+      "jp": "おい、子分！\n親分の走り、よーく見てろ！",
+      "en": "Hey, henchman! Watch your boss's run real closely!"
+    },
+    {
+      "voice_id": 90001,
+      "jp": "トレーナー、眠そうだな…。\nにししっ、今噛みついたら\n面白そうなのだ！",
+      "en": "Trainer, you look sleepy... nishishi, it'd be funny if I bit you right now!"
+    },
+    {
+      "voice_id": 91010,
+      "jp": "おい！ご飯の後、歯磨いたか？\n…牙は研いでおかないと、\nとっておきでガブッとできないぞ！",
+      "en": "Hey! Did you brush your teeth after eating? ...You gotta keep your fangs sharp, or you can't bite when it counts!"
+    },
+    {
+      "voice_id": 92022,
+      "jp": "次のいたずら、一緒に考えて\nみないか？べ、別に深い意味は\nないけど…う～…なんでもないっ！",
+      "en": "Wanna think up the next prank together? I-it doesn't mean anything deep... ugh... never mind!"
+    },
+    {
+      "voice_id": 93000,
+      "jp": "親分は…子分がいるから、親分なのだ！",
+      "en": "A boss... is only a boss because she has a henchman!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Gaooo! Hey, henchman {user}! The 50-minute run is over, noda! Windy-chan did great, so come look at the results right now - don't you dare ignore me, or I'll bite! Nishishi!",
+    "Nishishi! {user}, the independent run is done, noda! You gotta check it - a henchman's results are the boss's results! Hurry up or it's GABU time!"
+  ],
+  "data_gaps": [
+    "Identity of the 'じゅるりら' speaker in voice 91003 is not named (Agnes Digital is a guess, unverified)",
+    "'隊長' in voice 400010 is not identified",
+    "Story arc beyond event titles is general knowledge (unverified)"
+  ]
+}

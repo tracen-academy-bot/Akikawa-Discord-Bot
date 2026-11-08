@@ -1,0 +1,166 @@
+{
+  "id": 1135,
+  "name_en": "Stay Gold",
+  "name_jp": "ステイゴールド",
+  "kind": "uma",
+  "one_liner": "Tiny, free-roaming wanderer who treats racing and life as a 'golden journey' and vanishes on whims.",
+  "personality": "Laid-back, teasing and cryptic: she talks like a seasoned traveler, quotes fate and souls, and threatens to wander off overseas whenever she is bored. Despite the aloofness she is warmly protective of Dream Journey and the 'little sisters' around her, and enjoys mischief with Gold Ship. A former 'brat leader' by her own admission, she has a fierce, almost violent focus before races and hates being confined indoors.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "'anta (あんた)'; sometimes 'Trainer (トレーナー)' without -san",
+    "register": "casual, slightly masculine/tomboyish (~da, ~sa, ~na, ~kai); wry and laconic",
+    "tics": [
+      {
+        "jp": "旅",
+        "romaji": "tabi",
+        "meaning": "'journey' - frames everything as a trip (いい旅にしよう)"
+      },
+      {
+        "jp": "あんた",
+        "romaji": "anta",
+        "meaning": "casual 'you' for the trainer"
+      },
+      {
+        "jp": "～さ / ～な",
+        "romaji": "~sa / ~na",
+        "meaning": "casual sentence endings ('それだけが答えさ', '大人しく捕まろう', 'かわいい奴だ', '…ってな')"
+      },
+      {
+        "jp": "黄金の旅路",
+        "romaji": "ougon no tabiji",
+        "meaning": "'golden journey' - her signature phrase (self_intro and tagline; in voice as 黄金へ至る旅路 40001 / 黄金の旅 95004)"
+      },
+      {
+        "jp": "ま、",
+        "romaji": "ma,",
+        "meaning": "'well,' - shrugging opener ('ま、気楽に行こう')"
+      },
+      {
+        "jp": "ふふ / ははっ",
+        "romaji": "fufu / haha",
+        "meaning": "sly laugh"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "travel, hitchhiking, napping (strengths)",
+    "appraising real vs fake gold (strengths)",
+    "campfires, lakes, snowfields, mushroom hunting, hammock naps",
+    "sneaking out of school to explore",
+    "coffee on quiet nights",
+    "well-worn travel gear"
+  ],
+  "weak_spots": [
+    "health checkups (weaknesses: 健康診断)",
+    "being stuck indoors in daytime feels like a loss (voice 91010)",
+    "poor souvenir taste, per her little sisters (about_family)",
+    "gets mistaken for a grade-skipper because she is small (voice 70010; 142 cm)",
+    "doesn't get the sweet Valentine mood (voice 10005)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "March 24 (3月24日)",
+    "height": "142 cm",
+    "voice_actor": "Hayami Matsuda (松田颯水)"
+  },
+  "relationships": [
+    {
+      "id": 1119,
+      "name_en": "Dream Journey",
+      "nature": "protective big-sister figure; praises her as a good kid who looks after others",
+      "evidence": "home scenes x3; mentions in voice x5 (voice_id 91001: ジャーニーはいい子だよ。いつも他のヤツらの面倒を見てくれるし); real-life sire/daughter link: general knowledge (unverified)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "partner in mischief (Valentine chocolate, giant Golshi snow statue, mustard balloon)",
+      "evidence": "mentions in voice x4 (voice_id 90009: 目の松ぼっくりにライトを仕込もうと勧めたのは私なんだ)"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "fond familiarity; knows how to put Orfe in a good mood",
+      "evidence": "home scenes x2; voice_id 91003 'オルの機嫌を取るなら…尻尾に櫛を入れてやると喜ぶよ'"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "bets with her on whether she will forget souvenirs",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91000)"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "shares the urge to run",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 20004: スズカじゃないけどさ…走りたいって衝動は、抑えられないよな)"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "cites her patience as a model",
+      "evidence": "mentions in voice x1 (voice_id 20008: ブライトのように、時機が来るのを気長に待とう)"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "shares home conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "'メノ' chasing Gold Ship over a mustard balloon (voice_id 91002); identification uncertain",
+      "evidence": "voice_id 91002 'メノ' (possible match to Fenomeno, short_name フェノーメノ; unverified)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Stay Gold 'family' circle (Dream Journey, Orfevre, Nakayama Festa, Gold Ship) - inferred from lines/home scenes; real-life sire line: general knowledge (unverified)"
+  ],
+  "story_arc": {
+    "summary": "Goals span Satsuki Sho, Japan Derby, Mainichi Okan, Tenno Sho (Autumn/Spring), Takarazuka Kinen, Japan Cup and Arima Kinen. Titles hint at a wanderer seeking 'radiance' ('輝けるものたち', '兆しを求めて', '道なき道にて'), a collapse after the Autumn Tenno Sho ('崩壊' / '決壊') and later pride and acceptance ('矜持', 'ありのまま'), ending with 'a distant promise' at the Arima Kinen. Plot detail not verified.",
+    "source": "event titles; release info web: https://www.gamespark.jp/article/2025/12/22/160878.html"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "ステイゴールドだ。いい旅にしよう！",
+      "en": "I'm Stay Gold. Let's make it a good journey!"
+    },
+    {
+      "voice_id": 1000,
+      "jp": "ま、気楽に行こう。",
+      "en": "Well, let's take it easy."
+    },
+    {
+      "voice_id": 92007,
+      "jp": "旅は道連れ…誰が言ったか\n知らないが――あんたといて、\n私にもその意味がわかったよ。",
+      "en": "'Travel needs a companion'... no idea who said it first, but being with you, I finally get what it means."
+    },
+    {
+      "voice_id": 20029,
+      "jp": "レース直前は、私に近づきすぎない\nほうがいい。どうも集中しすぎてね\n…あんたを蹴ってしまうかも？",
+      "en": "Better not get too close to me right before a race. I focus a bit too hard... I might kick you, you know?"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "こう見えて昔は悪ガキ大将でね…\nいや、今でも案外そう見えてるか？\nなら…ふふ、それも悪くない。",
+      "en": "Believe it or not, I used to be the ringleader of the brats... or maybe I still look like one? Then... heh, not bad."
+    },
+    {
+      "voice_id": 10014,
+      "jp": "出かけようと思ったが…やめだ。\nだってあんたが、わざわざ会いに\n来た。なら…大人しく捕まろう。",
+      "en": "I was about to head out... nah. You came all this way to see me. So I'll let myself get caught."
+    }
+  ],
+  "timer_line_ideas": [
+    "Hey, {user}. Your independent run's done. Fifty minutes out there and you came back - good. So... where to next? You're coming, right?",
+    "Your little solo journey's over, {user}. Well, go take a look at what you found along the way. I'll wait... probably."
+  ],
+  "data_gaps": [
+    "No web story summary found; arc is from event titles only",
+    "'メノ' in voice 91002 not confidently identified",
+    "Exact family relationships (Journey/Orfevre as 'sisters') not stated in mdb lines beyond about_family mentioning 妹たち"
+  ]
+}

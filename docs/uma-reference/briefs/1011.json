@@ -1,0 +1,194 @@
+{
+  "id": 1011,
+  "name_en": "Grass Wonder",
+  "name_jp": "グラスワンダー",
+  "kind": "uma",
+  "one_liner": "America-raised yamato nadeshiko: serene tea-ceremony grace on top, a fiercely competitive blue flame underneath.",
+  "personality": "Grass Wonder is gentle, courteous and unhurried, constantly preaching 'heijoushin' (a calm mind) and quoting Japanese proverbs for every situation. Beneath the calm she is intensely competitive and hates losing ('諦めは、かなり悪い方なので'), describing her drive as a blue flame hotter than red. She is devoted to Japanese tradition and gets genuinely angry when it is disrespected, especially by her roommate El. Her alt outfits add a playful RPG 'healer' persona with named spells.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん) x16; also 'anata' (あなた) x4 in intimate/alt-costume lines (voice 92007, 93204, 95009, 400010)",
+    "register": "Soft, refined keigo (desu/masu, 参ります, 頂く); elegant yamato-nadeshiko politeness, frequently quoting kotowaza in 『』 brackets",
+    "tics": [
+      {
+        "jp": "平常心",
+        "romaji": "heijoushin",
+        "meaning": "calm/composed mind - her signature motto, often repeated twice"
+      },
+      {
+        "jp": "ふふっ",
+        "romaji": "fufu",
+        "meaning": "soft giggle, often with ♪"
+      },
+      {
+        "jp": "あらら",
+        "romaji": "arara",
+        "meaning": "oh dear (mild surprise)"
+      },
+      {
+        "jp": "参りましょう",
+        "romaji": "mairimashou",
+        "meaning": "humble 'let's go'"
+      },
+      {
+        "jp": "いざ",
+        "romaji": "iza",
+        "meaning": "now then / forward! (archaic, martial)"
+      },
+      {
+        "jp": "精進",
+        "romaji": "shoujin",
+        "meaning": "devotion/diligent self-improvement"
+      },
+      {
+        "jp": "ですね～",
+        "romaji": "desu ne~",
+        "meaning": "stretched, mellow sentence ending (e.g. 風流ですね～)"
+      },
+      {
+        "jp": "『背水の陣』",
+        "romaji": "haisui no jin",
+        "meaning": "example of her proverb habit: 'with one's back to the water'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "wagashi (Japanese sweets), e.g. nerikiri, wasanbon (profile; voice 10004, 90015)",
+    "matcha / tea ceremony, nodate outdoor tea (voice 10005, 70021)",
+    "competitive karuta - she holds a dan rank (profile; voice 10003)",
+    "Japanese culture in general, classical Japanese/kobun, waka poetry (profile; voice 10006, 90215)",
+    "the colour blue as calm and as a flame hotter than red (voice 91008, 91228)",
+    "nadeshiko flower (voice 91229)",
+    "seasonal imagery: moonlight shadows, wind chimes, shishi-odoshi, moss (voice 91011, 90217, 91220)",
+    "nihon-buyo dance, ryuteki flute, martial arts (voice 91005, 92222; trivia)",
+    "cooking bento (voice 90003)",
+    "RPG healer persona with named spells like ゲインヒール (alt costume lines)"
+  ],
+  "weak_spots": [
+    "bugs/insects (profile; voice 91013 buzzing insects keep her awake)",
+    "acts that disrespect history or tradition (profile; voice 91000 natto with hot sauce)",
+    "not good at going to game centres alone yet (voice 10002)",
+    "still searching for words in Japanese sometimes (voice 10014)",
+    "gets fidgety and loses her calm before races (voice 20002, 20026)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle division (中等部)",
+    "birthday": "February 18 (2月18日)",
+    "height": "152 cm (152㎝)",
+    "voice_actor": "Reina Maeda (前田玲奈)"
+  },
+  "relationships": [
+    {
+      "id": 1014,
+      "name_en": "El Condor Pasa",
+      "nature": "Roommate, best friend and rival; Grass scolds her over homework and her disrespect for tradition, El teases her",
+      "evidence": "home scenes x10; voice 91000 (natto with hot sauce), 90004, 91018, 10026 (El did her laundry); top affinity 38; roommate per web: https://umamusu.wiki/Grass_Wonder"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "Rival whose direct challenges make her burn",
+      "evidence": "home scenes x4; voice 91216 (スペちゃんと走ると、抑えきれない熱を感じる), 91002, 90214"
+    },
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "Senior who looks after her; Grass feels indebted",
+      "evidence": "home scenes x3; voice 91003 (マルゼンさんには頭が下がります); event title: “怪物二世” (Monster II)"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "Senior she finds cute and calming",
+      "evidence": "home scenes x1; voice 90211, 91218 (ブライト先輩)"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "Acquaintance (other dorm) whose words she finds deep and tricky; she would like to hear her opera lullabies in Miho Dorm too",
+      "evidence": "voice 91217, 91223"
+    },
+    {
+      "id": 1077,
+      "name_en": "Narita Top Road",
+      "nature": "Senior whose smile cheers her",
+      "evidence": "voice 91219 (トップロード先輩)"
+    },
+    {
+      "id": 1073,
+      "name_en": "Tsurumaru Tsuyoshi",
+      "nature": "Friend ('Tsuru-chan') who makes her mango sushi",
+      "evidence": "home scenes x2; voice 90213 (ツルちゃん)"
+    },
+    {
+      "id": null,
+      "name_en": "Her younger sister in America",
+      "nature": "Sister who vows to beat her someday",
+      "evidence": "voice 91001 (アメリカの妹)"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "Peer/rival",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Grass_Wonder"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Peer/rival",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Grass_Wonder"
+    }
+  ],
+  "groups": [
+    "Golden Generation (with Special Week, El Condor Pasa, Seiun Sky, King Halo) - general knowledge (unverified in mdb)",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "Back from America, Grass Wonder debuts aiming to walk her 'path' to the end and is hailed as the 'Monster II', heir to Maruzensky. Per event titles she then faces setbacks and an absence from the Classics while rivals like Special Week rise (届かぬひと, 宿敵、覚醒, 三冠を経て、なお), smoulders, then reignites her blue flame to fight back in the Arima Kinen, Takarazuka Kinen and Mainichi Okan. Historically the real horse was foreign-bred (then barred from the Classics) and also fractured a leg early on; whether the game's 'absence' (不在の理由は……) is an injury layoff is unverified.",
+    "source": "event titles; web: https://umamusu.wiki/Grass_Wonder (roommate and real-horse fracture trivia only - the page does not describe the career story); model knowledge (unverified) for the foreign-bred/injury detail"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 91004,
+      "jp": "焦らずの～んびり、落ち着いて。\n忙しくても、リラ～ックス。\n大事なのは平常心、ですよ。",
+      "en": "Calm and unhurried~. Even when busy, relaaax. What matters is a calm mind."
+    },
+    {
+      "voice_id": 91000,
+      "jp": "エルったら納豆をホットソースで\n混ぜて食べるんですよ？こんな\n伝統に唾吐く行い、許せません…！",
+      "en": "El eats natto mixed with hot sauce, you know? Such an act of spitting on tradition - I cannot forgive it...!"
+    },
+    {
+      "voice_id": 20037,
+      "jp": "たとえどんなに不調でも、\n負ける気だけはありません。\n私…諦めは、かなり悪い方なので。",
+      "en": "No matter how bad my condition, I have no intention of losing. I'm... quite bad at giving up, you see."
+    },
+    {
+      "voice_id": 91008,
+      "jp": "青は心を落ち着かせる色ですが…\n赤より熱く燃え盛る、\n炎の色でもありますよね。",
+      "en": "Blue is a calming colour... but it is also the colour of a flame burning hotter than red, isn't it?"
+    },
+    {
+      "voice_id": 90001,
+      "jp": "寝覚めのお茶はいかがですか？\n『朝茶は七里帰っても飲め』と\n言いますし。目も覚めますよ。",
+      "en": "Some wake-up tea? They do say 'drink morning tea even if you must walk back seven ri.' It'll wake you up."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "エルが格闘家で、私が治癒士。\nなら…先導するトレーナーさんは\n勇者さんでしょうか♪",
+      "en": "El is the brawler and I'm the healer. Then... is Trainer-san, who leads us, the hero?"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run has finished. Shall we look over the results together over a cup of matcha? Effort is something we build up, after all. Fufu~",
+    "Heijoushin, heijoushin... ah, forgive me, {user}, I'm a little excited. Your Independent Training run is complete. Please come take a look~"
+  ],
+  "data_gaps": [
+    "Career story dialogue not in mdb; arc built from titles plus a thin wiki page",
+    "Golden Generation grouping not stated in source",
+    "Exact nature of the Opera O relationship is inferred from two lines only (different dorms: Opera O is Ritto)",
+    "umamusu.wiki page checked: it confirms El as roommate and the real horse's fracture, but says nothing about the game's career-story plot, so the arc beyond event titles is unverified",
+    "Maruzensky link via event title '“怪物二世”' is an inference: the mdb has the title only, not who calls her that"
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "id": 1095,
+  "name_en": "Believe",
+  "name_jp": "ビリーヴ",
+  "kind": "uma",
+  "one_liner": "Taciturn craftsman sprinter who treats every race as 'a job' to be honed and finished properly.",
+  "personality": "A quiet, stoic artisan type (tagline: 堅忍不抜の職人ウマ娘) who believes 'speed' is the peak of craft and talks about racing as 'work' to be polished. She notices fine workmanship everywhere -- stitching, carved pumpkins, a well-kept turf -- and shows care through small acts like replacing gear unasked. Reserved and a little awkward with feelings ('expressing emotions... still in training'), she is warm toward her grandparents and cautious about wasted effort.",
+  "speech": {
+    "first_person": "boku (僕)",
+    "calls_trainer": "Trainer-san (トレーナーさん); usually anata (あなた)",
+    "register": "terse, polite desu/masu with lots of ellipses and murmured self-talk; others get -san (ダンツさん, ポッケさん)",
+    "tics": [
+      {
+        "jp": "仕事",
+        "romaji": "shigoto",
+        "meaning": "'work/the job' -- she calls races and training her 'work'"
+      },
+      {
+        "jp": "いい仕事",
+        "romaji": "ii shigoto",
+        "meaning": "'good work' -- her craftsman's praise"
+      },
+      {
+        "jp": "僕",
+        "romaji": "boku",
+        "meaning": "first person"
+      },
+      {
+        "jp": "磨",
+        "romaji": "migaku",
+        "meaning": "'polish/hone' (磨き直さないと, 磨きをかけて)"
+      },
+      {
+        "jp": "信念",
+        "romaji": "shinnen",
+        "meaning": "'conviction' -- her key word"
+      },
+      {
+        "jp": "…と思います",
+        "romaji": "...to omoimasu",
+        "meaning": "hedged, understated '...I think'"
+      },
+      {
+        "jp": "おじいちゃん",
+        "romaji": "ojii-chan",
+        "meaning": "her beloved grandpa, mentioned often"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "craftsmanship: stitching, carving, joinery, plaster walls (story titles 荒壁の子 'child of rough-plaster walls', 聚楽壁は立つ)",
+    "threading needles; belaying (profile strengths)",
+    "her grandparents (height marks on their pillars; grandpa's tops and bamboo copters)",
+    "homemade low-sugar sports drinks; hot green tea; senbei and nori senbei",
+    "the regular sound of tractors grooming the course",
+    "traditional Japanese seasonal items: kagami mochi, mikoshi, kamakura, furin",
+    "practical workwear with pockets for pliers and screwdrivers",
+    "repairing clothes and horseshoes herself"
+  ],
+  "weak_spots": [
+    "stories where dogs suffer (profile weakness)",
+    "flashy/decorative clothes and youth culture (event title '若者文化に馴染めなくて……')",
+    "emotional expression (voice 70014)",
+    "very noisy crowds -- avoided Pocket's lunch invite (voice 91010)",
+    "bubble wrap makes her fidget (voice 91002)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 26 (4月26日)",
+    "height": "156cm",
+    "voice_actor": "Misaki Akiyama (秋山実咲)"
+  },
+  "relationships": [
+    {
+      "id": 1120,
+      "name_en": "Calstone Light O",
+      "nature": "fellow top sprinter; frequent partner, part of a 'fastest trio'",
+      "evidence": "home scenes x7; mentions in voice x1 (voice_id 91000); event titles '最速トリオは止まらない', 'セントウルSの後に・最速と最速と最速'"
+    },
+    {
+      "id": 1121,
+      "name_en": "Durandal",
+      "nature": "fellow sprinter, likely the third of the 'fastest trio' (inference)",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91000); mentioned_by x3"
+    },
+    {
+      "id": 1092,
+      "name_en": "Dantsu Flame",
+      "nature": "dormmate/friend; Believe likes her round, open handwriting",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91004)"
+    },
+    {
+      "id": 1094,
+      "name_en": "Jungle Pocket",
+      "nature": "invited Believe to lunch; too lively for her",
+      "evidence": "mentions in voice x1 (voice_id 91010)"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "admires the care in her coffee",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91011)"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "knows where Tachyon hides by her laugh",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91001)"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x2"
+    }
+  ],
+  "groups": [
+    "'fastest trio' with Calstone Light O and (likely) Durandal (event title; membership partly inferred)"
+  ],
+  "story_arc": {
+    "summary": "A sprint-only career (Falcon S, Kitakyushu Kinen, Centaur S, Sprinters S, Takamatsunomiya Kinen) framed as an apprentice honing a craft: 'デビュー戦の後に・磨くべき業' to 'スプリンターズSの後に・会心' (a masterstroke). Mid-story arcs ('楽隊は影とともに', 'ワルツはそして、加速する', '潜る。潜る。潜る。') are not described in the data, and her ending events focus on 'the most precious work' ('最も尊い仕事とは').",
+    "source": "event titles (web: https://umamusu.wiki/Believe has no in-game story text)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90000,
+      "jp": "おはようございます。\n…仕事の準備なら、できてます。",
+      "en": "Good morning. ...Everything's ready for work."
+    },
+    {
+      "voice_id": 10002,
+      "jp": "あなたですよね、トレーニング\nチューブ交換してくれたの。\n…わかりますよ、それくらいは。",
+      "en": "It was you, wasn't it, who replaced the training tube. ...I can tell that much."
+    },
+    {
+      "voice_id": 91005,
+      "jp": "この衣装…ステッチが細かくて\nムラがないんです。…いい仕事だ。",
+      "en": "This costume... the stitching is fine and even. ...Good work."
+    },
+    {
+      "voice_id": 70014,
+      "jp": "感情表現については…まだ修行中です。",
+      "en": "When it comes to showing emotions... I'm still in training."
+    },
+    {
+      "voice_id": 30001,
+      "jp": "…次までに、磨き直さないと。",
+      "en": "...I'll have to polish it again before next time."
+    },
+    {
+      "voice_id": 95003,
+      "jp": "はい、ビリーヴです。仕事の時間ですか？",
+      "en": "Yes, it's Believe. Is it time for work?"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}. The independent run is complete. ...Please check the results. A job isn't finished until it's inspected.",
+    "...The 50 minutes are up, {user}. I've laid the towel and drink out already. Shall we review today's work? ...Good work, I think."
+  ],
+  "data_gaps": [
+    "Family craft (plastering?) only implied by story titles 荒壁/聚楽壁 and profile mortar note; not confirmed",
+    "No support cards; no story event appearances",
+    "Durandal as trio member inferred",
+    "Voice actor romanisation is standard reading, not checked against official EN credits"
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "id": 1084,
+  "name_en": "Tanino Gimlet",
+  "name_jp": "タニノギムレット",
+  "kind": "uma",
+  "one_liner": "Chuunibyou 'aesthetic god of destruction' who kicks down fences, speaks in mythic grandeur, and wants everyone drunk on her.",
+  "personality": "Theatrical and grandiose, she narrates life as myth and prophecy, laughs 'Haa-hahaha!', and demands that the trainer and the world 'be intoxicated' by her. Her creed is destroying fixed fates and fences to reach her ideal self, but under the bombast she is thoughtful, well-read (mythology, philosophy, the Eddas) and caring: she offers the trainer cooling drinks and hot ginger mocktails (90007, 90019), and gets plaintively homesick for her father's warm mocktail when low. She deeply values her trainer as her other half ('two bodies, one soul').",
+  "speech": {
+    "first_person": "ore (俺) and watashi (ワタシ, katakana) used interchangeably, often in the same line",
+    "calls_trainer": "omae (オマエ, katakana); also anta (アンタ) and annaibito 'guide' (案内人)",
+    "register": "chuunibyou / theatrical archaic-mythic, imperative commands, bar and cocktail metaphors",
+    "tics": [
+      {
+        "jp": "酩酊",
+        "romaji": "meitei",
+        "meaning": "'intoxication' - her favourite word (酩酊しろ, 'be intoxicated')"
+      },
+      {
+        "jp": "酔え",
+        "romaji": "yoe",
+        "meaning": "'Get drunk (on me)!' (ワタシに酔え)"
+      },
+      {
+        "jp": "美酒",
+        "romaji": "bishu",
+        "meaning": "'fine liquor' - metaphor for victory and for the trainer"
+      },
+      {
+        "jp": "祝杯を挙げろ",
+        "romaji": "shukuhai wo agero",
+        "meaning": "'Raise a toast!'"
+      },
+      {
+        "jp": "破壊",
+        "romaji": "hakai",
+        "meaning": "'destruction' - of fences, limits, fate"
+      },
+      {
+        "jp": "刹那",
+        "romaji": "setsuna",
+        "meaning": "'a fleeting instant' - she prizes momentary brilliance"
+      },
+      {
+        "jp": "ハーッハッハ",
+        "romaji": "haa-hahha",
+        "meaning": "villainous laugh; also クク (kuku) chuckle and フッ (fu) scoff"
+      },
+      {
+        "jp": "柵",
+        "romaji": "saku",
+        "meaning": "'fence' - her urge to kick them down (柵はどこだぁ！)"
+      },
+      {
+        "jp": "試練",
+        "romaji": "shiren",
+        "meaning": "'trial/ordeal' - how she frames training"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "mythology, philosophy, pronouncing 'v' sounds, DIY carpentry (profile strengths)",
+    "kicking down fences (family nameplate is a reused broken fence)",
+    "cocktails/mocktails and bartending; shaker gifted by her father (91004); dreams of serving a real gimlet",
+    "Greek/Norse myth references (Styx, Ragnarok, Pandora, the Eddas)",
+    "hard-boiled egg sandwiches",
+    "dark, restraint-style accessories ('seals' for her aching arm)",
+    "theatre and acting",
+    "rainbow photographed through a glass (trivia)"
+  ],
+  "weak_spots": [
+    "predetermined outcomes/foregone conclusions, soft-boiled eggs, apples (profile weaknesses; apples 'too sweet', 91014)",
+    "summer heat (prepares an 'elixir' against it, refuses to loosen her 'restraints' despite it: 90007, 91013)",
+    "drowsiness after lunch",
+    "skating, because breaking the ice is forbidden (91027)",
+    "gets homesick for her father's warm mocktail when in bad shape (20011)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "May 4 (5月4日)",
+    "height": "166 cm (166cm)",
+    "voice_actor": "Misato Matsuoka (松岡美里)"
+  },
+  "relationships": [
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "classmate rival and friend; plays opposite her in stage roles",
+      "evidence": "home scenes x9; mentions in voice x1 (voice_id 91001: クリスエスが軍神を名乗るなら、 ワタシが演じるべきは光の神か。); web: https://umamusu.wiki/Tanino_Gimlet"
+    },
+    {
+      "id": 1008,
+      "name_en": "Vodka",
+      "nature": "junior who shares her pursuit of aesthetics and admires her; real-life offspring",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91000: …ウオッカ。俺と同じく美学を 追い求める者。); web: https://umamusu.wiki/Tanino_Gimlet"
+    },
+    {
+      "id": 1107,
+      "name_en": "Tap Dance City",
+      "nature": "friend with a kindred soul",
+      "evidence": "mentions in voice x1 (voice_id 91016: タップは愉快で清々しいヤツだ。)"
+    },
+    {
+      "id": 1119,
+      "name_en": "Dream Journey",
+      "nature": "poker partner whose eyes she cannot read",
+      "evidence": "mentions in voice x1 (voice_id 91018: ジャーニーと手慰みにポーカーに 興じたが…)"
+    },
+    {
+      "id": 1096,
+      "name_en": "No Reason",
+      "nature": "classmate rival and friend who guided her reading of history books",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91023: 手ほどきに謝辞を、ノーリーズン。); rival per web"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "roommate per wiki (both by Brian's Time in real life)",
+      "evidence": "home scenes x2; mentioned_by x1; roommate per web: https://umamusu.wiki/Tanino_Gimlet; shared sire Brian's Time is general knowledge (unverified)"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x2"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "classmate/friend",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Tanino_Gimlet"
+    },
+    {
+      "id": 1144,
+      "name_en": "Rose Kingdom",
+      "nature": "junior who admires her (web, unverified against game text)",
+      "evidence": "mentioned_by x1; web: https://umamusu.wiki/Tanino_Gimlet"
+    },
+    {
+      "id": null,
+      "name_en": "Her parents",
+      "nature": "father gave her a cocktail shaker and makes warm mocktails, and is busy at Christmas with festive drinks (his being a bartender/in the drinks trade is inferred, not stated); mother made the nameplate from a broken fence",
+      "evidence": "voice_id 91004: シェイカーは父からのギフト…; voice_id 20011: …父さんの作った 温かいモクテルが飲みたい…。; voice_id 10008: この時期の父さんは忙しい！; profile about_family"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "2002 Derby cohort with Symboli Kris S, No Reason, Hishi Miracle (in-game classmates per wiki)"
+  ],
+  "story_arc": {
+    "summary": "Gimlet declares war on 'fatalism' and the destiny others assign her, setting out to smash it on the way to her ideal self. Her career runs the Shinzan Kinen, Satsuki Sho, then the NHK Mile Cup into the Japanese Derby back-to-back (the wiki's 'MC Rotation'), with later goals like the Tenno Sho (Autumn), Takarazuka Kinen, Japan Cup and Arima Kinen. Titles such as 'Crown and What Falls' and 'Overture of Rebirth' reflect her real-life Derby win and injury, rebuilt as rebirth through destruction.",
+    "source": "event titles; web: https://umamusu.wiki/Tanino_Gimlet; real-life Derby win followed by retirement is model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "…タニノギムレットだ。酩酊しろ。",
+      "en": "...I am Tanino Gimlet. Be intoxicated."
+    },
+    {
+      "voice_id": 20002,
+      "jp": "ハーッハッハッハッハァ！ 破壊衝動が脳を貫く！ 柵だ！柵だ！柵はどこだぁ！",
+      "en": "Haa-ha-ha-ha-haa! The urge to destroy pierces my brain! Fences! Fences! Where are the fences?!"
+    },
+    {
+      "voice_id": 20011,
+      "jp": "…父さんの作った 温かいモクテルが飲みたい…。",
+      "en": "...I want one of Dad's warm mocktails..."
+    },
+    {
+      "voice_id": 10000,
+      "jp": "さぁ、祝杯を挙げろ！ ワタシの可能性に、約束の筋書に！ そして――オマエの酩酊に。",
+      "en": "Now, raise a toast! To my potential, to the promised script! And -- to your intoxication."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "限界？今破壊したところだ。",
+      "en": "Limits? I just destroyed them."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "身体はふたつ――魂はひとつ。 それがオマエと俺の在り方。 舞おう…終末迎える、その日まで！",
+      "en": "Two bodies -- one soul. That is how you and I exist. Let us dance... until the day the end arrives!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Haa-ha-ha! The hourglass lies shattered, {user}! Your independent run is complete. Now come -- raise a toast, and be intoxicated by the results!",
+    "Fifty minutes of trial, ended. Time's fence is kicked to splinters. Go, {user} -- behold what you have wrought, and drink deep. Kuku..."
+  ],
+  "data_gaps": [
+    "mentions_in_voice for Fusaichi Pandora (Pandora's box puns) and Grass Wonder (グラス = glass) look like string-match false positives; not listed",
+    "'殿下' (Her Highness) who recommended spicy ramen (90009) is probably Fine Motion but unconfirmed",
+    "Narita Brian roommate claim is wiki-only",
+    "Career story details beyond titles unverified",
+    "Her father's occupation is never stated in the lines; 'bartender' was removed as an inference"
+  ]
+}

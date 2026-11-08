@@ -1,0 +1,175 @@
+{
+  "id": 1062,
+  "name_en": "Matikanetannhauser",
+  "name_jp": "マチカネタンホイザ",
+  "kind": "uma",
+  "one_liner": "Cheerful, clumsy 'totally ordinary' girl who shouts 'ei, ei, mun!' and refuses to stay ordinary.",
+  "personality": "Bubbly, upbeat and a bit scatterbrained: she talks in sound effects ('baban!', 'herororo~'), forgets to buy the chocolate she went to look at, and slips and gets nosebleeds. She calls herself completely ordinary but has a gutsy, tough streak and badly wants fans to remember her and to answer their cheers. She is warm and grateful toward her trainer, offering to 'split in half' joys and memories.",
+  "speech": {
+    "first_person": "watashi (私); also calls herself 'Machitan' (マチタン)",
+    "calls_trainer": "Trainer (トレーナー)",
+    "register": "polite-casual (desu/masu mixed with casual), playful, with mock-archaic ~ですぞ / ~ですとぉ",
+    "tics": [
+      {
+        "jp": "えい、えい、むん",
+        "romaji": "ei, ei, mun",
+        "meaning": "her catchphrase cheer (like 'hip hip, hooray!')"
+      },
+      {
+        "jp": "むん",
+        "romaji": "mun",
+        "meaning": "determined grunt she tacks onto sentences"
+      },
+      {
+        "jp": "ですぞ",
+        "romaji": "~desuzo",
+        "meaning": "mock-old-fashioned emphatic ending"
+      },
+      {
+        "jp": "ばば～ん",
+        "romaji": "babaan",
+        "meaning": "'ta-da!' sound effect"
+      },
+      {
+        "jp": "うひひ",
+        "romaji": "uhihi",
+        "meaning": "giggle"
+      },
+      {
+        "jp": "普通",
+        "romaji": "futsuu",
+        "meaning": "'ordinary' - her self-image"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "food: her family's diner (sanma set meal), potato salad with cucumber, yakiimo, ramen",
+    "colourful spider plushies",
+    "lucky charm from Fukukitaru (Fuku-chan senpai)",
+    "her hat with self-cut ear holes",
+    "taking memos/notes",
+    "dodgeball",
+    "answering fans' cheers",
+    "the colour blue ('blue Machitan')"
+  ],
+  "weak_spots": [
+    "real spiders",
+    "tomato juice",
+    "cold weather",
+    "clumsiness / nosebleeds (voice 91001; event '鼻血が出るのも悪くない')",
+    "feeling 'ordinary' and forgettable",
+    "back-to-back races ('ご無体なぁ～')"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "May 7 (5月7日)",
+    "height": "155cm",
+    "voice_actor": "Hikaru Tono (遠野ひかる)"
+  },
+  "relationships": [
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Close friend; walks the shopping street and lunches with her",
+      "evidence": "home scenes x5; mentions in voice x4 (voice_id 91003: ネイチャと商店街を歩いてると); top affinity 35"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "Senior from the same 'Machikane' name, fortune-teller who gives her lucky charms; roommate per wiki",
+      "evidence": "home scenes x3; voice_id 91004: フクちゃん先輩が毎朝運勢を占ってくれる; voice_id 91016 (lucky charm); roommate per web: https://umamusu.wiki/Matikanetannhauser (verified: 'Jump Scare Room')"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Friend who makes perfect travel guidebooks for their trips",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91018: イクノとの旅行はすごいんですよ！)"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "Friend whose fashion sense she admires",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 10027: ターボのお洋服っていいですよね！)"
+    },
+    {
+      "id": 1026,
+      "name_en": "Mihono Bourbon",
+      "nature": "Classmate-generation acquaintance who remarked on Tannhauser's odd speech; rivalry is general knowledge (unverified)",
+      "evidence": "mentions in voice x1 (voice_id 91019); rival per web: https://umamusu.wiki/Matikanetannhauser"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "Friendly rival in endurance contests",
+      "evidence": "mentions in voice x1 (voice_id 91017: ローレルさんとの我慢勝負は…)"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Friend and rival",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Matikanetannhauser"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "Home-scene partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 9002,
+      "name_en": "Chairwoman Akikawa",
+      "nature": "Met her and petted her cat on a morning run",
+      "evidence": "home scenes x1; voice_id 90011: 理事長さんと会いまして！"
+    }
+  ],
+  "groups": [
+    "Machikane (shares the crown name with Matikanefukukitaru)",
+    "Team Canopus with Nice Nature, Twin Turbo, Ikuno Dictus (anime-only; web: umamusu.wiki)"
+  ],
+  "story_arc": {
+    "summary": "A self-described 'ordinary' girl from a family-run diner, Tannhauser wants to break past being ordinary and win something everyone will remember (events '『普通』の先へ', 'それでも、夢見て、1等賞！'). Her career runs through the Classics and long races like the Diamond Stakes and Tenno Sho (Spring), with friends cheering from the stands; per the wiki a nosebleed always cancels her senior-year Japan Cup objective, mirroring the real horse's 1994 withdrawal. It peaks with a long-awaited win at the Arima Kinen ('有馬記念の後に・待ちかねた勝利').",
+    "source": "event titles + web: https://umamusu.wiki/Matikanetannhauser; model knowledge (unverified) for framing"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "頑張るぞー！えい、えい、むん！",
+      "en": "Let's do our best! Ei, ei, mun!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "私はなにもかもが普通ですけど、\nトレーナーと出会えた強運だけは、\n特別だと思うんですよね！うひひ。",
+      "en": "I'm ordinary at everything, but the luck of meeting you, Trainer, is the one thing that's special! Uhihi."
+    },
+    {
+      "voice_id": 20022,
+      "jp": "ななっ、なんと！？\nまた連続でレースですとぉ！？\nよよよよん…ご無体なぁ～！",
+      "en": "Wh-whaaat!? More back-to-back races!? Boo-hoo... how cruel~!"
+    },
+    {
+      "voice_id": 91002,
+      "jp": "クモのぬいぐるみはかわいくて\n大好きなんですけど、本物は…\nい、いつか慣れるぞ～！",
+      "en": "I love spider plushies, they're cute, but real ones... I-I'll get used to them someday~!"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "トレーナーが隣にいると、\nいつもの倍の倍の倍のばーいっ、\n頑張れそうな気がします！むんっ。",
+      "en": "When you're next to me, Trainer, I feel like I can try double double double times harder! Mun."
+    },
+    {
+      "voice_id": 91020,
+      "jp": "普通な私ですけども、声援には\n普通にちゃんと応えたいなーなんて\n思ったりもするのです。えへ。",
+      "en": "I may be ordinary, but I'd like to answer people's cheers properly, ordinary or not. Ehe."
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer {user}~! Pinpon panpon~ Announcement! The independent run is all done! Come check it with me, okay? Ei, ei, mun!",
+    "Babaan! {user}, the independent training's finished! It was a pretty ordinary run... but come look anyway, Trainer? I took memos! Mun!"
+  ],
+  "data_gaps": [
+    "Career story beyond event titles is thinly sourced (wiki has no plot detail)",
+    "Exact race schedule of the scenario not verified",
+    "name_en uses the official spelling 'Matikanetannhauser'"
+  ]
+}

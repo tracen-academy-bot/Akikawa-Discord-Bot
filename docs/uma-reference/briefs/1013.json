@@ -1,0 +1,198 @@
+{
+  "id": 1013,
+  "name_en": "Mejiro McQueen",
+  "name_jp": "メジロマックイーン",
+  "kind": "uma",
+  "one_liner": "Proud Mejiro heiress sworn to win the Tenno Sho, forever losing battles against sweets.",
+  "personality": "Mejiro McQueen is an elegant, dignified ojousama who carries the Mejiro family's long-cherished dream (悲願) of the Tenno Sho and constantly reminds herself what 'a Mejiro Uma Musume' must be. She is earnest, disciplined and caring toward family and friends, but her composure cracks around sweets (and weight control), her secret love of watching sports, and Gold Ship's antics. She often catches herself mid-slip and covers with a 'コホン' or flustered denial.",
+  "speech": {
+    "first_person": "watakushi (私) - written 私; reading わたくし is general knowledge (unverified in mdb)",
+    "calls_trainer": "Trainer-san (トレーナーさん) x8; also anata (貴方) in several lines (voice 90014, 92016, 92221, 93005)",
+    "register": "Ojousama speech: ～ですわ, ～ますわ, ～ませんこと？, ～ですのよ, ごきげんよう; formal keigo",
+    "tics": [
+      {
+        "jp": "ですわ",
+        "romaji": "desu wa",
+        "meaning": "classic ojousama sentence ending"
+      },
+      {
+        "jp": "ませんこと？",
+        "romaji": "masen koto?",
+        "meaning": "genteel 'won't you...?' invitation ending"
+      },
+      {
+        "jp": "ですのよ",
+        "romaji": "desu no yo",
+        "meaning": "refined emphatic ending"
+      },
+      {
+        "jp": "ごきげんよう",
+        "romaji": "gokigenyou",
+        "meaning": "aristocratic greeting"
+      },
+      {
+        "jp": "コホン",
+        "romaji": "kohon",
+        "meaning": "ahem - covering a slip of composure"
+      },
+      {
+        "jp": "メジロ家のウマ娘たるもの",
+        "romaji": "Mejiro-ke no Umamusume taru mono",
+        "meaning": "'as an Uma Musume of the Mejiro family...' - her self-admonishing refrain"
+      },
+      {
+        "jp": "悲願",
+        "romaji": "higan",
+        "meaning": "long-cherished wish (the Mejiro Tenno Sho dream)"
+      },
+      {
+        "jp": "参りましょう",
+        "romaji": "mairimashou",
+        "meaning": "humble 'let us go'"
+      },
+      {
+        "jp": "うぅ",
+        "romaji": "uu",
+        "meaning": "whimper when tempted by sweets"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "sweets: parfaits, gelato, shaved ice, cake (voice 90212, 90218, 91219, 10014)",
+    "secretly loves watching sports (profile tail: wags hard when sports come up; voice 10002, 91004)",
+    "afternoon tea and table manners (profile strengths; voice 90012, 91222)",
+    "classical, elegant fashion (voice 10025)",
+    "films - collects pamphlets (trivia; voice 10027)",
+    "race history, strategy, sports nutrition (trivia)",
+    "Mejiro family estate: garden pond, hot spring, grandmother (おばあ様) (voice 91024, 90018, 70004)",
+    "wings / soaring to the heavens imagery (voice 40004, 95009)"
+  ],
+  "weak_spots": [
+    "resisting sweets (profile weakness; voice 90003, 91001, 91010, 91014, 91021)",
+    "weight gain - 'slight increase' after events, outfit hides her stomach (voice 91218, 91228)",
+    "autumn (gets sick at season change) and cold (voice 90008, 91015, 91227)",
+    "Daitaku Helios's gyaru slang baffles her (voice 91018)",
+    "being mistaken for Gold Ship (voice 91216)",
+    "early mornings - yawns despite grandmother's training (voice 91221)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle division (中等部)",
+    "birthday": "April 3 (4月3日)",
+    "height": "159 cm (159㎝)",
+    "voice_actor": "Saori Onishi (大西沙織)"
+  },
+  "relationships": [
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "Mejiro family member and rival; her career story features their showdown",
+      "evidence": "home scenes x7; voice 90211; event title: ライアンとの戦い、始まる"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Rival and friend she worries about; Teio's energy both inspires and exasperates her",
+      "evidence": "home scenes x3; mentions in voice x6 (voice 90013, 90210, 91003, 91020, 91021, 400005)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Chaotic acquaintance whose antics she cannot parse; grudgingly thankful",
+      "evidence": "home scenes x3; voice 91000 (Cossack dance), 91216, 91226, 400010"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Roommate (implied) and health-management confidante",
+      "evidence": "home scenes x4; voice 90214 (doesn't want to come back sweaty for Ikuno's sake), 91016"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Mejiro family member she confides in; took her to a summer festival",
+      "evidence": "home scenes x1; voice 91017, 91220"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "Mejiro family member; similar fashion taste",
+      "evidence": "home scenes x2; voice 90213, 91012"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "Mejiro family member; similar fashion taste",
+      "evidence": "home scenes x2; voice 90213, 91225"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Kind friend who helped find her handkerchief",
+      "evidence": "home scenes x2; voice 91019"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Acquaintance whose slang confuses her",
+      "evidence": "home scenes x1; voice 91018"
+    },
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "Bad influence on her dessert discipline",
+      "evidence": "voice 91010"
+    }
+  ],
+  "groups": [
+    "Mejiro family",
+    "Ritto Dorm",
+    "Team Spica (anime only)"
+  ],
+  "story_arc": {
+    "summary": "McQueen enters with one goal: to fulfil the Mejiro family's dream of winning the Tenno Sho. Her event titles trace a debut, a heated rivalry with Mejiro Ryan, the Kikka Sho, then the Spring Tenno Sho (悲願、成就す - the wish fulfilled), the Takarazuka Kinen and the Autumn Tenno Sho (未踏の栄光), all while wrestling with self-management and the weight of inheriting the Mejiro name (メジロ家を継ぐもの). Her voice lines add that she started out unable even to manage herself (voice 70001).",
+    "source": "event titles"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95004,
+      "jp": "勝利こそ我が定め。\n盾の栄誉へ向けて、いざ！",
+      "en": "Victory is my destiny. Toward the honour of the shield - onward!"
+    },
+    {
+      "voice_id": 90003,
+      "jp": "お昼になるとスイーツが\n恋しくなりますが、体型維持の\nためにも我慢しなくては…。",
+      "en": "Come noon I start craving sweets, but for the sake of my figure I must endure..."
+    },
+    {
+      "voice_id": 91004,
+      "jp": "昨日、テレビをつけたらたまたま\nスポーツ中継が…っ！コホン、\nやっぱりなんでもありませんわ。",
+      "en": "Yesterday I turned on the TV and happened upon a sports broadcast...! *Ahem*, never mind, it's nothing."
+    },
+    {
+      "voice_id": 91000,
+      "jp": "先程、ゴールドシップさんが急に\n目の前でコサックダンスを踊り始め\nたのですが…なんだったのかしら…",
+      "en": "Just now Gold Ship suddenly started doing a Cossack dance right in front of me... what was that about..."
+    },
+    {
+      "voice_id": 92220,
+      "jp": "『メジロ家のウマ娘たるもの』\n…この矜持を忘れず、そして\n縛られず、邁進して参りますわ。",
+      "en": "'As an Uma Musume of the Mejiro family'... I will advance without forgetting this pride, yet without being bound by it."
+    },
+    {
+      "voice_id": 30005,
+      "jp": "ふふっ…コホン、当然ですわ。",
+      "en": "Fufu... *ahem*, naturally."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your Independent Training has concluded. A Mejiro attends to such matters promptly, so kindly do the same. ...N-no, I was not thinking of the tea-time sweets afterwards!",
+    "Ahem. The independent run is finished, {user}. Shall we review the results together? As befits a Mejiro, with elegance, if you please."
+  ],
+  "data_gaps": [
+    "mentions_in_voice Manhattan Cafe x1 is a false hit on カフェテリア (voice 91001)",
+    "Ikuno Dictus as roommate is inferred from voice 90214, not stated",
+    "Career story dialogue not in mdb; summary from event titles",
+    "Team Spica membership is anime-only (general knowledge)"
+  ]
+}

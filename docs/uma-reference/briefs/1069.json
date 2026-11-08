@@ -1,0 +1,203 @@
+{
+  "id": 1069,
+  "name_en": "Sakura Chiyono O",
+  "name_jp": "サクラチヨノオー",
+  "kind": "uma",
+  "one_liner": "Earnest, hardworking Maruzensky fangirl who invents homemade proverbs and records everything in her 'Chiyonote'.",
+  "personality": "Honest, diligent and a little flustered, she sees herself as ordinary and believes steady effort will make her 'bloom'. She worships Maruzensky, copies her retro 'bubbly' style, and dreams of standing on the big stage beside her. She constantly coins quirky proverbs (often about carrots, radishes or sakura) and writes everything, including her trainer's advice, in her notebook, the Chiyonote. She also uses sumo vocabulary when she gets competitive.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "polite desu/masu, bright and slightly flustered (stammers, あわわ); sumo terms and sakura metaphors",
+    "tics": [
+      {
+        "jp": "『よい挨拶は、よい人参に勝る』",
+        "romaji": "yoi aisatsu wa, yoi ninjin ni masaru",
+        "meaning": "'A good greeting beats a good carrot'; one of the made-up maxims (in 『』) she drops into many lines"
+      },
+      {
+        "jp": "チヨノ・オーッ！ / ファイ・オーッ！",
+        "romaji": "Chiyono-Ō! / Fai-Ō!",
+        "meaning": "her cheer, a pun on her name and 'Fight-oh!'"
+      },
+      {
+        "jp": "チヨノート",
+        "romaji": "Chiyonōto",
+        "meaning": "'Chiyonote', her notebook of proverbs and notes"
+      },
+      {
+        "jp": "咲き誇る / 満開 / 花開かせて",
+        "romaji": "sakihokoru / mankai / hanahirakasete",
+        "meaning": "bloom in full glory / full bloom: her sakura motif for success (花開かせて appears only in her profile self-intro, not in voice lines)"
+      },
+      {
+        "jp": "白星 / 大金星 / 番付昇進 / がっぷり四つ",
+        "romaji": "shiroboshi / ōkinboshi / banzuke shōshin / gappuri yotsu",
+        "meaning": "sumo terms: a win / a huge upset win / promotion in rank / locked in a full grapple"
+      },
+      {
+        "jp": "どどん！",
+        "romaji": "dodon!",
+        "meaning": "'ta-da!' emphasis"
+      },
+      {
+        "jp": "チヨーっす！",
+        "romaji": "Chiyō-ssu!",
+        "meaning": "her attempt at a signature casual greeting"
+      },
+      {
+        "jp": "あわわ… / わわっ",
+        "romaji": "awawa / wawa",
+        "meaning": "flustered noises"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Maruzensky (cares for her tail with the same oil as her, per profile)",
+    "Making wagashi: anko, sakura mochi, chestnut yokan (profile strength)",
+    "Tidying and organising (profile strength)",
+    "Sakura and blooming imagery",
+    "Her Chiyonote and coining proverbs",
+    "Retro 'bubbly' and 'nau' (trendy) style borrowed from Maruzensky",
+    "Kombu tea; matching tea and sweets with Mejiro Ardan",
+    "Victory Club (ヴィクトリー倶楽部)",
+    "Family hotpot dinners (profile about_family)",
+    "Sakura Wanko-O, apparently a dog (or dog plush) she wants to bring to meet the trainer (voice 10002; what it is isn't stated)"
+  ],
+  "weak_spots": [
+    "Cars and planes: motion sickness (profile; event title へろへろトレイン)",
+    "Thinks she is 'still ordinary' (voice 10010)",
+    "Clumsy and easily flustered: 'こんな慌て者の精霊いないですっ' (voice 91027); event title 決まり手：うっかり",
+    "Embarrassed about yawning (voice 91011)",
+    "Worries she isn't mature enough (voice 90014)",
+    "Anxious that she might be 'the leaf, not the blossom' (voice 20037)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "February 19 (2月19日)",
+    "height": "156 cm (156cm)",
+    "voice_actor": "Ruriko Noguchi (野口瑠璃子)"
+  },
+  "relationships": [
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "Idol and the person she wants to stand beside ('Maruzen-san')",
+      "evidence": "home scenes x3; mentions in voice x6 (voice_id 10000: 憧れ、尊敬、羨望――マルゼンさん への想いは一言では語れません; 91008); trivia: マルゼンさんとのナウいツーショット！; self-intro 憧れのあの人"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "Roommate and close friend (they swap sweets and wear matching earrings)",
+      "evidence": "home scenes x6; mentions in voice x5 (voice_id 90010: 同室のアルダンさん; 91028: この耳飾り、アルダンさんと おそろいなんです♪)"
+    },
+    {
+      "id": 1072,
+      "name_en": "Yaeno Muteki",
+      "nature": "Friend and rival she wants to bring into the matching-earrings set",
+      "evidence": "home scenes x5; voice_id 91028: なんとかヤエノさんにも…！; web: https://umamusu.wiki/Sakura_Chiyono_O (classmate, rival)"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Fellow Victory Club member",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91016: バクシンオーさん、ローレルさん、 それに私！我ら 『ヴィクトリー倶楽部』; 91002)"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "Fellow Victory Club member",
+      "evidence": "home scenes x3; voice_id 91016"
+    },
+    {
+      "id": 1045,
+      "name_en": "Super Creek",
+      "nature": "Someone she can never manage to be in sync with, but wants to spend more time with",
+      "evidence": "home scenes x2; voice_id 91019: なぜかクリークさんとだけは タイミング合わないんですよね～"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "Home-scene partner; possibly linked to the event title 風紀委員長賞、受賞者ですから ('I'm a disciplinary-chair award winner'). Bamboo being disciplinary chair is general knowledge (unverified)",
+      "evidence": "home scenes x2; event title: 風紀委員長賞、受賞者ですから"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Waka poetry contest partner",
+      "evidence": "voice_id 91022: 午後はグラスさんと、和歌勝負して みようかな"
+    },
+    {
+      "id": 1126,
+      "name_en": "Sakura Chitose O",
+      "nature": "Fellow Victory Club member per web",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Sakura_Chiyono_O"
+    },
+    {
+      "id": 1057,
+      "name_en": "Mr. C.B.",
+      "nature": "Senior who warns her that Maruzensky's life isn't as ideal as it looks",
+      "evidence": "web: https://umamusu.wiki/Sakura_Chiyono_O"
+    },
+    {
+      "id": null,
+      "name_en": "Her older brother (お兄ちゃん)",
+      "nature": "Family; once won an award around Tanabata",
+      "evidence": "voice_id 10006: お兄ちゃんが七夕の頃にある賞を 取ったことがあって"
+    }
+  ],
+  "groups": [
+    "Victory Club (ヴィクトリー倶楽部) with Sakura Bakushin O and Sakura Laurel (voice 91016, 10026)",
+    "Sakura name group ('サクラはサクラ、メジロはメジロ', voice 91020)",
+    "Team Alkes (manga-only; web: https://umamusu.wiki/Sakura_Chiyono_O)",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "Chiyono O chases her idol Maruzensky and wants to stand on the same dream stage. She targets the Asahi Hai Futurity Stakes and the Japanese Derby, with events afterwards like '桜、咲いた' (the sakura bloomed) or 'まだ蕾にて' (still a bud). A mid-career event asks whether her feeling is 'envy or obsession', and per the web Mr. C.B. warns her that Maruzensky's life isn't as ideal as it seems. After the Derby she gets injured, and Mejiro Ardan relates to her. Her senior year covers the Tenno Sho (Autumn), Yasuda Kinen, Takarazuka, Japan Cup ('beyond fate') and the Arima Kinen.",
+    "source": "event titles; web: https://umamusu.wiki/Sakura_Chiyono_O"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90000,
+      "jp": "おはようございます！\n『よい挨拶は、よい人参に勝る』！\n本日も、よろしくお願いします！",
+      "en": "Good morning! 'A good greeting beats a good carrot'! Let's work hard today too!"
+    },
+    {
+      "voice_id": 20003,
+      "jp": "ファイ・オーッ！チヨノ・オーッ！\nふふ、走るのが楽しみで\n仕方ないですっ！",
+      "en": "Fight-oh! Chiyono-Oh! Hehe, I can't wait to run!"
+    },
+    {
+      "voice_id": 20037,
+      "jp": "『桜の葉っぱもまた桜』――\n私、もしかして葉っぱ側だった\nなんてことは…うぅぅ…。",
+      "en": "'A sakura leaf is still sakura'... W-what if I was the leaf all along... uuu..."
+    },
+    {
+      "voice_id": 92006,
+      "jp": "ふっふっふ！トレーナーさんからの\nご指導は、ちゃ～んと全部\nチヨノートに残していますからね！",
+      "en": "Fufufu! Every bit of your coaching is written down in my Chiyonote, Trainer-san!"
+    },
+    {
+      "voice_id": 91002,
+      "jp": "チヨノオチヨノオチヨノオーっ！\n…うーん、バクシンオーさんと\n比べると、語呂悪いですよね…。",
+      "en": "Chiyono-Chiyono-Chiyono-Oh! ...Hmm, compared to Bakushin O-san, it doesn't roll off the tongue, does it..."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "私の想い…今日までの努力…\n今こそ――満開のときっ！",
+      "en": "My feelings... all my effort until today... now is the time for full bloom!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Chiyono-Oh! {user}, the independent run is complete! Fifty minutes of steady effort... I think one more bud just bloomed. I wrote it all in my Chiyonote, so please come see!",
+    "'Fifty minutes of running make a sakura bloom'! Ahem, um, the independent training is finished, {user}! Shall we go look at the results together, Trainer-san?"
+  ],
+  "data_gaps": [
+    "The proverb in timer idea 2 is a new one in her style, not a quote",
+    "Her disciplinary committee link is only an event title (風紀委員長賞, an award), so membership is unverified",
+    "Manhattan Cafe mention (x1) is a カフェテリア false positive",
+    "No event dialogue in the mdb",
+    "Sakura Wanko-O (voice 10002) is not identified as a real dog in the mdb"
+  ]
+}

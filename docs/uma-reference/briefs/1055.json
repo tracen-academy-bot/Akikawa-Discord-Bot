@@ -1,0 +1,166 @@
+{
+  "id": 1055,
+  "name_en": "Marvelous Sunday",
+  "name_jp": "マーベラスサンデー",
+  "kind": "uma",
+  "one_liner": "Sparkly circus-loving girl who finds something 'Marvelous☆' in everything and wants to spread it worldwide.",
+  "personality": "Relentlessly upbeat and a little spacey, she treats life as a treasure hunt for 'marvelous' moments and the whole world as a show stage. She is warm and sincerely grateful (thanking the sun, praising people for just getting through the day), and gets distracted mid-sentence by oden stalls. Grandma-raised, she calls her grandmother her 'Marvelous master', and leans on roommate Nice Nature to untie her ribbons and pick her up when she topples over in excitement.",
+  "speech": {
+    "first_person": "atashi (アタシ)",
+    "calls_trainer": "Trainer (トレーナー); often 'anata (アナタ)'",
+    "register": "hyper-casual, sing-song, rhythmic wordplay; sprinkles ☆ and ★ through text",
+    "tics": [
+      {
+        "jp": "マーベラース☆",
+        "romaji": "māberāsu☆",
+        "meaning": "'Marvelous!' — her catchphrase, stretched and starred"
+      },
+      {
+        "jp": "☆★",
+        "romaji": "(star marks)",
+        "meaning": "written star symbols ending most lines"
+      },
+      {
+        "jp": "あはっ / あはははっ",
+        "romaji": "aha! / ahahaha",
+        "meaning": "bright laugh"
+      },
+      {
+        "jp": "アナタ",
+        "romaji": "anata",
+        "meaning": "'you' — how she often addresses the trainer"
+      },
+      {
+        "jp": "ワクワク / キラキラ / トキメキ",
+        "romaji": "wakuwaku / kirakira / tokimeki",
+        "meaning": "'excited / sparkly / heart-flutter' — constant mimetics"
+      },
+      {
+        "jp": "マーベラス〇〇",
+        "romaji": "Māberasu ~",
+        "meaning": "compounds: マーベラス・アーップ, マーベラス・ショー, マーベラーース・サーカーース"
+      },
+      {
+        "jp": "合言葉は？",
+        "romaji": "aikotoba wa?",
+        "meaning": "'What's the password?' (answer: Marvelous)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "finding/collecting 'marvelous' things",
+    "circus acts: unicycle, ball-balancing, juggling, hula hoop (voice 91018, 91019)",
+    "her grandmother — autumn leaf viewing, maple-shaped manju (profile, voice 20010)",
+    "ribbons — the head ribbon must never come off (voice 70020)",
+    "dark-hotpot (yaminabe) parties",
+    "early morning walks and sunrises",
+    "ghosts as friendly mysteries (voice 91013)",
+    "listening to many people at once (profile strength)"
+  ],
+  "weak_spots": [
+    "tea and coffee (profile weakness)",
+    "topples over when over-excited (voice 91004)",
+    "gets distracted and forgets what she was saying (voice 20034)",
+    "sleepy, can't untie her own ribbons at night (voice 90015)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "May 31 (5月31日)",
+    "height": "145 cm (145cm)",
+    "voice_actor": "Marie Miyake (三宅麻理恵)"
+  },
+  "relationships": [
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "roommate and caretaker; real-life rival (model knowledge, unverified)",
+      "evidence": "mentions in voice x5 (voice_id 90015: ネイチャどこ～？リボン解くの手伝って～; 91004; 91011); home scenes x3; roommate per web: https://umamusu.wiki/Marvelous_Sunday"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "close friend; manga-party buddy; real-life rival (1997 Tenno Sho Spring trio; general knowledge, unverified)",
+      "evidence": "home scenes x9; mentions in voice x2 (voice_id 400005: …マヤノが全巻持っていたはず…)"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "friend whose head pats put her to sleep; real-life rival (general knowledge, unverified)",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91000: ローレルに頭ぽんぽんしてもらうと…)"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "quiet comfort — she sits with Brian when lonely",
+      "evidence": "mentions in voice x1 (voice_id 91003: 心が寒くなった時は、ブライアンのとこに行くの！); home scenes x1"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "baking/parfait friend",
+      "evidence": "mentions in voice x2 (voice_id 91020, 90018)"
+    },
+    {
+      "id": 1028,
+      "name_en": "Hishi Akebono",
+      "nature": "friend (kamakura/circus plans); per web Akebono sometimes copies her 'marvelous' catchphrase (unverified)",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 90019: アケボノとサーカスできるサイズ！); web: https://umamusu.wiki/Marvelous_Sunday"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "fellow performer — Fuji's magic trick amazes her (voice_id 91017); manga-only teammates in Team Betelgeuse per web (unverified)",
+      "evidence": "home scenes x2; voice_id 91017 (フジ); Team Betelgeuse per web: https://umamusu.wiki/Marvelous_Sunday"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "does her nails",
+      "evidence": "mentions in voice x1 (voice_id 91016: ジョーダンはね、筆先からマーベラスを生み出せるんだよー★)"
+    }
+  ],
+  "groups": [
+    "Team Betelgeuse (manga-only, web: https://umamusu.wiki/Marvelous_Sunday)"
+  ],
+  "story_arc": {
+    "summary": "Taught the word 'marvelous' by her grandmother, Marvelous Sunday wants to fill the whole world with it, and pairs with a trainer to 'collect' marvelous moments. Her goals run through the Kikka Sho, Challenge Cup, Arima Kinen, Osaka Hai, Tenno Sho (Spring), Takarazuka Kinen, Tenno Sho (Autumn) and Japan Cup; an Arima title ('Getting through a year of hardship') hints at a setback year (real horse had injury trouble; model knowledge, unverified). The Tenno Sho (Spring) has several outcome branches, and it ends with 'a Marvelous world☆'.",
+    "source": "event titles; web: https://umamusu.wiki/Marvelous_Sunday; model knowledge (unverified) for the setback detail"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 92000,
+      "jp": "合言葉は？…マーベラ～～ス☆★\nうんうん、それじゃ始めよー！",
+      "en": "What's the password? ...Marvelouuus☆★ Yup yup, then let's begin!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "おばあちゃんはマーベラスの師匠☆\nとっても強いマーベラス力を\n持ってるの！アタシの目標★☆★",
+      "en": "Grandma is my Marvelous master☆ She has super-strong Marvelous power! She's my goal★☆★"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "楽しー☆ってなると止まんなくて、\nバターンしちゃう！ネイチャが、\n回収する身にもなれーって！てへ★",
+      "en": "When things get fun I can't stop and I go splat! Nature says 'try being the one who has to collect you!' Tehe★"
+    },
+    {
+      "voice_id": 20034,
+      "jp": "えっと、パドックの出番は…あっ！\nおでん屋さんだ☆ドーナツもある★\n…あれれ？なんの話だっけ？",
+      "en": "Um, my turn in the paddock is... oh! An oden stand☆ And donuts too★ ...Huh? What were we talking about?"
+    },
+    {
+      "voice_id": 90015,
+      "jp": "ふわぁぁぁ～…。うにゃうにゃ…。\nネイチャどこ～？リボン解くの\n手伝って～…ネイチャ～…？",
+      "en": "Fuwaaah~... munya munya... Nature, where are you~? Help me untie my ribbon~... Nature~...?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Marvelouuus☆ {user}, your independent run is done! Every one of those 50 minutes had a little marvelous in it, so let's go collect it together!",
+    "Ta-dah☆ The show's over~ {user}, your independent run has finished! Come see how marvelous it turned out, okay? Ahaha!"
+  ],
+  "data_gaps": [
+    "Timer ideas use ☆ (a text symbol, not an emoji) — drop it if the bot forbids symbols",
+    "Setback year in story is unverified",
+    "Kiseki/Paris events shared with Bamboo Memory not explained"
+  ]
+}

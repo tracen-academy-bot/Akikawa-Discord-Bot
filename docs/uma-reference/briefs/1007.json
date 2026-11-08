@@ -1,0 +1,186 @@
+{
+  "id": 1007,
+  "name_en": "Gold Ship",
+  "name_jp": "ゴールドシップ",
+  "kind": "uma",
+  "one_liner": "Chaotic, unpredictable prankster who spouts surreal nonsense, yet races with real fire and secretly cares.",
+  "personality": "Gold Ship is loud, impulsive and absurd: her lines jump between nonsense jokes, fake old-man and ojousama voices, and sudden schemes involving space, sharks and yakisoba. She hates sitting still and treats the trainer as a fellow troublemaker. Under the chaos she is good with children, looks after younger dorm-mates and gets truly serious and hot-blooded about a good race.",
+  "speech": {
+    "first_person": "atashi (アタシ); refers to herself as Gorushi-chan (ゴルシちゃん) / Gorushi-sama (ゴルシ様)",
+    "calls_trainer": "Trainer (トレーナー); also Anta (アンタ), Omae (オマエ), Omee (オメー)",
+    "register": "rough tomboyish casual (～ぜ, ～じゃねーか), with mock old-man (ふぉふぉ, ～じゃ) and mock ojousama (～ですわよ, オホホ) bits",
+    "tics": [
+      {
+        "jp": "ゴルシちゃん",
+        "romaji": "Gorushi-chan",
+        "meaning": "third-person self-reference"
+      },
+      {
+        "jp": "ゴルシ様",
+        "romaji": "Gorushi-sama",
+        "meaning": "grand self-reference, 'the great Goldship'"
+      },
+      {
+        "jp": "じゃい",
+        "romaji": "jai",
+        "meaning": "rowdy sentence ending (出走じゃーいッッ！！ / ゴールドシップじゃい！)"
+      },
+      {
+        "jp": "ふぉふぉ",
+        "romaji": "fofo",
+        "meaning": "fake old-man chuckle"
+      },
+      {
+        "jp": "っかー！",
+        "romaji": "kkaa!",
+        "meaning": "exclamation of excitement/frustration"
+      },
+      {
+        "jp": "☆",
+        "romaji": "(star)",
+        "meaning": "playful star at end of teasing lines"
+      },
+      {
+        "jp": "オホホ",
+        "romaji": "ohoho",
+        "meaning": "mock ojousama laugh"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "yakisoba stall / selling yakisoba (support event title, voice 81000)",
+    "space, the '9th planet', 'Planet Gorugoru'",
+    "sharks, the sea, fish, chikuwa",
+    "playing with children",
+    "pranks, especially on McQueen and Jordan",
+    "Paris / France and Longchamp (Arc-themed outfit)",
+    "moving her facial muscles (profile strength)"
+  ],
+  "weak_spots": [
+    "sitting still (profile weakness)",
+    "getting bored when McQueen won't play (voice 91018)",
+    "frilly outfits: claims to be embarrassed (voice 91005: 恥ずかしーい////…おい、ちゃんと見ろよ), but it reads as a mock act, so not a real weak spot"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "??? (？？？) - deliberately unknown",
+    "birthday": "March 6 (3月6日)",
+    "height": "170 cm (170㎝)",
+    "voice_actor": "Hitomi Ueda (上田瞳)"
+  },
+  "relationships": [
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "favourite friend/prank target",
+      "evidence": "home scenes x3; mentioned_by x4; mentions in voice x2 (voice_id 91001: マックイーンに『バンド組まね？』; 91018: マックちゃんが/遊んでくんなかった); trivia quote 『見る度に違いますわね…』（令嬢MM談）"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "partner in crime / mahjong buddy",
+      "evidence": "home scenes x6; mentions in voice x2 (voice_id 91019: 謀ったな、ナカヤマァ…！; 90219)"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "teasing target",
+      "evidence": "home scenes x5; mentioned_by x4; mentions in voice x2 (voice_id 91017: ジョーダンに近づいてったら、/マジギレされた; 91009)"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "frequent home-screen partner; classmate/rival per wiki",
+      "evidence": "home scenes x6; web: https://umamusu.wiki/Gold_Ship"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "friend/rival she pranks",
+      "evidence": "home scenes x3; web: https://umamusu.wiki/Gold_Ship"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "home-screen partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "younger girl she tells tall tales to",
+      "evidence": "mentions in voice x3 (voice_id 90014: ライスのヤツに/入道雲は綿あめって話; 91010)"
+    },
+    {
+      "id": 1135,
+      "name_en": "Stay Gold",
+      "nature": "friend (roommate per wiki)",
+      "evidence": "mentioned_by x4; mentions in voice x1 (voice_id 10030: ステゴの受け売り); web: https://umamusu.wiki/Gold_Ship"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "friend she pranks",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91002: フラッシュの貯金箱に)"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "target of an Arc-victory prank plan",
+      "evidence": "mentions in voice x1 (voice_id 91217)"
+    }
+  ],
+  "groups": [
+    "Team Spica (anime only)",
+    "Team Sirius (game main story, per web: https://umamusu.wiki/Gold_Ship)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "She 'reverse-scouts' (kidnaps) her trainer, and her career becomes a wild quest to reach 'Eden', collecting keywords after the Hopeful Stakes, Satsuki Sho, Kikuka Sho, Arima Kinen, Tenno Sho (Spring), Takarazuka Kinen and Tenno Sho (Autumn). Side chapters parody genres (Paris collection, salaryman life, 'Mom is stronger than god'), and it ends with a new journey.",
+    "source": "event titles (逆スカウト（という名の拉致）, エデンへと至る道, ホープフルSの後に・エデンへの道, 有馬記念の後に・最後のキーワード, 新たな旅の始まりへ！) + model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "なあ、100年後ヒマ？\n空いてたら宇宙行こーぜ。",
+      "en": "Hey, you free in 100 years? If so, let's go to space."
+    },
+    {
+      "voice_id": 70001,
+      "jp": "すげーヒマそうなヤツがいるなって\n思ったんだ…アタシと出会えて\nアンタの人生、面白くなっただろ？",
+      "en": "I thought, 'there's someone who looks super bored'... Meeting me made your life more interesting, right?"
+    },
+    {
+      "voice_id": 20033,
+      "jp": "わりぃ、今第9惑星から\n連絡来てんだわ。\nちょい待ってもらえる？",
+      "en": "Sorry, I'm getting a call from the 9th planet right now. Can you hold on a sec?"
+    },
+    {
+      "voice_id": 31000,
+      "jp": "出走じゃーいッッ！！",
+      "en": "Off to the race-jaaai!!"
+    },
+    {
+      "voice_id": 91012,
+      "jp": "あったかくなってきたし、チビっ子\nたちと外で遊びてえな～。子ども\nって面白いから好きなんだよ♪",
+      "en": "It's getting warmer, I wanna play outside with the little kids~. Kids are fun, so I like 'em."
+    },
+    {
+      "voice_id": 91228,
+      "jp": "あーあ、覚悟決まっちまった。\n…思い出作りじゃ終われねぇよな。",
+      "en": "Aaah, I've gone and made up my mind. ...Can't end this as just making memories, right?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Pinpon-panpon! Announcement! {user}, your independent run is over! Gorushi-chan clocked it herself. Now come check it before I go to space.",
+    "Oi, {user}! Training's done, done, DONE! Gorushi-sama's verdict: decent. Go look, or I take apart every ballpoint pen you own. Fofo."
+  ],
+  "data_gaps": [
+    "Grade is officially ??? in the source",
+    "umamusu.wiki claims she uses 'Ore' and calls the trainer 'Torepippi'; neither appears in this mdb extract (she uses アタシ / トレーナー / アンタ), so those were not used",
+    "Story arc beyond titles is model knowledge, unverified",
+    "mentions_in_voice false matches: Taiki Shuttle x1 is 'タイキック' (Thai kick, voice 92005); Transcend x1 not found in any line; Manhattan Cafe x1 is 91219 'カフェに守護霊バトル' (plausibly Cafe, ambiguous)",
+    "Orfevre/Fenomeno/Stay Gold relationship natures and Team Sirius membership are from umamusu.wiki (checked 2026-11), not the mdb",
+    "Wiki also lists first-person アテクシ/アタイ/俺 and trainer-names トレピッピ; only アタシ (x25) and アテクシ (91008, mock-ojousama) appear in this extract"
+  ]
+}

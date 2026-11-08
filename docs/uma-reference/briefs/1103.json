@@ -1,0 +1,185 @@
+{
+  "id": 1103,
+  "name_en": "Royce and Royce",
+  "name_jp": "ロイスアンドロイス",
+  "kind": "uma",
+  "one_liner": "A data-obsessed self-producer who keeps trying on 'characters' to make herself the Strongest everyone remembers.",
+  "personality": "Driven by one goal - the title of \"Strongest\" and being remembered - she treats everything as self-promotion: camera angles, fan service, catchphrases, even Christmas litter-picking for likeability. She is analytical and efficiency-minded (spreadsheets, 'taipa'), and constantly test-drives personas mid-sentence before judging them a flop. Underneath the act she is sincere and a bit insecure: she psyches herself up with an imaginary cheer squad and gets flustered giving the trainer Valentine chocolate.",
+  "speech": {
+    "first_person": "watashi (私); calls herself Royce-chan (ロイスちゃん) in third person when performing",
+    "calls_trainer": "anata (貴方); once anta (アンタ) in a mock-tsundere bit (voice 10004)",
+    "register": "confident feminine casual (～わ, ～よ, ～わよ, ～かしら), frequently quoting herself in made-up 'character' voices; marketing jargon",
+    "tics": [
+      {
+        "jp": "最強",
+        "romaji": "saikyō",
+        "meaning": "'the Strongest' - her goal and catchword"
+      },
+      {
+        "jp": "ロイスちゃん",
+        "romaji": "Roisu-chan",
+        "meaning": "her self-branded name"
+      },
+      {
+        "jp": "タイパ",
+        "romaji": "taipa",
+        "meaning": "'time performance', time-efficiency"
+      },
+      {
+        "jp": "コスパ",
+        "romaji": "kosupa",
+        "meaning": "'cost performance', value for money"
+      },
+      {
+        "jp": "セルフプロデュース",
+        "romaji": "serufu purodyūsu",
+        "meaning": "self-production / self-branding"
+      },
+      {
+        "jp": "アリね",
+        "romaji": "ari ne",
+        "meaning": "'that could work' - approving a new idea"
+      },
+      {
+        "jp": "演出",
+        "romaji": "enshutsu",
+        "meaning": "staging, presentation"
+      },
+      {
+        "jp": "キャラ",
+        "romaji": "kyara",
+        "meaning": "a persona/character type she tries on"
+      },
+      {
+        "jp": "わよ！",
+        "romaji": "~wa yo!",
+        "meaning": "assertive feminine sentence ending"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "self-production and fan service",
+    "data organizing in spreadsheets; exercising while multitasking (profile)",
+    "collecting qualifications (event 資格王ロイス; voice 90003 weather forecaster idea)",
+    "retro minicars (voice 91001)",
+    "kakigori ice bars for cost-performance (voice 91013)",
+    "ramune for focus (voice 90002)",
+    "glasses / comedy glasses / party glasses",
+    "blends her own tail cologne (profile)",
+    "reads marketing, psychology, biographies, neuroscience (voice 90008)",
+    "lavender, green-and-purple colour scheme"
+  ],
+  "weak_spots": [
+    "packets that say 'can be opened from anywhere on this side' (profile weakness)",
+    "glasses fogging up in winter; contacts irritate her (voice 91015)",
+    "overthinking which persona to use (voice 20034)",
+    "getting flustered being sincere with the trainer (voice 10005)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Junior/Middle School Division (中等部)",
+    "birthday": "March 10 (3月10日)",
+    "height": "159 cm (159cm)",
+    "voice_actor": "田辺留依 (Tanabe Rui)"
+  },
+  "relationships": [
+    {
+      "id": 1102,
+      "name_en": "Sounds of Earth",
+      "nature": "frequent home-scene partner; anime Team Canopus teammate",
+      "evidence": "home scenes x6; Team Canopus per web: https://umamusu.wiki/Royce_and_Royce"
+    },
+    {
+      "id": 1043,
+      "name_en": "Shinko Windy",
+      "nature": "roommate who nibbles her in her sleep; Royce studies Windy's 'character'",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91000: 同室のウインディさん、寝ぼけて甘噛みしてくる); Windy voice 90010, 91023"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Royce thinks Nature has idol-level 'oshi' appeal",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91002); anime Team Canopus per web"
+    },
+    {
+      "id": 1062,
+      "name_en": "Matikanetannhauser",
+      "nature": "Team Canopus teammate (anime)",
+      "evidence": "home scenes x3; web: https://umamusu.wiki/Royce_and_Royce"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Team Canopus teammate; Royce hopes to build a fandom like hers",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Royce_and_Royce"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "friend/rival; fellow data analyst who attended Royce's fan-service lecture",
+      "evidence": "home scenes x1; Biwa Hayahide voice 90212; rivalry per web: https://umamusu.wiki/Royce_and_Royce"
+    },
+    {
+      "id": 1057,
+      "name_en": "Mr. C.B.",
+      "nature": "C.B. sees her as her opposite but similar at the root",
+      "evidence": "Mr. C.B. voice 91019"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "Royce reminds Turbo to collect rewards",
+      "evidence": "home scenes x1; Twin Turbo voice 400013"
+    }
+  ],
+  "groups": [
+    "Miho Dorm",
+    "Team Canopus (anime-only, Season 3; per web: https://umamusu.wiki/Royce_and_Royce)"
+  ],
+  "story_arc": {
+    "summary": "Her career chapters are named after Rolls-Royce models (Phantom, Silver Shadow, Corniche, Cullinan, Spectre, Wraith, Sweptail). She sets out to manufacture a 'Strongest' legend through self-production; event titles chart a debut 'unveiling', setbacks after the Derby (\"Black Swan\", \"Overshadow\"), a route change after the Kikuka Sho, and a reckoning after the Autumn Tenno Sho (\"A change in self-image\", \"The essence of tears of regret\"). Her real-life model (3 wins, 9 seconds from 28 starts) placed in many big races without winning one, which fits the theme of being remembered without titles (real-horse note unverified).",
+    "source": "event titles; web: https://umamusu.wiki/Royce_and_Royce, https://www.inside-games.jp/article/2026/02/13/177317.html; real-horse record: model knowledge + web search summary (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "“最強”は作りだせるの。\nそのための物語づくりは――\n貴方にも協力してもらうわよ？",
+      "en": "The 'Strongest' can be manufactured. And the story it takes - you're helping me write it, alright?"
+    },
+    {
+      "voice_id": 90001,
+      "jp": "おはようございます。おはざっス！\nおっはおは～♡…さて。貴方的には\nどの挨拶が刺さったかしら？",
+      "en": "Good morning. Mornin'-ssu! Morning-morning~♡ ...Now. Which greeting hit you the hardest?"
+    },
+    {
+      "voice_id": 20008,
+      "jp": "おかしいわね、拭いても拭いても\n眼鏡が曇るわ…は！眼鏡キャラを\n変えてみろっていう…天啓！？",
+      "en": "Weird, my glasses keep fogging no matter how much I wipe them... Ah! Is this a sign to change my glasses-girl character!?"
+    },
+    {
+      "voice_id": 20035,
+      "jp": "…ううん、弱気になっちゃダメよ\nロイス！そう、私はサイキョー！\n頑張り屋！カワイイ！賢ぉーいっ！",
+      "en": "...No, I can't go weak now, Royce! That's right, I'm the Strongest! A hard worker! Cute! Sma-a-art!"
+    },
+    {
+      "voice_id": 92001,
+      "jp": "必要な器具は全部まとめて揃えて\nあるわ。ライバルを上回るなら、\nタイパ重視で進めたいもの。",
+      "en": "I've got all the equipment I need laid out. If I'm going to beat my rivals, I want the best time-efficiency."
+    },
+    {
+      "voice_id": 10004,
+      "jp": "バレンタインね。…ふん、勘違い\nしないで！アンタのぶん、ついでに\n用意しただけなんだから！…どう？",
+      "en": "It's Valentine's. ...Hmph, don't get the wrong idea! I only made yours as an extra! ...How was that?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Attention, {user}! Your independent run just wrapped. Check the results right away - best time-efficiency move you'll make today. ...That delivery was memorable, right?",
+    "Here's a notice for you, {user}: the 50-minute run is done! Every result is material for the Strongest story, so let's review it together. Now, go!"
+  ],
+  "data_gaps": [
+    "Career story text not available; arc summary inferred from event titles plus a short web blurb.",
+    "mentions_in_voice for Daring Tact (x1) does not match any clear reference in her lines; likely a false positive.",
+    "Only one trainee card in source.",
+    "Real horse's 'never won a graded race' framing not confirmed; reworded as placing in big races without winning one."
+  ]
+}

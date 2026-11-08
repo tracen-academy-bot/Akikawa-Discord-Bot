@@ -1,0 +1,195 @@
+{
+  "id": 1023,
+  "name_en": "Biwa Hayahide",
+  "name_jp": "ビワハヤヒデ",
+  "kind": "uma",
+  "one_liner": "Bespectacled logician seeking the perfect 'victory formula' - and insisting her big fluffy hair doesn't mean a big head.",
+  "personality": "A calm, analytical senior who frames everything as theory, data and equations, and wants to complete her 'formula for victory' with her trainer as partner. She is a caring, slightly fussy older sister to Narita Brian and the steady anchor of her friends Winning Ticket and Narita Taishin. Her composure cracks over her voluminous hair (she insists her head is a normal size) and over caterpillars, and she admits feelings sometimes reach her before logic does.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-kun (トレーナー君) / kimi (君)",
+    "register": "formal, intellectual, slightly masculine plain form ('～だ', '～たまえ'); loves katakana jargon",
+    "tics": [
+      {
+        "jp": "トレーナー君",
+        "romaji": "toreenaa-kun",
+        "meaning": "How she addresses the trainer"
+      },
+      {
+        "jp": "ふむ",
+        "romaji": "fumu",
+        "meaning": "'Hm' - thinking aloud"
+      },
+      {
+        "jp": "成程",
+        "romaji": "naruhodo",
+        "meaning": "'I see'"
+      },
+      {
+        "jp": "方程式",
+        "romaji": "houteishiki",
+        "meaning": "'Equation / formula' - her 'formula for victory'"
+      },
+      {
+        "jp": "理論上は",
+        "romaji": "rironjou wa",
+        "meaning": "'In theory'"
+      },
+      {
+        "jp": "頭は大きくない！",
+        "romaji": "atama wa ookikunai!",
+        "meaning": "'My head is NOT big!' - running gag about her hair"
+      },
+      {
+        "jp": "～たまえ",
+        "romaji": "-tamae",
+        "meaning": "Lofty imperative ('期待していたまえ' - 'go ahead and expect it')"
+      },
+      {
+        "jp": "Q.E.D.",
+        "romaji": "kyuu ii dii",
+        "meaning": "Quod erat demonstrandum, after a win"
+      },
+      {
+        "jp": "～君",
+        "romaji": "-kun",
+        "meaning": "Suffix she uses for juniors and peers (オペラオー君, ネイチャ君)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "theories, data, equations, her trusty scientific calculator",
+    "tidying up (official strength)",
+    "libraries, books, mystery dramas",
+    "hair care (new hair oil, electric hairbrush)",
+    "healthy sandwiches and soups; banana sweets (a weakness for them)",
+    "archery (kyudo) analysis",
+    "her younger sister Brian"
+  ],
+  "weak_spots": [
+    "rainy season / humidity (official weakness; her tail won't fit the tail hole)",
+    "comments about her big hair / head",
+    "caterpillars",
+    "stage performance - thinks she is bad at singing and dancing",
+    "falling asleep (habit of reflecting at night)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 10 (3月10日)",
+    "height": "171 cm (171cm)",
+    "voice_actor": "Yui Kondou (近藤唯)"
+  },
+  "relationships": [
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "Younger sister; Hayahide fusses over Brian's hair-drying, picky eating and not calling home",
+      "evidence": "home scenes x6; mentions in voice (voice_id 10007, 90215, 91004, 91013, 91021)"
+    },
+    {
+      "id": 1050,
+      "name_en": "Narita Taishin",
+      "nature": "Close friend and rival (BNW); always finishes thick books but gives sloppy reviews",
+      "evidence": "home scenes x5; mentions in voice x5 (voice_id 91000, 90015, 90019); Taishin mentions her x7"
+    },
+    {
+      "id": 1035,
+      "name_en": "Winning Ticket",
+      "nature": "Close friend and rival (BNW); tutors her, gets her hair turned into 'Santa's beard'",
+      "evidence": "home scenes x4; mentions in voice x7 (voice_id 10008, 91001, 90004); Ticket mentions her x6"
+    },
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "Gets pulled into Opera O's morning theatre; invites the trainer to operas with Opera O's commentary",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 10026, 90211); top affinity 40"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "Gave her a lecture on fan service",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 90212)"
+    },
+    {
+      "id": 1111,
+      "name_en": "Air Messiah",
+      "nature": "Library companion",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 90213)"
+    },
+    {
+      "id": 9045,
+      "name_en": "Sugar Lights (NPC, 'Dr. Lights')",
+      "nature": "Recommended her a sci-fi novel",
+      "evidence": "home scenes x1; voice_id 91223 (ライツ博士)"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "Brian's roommate; Hayahide worries Gimlet has her hands full",
+      "evidence": "mentions in voice x1 (voice_id 91220)"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Feels oddly close to her, 'maybe the colour scheme'",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    }
+  ],
+  "groups": [
+    "BNW (with Winning Ticket and Narita Taishin; general knowledge, unverified in mdb)",
+    "Narita Brian's family (older sister)"
+  ],
+  "story_arc": {
+    "summary": "Hayahide sets out to build a complete 'formula for victory' through theory, but her story (chapter titles like 'Theory and Instinct', 'The Sisters' Hypothesis') pushes her to accept instinct and feelings alongside logic. Her career runs Asahi Hai FS, Satsuki Sho, Derby, Kikka Sho, then Tenno Sho Spring, Takarazuka, Tenno Sho Autumn and Arima; event titles show anxiety and pretending after the Satsuki Sho, 'noise' after the Derby, and regret after the Tenno Sho Spring. Her rivalry with friends Ticket and Taishin and her relationship with sister Brian are central.",
+    "source": "event titles; chara_story_titles; model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "私は――より勝利に近づける理論を\nどこまでも追い求めていきたい。\n頼り甲斐のある相棒と共に、ね。",
+      "en": "I want to keep pursuing theories that bring me closer to victory, wherever they lead. Together with a partner I can rely on."
+    },
+    {
+      "voice_id": 91017,
+      "jp": "『髭もじゃのサンタがいる』と\n噂になっているらしい…が、私の\n頭は…もじゃもじゃではないぞ！",
+      "en": "Apparently there's a rumour about a 'Santa with a bushy beard'... but my head is not bushy!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "先日、チケットに頼まれて勉強を\n教えたんだが…大丈夫、赤点は\n回避できる…はずだ、理論上は。",
+      "en": "Ticket asked me to tutor her the other day... It's fine, she'll avoid failing marks... she should, in theory."
+    },
+    {
+      "voice_id": 20023,
+      "jp": "ふっ…調整は完璧だ。\n勝利は確約されたに等しい――\n期待していたまえ、トレーナー君！",
+      "en": "Heh... my conditioning is perfect. Victory is as good as guaranteed. Go ahead and look forward to it, Trainer-kun!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "この間、部屋に毛虫が現れてな…。\n毛で膨らみ、うねうね蠢くあの姿…\nああ、思い出すだけでぞっとする！",
+      "en": "A caterpillar showed up in my room the other day... Puffed up with hair, squirming... ah, just remembering it gives me chills!"
+    },
+    {
+      "voice_id": 30206,
+      "jp": "Q.E.D.…\n分析通り、だよ。",
+      "en": "Q.E.D. ...Just as analysed."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run has concluded. Fifty minutes, precisely as calculated. Shall we review the data together, Trainer-kun? ...And no, my hair is not blocking the screen.",
+    "Fumu. The variables held and the run is complete, {user}. The logical next step is to check the results promptly. Q.E.D."
+  ],
+  "data_gaps": [
+    "'mentions_in_voice' lists Mejiro Ryan x8; these are false positives from the substring ライアン inside ブライアン. Narita Brian's x8 count may be accurate.",
+    "Manhattan Cafe mention is a false positive (近所のカフェ, voice_id 90017).",
+    "BNW grouping is general knowledge; not named in the source data.",
+    "Story arc specifics are model knowledge plus titles."
+  ]
+}

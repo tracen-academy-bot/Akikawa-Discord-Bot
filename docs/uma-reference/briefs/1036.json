@@ -1,0 +1,197 @@
+{
+  "id": 1036,
+  "name_en": "Air Shakur",
+  "name_jp": "エアシャカール",
+  "kind": "uma",
+  "one_liner": "Foul-mouthed hacker genius who trusts only data and simulations, and calls everything else noise.",
+  "personality": "Air Shakur is a prickly, sharp-tongued loner who frames everything as data, code, simulations and logic, and dismisses guts, wishes and superstition as illogical. She hates noise and crowds, prefers the night, and brushes off concern, but she quietly keeps tabs on people (she knows the trainer's birthday 'as data', looks after the clumsy Doto) and admits the trainer is a 'piece' she won't allow to go missing. Under the gruffness she is grudgingly appreciative and even embarrassed by kindness.",
+  "speech": {
+    "first_person": "ore (オレ)",
+    "calls_trainer": "omae (お前) / omee (オメー) / anta (アンタ); no 'Trainer-san' address seen",
+    "register": "rough, delinquent-style casual male speech; vowels dragged and の/る slurred into ン (なンだ, してンだ), ねェ for ない",
+    "tics": [
+      {
+        "jp": "ロジカル",
+        "romaji": "rojikaru",
+        "meaning": "'logical' - her core value word; 'Let's go logical' (ロジカルに行こうぜ)"
+      },
+      {
+        "jp": "ねェ",
+        "romaji": "nee",
+        "meaning": "rough negative ending replacing nai (問題ねェ = no problem)"
+      },
+      {
+        "jp": "ン",
+        "romaji": "n",
+        "meaning": "slurs の/る into ン: なンだ, してンだ, ンだよ"
+      },
+      {
+        "jp": "チッ",
+        "romaji": "chi'",
+        "meaning": "tongue click, 'tch'"
+      },
+      {
+        "jp": "シミュレーション通り",
+        "romaji": "shimyureeshon doori",
+        "meaning": "'exactly as simulated'"
+      },
+      {
+        "jp": "ノイズ",
+        "romaji": "noizu",
+        "meaning": "'noise' - anything annoying or irrational"
+      },
+      {
+        "jp": "ブチかま",
+        "romaji": "buchikama(su)",
+        "meaning": "'smash it / blow them away'"
+      },
+      {
+        "jp": "ダリィ",
+        "romaji": "darii",
+        "meaning": "'what a drag' (darui)"
+      },
+      {
+        "jp": "検証",
+        "romaji": "kenshou",
+        "meaning": "'verification' - 検証開始 / 検証終了 = test started / finished"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Programming, PCs and new PC parts (profile strength; voice 10009)",
+    "Data, simulations and verification",
+    "Night time and quiet, noise-free places (90004)",
+    "Video games - 'rule-based, honest play' (91003)",
+    "Sneakers ('never enough', 70021); buys clothes online and jokes about writing a program to judge outfits (10027)",
+    "Making and uploading music (91011); was impressed by a mixer Tap's friend brought in (400004)",
+    "High-cacao chocolate, jelly drinks instead of breakfast (10004, 90001)",
+    "Devil / hell / 'contract' imagery in her alternate outfit lines (93004, 95010)"
+  ],
+  "weak_spots": [
+    "Cicadas - her listed weakness is the large brown cicada (アブラゼミ); 'why are cicadas so noisy?!' (90007)",
+    "Noise, crowds, Christmas illumination and festive buzz (10008, 90011)",
+    "Talking in the morning (91009)",
+    "Ghost talk - insists it's illogical and denies being scared (91019, 91023)",
+    "Very sweet snacks (90013)",
+    "Has never opened the care packages her mother sends (profile)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "February 26 (2月26日)",
+    "height": "168 cm",
+    "voice_actor": "Minami Tsuda (津田美波)"
+  },
+  "relationships": [
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "Roommate (web); Shakur grudgingly looks after the clumsy Doto",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91001: 面倒みてるつもりはねェ、やたら居合わせるだけだ…ドトウのヤツ、今日もドジ連発しやがって…; voice_id 91021: またドトウのドジで目が覚めた…); Doto mentions her x3; roommate per web: https://umamusu.wiki/Air_Shakur"
+    },
+    {
+      "id": 1107,
+      "name_en": "Tap Dance City",
+      "nature": "Cheerful pest whose humming gets stuck in her head; wiki says Tap keeps trying to recruit her",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91024: タップの鼻歌が頭から離れねェ…！); web: https://umamusu.wiki/Air_Shakur"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "Fine Motion keeps dragging her into chats; complicated 'fate' theme per wiki",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91010: 休憩は大事とか言ってファインが ダベりに誘ってきやがる…); web: https://umamusu.wiki/Air_Shakur"
+    },
+    {
+      "id": 1111,
+      "name_en": "Air Messiah",
+      "nature": "Most frequent home-scene partner; in-game friend/junior she supports; real-life niece (Messiah's dam Air Deja Vu is Shakur's half-sister)",
+      "evidence": "home scenes x5; Air Messiah mentions her x1; web: https://umamusu.wiki/Air_Shakur, https://umamusu.wiki/IRL:Air_Messiah (real-horse pedigree)"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "Fellow lab-type she finds irritating; teasing research rivalry",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 10007: タキオンに絡まれてイラついてンだ); web: https://umamusu.wiki/Air_Shakur"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "Brews her coffee but causes 'phenomena logic can't explain'",
+      "evidence": "mentions in voice x1 (voice_id 91002: カフェのヤツ、コーヒーを淹れて くれンのはいいが…)"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "Talks too slowly for her taste - she has timed it",
+      "evidence": "mentions in voice x1 (voice_id 91016: 5秒で終わる会話をギムレットは 平均17.6秒かけやがる)"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "Too quiet to collect data on",
+      "evidence": "mentions in voice x1 (voice_id 91020: クリスエスのヤツは、さすがに もうちっと喋らねェモンかね)"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "Frequent home-scene partner",
+      "evidence": "home scenes x3 (the mdb's 'mentions in voice x1' is a false positive: voice 91003 uses デジタル as the word 'digital', not her name)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Home-scene partner",
+      "evidence": "home scenes x2"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Shakur trusts a race-prediction program she built (wiki calls it Parcae) and wants to prove through data that she can overturn the numbers, culminating around the Japanese Derby where the predicted gap is tiny (event titles 日本ダービーの後に・0 / 7？ / ≠). The real horse won the Satsuki Sho and Kikuka Sho but lost the Derby by a nose, missing the Triple Crown (general knowledge, unverified in mdb). Her event titles use programming jargon (training events 要件定義：奇跡を数値化する etc.; character-story chapters YAGNIに従え, “Permission Denied”), showing her logic gradually letting the trainer's 'illogical' input in.",
+    "source": "event titles; web: https://umamusu.wiki/Air_Shakur; model knowledge (unverified) for real-horse results"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "ロジカルに行こうぜ…。",
+      "en": "Let's go logical..."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "お前っつう変数を定義した時点で、\nオレのコードにも否応なく変化が\n起きンだ。さァ、どうなることか。",
+      "en": "The moment I defined a variable called 'you', my code was bound to change whether I liked it or not. Now, let's see how it plays out."
+    },
+    {
+      "voice_id": 91001,
+      "jp": "面倒みてるつもりはねェ、やたら\n居合わせるだけだ…ドトウのヤツ、\n今日もドジ連発しやがって…。",
+      "en": "I'm not looking after her, I just keep ending up nearby... That Doto, screwing up nonstop again today..."
+    },
+    {
+      "voice_id": 92005,
+      "jp": "お前はピースだ。\n今さら欠けるのは許さねェ。",
+      "en": "You're a piece of this. I won't allow you to go missing now."
+    },
+    {
+      "voice_id": 93004,
+      "jp": "お前との『契約』…悪くなかったよ。\nハハ、愉快な地獄だったなァ？",
+      "en": "Our 'contract'... wasn't bad. Haha, that was one fun hell, huh?"
+    },
+    {
+      "voice_id": 90007,
+      "jp": "クソッ、セミってのは\nなンでああもノイジィなンだ？\nイライラさせやがる…っ！",
+      "en": "Damn it, why are cicadas so freaking noisy? They're pissing me off...!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Oi, {user}. Independent run's done, right on the simulation. Data's logged, so quit standing around and check the results. Logical, ain't it?",
+    "Tch. Fifty minutes, zero noise, verification complete. {user}, the run's over. Go look at the numbers before I lose interest."
+  ],
+  "data_gaps": [
+    "Groups: none confirmed beyond dorm",
+    "She never calls the trainer トレーナー in her own voice lines; only pronouns",
+    "Voice actor romanisation is from general knowledge",
+    "Air Messiah 'niece' tie is real-horse pedigree (web), not stated in mdb lines",
+    "mdb mentions_in_voice count for Agnes Digital (1019) is a false positive from the word デジタル"
+  ]
+}

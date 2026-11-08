@@ -1,0 +1,73 @@
+{
+ "id": 2003,
+ "name_en": "Little Cocon",
+ "name_jp": "リトルココン",
+ "kind": "npc",
+ "one_liner": "Stoic, sharp-tongued Team Zenith loner who is secretly compassionate and loves fashion.",
+ "personality": "The source has no profile text. Per umamusu.wiki she is stoic, sharp-tongued and standoffish, resists changing herself and avoids group activities. Underneath, she is compassionate and badly wants to get stronger.",
+ "speech": {
+  "first_person": "atashi (アタシ) - web: umamusu.wiki",
+  "calls_trainer": "unknown",
+  "register": "curt, sardonic casual (web; no lines in mdb)",
+  "tics": []
+ },
+ "likes_and_motifs": [
+  "fashion (web)",
+  "getting stronger (web)"
+ ],
+ "weak_spots": [
+  "group activities / buddy-buddy teamwork (web)"
+ ],
+ "profile": {
+  "dorm": "unknown",
+  "grade": "unknown",
+  "birthday": "unknown",
+  "height": "unknown",
+  "voice_actor": "Saho Shirasu (白砂沙帆)"
+ },
+ "relationships": [
+  {
+   "id": 2002,
+   "name_en": "Bitter Glasse",
+   "nature": "Team Zenith teammate",
+   "evidence": "home scenes x4; web: https://umamusu.wiki/Little_Cocon"
+  },
+  {
+   "id": 9006,
+   "name_en": "Riko Kashimoto",
+   "nature": "Team Zenith trainer",
+   "evidence": "home scenes x1; web: https://umamusu.wiki/Little_Cocon"
+  },
+  {
+   "id": 1030,
+   "name_en": "Rice Shower",
+   "nature": "shares a home conversation; no stated relationship",
+   "evidence": "home scenes x1"
+  },
+  {
+   "id": 2001,
+   "name_en": "Happy Meek",
+   "nature": "shares a home conversation; no stated relationship",
+   "evidence": "home scenes x1"
+  }
+ ],
+ "groups": [
+  "Team Zenith (Unity Cup / Aoharu Cup, game-only) - web"
+ ],
+ "story_arc": {
+  "summary": "She has no training story in the mdb. Per web sources she is Bitter Glasse's teammate on Riko Kashimoto's rival team in the Unity Cup (Aoharu Cup) scenario. After that team is beaten, the two return as top opponents in the URA Finals.",
+  "source": "web: https://umamusu.wiki/Little_Cocon, https://gametora.com/umamusume/unity-cup"
+ },
+ "sample_lines": [],
+ "timer_line_ideas": [
+  "Heh... {user}, your independent run is over. Don't make me tell you twice. Go check it yourself.",
+  "The run's done, {user}. Fifty minutes, no hand-holding needed. ...Well? Go look, already."
+ ],
+ "data_gaps": [
+  "name_en is null in the source; the EN name used is the one on umamusu.wiki (web), not from the mdb.",
+  "No voice lines in the source file (voice_lines empty); sample_lines left empty and speech details are from the web, not the mdb.",
+  "dorm, grade, birthday and height are null in the source and were not filled from the web.",
+  "How she addresses the trainer is unknown.",
+  "The 'Heh...' in a timer draft comes from one web-quoted EN line and is not a confirmed tic."
+ ]
+}

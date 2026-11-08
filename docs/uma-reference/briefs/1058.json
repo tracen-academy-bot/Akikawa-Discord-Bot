@@ -1,0 +1,190 @@
+{
+  "id": 1058,
+  "name_en": "Meisho Doto",
+  "name_jp": "メイショウドトウ",
+  "kind": "uma",
+  "one_liner": "Clumsy, self-deprecating worrier who never gives up and wants to believe in herself.",
+  "personality": "Timid, apologetic and endlessly clumsy, she trips, forgets to write her name/address on tanabata strips and gifts, burns pies and constantly apologises ('sorry for being born...'), yet she refuses to give up. She idolises T.M. Opera O and practises imitating her, and is deeply grateful to a trainer who saw strengths in her. Kind and gentle with everyone, she hides behind things when sad and treats her trainer as her salvation and guiding star.",
+  "speech": {
+    "first_person": "watashi (私) — x58; once mimics Opera O's 'boku (ボク)' (voice 91002)",
+    "calls_trainer": "Trainer-san (トレーナーさん) x12",
+    "register": "polite, timid and stammering, with drawn-out whimpery endings and frequent tongue-slips",
+    "tics": [
+      {
+        "jp": "〜ですぅ / 〜ますぅ",
+        "romaji": "~desuu / ~masuu",
+        "meaning": "whimpering stretched endings (ですぅ x25, ますぅ x13)"
+      },
+      {
+        "jp": "ふえぇ / はぅ / ひえぇ / あわわ",
+        "romaji": "fuee / hau / hiee / awawa",
+        "meaning": "distressed interjections (ふえぇ x3, はぅ x3, ひえぇ x3, あわわ x3)"
+      },
+      {
+        "jp": "私なんか",
+        "romaji": "watashi nanka",
+        "meaning": "'someone like me' (x8)"
+      },
+      {
+        "jp": "ごめんなさい / すみませぇぇん",
+        "romaji": "gomen nasai / sumimaseeen",
+        "meaning": "constant apologies (ごめんなさい x6, すみませぇぇん x3)"
+      },
+      {
+        "jp": "〜ましゅ / 〜しゅ",
+        "romaji": "~mashu",
+        "meaning": "biting her tongue on 'masu' (ましゅ x3: お願いしましゅっ, ご案内しましゅっ, 信頼してましゅっ); the self_intro also has 努力しゅてま…かんだっ"
+      },
+      {
+        "jp": "迷惑",
+        "romaji": "meiwaku",
+        "meaning": "fear of causing trouble (x6)"
+      },
+      {
+        "jp": "恐れ多い",
+        "romaji": "osoreōi",
+        "meaning": "'I'm not worthy' (x2)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "enka singing (profile strength)",
+    "not giving up (profile strength)",
+    "her bag of bandages and plasters — 'brave x100' (voice 70015, 91007)",
+    "lanterns and pumpkins (alt-outfit lines 70016, 91021, 91025, 91027, 91028)",
+    "snack time with Haru Urara (voice 91022)",
+    "animals: cats, tanuki, goats (voice 90019, 91023, 10027)",
+    "sunflowers and summer sunshine (voice 90007)"
+  ],
+  "weak_spots": [
+    "tongue twisters / biting her tongue (profile weakness; voice 91014)",
+    "extreme clumsiness: falls, buttons, snagged ribbons (voice 70010, 91005)",
+    "cooking (voice 10004, 90013)",
+    "haunted houses, the dark (voice 90012)",
+    "fast-tempo songs (voice 91006)",
+    "hot weather (voice 90007)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "March 25 (3月25日)",
+    "height": "164 cm (164cm)",
+    "voice_actor": "Misaki Watada (和多田美咲)"
+  },
+  "relationships": [
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "idol she imitates; real-life rival who beat her repeatedly (general knowledge, unverified)",
+      "evidence": "home scenes x10; mentions in voice x4 by name (voice_id 20002, 20024, 90001, 91003) plus imitation line 91002 (わた…ボクこそが世紀末覇王さ！); top affinity x35"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "Ritto-dorm friend who keeps looking after her (roommate claim is outside knowledge, unverified)",
+      "evidence": "mentions in voice x3 (voice_id 10010: シャカールさんに頼りきりです; 10004; 90011); home scenes x2; event title: エアシャカールのダービー; Shakur mentions her x2 (91001: 面倒みてるつもりはねェ…; 91021); both in 栗東寮; roommate status per web (https://umamusu.wiki/Meisho_Doto) unverified"
+    },
+    {
+      "id": 1033,
+      "name_en": "Admire Vega",
+      "nature": "she admires Opera O and Vega's bond",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91003); Vega mentions her x4"
+    },
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "snack-time friend",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91022; 90001)"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "friend she worries about",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91017; 400002)"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "friend; source of lucky items and charms",
+      "evidence": "home scenes x3; trivia: フクキタル占いのラッキーアイテムを常備; Fukukitaru voice_id 91018"
+    },
+    {
+      "id": 1077,
+      "name_en": "Narita Top Road",
+      "nature": "same-generation friend (real-life rival; general knowledge, unverified)",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "karaoke friend who hypes her enka",
+      "evidence": "mentions in voice x1 (voice_id 91020)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "taught her a 'party-people greeting'",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1043,
+      "name_en": "Shinko Windy",
+      "nature": "won't bite her because she cries too much",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "invited her to a party, which made her feel out of place",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91004: タイキシャトルさんからパーティーに誘われたんですけど)"
+    }
+  ],
+  "groups": [
+    "none confirmed in source"
+  ],
+  "story_arc": {
+    "summary": "Desperate to stop apologising for herself, Doto is thrown straight into the classics (Satsuki Sho, 'suddenly the Tokyo Yushun'), where Air Shakur's Derby and 'a fearsome first-magnitude star' loom. As a senior she chases T.M. Opera O through the Nikkei Shinshun Hai, Kinko Sho, Tenno Sho (Spring), Takarazuka Kinen ('glass ceiling'), Tenno Sho (Autumn), Japan Cup and Arima Kinen, plus an event titled 'A great feat! Me, the King!?' ('偉業！私が覇王！？') hinting she can finally topple Opera O. Her real namesake was Opera O's perennial runner-up before winning the 2001 Takarazuka Kinen (general knowledge, unverified).",
+    "source": "event titles; web: https://umamusu.wiki/Meisho_Doto; model knowledge (unverified) for real-horse notes"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20010,
+      "jp": "ドジばかりでごめんなさい…。\n生まれてきてごめんなさいぃぃ…。",
+      "en": "Sorry for being such a klutz... Sorry for being born..."
+    },
+    {
+      "voice_id": 91002,
+      "jp": "わた…ボクこそが世紀末覇王さ！\nはーっはっはっは！！\n………に、似てましたか…？",
+      "en": "I'm... I-I am the Century-End King! Hahahaha!! ...D-did that sound like her?"
+    },
+    {
+      "voice_id": 10000,
+      "jp": "私なんかにも長所があるって…\nトレーナーさんの言葉で、\nすごく救われたんです…。",
+      "en": "Even someone like me has strengths... your words really saved me, Trainer-san..."
+    },
+    {
+      "voice_id": 91014,
+      "jp": "や、焼き芋は危険れす～！\nよーく冷まさないと、私みたいに\n舌をヤケドひて…はぅ…。",
+      "en": "S-sweet potatoes are dangerouf~! If you don't cool them well, you burn your tongue like me... hau..."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "と、トレーナーさんは私の救いで…\n私にとっての道しるべで――\n心から信頼してましゅっ！",
+      "en": "Tr-Trainer-san, you're my salvation... my guiding star — I trusht you from the bottom of my heart!"
+    },
+    {
+      "voice_id": 81000,
+      "jp": "しょ、勝負です…！\n………ひえぇ、\n言っちゃったぁぁぁ…。",
+      "en": "Th-this is a challenge...! ......Hieee, I said it..."
+    }
+  ],
+  "timer_line_ideas": [
+    "Ah, um, {user}... the independent run has finished! S-sorry to bother you... will you come check it? I didn't trip even once this time, I think...",
+    "Hieee, the timer! The independent run is over! I-I hope I'm not being a nuisance, but... please take a look, {user}~"
+  ],
+  "data_gaps": [
+    "Real-horse notes are general knowledge, unverified",
+    "Ireland/Christmas and parents' postings (voice 400089, profile) — country list not in source",
+    "Source mentions_in_voice lists Lucky Lilac x2 but her lines only contain 'ラッキーアイテム'/'ラッキー' (substring false match); no real Lucky Lilac mention"
+  ]
+}

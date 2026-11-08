@@ -1,0 +1,61 @@
+{
+ "id": 2005,
+ "name_en": "Venus Paques",
+ "name_jp": "ヴェニュスパーク",
+ "kind": "npc",
+ "one_liner": "Undefeated French genius, the hope of all France, chasing her master Montjeu.",
+ "personality": "The source has no profile text. Per umamusu.wiki she is a genius racer who loves France and is loved by it, and she entered the Arc undefeated. Her private life is messy enough that her master sometimes scolds her. Her signature line is reported as 'D'accord! I will win, as the hope of all France!' (web, not re-verified)",
+ "speech": {
+  "first_person": "unknown - web (umamusu.wiki) lists '私 (Atashi)': the kanji and reading disagree, and the mdb has no lines",
+  "calls_trainer": "unknown",
+  "register": "confident, upbeat; uses French (web: 'D'accord!')",
+  "tics": []
+ },
+ "likes_and_motifs": [
+  "France, her home country (web)",
+  "the Prix de l'Arc de Triomphe (web)"
+ ],
+ "weak_spots": [
+  "messy private life that gets her scolded by her master (web)"
+ ],
+ "profile": {
+  "dorm": "unknown",
+  "grade": "unknown",
+  "birthday": "unknown",
+  "height": "unknown",
+  "voice_actor": "Hina Orihara (折原日菜)"
+ },
+ "relationships": [
+  {
+   "id": 2004,
+   "name_en": "Montjeu",
+   "nature": "her 'master'; admired since childhood and a rival to surpass",
+   "evidence": "web: https://umamusu.wiki/Montjeu (says Venus treats Montjeu as her 'master'); https://umamusu.wiki/Venus_Paques mentions a childhood-idol 'master' she wants to surpass but does not name her"
+  },
+  {
+   "id": 2006,
+   "name_en": "Rigantona",
+   "nature": "fellow Project L'Arc final rival",
+   "evidence": "web: https://gametora.com/umamusume/project-larc"
+  }
+ ],
+ "groups": [
+  "Project L'Arc rivals - web"
+ ],
+ "story_arc": {
+  "summary": "She has no training story in the mdb. She is the main rival, along with Rigantona, in the Prix de l'Arc de Triomphe that ends the Project L'Arc scenario.",
+  "source": "web: https://umamusu.wiki/Venus_Paques, https://gametora.com/umamusume/project-larc"
+ },
+ "sample_lines": [],
+ "timer_line_ideas": [
+  "D'accord! {user}, the independent run is finished! As the hope of all France, I say: go and take a look!",
+  "Fifty minutes, done! {user}, your run is over. Come and see it with me, d'accord?"
+ ],
+ "data_gaps": [
+  "name_en is null in the source; the EN name used is the one on umamusu.wiki (web), not from the mdb. The old official site spelled it 'Venus Park'.",
+  "No voice lines in the source file (voice_lines empty); sample_lines left empty and speech details are from the web, not the mdb.",
+  "dorm, grade, birthday and height are null in the source and were not filled from the web.",
+  "First person: umamusu.wiki gives '私 (Atashi)', which is self-contradictory, so it is left unknown.",
+  "The 'D'accord!' signature line was not found on the re-checked wiki page, so it is unverified. Timer drafts use only 'D'accord'."
+ ]
+}

@@ -1,0 +1,206 @@
+{
+  "id": 1076,
+  "name_en": "Sakura Laurel",
+  "name_jp": "サクラローレル",
+  "kind": "uma",
+  "one_liner": "Gentle, relentlessly positive late bloomer with fragile legs, dreaming of winning the Prix de l'Arc de Triomphe in France.",
+  "personality": "Warm, upbeat and big-sisterly: she cheers others on with 'せーの、ヴィクトリー！', bakes and cooks for friends, and pushes the trainer to go home instead of doing overtime. Under the sunny surface is grit forged by injury: she constantly compares herself to a cherry tree that endures winter to bloom, and is very careful about rest, limits and leg care. She is openly devoted to the trainer as the one who 'dreamed with her when she couldn't run', and has a fan-like fixation on Narita Brian, whom she wants to catch.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Anata (貴方) most often; also Trainer-san (トレーナーさん)",
+    "register": "Polite desu/masu with soft, bright endings (♪, ふふっ); slips into casual speech with peers (いいよ、～だねっ). Sprinkles French.",
+    "tics": [
+      {
+        "jp": "せーの、ヴィクトリー！",
+        "romaji": "se-no, vikutorī!",
+        "meaning": "'Ready, set, Victory!' - her Victory Club cheer"
+      },
+      {
+        "jp": "ポジティブに頑張っていこう！",
+        "romaji": "pojitibu ni ganbatte ikou!",
+        "meaning": "'Let's keep going, positively!'"
+      },
+      {
+        "jp": "咲",
+        "romaji": "saku / sakihokoru",
+        "meaning": "blooming / cherry-blossom imagery for success (満開 'full bloom', つぼみ 'bud', 冬を越えて咲く 'bloom after winter')"
+      },
+      {
+        "jp": "ふふっ",
+        "romaji": "fufu",
+        "meaning": "soft giggle, very frequent"
+      },
+      {
+        "jp": "さあさあ",
+        "romaji": "saa saa",
+        "meaning": "'come on, come on' - cheerful urging"
+      },
+      {
+        "jp": "無理は禁物",
+        "romaji": "muri wa kinmotsu",
+        "meaning": "'no overdoing it' - her injury-conscious caution"
+      },
+      {
+        "jp": "On apprend le français",
+        "romaji": "(French)",
+        "meaning": "from 'On apprend le français ensemble?' = 'Shall we learn French together?' - she drops French phrases"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "cherry blossoms / sakura colour (her central metaphor: enduring winter to bloom)",
+    "France and the Prix de l'Arc de Triomphe; reads French books in bed",
+    "French home cooking from her father: omelettes, galettes, quiche, pot-au-feu, financiers",
+    "salads (profile: can eat salad like wanko soba)",
+    "Victory Club (her origin club, with Bakushin O / Chiyono O / Chitose O)",
+    "taking care of horseshoes nightly; bandaging; medicinal (yakuzen) tea and food",
+    "travel magazines, going out alone, matching outfits with her mother",
+    "sunrise as a symbol that 'morning always comes'"
+  ],
+  "weak_spots": [
+    "the moment a plane takes off (profile); also thrill rides at amusement parks (voice 91004)",
+    "fragile legs / history of injury - she must constantly guard against overwork",
+    "gets overexcited at winter events and has run fevers from it (voice 91015, 400005)",
+    "can't resist Chiyono O's kuri-kinton in autumn (voice 90018)",
+    "colour mix-up: called her purple outfit 'tricolore' (voice 91006)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 8 (5月8日)",
+    "height": "162 cm (162cm)",
+    "voice_actor": "Mizuki Mano (真野美月)"
+  },
+  "relationships": [
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "Her target/idol-rival; records all of Brian's races and gushes about her; Brian is curt with her ('……で？')",
+      "evidence": "home scenes x3; mentions in voice x5 (voice_id 91002: ブライアンちゃんのレースなら全部 録画していますよ！); top affinity 32; web: https://umamusu.wiki/Sakura_Laurel"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Victory Club friend ('Baku-chan'); goes to yakiniku and hanami together",
+      "evidence": "home scenes x3; voice_id 91020 (バクちゃんと焼肉に行くと), 10007; web: https://umamusu.wiki/Sakura_Laurel"
+    },
+    {
+      "id": 1069,
+      "name_en": "Sakura Chiyono O",
+      "nature": "Victory Club friend ('Chiyo-chan'); makes kuri-kinton Laurel loves",
+      "evidence": "home scenes x3; voice_id 90018 (チヨちゃんお手製の栗きんとん), 10007"
+    },
+    {
+      "id": 1126,
+      "name_en": "Sakura Chitose O",
+      "nature": "Victory Club friend; they cook medicinal (yakuzen) food together when Laurel's legs hurt",
+      "evidence": "home scenes x1; voice_id 91016 (チトセちゃん に相談して一緒に作るんです、薬膳 料理！)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Roommate; Laurel set the dorm-room clock 5 minutes fast to curb Sky's lateness, worries about her sunburn from fishing",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91021: 寮部屋の時計を5分 早めたんです！...減らせました、スカイちゃんの遅刻！; 91013); roommate per web: https://umamusu.wiki/Sakura_Laurel"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "Tea/frappe friend; their chats always drift to Brian",
+      "evidence": "home scenes x3; voice_id 91010, 91022"
+    },
+    {
+      "id": 1012,
+      "name_en": "Hishi Amazon",
+      "nature": "Miho dorm friend (dorm made her birthday cake)",
+      "evidence": "home scenes x2; voice_id 10013 (ヒシアマちゃんや寮のみんなが ケーキを作ってくれた)"
+    },
+    {
+      "id": 1055,
+      "name_en": "Marvelous Sunday",
+      "nature": "Frequent home-screen partner; nature not stated in her lines",
+      "evidence": "home scenes x3; mentioned_by x1 (she is mentioned once in Marvelous Sunday's lines); no lines of Laurel's describe her"
+    },
+    {
+      "id": 1124,
+      "name_en": "Bubble Gum Fellow",
+      "nature": "Friend she went to a pink 'kawaii cafe' with",
+      "evidence": "mentions in voice x1 (voice_id 91019: バブルちゃんと行きました！)"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "Fellow Health Committee member; they hand out salt candy together",
+      "evidence": "mentions in voice x1 (voice_id 90017: アルダンさんと配ってるんです、 塩飴！)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Fellow horseshoe nerd",
+      "evidence": "mentions in voice x1 (voice_id 91017: イクノちゃんとの蹄鉄トーク！)"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "Laurel admires her galette table manners",
+      "evidence": "mentions in voice x1 (voice_id 90013)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Taught Laurel tips on coaching juniors (Laurel jokingly adopts 'たわけ！')",
+      "evidence": "mentions in voice x1 (voice_id 90015)"
+    }
+  ],
+  "groups": [
+    "Victory Club (ヴィクトリー倶楽部) with Sakura Bakushin O, Chiyono O, Chitose O - in-game voice lines 91000/91008/90002",
+    "Health Committee (保健委員) - voice_id 90017",
+    "Team Alkes (Star Blossom manga only, with the Sakura trio; web: https://umamusu.wiki/Sakura_Laurel)",
+    "Sakura- name family of horses (Sakura Bakushin O / Chiyono O / Chitose O share the Sakura crown) - general knowledge"
+  ],
+  "story_arc": {
+    "summary": "A girl with fragile, injury-prone legs who dreams of the Arc de Triomphe. Event titles trace her watching the Classic season and the 'monster' Narita Brian from the outside (『君はまだ獣を知らない』, 『怪物が見せた夢』, 『こぼれ始めた感情』) while she endures her 'winter' (『我らに冬が訪れようとも』), then finally starts her own story (『目標達成の後に・“私”が始まる』), blooming at the Nakayama Kinpai (『さくらさく』), the Spring Tenno Sho and the Arima Kinen (『有馬記念の後に・開花』). Real-life Sakura Laurel missed the classics through injury and later won the 1996 Spring Tenno Sho and Arima Kinen before a career-ending injury in France (general knowledge).",
+    "source": "event titles; web: https://umamusu.wiki/Sakura_Laurel; real-horse history from model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "泣かないめげない諦めない！\nサクラローレルです！",
+      "en": "Never cry, never give up, never quit! I'm Sakura Laurel!"
+    },
+    {
+      "voice_id": 8007,
+      "jp": "せーの、ヴィクトリー！！",
+      "en": "Ready, set... Victory!!"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "大丈夫ですよ、絶対咲きます。\nだって私、貴方が育てた\nつぼみなんですから！",
+      "en": "It's all right, I'll bloom for sure. After all, I'm a bud that you raised!"
+    },
+    {
+      "voice_id": 90014,
+      "jp": "…頑張りたい気持ち、わかります！\nすっごく！でも…残業続きだと心が\n疲れちゃうので！もう帰りましょ？",
+      "en": "...I get wanting to work hard! Totally! But... nonstop overtime wears your heart out! Let's go home, okay?"
+    },
+    {
+      "voice_id": 91002,
+      "jp": "ブライアンちゃんのレースなら全部\n録画していますよ！1回本人にバレ\nて処分されかけましたけど…えへ。",
+      "en": "I've recorded every one of Brian-chan's races! She found out once and nearly threw them all out, though... ehe."
+    },
+    {
+      "voice_id": 40000,
+      "jp": "冬を越えて、私は咲く！",
+      "en": "I'll get through the winter, and I will bloom!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run is done! You worked hard - now rest properly, okay? No overdoing it. Ready, set... Victory!",
+    "Fufu, {user}, the timer's finished! One more bud on the branch. Shall we go see how it bloomed together?"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Mejiro Ryan x5 and Manhattan Cafe x3: these look like substring false positives ('ブライアン' contains 'ライアン'; 'カフェ' in カフェテリア/カフェ). No real lines about either were found; excluded.",
+    "Mayano Top Gun's relationship is light; Marvelous Sunday appears in 3 home scenes but nothing in Laurel's own lines describes her.",
+    "Career story beats are inferred from event titles; actual dialogue not in mdb.",
+    "Roommate (Seiun Sky) is from umamusu.wiki, not the mdb; her lines only imply it (shared dorm-room clock)."
+  ]
+}

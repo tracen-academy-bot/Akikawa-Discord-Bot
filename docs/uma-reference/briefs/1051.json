@@ -1,0 +1,186 @@
+{
+  "id": 1051,
+  "name_en": "Nishino Flower",
+  "name_jp": "ニシノフラワー",
+  "kind": "uma",
+  "one_liner": "Tiny, hyper-diligent junior who cooks, gardens and badly wants to be seen as a reliable big sister.",
+  "personality": "A small, earnest middle-schooler who works hard to act grown-up: she cooks bento and onigiri for her trainer, offers to iron and clean, and studies menus in advance. She talks constantly about wanting to grow (taller, into a 'proper big sister') and frames herself as a little flower that will bloom one day. Gentle and polite, but she scolds cutely ('meh!') when someone slacks off, and gets nervous, then pep-talks herself ('I'm a capable girl, capable Flower').",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); 'anata (あなた)' in emotional race-result/training/outing lines (x4: voice_id 30006, 93000, 93004, 95009)",
+    "register": "polite desu/masu, soft and childlike; lots of ♪ and 'ですっ' with a little catch",
+    "tics": [
+      {
+        "jp": "めっです",
+        "romaji": "metsu desu",
+        "meaning": "'No-no!' — childish scolding (e.g. さぼっちゃめっです！ 'No slacking!', ケガは、めっです！)"
+      },
+      {
+        "jp": "～ですっ / ～ますっ",
+        "romaji": "-desu! / -masu!",
+        "meaning": "polite endings with an eager small-tsu catch"
+      },
+      {
+        "jp": "ぐんぐん",
+        "romaji": "gungun",
+        "meaning": "'growing steadily/rapidly' — her growth motif (目指せ、ぐんぐん大成長！)"
+      },
+      {
+        "jp": "お姉さん",
+        "romaji": "onee-san",
+        "meaning": "'big sister' — what she aspires to be"
+      },
+      {
+        "jp": "できる子フラワー",
+        "romaji": "dekiru ko Furawā",
+        "meaning": "'capable girl Flower' — self pep-talk in third person"
+      },
+      {
+        "jp": "えへへ",
+        "romaji": "ehehe",
+        "meaning": "shy giggle"
+      },
+      {
+        "jp": "はなまる",
+        "romaji": "hanamaru",
+        "meaning": "'flower-circle' gold-star mark; she says ミッション達成、はなまるですねっ！"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "flowers and flowerbeds, blooming/buds/seeds imagery",
+    "gardening (profile strength)",
+    "housework and cooking: bento, onigiri, ohagi, osechi, soups, cookies (profile strength: all housework)",
+    "picnics",
+    "knitting mufflers/gloves",
+    "otedama juggling (won a class tournament, voice 91004)",
+    "the watering can her parents gave her (profile)",
+    "her red shoes (voice 70021)",
+    "wanting to grow taller — bought a bigger uniform in advance (voice 70010)"
+  ],
+  "weak_spots": [
+    "carbonated drinks (profile weakness)",
+    "being small/young and looked at as a child",
+    "ghosts and the dark (voice 90004)",
+    "kanji she can't read — she looks them up right away (profile trivia)",
+    "nerves before races against bigger 'big sisters' (voice 20035)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "April 19 (4月19日)",
+    "height": "135 cm (135cm)",
+    "voice_actor": "Haruna Kawai (河井晴菜)"
+  },
+  "relationships": [
+    {
+      "id": 1026,
+      "name_en": "Mihono Bourbon",
+      "nature": "roommate; they bake together",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 90011: 昨日の夜、ブルボンさんとアイシングクッキーを作りました！); roommate per web: https://umamusu.wiki/Nishino_Flower"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "admired bright senior she cooks for; real-life sprint rival",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 91025: バクシンオーさんって、ヒマワリみたいなかただと思いませんか？; 10008 cake-making; 91002 snacks)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "calming friend whose tail absent-mindedly grabs her; same real-life owner/stable",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91000: …スカイさんといると落ち着きます。; 91016); stable link per web: https://umamusu.wiki/Nishino_Flower"
+    },
+    {
+      "id": 1078,
+      "name_en": "Yamanin Zephyr",
+      "nature": "friend she picnics with after school; teaches her names of winds",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 90013: 放課後、たまにゼファーさんとピクニックをするんです。)"
+    },
+    {
+      "id": 1045,
+      "name_en": "Super Creek",
+      "nature": "role model — the 'nice big sister' she wants to become",
+      "evidence": "mentions in voice x1 (voice_id 91001: クリークさんは私の目標なんです♪)"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "affectionate senior ('Taiki-senpai') who spins her around",
+      "evidence": "mentions in voice x1 (voice_id 91018: タイキ先輩、ドレスをいっぱいほめてくれて…); home scenes x1"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "flowerbed-tending companion",
+      "evidence": "mentions in voice x1 (voice_id 91022: さっき、エアグルーヴさんと一緒に花壇のお手入れをしてきました。)"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "friend; designed a heart-shaped flowerbed idea",
+      "evidence": "mentions in voice x1 (voice_id 90016)"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "invited her to plant-longevity research",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "fireworks with Helios's group; Flower tries her gyaru slang",
+      "evidence": "mentions in voice x1 (voice_id 91013: ヘリオスさんたちとの花火、楽しかったなぁ♪)"
+    },
+    {
+      "id": 1095,
+      "name_en": "Believe",
+      "nature": "frequent home-screen partner (nature not stated in data)",
+      "evidence": "home scenes x2"
+    }
+  ],
+  "groups": [
+    "Groundskeeping/greening committee (web, unverified in mdb: web: https://umamusu.wiki/Nishino_Flower)"
+  ],
+  "story_arc": {
+    "summary": "A grade-skipping 'genius girl' (event: 阪神JFの後に・天才少女) who is younger and smaller than everyone, she enters Tracen wanting to become a dependable big sister and give others courage. Her career follows flower-growth titles (seed sown, sprouting, bud, waiting to bloom) through the Hanshin JF, Oka Sho, Oaks, Sprinters S and Mile CS, with an Oaks stumble ('Queen of the Oaks……?') and a meeting with a 'new wind' (likely Yamanin Zephyr, unverified). It ends with her finding her own kind of courage and 'a flower of smiles' blooming.",
+    "source": "event titles; plus web: https://umamusu.wiki/Nishino_Flower (background only)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90002,
+      "jp": "ご飯、きちんと食べていますか？\nあのっ、お忙しいようなら、\nおにぎりを作ってきます！",
+      "en": "Are you eating properly? Um, if you're too busy, I'll make you some onigiri!"
+    },
+    {
+      "voice_id": 1108,
+      "jp": "さぼっちゃめっです！",
+      "en": "No slacking off — that's a no-no!"
+    },
+    {
+      "voice_id": 20036,
+      "jp": "弱気になってちゃダメですよね。\n私はできる子、\nできる子フラワー…！",
+      "en": "I can't go getting timid. I'm a capable girl, capable Flower...!"
+    },
+    {
+      "voice_id": 90004,
+      "jp": "暗くならないうちに帰らなくちゃ。\n夜は色々と怖いですから…\nその…おばけ、とか…。",
+      "en": "I have to get home before it's dark. Night is scary in lots of ways... um... like, ghosts..."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "今はまだ小さくても\nきっときれいな花になれる…\nそう信じられるようになりました。",
+      "en": "Even if I'm still small now, I'll surely become a pretty flower... I've come to believe that."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, Trainer-san! Your independent training run is all done~ I brought a towel and a water bottle for you too, so shall we go check it together?",
+    "Leaving a finished run unchecked is a no-no, {user}! ...Ehehe. It bloomed nicely, I think, so please come take a look, Trainer-san!"
+  ],
+  "data_gaps": [
+    "'スイちゃん' in voice_id 90012 is not identified in the data (possibly Sweep Tosho, unverified)",
+    "Story arc dialogue not in mdb; summary built from event titles",
+    "Committee membership comes only from the wiki"
+  ]
+}

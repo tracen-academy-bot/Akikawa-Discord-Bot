@@ -1,0 +1,126 @@
+{
+  "id": 9003,
+  "name_en": "Etsuko Otonashi",
+  "name_jp": "乙名史記者",
+  "kind": "npc",
+  "one_liner": "An excitable racing-magazine reporter who reads deep resolve into every trainer choice and gushes about it.",
+  "personality": "Passionate and quick to get carried away: she reads big intentions into small actions ('言わずとも、その思い伝わってきますよ！さすがです…！') and swoons over the prospect of great races ('ああっ、胸が高鳴ります…'). She is meticulous as a journalist, keeping every data point in her notebook, and she is openly a fan as well as a reporter.",
+  "speech": {
+    "first_person": "unknown (no first-person pronoun in her lines)",
+    "calls_trainer": "Trainer-san (トレーナーさん); anata-tachi (貴方たち) for trainer and Uma",
+    "register": "polite (desu/masu), breathless and gushing, with trailing '…'",
+    "tics": [
+      {
+        "jp": "素晴らしいです！",
+        "romaji": "subarashii desu!",
+        "meaning": "'Wonderful!'"
+      },
+      {
+        "jp": "さすがです…！",
+        "romaji": "sasuga desu...!",
+        "meaning": "'Just as expected of you...!'"
+      },
+      {
+        "jp": "ああっ、胸が高鳴ります…",
+        "romaji": "aa', mune ga takanarimasu...",
+        "meaning": "'Ah, my heart is racing...'"
+      },
+      {
+        "jp": "～のですね…！",
+        "romaji": "~no desu ne...!",
+        "meaning": "trailing, awed realisation (600007 '叶えられるのですね…！'; also 600001 '見られるんですね…！')"
+      },
+      {
+        "jp": "抜かりなし、です！",
+        "romaji": "nukari nashi, desu!",
+        "meaning": "'Nothing overlooked!'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "her beloved notebook full of data ('愛用の手帳に全データを網羅')",
+    "G1 races and historic races",
+    "what readers want to know ('読者の関心が高い')",
+    "the winner's circle"
+  ],
+  "weak_spots": [
+    "gets carried away and over-reads people's intentions (from her lines; the wiki also notes she exaggerates when excited)"
+  ],
+  "profile": {
+    "dorm": "n/a (outsider; magazine reporter)",
+    "grade": "n/a",
+    "birthday": "May 3 (web: umamusu.wiki; not in mdb)",
+    "height": "168 cm (web: umamusu.wiki; not in mdb)",
+    "voice_actor": "Emiri Suyama (陶山恵実里)"
+  },
+  "relationships": [
+    {
+      "id": 9004,
+      "name_en": "Aoi Kiryuin",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1133,
+      "name_en": "Chrono Genesis",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 9002,
+      "name_en": "Yayoi Akikawa",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 9001,
+      "name_en": "Tazuna Hayakawa",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Monthly Twinkle magazine (web: https://umamusu.wiki/Etsuko_Otonashi)"
+  ],
+  "story_arc": {
+    "summary": "She has no career story or support card in the source. The wiki says she is a reporter for the monthly magazine Twinkle, appears in every scenario, and is featured most in the Trackblazer scenario. In the mdb her lines are all commentary on the practice/race-replay menu.",
+    "source": "web: https://umamusu.wiki/Etsuko_Otonashi"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 600012,
+      "jp": "『どんな条件下でも関係ない。迎え\n撃つのみ』…言わずとも、その思い\n伝わってきますよ！さすがです…！",
+      "en": "'No matter the conditions, I'll simply meet them head-on'... you don't have to say it, I can feel that resolve! Just as expected...!"
+    },
+    {
+      "voice_id": 600006,
+      "jp": "練習とはいえ…あの白熱する\nGⅠレースが見られるなんて…\nああっ、胸が高鳴ります…。",
+      "en": "Even if it's only practice... to see a heated G1 race... ah, my heart is racing..."
+    },
+    {
+      "voice_id": 600016,
+      "jp": "どなたが出走しても、取材準備に\n抜かりなし、です！愛用の手帳に\n全データを網羅しておりますので♪",
+      "en": "Whoever runs, my interview prep has nothing overlooked! My trusty notebook covers all the data♪"
+    },
+    {
+      "voice_id": 600009,
+      "jp": "コース選択は、どのように？\nトレーナーさんのレース計画は、\n特に読者の関心が高いのです。",
+      "en": "How will you choose the course? Readers are especially interested in your race plans, Trainer-san."
+    },
+    {
+      "voice_id": 600017,
+      "jp": "今回ウイナーズ・サークルを\n踏みしめるのは誰か…記者として、\nいちファンとして…心が躍ります。",
+      "en": "Who will tread the Winner's Circle this time... as a reporter, and as a fan... my heart is dancing."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the Independent Training run is complete! Fifty minutes without pause... you don't have to say it, I can feel your resolve! Wonderful!",
+    "The run has finished...! {user}, please check the results. I've noted all the data in my notebook, of course. Ah, my heart is racing..."
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Etsuko Otonashi' is the standard EN name (umamusu.wiki). Given name 悦子 is not in the source.",
+    "No profile fields in the mdb; birthday and height are from the wiki.",
+    "First person unknown.",
+    "No event titles; story context is from the wiki only."
+  ]
+}

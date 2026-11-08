@@ -1,0 +1,115 @@
+{
+  "id": 9006,
+  "name_en": "Riko Kashimoto",
+  "name_jp": "樫本理子",
+  "kind": "npc",
+  "one_liner": "A strict, businesslike URA trainer who guards Umamusume health; cold outside, caring underneath.",
+  "personality": "Professional and exacting: she treats a trainer's duty to Umamusume health as non-negotiable ('緊張感をもって業務に当たるのは当然です'). Her lines read like a business memo ('ウィンウィンの関係を築きましょう', 'より有益な情報交換を'). Her tagline and event titles say she is kind under the strictness ('厳しくも優しい', '意外な一面', '胸の内を少しだけ').",
+  "speech": {
+    "first_person": "unknown (none in her lines)",
+    "calls_trainer": "unknown (not in her lines)",
+    "register": "formal, curt business-polite (desu/masu, terse)",
+    "tics": [
+      {
+        "jp": "～しましょう。",
+        "romaji": "~shimashou.",
+        "meaning": "flat, businesslike 'let's ~'"
+      },
+      {
+        "jp": "ウィンウィンの関係",
+        "romaji": "win-win no kankei",
+        "meaning": "'a win-win relationship'"
+      },
+      {
+        "jp": "～のは当然です",
+        "romaji": "~no wa touzen desu",
+        "meaning": "'it is only natural that ~' (profile)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "tidying methods ('樫本流、片付け術')",
+    "singing with feeling ('歌には想いを乗せて'; web says she sings well but dances badly)",
+    "Umamusume health and condition"
+  ],
+  "weak_spots": [
+    "physically very weak; can barely run (web: umamusu.wiki)",
+    "bad at dancing / no rhythm (web: umamusu.wiki)",
+    "flustered by people's affection ('向けられる想いと戸惑い')",
+    "past mistakes she vows not to repeat ('理子との絆・過ちは繰り返さない')"
+  ],
+  "profile": {
+    "dorm": "n/a (staff; URA trainer)",
+    "grade": "n/a (veteran trainer from the URA)",
+    "birthday": "July 1 (7月1日)",
+    "height": "unknown",
+    "voice_actor": "Romi Park (朴璐美)"
+  },
+  "relationships": [
+    {
+      "id": 9004,
+      "name_en": "Aoi Kiryuin",
+      "nature": "colleague and opposite",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Riko_Kashimoto"
+    },
+    {
+      "id": 2002,
+      "name_en": "Bitter Glasse (ビターグラッセ; no EN name in source)",
+      "nature": "one of her trainees on Team Zenith in the Unity Cup scenario",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Riko_Kashimoto"
+    },
+    {
+      "id": 2003,
+      "name_en": "Little Cocon (リトルココン; no EN name in source)",
+      "nature": "one of her trainees on Team Zenith in the Unity Cup scenario",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Riko_Kashimoto"
+    },
+    {
+      "id": 9001,
+      "name_en": "Tazuna Hayakawa",
+      "nature": "acted as her secretary while Riko was acting director",
+      "evidence": "web: https://umamusu.wiki/Hayakawa_Tazuna"
+    }
+  ],
+  "groups": [
+    "URA",
+    "Tracen Academy (Acting Director; web: umamusu.wiki)",
+    "Team Zenith (EN) / チーム<ファースト> (JP), her rival team in the Unity Cup scenario (EN name web: umamusu.wiki; JP name general knowledge, unverified)"
+  ],
+  "story_arc": {
+    "summary": "She has no career story; she is a support-card NPC and the central figure of the Unity Cup (アオハル杯) scenario. She comes from the URA as acting director and revives the team tournament to prove her strict, management-style training (web). Her support event titles go from 'professional Kashimoto Riko' ('仕事人の樫本理子') to glimpses of a gentler side and a bond event vowing not to repeat past mistakes ('理子との絆・過ちは繰り返さない').",
+    "source": "event titles; web: https://umamusu.wiki/Riko_Kashimoto"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95005,
+      "jp": "ウィンウィンの関係を築きましょう。",
+      "en": "Let's build a win-win relationship."
+    },
+    {
+      "voice_id": 70000,
+      "jp": "磨き合うことも、ときには必要です。",
+      "en": "Polishing each other is necessary at times, too."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "より有益な情報交換を。",
+      "en": "Toward a more productive exchange of information."
+    },
+    {
+      "voice_id": 20051,
+      "jp": "協力しましょう。",
+      "en": "Let's cooperate."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}. The Independent Training run has ended. Review the results promptly. Managing condition is a trainer's duty, after all.",
+    "The 50-minute run is complete, {user}. Check the data, then make sure she rests. Overwork is not something I will repeat... or allow."
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Riko Kashimoto' is the standard EN name.",
+    "Only 4 voice lines; first person and how she addresses the trainer are unknown.",
+    "Height unknown. Weaknesses come from the wiki.",
+    "Team name: umamusu.wiki gives 'Team Zenith' (game-only team); the JP name チーム<ファースト> is general knowledge, not in the mdb."
+  ]
+}

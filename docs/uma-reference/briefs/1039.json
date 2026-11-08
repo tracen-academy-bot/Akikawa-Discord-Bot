@@ -1,0 +1,192 @@
+{
+  "id": 1039,
+  "name_en": "Kawakami Princess",
+  "name_jp": "カワカミプリンセス",
+  "kind": "uma",
+  "one_liner": "Fist-first tomboy who dreams of being a true princess, mixing ojousama speech with brawler slang.",
+  "personality": "Kawakami Princess is loud, sunny and enormously energetic, a former 'gaki-daishou' (neighbourhood kid-boss; event titles 元ガキ大将の…) who now strives to be an elegant princess modelled on the anime 'Princess Fighter' (プリファイ) and on King Halo. Her ojousama 'desu wa' speech constantly collides with rough words like 'buttobasu' and 'buchikamasu', and her solution to most problems is guts and muscle. She is sincere and devoted, calling the trainer her prince and treating them as her destined partner.",
+  "speech": {
+    "first_person": "watashi (私); 'watakushi' once in a playful line (わ・た・く・し)",
+    "calls_trainer": "anata (貴方), Trainer-san (トレーナーさん), and Ouji-sama (王子様, 'my prince')",
+    "register": "ojousama speech (ですわ, ましてよ) mixed with rough tomboy slang",
+    "tics": [
+      {
+        "jp": "ですわ",
+        "romaji": "desu wa",
+        "meaning": "ojousama sentence ending"
+      },
+      {
+        "jp": "ましてよ",
+        "romaji": "mashite yo",
+        "meaning": "ojousama ending (ただいま戻りましてよ)"
+      },
+      {
+        "jp": "おーっほっほっほ",
+        "romaji": "oo-hohoho",
+        "meaning": "ojousama laugh she learned from King Halo"
+      },
+      {
+        "jp": "ぶっ飛ばし",
+        "romaji": "buttobashi(masu)",
+        "meaning": "'blast/knock them flying'"
+      },
+      {
+        "jp": "ぶちかまし",
+        "romaji": "buchikamashi(masu)",
+        "meaning": "'let them have it'"
+      },
+      {
+        "jp": "ぶち上が",
+        "romaji": "buchiaga(ru)",
+        "meaning": "'hype goes through the roof'"
+      },
+      {
+        "jp": "根性・根性・ド根性",
+        "romaji": "konjou konjou dokonjou",
+        "meaning": "'guts, guts, GUTS!' battle cry"
+      },
+      {
+        "jp": "姫たるもの",
+        "romaji": "hime taru mono",
+        "meaning": "'as a princess, one must...'"
+      },
+      {
+        "jp": "プリファイ",
+        "romaji": "purifai",
+        "meaning": "Princess Fighter, her favourite anime"
+      },
+      {
+        "jp": "王子様",
+        "romaji": "ouji-sama",
+        "meaning": "'prince' - her name for the trainer"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "The anime Princess Fighter / プリファイ (91011, 91026)",
+    "King Halo - idol and mentor; matching ribbon (91001, 91029)",
+    "Muscle training, guts and martial arts; seiken-zuki punches (profile; 91016, 91027)",
+    "Exterminating cockroaches (physically) - profile strength",
+    "Her dog Sebastian, dressed in a butler outfit (profile trivia; 91002)",
+    "Big hearty meals, roasted sweet potatoes (90011, 91014)",
+    "Bug-catching as a kid - 'Mushi Princess' (91013)"
+  ],
+  "weak_spots": [
+    "Wasting money (profile weakness)",
+    "Ghosts - 'can't punch them' (91003, 90014)",
+    "Studying - wants to escape being the 'failing-grade princess' (90001)",
+    "Dancing in sync with others, nearly stepping on feet (91006)",
+    "Delicacy: breaks teacups at tea parties (91019); her straight hair won't curl (91020)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "June 5 (6月5日)",
+    "height": "154 cm",
+    "voice_actor": "Karin Takahashi (高橋花林)"
+  },
+  "relationships": [
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "Idol and mentor in elegance; source of her ojousama laugh and matching ribbon",
+      "evidence": "mentions in voice x10 (voice_id 90002: キングさん直伝のご挨拶ですわ！ おーっほっほっほ！); home scenes x4; web: https://umamusu.wiki/Kawakami_Princess"
+    },
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "Roommate (web); helps her change and watches Princess Fighter with her",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 90015: パールさんに いつも手伝ってもらってますの); web: https://umamusu.wiki/Kawakami_Princess"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "Friend and rival who also loves Princess Fighter (web)",
+      "evidence": "home scenes x5; web: https://umamusu.wiki/Kawakami_Princess"
+    },
+    {
+      "id": 1113,
+      "name_en": "Fusaichi Pandora",
+      "nature": "Rival in the Triple Tiara route who stays a good friend (web)",
+      "evidence": "home scenes x5; Pandora mentions her x1; web: https://umamusu.wiki/Kawakami_Princess"
+    },
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "Muscle-training buddy",
+      "evidence": "mentions in voice x2 (voice_id 91016: ウララさんとプリンセス流 筋トレを実践中ですの！)"
+    },
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "Admires her tiara",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91004)"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Recommended her a ramen order",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1028,
+      "name_en": "Hishi Akebono",
+      "nature": "Home-scene partner",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1112,
+      "name_en": "Daring Heart",
+      "nature": "Home-scene partner",
+      "evidence": "home scenes x1 (no voice mentions in either direction in the mdb)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Inspired by the anime Princess Fighter, Kawakami sets out on her 'Princess Road' to become a legendary princess, with Triple Tiara goals (Oka Sho, Oaks, Shuka Sho) plus the Queen Elizabeth II Cup, Victoria Mile and Takarazuka Kinen. Her mid-story crisis is about finding the line between being herself and being selfish (event title 見つけて！私らしさと自分勝手の境界線), with an Elizabeth-Cup setback (エリザベス女王杯の後に・らしくない). The real horse won the Oaks and Shuka Sho unbeaten, then crossed first in the Queen Elizabeth II Cup but was disqualified to 12th (general knowledge, unverified in mdb).",
+    "source": "event titles; web: https://umamusu.wiki/Kawakami_Princess; model knowledge (unverified) for real-horse results"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95004,
+      "jp": "姫たるもの、華麗に優雅に――\nぶちかましてやりますわっ！！",
+      "en": "A princess must be graceful and elegant - and then let them have it!!"
+    },
+    {
+      "voice_id": 90002,
+      "jp": "ごきげんよう♪\nキングさん直伝のご挨拶ですわ！\nおーっほっほっほ！",
+      "en": "Good day! A greeting passed down from King-san! Ohohoho!"
+    },
+    {
+      "voice_id": 20032,
+      "jp": "はぁ…ちゃんと気合いを\n入れないと…。すぅーっ、\n根性・根性・ド根性～～～～～！！",
+      "en": "Haah... I have to get fired up properly... *inhale* Guts, guts, GUTS!!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "さすがの私もおばけはちょっと…。\n怖いし、得体が知れないし、\nぶっ飛ばせませんもの～。",
+      "en": "Even I find ghosts a bit... They're scary, they're mysterious, and you can't punch them~"
+    },
+    {
+      "voice_id": 10002,
+      "jp": "どんな戦いも、私たちの“絆”\nパワーがあれば無敵ですわ！ねっ？\n王子様【トレーナーさん】？",
+      "en": "Any battle is ours with the power of our 'bond'! Right? My prince (Trainer-san)?"
+    },
+    {
+      "voice_id": 92022,
+      "jp": "最強の姫の最強の舞…\n誰より傍で見てくれなきゃ\nバキッ！ですからね？",
+      "en": "The strongest princess's strongest dance... if you don't watch it from closer than anyone - WHACK! Got it?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Ohohoho! The independent run is complete, {user}! Your princess blasted through it elegantly, of course! Now come see the results, my prince... er, Trainer-san!",
+    "Guts, guts, GUTS! Fifty minutes of training, finished with princessly grace! {user}, come witness the results this instant, desu wa!"
+  ],
+  "data_gaps": [
+    "Groups: none confirmed beyond dorm",
+    "Voice actor romanisation is from general knowledge",
+    "mdb lists mentions of Lucky Lilac (x2) and El Condor Pasa (x1) not covered in relationships"
+  ]
+}

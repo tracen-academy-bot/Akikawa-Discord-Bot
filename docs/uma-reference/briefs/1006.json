@@ -1,0 +1,174 @@
+{
+  "id": 1006,
+  "name_en": "Oguri Cap",
+  "name_jp": "オグリキャップ",
+  "kind": "uma",
+  "one_liner": "Stoic, earnest country girl from Kasamatsu with a bottomless appetite who runs to make her hometown proud.",
+  "personality": "Oguri is calm, plain-spoken and sincere, speaking in short, slightly masculine sentences. She is deeply grateful to her hometown, family and fans and frames her racing as repaying their support. Off the track she is an airhead in an endearing way: food dominates her thoughts, she takes jokes literally, and city things like phones and cameras baffle her.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer (トレーナー), also Kimi (キミ)",
+    "register": "plain/casual, terse and slightly masculine (～だ, ～だな, 頼む); not keigo",
+    "tics": [
+      {
+        "jp": "む",
+        "romaji": "mu",
+        "meaning": "small grunt of noticing/thinking ('hm')"
+      },
+      {
+        "jp": "ふむ",
+        "romaji": "fumu",
+        "meaning": "'hmm' while considering"
+      },
+      {
+        "jp": "よろしく頼む",
+        "romaji": "yoroshiku tanomu",
+        "meaning": "'I'm counting on you' - her standard greeting/request"
+      },
+      {
+        "jp": "ほっほっひっふ～っ！",
+        "romaji": "hoh hoh hih fuu!",
+        "meaning": "breathing chant she makes when in good condition"
+      },
+      {
+        "jp": "見ていてくれ",
+        "romaji": "mite ite kure",
+        "meaning": "'watch me'"
+      },
+      {
+        "jp": "全力",
+        "romaji": "zenryoku",
+        "meaning": "'full strength' - recurring word in race lines"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "eating huge amounts of food (multiple breakfasts, 50-serving snack orders, cafeteria)",
+    "Kasamatsu hometown, local festivals and dishes (doteni, kushikatsu, gohei-mochi)",
+    "cooking class (profile)",
+    "her mother and the people back home; letters from home",
+    "stars and Christmas/Santa imagery (Christmas outfit)",
+    "Cinderella imagery (Cinderella Gray outfit)"
+  ],
+  "weak_spots": [
+    "swimming (profile weakness); nervous reaction to the sea (voice 20047)",
+    "smartphones and taking photos (voice 91004, 91005)",
+    "standing out/attention in the cafeteria (voice 91003)",
+    "heat (voice 91225); getting sick (voice 90009)",
+    "taking idioms literally ('hana yori dango', voice 91012)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School division (高等部)",
+    "birthday": "March 27 (3月27日)",
+    "height": "167 cm (167㎝)",
+    "voice_actor": "Tomoyo Takayanagi (高柳知葉)"
+  },
+  "relationships": [
+    {
+      "id": 1021,
+      "name_en": "Tamamo Cross",
+      "nature": "close friend/rival; she calls her 'Tama', they argue about food but greet each other every day",
+      "evidence": "home scenes x6; mentioned_by x6; mentions in voice (voice_id 91000: タマと言い争いをしてしまった…; 91219: レース前でも、タマとぎくしゃく/したことはない); roommate per web: https://umamusu.wiki/Oguri_Cap"
+    },
+    {
+      "id": 1045,
+      "name_en": "Super Creek",
+      "nature": "friend who fusses over her (pats her head, wipes her mouth)",
+      "evidence": "home scenes x6; mentions in voice x5 (voice_id 91221: クリークに口を拭かれてしまった; 1019: 心強いよ、クリーク。)"
+    },
+    {
+      "id": 1034,
+      "name_en": "Inari One",
+      "nature": "friend; eats lunch with her",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91010: イナリとお昼ご飯に行ったんだが; 91222)"
+    },
+    {
+      "id": 1072,
+      "name_en": "Yaeno Muteki",
+      "nature": "friend who taught her a hunger-endurance trick",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91216: ヤエノが教えてくれたんだ。)"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "frequent home-screen partner",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "friend; plans to practise surfing with her",
+      "evidence": "mentions in voice x2 (voice_id 90017: 私も、ハヤヒデと練習を始めるか。; 91017)"
+    },
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "recommends protein to her",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91217)"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "friend; called her shoes magic glass slippers",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91218)"
+    },
+    {
+      "id": 1069,
+      "name_en": "Sakura Chiyono O",
+      "nature": "friend who keeps a diary of lessons",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91223)"
+    }
+  ],
+  "groups": [
+    "Kasamatsu (local racing origin; Cinderella Gray manga/anime focus)",
+    "'Heisei Big Three' with Super Creek and Inari One (web: https://umamusu.wiki/Oguri_Cap)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "A 'monster from the countryside' who transfers from Kasamatsu local racing to Tracen and must adapt to the big city while carrying her hometown's hopes. Her career runs through the NHK Mile Cup, Mile CS, Tenno Sho (Autumn) and Arima Kinen, with Tamamo Cross ('the lightning') as a key rival. It ends with her standing as 'the grey-haired monster' in a final Arima Kinen, recalling the real horse's famous comeback.",
+    "source": "event titles (デビュー戦の後に・届け笠松の空へ, 有馬記念の後に・稲妻は突然に, 有馬記念の後に・葦毛の怪物、立つ, 都会の洗礼) + web: https://umamusu.wiki/Oguri_Cap + model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "私より速いウマ娘たちが\nまだまだいると思うと、\n胸が高鳴るな…！",
+      "en": "Knowing there are still girls out there faster than me... it makes my heart race...!"
+    },
+    {
+      "voice_id": 90000,
+      "jp": "おはよう。朝はもう食べたか？\nまだなら一緒に行こう。\nちょうど食べ足りなかったんだ。",
+      "en": "Morning. Have you eaten breakfast yet? If not, let's go together. I happened to still be hungry."
+    },
+    {
+      "voice_id": 90210,
+      "jp": "おはよう。…これから、朝ご飯を\n一緒に食べないか？まだ食べてない\nんだ。3度目の、朝ご飯。",
+      "en": "Morning. ...Want to have breakfast together now? I haven't eaten yet. My third breakfast, that is."
+    },
+    {
+      "voice_id": 92006,
+      "jp": "故郷のみんなに\n喜んでもらえるよう、\nこれからも…頑張ろう。",
+      "en": "So that everyone back home can be happy... I'll keep doing my best."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "…見ていてくれ…これが！私の！…全力だ！",
+      "en": "...Watch me... this is! My! ...Full strength!"
+    },
+    {
+      "voice_id": 92015,
+      "jp": "さあ、頑張るぞ\nオグリキャップ…なんてな。",
+      "en": "Alright, do your best, Oguri Cap... just kidding."
+    }
+  ],
+  "timer_line_ideas": [
+    "Mm. {user}, your independent run is finished. Good work. ...Have you eaten yet? If not, let's go together. I'm counting on you.",
+    "Hoh hoh hih fuu! The independent training is done, {user}. Come watch what I achieved. ...Then food. Lots of food."
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Manhattan Cafe x5, but the matching lines say 'cafe/cafeteria' (カフェ/カフェテリア), so it is a false match, not a relationship",
+    "King Halo mention x1 not found in her lines",
+    "Story arc details beyond titles are from wiki/model knowledge, not mdb dialogue",
+    "Roommate with Tamamo Cross comes from the wiki, not the mdb"
+  ]
+}

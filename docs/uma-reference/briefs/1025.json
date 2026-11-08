@@ -1,0 +1,180 @@
+{
+  "id": 1025,
+  "name_en": "Manhattan Cafe",
+  "name_jp": "マンハッタンカフェ",
+  "kind": "uma",
+  "one_liner": "Quiet, coffee-loving medium who races to catch her invisible 'Friend' running ahead of her.",
+  "personality": "A soft-spoken, mysterious girl who speaks in trailing pauses and poetic images, and sees and hears things others can't, above all the 'Friend' (お友だち) she has always chased. She prefers night, shadows and solitude, wilts in bright sunshine, and finds peace in brewing coffee and making wagashi. Though aloof, she is quietly kind: she protects the trainer from spirits, keeps Agnes Tachyon's experiments in check and treasures gentle friends like Yukino Bijin.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (アナタ, written in katakana)",
+    "register": "quiet polite (desu/masu) with many ellipses; poetic and eerie",
+    "tics": [
+      {
+        "jp": "…",
+        "romaji": "(pause)",
+        "meaning": "Trailing ellipses in nearly every line"
+      },
+      {
+        "jp": "お友だち",
+        "romaji": "otomodachi",
+        "meaning": "'My Friend' - the invisible presence she chases"
+      },
+      {
+        "jp": "アナタ",
+        "romaji": "anata",
+        "meaning": "'You' in katakana - how she addresses the trainer"
+      },
+      {
+        "jp": "珈琲",
+        "romaji": "koohii",
+        "meaning": "Coffee, written in kanji"
+      },
+      {
+        "jp": "影",
+        "romaji": "kage",
+        "meaning": "'Shadow' - the figure she runs after"
+      },
+      {
+        "jp": "『彼ら』",
+        "romaji": "karera",
+        "meaning": "'Them' - spirits"
+      },
+      {
+        "jp": "ふふ",
+        "romaji": "fufu",
+        "meaning": "Quiet chuckle"
+      },
+      {
+        "jp": "です…",
+        "romaji": "desu...",
+        "meaning": "Polite ending that trails off"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "coffee (brewing it is her official strength; family imports beans)",
+    "night, darkness, the colour black, the moon",
+    "wagashi and Japanese cafes",
+    "cats",
+    "mountains and night hikes with a lamp",
+    "fairy tales, ghost stories (kaidan)",
+    "painting, flowers pressed in bookmarks"
+  ],
+  "weak_spots": [
+    "clear sunny days (official weakness) and bright light",
+    "daytime - little energy until the sun sets"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 5 (3月5日)",
+    "height": "155 cm (155cm)",
+    "voice_actor": "Yui Ogura (小倉唯)"
+  },
+  "relationships": [
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "Shares a common space (共同スペース, voice_id 400007) with her at school; exasperated by her experiments but vouches for her results",
+      "evidence": "home scenes x9; mentions in voice x6 (voice_id 91000: 『トリックスター』; 400007; 900007)"
+    },
+    {
+      "id": 1029,
+      "name_en": "Yukino Bijin",
+      "nature": "Gentle friend (roommate per general knowledge); braids Cafe's hair, bakes for her coffee, chose her alarm sound",
+      "evidence": "home scenes x4; mentions in voice x7 (voice_id 91001, 91029, 90211, 400001)"
+    },
+    {
+      "id": 1094,
+      "name_en": "Jungle Pocket",
+      "nature": "Classmate; Cafe gives her coffee when she dozes; fought Tachyon over a strawberry daifuku",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 90012, 91016 - ポッケさん)"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "Her 'Friend' is drawn to Gentildonna; no spirits approach her overwhelming aura",
+      "evidence": "mentions in voice x3 (voice_id 90213, 400000, 400137)"
+    },
+    {
+      "id": 1131,
+      "name_en": "Gran Alegria",
+      "nature": "Like Gentildonna, too vibrant for spirits to approach",
+      "evidence": "mentions in voice x2 (voice_id 90213, 400137)"
+    },
+    {
+      "id": 1135,
+      "name_en": "Stay Gold",
+      "nature": "Cafe suspects she knows about her 'Friend'",
+      "evidence": "mentions in voice x1 (voice_id 91218, ステゴさん)"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x2"
+    },
+    {
+      "id": 1092,
+      "name_en": "Dantsu Flame",
+      "nature": "Cafe watches over her protectively",
+      "evidence": "home scenes x2; mentions in voice (voice_id 91216)"
+    },
+    {
+      "id": null,
+      "name_en": "The 'Friend' (お友だち)",
+      "nature": "An unseen figure only Cafe perceives, whom she has always run behind and wants to catch",
+      "evidence": "self_intro; voice_id 2033, 92001, 91218"
+    }
+  ],
+  "groups": [
+    "unknown (no team/faction in source); shares a common space (共同スペース) at school with Agnes Tachyon (voice_id 400007)"
+  ],
+  "story_arc": {
+    "summary": "Cafe wants to catch up with the invisible 'Friend' who always runs in front of her; chapter titles written in eerie katakana ('I reject you', 'I will protect', 'She and I') suggest the Friend's voice. Her career covers Yayoi Sho, Derby, St Lite Kinen, Kikka Sho, Arima Kinen, Tenno Sho Spring, Takarazuka and Japan Cup; event titles like 'spirit disturbance' (霊障), 'parting' (別離) and 'resurrection' (復活) point to a supernatural crisis around her and the trainer. How the arc resolves with the 'Friend' is not in the source data (model knowledge only, unverified).",
+    "source": "event titles; chara_story_titles; model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90000,
+      "jp": "…おはようございます。\n目覚ましの珈琲は、\nもうお済みですか…？",
+      "en": "...Good morning. Have you had your wake-up coffee yet...?"
+    },
+    {
+      "voice_id": 10002,
+      "jp": "…アナタは『彼ら』に好かれやすい\nようです…おかしなことがあれば、\nすぐに言ってください…。",
+      "en": "...You seem to be popular with 'them'... If anything strange happens, tell me right away..."
+    },
+    {
+      "voice_id": 90003,
+      "jp": "日中は、あまり力が湧かなくて…\nトレーニングは…\nもっと日が傾いてから…。",
+      "en": "I don't have much strength during the day... training... after the sun sets a little more..."
+    },
+    {
+      "voice_id": 91000,
+      "jp": "タキオンさんについて…？\n…『トリックスター』。その\n一言で充分ではないでしょうか。",
+      "en": "About Tachyon-san...? 'Trickster.' Isn't that one word enough?"
+    },
+    {
+      "voice_id": 92001,
+      "jp": "あの子に、追いつくために…。",
+      "en": "To catch up with that girl..."
+    },
+    {
+      "voice_id": 91011,
+      "jp": "魔法のランプを見つけたら、\nこうお願いしようかと…。\n『このまま、夜でいさせて』――",
+      "en": "If I found a magic lamp, I think I'd wish: 'Let it stay night, just like this.'"
+    }
+  ],
+  "timer_line_ideas": [
+    "...{user}. Your independent run has ended. My Friend says so too... Shall we look at it together, over a cup of coffee?",
+    "The shadows have grown longer... fifty minutes have passed, {user}. Your run is complete. Please check it... before something else does."
+  ],
+  "data_gaps": [
+    "mentions_in_voice and mentioned_by counts likely include substring false positives for 'カフェ' (e.g. カフェテリア, カフェイン) in other characters' lines; 'mentioned_by x66' is inflated.",
+    "Yukino Bijin as roommate and the exact nature of the Tachyon shared space are general knowledge.",
+    "Story arc specifics (what the 'Friend' is, the ending) are model knowledge plus titles.",
+    "Fact-check: brief previously said she shares a ROOM with Tachyon; source only supports a shared common space (400007), corrected. Removed weak spot 'people not understanding what she sees' (no supporting line). Story ending claim removed as unsupported."
+  ]
+}

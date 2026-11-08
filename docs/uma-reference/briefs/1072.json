@@ -1,0 +1,196 @@
+{
+  "id": 1072,
+  "name_en": "Yaeno Muteki",
+  "name_jp": "ヤエノムテキ",
+  "kind": "uma",
+  "one_liner": "Hot-blooded martial artist of the Kongo Yaegaki school who must master her inner 'raging fire'.",
+  "personality": "Stoic, intensely courteous and earnest, a practitioner of her grandfather's martial art who treats racing, training and even dancing as budo practice. Underneath she has a fierce temper (烈火) that she is learning to control with a calm 'still water' mind (止水); uniting the two is her goal (火水合一). She reveres her trainer as her master (師), constantly calls herself immature, and has a soft spot for cute, small things she feels she must protect, which flusters her.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-dono (トレーナー殿); also 'master' (師 / 我が師) and anata (貴方)",
+    "register": "Stiff samurai/martial-artist register: polite keigo mixed with archaic, bushido-style vocabulary and yojijukugo (four-character idioms such as 乾坤一擲, 心頭滅却)",
+    "tics": [
+      {
+        "jp": "押忍",
+        "romaji": "osu",
+        "meaning": "Martial-arts 'yes, sir!' greeting and affirmation"
+      },
+      {
+        "jp": "喝ッ",
+        "romaji": "katsu!",
+        "meaning": "Zen shout to dispel distraction"
+      },
+      {
+        "jp": "未熟",
+        "romaji": "mijuku",
+        "meaning": "'Immature/unskilled', her constant self-reproach"
+      },
+      {
+        "jp": "精進せねば",
+        "romaji": "shoujin seneba",
+        "meaning": "I must devote myself / train harder"
+      },
+      {
+        "jp": "『烈火』",
+        "romaji": "rekka",
+        "meaning": "Raging fire, her temper and fighting spirit"
+      },
+      {
+        "jp": "『止水』",
+        "romaji": "shisui",
+        "meaning": "Still water, a calm mind"
+      },
+      {
+        "jp": "『火水合一』",
+        "romaji": "kasui gouitsu",
+        "meaning": "Union of fire and water, her ideal"
+      },
+      {
+        "jp": "参る",
+        "romaji": "mairu",
+        "meaning": "Here I come (warrior's declaration)"
+      },
+      {
+        "jp": "ぬぅ",
+        "romaji": "nuu",
+        "meaning": "Grunt of frustration"
+      },
+      {
+        "jp": "スゥゥッ",
+        "romaji": "suuu",
+        "meaning": "Audible breathing technique of her school"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Kongo Yaegaki-ryu martial arts (金剛八重垣流)",
+    "Her grandfather and grandparents",
+    "Double-flowered camellias and yaezakura (八重 motif)",
+    "Chanbara and sword practice",
+    "Sewing and floor-wiping (profile strengths); she says her floor-wiping is 'fully mastered' (免許皆伝, voice 10010)",
+    "Shogi with No Reason (she plays Ranging Rook)",
+    "Sun Tzu and samurai imagery; she calls the trainer a modern samurai",
+    "Cute small things: puppies, Narita Taishin, Hishi Miracle"
+  ],
+  "weak_spots": [
+    "Sitting in seiza (profile)",
+    "Snacking while out (買い食い, profile); hunger (voice 90013)",
+    "Her own temper (烈火)",
+    "Cute voices make her ears turn red (profile); cute things fluster her (voice 140011, 91019)",
+    "Super Creek's spoiling, which she calls 'the ninja art of pampering' (voice 91017)",
+    "Skating; Ardan saw her trembling on the rink (Ardan voice 91027)",
+    "Fumbled her 'osu' once (voice 20011: おしゅっ)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 11 (4月11日)",
+    "height": "159 cm",
+    "voice_actor": "Ayumi Hihara (日原あゆみ)"
+  },
+  "relationships": [
+    {
+      "id": 1096,
+      "name_en": "No Reason",
+      "nature": "Roommate and shogi partner",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91016: 相部屋のノーリーズンさんとはよく将棋を指します)"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "Friend she is often mistaken for (both wear headbands); they do zazen and kendo together",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 90012: またバンブーさんと人違いされました); Bamboo Memory voice 91001; voice_id 91020 (バンブーさんの剣道指南); Bamboo Memory voice 91001 is about zazen together"
+    },
+    {
+      "id": 1069,
+      "name_en": "Sakura Chiyono O",
+      "nature": "Same-generation friend and rival; they went to a puppy cafe",
+      "evidence": "home scenes x5; voice_id 91001"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "Same-generation friend whose composure she admires",
+      "evidence": "home scenes x4; voice_id 91002 (アルダンさんの立ち居振る舞いはぜひとも見習いたい)"
+    },
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "Friend; also a rival she is jealous of and vows to beat (web)",
+      "evidence": "home scenes x4; voice_id 91013 (オグリさんたちとスイカ割り); rivalry/jealousy is web-sourced: https://umamusu.wiki/Yaeno_Muteki"
+    },
+    {
+      "id": 1045,
+      "name_en": "Super Creek",
+      "nature": "Spoils her like a mother, to Yaeno's alarm",
+      "evidence": "home scenes x3; voice_id 91004, 91017"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "Someone whose smile she wants to protect",
+      "evidence": "voice_id 91018"
+    },
+    {
+      "id": 1050,
+      "name_en": "Narita Taishin",
+      "nature": "She wants to protect her like a small animal, though Taishin would hate that",
+      "evidence": "voice_id 91019"
+    },
+    {
+      "id": null,
+      "name_en": "Her grandfather",
+      "nature": "Master of the family martial-arts school; her greatest influence",
+      "evidence": "voice_id 91000, 91008; profile about_family"
+    }
+  ],
+  "groups": [
+    "Kongo Yaegaki-ryu school (金剛八重垣流)",
+    "1988 Classic generation with Chiyono O and Ardan (web: umamusu.wiki, general knowledge)",
+    "Appears in the Cinderella Gray anime and manga (web: umamusu.wiki)"
+  ],
+  "story_arc": {
+    "summary": "Yaeno joins Tracen to prove her family's Kongo Yaegaki martial art through racing, but she struggles to control her own fiery temper. Under her trainer, whom she treats as a master, she pursues the Satsuki Sho, Derby, Kikuka Sho and senior races toward the ideal of 火水合一, the union of fire and still water. Her later chapters are built around the virtues 義・礼・智・仁・信 and her rivalry with Oguri Cap's 'monster' generation. The real horse won the 1988 Satsuki Sho and the 1990 Tenno Sho (Autumn).",
+    "source": "event titles + web: https://umamusu.wiki/Yaeno_Muteki + general knowledge (unverified for the real-horse record)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20003,
+      "jp": "神前に礼、トレーナー殿に礼！\n押忍！！お願いします！！",
+      "en": "A bow to the shrine, a bow to Trainer-dono! Osu!! Please train me!!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "常に心は『止水』の境地――されど闘志は！\n『烈火』の如くッ！！光明得たり――",
+      "en": "My heart ever in the state of 'still water'... yet my fighting spirit! Like a 'raging fire'!! I have found the light..."
+    },
+    {
+      "voice_id": 20009,
+      "jp": "邪念が拭えない…！\n…喝ッ！",
+      "en": "I can't shake these idle thoughts...! ...Katsu!"
+    },
+    {
+      "voice_id": 20011,
+      "jp": "押忍、押忍、おしゅっ！\nぅ…き、聞かなかったことに！",
+      "en": "Osu, osu, oshu! Uh... p-pretend you didn't hear that!"
+    },
+    {
+      "voice_id": 91019,
+      "jp": "タイシンさんは小動物のようで…\n護りたい…！いや、嫌がられるのは\n目に見えている！耐えろ、私っ…！",
+      "en": "Taishin-san is like a small animal... I want to protect her...! No, she'd clearly hate that! Endure it, me...!"
+    },
+    {
+      "voice_id": 10004,
+      "jp": "師への『義心』を籠め、チョコを\n作りました！義理チョコならぬ\n義チョコ…どうぞ、お納めを！！",
+      "en": "I made chocolate filled with 'loyalty' to my master! Not obligation chocolate, but righteousness chocolate... please accept it!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Osu!! {user}, Trainer-dono! The independent training is concluded. Fifty minutes, my raging fire held in check the whole way. Kindly inspect the results, master!",
+    "The bout is over. My solo training has ended, {user}. Still immature... yet I gave it everything. Your stern guidance, please! Osu!"
+  ],
+  "data_gaps": [
+    "The per-chapter content of her career story is inferred from event titles; the details are not verified",
+    "mentions_in_voice counts for K.S. Miracle (x1) and Manhattan Cafe (x1) are false positives: 91018 names Hishi Miracle, 91001 is 子犬カフェ"
+  ]
+}

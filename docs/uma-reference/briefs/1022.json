@@ -1,0 +1,218 @@
+{
+  "id": 1022,
+  "name_en": "Fine Motion",
+  "name_jp": "ファインモーション",
+  "kind": "uma",
+  "one_liner": "Gentle Irish princess studying in Japan with bodyguards in tow, obsessed with ramen and making memories.",
+  "personality": "A royal from Ireland who greets everyone with 'gokigenyou' but is playful, curious and very casual with her trainer, often teasing with mock-royal decrees and then saying 'nante ne' (just kidding). She treasures ordinary student life (gift exchanges, festival stalls, cup noodles) as precious memories, knowing she raced in Japan by her father's permission and must return home with results to be proud of (voice_id 91004). Her official weakness is doubting people: she is trusting and good at mediating fights, and she feels a strong duty to make her homeland proud.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "kimi (キミ) / Trainer (トレーナー); occasionally anata (貴方) in formal moments",
+    "register": "mix of soft, refined polite speech and casual friendly speech; mock-royal pronouncements as jokes",
+    "tics": [
+      {
+        "jp": "ごきげんよう",
+        "romaji": "gokigenyou",
+        "meaning": "Refined 'good day' greeting"
+      },
+      {
+        "jp": "参りましょう",
+        "romaji": "mairimashou",
+        "meaning": "Humble-formal 'let us go'"
+      },
+      {
+        "jp": "仰せのままに",
+        "romaji": "oose no mama ni",
+        "meaning": "'As you command' (playful)"
+      },
+      {
+        "jp": "なんてね",
+        "romaji": "nante ne",
+        "meaning": "'Just kidding' after a regal line"
+      },
+      {
+        "jp": "褒めて遣わす",
+        "romaji": "homete tsukawasu",
+        "meaning": "Archaic royal 'I shall praise you' (joking)"
+      },
+      {
+        "jp": "～かしら",
+        "romaji": "-kashira",
+        "meaning": "Soft feminine 'I wonder'"
+      },
+      {
+        "jp": "ごめんあそばせ",
+        "romaji": "gomen asobase",
+        "meaning": "Very refined 'pardon me'"
+      },
+      {
+        "jp": "クローバーのご加護",
+        "romaji": "kuroobaa no gokago",
+        "meaning": "'Blessing of the clover' - her good-luck motif"
+      },
+      {
+        "jp": "思い出",
+        "romaji": "omoide",
+        "meaning": "'Memories' - her favourite word"
+      },
+      {
+        "jp": "ふふっ",
+        "romaji": "fufu",
+        "meaning": "Soft giggle"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "ramen in every form (shop noren photos, cup noodles, miso blends, making her own noodles)",
+    "making memories / taking photos",
+    "four-leaf clovers and shamrocks",
+    "tea parties, milk tea, liquorice sweets",
+    "green things (emerald, green stationery)",
+    "Irish culture: fairies, leprechauns, Celtic knots, weddings",
+    "soccer (lifting, passing practice)",
+    "kotatsu ('a medal-worthy idea')"
+  ],
+  "weak_spots": [
+    "doubting people (official weakness)",
+    "worrying her SP bodyguards",
+    "Japanese summer humidity (remarks on it in 90007; more an observation than a stated weakness)",
+    "very spicy food (needs Meisho Doto's help to finish spicy malatang)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "January 27 (1月27日)",
+    "height": "158 cm (158cm)",
+    "voice_actor": "Chinami Hashimoto (橋本ちなみ)"
+  },
+  "relationships": [
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Friend; teases Fine about eating so much ramen; Fine also told her own sister about Groove's racing outfit",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91000; also 91017, 400006); Air Groove mentions her x5"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "Friend she lures to tea parties by citing caffeine's effect on productivity",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91001, 90018)"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x4; Kris S mentions her x2"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1121,
+      "name_en": "Durandal",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "Admires Flower's 'jewel box' bento",
+      "evidence": "mentions in voice (voice_id 91002)"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "Holds dark-hotpot (yami-nabe) parties with her",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "Goes for extreme-spicy malatang together",
+      "evidence": "mentions in voice x1 (voice_id 91218)"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Nature made fried rice from leftover ramen ingredients",
+      "evidence": "mentions in voice x1 (voice_id 91222)"
+    },
+    {
+      "id": 1096,
+      "name_en": "No Reason",
+      "nature": "Asks her about history like a teacher",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91217)"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "Visited the amusement park owned by Bright's father",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1039,
+      "name_en": "Kawakami Princess",
+      "nature": "Recommended the anime 'Prifai' to her",
+      "evidence": "voice_id 91003 (カワカミちゃん)"
+    },
+    {
+      "id": null,
+      "name_en": "Her elder sister and father; SP bodyguards and their captain",
+      "nature": "Sister is free-spirited, Fine handles her better than their parents; father gave permission to race; guards follow her everywhere",
+      "evidence": "profile about_family; voice_id 91004, 91024, 91026, 91011"
+    }
+  ],
+  "groups": [
+    "Irish royal family (game lore)"
+  ],
+  "story_arc": {
+    "summary": "A princess allowed to race in Japan only for a limited time, who wants to fill it with ordinary, wonderful memories. Her career aims at the Tiara/Elizabeth line then senior mile-medium races (Oka Sho, Oaks, Shuka Sho, Elizabeth Queen Cup, Osaka Hai, Takarazuka, Sapporo Kinen, Tenno Sho Autumn, Mile CS, Arima); event titles alternate English phrases ('Win!', 'Lost...', 'Just a Dream...', 'Sweet Memories', 'Still with You'). The arc is about her duty as a royal versus her freedom, and the trainer helping her choose to keep running.",
+    "source": "event titles; model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90000,
+      "jp": "ごきげんよう！\n今日も思い出に残る\n素敵な1日にしようね♪",
+      "en": "Gokigenyou! Let's make today another lovely day to remember!"
+    },
+    {
+      "voice_id": 10017,
+      "jp": "ミッションを達成したんだね！\n褒めて遣わす～♪…なんてね！",
+      "en": "You completed a mission! I shall praise you~ ...Just kidding!"
+    },
+    {
+      "voice_id": 91000,
+      "jp": "この前グルーヴさんが『ラーメン\nラーメンよく飽きないな』って…\n色んな味があるから飽きないよ！",
+      "en": "Groove-san asked me the other day, 'How do you not get sick of ramen, ramen, ramen?' There are so many flavours, I never do!"
+    },
+    {
+      "voice_id": 91011,
+      "jp": "なるべく早寝を心がけないとね。\n私が夜更かしをすると護衛の方々の\nローテーションも崩れちゃうもの！",
+      "en": "I should try to sleep early. If I stay up late, it throws off my bodyguards' rotation!"
+    },
+    {
+      "voice_id": 92015,
+      "jp": "貴方が私を導くこと、\nこれを至上命令と心得なさい。\n…あはは！びっくりした？",
+      "en": "Consider guiding me to be your supreme order. ...Ahaha! Did I surprise you?"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "思い出作りはね、何をしたかも大事\nだけど、誰といたかも大事なんだ。\nキミがトレーナーでよかった…。",
+      "en": "Making memories isn't only about what you did, but who you were with. I'm glad you're my trainer..."
+    }
+  ],
+  "timer_line_ideas": [
+    "Gokigenyou, {user}~ Your independent run has concluded! I shall praise you... nante ne. Shall we look over it together, and make it a lovely memory?",
+    "{user}, the run is finished! My guards say I mustn't dawdle, so let us review it at once. Afterwards... perhaps a celebratory bowl of ramen?"
+  ],
+  "data_gaps": [
+    "'mentions_in_voice' counts Manhattan Cafe x2, but these are false positives (カフェイン 91001, デカフェ 90005); omitted.",
+    "Nishino Flower's mention count of 2 likely includes 'フラワーシャワー' (90016), a false positive.",
+    "'ビューティーさん' (voice_id 91029, 400001) is Beauty Anshinzawa (NPC id 9007, no name_en in source); context is an event outfit, relationship unclear.",
+    "Story arc details are model knowledge; the mdb only has event titles.",
+    "Fact-check: the idea that her time in Japan is strictly limited is not in the voice lines or profile (91004 only says her father gave permission); treat as unverified game-story knowledge."
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "id": 1029,
+  "name_en": "Yukino Bijin",
+  "name_jp": "ユキノビジン",
+  "kind": "uma",
+  "one_liner": "Hard-working country girl from Morioka, Iwate, chasing her dream of becoming a stylish 'city girl', dialect intact.",
+  "personality": "Earnest, cheerful and a little bumbling, she came to Tokyo from snowy Iwate dreaming of becoming a glamorous 'city girl' in the Twinkle Series. Her Iwate dialect slips out constantly, as do her baffled attempts at trendy words written in hiragana ('ちるする', 'せるふぃー'). She is proud of her hometown and its food and festivals, and draws on 'snow-country grit' when things get hard. She is bashful about wearing the fashionable clothes Gold City picks for her, keeping them on display instead.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "polite speech heavily mixed with Iwate/Morioka dialect (盛岡弁/南部弁); 'ン' replacing 'ん/の' sounds",
+    "tics": [
+      {
+        "jp": "なはん",
+        "romaji": "nahan",
+        "meaning": "Morioka sentence ending, roughly 'you know / isn't it' (勝利だなはん)"
+      },
+      {
+        "jp": "がんす",
+        "romaji": "gansu",
+        "meaning": "dialect polite copula, like 'desu/gozaimasu' (おはよがんす, 行くでがんす)"
+      },
+      {
+        "jp": "ありがとがんす",
+        "romaji": "arigatō gansu",
+        "meaning": "'thank you' in dialect"
+      },
+      {
+        "jp": "くなンしぇ",
+        "romaji": "kunanshe",
+        "meaning": "dialect 'please (do for me)' (見ててくなンしぇ)"
+      },
+      {
+        "jp": "ほにほに",
+        "romaji": "honihoni",
+        "meaning": "dialect 'really, truly'"
+      },
+      {
+        "jp": "あべ",
+        "romaji": "abe",
+        "meaning": "dialect 'let's go!'"
+      },
+      {
+        "jp": "めンこい",
+        "romaji": "menkoi",
+        "meaning": "cute"
+      },
+      {
+        "jp": "おもさげねぇ",
+        "romaji": "omosagenē",
+        "meaning": "'I'm sorry/ashamed' (dialect)"
+      },
+      {
+        "jp": "はっかはっか",
+        "romaji": "hakka hakka",
+        "meaning": "nervous/heart-pounding (dialect)"
+      },
+      {
+        "jp": "じゃじゃじゃっ",
+        "romaji": "jajaja",
+        "meaning": "Iwate exclamation of surprise"
+      },
+      {
+        "jp": "雪国根性",
+        "romaji": "yukiguni konjō",
+        "meaning": "'snow-country grit'"
+      },
+      {
+        "jp": "“シチーガール”",
+        "romaji": "shichī gāru",
+        "meaning": "'city girl' - her dream"
+      },
+      {
+        "jp": "おあげんしぇ",
+        "romaji": "oagenshe",
+        "meaning": "dialect 'please have some' (勝利の味、おあげんしぇ！)"
+      },
+      {
+        "jp": "あや",
+        "romaji": "aya",
+        "meaning": "dialect 'oh my'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "hotpot cooking and snowball fights (profile strengths)",
+    "kotatsu - she uses a mini kotatsu in the dorm (profile trivia)",
+    "Morioka food: wanko soba, Morioka reimen; prefers rice to bread",
+    "Sansa Odori festival",
+    "wagashi and tea (alternate outfit)",
+    "snow, her hometown, her childhood friend Mifuyu",
+    "cosmetics ('こすめ') picked by Gold City"
+  ],
+  "weak_spots": [
+    "heat (profile weakness)",
+    "city trends and slang confuse her",
+    "gets lost (wrong station exit on day one)",
+    "too shy to wear the fancy clothes Gold City chose (voice_id 10027)",
+    "sleepy as soon as it gets dark"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "March 10 (3月10日)",
+    "height": "156 cm (156cm)",
+    "voice_actor": "Nozomi Yamamoto (山本希望)"
+  },
+  "relationships": [
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "Her 'city girl' idol who picks cosmetics and clothes for her and coaches her.",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91000: シチーさんが、あたしに似合う色のこすめを選ンでくれるって…; 10027); event title: シチーさんと猛特訓だべ! (mdb mentions count of 14 is inflated by the word “シチーガール”)"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "Probable roommate (Cafe comes into 'the room' smelling of coffee); Yukino wants to show her Morioka's cafes.",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 91003: カフェさんが部屋に入ってくると…; 91016, 400009, 400071; mdb count of 6 includes カフェテリア/カフェテラス false positives); mentioned by Cafe x7; both Miho Dorm; roommate status: general knowledge (unverified)"
+    },
+    {
+      "id": 1035,
+      "name_en": "Winning Ticket",
+      "nature": "Calls Yukino 'cute!' no matter what; she admires Ticket's skiing and skating.",
+      "evidence": "home scenes x4; voice_id 91001, 91019 (as チケゾーさん)"
+    },
+    {
+      "id": 1082,
+      "name_en": "North Flight",
+      "nature": "Can do kimono dressing and mixes it with Western fashion.",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Pops up to cheer her on.",
+      "evidence": "mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": null,
+      "name_en": "Mifuyu (美冬ちゃん)",
+      "nature": "Childhood friend back home who is good at singing and dancing.",
+      "evidence": "voice_id 91004; profile trivia: 上京する時に撮った美冬ちゃんとの写真"
+    }
+  ],
+  "groups": [
+    "none confirmed in the source data"
+  ],
+  "story_arc": {
+    "summary": "Yukino comes to Tracen from rural Morioka dreaming of becoming a real 'city girl' who shines in the Twinkle Series. Her goal races span the Hanshin JF, the Tiara races (Oka Sho, Oaks, Shuka Sho), the Queen Stakes, the Mile Championship Nambu Hai, then the Osaka Hai, Victoria Mile, Queen Elizabeth II Cup and Japan Cup. In the end she finds her own idea of a city girl without losing her roots (titles: '“ユキノビジン”', 'ティアラの夢の、その先は', 'ふるさと、想えば').",
+    "source": "event titles; web: https://umamusu.wiki/Yukino_Bijin (not re-checked)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "トレーナーさん！あたし\nキレイで、強くて、カッコいい――\n真の“シチーガール”になります！",
+      "en": "Trainer-san! I'm gonna become pretty, strong, and cool - a true 'city girl'!"
+    },
+    {
+      "voice_id": 90003,
+      "jp": "お昼に“ちるする”って聞いたン\nですけど、なンですかね？\n…なンか散っちゃうンですか…？",
+      "en": "At lunch I heard folks sayin' 'chill-suru', but what's that mean? ...Does somethin' scatter?"
+    },
+    {
+      "voice_id": 30005,
+      "jp": "あべあべ～！\nえへ、勝利だなはんっ！",
+      "en": "Abe abe~! Ehe, it's a win, nahan!"
+    },
+    {
+      "voice_id": 92006,
+      "jp": "ほにほに、トレーナーさんが\nトレーナーさんでよかったなぁ！\n…ん？ちょっとややこしいですね？",
+      "en": "Honihoni, I'm so glad Trainer-san is my Trainer-san! ...Huh? That came out kinda confusin', didn't it?"
+    },
+    {
+      "voice_id": 20002,
+      "jp": "元気いっぱい！もりもりです～！！\nトレーナーさん、何っでもどうぞ！\n雪国根性でやり切りますよ～！",
+      "en": "Full of energy! Raring to go~!! Trainer-san, give me anything! I'll get it done with snow-country grit~!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer-san! {user}! The independent run's all done, a full 50 minutes, nahan! Snow-country grit got me through. Come take a look, kunanshe!",
+    "Aya~, the timer rang! {user}, the run's finished! Arigatō gansu for waitin'... let's check how it went together, then maybe tea and wagashi?"
+  ],
+  "data_gaps": [
+    "Dialect glosses are approximate; some (なはん, くなンしぇ) are standard Morioka-ben, others inferred from context",
+    "Manhattan Cafe as roommate not verified",
+    "Story arc detail beyond titles is thin",
+    "Iwate is not named in her lines; Morioka is (voice_id 91016, 90007)",
+    "Earmuffs/letters-home motifs removed: no support in source"
+  ]
+}

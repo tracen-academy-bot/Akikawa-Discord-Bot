@@ -1,0 +1,172 @@
+{
+  "id": 1144,
+  "name_en": "Rose Kingdom",
+  "name_jp": "ローズキングダム",
+  "kind": "uma",
+  "one_liner": "Princely heir of the Rose family, sworn to break the family's 'curse of thorns' and win its long-held dream.",
+  "personality": "A composed, regal 'prince of roses' who speaks with formal, slightly archaic dignity and carries her family's long-cherished wish (悲願) as a personal duty. She is gracious and grateful toward the trainer, treating them as a comrade rather than a servant, and is fascinated by ordinary 'commoner' (市井) life such as dagashi, nabe and cheap gift exchanges. Sheltered upbringing shows in small ways: she misses her household staff, had never worn a skirt uniform, and still needs a friend to chase bugs out of her room.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "kimi (君); also addresses the trainer as a comrade (同志, voice 92003)",
+    "register": "formal, princely/aristocratic, slightly archaic (plain-form だ/しよう, words like 大儀, 市井, 悲願)",
+    "tics": [
+      {
+        "jp": "フッ / フ…",
+        "romaji": "fu",
+        "meaning": "soft, composed chuckle"
+      },
+      {
+        "jp": "薔薇一族",
+        "romaji": "bara ichizoku",
+        "meaning": "'the Rose family' - she invokes her clan constantly"
+      },
+      {
+        "jp": "悲願",
+        "romaji": "higan",
+        "meaning": "'long-cherished wish' of her family"
+      },
+      {
+        "jp": "茨の呪縛",
+        "romaji": "ibara no jubaku",
+        "meaning": "'curse/binding of thorns' - her family's run of bad fortune"
+      },
+      {
+        "jp": "市井",
+        "romaji": "shisei",
+        "meaning": "'the common folk / ordinary town life', which she finds novel"
+      },
+      {
+        "jp": "薔薇の王国",
+        "romaji": "bara no oukoku",
+        "meaning": "'Kingdom of Roses' - the legacy she means to build"
+      },
+      {
+        "jp": "大儀だった",
+        "romaji": "taigi datta",
+        "meaning": "'You have done well' - a lordly thanks"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "roses (rose bath, rose tree, rose financiers, rose-shaped ham, autumn roses)",
+    "rosehip tea, especially before sleep",
+    "commoner food and customs (dagashi tower, nabe, the legendary roasted sweet-potato truck)",
+    "board games / chess with Rulership",
+    "escorting others; dress codes, perfume, tailored clothes",
+    "eating without making a sound with her cutlery (profile strength)",
+    "images of kings, knights, kingdoms and blooming"
+  ],
+  "weak_spots": [
+    "the smell of disinfectant (profile weakness)",
+    "bugs - had to rely on Victoire Pisa to drive one out again (voice 91000)",
+    "unfamiliar with commoner customs, e.g. a 1,000-yen gift limit (voice 10008)",
+    "habitually calls for her butler/nanny (爺や/婆や) who are not there (voices 91013, 91009)",
+    "draws unwanted attention; oblivious when a first-year blushes at her (voice 91012)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 10 (5月10日)",
+    "height": "155 cm (155cm)",
+    "voice_actor": "Yurina Kikuchi (菊池ゆりな)"
+  },
+  "relationships": [
+    {
+      "id": 1145,
+      "name_en": "Rulership",
+      "nature": "close friend and game partner; Rulership says Rose's chess modesty is a bluff",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91010: …君、ルーラーは見かけたか？ 久々に遊戯をと思ったのだが。); Rulership's own file voice_id 91000: ローズはチェスの腕ならなかなかの ものでね。"
+    },
+    {
+      "id": 1143,
+      "name_en": "Victoire Pisa",
+      "nature": "friend she leans on (chases bugs out of her room)",
+      "evidence": "home scenes x3; voice_id 91000: またも、虫を追い出すにあたり、 ピサを頼ってしまった…"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "senior (先輩) she holds tea parties with",
+      "evidence": "home scenes x2; voice_id 91002: 明日はフラッシュ先輩との茶会だ。"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "friend; they have scheduled rose baths together",
+      "evidence": "mentions in voice x1 (voice_id 91011: 今日はオペラオーと、薔薇風呂に 入る日だったか。)"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "senior who introduces her to 'commoner' games",
+      "evidence": "mentions in voice x1 (voice_id 91004: ギムレット先輩の行う市井の遊戯 は、どれも刺激的だ。)"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "acquaintance; Rose admires her gentle piano playing",
+      "evidence": "mentions in voice x1 (voice_id 91001: カレンは本当に優しく、ピアノを 鳴らすのだな。)"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "home-screen partner; real-life rival (Buena Vista was demoted in the 2010 Japan Cup, giving Rose Kingdom the win). Event titles mention a 'Queen' (“女王”) after the Japan Cup, possibly her - unverified",
+      "evidence": "home scenes x1; event title: ジャパンCの後に・“女王”のはなむけ; real-life result: general knowledge (unverified)"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "home-screen partner; nature unknown",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Rose family (薔薇一族) - her clan; real-life 'Rose family' bloodline (general knowledge)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Heir to the Rose family, whose members have long been bound by a 'curse of thorns' that kept them from the top prize, she enters Tracen vowing to fulfil the family's wish and build a 'Kingdom of Roses'. Event titles trace her and the trainer becoming king and knight/right hand (貴方の右腕として, “王”と“騎士”), a fall (蕾、落ちて, 虚空へ散る), a recovery (遥か彼方より射す光, 王の器) and the finale 'The Rose King' (有馬記念の後に・薔薇の王). In real life Rose Kingdom won the 2009 Asahi Hai FS and the 2010 Japan Cup.",
+    "source": "event titles + voice lines; real-life record: web: https://gametora.com/umamusume/characters/rose-kingdom; story interpretation beyond titles is model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 40001,
+      "jp": "永く続いた茨の螺旋…\n断ち切る時は…今！\nさあ、咲き誇れ――薔薇の王国よ！",
+      "en": "The spiral of thorns that has lasted so long... the time to sever it is... now! Now bloom in glory, O Kingdom of Roses!"
+    },
+    {
+      "voice_id": 91000,
+      "jp": "またも、虫を追い出すにあたり、\nピサを頼ってしまった…。次こそ\nはと、心に誓ったというのに――",
+      "en": "Once again I had to rely on Pisa to drive out a bug... even though I had sworn in my heart that next time, for sure--"
+    },
+    {
+      "voice_id": 90001,
+      "jp": "今朝は、ゆで卵を食したのだが…。\n――かつてないほど、傷つけずに\n剥けた。…君の指導の賜物だな。",
+      "en": "I had a boiled egg this morning... and I peeled it more cleanly than ever before. ...The fruit of your instruction, I suppose."
+    },
+    {
+      "voice_id": 91013,
+      "jp": "今日は蒸すな…。――爺や、\n冷たい飲み物の準備を…。\nむ…すまない、忘れてくれ。",
+      "en": "Muggy today... Jiiya, prepare a cold drink... Hm... my apologies, forget I said that."
+    },
+    {
+      "voice_id": 10005,
+      "jp": "――14本の薔薇を君に。\n願わくば、君と末永く共に、\n道を歩めんことを。",
+      "en": "--Fourteen roses, for you. May I walk this road at your side for many long years."
+    },
+    {
+      "voice_id": 70001,
+      "jp": "まるで王と騎士のよう、か…。\n…我らは、薔薇の王国を築く者。\n――強ち、間違いではないな。",
+      "en": "'Like a king and a knight,' is it... We are the ones who will build the Kingdom of Roses. --That is not entirely wrong."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your independent run has concluded. Fu... another stone laid in the foundation of the Kingdom of Roses. Come, let us review it together.",
+    "The run is complete, {user}. You have served the Rose family's wish well. ...Taigi datta. Now, do look over the results, and then rest."
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists King Halo x3, but these are false positives from the substring キング inside her own name ローズキングダム; no real King Halo mention found.",
+    "Story arc dialogue is not in the mdb; the summary uses event titles plus unverified general knowledge. Who the 'Queen' in the Japan Cup event titles is was not confirmed.",
+    "Exact meaning of the 'curse of thorns' plot is inferred from voice lines; full story not confirmed via web (nicovideo pages returned 403)."
+  ]
+}

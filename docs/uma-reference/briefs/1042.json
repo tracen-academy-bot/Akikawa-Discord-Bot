@@ -1,0 +1,198 @@
+{
+  "id": 1042,
+  "name_en": "Seeking the Pearl",
+  "name_jp": "シーキングザパール",
+  "kind": "uma",
+  "one_liner": "Flamboyant, globe-trotting 'big sister' who peppers Japanese with English and vows to turn the impossible into 'possible'.",
+  "personality": "Theatrical, confident and warm; she laughs 'Ho-ho-ho!', compares herself to a pearl, and believes the world is full of possibility that she personally will prove. Her speech is a wall of katakana English ('So good!', 'Amazing!', 'Fabulous!'), and she loves dancing, pantomime and grand gestures. Under the showmanship she is caring and sensible - she reminds the trainer about sunscreen, rest and hydration, and refuses back-to-back races because 'fighting on the world stage needs rest too'.",
+  "speech": {
+    "first_person": "watashi (私); occasionally refers to herself as パール",
+    "calls_trainer": "Trainer (トレーナー, no -san); anata (貴方); 'My dear' (マイディアー)",
+    "register": "Casual feminine (~わ/~よ/~かしら) big-sister tone, heavily mixed with katakana English",
+    "tics": [
+      {
+        "jp": "ほーっほっほっほ！",
+        "romaji": "hoo-hohoho!",
+        "meaning": "Grand high laugh"
+      },
+      {
+        "jp": "ン～",
+        "romaji": "nnn~",
+        "meaning": "Drawn-out musing hum before a statement (ンン～, ンッン～)"
+      },
+      {
+        "jp": "ファビュラス",
+        "romaji": "fabyurasu",
+        "meaning": "'Fabulous!'"
+      },
+      {
+        "jp": "アーハン",
+        "romaji": "aahan",
+        "meaning": "'Uh-huh' / 'Aha?'"
+      },
+      {
+        "jp": "ソーグッド",
+        "romaji": "soo guddo",
+        "meaning": "'So good!'"
+      },
+      {
+        "jp": "アメージング",
+        "romaji": "ameejingu",
+        "meaning": "'Amazing!'"
+      },
+      {
+        "jp": "ディス地球",
+        "romaji": "disu chikyuu",
+        "meaning": "'This Earth' - her pantomime globe"
+      },
+      {
+        "jp": "ア～ンド",
+        "romaji": "aando",
+        "meaning": "'And...!' as a dramatic connector"
+      },
+      {
+        "jp": "ポッシブル",
+        "romaji": "possiburu",
+        "meaning": "'Possible!' - her theme of making the impossible possible"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Pearls (her name; her parents give her one pearl every birthday)",
+    "The world / overseas, France, Deauville beach (profile trivia)",
+    "Miso soup every morning (red + white mixed), seafood soups",
+    "Dancing, singing, pantomime and presentations (profile strengths)",
+    "Rockets, shooting stars and space",
+    "Sunglasses (family owns matching pairs)",
+    "Fashion with a 'world' flair",
+    "Bento / lunchboxes (story title 'ランチボックスは誘惑の香り', event 'さすらいの弁当ヒーロー'; 'ekiben' specifically not in source)"
+  ],
+  "weak_spots": [
+    "Gargling (profile weakness)",
+    "Always slightly hungry for some reason (profile trivia)",
+    "Long distances: Short/Mile A, Medium E, Long G; Dirt F"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 16 (4月16日)",
+    "height": "168cm",
+    "voice_actor": "Ayaka Fukuhara (福原綾香)"
+  },
+  "relationships": [
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "Playful friend; Pearl 'catches' Taiki's finger-gun BANG",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91000: タイキに『BANG！』されたら)"
+    },
+    {
+      "id": 1039,
+      "name_en": "Kawakami Princess",
+      "nature": "Close friend (likely roommate - unverified) who hears her sleep-singing",
+      "evidence": "home scenes x4; mentions in voice (voice_id 91002: カワカミが言うには、私、昨日も 寝言で歌っていたらしいのよ)"
+    },
+    {
+      "id": 1014,
+      "name_en": "El Condor Pasa",
+      "nature": "Frequent home-screen partner (fellow overseas challenger in real-horse history)",
+      "evidence": "home scenes x4; overseas link is general knowledge (unverified)"
+    },
+    {
+      "id": 1043,
+      "name_en": "Shinko Windy",
+      "nature": "Windy's admired 'senpai'; teaches her English, co-hosts events",
+      "evidence": "Windy mentions her x4 (Windy voice 91002: パール先輩の英会話で); home scenes x1"
+    },
+    {
+      "id": 1028,
+      "name_en": "Hishi Akebono",
+      "nature": "Admires Akebono's chanko nabe",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91019: アケボノの作るちゃんこ鍋)"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "Invited her to a Mejiro tea party",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91001: ドーベルにメジロのお茶会へ 誘われたの)"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "Brings tea leaves Bright would like",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91001)"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "She thinks Mayano grasps the essence of things; music-event teammate",
+      "evidence": "mentions in voice x2 (voice_id 91016: マヤノは物事の本質を捉えてるわ)"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "Fortune-teller friend ('the key to happiness is a rocket')",
+      "evidence": "home scenes x1; mentions in voice (voice_id 91017: フクキタルの占いに出たの)"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Wants to fuse Grass's Japanese dance with her own",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91018: グラスの日本舞踊)"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "Calls Sweep her 'senior as a witch' (Halloween outfit lines)",
+      "evidence": "mentions in voice x1 (voice_id 91020: 魔女としてはスイープの方が先輩。)"
+    }
+  ],
+  "groups": [
+    "Overseas/expedition-minded Tracen students with Taiki Shuttle and El Condor Pasa (general knowledge, unverified as an official group)"
+  ],
+  "story_arc": {
+    "summary": "Pearl dreams of proving the world is full of possibility by racing abroad; her career is built around miles and sprints (Daily Hai Junior S, Hanshin JF, NHK Mile Cup, Mile CS, Takamatsunomiya Kinen, Yasuda Kinen, Sprinters S). Event titles show setbacks ('a little miscalculation' at the NHK Mile, an injury-like 'battered miracle' at the Mile CS, 'unerasable regret', a 'grounded airline') and memories of Paris, ending with 'Everyone is possible' after the Mile CS. Her real-horse namesake was the first Japan-trained horse to win a European Group 1 (Prix Maurice de Gheest, Deauville, 1998).",
+    "source": "event titles (trainee_event_titles); real-horse Deauville win is general knowledge (unverified), consistent with profile trivia 'ドーヴィルビーチ'"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20002,
+      "jp": "ほーっほっほっほ！\n今日もマックスな輝きね！\nンン～！プレシャス！",
+      "en": "Ho-ho-ho-ho! Max sparkle again today! Mmm~! Precious!"
+    },
+    {
+      "voice_id": 20022,
+      "jp": "オウ…またレースなの？\n悪いけど、私はノットアグリー。\n世界で戦うには休息も必要だもの。",
+      "en": "Oh... another race? Sorry, but I do not agree. Fighting on the world stage requires rest too."
+    },
+    {
+      "voice_id": 90003,
+      "jp": "地球の反対側は今ごろ夜。そして\nフランスはモーニング♪…そう！\n歩く世界時計とはこの私のことよ！",
+      "en": "It's night on the other side of the globe right now, and morning in France... yes! I am the walking world clock!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "私、実はパントマイムが得意なの♪\nン～～…………ッ！ほら見てッ！\n手の中に浮かぶ…ディス地球！",
+      "en": "Actually, I'm great at pantomime! Mmm......! Look! Floating in my hands... this Earth!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "わかるの。貴方は誰よりも\n私の可能性を信じてくれている…\nだからベストトレーナーなのよ！",
+      "en": "I know. You believe in my possibilities more than anyone... that's why you're the best trainer!"
+    },
+    {
+      "voice_id": 92001,
+      "jp": "真珠の層は、何層も何層も\n重なってやっと輝く…\nそしてビッグになっていくのよ。",
+      "en": "A pearl's layers stack up over and over before it finally shines... and that's how it grows big."
+    }
+  ],
+  "timer_line_ideas": [
+    "Mmm~ So good! {user}, the 50-minute run is complete! Proof once again the world is full of possibility. Now, Trainer, come check the results, please?",
+    "Ho-ho-ho-ho! Mission clear~! {user}, the independent run has finished. Aaand... I'll be waiting with the results. Don't keep a pearl waiting, okay?"
+  ],
+  "data_gaps": [
+    "Story-arc details beyond event titles are general knowledge (unverified)",
+    "mentions_in_voice count for King Halo (x5) is a false positive from 'シーキング'/'シンキング' matching キング; no real King Halo line found",
+    "Whether Kawakami Princess is her roommate is unverified"
+  ]
+}

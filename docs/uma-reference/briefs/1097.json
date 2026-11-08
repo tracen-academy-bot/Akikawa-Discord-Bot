@@ -1,0 +1,172 @@
+{
+  "id": 1097,
+  "name_en": "Still in Love",
+  "name_jp": "スティルインラブ",
+  "kind": "uma",
+  "one_liner": "A demure, easily-overlooked sweets-lover hiding a ravenous inner 'beast' that wants to devour every rival on the track.",
+  "personality": "Still in Love is soft-spoken, self-effacing and politely formal, so faint a presence that she once sparked a missing-person scare just by sitting in the shade. Inside her lives 'that child' (あの子), a hungry, predatory racing instinct she describes in eating metaphors, devouring rivals and calling races a feast. She fears losing control and showing her 'unseemly' true self, and clings with intense, slightly unsettling devotion to the trainer who accepts both sides of her.",
+  "speech": {
+    "first_person": "watashi (私); written ワタシ when the inner beast surfaces",
+    "calls_trainer": "anata (貴方) x32 in her lines; アナタ in beast moments (e.g. voice_id 93001). 'Trainer-san (トレーナーさん)' is claimed by umamusu.wiki but never appears in her mdb lines (unverified)",
+    "register": "soft, polite keigo (desu/masu, ～でしょうか), breathy with many ellipses; turns hungry and casual when the beast speaks",
+    "tics": [
+      {
+        "jp": "あの子",
+        "romaji": "ano ko",
+        "meaning": "'that child', her name for the predatory instinct inside her"
+      },
+      {
+        "jp": "喰らう",
+        "romaji": "kurau",
+        "meaning": "'devour', used for beating rivals"
+      },
+      {
+        "jp": "ごちそうさま",
+        "romaji": "gochisousama",
+        "meaning": "'thanks for the meal', said after winning"
+      },
+      {
+        "jp": "美味しい子",
+        "romaji": "oishii ko",
+        "meaning": "'a tasty one', a strong rival"
+      },
+      {
+        "jp": "はしたない",
+        "romaji": "hashitanai",
+        "meaning": "'unseemly', her fear of showing her true self"
+      },
+      {
+        "jp": "貴方",
+        "romaji": "anata",
+        "meaning": "'you', for the trainer"
+      },
+      {
+        "jp": "ふふ",
+        "romaji": "fufu",
+        "meaning": "quiet laugh; escalates to ふふふふふ when she loses control"
+      },
+      {
+        "jp": "猛り",
+        "romaji": "takeri",
+        "meaning": "'rage/raging', what the beast does"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Baking sweets and cakes; cafes and recommending cake shops",
+    "Strong coffee with sweets",
+    "Bobbin lace and red-fruit jams (profile strengths)",
+    "Historical novels; talking history with her father",
+    "Night, darkness and the moon (but the full moon wakes 'that child')",
+    "Cleaning in the morning",
+    "Parasol (voice_id 10027) and the veil her parents gave her for her birthday because she is weak to sunlight (voice_id 10013)",
+    "Red: her racing outfit's crimson mirrors the beast's heart"
+  ],
+  "weak_spots": [
+    "Big full-length mirrors, strongly scented food, the full moon (profile)",
+    "Strong sunlight; constantly seeks shade",
+    "Being overlooked: weak presence, mistaken for a ghost in summer",
+    "Fear of losing control and showing her 'unseemly' side"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "May 2 (5月2日)",
+    "height": "153cm",
+    "voice_actor": "Saki Miyashita (宮下早紀)"
+  },
+  "relationships": [
+    {
+      "id": 1118,
+      "name_en": "Admire Groove",
+      "nature": "Triple Tiara rival; her inner 'beast' sees Groove as prey (per wiki)",
+      "evidence": "home scenes x5; Admire Groove mentions her in voice x3 (mentioned_by); web: https://umamusu.wiki/Still_in_Love"
+    },
+    {
+      "id": 1105,
+      "name_en": "Neo Universe",
+      "nature": "Roommate and supportive friend; they stargaze together",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91001: ユニヴァースさんと星を見上げていると…); roommate per web: https://umamusu.wiki/Still_in_Love"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "The first Triple Tiara winner, whose presence stirs Still's rivalry",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91000: ラモーヌさんを見るたび、何かがちりちりと心を炙る); web: https://umamusu.wiki/Still_in_Love"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "Friend who shares her love of sweets",
+      "evidence": "home scenes x3; web: https://umamusu.wiki/Still_in_Love (they 'share a passion for sweets'; no voice mentions in the mdb)"
+    },
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "Classmate and fellow book-lover",
+      "evidence": "home scenes x3; Rob Roy mentions her in voice x1 (mentioned_by); web: https://umamusu.wiki/Still_in_Love"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "Friend who made up a 'magic spell' for her tomato juice (and per the wiki thinks she's a vampire)",
+      "evidence": "mentions in voice x1 (voice_id 91002: スイープさんの考えてくれたトマトジュースが美味しくなる呪文です); web: https://umamusu.wiki/Still_in_Love"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "Shares a home scene; nature unknown",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Triple Tiara line (Oka Sho / Oaks / Shuka Sho) after Mejiro Ramonu; web: umamusu.wiki"
+  ],
+  "story_arc": {
+    "summary": "Still in Love aims to become the second Triple Tiara winner after Mejiro Ramonu, racing the Oka Sho, Oaks and Shuka Sho against favourite Admire Groove. Her career is about learning, with the trainer, to tame rather than suppress 'that child' inside her; the English-titled events (Still Dreaming, Still Without Love, The Metamorphosis, Drowning in Love, Spiraling Madness) track her growing hunger. Per umamusu.wiki the career UI itself gets more 'unhinged' with an intensifying red tint as she progresses, and one ending has her almost forgotten by everyone but her trainer, Neo Universe and Admire Groove.",
+    "source": "event titles; web: https://umamusu.wiki/Still_in_Love"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "スティルインラブです。\n私を…解き放つのですか？",
+      "en": "I am Still in Love. Will you... unleash me?"
+    },
+    {
+      "voice_id": 1008,
+      "jp": "いちばん美味しい子は…ワタシのもの。",
+      "en": "The tastiest one... is mine."
+    },
+    {
+      "voice_id": 30005,
+      "jp": "よい勝負をありがとう…甘い魂を、ごちそうさま。",
+      "en": "Thank you for a fine race... and thank you for the meal of your sweet soul."
+    },
+    {
+      "voice_id": 91010,
+      "jp": "しばし日陰に入っていたら、知らぬ\n間に失踪事件になっていたことが\nあり…影が薄いのも考えものです。",
+      "en": "I sat in the shade for a while, and before I knew it, it had turned into a missing-person case... Having such a faint presence has its problems."
+    },
+    {
+      "voice_id": 20022,
+      "jp": "…わからなく、なってきた…。\n猛り狂う怪物、抑えようとする私…\n本物は…どっち…？",
+      "en": "...I'm starting not to know anymore. The raging monster, and the me who holds it back... which one is real?"
+    },
+    {
+      "voice_id": 90002,
+      "jp": "お昼ご飯には、タイマーが必須です\n…ないと、じっくり味わっている間\nに休憩時間が終わってしまうので…",
+      "en": "A timer is essential at lunch... Without one, the break ends while I'm still savouring my food..."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}... the independent run has ended. Forgive me, I fear no one noticed me finish... Would you come and look? You always do.",
+    "The run is over... and yet that child inside me is still hungry. {user}, please come quickly... before I become unseemly."
+  ],
+  "data_gaps": [
+    "Her lines address the trainer as 貴方/アナタ; 'Trainer-san' comes from umamusu.wiki, not the mdb",
+    "No career dialogue in the mdb; arc from event titles + wiki",
+    "Roommate (Neo Universe) from the web only",
+    "Gentildonna link unknown beyond one home scene",
+    "Voice actor romanisation (Saki Miyashita) is standard reading, not from the mdb"
+  ]
+}

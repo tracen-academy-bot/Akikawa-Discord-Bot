@@ -1,0 +1,182 @@
+{
+  "id": 1141,
+  "name_en": "Epiphaneia",
+  "name_jp": "エピファネイア",
+  "kind": "uma",
+  "one_liner": "Loud, hyper-energetic 'runaway' who follows the 'Voice of Fate' and drags everyone toward happiness.",
+  "personality": "Boundlessly enthusiastic and impulsive: everything is 'fate', she wants to do it NOW, and she declares her intuition (the 『運命の声』, 'Voice of Fate') guides her. Generous and good at seeing others' best points, she wants to see her trainer's best smile and lead others rather than rule them. Her huge footsteps and volume are a running gag (she once woke the whole dorm).",
+  "speech": {
+    "first_person": "atashi (アタシ)",
+    "calls_trainer": "Kimi (キミ)",
+    "register": "casual, loud, exclamatory, boyish/heroic",
+    "tics": [
+      {
+        "jp": "運命",
+        "romaji": "unmei",
+        "meaning": "fate/destiny - in nearly every line (これが、運命だ！)"
+      },
+      {
+        "jp": "『運命の声』",
+        "romaji": "unmei no koe",
+        "meaning": "'the Voice of Fate', her inner voice/intuition"
+      },
+      {
+        "jp": "ワクワク",
+        "romaji": "wakuwaku",
+        "meaning": "excited/thrilled"
+      },
+      {
+        "jp": "そう、",
+        "romaji": "sou,",
+        "meaning": "'Yes,' / 'That's right,' - dramatic self-confirmation before a reveal"
+      },
+      {
+        "jp": "今すぐ / すぐやろう",
+        "romaji": "ima sugu / sugu yarou",
+        "meaning": "'right now' / 'let's do it now'"
+      },
+      {
+        "jp": "最高だ！",
+        "romaji": "saikou da",
+        "meaning": "'The best!'"
+      },
+      {
+        "jp": "〜だ！ / 〜だな！ / 〜だろ！",
+        "romaji": "-da! / -da na! / -daro!",
+        "meaning": "blunt masculine sentence endings"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "fate and the 'Voice of Fate'",
+    "cosmic imagery (Big Bang, supernova, infinity, stars)",
+    "galettes / galette des rois",
+    "sweets (limited-time desserts, mountains of candy)",
+    "her loud footsteps; trying shoes with different soles",
+    "dancing",
+    "yacht sailing (strength)",
+    "snowmen, snowball league, big events",
+    "wristwatch from her father (family treasure)",
+    "her cape fluttering in the wind"
+  ],
+  "weak_spots": [
+    "tongue twisters (早口言葉)",
+    "tying shoelaces (靴紐を結ぶこと)",
+    "being too loud - woke the whole dorm with her footsteps",
+    "riding a bicycle - implied: Kris S watches over her bicycle-riding practice (voice 91002)",
+    "feeling sleepy after lunch - doesn't understand it"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "February 11 (2月11日)",
+    "height": "159 cm",
+    "voice_actor": "Hikari Senga (千賀光莉)"
+  },
+  "relationships": [
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "mentor ('master' even outside races); her ears resemble Kris S's; real-life sire (general knowledge)",
+      "evidence": "mentions in voice x3 (voice_id 91002: クリスエスはレース以外でも師匠だな！); profile about_ears; home scenes x1"
+    },
+    {
+      "id": 1110,
+      "name_en": "Cesario",
+      "nature": "close, grooms her tail and ears; same shampoo; real-life dam (general knowledge)",
+      "evidence": "mentions in voice x2 (voice_id 91001: さっきシーザリオが整えてくれたんだ！); profile about_tail; home scenes x1"
+    },
+    {
+      "id": 1142,
+      "name_en": "Logotype",
+      "nature": "friend; Logotype is great at repairing shoes/clothes; real-life rival who beat her in the 2013 Satsuki Sho (general knowledge, unverified in-game)",
+      "evidence": "voice_id 91000: ロゴは名人だな～！; home scenes x1"
+    },
+    {
+      "id": 1145,
+      "name_en": "Rulership",
+      "nature": "friend; board-game master; Rulership grumbles that Epi's loud mornings and curfew worrying bother her",
+      "evidence": "mentions in voice x1 (voice_id 91003); Rulership voice 90005, 91009"
+    },
+    {
+      "id": 1146,
+      "name_en": "Efforia",
+      "nature": "looks out for her - senses when 'Ef' is troubled and tells her to just go forward; real-life offspring (general knowledge)",
+      "evidence": "voice_id 91004: エフがどこにいても、悩んでるときは不思議とわかるんだ！"
+    },
+    {
+      "id": 1075,
+      "name_en": "Daring Tact",
+      "nature": "shares a home scene",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Epi drags her around to various places",
+      "evidence": "Curren voice 91004: エピさんに手を引かれ、様々な場所を巡るのは…わくわくします"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "rival who wants to put Epi in her place in parallel runs",
+      "evidence": "Gentildonna voice 91022: どうしても私に競り勝ちたいようで…思い知らせて差し上げませんと"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "finds Epi's 'fateful' actions a menace",
+      "evidence": "Fenomeno voice 91020"
+    }
+  ],
+  "groups": [
+    "Symboli Kris S / Cesario lineage (real-life family; in-game shown via ears/tail notes - unverified as a formal group)"
+  ],
+  "story_arc": {
+    "summary": "Released as a playable trainee in Aug 2026 (5.5th anniversary). Her chapters are all 'Voice of Fate' titles (Hear it! Ring it! Believe it! Go with it!...). Career goals run Hopeful S, Satsuki Sho, Japan Derby, Kikka-sho, Osaka Hai, Takarazuka Kinen, Tenno Sho (Autumn), Japan Cup and Arima Kinen; post-race titles hint she stumbles at the Satsuki Sho ('あれ！？', 'a friend's back'), rages after the Derby, gets a 'perfect fate' at the Kikka-sho and asks 'can you hear the voice?' in her senior year, then the Japan Cup ('let's go together with fate') and finally the Arima Kinen ('Chase this light!'). Dialogue specifics not verified.",
+    "source": "event titles; web: https://www.inside-games.jp/article/2026/08/22/186607.html (release info); real-race parallels general knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 1001,
+      "jp": "これが、運命だ！",
+      "en": "This is fate!"
+    },
+    {
+      "voice_id": 10000,
+      "jp": "キミこそアタシのトレーナーだと、\nすぐにわかった！運命でつながって\nいると！今ならキミもわかるよな！",
+      "en": "I knew right away YOU were my trainer! That we're bound by fate! You get it now too, right?"
+    },
+    {
+      "voice_id": 20021,
+      "jp": "『運命の声』が、\n鬼電をかけてきているぞ！？\n『やめておけ』、と…！",
+      "en": "The 'Voice of Fate' is blowing up my phone!? Saying 'Don't do it'...!"
+    },
+    {
+      "voice_id": 91011,
+      "jp": "夜、寮の廊下を歩くときだけは\n気をつけてるんだ！…一度、足音で\n全員起こしてしまったからな！",
+      "en": "I'm careful only when I walk the dorm halls at night! ...I once woke everyone up with my footsteps!"
+    },
+    {
+      "voice_id": 110002,
+      "jp": "レース！レースだな！？\nよし行こう、いますぐ行こう！\nアタシは24時間準備万全だ！",
+      "en": "A race! It's a race, right!? Let's go, let's go right now! I'm ready 24 hours a day!"
+    },
+    {
+      "voice_id": 940000,
+      "jp": "写真を集めてライブを盛り上げろと、運命も言った！\nなら早くやろう、すぐやろう！　今すぐ撮りまくれ！",
+      "en": "Fate said it too: collect photos and hype up the live! Then let's do it fast, do it now! Start snapping right now!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}! The Voice of Fate is calling! Your Independent Training run is DONE! I knew it was coming! Let's go look, right now!",
+    "Done! The run is done! That's fate, {user}! Come on, come on, check it right now, I can't wait! Then on to the next fate!"
+  ],
+  "data_gaps": [
+    "Story arc built from event titles only; no dialogue checked",
+    "Roommate unknown (event 同室失態コンビ！？ 'Roommate blunder duo' implies one; possibly Rulership, unverified)",
+    "Family links to Kris S / Cesario / Efforia are real-horse facts; in-game framing unverified",
+    "mentions_in_voice entries for Manhattan Cafe and Samson Big are false positives (カフェテリア, ビッグバン) and were dropped",
+    "top_affinity is a game-mechanic score, not used as relationships"
+  ]
+}

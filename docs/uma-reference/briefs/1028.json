@@ -1,0 +1,187 @@
+{
+  "id": 1028,
+  "name_en": "Hishi Akebono",
+  "name_jp": "ヒシアケボノ",
+  "kind": "uma",
+  "one_liner": "Huge, gentle, sumo-loving cook who wants to be 'chanko nabe' and feed everyone 'bono'.",
+  "personality": "Big in every sense: laid-back, warm and generous, she speaks in drawn-out vowels and wants to make everyone happy through food. She treats races like sumo bouts ('dosukoi', 'hakkeyoi', becoming a yokozuna of racing) and describes everything with cooking and hotpot metaphors; her goal is to become a 'true chanko nabe' that brings everyone together. She always carries snacks for hungry classmates and thinks bigger is always better.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "casual, gentle, drawn-out vowels (～, ♪, ☆); food and sumo vocabulary",
+    "tics": [
+      {
+        "jp": "ボノボーノ",
+        "romaji": "bono bōno",
+        "meaning": "her signature greeting/cheer, from 'buono' (Italian 'good') plus her name"
+      },
+      {
+        "jp": "ボーノ",
+        "romaji": "bōno",
+        "meaning": "'buono' - good/delicious, used for anything happy"
+      },
+      {
+        "jp": "どすこい",
+        "romaji": "dosukoi",
+        "meaning": "sumo shout for gearing up"
+      },
+      {
+        "jp": "はっけよい",
+        "romaji": "hakkeyoi",
+        "meaning": "sumo referee's call; she asks the trainer to say it"
+      },
+      {
+        "jp": "ビッグ",
+        "romaji": "biggu",
+        "meaning": "'big' - everything should be big"
+      },
+      {
+        "jp": "ちゃんこ鍋",
+        "romaji": "chanko nabe",
+        "meaning": "sumo hotpot, her metaphor for bringing people together"
+      },
+      {
+        "jp": "召しあがれ",
+        "romaji": "meshiagare",
+        "meaning": "'enjoy your meal' - her race/finish line"
+      },
+      {
+        "jp": "ありゃ",
+        "romaji": "arya",
+        "meaning": "'oops/huh'"
+      },
+      {
+        "jp": "だよ～",
+        "romaji": "da yo~",
+        "meaning": "drawn-out sentence ending"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "sweets-making and sumo (profile strengths: お菓子作り、相撲); cooking for everyone (lines)",
+    "chanko nabe and hotpots of all kinds",
+    "big things: party size over L size",
+    "her family's Italian restaurant and its seafood (voice_id 91003: うちのお店; web: https://umamusu.wiki/Hishi_Akebono); father is a cooking master, mother teaches sweets-making (profile about_family)",
+    "circus imagery (alternate outfit lines 70016, 91028)",
+    "shiko stomps every morning",
+    "carrying snacks in her pockets (profile trivia)"
+  ],
+  "weak_spots": [
+    "being a 'nabe bugyō' who takes over the hotpot (profile weakness)",
+    "rips her pajamas doing shiko stomps",
+    "says she's 'had her fill' of races when overraced (voice_id 20022)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "February 27 (2月27日)",
+    "height": "180 cm (180cm)",
+    "voice_actor": "Rei Matsuzaki (松嵜麗)"
+  },
+  "relationships": [
+    {
+      "id": 1054,
+      "name_en": "Biko Pegasus",
+      "nature": "Roommate; they share the early-to-bed motto and play Carrotman together.",
+      "evidence": "home scenes x6; mentions in voice x3 (voice_id 90011: あたしとビコーちゃんのモットーは早寝早起き！); roommate: web: https://umamusu.wiki/Hishi_Akebono (checked: \"Friend, rival, and roommate\"); both Ritto Dorm in source"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "Friend ('Mira-ko') who grills okonomiyaki for her and looks blissful eating her food.",
+      "evidence": "voice_id 10026: ミラ子さんとお好み焼きに行くと…; voice_id 91017; 'Mira-ko' = Hishi Miracle confirmed from Hishi Miracle's own lines (voice_id 1169: ミラ子とっ？)"
+    },
+    {
+      "id": 1039,
+      "name_en": "Kawakami Princess",
+      "nature": "Frequent home-screen partner.",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "Ritto dorm leader; Akebono plans tea parties with bittersweet chocolate for her.",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "Akebono admires her big scale.",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91001)"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "Barbecue partner.",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "Collab cooking stream partner; Akebono encourages her to be a 'muse'.",
+      "evidence": "home scenes x2; voice_id 91016, 400008"
+    },
+    {
+      "id": 1055,
+      "name_en": "Marvelous Sunday",
+      "nature": "Akebono imitates her 'Marvelous'.",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91020)"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "Praised Akebono's stollen.",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1113,
+      "name_en": "Fusaichi Pandora",
+      "nature": "Akebono made a special seasoning so she'd eat vegetables.",
+      "evidence": "mentions in voice x1 (voice_id 91021)"
+    }
+  ],
+  "groups": [
+    "Hishi-named runners (Hishi Amazon, Hishi Miracle) share the crown prefix; family relation unverified"
+  ],
+  "story_arc": {
+    "summary": "Akebono loves sumo but chose the track, and she wants to become 'chanko nabe', a dish that fills everyone with warmth. Her scenario is a sprint/mile campaign: the Sprinters Stakes, Swan Stakes, Mile CS, Takamatsunomiya Kinen and Yasuda Kinen. Through it she works out what 'true chanko' needs (titles: '真のちゃんこ', '完成の調味料', 'お鍋に映るは、あなたの笑顔'), and her lines name the trainer as its most important ingredient (voice_id 10001).",
+    "source": "event titles; web: https://umamusu.wiki/Hishi_Akebono"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10001,
+      "jp": "『真のちゃんこ鍋』になるために\n欠かせないものはたくさんあるけど\n1番はトレーナーさんだねっ。",
+      "en": "There are lots of things you need to become a 'true chanko nabe', but number one is you, Trainer-san."
+    },
+    {
+      "voice_id": 90001,
+      "jp": "目が覚めたら、まずは\nおっきく四股を踏むんだ～。\n時々パジャマが破けちゃうけど☆",
+      "en": "When I wake up, first I do a big shiko stomp~. Sometimes my pajamas rip, though☆"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "何事も大きいことが1番っ。\nMサイズよりLサイズ、\nLサイズよりパーティーサイズ☆",
+      "en": "Bigger is always best. L size over M size, party size over L size☆"
+    },
+    {
+      "voice_id": 20024,
+      "jp": "鍋で言うと、具もダシも準備完了、\nって感じだね～☆あとは～…\n火を入れるだけっ！",
+      "en": "In hotpot terms, the ingredients and broth are all ready☆ All that's left~... is to turn on the heat!"
+    },
+    {
+      "voice_id": 92005,
+      "jp": "1日1日を全力で取り組むよ～！\nというわけでトレーナーさん、\nはっけよい、のかけ声、お願いっ☆",
+      "en": "I give every single day my all~! So, Trainer-san, please give me the 'hakkeyoi' call☆"
+    }
+  ],
+  "timer_line_ideas": [
+    "Bono bōno~☆ {user}, Trainer-san, your 50-minute run is all cooked through! Come take a peek~, and if you're hungry after, I made a big pot for everyone♪",
+    "Dosukoi~! Independent Training's finished, {user}! Ingredients prepped, broth simmered, now we just serve it up. Let's go see the results together~♪"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Samson Big x16 - this is a false positive from the word ビッグ ('big', Samson Big's short name) and is excluded",
+    "Hishi family relation to Hishi Amazon/Miracle not established in source",
+    "Story arc dialogue not in mdb; race outcomes unverified",
+    "Timer lines use ☆ and ♪ (her own text symbols, not emoji); strip them if the bot filters non-ASCII symbols"
+  ]
+}

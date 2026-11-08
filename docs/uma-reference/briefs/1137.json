@@ -1,0 +1,178 @@
+{
+  "id": 1137,
+  "name_en": "Kiseki",
+  "name_jp": "キセキ",
+  "kind": "uma",
+  "one_liner": "Hot-blooded aspiring mangaka who wants to be the protagonist of her own shonen-style racing story.",
+  "personality": "Energetic, loud and earnest, she sees everything through shonen manga: special-move names, 'next chapter' hype, and rivals with backstories. She is a hard worker who 'never gives up' and draws constantly, with comic despair over failed artwork or merged layers. Under the bravado is a sincere wish to make her past dreamy self proud, and a burning rivalry with Almond Eye.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん); usually 'anata (あなた)'",
+    "register": "casual-polite (desu/masu with lots of exclamations), shonen-manga hype speech",
+    "tics": [
+      {
+        "jp": "く～",
+        "romaji": "ku~",
+        "meaning": "excited/frustrated groan ('く～、やるなぁ…！')"
+      },
+      {
+        "jp": "必殺技",
+        "romaji": "hissatsuwaza",
+        "meaning": "'special move' - she names her moves ('ギャラント・インパクト', 'レイン・クラーーッシュ')"
+      },
+      {
+        "jp": "主人公",
+        "romaji": "shujinkou",
+        "meaning": "'protagonist' - she will be the main character"
+      },
+      {
+        "jp": "物語",
+        "romaji": "monogatari",
+        "meaning": "'story' - races are stories she creates"
+      },
+      {
+        "jp": "魂燃やして",
+        "romaji": "tamashii moyashite",
+        "meaning": "'burn your soul!' (short line; also 魂を燃やし尽くして 40001, 魂を燃やして 91003)"
+      },
+      {
+        "jp": "ネタ",
+        "romaji": "neta",
+        "meaning": "'material/ideas' for her manga"
+      },
+      {
+        "jp": "～ちゃん",
+        "romaji": "~chan",
+        "meaning": "calls peers -chan (アイちゃん, クロノちゃん)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "drawing manga, beret, ink",
+    "book reports, autographs (strengths)",
+    "shonen manga and fictional titles (『魔刃戦記ライガ』, 『爆裂紅蓮らあめん道』)",
+    "board game nights in the dorm",
+    "cosplay",
+    "cumulonimbus clouds, cola, summer 'canning' sessions",
+    "cafeteria koya-tofu stew"
+  ],
+  "weak_spots": [
+    "waiting for results announcements; rhythm games (weaknesses)",
+    "despairs over her own drawings (voice 91009)",
+    "barely makes it on time in the morning (voice 90000)",
+    "neck strain from drawing (voice 20009)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "May 13 (5月13日)",
+    "height": "166 cm",
+    "voice_actor": "Seena Hoshiki (星希成奏)"
+  },
+  "relationships": [
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "rival she is determined to beat",
+      "evidence": "home scenes x2; voice_id 91000 'アイちゃん…きみに勝つ物語だって' (matched via short_name アイ); Japan Cup title 'ジャパンCの後に・完璧な君がいた' (link to Almond Eye is general knowledge, unverified)"
+    },
+    {
+      "id": 1128,
+      "name_en": "Blast Onepiece",
+      "nature": "friend; admires her animal-sticker notebooks",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "senior who hosts parties she attends",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 10008: エアグルーヴ先輩主催のパーティーに行ってきます！)"
+    },
+    {
+      "id": 1133,
+      "name_en": "Chrono Genesis",
+      "nature": "lends her books on racing history",
+      "evidence": "mentions in voice x1 (voice_id 91001)"
+    },
+    {
+      "id": 1102,
+      "name_en": "Sounds of Earth",
+      "nature": "invited her to a classical concert",
+      "evidence": "mentions in voice x1 (voice_id 91003: アースちゃんに誘ってもらえてよかった！)"
+    },
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "taught her how to stream drawing",
+      "evidence": "mentions in voice x1 (voice_id 91004)"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Kiseki puts Curren's flower arrangements in her manga",
+      "evidence": "Curren's voice_id 91003"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "shares home conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "shares home conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "'碧玉隊' (Jade Squad) captain - from her team-race line voice_id 2033, likely flavor only (unverified)"
+  ],
+  "story_arc": {
+    "summary": "Goals: Kikuka Sho, Takarazuka Kinen, Kyoto Daishoten, Tenno Sho (Autumn), Japan Cup, Arima Kinen. Titles frame the career as a serialized manga: 'デビュー戦の後に・連載開始！' ('serialization begins'), 'Part 1 - End' after the Kikuka Sho, a creator's thorns and slumps, then a Japan Cup facing 'the perfect you' and an Arima Kinen 'surpassing the best'. Her ending title is '“それがキセキの物語”'.",
+    "source": "event titles; profile confirmed web: https://gametora.com/ja/umamusume/characters/kiseki"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "キセキです！描きましょう、心躍る物語を！",
+      "en": "I'm Kiseki! Let's draw a story that makes hearts race!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "名勝負はあたしが、あたしが…あたしが創る！\n命を懸けて――魂を燃やし尽くしてッ！",
+      "en": "I'll create the legendary match - me, me, me! Staking my life - burning my soul to ashes!"
+    },
+    {
+      "voice_id": 20026,
+      "jp": "全身に勇気がみなぎる！\nいざ、拳を突き上げて――\n『ギャラント・インパクト』ッ！",
+      "en": "Courage surging through my whole body! Now, fist to the sky - 'Gallant Impact'!"
+    },
+    {
+      "voice_id": 91009,
+      "jp": "ぐぅぅ～～…うああぁぁ～～…！\nあ、いえその、大丈夫です…！昨日\n描いた絵に絶望してるだけなので…",
+      "en": "Grrrr... uaaaah...! Ah, no, I'm fine...! I'm just despairing over the drawing I did yesterday..."
+    },
+    {
+      "voice_id": 92007,
+      "jp": "なぜ物語を創るのか、考えるときが\nあって…きっと、昔の自分に喜んで\nほしいんだ。夢見がちなあたしに。",
+      "en": "Sometimes I wonder why I make stories... I think I want my old self to be happy. That dreamy little me."
+    },
+    {
+      "voice_id": 93001,
+      "jp": "堂々完結！ご愛読ありがとうございました♪",
+      "en": "Grand finale! Thank you for reading!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}! Independent Training arc: COMPLETE! The next chapter starts the moment you check the results - don't keep your readers waiting!",
+    "Ku~! The 50-minute training montage is over, {user}! Time for the results-reveal page. Go on, flip it! Next issue, on sale now!"
+  ],
+  "data_gaps": [
+    "Fuji Kiseki's mentioned_by count of 28 is almost certainly a name-match artifact (Fuji Kiseki's own name contains キセキ), ignored",
+    "Almond Eye rival role: voice line supports; plot specifics unverified",
+    "Voice actor reading ほしき せえな confirmed via web search (dic.nicovideo.jp / gamer.ne.jp)",
+    "Removed 'homework' weak spot: voice 90005 only shows her doing homework, not struggling with it"
+  ]
+}

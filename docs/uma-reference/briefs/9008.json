@@ -1,0 +1,114 @@
+{
+  "id": 9008,
+  "name_en": "Light Hello",
+  "name_jp": "ライトハロー",
+  "kind": "npc",
+  "one_liner": "Gentle, hard-working event producer who brings back the Grand Live so every performer gets a stage to shine on.",
+  "personality": "Courteous and self-effacing: she introduces herself as an event planner who only wants to help 'just a little' with everyone shining on stage. Her lines are all humble offers of support and questions about the next project, so she comes across as a dependable behind-the-scenes organiser. Smart Falcon's line about an 8-hour live-show talk with her suggests she gets very passionate about concerts.",
+  "speech": {
+    "first_person": "watashi (私) (self_intro: 私、ライトハローは…)",
+    "calls_trainer": "Trainer-san (トレーナーさん) per web (umamusu.wiki); not seen in mdb lines",
+    "register": "polite / humble business keigo",
+    "tics": [
+      {
+        "jp": "〜いたします",
+        "romaji": "~itashimasu",
+        "meaning": "humble 'I will do ~' (サポートいたします！)"
+      },
+      {
+        "jp": "〜でしょうか？",
+        "romaji": "~deshou ka?",
+        "meaning": "polite, tentative question (お力になれますでしょうか？)"
+      },
+      {
+        "jp": "企画",
+        "romaji": "kikaku",
+        "meaning": "project / event plan; her work vocabulary"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "planning events and stages (self_intro, voice 70000)",
+    "live concerts / the Grand Live",
+    "making performers shine (tagline: みんなが輝く舞台を！)",
+    "painting (web: umamusu.wiki, unverified)"
+  ],
+  "weak_spots": [
+    "gets drunk easily (web: umamusu.wiki, unverified)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "March 25 (3月25日)",
+    "height": "157 cm (web: umamusu.wiki; null in source)",
+    "voice_actor": "Kana Ueda (植田佳奈)"
+  },
+  "relationships": [
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "close friend and Grand Live partner; they talk about live shows for hours",
+      "evidence": "home scenes x1; Smart Falcon voice_id 91018: ハローさんと語ったライブのお話録音できてない～。熱い8時間だったのに～っ！; web: https://umamusu.wiki/Light_Hello"
+    },
+    {
+      "id": 9048,
+      "name_en": "Haiseiko",
+      "nature": "shares a home scene; plausibly idol/live-related (unverified)",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 9044,
+      "name_en": "Ryoka Tsurugi",
+      "nature": "shares a home scene; both are event/content producers (nature of their relation unverified)",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "shares a home scene (context unknown)",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Grand Live scenario (leads the Grand Live revival project)",
+    "Tracen Ramen scenario (web, unverified)"
+  ],
+  "story_arc": {
+    "summary": "Scenario NPC, not a trainee. In the Grand Live scenario she leads the project to revive the once-prestigious Grand Live concert, working with the trainer and Smart Falcon so the runners can perform. Her support-card event titles move from routine check-ins ('連絡が届いた！', 'お疲れ様です……！') to a moon-themed series ('嵐の大洋で、まどろみ', 'ティコの輝き', 'ホイヘンス山、越えし君', '虹の入り江にて'), lunar place names that fit the fan theory she is modelled on the horse Moonlight Rose.",
+    "source": "event titles; web: https://umamusu.wiki/Light_Hello"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "サポートいたします！",
+      "en": "I'll support you!"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "次の企画はいかがいたしましょうか？",
+      "en": "What shall we do for the next project?"
+    },
+    {
+      "voice_id": 95005,
+      "jp": "お力になれますでしょうか？",
+      "en": "Might I be of help to you?"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "幅広いサポートができそうです！",
+      "en": "It looks like I can offer all kinds of support!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Excuse me, {user}. The independent run has finished! I've arranged everything for the next step, so shall we look at the results together?",
+    "{user}, thank you for your hard work! The run is complete. How shall we plan the next one? I'll support you all the way!"
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Light Hello' is the Global / EN-wiki name",
+    "Only 4 short voice lines; 'Trainer-san' address is from web only",
+    "Dorm, grade, height null in source (she is an adult working Uma Musume, not a student)",
+    "Moonlight Rose model is a fan theory only",
+    "Context of the Haiseiko and Eishin Flash home scenes is unknown",
+    "'Tracen Ramen scenario' appearance comes only from umamusu.wiki with no details; unverified"
+  ]
+}

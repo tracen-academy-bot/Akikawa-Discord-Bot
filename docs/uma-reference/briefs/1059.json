@@ -1,0 +1,180 @@
+{
+  "id": 1059,
+  "name_en": "Mejiro Dober",
+  "name_jp": "メジロドーベル",
+  "kind": "uma",
+  "one_liner": "Prickly, shy Mejiro lady who fears men and stares, running to change and prove herself.",
+  "personality": "Reserved and tsundere, she snaps 'don't look at me' and 'it's not like...' but quietly cares, offering ginger tea or to help with paperwork. Haunted by an unhappy childhood and a fear of men and crowds' gazes, she feels she falls short of the dignified Mejiro family and wants to become strong and change. As her bond grows her lines soften, with alternate versions swapping 'アンタ' for 'トレーナー', and she secretly enjoys manga, cute things, aroma blending and tea.",
+  "speech": {
+    "first_person": "atashi (アタシ) — x51",
+    "calls_trainer": "Anta (アンタ) x11; 'トレーナー' appears 13 times excluding 'チーフトレーナー', but only ~6 are direct address (20007, 2032, 70101, 90104, 92107, 92121), mostly in softer alt lines; the rest are 'as a trainer' phrasing (92002, 92007, 93000, 93001)",
+    "register": "casual, curt tsundere; becomes gentler in alternate (10100/20100/90100-series) lines; one ojousama slip 'いきますわよ' (1033)",
+    "tics": [
+      {
+        "jp": "べ、別に",
+        "romaji": "be, betsu ni",
+        "meaning": "'it's not like...' tsundere denial (べ、別に x3; 別に x10 overall)"
+      },
+      {
+        "jp": "…かも",
+        "romaji": "...kamo",
+        "meaning": "hedging 'maybe' (かも x20, incl. かもね etc.)"
+      },
+      {
+        "jp": "見ないで / 忘れて",
+        "romaji": "minaide / wasurete",
+        "meaning": "'don't look' (見ないで x1, voice 90000) / 'forget that' (忘れて x3, one is 'わ、忘れて！' 90005; others are 忘れてない)"
+      },
+      {
+        "jp": "ああもうっ",
+        "romaji": "aa mō",
+        "meaning": "frustrated exclamation (x2)"
+      },
+      {
+        "jp": "大丈夫、大丈夫",
+        "romaji": "daijōbu, daijōbu",
+        "meaning": "self-reassurance before races (x2: 20027, 60000)"
+      },
+      {
+        "jp": "メジロ家",
+        "romaji": "Mejiro-ke",
+        "meaning": "reference to her family's standards (x6 in lines; also in self_intro)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "knowledge of tea brands; ginger tea (profile strength; voice 90019)",
+    "manga and drawing ('べじキャロリン' sketches, voice 10002)",
+    "aroma blending (voice 91019)",
+    "cherry-blossom viewing because nobody looks at her (voice 91012)",
+    "night training, away from eyes (voice 91011)",
+    "rain (voice 91013)",
+    "doing other people's hair (Taiki 90210/91018, Bright 90013 say she styles theirs; own hair set 90110)"
+  ],
+  "weak_spots": [
+    "men (profile weakness; voice 10001)",
+    "thunder (profile weakness; voice 91013)",
+    "being stared at / crowds (voice 20010, 20035)",
+    "childhood memories (voice 91001)",
+    "being called 'Bell-chan' by her father (voice 91000)",
+    "winter weight gain (voice 91015, 91027)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Senior Division / high school (高等部)",
+    "birthday": "May 6 (5月6日)",
+    "height": "157 cm (157cm)",
+    "voice_actor": "Hikari Kubota (久保田ひかり)"
+  },
+  "relationships": [
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "Mejiro relative and longtime supporter who picked her clothes",
+      "evidence": "home scenes x7; mentions in voice x6 (voice_id 91002: ライアンには昔から迷惑をかけることも多かったから; 92021; 400002)"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "roommate (implied: Taiki is lonely if Dober isn't there when she wakes)",
+      "evidence": "mentions in voice x3 (voice_id 91009: 寝起きにアタシがいないと、タイキが寂しがるんだよね; 91022; 400010); home scenes x2; Taiki mentions her x3 (hair styling, homework help); roommate status general knowledge (unverified)"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "Mejiro relative whose fluffy hair she admires",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91029); Bright mentions her x5"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "respected senior she measures herself against",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 400004: 想いの強さなら、エアグルーヴ先輩にも負けない; 400003)"
+    },
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "recommends bedtime reading",
+      "evidence": "home scenes x1; mentions in voice x2 lines (voice_id 91023, 91123)"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Mejiro relative; admired for being elegant in the morning",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 90001)"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Mejiro relative who over-praises her",
+      "evidence": "mentions in voice x1 (voice_id 91016)"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "Mejiro senior who makes her nervous",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 400048)"
+    },
+    {
+      "id": null,
+      "name_en": "former Chief Trainer",
+      "nature": "the chief trainer who chose her current trainer",
+      "evidence": "voice_id 10000: チーフトレーナー、元気かな; trivia: 元チーフと現トレーナーの3人で撮った写真"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "notices Dober's passion when sketching",
+      "evidence": "Cafe mentions her x1 (Cafe voice_id 91223: スケッチブックに向かうドーベルさんの瞳…); Dober never mentions Cafe"
+    }
+  ],
+  "groups": [
+    "Mejiro family"
+  ],
+  "story_arc": {
+    "summary": "Scarred by her past and afraid of men and attention, Dober is handed to a new trainer by her former chief trainer and tries to run without fearing the stares. She takes on the Hanshin JF, Oka Sho, Oaks and Shuka Sho, then faces the Arima Kinen, Osaka Hai, Tenno Sho (Spring), Takarazuka Kinen, Fuchu Umamusume Stakes and the Queen Elizabeth II Cup, with branching 'shine / falter' outcomes. Her real namesake won the Oaks, Shuka Sho and two Queen Elizabeth II Cups (general knowledge, unverified).",
+    "source": "event titles; model knowledge (unverified) for real-horse notes"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90000,
+      "jp": "おはよう。…って、なに？\n挨拶しただけでしょ。\nそんなに見ないで。",
+      "en": "Morning. ...What? I just said hello. Don't stare at me like that."
+    },
+    {
+      "voice_id": 92007,
+      "jp": "…アンタのことは\nトレーナーとしては信頼してる…。\nト、トレーナーとしてはね！",
+      "en": "...I trust you — as a trainer... O-only as a trainer!"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "メジロ家のみんなは堂々としてて、\nすごく立派でしょ。\n…アタシとは違うの。",
+      "en": "Everyone in the Mejiro family is so poised and admirable, right? ...I'm not like them."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "世界中の男の人がアンタだったら…\n少しはアタシもマシだったかな…？\n…うそ、やっぱりそれはそれで無理",
+      "en": "If every man in the world were you... maybe I'd be a little better off...? ...Kidding, that'd be impossible too."
+    },
+    {
+      "voice_id": 91000,
+      "jp": "『ベルちゃん』はやめてって\n言ってるのに、お父さんったら…\nあっ、や、なんでもない！",
+      "en": "I keep telling him to stop calling me 'Bell-chan', but Dad... ah, n-never mind!"
+    },
+    {
+      "voice_id": 92122,
+      "jp": "次はどこ行くんだったっけ？\n行ったことある場所？ない場所？\nどっちでもいいよ、一緒ならね。",
+      "en": "Where were we going next? Somewhere we've been, or somewhere new? Either's fine, as long as we're together."
+    }
+  ],
+  "timer_line_ideas": [
+    "The independent run's over. ...It's not like I was waiting by the timer or anything. Just go check it, {user}. Don't look at me like that.",
+    "{user}, the independent run finished. ...You did well, I guess. Hurry and go see the results, okay? I'll, um, come too. Maybe."
+  ],
+  "data_gaps": [
+    "Taiki Shuttle as roommate is inferred from voice 91009 + general knowledge, unverified",
+    "Real-horse notes unverified",
+    "Dober's own lines' 'カフェ' (90012, 90112) are generic cafes, not Manhattan Cafe; Cafe's single mention of Dober (91223) is genuine",
+    "Brief previously cited a profile note on hair care; no such field exists in source — removed"
+  ]
+}

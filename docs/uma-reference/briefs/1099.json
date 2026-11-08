@@ -1,0 +1,201 @@
+{
+  "id": 1099,
+  "name_en": "Hokko Tarumae",
+  "name_jp": "ホッコータルマエ",
+  "kind": "uma",
+  "one_liner": "A hard-working, pragmatic 'locodol' who races and sings to put her hometown Tomakomai, Hokkaido, on the map.",
+  "personality": "Hokko Tarumae is a diligent, realistic local idol and Tomakomai tourism ambassador who turns every event, snack time and outfit into hometown PR (haskap berries, surf clams, swans). She is polite and serious, plans everything, believes in effort rather than luck, and is often exasperated by Copano Rickey's feng shui. She used to shoulder Tomakomai's fate alone; with her trainer she learns to share the load, and she keeps workshopping cutesy dialect catchphrases, then second-guessing them.",
+  "speech": {
+    "first_person": "watashi (私), standard; ora (おら) x2 in locodol-dialect lines (voice_id 40003, 95008)",
+    "calls_trainer": "Trainer-san (トレーナーさん) x13; anata (あなた) x2 in tender moments (voice_id 10014, 93001)",
+    "register": "polite standard Japanese (desu/masu) that switches into deliberate Hokkaido dialect in 'locodol mode'",
+    "tics": [
+      {
+        "jp": "だべ",
+        "romaji": "da be",
+        "meaning": "Hokkaido/Tohoku dialect copula, 'it is, y'know'"
+      },
+      {
+        "jp": "けっぱる",
+        "romaji": "kepparu",
+        "meaning": "Hokkaido dialect 'give it your all' (けっぱるべ！, けっぱれ～！)"
+      },
+      {
+        "jp": "なんまら",
+        "romaji": "nanmara",
+        "meaning": "Hokkaido dialect 'really, super'"
+      },
+      {
+        "jp": "はっちゃきこく",
+        "romaji": "hacchaki koku",
+        "meaning": "Hokkaido dialect 'go all-out'"
+      },
+      {
+        "jp": "めんこい",
+        "romaji": "menkoi",
+        "meaning": "dialect 'cute'"
+      },
+      {
+        "jp": "なんもなんも",
+        "romaji": "nanmo nanmo",
+        "meaning": "Hokkaido 'not at all / no worries'"
+      },
+      {
+        "jp": "おばんです",
+        "romaji": "oban desu",
+        "meaning": "Hokkaido 'good evening'"
+      },
+      {
+        "jp": "とまこま～☆",
+        "romaji": "tomakomaa",
+        "meaning": "her trial greeting built from 'Tomakomai'"
+      },
+      {
+        "jp": "苫小牧",
+        "romaji": "Tomakomai",
+        "meaning": "her hometown, mentioned constantly"
+      },
+      {
+        "jp": "努力あるのみ",
+        "romaji": "doryoku aru nomi",
+        "meaning": "'nothing but effort', her creed"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Tomakomai: haskap berries, surf clams (ホッキ貝), salmon, Lake Utonai swans, the port",
+    "Tomakomai quizzes and mountain climbing (profile)",
+    "Locodol work: MCing events, catchphrases, PR ideas, fashion research",
+    "Ice dance from her hometown",
+    "Her hat: a personal fashion fixation within her 'simple and cute' locodol wardrobe (voice_id 10025)",
+    "Dream of a ferry-deck concert"
+  ],
+  "weak_spots": [
+    "Relying on luck (profile)",
+    "Riding boats / seasickness (profile; voice_id 91020)",
+    "Ghosts and scary stories (voice_id 90015)",
+    "Sunburn",
+    "Overthinking and carrying everything alone (voice_id 70001)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "May 26 (5月26日)",
+    "height": "162cm",
+    "voice_actor": "Sayaka Kikuchi (菊池紗矢香)"
+  },
+  "relationships": [
+    {
+      "id": 1098,
+      "name_en": "Copano Rickey",
+      "nature": "Close friend and rival; Tarumae dismisses feng shui but quietly respects her",
+      "evidence": "home scenes x9; mentions in voice x3 (voice_id 91016: リッキーってば、海にも風水道具を持ってくるんですよ; 400007: リッキーのああいうとこは、尊敬だな); web: https://umamusu.wiki/Hokko_Tarumae"
+    },
+    {
+      "id": 1100,
+      "name_en": "Wonder Acute",
+      "nature": "Close friend and rival; they swap pickles and hometown sweets, go clam digging",
+      "evidence": "home scenes x5; mentions in voice x2 (voice_id 91002, 91017); Acute mentions her x5"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Upperclassman idol she admires as a performer",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91001, 91018: やっぱりすごいな、ファル子さん); event title ファル子からの挑戦状"
+    },
+    {
+      "id": 1090,
+      "name_en": "Verxina",
+      "nature": "Roommate whose glamorous vacation photos dazzle her",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91019); roommate per web: https://umamusu.wiki/Hokko_Tarumae"
+    },
+    {
+      "id": 1097,
+      "name_en": "Still in Love",
+      "nature": "Friend who shares her love of sweets",
+      "evidence": "home scenes x3; web: https://umamusu.wiki/Hokko_Tarumae"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "'Artisan' she asks to judge her haskap sweets",
+      "evidence": "mentions in voice x1 (voice_id 91000)"
+    },
+    {
+      "id": 1079,
+      "name_en": "Furioso",
+      "nature": "Friend who gave her local spinach",
+      "evidence": "mentions in voice x1 (voice_id 90018)"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "Sends her late-night regional-revitalisation emails",
+      "evidence": "mentions in voice x1 (voice_id 91023)"
+    },
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "Showed interest in a haskap lollipop",
+      "evidence": "mentions in voice x1 (voice_id 90013)"
+    },
+    {
+      "id": 1104,
+      "name_en": "Katsuragi Ace",
+      "nature": "Upperclassman who gives her training advice",
+      "evidence": "Katsuragi Ace mentions her in voice x1 (mentioned_by); web: https://umamusu.wiki/Hokko_Tarumae"
+    }
+  ],
+  "groups": [
+    "Dirt-racing friend circle with Copano Rickey, Wonder Acute and Smart Falcon (inferred from home scenes and voice mentions; not an official group name)",
+    "Tetra Mystics idol unit with Wonder Acute, Copano Rickey and Hokko Tarumae (web: https://umamusu.wiki/Wonder_Acute; not in the mdb; fourth member not confirmed)",
+    "Tomakomai tourism ambassador (とまこまい観光大使, in-universe role; voice_id 2034)"
+  ],
+  "story_arc": {
+    "summary": "Tarumae comes from Tomakomai to race on dirt (Leopard Stakes, Champions Cup, Kawasaki Kinen, Kashiwa Kinen, Teio Sho, JBC Classic, Tokyo Daishoten) so her wins and concerts will draw attention to her struggling hometown. At first she tries to save Tomakomai single-handedly; with her trainer she learns it is a 'three-legged race' and that it's fine to be her serious, stiff self (voice_id 70001, 10002). Event titles also include a challenge from Smart Falcon and scenes in Paris (パリの街にて), but their content is not in the mdb.",
+    "source": "event titles and voice lines; web: https://umamusu.wiki/Hokko_Tarumae"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95004,
+      "jp": "最速ロコドル、苫小牧から\n参上だべ～☆…よし、決まった！",
+      "en": "The fastest locodol, here from Tomakomai! ...Okay, nailed it!"
+    },
+    {
+      "voice_id": 90003,
+      "jp": "とまこま～☆…この挨拶、悪くない\nかもしれません。トレーナーさん、\nとまこま～☆…どうでしょう！？",
+      "en": "Tomakoma~! ...This greeting might not be bad. Trainer-san, tomakoma~! ...How's that!?"
+    },
+    {
+      "voice_id": 70001,
+      "jp": "あの頃は1人で気負い過ぎて\nいました。私が苫小牧を救うんだ、\nって…今は、二人三脚です。",
+      "en": "Back then I was carrying too much by myself. Thinking I'd be the one to save Tomakomai... Now it's a three-legged race."
+    },
+    {
+      "voice_id": 10002,
+      "jp": "私は私でいい。真面目で堅い私でも\nいい。…ふふ。トレーナーさんと\nいて、見つけた答えですよ。",
+      "en": "It's fine for me to be me. Even a serious, stiff me. ...Heh. That's the answer I found being with you, Trainer-san."
+    },
+    {
+      "voice_id": 20009,
+      "jp": "元気が、出ません…。\nかくなる上は…お仕事モード！\nなんまら～…けっぱるべッ！",
+      "en": "I've got no energy... In that case, work mode! Nanmara... kepparu-be!"
+    },
+    {
+      "voice_id": 91016,
+      "jp": "リッキーってば、海にも風水道具を\n持ってくるんですよ。…落として\n泣きついてきても知らないんだから",
+      "en": "Rickey even brings her feng-shui gear to the beach. ...If she drops it and comes crying to me, I'm not helping."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your independent training is done! Nothing but effort, right? Let's check the results together... then maybe a haskap snack. Kepparu-be!",
+    "Tomakoma~! The run is finished, {user}! ...Hm, was that greeting too much? Anyway, the results are in, please go take a look!"
+  ],
+  "data_gaps": [
+    "Mentions of Manhattan Cafe (x2) and Nishino Flower (x1) look like false matches on カフェ / フラワーフレーム; not listed",
+    "Paris-related event titles (彼の都の思い出は, パリの街にて) unexplained",
+    "Roommate (Verxina) from web only",
+    "Voice actor romanisation (Sayaka Kikuchi) is standard reading, not from the mdb",
+    "'Tetra Mystics' unit is only on umamusu.wiki's Wonder Acute page (not her own page, not the mdb)"
+  ]
+}

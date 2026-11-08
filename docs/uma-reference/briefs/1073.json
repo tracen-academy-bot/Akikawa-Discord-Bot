@@ -1,0 +1,186 @@
+{
+  "id": 1073,
+  "name_en": "Tsurumaru Tsuyoshi",
+  "name_jp": "ツルマルツヨシ",
+  "kind": "uma",
+  "one_liner": "Sickly but relentlessly upbeat girl chasing a Triple Crown like her idol Rudolf, coughing all the way.",
+  "personality": "Boundlessly enthusiastic and always at full power, but her frail body keeps failing her. She coughs, gets dizzy, catches colds and insists she is 'totally fine'. She idolises Symboli Rudolf, wants to become a Triple Crown winner, and even writes puns to make her laugh. She wants to be reliable for others, and she is learning from her trainer to work hard the right way instead of recklessly.",
+  "speech": {
+    "first_person": "watashi (私); she also calls herself 'Tsuyoshi' in the third person (元気なツヨシはなんでもできる)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also anata, written アナタ in katakana",
+    "register": "Energetic, cheerful polite speech (desu/masu) with lots of exclamations; casual with friends, using -chan nicknames",
+    "tics": [
+      {
+        "jp": "ゲホッ",
+        "romaji": "geho!",
+        "meaning": "Cough that cuts off her sentences"
+      },
+      {
+        "jp": "ヴッ",
+        "romaji": "vu!",
+        "meaning": "Sudden choke/queasy gag mid-sentence"
+      },
+      {
+        "jp": "うおぉ",
+        "romaji": "uoo",
+        "meaning": "Fired-up roar"
+      },
+      {
+        "jp": "大丈夫",
+        "romaji": "daijoubu",
+        "meaning": "'I'm fine!', which she says when she clearly isn't"
+      },
+      {
+        "jp": "全力",
+        "romaji": "zenryoku",
+        "meaning": "Full power"
+      },
+      {
+        "jp": "レッツゴー",
+        "romaji": "rettsu goo",
+        "meaning": "Let's go!"
+      },
+      {
+        "jp": "ツヨシ",
+        "romaji": "Tsuyoshi",
+        "meaning": "Refers to herself by name ('Tsuyoshi is strong')"
+      },
+      {
+        "jp": "会長",
+        "romaji": "kaichou",
+        "meaning": "'President': what she calls Symboli Rudolf"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Developing original smoothies and 'health drinks' (profile; event title ツヨシ印の健康ドリンク！)",
+    "Over-the-top named health foods (爆肉金剛定食, 破天爆裂健康ハーブティー)",
+    "Symboli Rudolf and the Triple Crown",
+    "Making puns to please Rudolf",
+    "Her younger siblings",
+    "Snow (she could only watch it from indoors as a child)",
+    "Care supplies: oxygen spray, taping, hand warmers",
+    "Dance taught by Teio ('Tsuyoshi Step')"
+  ],
+  "weak_spots": [
+    "Poor health: coughing, dizziness, catching colds",
+    "The smell of pain-relief patches, low air pressure, being told to rest completely (profile)",
+    "Pollen and heat; seasonal fatigue",
+    "Bread is hard for her to digest",
+    "Her tail catches a cold if not dried quickly (profile)",
+    "Tends to overwork herself"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 6 (4月6日)",
+    "height": "160 cm",
+    "voice_actor": "Yoshino Aoyama (青山吉能)"
+  },
+  "relationships": [
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "Her idol, whom she calls 会長; she wants to become a Triple Crown winner like her",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 92005: ルドルフ会長みたいな三冠ウマ娘になるために); Rudolf voice 91222"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "Roommate, whose company calms her",
+      "evidence": "home scenes x4; voice_id 91011 (最高のルームメイトですっ); Bright voice 90010/90211 (ツルちゃんさま wakes her and curls her hair)"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Friend and dance teacher; a fellow Rudolf fan who matches outfits with her",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91005); Teio voice 91228"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "Classmate and friend; also a rival (web)",
+      "evidence": "home scenes x4; voice_id 91010 (スペちゃん); web: https://umamusu.wiki/Tsurumaru_Tsuyoshi"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Helps her keep up with her studies ('Grass-chan-sensei')",
+      "evidence": "home scenes x2; voice_id 91002"
+    },
+    {
+      "id": 1149,
+      "name_en": "Phalaenopsis",
+      "nature": "Friend who drinks her special health drinks; also has health issues (web)",
+      "evidence": "affinity 31 (highest); Phalaenopsis voice 91009; web: https://umamusu.wiki/Tsurumaru_Tsuyoshi"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Friend ('Sei-chan') she sends cat photos to",
+      "evidence": "home scenes x2; voice_id 91003"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "Friend she cheers for",
+      "evidence": "home scenes x1; voice_id 91004"
+    },
+    {
+      "id": 1014,
+      "name_en": "El Condor Pasa",
+      "nature": "Friend who taught her a catchphrase",
+      "evidence": "home scenes x1; voice_id 91001"
+    }
+  ],
+  "groups": [
+    "Special Week's generation (the 1998 Classic class): Spe, Grass, El, Sky, King (web: umamusu.wiki)",
+    "Appears in the Umayuru spin-off anime (web: umamusu.wiki; unverified)"
+  ],
+  "story_arc": {
+    "summary": "Tsuyoshi wants to win the Triple Crown like her idol Rudolf, but her fragile body keeps breaking down when she overexerts herself. With her trainer she learns to work hard 'the right way', running the Satsuki Sho, Derby and Kikuka Sho and then senior races such as the Tenno Sho (Spring), Kyoto Daishoten and Arima Kinen, with recurring themes of 'absolute' promises and being 'okay' (“大丈夫”). The real horse was famously frail and won the 1999 Kyoto Daishoten.",
+    "source": "event titles + web: https://umamusu.wiki/Tsurumaru_Tsuyoshi + general knowledge (unverified for the real-horse record)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "アナタが教えてくれたやり方で、\nちゃんとした方法でがんばります！\n暴走しないよう…気をつけますっ！",
+      "en": "I'll work hard the proper way you taught me! I'll be careful... not to run wild!"
+    },
+    {
+      "voice_id": 20001,
+      "jp": "は、はい！ちょっと休んだら\nすぐに行きま――ゴホッ…！\nゲホゴホォォッ！！",
+      "en": "Y-yes! I'll just rest a bit and go right awa- *cough*...! *hack hack*!!"
+    },
+    {
+      "voice_id": 20036,
+      "jp": "ゴホォォォッ…！！！\n大丈夫です…！今のはその、\nしゃっくりみたいなものなので…！",
+      "en": "*HACK*...!!! I'm fine...! That was just, um, like a hiccup...!"
+    },
+    {
+      "voice_id": 40000,
+      "jp": "誰より強い！ツルマルツヨシ！",
+      "en": "Stronger than anyone! Tsurumaru Tsuyoshi!"
+    },
+    {
+      "voice_id": 91000,
+      "jp": "『道路が渋滞して、手痛い停滞』…\nえへへ、新しいダジャレです。\n会長に喜んでもらいたくて！",
+      "en": "'The road's congested, so I'm painfully arrested'... ehehe, a new pun. I want to make the President happy!"
+    },
+    {
+      "voice_id": 20004,
+      "jp": "元気なツヨシはなんでもできる！\nさあ、今日のメニューを\n教えてください！",
+      "en": "Healthy Tsuyoshi can do anything! Come on, tell me today's menu!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}! Independent training, finished! Full power for fifty whole minutes! Tsuyoshi is super healthy, totally fine! Let's go check the resul- *cough cough* ...j-just a hiccup!",
+    "Trainer-san! The run's all done! Let's go look at it together, {user}! Let's gooo- *urk* ...I'm okay! I'm okay!"
+  ],
+  "data_gaps": [
+    "Height comes from the source profile (160 cm); the web did not confirm it",
+    "An event title 'ボクらの“絶対”' uses ボク, but her voice lines only use 私, so ボク is not listed as her first person",
+    "Exact plot of her career chapters is inferred from event titles",
+    "The source's mentioned_by list is empty, yet Teio (10026, 91227, 91228 'ツルちゃん'), Rudolf (91222), Phalaenopsis (91009) and Mejiro Bright (90010, 90211) mention her; the counter seems to miss nicknames. Friends call her ツルちゃん (Tsuru-chan)"
+  ]
+}

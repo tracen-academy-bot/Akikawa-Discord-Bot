@@ -1,0 +1,192 @@
+{
+  "id": 1091,
+  "name_en": "Vivlos",
+  "name_jp": "ヴィブロス",
+  "kind": "uma",
+  "one_liner": "Pampered, sparkle-obsessed youngest sister who dreams of a glamorous 'celeb' race in Dubai.",
+  "personality": "A natural-born expert at being doted on (tagline: 天性の甘え上手): bubbly, flirty and openly fishing for praise and treats from her Trainer. Everything is framed around becoming a 'celeb' -- Dubai, resorts, cruises, private jets, fashion and cosmetics -- and she adores her sisters Verxina and Cheval Grand. Under the sugar she is genuinely competitive ('a race is something I'm going to win') and, when worn out, whines and bargains to skip training.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Tore-cchi (トレっち); also anata (あなた) in tender lines",
+    "register": "casual, sugary gyaru-ish girl talk with lots of ♪/☆/♡, stretched vowels and English loanwords (Hi, handsome!)",
+    "tics": [
+      {
+        "jp": "トレっち",
+        "romaji": "Tore-cchi",
+        "meaning": "her cutesy nickname for the Trainer"
+      },
+      {
+        "jp": "セレブ",
+        "romaji": "serebu",
+        "meaning": "'celeb'; her constant goal word (目指せセレブ！ 'aim for celeb-dom!')"
+      },
+      {
+        "jp": "キラキラ",
+        "romaji": "kirakira",
+        "meaning": "sparkly/glittery; also キラキラモード 'sparkle mode'"
+      },
+      {
+        "jp": "ときめ",
+        "romaji": "tokime(ku)",
+        "meaning": "heart-fluttering thrill (ときめきが止まらない etc.)"
+      },
+      {
+        "jp": "ちょー",
+        "romaji": "chō",
+        "meaning": "gyaru-ish 'super-' intensifier (ちょーキュート, ちょーロマンチック)"
+      },
+      {
+        "jp": "えらいえら～い",
+        "romaji": "erai era~i",
+        "meaning": "'good job, good job~' praise she gives the Trainer"
+      },
+      {
+        "jp": "お姉ちゃん",
+        "romaji": "onee-chan",
+        "meaning": "how she refers to her big sister Verxina"
+      },
+      {
+        "jp": "シュヴァち",
+        "romaji": "Shuva-chi",
+        "meaning": "her nickname for sister Cheval Grand"
+      },
+      {
+        "jp": "やーん",
+        "romaji": "yaan",
+        "meaning": "squealy 'eek~/oh no~' (playful)"
+      },
+      {
+        "jp": "でしょ",
+        "romaji": "desho",
+        "meaning": "'right?' tag fishing for agreement/praise"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Dubai (dream race destination; family photo taken in Dubai)",
+    "celebrity lifestyle: resorts, cruises, first class, limousines, night pools",
+    "fashion: ribbons, frills, hearts, sparkly accessories",
+    "the colour blue (same as her sisters) and pink",
+    "cosmetics, hair oil, fragrances, skincare",
+    "studying English for life abroad",
+    "overseas dramas and celebrity gossip",
+    "dad's hamburg steak whenever the family gathers (profile)",
+    "baseball (profile strength)",
+    "'celeb' daydream play (profile strength)",
+    "fishing with Cheval Grand in summer",
+    "being pampered and praised"
+  ],
+  "weak_spots": [
+    "noise (profile weakness)",
+    "cleaning (profile weakness)",
+    "spooky noises (voice 91011: 'Pya!! Did something just make a sound!?')",
+    "hard/tiring training; the iron-ball mental training (voice 92018)",
+    "drops into anxious 'I have to win or I can't be a celeb' mode when in bad condition"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 9 (4月9日)",
+    "height": "156cm",
+    "voice_actor": "Ayasa Ito (伊藤彩沙)"
+  },
+  "relationships": [
+    {
+      "id": 1090,
+      "name_en": "Verxina",
+      "nature": "eldest sister and role model ('お姉ちゃん'); shops together, wants to match her racing outfit",
+      "evidence": "home scenes x8; mentioned_by x9; voice 400005: 'ミューズはお姉ちゃんで決まりっ！'; web: https://umamusu.wiki/Vivlos"
+    },
+    {
+      "id": 1089,
+      "name_en": "Cheval Grand",
+      "nature": "middle sister ('シュヴァち'); teases her, wants matching rings/nails, goes fishing with her",
+      "evidence": "home scenes x5; voice 91029 / 10027 / 91013; web: https://umamusu.wiki/Vivlos"
+    },
+    {
+      "id": 1088,
+      "name_en": "Satono Crown",
+      "nature": "friend; her go-to source for celeb trends, invites her to Satono resort / limousine girls' party",
+      "evidence": "mentions in voice x3 (voice_id 91000: '最新トレンド聞くならやっぱりクラウン！'); home scenes x2"
+    },
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "acquaintance (shares home scenes); 'Satono-n' limousine party may refer to the Satono family",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "consults her about lunches/nutrition when serious",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91010)"
+    },
+    {
+      "id": 1111,
+      "name_en": "Air Messiah",
+      "nature": "asks her advice on bedtime aromas ('メサイアさん')",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 90014)"
+    },
+    {
+      "id": 1102,
+      "name_en": "Sounds of Earth",
+      "nature": "always praises her, but sometimes with a worryingly serious look",
+      "evidence": "mentions in voice x1 (voice_id 91004)"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "likely 'アイさん', who knows a lot about Dubai (name match is an inference)",
+      "evidence": "voice_id 91016 ('アイさんってドバイに詳しいの！'); mentioned_by x1"
+    }
+  ],
+  "groups": [
+    "Verxina / Cheval Grand / Vivlos sisters (three-sister family)"
+  ],
+  "story_arc": {
+    "summary": "Inspired by Verxina, Vivlos takes the Triple Tiara route (Oka Sho, Oaks, Shuka Sho; event titles 'Triple Tiara♡' etc.), partly to avenge her sister's defeats, then races older-year targets up to the Victoria Mile, Takarazuka Kinen and Japan Cup. Her chapters mix sisterly bonding ('My Beloved Sister♡', 'Sisters♡') with a health scare ('Keep Going'), always pointed at her dream of a glamorous race in Dubai ('ドバイマスター・ヴィブロス').",
+    "source": "event titles + web: https://umamusu.wiki/Vivlos (Gentildonna revenge motive and health issues per wiki, not verified in-game)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90010,
+      "jp": "おっはよー！今日のトレっちは\nキラキラモード何パーセント？\n私はね～、120パーセント☆",
+      "en": "Mornin'! What percent is your Sparkle Mode today, Tore-cchi? Me? 120 percent☆"
+    },
+    {
+      "voice_id": 10017,
+      "jp": "ミッションクリア！\nトレっち、がんばってたもんね♪\nえらいえら～い！",
+      "en": "Mission clear! You worked so hard, Tore-cchi♪ Good job, good jo~b!"
+    },
+    {
+      "voice_id": 20033,
+      "jp": "私の言うことマネしてくれる？\n『ヴィブちゃん、かわいーっ♡』\n…うん、ちょっと元気出たかなっ。",
+      "en": "Will you repeat after me? 'Vib-chan, so cute♡' ...Yeah, I feel a little better now."
+    },
+    {
+      "voice_id": 92018,
+      "jp": "メンタルを鍛えるのも大事だって\nお姉ちゃん言ってたけど…うぅ、\n鉄球トレーニングはやだよぉ～…。",
+      "en": "Big sis said training your mind is important too, but... ugh, I don't wanna do iron-ball training~..."
+    },
+    {
+      "voice_id": 91011,
+      "jp": "――ぴゃっ！！？\n今なんか音しなかった！！？\n…か、風…？ほんとに…？",
+      "en": "--Pya!!? Did something just make a noise!!? ...J-just the wind...? Really...?"
+    },
+    {
+      "voice_id": 30004,
+      "jp": "セレブになるんだもん！とーぜんっ！",
+      "en": "I'm gonna be a celeb, after all! Natch!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Tore-cchi~! {user}, your independent run is all done! You worked sooo hard, good job, good jo~b! Now come check it with me, then let's go somewhere sparkly, okay?",
+    "Ding ding~ Sparkle Mode complete! {user}, the run's finished, so take a peek, okay? ...And a celeb-worthy reward for me would be nice too, right?"
+  ],
+  "data_gaps": [
+    "Older-year story details and exact rivals are from wiki/titles only, not dialogue",
+    "Identity of 'アイさん' (Almond Eye?) and 'サトノん' not confirmed",
+    "Voice actor romanisation is standard reading, not checked against official EN credits",
+    "fact-check: sample 30004 EN previously added 'I won', which is not in the JP line (it is a race_result line); corrected"
+  ]
+}

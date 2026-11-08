@@ -1,0 +1,189 @@
+{
+  "id": 1129,
+  "name_en": "Almond Eye",
+  "name_jp": "アーモンドアイ",
+  "kind": "uma",
+  "one_liner": "Ultra-competitive, disciplined honour student who wins because she wants to win, and believes she will.",
+  "personality": "Fiercely competitive (tagline: \"super x9 sore loser\") and utterly sure of herself: \"I win because I want to win. That is all.\" She runs a tight self-care routine (bed-making, morning to-do memos, PFC-balanced homemade lunches, bath and sleep rituals) and is proud of her grades in every subject. She is warm and teasing with her trainer, treats them as an equal partner whose reasons she wants to hear, and refuses reckless plans, though she herself keeps asking to raise the training load.",
+  "speech": {
+    "first_person": "watashi (わたし, written in hiragana)",
+    "calls_trainer": "anata (貴方); no \"Trainer-san\" form seen in her lines",
+    "register": "Casual, confident standard Japanese with feminine endings (~wa, ~yo, ~wa yo, ~desho); not keigo with the trainer",
+    "tics": [
+      {
+        "jp": "行くわよ",
+        "romaji": "iku wa yo",
+        "meaning": "\"Let's go!\" (feminine, assertive ~wa yo)"
+      },
+      {
+        "jp": "勝つ準備はできてるわ",
+        "romaji": "katsu junbi wa dekiteru wa",
+        "meaning": "\"I'm ready to win\" - recurring boast"
+      },
+      {
+        "jp": "勝って勝って勝ち続けて",
+        "romaji": "katte katte kachitsuzukete",
+        "meaning": "\"win, win and keep on winning\" - her refrain"
+      },
+      {
+        "jp": "でしょ？",
+        "romaji": "desho?",
+        "meaning": "\"right?\" tag, seeking agreement"
+      },
+      {
+        "jp": "しておきましょ",
+        "romaji": "shite okimasho",
+        "meaning": "clipped \"let's get it done\" (e.g. 準備しておきましょ！)"
+      },
+      {
+        "jp": "ふふ",
+        "romaji": "fufu",
+        "meaning": "soft confident laugh"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "winning, being first, \"a new era/legend I create\"",
+    "eye contact and spot-the-difference puzzles (profile strengths)",
+    "cherry blossoms after a race (voice 90006)",
+    "cold showers and cucumbers in summer (90007)",
+    "yoga (profile: ties her tail for yoga)",
+    "studying; confident in every subject (70004, 91014)",
+    "homemade bento and brownies (90002, 10005, 91000)",
+    "bath goods, mint shower gel; sleep rituals with Blast (10011, 91011)",
+    "light blue (her colour), choker, ribbon, horseshoe motif (91007, 91008, 70009, 70010)",
+    "okonomiyaki, after Lucky Lilac taught her (91001)",
+    "family car rides with hip-hop (profile)",
+    "butterfly crossing the sea, stars, light/brilliance imagery"
+  ],
+  "weak_spots": [
+    "disguises (profile weakness)",
+    "saunas (profile weakness)",
+    "prone to heatstroke, by her own account (91013, 92002, 20000)",
+    "still stung by losing a fishing contest to Seiun Sky (400014)",
+    "tends to push training intensity; insists she will not overdo it (92003)",
+    "a \"lazy summer\" horrifies her (400009)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Junior High Division (中等部)",
+    "birthday": "March 10 (3月10日)",
+    "height": "163 cm (163cm)",
+    "voice_actor": "Kaori Ishihara (石原夏織)"
+  },
+  "relationships": [
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "Friend and rival; calls her \"Lala\", admires her sense of style, goes for okonomiyaki with her",
+      "evidence": "home scenes x3; voice_id 10026 (ララの美意識の高さ…さすがよね) and 91001; rival per web: https://umamusu.wiki/Almond_Eye"
+    },
+    {
+      "id": 1113,
+      "name_en": "Fusaichi Pandora",
+      "nature": "Close friend who pampers her (tea parties, loves her homemade bento); calls her \"Pandora-san\"",
+      "evidence": "home scenes x2; mentions in voice x4 (voice_id 91000: パンドラさん、わたしの手作り弁当ですごく喜ぶの…)"
+    },
+    {
+      "id": 1128,
+      "name_en": "Blast Onepiece",
+      "nature": "Friend who takes her clothes shopping and tries sleep tricks with her; roommate per wiki",
+      "evidence": "mentions in voice x4 (voice_id 91002, 90009, 91011); roommate per web: https://umamusu.wiki/Almond_Eye"
+    },
+    {
+      "id": 1137,
+      "name_en": "Kiseki",
+      "nature": "Kiseki is teaching her how to draw manga",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91003: キセキちゃんから漫画の描き方を教わるのよ)"
+    },
+    {
+      "id": 1075,
+      "name_en": "Daring Tact",
+      "nature": "Friend she admires for unshakable nerves",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91006)"
+    },
+    {
+      "id": 1091,
+      "name_en": "Vivlos",
+      "nature": "Planning a Dubai trip together",
+      "evidence": "mentions in voice x1 (voice_id 91004)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Upperclassman who keeps bragging about beating her at fishing",
+      "evidence": "mentions in voice x1 (voice_id 400014)"
+    },
+    {
+      "id": 1131,
+      "name_en": "Gran Alegria",
+      "nature": "Rival at the mile; Gran admires her but vows to beat her at miles",
+      "evidence": "home scenes x1; Gran voice_id 91001 (1131.json); web: https://umamusu.wiki/Almond_Eye"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Close friend and underclassman who looks up to her (per wiki; both are 中等部 in source, so 'underclassman' is unverified in-game)",
+      "evidence": "home scenes x2; nature per web (unverified in mdb): https://umamusu.wiki/Almond_Eye"
+    },
+    {
+      "id": 1109,
+      "name_en": "Rhein Kraft",
+      "nature": "Shared home conversations; nature not stated in source",
+      "evidence": "home scenes x2"
+    }
+  ],
+  "groups": [
+    "Miho Dorm",
+    "Triple Tiara aspirant (her race lines say ティアラの実力, voice 1258)",
+    "No team/family/faction confirmed in source"
+  ],
+  "story_arc": {
+    "summary": "Her career path is the Triple Tiara (Shinzan Kinen, Oka Sho, Oaks, Shuka Sho), then the Japan Cup (post-race title \"Impact\"), and into the senior year: Osaka Hai, Victoria Mile, Yasuda Kinen, Tenno Sho (Autumn) and a second Japan Cup (\"Our win\"). Title arcs like \"Glory Eyes\", \"Because I want to win!\" and \"The view no one has reached\" frame her as the challenger who beats legends and creates a new era. Per the wiki, she gets frustrated when told another Uma has beaten her record, and her final Japan Cup pits her against Umas based on seven-time G1 winners.",
+    "source": "event titles + web: https://umamusu.wiki/Almond_Eye"
+  },
+  "timer_line_ideas": [
+    "{user}, the independent run is done. Fifty minutes, no compromises. Let's review it together, then go again. Win, win, and keep on winning, right?",
+    "Run complete! ...Why are you just staring at me, {user}? Go check the results. I'm ready to win the next one, too. You're coming, aren't you?"
+  ],
+  "data_gaps": [
+    "No \"Trainer-san\" form in her lines; she says 貴方 (anata).",
+    "Mentions extractor also flagged King Halo x1, but the only match is the substring キング in ベッドメイキング (voice 90001): false positive, dropped.",
+    "Lucky Lilac is called ララ in her lines, so the extractor did not count it under mentions.",
+    "Story arc details beyond event titles come from umamusu.wiki; full dialogue not in mdb.",
+    "Roommate (Blast Onepiece) is from the wiki, not the mdb.",
+    "Curren Bouquetd'or as 'underclassman' is wiki-only; source lists both as Junior High Division."
+  ],
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "勝ちたいから勝つ。それだけよ！",
+      "en": "I win because I want to win. That's all!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "勝って勝って勝ち続けて…\n誰も見たことない煌めきを\nこの手に掴んでみせる！",
+      "en": "Win and win and keep on winning... I'll grab a brilliance no one has ever seen with these hands!"
+    },
+    {
+      "voice_id": 92006,
+      "jp": "貴方も本当負けず嫌いよね…。\nふふっ。それでこそ\nわたしのトレーナーね。",
+      "en": "You really hate losing too, don't you... Heh. That's what makes you my trainer."
+    },
+    {
+      "voice_id": 10007,
+      "jp": "おばけナースコスって…はぁ…\n貴方どう思う？パンドラさんの提案\nだけど、さすがに浮かれすぎよね？",
+      "en": "A ghost-nurse costume... *sigh*... what do you think? It was Pandora-san's idea, but that's a bit too giddy, isn't it?"
+    },
+    {
+      "voice_id": 90009,
+      "jp": "かけ布団の数が多くて、ブラストに\nミルフィーユだって言われたわ！\n…風邪引かないのが一番大事よね？",
+      "en": "I had so many duvets that Blast called me a mille-feuille! ...Not catching a cold matters most, right?"
+    },
+    {
+      "voice_id": 20022,
+      "jp": "…賛成できない。無謀なやり方を\n続けたら、必ず限界が来るわ。\nそんなのは嫌よ。――絶対に、嫌。",
+      "en": "...I can't agree. Keep going with a reckless method and you'll hit a limit for sure. I don't want that. Absolutely not."
+    }
+  ]
+}

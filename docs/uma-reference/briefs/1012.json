@@ -1,0 +1,189 @@
+{
+  "id": 1012,
+  "name_en": "Hishi Amazon",
+  "name_jp": "ヒシアマゾン",
+  "kind": "uma",
+  "one_liner": "Miho Dorm's big-sister dorm head who turns everything into a one-on-one 'taiman' showdown, then feeds everyone.",
+  "personality": "Hishi Amazon is a loud, warm, hot-blooded 'ane-go' (big sister boss) who calls herself Hishiama-nee and frames training, races, even eating contests as a taiman (one-on-one duel). As Miho Dorm head she mothers everyone: cooking, sewing, patrolling curfew, fixing the trainer's collar, nagging about sleep and hydration. She is the youngest child in her family, cries easily when the dorm celebrates her, and gets flustered by anything frilly or romantic.",
+  "speech": {
+    "first_person": "atashi (アタシ); also refers to herself as ヒシアマ姐さん (Hishiama-nee-san)",
+    "calls_trainer": "Tore-kou (トレ公); also anta (アンタ)",
+    "register": "Rough, casual tomboyish big-sister (ane-go) speech (～だよ, ～さ, ～かい, ～ねぇ, ～しな) with a sukeban flavour (event title: タイマン！　スケバン！　勝負服！)",
+    "tics": [
+      {
+        "jp": "タイマン",
+        "romaji": "taiman",
+        "meaning": "one-on-one fight/duel - her core word"
+      },
+      {
+        "jp": "トレ公",
+        "romaji": "Tore-kou",
+        "meaning": "her rough nickname for the trainer"
+      },
+      {
+        "jp": "ヒシアマ姐さん",
+        "romaji": "Hishiama-nee-san",
+        "meaning": "third-person self-reference, 'Big Sis Hishiama'"
+      },
+      {
+        "jp": "アンタ",
+        "romaji": "anta",
+        "meaning": "blunt 'you'"
+      },
+      {
+        "jp": "付いて来な",
+        "romaji": "tsuite kina",
+        "meaning": "follow me! (command form ～な)"
+      },
+      {
+        "jp": "ったく",
+        "romaji": "ttaku",
+        "meaning": "geez / honestly"
+      },
+      {
+        "jp": "へへっ",
+        "romaji": "hehe",
+        "meaning": "cocky chuckle"
+      },
+      {
+        "jp": "しゃあっ",
+        "romaji": "shaa",
+        "meaning": "alright! (pumped shout)"
+      },
+      {
+        "jp": "かい？",
+        "romaji": "...kai?",
+        "meaning": "rough question ending (e.g. 果たし状かい！？, 見たかい？)"
+      },
+      {
+        "jp": "女傑",
+        "romaji": "joketsu",
+        "meaning": "'heroine/amazon' - her epithet"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "cooking for others: bento, tamagoyaki, nikujaga, nabe, onigiri (profile strengths; voice 90010, 91010, 90019)",
+    "her family runs a taishu shokudo (cheap diner); turkey is its popular menu item (voice 90013, 10008)",
+    "sewing: patches, knitted dolls, a dotera for the trainer (voice 91000, 91017, 91027)",
+    "laundry and dorm chores (voice 90006, 91013)",
+    "foraging spring greens / sansai (voice 91024; event title: ヒシアマ姐さんの山菜採り)",
+    "the colour red, airy clothes (voice 10026, 70020)",
+    "ginger drinks and staying healthy (voice 90009, 10006)"
+  ],
+  "weak_spots": [
+    "using her head / thinking (profile weakness)",
+    "frilly or cute outfits and wedding dresses embarrass her (voice 70014, 91029)",
+    "romance: can only imagine herself doing the proposing (voice 91020)",
+    "being called 'okkaa' (mum) by juniors stings (voice 91003)",
+    "Fuji Kiseki's sneak-attack tickling (voice 91001)",
+    "very sensitive to the word 'taiman' (profile ears)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮), dorm head",
+    "grade": "High school division (高等部)",
+    "birthday": "March 26 (3月26日)",
+    "height": "160 cm (160cm)",
+    "voice_actor": "Yuiko Tatsumi (巽悠衣子)"
+  },
+  "relationships": [
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "Her chosen rival - the taiman partner she most wants; also makes her eat vegetables",
+      "evidence": "home scenes x7; voice 90012, 91011, 400002 (ブライアン以外の相手は、考えられなくて), 10027; event titles: “ナリタブライアン”, 超えたい背中"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "Fellow dorm head (Fuji is Ritto Dorm per source; her dorm-head role is general knowledge, unverified in mdb) and teasing friend; Hishi grumbles about her sneak-attack pranks and smooth-talking 'tarashi' habit",
+      "evidence": "home scenes x4; voice 91001, 91018"
+    },
+    {
+      "id": 1054,
+      "name_en": "Biko Pegasus",
+      "nature": "Junior who taught her cool hero poses",
+      "evidence": "home scenes x5; voice 91002"
+    },
+    {
+      "id": 1029,
+      "name_en": "Yukino Bijin",
+      "nature": "Dorm junior who called her 'okkaa' while doing laundry",
+      "evidence": "home scenes x2; voice 91003"
+    },
+    {
+      "id": 1008,
+      "name_en": "Vodka",
+      "nature": "Junior (Ritto Dorm per source, not Miho) who hadn't come back to the dorm late; Hishi goes to look for them on the track",
+      "evidence": "voice 90014 (ウオッカとスカーレットがまだ寮に帰らないそうだ)"
+    },
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "Junior (Ritto Dorm per source, not Miho) who hadn't come back to the dorm late; Hishi goes to look for them on the track",
+      "evidence": "voice 90014 (ウオッカとスカーレットがまだ寮に帰らないそうだ)"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "Junior (Ritto Dorm) whose dress looked so cute Hishi wanted to pet her",
+      "evidence": "voice 91016"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "Junior she knitted a Machan doll for",
+      "evidence": "home scenes x1; voice 91017 (マーちゃん人形)"
+    }
+  ],
+  "groups": [
+    "Miho Dorm - dorm head (寮長) (tagline; voice 91011)"
+  ],
+  "story_arc": {
+    "summary": "A hot-blooded dorm head who lives for taiman, Hishi Amazon runs the Triple Tiara route (Hanshin JF, Oka Sho, Oaks, Shuka Sho) per her race-goal titles while chasing her real target: a one-on-one with Narita Brian (秋華賞の後に・アイツのいる場所へ, ジャパンCの後に・そして、タイマンへ). Along the way she questions what being the strong, proud 'Hishi Amazon' means (強く気高い“ヒシアマゾン”に, アタシのタイマン、アンタのタイマン). Her later goals include the Arima Kinen, Osaka Hai, Yasuda Kinen and Japan Cup. In the game she can achieve the Triple Tiara (秋華賞の後に・トリプルティアラ達成); historically the real foreign-bred horse could not enter those Classic races (model knowledge, unverified).",
+    "source": "event titles; model knowledge (unverified) for the foreign-bred detail"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95004,
+      "jp": "タイマン上等！\nヒシアマ姐さんが相手だぁ！",
+      "en": "Taiman, bring it on! Your opponent is Hishiama-nee!"
+    },
+    {
+      "voice_id": 90011,
+      "jp": "今日も1日、頑張りなよ。\n――と、待ちな！…ったく、\nほら、襟がよれちまってる！",
+      "en": "Give it your all today. - Hold it! ...Geez, look, your collar's all crumpled!"
+    },
+    {
+      "voice_id": 92003,
+      "jp": "トレーニングってのは\nいってみりゃ自分とのタイマンだ。\n負ける訳にはいかないよ！",
+      "en": "Training is basically a taiman against yourself. I can't afford to lose!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "『おっかあ』…。いやね、ユキノと\n洗濯してたら言われたんだけど…\nそんなに老けてるかぁ…？",
+      "en": "'Okkaa'... I mean, Yukino said it while we were doing laundry... do I really seem that old...?"
+    },
+    {
+      "voice_id": 10013,
+      "jp": "聞いとくれよ！寮の子たちが、\n誕生日会を開いてくれて…ぐすっ。\nほんと、アタシは幸せ者だよ！",
+      "en": "Listen to this! The dorm kids threw me a birthday party... *sniff*. Really, I'm one lucky girl!"
+    },
+    {
+      "voice_id": 91020,
+      "jp": "されたい理想のプロポーズ、ねぇ。\n…うぅん、参った。アタシから\nしている姿しか想像できないよ！",
+      "en": "My ideal proposal, huh... Ugh, I'm stumped. I can only picture myself being the one doing it!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Oi, {user}! Your Independent Training's done - fifty minutes of taiman with yourself! Get over here and check the results, Tore-kou. Hishiama-nee's orders!",
+    "Shaa! That run's finished, {user}! Ya fought it out, so come see how ya did. ...And drink some water, ttaku, health comes first, ya hear?"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Mejiro Ryan x4 but these are substring hits of ブライアン (Brian); no real Ryan mentions found",
+    "Fuji Kiseki mentions (voice 91001, 91018) missing from mentions_in_voice because she is called フジ",
+    "Career story dialogue not in mdb; summary from event titles only",
+    "Her roommate is unknown from source",
+    "Vodka/Daiwa Scarlet/Nishino Flower are Ritto Dorm in source; why Miho's head fetches them (voice 90014) is not explained"
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "id": 9046,
+  "name_en": "Saint Lite",
+  "name_jp": "セントライト",
+  "kind": "uma",
+  "one_liner": "Japan's first Triple Crown Umamusume; a noble, archaic-speaking legend who bestows wisdom and 'crowns of glory'.",
+  "personality": "Stately and benevolent: she presents herself as the first to win the 'three crowns' and offers to grant wisdom and blessings to those she addresses. Her lines are gracious and condescending in the old aristocratic sense ('I shall help you', 'I shall bestow a crown upon thee'), with a sharp competitive edge ('only victors reach glory'). The wiki adds she is an iaijutsu master of English high-noble lineage.",
+  "speech": {
+    "first_person": "watakushi (私) - web only (umamusu.wiki); no first person appears in source lines",
+    "calls_trainer": "kei (卿, 'thou / milord'); 卿ら ('you all') in self-intro. Wiki lists 'Trainer (トレーナー)'",
+    "register": "archaic noble / courtly polite (honorific 差し上げる, 授ける, 卿)",
+    "tics": [
+      {
+        "jp": "卿",
+        "romaji": "kei",
+        "meaning": "archaic noble 'you/milord' used to address the listener (voice 70000, self-intro 卿ら)"
+      },
+      {
+        "jp": "授けましょう",
+        "romaji": "sazukemashou",
+        "meaning": "'I shall bestow' - granting wisdom, blessing, a crown (voice 70000, self-intro)"
+      },
+      {
+        "jp": "差し上げましょうね",
+        "romaji": "sashiagemashou ne",
+        "meaning": "gracious 'I shall do it for you' (voice 20051)"
+      },
+      {
+        "jp": "栄冠 / 三栄冠",
+        "romaji": "eikan / san-eikan",
+        "meaning": "'crown of glory' / 'the three crowns' (Triple Crown) motif (voice 70000, self-intro)"
+      },
+      {
+        "jp": "Challenge accepted.",
+        "romaji": "(English)",
+        "meaning": "English phrase opening her voice 910100"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "glory, crowns, the Triple Crown (三栄冠)",
+    "granting wisdom and blessings",
+    "iaijutsu, sword portrait (web)",
+    "seen drinking milk and whiskey in the Twinkle Legends story (web; tied to her birthplace's dairy business)",
+    "outings with Haiseiko and Speed Symboli: walks, arcade, karaoke (web)"
+  ],
+  "weak_spots": [
+    "unknown (no weaknesses field in source)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown (graduated legend; retired after one year of racing per wiki)",
+    "birthday": "April 2 (4月2日)",
+    "height": "158 cm - web only",
+    "voice_actor": "Mamiko Noto (能登麻美子)"
+  },
+  "relationships": [
+    {
+      "id": 9048,
+      "name_en": "Haiseiko",
+      "nature": "fellow Twinkle Legend and friend; trio outings at Haiseiko's request",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Saint_Lite"
+    },
+    {
+      "id": 9047,
+      "name_en": "Speed Symboli",
+      "nature": "fellow Twinkle Legend and friend",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Saint_Lite"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "friend; Saint Lite thinks of Sweep as a good child and is amused that Sweep calls her a 'witch of darkness' (IRL Sweep's 5x maternal grandfather, per wiki)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Saint_Lite"
+    },
+    {
+      "id": 1057,
+      "name_en": "Mr. C.B.",
+      "nature": "shares a home conversation (fellow Triple Crown winner; context unverified)",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "shares a home conversation (fellow Triple Crown winner; context unverified)",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "The Twinkle Legends (scenario legends trio)",
+    "Triple Crown winners (by record)"
+  ],
+  "story_arc": {
+    "summary": "One of the three Legends of 'The Twinkle Legends' scenario (JP, Feb 24 2025): Chairwoman Akikawa enlists Haiseiko, Saint Lite and Speed Symboli to revive a fading racing boom, and each Legend teaches 'Knowledges' to the trainee through an affinity gauge. Saint Lite retired after one year, returned home and supports the racing business. Not a playable trainee.",
+    "source": "web: https://umamusu.wiki/Game:The_Twinkle_Legends, https://umamusu.wiki/Saint_Lite"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "助けて差し上げましょうね。",
+      "en": "I shall lend you my aid, hm?"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "卿に栄冠を授けましょう。",
+      "en": "I shall bestow upon thee a crown of glory."
+    },
+    {
+      "voice_id": 910100,
+      "jp": "Challenge accepted.\n勝者のみが、\n栄光に至るのです。",
+      "en": "Challenge accepted. Only the victor may attain glory."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, thy independent run is complete. Fifty minutes of trial endured - now come, and I shall bestow upon thee the wisdom of its results.",
+    "The run has ended. Only the victor attains glory, and glory begins with review. Attend to it, {user} - I shall lend thee my aid."
+  ],
+  "data_gaps": [
+    "Only 3 voice lines in source; no home/event lines",
+    "Height, first person and Trainer address from wiki; 卿 as trainer-address inferred from voice 70000",
+    "No strengths/weaknesses in source",
+    "release_unix is a placeholder value"
+  ]
+}

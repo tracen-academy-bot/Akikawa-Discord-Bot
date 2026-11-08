@@ -1,0 +1,185 @@
+{
+  "id": 1005,
+  "name_en": "Fuji Kiseki",
+  "name_jp": "フジキセキ",
+  "kind": "uma",
+  "one_liner": "Princely 'jet-black entertainer' and dorm leader who lives to surprise people with magic, dance and a little kiseki (miracle).",
+  "personality": "Charming, gallant and theatrical, she plays the gentlemanly prince to her adoring 'pony-chan' juniors, escorting, dancing and pulling magic tricks to make people smile. Raised in a stage family, she treats races as performances and is always conscious of being watched. Beneath the showmanship she is responsible and caring (patrolling the dorm, worrying about juniors), privately admits to being 'quite greedy' for wonder, and gets flustered when she is sincere instead of joking.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); often kimi (君)",
+    "register": "Gentle, princely casual (…だね, …かな, …さ) with theatrical flourishes and English/French stage words",
+    "tics": [
+      {
+        "jp": "キセキ",
+        "romaji": "kiseki",
+        "meaning": "'miracle', punning on her own name; '“キセキ”を見せてあげるよ'"
+      },
+      {
+        "jp": "ポニーちゃん",
+        "romaji": "pony-chan",
+        "meaning": "her pet name for younger students and fans"
+      },
+      {
+        "jp": "サプライズ",
+        "romaji": "sapuraizu",
+        "meaning": "'surprise' - her favourite thing to give"
+      },
+      {
+        "jp": "エスコート",
+        "romaji": "esukooto",
+        "meaning": "'escort' - she offers to escort people constantly"
+      },
+      {
+        "jp": "舞台の開幕だ",
+        "romaji": "butai no kaimaku da",
+        "meaning": "'the curtain rises on the stage!'"
+      },
+      {
+        "jp": "お手をどうぞ",
+        "romaji": "ote wo douzo",
+        "meaning": "'may I have your hand?'"
+      },
+      {
+        "jp": "ふふっ",
+        "romaji": "fufu",
+        "meaning": "amused, knowing laugh"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Surprising people and watching surprise turn into a smile (listed strength, voice 91003)",
+    "Magic tricks (smoke from hands, endless gum, vanishing bedhead)",
+    "Dance: jazz especially, plus standard and Latin ballroom",
+    "Theatre: her family are stage performers; collects programmes of shows she's seen; her mother's debut poster",
+    "Absolute pitch",
+    "Pants-style outfits",
+    "Oil-free hand cream; mother's homemade loofah-water toner"
+  ],
+  "weak_spots": [
+    "Sweet things (listed weakness 甘いもの - unclear if she can't resist them or dislikes them)",
+    "Being surprised instead of surprising, e.g. by Agnes Tachyon and Sirius Symboli (voices 91004, 91019)",
+    "Gets bashful when sincere rather than joking (voice 10005)",
+    "Not wanting juniors to see her tired (voice 20000)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 15 (4月15日)",
+    "height": "168 cm (168cm)",
+    "voice_actor": "Eriko Matsui (松井恵理子)"
+  },
+  "relationships": [
+    {
+      "id": 1012,
+      "name_en": "Hishi Amazon",
+      "nature": "Fellow dorm leader and friend; keeps reacting to Fuji's surprises (general knowledge: Miho Dorm leader, unverified)",
+      "evidence": "home scenes x4; mentions in voice x6 (voice_id 91001: ヒシアマが走ってきて『グレたのか！？』って…あはは！; 91016; 91227; 400083)"
+    },
+    {
+      "id": 1094,
+      "name_en": "Jungle Pocket",
+      "nature": "Kouhai who tries to copy her; Fuji wants her to find her own style and won't let her overtake",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 10026: ポッケが私の服装を真似ようとしていたから、止めたよ; 91220; 400010)"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "Keeps surprising Fuji (glowing-body potions); Fuji can read her all-nighter face",
+      "evidence": "mentions in voice x4 (voice_id 91004: タキオンには驚かされることが多くてね; 91216; 91221; 91225)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Dance partner Fuji wants to build trust with",
+      "evidence": "mentions in voice x3 (voice_id 91018: スカイを見なかったかい？ぜひまた彼女と踊りたいんだ; 400004; 400007)"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "Watches Fuji's acting and gives detailed notes",
+      "evidence": "voice 91219: カフェに演技を見てもらうんだ; 91221 (other 'カフェ' hits are the cafeteria)"
+    },
+    {
+      "id": 1124,
+      "name_en": "Bubble Gum Fellow",
+      "nature": "Kouhai she taught a gum magic trick",
+      "evidence": "home scenes x3; voice 91222"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "Performed an opera with her (and Sounds of Earth) at a school festival",
+      "evidence": "voice 91226: 昔、聖蹄祭でオペラオーやアースと歌劇をしたんだ"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "Target of a planned prank (make her grass stalk bloom)",
+      "evidence": "home scenes x1; voice 91002"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "Senpai whose sharpness surprises her",
+      "evidence": "voice 91019"
+    },
+    {
+      "id": null,
+      "name_en": "Her mother",
+      "nature": "Stage actress she admires and who loves surprises too",
+      "evidence": "profile about_family: 舞台一家で、両親は全国を飛び回っている; voices 91000, 400006"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm leader (寮長) - strongly implied by dorm patrols/curfew lines (voices 90004, 91011, 10010); title 'dorm leader' itself is general knowledge, unverified",
+    "'Fuji Kiseki Fan Club' (フジキセキの会) of admirers (voice 91229)"
+  ],
+  "story_arc": {
+    "summary": "Structured as a stage play in acts, her story begins when she picks up the trainer's dropped badge. A dazzling, unbeaten-style rise (Asahi Hai FS, Yayoi Sho 'a surprise for you') is shadowed by injury: the real Fuji Kiseki retired undefeated after four races with a tendon problem. Later events ('a receding back' after the Takamatsunomiya Kinen, 'a definite abnormality' after the Yasuda Kinen, 'restart' after the Autumn Tenno Sho) suggest a struggle to keep performing, ending in her own show that is nobody's imitation.",
+    "source": "event titles (第一幕 スマイル … 終幕 あの窓からこぼれる光, 安田記念の後に・確かな異変, 天皇賞（秋）の後に・再始動) + voices 70001, 92221; real-life retirement from model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 30006,
+      "jp": "ふふっ、見とれてくれたかな？\nさあ、お手をどうぞ。",
+      "en": "Fufu, were you captivated? Now then, may I have your hand?"
+    },
+    {
+      "voice_id": 90004,
+      "jp": "そろそろ見回りの時間だね。\n私のかわいいポニーちゃんたちは、\nお利口にしてるかな？",
+      "en": "Almost time for my rounds. Are my cute pony-chans behaving themselves?"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "サプライズした時、驚きから笑顔に\n変わる瞬間が大好きなんだ。\nふふっ、やめられないよね。",
+      "en": "I love the moment a surprise turns into a smile. Fufu, I can't stop."
+    },
+    {
+      "voice_id": 10005,
+      "jp": "これは…君のために用意したんだ。\nははっ、冗談めかしていると簡単\nなのに真面目にやると…照れるね。",
+      "en": "This is... I prepared it for you. Haha, it's easy when I'm joking, but doing it sincerely is... embarrassing."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "キセキの瞬間！感動の煌めき！\n…さあ、夢の舞台の開幕だ！",
+      "en": "The moment of kiseki! A glimmer of emotion! ...Now, the curtain rises on a stage of dreams!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "手から煙を出す手品の練習を\nしてたら、ヒシアマが走ってきて\n『グレたのか！？』って…あはは！",
+      "en": "I was practising a trick where smoke comes from my hands, and Hishiama ran over yelling 'Have you gone delinquent!?' ...Ahaha!"
+    }
+  ],
+  "timer_line_ideas": [
+    "The curtain falls on your independent run, {user}. A fine performance, if I may say. Now, shall I escort you to the results, Trainer-san? A little kiseki awaits.",
+    "Ta-da! Fifty minutes vanished, just like magic. {user}, your run is finished - come take a bow, and let me see that smile. Fufu, surprise!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Kiseki (1137) x28 - almost certainly the word キセキ ('miracle') in her own lines, not the character; no real Kiseki relationship evidenced",
+    "Some Manhattan Cafe mentions are 'カフェテリア' false positives; only 91219/91221 refer to her",
+    "Dorm-leader title is inferred/general knowledge; the profile does not state it",
+    "Meaning of 甘いもの as weakness (can't resist vs dislikes) is ambiguous",
+    "Story arc beyond event titles from model knowledge (unverified)"
+  ]
+}

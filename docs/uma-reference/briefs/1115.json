@@ -1,0 +1,171 @@
+{
+  "id": 1115,
+  "name_en": "Orfevre",
+  "name_jp": "オルフェーヴル",
+  "kind": "uma",
+  "one_liner": "Golden tyrant calling herself King of the Turf - imperious to everyone, pampered by her older sister.",
+  "personality": "Orfevre speaks like an absolute monarch: the trainer is her vassal, others are 'common folk', and everything is a tribute to her 'path of conquest'. She demands tea and scones, refuses to admit losing is possible, and turns her fury on herself when she does lose. Beneath the arrogance she has refined taste (her father's craftsmanship, seasonal scenery), is gracious to children, relies entirely on her sister to wake and groom her, and eventually grants the trainer the 'right' to follow her.",
+  "speech": {
+    "first_person": "yo (余, x30 - royal) and watashi (私, x18) - both used",
+    "calls_trainer": "kisama (貴様, x18) - archaic 'you'; treats the trainer as her vassal (臣下); never says トレーナー",
+    "register": "archaic royal / imperious (～であろう, ～せよ, ～ぬ)",
+    "tics": [
+      {
+        "jp": "疾く",
+        "romaji": "toku",
+        "meaning": "swiftly, at once (voice 10015: 疾く報告せよ)"
+      },
+      {
+        "jp": "褒めて遣わす",
+        "romaji": "homete tsukawasu",
+        "meaning": "I shall deign to praise you (voice 10021, 20006)"
+      },
+      {
+        "jp": "許す",
+        "romaji": "yurusu",
+        "meaning": "you are permitted (voice 1008, 10016)"
+      },
+      {
+        "jp": "覇道",
+        "romaji": "hadou",
+        "meaning": "the path of conquest/supremacy (voice 95003, 10002)"
+      },
+      {
+        "jp": "民草",
+        "romaji": "tamigusa",
+        "meaning": "the common folk (voice 90005, 40001)"
+      },
+      {
+        "jp": "～せよ / ～がよい",
+        "romaji": "~seyo / ~ga yoi",
+        "meaning": "royal imperatives (voice 15: 励むがよい)"
+      },
+      {
+        "jp": "興が乗った / 興が乗らぬ",
+        "romaji": "kyou ga notta / kyou ga noranu",
+        "meaning": "I am amused / I am not in the mood (voice 70001, 20010)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Tea ('Harrows' / ハロウス tea leaves - likely a Harrods parody) and scones (voice 10011, 91010)",
+    "Genuine craftsmanship; her ear ornaments made by her father (profile, voice 10025, 70021)",
+    "Gold, light and radiance motifs - 'golden radiance', golden rice ears (voice 90007, 91014)",
+    "Seasonal elegance: swallows, wind chimes, snowflakes (voice 91012, 91013, 90009)",
+    "Reading race history - which she will rewrite (voice 10027)",
+    "Being entertained; she asks the trainer to draw her portrait (voice 10013)"
+  ],
+  "weak_spots": [
+    "Humidity (profile weaknesses: 湿気)",
+    "Mechanical alarm clocks - only her sister's voice will do (voice 90000)",
+    "Cannot accept defeat; blames herself (voice 30002, 30003)",
+    "Gets moody and blunt when not in the mood (voice 20010, 20011)",
+    "Dislikes cooking (web: https://umamusu.wiki/Orfevre; event title 王様のクッキング)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Senior Division / high school (高等部)",
+    "birthday": "May 14 (5月14日)",
+    "height": "165 cm (165cm)",
+    "voice_actor": "Yoko Hikasa (日笠陽子)"
+  },
+  "relationships": [
+    {
+      "id": 1119,
+      "name_en": "Dream Journey",
+      "nature": "Older sister ('Ane-ue') and roommate who wakes her, grooms her tail and manages her",
+      "evidence": "home scenes x11; voice_id 91004: 私の身支度は姉上がする。; voice_id 90000: 朝は姉上の声が私を起こす。; profile about_tail: 姉上の手入れは常に完璧; web: https://umamusu.wiki/Orfevre"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Classmate friend/rival she considers unfathomable; highest affinity. Both are by Stay Gold in real life (general knowledge)",
+      "evidence": "home scenes x6; mentions in voice x1 (voice_id 91002: ゴールドシップ…あれは、底が知れん。油断すれば、喰われよう。); top affinity 45; web: https://umamusu.wiki/Orfevre (classmate, friend and rival)"
+    },
+    {
+      "id": 1117,
+      "name_en": "Win Variation",
+      "nature": "Rival whose eyes 'say more than words'",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91001: ウインバリアシオン…奴の目は、言葉よりも多くを語る。); web: https://umamusu.wiki/Orfevre (calls her 'Shion', likes her apples)"
+    },
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "Admiring junior who imitates her - Orfevre finds it amusing",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91003: ラッキーライラックが鏡の前で私の真似を…不敬を通り越して愉快であった。)"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "Shares home scenes; nature not shown in her lines",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "Shares home scenes; nature not shown in her lines",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1135,
+      "name_en": "Stay Gold",
+      "nature": "Frustrated that she keeps leaving, but eager for her travel stories (web); real-life sire (general knowledge)",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Orfevre; voice 400009 (あやつ、此度こそしばらく留まるのだろうな…旅の話、飽くまで聞かせてもらおう) fits this but names no one"
+    },
+    {
+      "id": null,
+      "name_en": "Her father (unnamed)",
+      "nature": "Craftsman who made her ear ornaments",
+      "evidence": "profile about_ears: 耳飾りは父の作; voice_id 10025: 装飾は父上の細工物だ。"
+    }
+  ],
+  "groups": [
+    "Stay Gold 'family' with Dream Journey and Gold Ship (real-life sire line; general knowledge, unverified as an in-game group)"
+  ],
+  "story_arc": {
+    "summary": "Orfevre treats the Classic Triple Crown as hers by right and storms through the Satsuki Sho, Japanese Derby and Kikuka Sho ('One', 'Two', '-Three'), then the Arima Kinen, Tenno Sho (Spring), Takarazuka Kinen and Japan Cup. Event titles like 'Solitude' and 'To Bid Farewell to a Dream' hint at a story about loneliness and what a king is; per the fan wiki she suffers chest pain after the Tenno Sho (Spring), an Arima scene involves a hospitalised boy watching her, and the senior year includes a trip to France for the Arc.",
+    "source": "event titles + web: https://umamusu.wiki/Orfevre (spot-checked: chest pain after Tenno Sho Spring, hospital boy at Arima, France for the Arc)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "我が名はオルフェーヴル、覇道を征く王である。",
+      "en": "My name is Orfevre - the king who walks the path of conquest."
+    },
+    {
+      "voice_id": 20035,
+      "jp": "余は負けぬ。何故なら余が…\nそれを許さぬからだ。",
+      "en": "I do not lose. For I... do not permit it."
+    },
+    {
+      "voice_id": 90000,
+      "jp": "朝は姉上の声が私を起こす。\n…機械仕掛けの音では、\n不快な目覚めになるのでな。",
+      "en": "In the morning, my sister's voice wakes me. ...A mechanical noise would make for an unpleasant awakening."
+    },
+    {
+      "voice_id": 91003,
+      "jp": "ラッキーライラックが鏡の前で\n私の真似を…不敬を通り越して\n愉快であった。…似てはおらんがな",
+      "en": "Lucky Lilac was imitating me before the mirror... beyond insolence, it was amusing. ...Though it was no likeness."
+    },
+    {
+      "voice_id": 20011,
+      "jp": "…今日は茶が不味い。\n姉上から淹れ方を教わってこい。",
+      "en": "...The tea is foul today. Go and have my sister teach you how to brew it."
+    },
+    {
+      "voice_id": 92007,
+      "jp": "…ついてこい。\nその権利が、貴様にはある。",
+      "en": "...Follow me. You have earned that right."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}. The independent run is concluded. Come swiftly and behold the result - I shall deign to praise you for it. Do not keep your king waiting.",
+    "Rejoice, {user}. Fifty minutes of training, done. Report to me at once - the path of conquest waits for no vassal."
+  ],
+  "data_gaps": [
+    "Nature of relationships with Nakayama Festa, Gentildonna, Fenomeno and Stay Gold is not shown in her own lines",
+    "Voice 91000 (an iron ball in the flowerbed) and 400009 (someone back from travels) refer to unnamed people",
+    "Card title is Japanese only ([総攬]); no EN card title in source",
+    "No story dialogue in mdb; arc from titles + fan wiki"
+  ]
+}

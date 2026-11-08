@@ -1,0 +1,145 @@
+{
+  "id": 9002,
+  "name_en": "Yayoi Akikawa",
+  "name_jp": "秋川理事長",
+  "kind": "npc",
+  "one_liner": "Tracen's tiny, booming Chairwoman who opens nearly every sentence with a two-kanji shout ending in 'ッ！'.",
+  "personality": "Loud, energetic and generous. She exists to back the students and their trainers ('全力を尽くす所存ッ！！是非、存分に頼ってほしいっ！！'). She praises hard work lavishly ('感服ッ！…実に見事だったぞ！') but also thinks rest matters ('時には休息も必要。存分に遊んでほしい！'). She speaks like a commanding elder despite her size.",
+  "speech": {
+    "first_person": "watashi (わたし)",
+    "calls_trainer": "kimi (君), from the event title '展望ッ！これからのわたしと君と' only; her voice lines say 'トレーナー' (700000 'トレーナーの実力') with no -san",
+    "register": "commanding, old-fashioned/authoritative ('くれたまえ', 'である', 'うむ'), shouty",
+    "tics": [
+      {
+        "jp": "〇〇ッ！",
+        "romaji": "(two-kanji word)-!",
+        "meaning": "opens a line with a shouted kanji compound, e.g. 歓迎ッ！ (Welcome!), 注目ッ！ (Attention!), 挑戦ッ！ (Challenge!), 期待ッ！ (Expectations!)"
+      },
+      {
+        "jp": "～くれたまえ",
+        "romaji": "~kuretamae",
+        "meaning": "lofty 'do ~ for me' command"
+      },
+      {
+        "jp": "うむ",
+        "romaji": "umu",
+        "meaning": "'Mm, indeed' (approving grunt)"
+      },
+      {
+        "jp": "感心感心！",
+        "romaji": "kanshin kanshin!",
+        "meaning": "'Admirable, admirable!'"
+      },
+      {
+        "jp": "～ぞ！",
+        "romaji": "~zo!",
+        "meaning": "emphatic masculine ending"
+      },
+      {
+        "jp": "行くぞーッ",
+        "romaji": "iku zō!",
+        "meaning": "'Here we go!'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Umamusume plushies ('ぬいぐるみ')",
+    "grand plans such as a theme park ('計画ッ！トレセンランド（仮）')",
+    "fluffy cows ('堪能ッ！もふもふモーモー！')",
+    "a cat that always sits on her (web: umamusu.wiki)",
+    "a fan whose written words match her mood (web: umamusu.wiki)"
+  ],
+  "weak_spots": [
+    "unknown from source; event titles do not show one"
+  ],
+  "profile": {
+    "dorm": "n/a (staff)",
+    "grade": "n/a (Chairwoman of Tracen Academy)",
+    "birthday": "March 15 (3月15日)",
+    "height": "140 cm (web: umamusu.wiki; not in mdb)",
+    "voice_actor": "Kaori Mizuhashi (水橋かおり)"
+  },
+  "relationships": [
+    {
+      "id": 9001,
+      "name_en": "Tazuna Hayakawa",
+      "nature": "her secretary and friend",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Yayoi_Akikawa"
+    },
+    {
+      "id": 1062,
+      "name_en": "Matikanetannhauser",
+      "nature": "she watches her closely and expects a lot of her (wiki); the wiki also speculates Yayoi is based on Northern Taste, Matikanetannhauser's real-life sire",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Yayoi_Akikawa"
+    },
+    {
+      "id": 9043,
+      "name_en": "Mei Satake (佐岳メイ; no EN name in source)",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 9003,
+      "name_en": "Etsuko Otonashi",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "mentioned once",
+      "evidence": "mentions in voice x1 (source counts it, but no line naming her appears in the extracted voice_lines)"
+    },
+    {
+      "id": 9006,
+      "name_en": "Riko Kashimoto",
+      "nature": "acting director while Yayoi is away",
+      "evidence": "web: https://umamusu.wiki/Yayoi_Akikawa"
+    }
+  ],
+  "groups": [
+    "Tracen Academy staff (Chairwoman)"
+  ],
+  "story_arc": {
+    "summary": "She has no career story; she is a support-card NPC and the main focus of the Gourmet Festival scenario (web). Her support event titles all follow her 'Word-ッ！' style: quizzes ('出題ッ！理事長チェック！'), big schemes ('計画ッ！トレセンランド（仮）'), memories ('記憶ッ！蘇るはあの日のこと'), and a closing look at the future of 'me and you' ('展望ッ！これからのわたしと君と').",
+    "source": "event titles; web: https://umamusu.wiki/Yayoi_Akikawa"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 260013,
+      "jp": "感服ッ！\n数多の募集に応えた働きぶり、\n実に見事だったぞ！",
+      "en": "Impressed! The way you answered so many requests was truly splendid!"
+    },
+    {
+      "voice_id": 141000,
+      "jp": "うむ、時には休息も必要。存分に遊んでほしい！",
+      "en": "Mm, sometimes rest is necessary. Go and play to your heart's content!"
+    },
+    {
+      "voice_id": 700000,
+      "jp": "挑戦ッ！\n試験でトレーナーの実力を大いに\n発揮してくれたまえ！",
+      "en": "Challenge! Show off your full ability as a trainer in the exam!"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "尽力ッ！任せておけ！",
+      "en": "Effort! Leave it to me!"
+    },
+    {
+      "voice_id": 141002,
+      "jp": "天晴ッ！これほど大量のぬいぐるみを獲得するとは！感心感心！",
+      "en": "Splendid! To win this many plushies! Admirable, admirable!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Complete! The Independent Training run is over! {user}, come and confirm the results, I say! Admirable, admirable!",
+    "Attention! {user}! Fifty minutes of training, done! Mm, sometimes rest is necessary too. Check your results, then rest!"
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Yayoi Akikawa' is the standard EN name (umamusu.wiki). Source name_jp is '秋川理事長'; given name やよい is from her self_intro.",
+    "First person 'わたし' is taken from the event title '展望ッ！これからのわたしと君と'; it does not occur in her voice lines.",
+    "Height, the cat and the fan come from the wiki, not the mdb.",
+    "Source counts 1 mention of King Halo, but no line naming her is in voice_lines.",
+    "Matikanetannhauser and Kashimoto relationship details and the Northern Taste link are wiki-only (speculative for Northern Taste)."
+  ]
+}

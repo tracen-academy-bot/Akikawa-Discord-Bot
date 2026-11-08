@@ -1,0 +1,187 @@
+{
+ "id": 1107,
+ "name_en": "Tap Dance City",
+ "name_jp": "タップダンスシチー",
+ "kind": "uma",
+ "one_liner": "A flamboyant American pirate-captain type who wants money, fame, friends and 'romance', and dances through everything.",
+ "personality": "Loud, bold and generous, she frames life as a treasure-hunting voyage and openly says she wants gold, fame and a castle of her own, then wants everyone she likes aboard her 'ship'. She turns every bad day into a party, hates curfews and punctuality, and is a natural fight-breaker and crew-gatherer. Under the swagger she is loyal and warm, treating friends like siblings and promising her trainer a lifelong party together.",
+ "speech": {
+  "first_person": "atashi (アタシ)",
+  "calls_trainer": "Navigator (航海士殿, koukaishi-dono); also anta (アンタ) and Trainer (トレーナー)",
+  "register": "Rough, boisterous casual Japanese (~ze, ~sa, ~daro) heavily mixed with English words and exclamations",
+  "tics": [
+   {
+    "jp": "航海士殿",
+    "romaji": "koukaishi-dono",
+    "meaning": "'Sir Navigator' - her name for the trainer"
+   },
+   {
+    "jp": "アンタ",
+    "romaji": "anta",
+    "meaning": "blunt 'you'"
+   },
+   {
+    "jp": "ロマン",
+    "romaji": "roman",
+    "meaning": "'romance/adventure', her core value"
+   },
+   {
+    "jp": "宴",
+    "romaji": "utage",
+    "meaning": "'feast/party' - she calls races and lives parties"
+   },
+   {
+    "jp": "踊ろうぜ",
+    "romaji": "odorou ze",
+    "meaning": "'let's dance!'"
+   },
+   {
+    "jp": "Awesome!",
+    "romaji": "Awesome!",
+    "meaning": "English exclamations (also Wow!, Yo ho!, Hey!, Come on!)"
+   },
+   {
+    "jp": "ハハッ",
+    "romaji": "haha!",
+    "meaning": "brash laugh"
+   }
+  ]
+ },
+ "likes_and_motifs": [
+  "tap dancing (her mother is a dancer)",
+  "pirates, treasure, voyages, ships, castles",
+  "gold accessories, gold ginkgo avenues",
+  "parties, banquets, staying up late",
+  "giant pizza (profile trivia; good at cutting pizza)",
+  "her mom's marshmallow pie",
+  "flipping a coin when she can't decide",
+  "America (misses her friends there across the time difference, voice_id 91023; her leather jacket from her time there)"
+ ],
+ "weak_spots": [
+  "being on time (profile)",
+  "staring contests (profile)",
+  "dorm lights-out / curfew",
+  "kotatsu ('a terrifying trap')",
+  "summer heat",
+  "sleepy habit of kissing cheeks when half-awake (voice_id 91021)"
+ ],
+ "profile": {
+  "dorm": "Ritto Dorm (栗東寮)",
+  "grade": "High School Division (高等部)",
+  "birthday": "March 16 (3月16日)",
+  "height": "170 cm (170cm)",
+  "voice_actor": "Minami Shinoda (篠田みなみ)"
+ },
+ "relationships": [
+  {
+   "id": 1065,
+   "name_en": "Daitaku Helios",
+   "nature": "Roommate and party partner (mirror ball, DJ gear)",
+   "evidence": "mentions in voice x4 (voice_id 91000: ヘリオスは最高のRoommateさ！); home scenes x1"
+  },
+  {
+   "id": 1104,
+   "name_en": "Katsuragi Ace",
+   "nature": "Idol and senpai; taught her bon-odori, buys matching sukajan, digs sweet potatoes with her",
+   "evidence": "home scenes x4; mentions in voice x3 (voice_id 90007: エースに頼んで、盆踊りを教えてもらったんだ！); idolization per web: https://umamusu.wiki/Tap_Dance_City"
+  },
+  {
+   "id": 1083,
+   "name_en": "Symboli Kris S",
+   "nature": "Rival she bonds with through dance; fellow American roots",
+   "evidence": "home scenes x3; mentions in voice x3 (voice_id 91002: クリスエスとは話している時より、踊っている時のほうが通じ合うね; 400010); web: https://umamusu.wiki/Tap_Dance_City"
+  },
+  {
+   "id": 1036,
+   "name_en": "Air Shakur",
+   "nature": "Frequent home-screen partner",
+   "evidence": "home scenes x4; nature not stated in her lines"
+  },
+  {
+   "id": 1084,
+   "name_en": "Tanino Gimlet",
+   "nature": "Fellow student she admires for creating her own rhythm and calls a romantic",
+   "evidence": "mentions in voice x2 (voice_id 91016: ギムレットは、自分だけのリズムを創造している)"
+  },
+  {
+   "id": 1047,
+   "name_en": "Zenno Rob Roy",
+   "nature": "Talks adventure books with her",
+   "evidence": "home scenes x1; mentions in voice x1 (voice_id 91014)"
+  },
+  {
+   "id": 1100,
+   "name_en": "Wonder Acute",
+   "nature": "Reminds her of her grandma",
+   "evidence": "mentions in voice x1 (voice_id 91003: アキュートの雰囲気、なんとなくうちのグランマに似てるんだよな)"
+  },
+  {
+   "id": 1008,
+   "name_en": "Vodka",
+   "nature": "Someone who 'gets romance'",
+   "evidence": "mentions in voice x1 (voice_id 91019)"
+  },
+  {
+   "id": 1081,
+   "name_en": "Espoir City",
+   "nature": "Home-screen partner (fellow 'City')",
+   "evidence": "home scenes x2"
+  },
+  {
+   "id": 1040,
+   "name_en": "Gold City",
+   "nature": "Home-screen partner (fellow 'City')",
+   "evidence": "home scenes x2; the mdb's mentions x2 look like substring artifacts (e.g. voice_id 70021: アクセサリーはゴールドって決めてんだ), not real mentions of Gold City"
+  }
+ ],
+ "groups": [
+  "Ritto Dorm",
+  "American transfer (from Kentucky, per web)"
+ ],
+ "story_arc": {
+  "summary": "Inspired by Katsuragi Ace's underdog 1984 Japan Cup win, she came from America to Japan chasing 'romance' and invites the trainer aboard as her navigator. Her career goes through the Satsuki Sho and Kikuka Sho, then Challenge Cup, Kinko Sho ('Record Breaker'), Takarazuka Kinen ('We Are One!'), Japan Cup ('The Legend, Again', echoing Ace's front-running win) and Arima Kinen. Ace teaches her the front-running style. Her normal ending has a near-miss trip to the Arc when her flight to France is cancelled.",
+  "source": "event titles; web: https://umamusu.wiki/Tap_Dance_City"
+ },
+ "sample_lines": [
+  {
+   "voice_id": 10001,
+   "jp": "アタシの城を建てた暁には、\nアンタも招待してやるよ。\n一生踊り続けようぜ、航海士殿？",
+   "en": "When I build my castle, you're invited too. Let's keep dancing for life, Navigator!"
+  },
+  {
+   "voice_id": 20005,
+   "jp": "Yo ho!アンタの考えた\nメニューを見せなよ。\nそいつが今日の航海図だ！",
+   "en": "Yo ho! Show me the menu you came up with. That's today's sea chart!"
+  },
+  {
+   "voice_id": 10010,
+   "jp": "108個の欲を落とす鐘だって？\nなら、アタシは1000個持つ！\nアタシから欲を消すのは不可能さ！",
+   "en": "A bell that rings away 108 desires? Then I'll have 1,000! You can't purge desire from me!"
+  },
+  {
+   "voice_id": 20010,
+   "jp": "航海士殿～、今日はよさないか？\nノらない時に走ったって、\nつかめるもんは少ないだろ？",
+   "en": "Navigatooor, can we skip today? If you run when you're not feeling it, you won't grab much, right?"
+  },
+  {
+   "voice_id": 30006,
+   "jp": "最っ高の気分だ！踊ろう、航海士殿！",
+   "en": "I feel amazing! Dance with me, Navigator!"
+  },
+  {
+   "voice_id": 70000,
+   "jp": "金も、ロマンも！全部アタシがいただく！",
+   "en": "Gold and romance! I'm taking it all!"
+  }
+ ],
+ "timer_line_ideas": [
+  "Yo ho! Land ho, {user}! The independent run's done, Navigator. Treasure's on deck, so come haul it in and let's dance on the way!",
+  "Awesome! That voyage is over, {user}. Fifty minutes of romance, all logged in the sea chart. Come check the haul, then it's party time!"
+ ],
+ "data_gaps": [
+  "No dialogue for career events (titles only)",
+  "Nature of relationship with Air Shakur unknown from data despite x4 home scenes",
+  "Kentucky origin and Arc ending are from the wiki, not the mdb",
+  "Fact-check: no voice line supports 'ice skating back home' (removed); Gold City mention count is a substring artifact"
+ ]
+}

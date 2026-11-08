@@ -1,0 +1,207 @@
+{
+  "id": 1098,
+  "name_en": "Copano Rickey",
+  "name_jp": "コパノリッキー",
+  "kind": "uma",
+  "one_liner": "A sunny feng-shui evangelist who reads ki and lucky directions to bring everyone happiness, on dirt and off.",
+  "personality": "Copano Rickey is relentlessly cheerful, hands-on and caring, the eldest of many siblings who loves looking after people (whether they asked or not). She treats feng shui as a practical, statistics-based philosophy of environment rather than magic, and applies it to everything: training spots, pajama colours, cafeteria chopsticks, race tactics. When luck reads badly she doesn't give up; her creed is that people who believe and work hard are the ones rewarded.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer (トレーナー) and kimi (キミ)",
+    "register": "bright casual, sprinkled with feng-shui jargon (氣, 吉方, 相生, 巒頭) and ☆/♪ flourishes",
+    "tics": [
+      {
+        "jp": "リッキー☆ラッキー☆",
+        "romaji": "Rikkii Rakkii",
+        "meaning": "'Rickey-Lucky!', her signature greeting/cheer"
+      },
+      {
+        "jp": "大吉祥",
+        "romaji": "daikisshou",
+        "meaning": "'great good fortune'"
+      },
+      {
+        "jp": "コパッと",
+        "romaji": "kopatto",
+        "meaning": "pun on her name: 'snappily, Copa-style'"
+      },
+      {
+        "jp": "コパコパ",
+        "romaji": "kopa-kopa",
+        "meaning": "her name as an onomatopoeia for being fired up/lucky"
+      },
+      {
+        "jp": "氣",
+        "romaji": "ki",
+        "meaning": "life energy/flow, written with the old feng-shui kanji"
+      },
+      {
+        "jp": "吉方",
+        "romaji": "kippou",
+        "meaning": "the auspicious direction"
+      },
+      {
+        "jp": "開運",
+        "romaji": "kaiun",
+        "meaning": "'good luck incoming / fortune opening'"
+      },
+      {
+        "jp": "ハッピー",
+        "romaji": "happii",
+        "meaning": "'happy', her favourite word"
+      },
+      {
+        "jp": "キミ",
+        "romaji": "kimi",
+        "meaning": "'you', for the trainer"
+      },
+      {
+        "jp": "大地の“聲”",
+        "romaji": "daichi no koe",
+        "meaning": "'the voice of the earth' she listens to"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Feng shui: lucky colours, directions, luo pan compass",
+    "Cleaning, decluttering, caring for plants (profile)",
+    "Lucky foods (eel and conger eel for breakfast), seasonal food",
+    "Singing and music feng shui; Smart Falcon's idol songs",
+    "Cherry-blossom viewing three times a year",
+    "Yellow (luck) and red (winning luck)",
+    "Looking after little kids as the eldest sibling"
+  ],
+  "weak_spots": [
+    "Dusty places (profile)",
+    "Overdoing it: piles on 'lucky items', redecorates others' spaces uninvited (event titles 良かれと思って……, 突発！風水バトル！？)",
+    "Losing the 'voice' of the earth in a slump (voice_id 30003; character story スランプで大ピンチ～？)",
+    "Ebi-ten trouble (event title えび天クライシス; details unknown)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "March 24 (3月24日)",
+    "height": "165cm",
+    "voice_actor": "Konomi Inagaki (稲垣好)"
+  },
+  "relationships": [
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "Close friend and 'mutually generating' (相生) rival; the logical Tarumae is often exasperated by her feng shui",
+      "evidence": "home scenes x9; mentions in voice x3 (voice_id 91000: 『相生』のタルマエとは、いいライバルなんだよ！); web: https://umamusu.wiki/Copano_Rickey"
+    },
+    {
+      "id": 1100,
+      "name_en": "Wonder Acute",
+      "nature": "Close friend; 'mutually overcoming' (相剋) rival on the track; they snack together",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 91001: アキュートさんとは『相剋』なの; 91019); Acute mentions her x6 (mentioned_by)"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Senior and friend; invited her to be a 'feng-shui umadol' and takes her to festivals",
+      "evidence": "home scenes x3; mentions in voice x4 (voice_id 91002: ファル子さんに『風水系ウマドルやってみない？』って言われたの！)"
+    },
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "Roommate who won't get up early and bristles at her feng-shui compliments",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 90011: エスポさんを起こしても『寒ぃ！』ってベッドに戻っちゃう); roommate per web: https://umamusu.wiki/Copano_Rickey"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "Friend stunned when Rickey 'reads' her worries",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91016)"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "Acquaintance who grudgingly called feng shui 'logical, I guess'",
+      "evidence": "mentions in voice x1 (voice_id 91004)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Student-council figure she plans to lobby for golden cafeteria chopsticks",
+      "evidence": "mentions in voice x1 (voice_id 90013)"
+    },
+    {
+      "id": 1117,
+      "name_en": "Win Variation",
+      "nature": "Possibly the 'Shion-san' who seems to know feng shui (the mdb matcher linked her by the substring シオン; unverified)",
+      "evidence": "mentions in voice x1 (voice_id 91027: シオンさんも、風水詳しいのかな！)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Friend she admires and praises; they sometimes fish together (per wiki)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Copano_Rickey"
+    },
+    {
+      "id": 1090,
+      "name_en": "Verxina",
+      "nature": "Shares a home scene; nature unknown",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1079,
+      "name_en": "Furioso",
+      "nature": "Friend who tries to keep Rickey's feng shui at arm's length (per wiki)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Copano_Rickey"
+    }
+  ],
+  "groups": [
+    "Dirt-racing friend circle with Hokko Tarumae, Wonder Acute and Smart Falcon (inferred from home scenes x9/x3/x3 and voice mentions; not an official group name)",
+    "Tetra Mystics idol unit with Wonder Acute, Copano Rickey and Hokko Tarumae (web: https://umamusu.wiki/Wonder_Acute; not in the mdb; fourth member not confirmed)"
+  ],
+  "story_arc": {
+    "summary": "A feng-shui girl whose 'taiji' points her to dirt racing, Rickey works through the Fushiryu Stakes, February Stakes, JBC Classic, Champions Cup, Tokyo Daishoten, Kashiwa Kinen, Teio Sho and Mile CS Nambu Hai while trying to prove feng shui is 'no miracle' but a real tool. Her character story covers a slump where she loses the 'voice of the earth', and the trainer showing her a weakness she hadn't seen. Per umamusu.wiki an 'Ominous Portent' status appears in her Classic year and clears after she wins the February Stakes, and a secret event (天に輝く11の星) fires if she wins 11 dirt G1s, nodding to the real horse's record G1/Jpn1 tally.",
+    "source": "event titles; web: https://umamusu.wiki/Copano_Rickey"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "コパノリッキーだよ！\nラッキーを届けるね！",
+      "en": "It's Copano Rickey! I'll deliver you some luck!"
+    },
+    {
+      "voice_id": 90005,
+      "jp": "勝負の前は、東枕に赤のパジャマで\n寝るといいよ！レースにテストに\n恋愛に…とにかく効くんだから！",
+      "en": "Before a big match, sleep with your pillow to the east in red pajamas! Races, tests, romance... it just works!"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "風水は統計に則った環境哲学なの！\nシャカールさんも『まァ、ロジカル\nではある』って言ってくれたよ！",
+      "en": "Feng shui is an environmental philosophy based on statistics! Even Shakur-san said 'Well, it IS logical'!"
+    },
+    {
+      "voice_id": 92006,
+      "jp": "信じる者が救われる？ううん、\n信じて努力する者が報われるの！\nほら、私たちみたいにね☆",
+      "en": "The believers are saved? Nope, it's the ones who believe AND work hard who get rewarded! Like us, see?"
+    },
+    {
+      "voice_id": 91000,
+      "jp": "火が燃えて土を産む――\n『相生』のタルマエとは、\nいいライバルなんだよ！",
+      "en": "Fire burns and gives birth to earth. Tarumae and I are 'mutually generating', so we're good rivals!"
+    },
+    {
+      "voice_id": 30005,
+      "jp": "ね？風水ってすごいでしょ☆",
+      "en": "See? Isn't feng shui amazing?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Rickey-Lucky! {user}, your independent run is all done! The ki says this is a lucky time to check the results, so come on, come on!",
+    "Ding! Fifty minutes, finished! {user}, go check it from your lucky direction, okay? Copa-tto, let's keep that happy flow going!"
+  ],
+  "data_gaps": [
+    "Mention count for Manhattan Cafe (x1) appears to be a false match on カフェテリア (voice_id 91022); not listed",
+    "'Shion-san' (voice_id 91027) identity unconfirmed",
+    "Roommate (Espoir City) from web only",
+    "Voice actor romanisation (Konomi Inagaki) is standard reading, not from the mdb",
+    "Identifying 'Shion-san' as Win Variation rests only on the mdb substring match (ウインバリアシ'オン'); unverified",
+    "'Tetra Mystics' unit is only on umamusu.wiki's Wonder Acute page (not her own page, not the mdb)"
+  ]
+}

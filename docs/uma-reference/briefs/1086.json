@@ -1,0 +1,191 @@
+{
+  "id": 1086,
+  "name_en": "Mejiro Ramonu",
+  "name_jp": "メジロラモーヌ",
+  "kind": "uma",
+  "one_liner": "Aloof, sensual Mejiro beauty who treats racing itself as her one true lover.",
+  "personality": "Ramonu is cool, languid and faintly dismissive toward the trainer, answering event notices with lines like 'Do as you please' and demanding to be escorted. Her real passion is racing, which she addresses as a lover ('“貴方”', 'my love'): she speaks of devoting herself, body and all, to the turf, and keeps her body polished like a bride before a wedding. Underneath the hauteur she watches her younger Mejiro relatives (especially Ardan and Ryan) with amused, possessive affection.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (貴方); she also writes “貴方” in quotes for racing itself, her 'beloved'",
+    "register": "elegant ojousama / sultry; mixes ですわ and よろしくて with short, curt replies",
+    "tics": [
+      {
+        "jp": "ですわ",
+        "romaji": "desu wa",
+        "meaning": "refined feminine sentence ending"
+      },
+      {
+        "jp": "よろしくて",
+        "romaji": "yoroshikute",
+        "meaning": "'Is that acceptable?' / 'Very well' (high-class register)"
+      },
+      {
+        "jp": "頂戴",
+        "romaji": "choudai",
+        "meaning": "'give me / do it for me' as a lofty command"
+      },
+      {
+        "jp": "ご覧なさいな",
+        "romaji": "goran nasai na",
+        "meaning": "'go on, take a look / try it'"
+      },
+      {
+        "jp": "くす",
+        "romaji": "kusu",
+        "meaning": "quiet, amused giggle"
+      },
+      {
+        "jp": "愛",
+        "romaji": "ai",
+        "meaning": "'love' - her constant word for racing"
+      },
+      {
+        "jp": "完璧",
+        "romaji": "kanpeki",
+        "meaning": "'perfect' - her standard for herself"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "oil painting (profile; buys art supplies, colour names like vermilion)",
+    "yoga (profile)",
+    "being photographed / being looked at (profile; 'gaze at me as much as you like')",
+    "racing as a lover; wedding/bridal imagery (rings, bridal esthetics, 'ceremony')",
+    "luxury: dresses, department-store shopping with home delivery, body oil, foot care",
+    "flowers and the wintersweet (蝋梅) in the Mejiro garden (profile)",
+    "quiet cafes and snowy silence",
+    "Ramen (training event title '愛、美、幸福――そしてラーメン')"
+  ],
+  "weak_spots": [
+    "artificial flowers (profile)",
+    "microwave ovens (profile)",
+    "muggy, humid heat (voice 90007)",
+    "boorishness, e.g. the trainer still working on a beautiful night ('無粋', voice 91023)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 9 (4月9日)",
+    "height": "165 cm (165cm)",
+    "voice_actor": "Nao Toyama (東山奈央)"
+  },
+  "relationships": [
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "younger Mejiro relative she dotes on and teases; wiki calls her Ramonu's younger sister",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 91001: 「可愛いでしょう、アルダン。」); web: https://umamusu.wiki/Mejiro_Ramonu"
+    },
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "Mejiro family junior who fusses over her (blankets, Christmas greetings)",
+      "evidence": "home scenes x2; mentions in voice x3 (voice_id 10026: 「ライアンが、ブランケットを」)"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "childhood friend and rival (Symboli side)",
+      "evidence": "home scenes x5; web: https://umamusu.wiki/Mejiro_Ramonu"
+    },
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "childhood friend / rival; Ramonu teases 'the Emperor' and wants her to race; event '“皇帝”の決断'",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91002: 「ルドルフとのランチは退屈…」); event title: “メジロ家”と“シンボリ家”; web: https://umamusu.wiki/Mejiro_Ramonu"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "friend who helps her into dresses; roommate per wiki (unverified)",
+      "evidence": "mentions in voice x1 (voice_id 90010: 「クリスエスに頼んでいるわ」); web: https://umamusu.wiki/Mejiro_Ramonu"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "acquaintance whose poetic views she enjoys",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91024: 「輪廻を」)"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Mejiro relative who gets her old sunglasses",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91025: 「パーマーにあげようかしら」)"
+    },
+    {
+      "id": 1104,
+      "name_en": "Katsuragi Ace",
+      "nature": "lunch companion",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91022: 「エースたちと」)"
+    },
+    {
+      "id": 1112,
+      "name_en": "Daring Heart",
+      "nature": "someone she addresses about 'supreme conversation' (racing); nature unclear",
+      "evidence": "mentions in voice x1 (voice_id 91017: 「貴方ならわかるでしょう？ハート」)"
+    },
+    {
+      "id": 9007,
+      "name_en": "Beauty Anshinzawa (romanised; no EN name in source)",
+      "nature": "NPC acupuncturist; Ramonu calls her a matchmaker (月下氷人) and tells the trainer to send her first-class gifts",
+      "evidence": "home scenes x1; voice_id 91016: 「安心沢さんには」"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "Mejiro family member",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Mejiro_Ramonu"
+    }
+  ],
+  "groups": [
+    "Mejiro family (voice 95003 'メジロラモーヌ', 91006; event titles)"
+  ],
+  "story_arc": {
+    "summary": "Introduced as the 'treasure of the Mejiro family', Ramonu pursues racing as a 'supreme love' in a route built on the fillies' Triple Tiara (Hanshin JF, Oka Sho, Oaks, Shuka Sho) and later Arima Kinen, Victoria Mile and Japan Cup goals. Event titles pit the Mejiro and Symboli houses against each other, bring in 'the Emperor's decision' and the Mejiro grandmother, and branch into 'Seeking the Way or the Royal Road' (求道か、王道か). Her real-life model was Japan's first Triple Tiara winner.",
+    "source": "event titles; web: https://umamusu.wiki/Mejiro_Ramonu; real-horse fact is model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10001,
+      "jp": "貴方の愛…\nどうぞ、捧げてご覧なさいな。",
+      "en": "Your love... go on, try offering it to me."
+    },
+    {
+      "voice_id": 20022,
+      "jp": "貴方、レースを愛していないのね。\nとっても残念…本当に。",
+      "en": "You don't love racing, do you. How very disappointing... truly."
+    },
+    {
+      "voice_id": 91028,
+      "jp": "貴方でいいわ。エスコートなさい。\n…まさか、この格好の私を\nひとりで歩かせる気？",
+      "en": "You'll do. Escort me. ...Surely you don't intend to let me walk alone dressed like this?"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "可愛いでしょう、アルダン。\n放っても、黙って私についてきて…\nああ…今はもう、違うわね。",
+      "en": "Ardan is lovely, isn't she? Leave her be and she'd follow me without a word... ah, but that's no longer true."
+    },
+    {
+      "voice_id": 40004,
+      "jp": "捧げるわ、全て。\nさあ、語らいましょう――\n愛してるわ、“貴方”。",
+      "en": "I offer it all. Now, let us converse - I love you, 'You'."
+    },
+    {
+      "voice_id": 91029,
+      "jp": "どうぞ。好きに見蕩れなさいな。\nあら、もういいの？\nふふ…本当に？",
+      "en": "Go on, gaze at me all you like. Oh, done already? Fufu... really?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Kusu... fifty minutes poured into love, and the run is over. {user}, come and look at the results. Or would you rather just gaze at me? Fufu.",
+    "The independent run has ended, {user}. Was it perfect? Examine it yourself and tell me. ...I expect a wise judgment, as befits a trainer."
+  ],
+  "data_gaps": [
+    "Career story plot not in the mdb; summary built from event titles and a thin wiki page",
+    "Exact family relation to Ardan (sister vs cousin) taken from umamusu.wiki, not the mdb",
+    "Daring Heart relationship nature unclear from a single line",
+    "Beauty Anshinzawa (9007) has no name_en in source; romanised",
+    "Symboli Kris S as roommate comes only from the wiki (unverified); 'Ardan', 'Sirius' and 'Rudolf' childhood-friend/sibling framings are wiki-sourced"
+  ]
+}

@@ -1,0 +1,193 @@
+{
+ "id": 1108,
+ "name_en": "Duramente",
+ "name_jp": "ドゥラメンテ",
+ "kind": "uma",
+ "one_liner": "Stoic scion of an elite bloodline who seeks not just victory but to be \"the strongest\", fiercely and nobly.",
+ "personality": "Serious, terse and disciplined, she speaks in clipped statements about blood, lineage and becoming 'the strongest' (最強), and approaches everything, from smoothies to sand castles, as training. Behind the severity she is earnest and a little awkward: unsure how to give presents, nervous getting makeup from Air Groove, and secretly reading Dracula a little at a time at night. She grows to rely openly on her trainer, saying she wants to make them proud.",
+ "speech": {
+  "first_person": "watashi (私)",
+  "calls_trainer": "kimi (君)",
+  "register": "Terse, formal plain form (~da, ~shiyou), slightly archaic/martial phrasing, many em-dashes and ellipses",
+  "tics": [
+   {
+    "jp": "最強",
+    "romaji": "saikyou",
+    "meaning": "'the strongest' - her goal, usually in quotes"
+   },
+   {
+    "jp": "荒々しく",
+    "romaji": "araarashiku",
+    "meaning": "'fiercely/roughly' (her name means 'roughly' in Italian music terms)"
+   },
+   {
+    "jp": "…………以上だ",
+    "romaji": "...ijou da",
+    "meaning": "'...that is all' - ends her profile self-introduction (only there; not in voice_lines)"
+   },
+   {
+    "jp": "一族",
+    "romaji": "ichizoku",
+    "meaning": "'my clan/family' - constant reference point"
+   },
+   {
+    "jp": "この血",
+    "romaji": "kono chi",
+    "meaning": "'this blood' (in my veins)"
+   },
+   {
+    "jp": "為すべきを為す",
+    "romaji": "nasubeki wo nasu",
+    "meaning": "'do what must be done'"
+   },
+   {
+    "jp": "征こう",
+    "romaji": "yukou",
+    "meaning": "martial 'let us go/advance'"
+   }
+  ]
+ },
+ "likes_and_motifs": [
+  "blood, lineage, crystal (結晶) imagery",
+  "fitness tests, especially side-step jumps (profile)",
+  "nutrition: smoothies (red vegetables), protein, boiled eggs, 70% cacao",
+  "Dracula / vampires (Claret Nosferatu card; reads Dracula)",
+  "classical music at bedtime, stretching and yoga",
+  "family table-tennis battles at hot springs",
+  "Air Groove's flowerbed, brewing Darjeeling",
+  "fishing with Cheval Grand",
+  "anti-loss tags on important things (profile trivia)",
+  "treats even a dorm test-of-courage contest as a race to win (voice_id 91025: 勝利するための策を、一緒に考えてくれ)"
+ ],
+ "weak_spots": [
+  "cracking eggs neatly (profile)",
+  "giving presents ('I have little experience')",
+  "the sun-weakness of Dracula worries her",
+  "report writing too long to fit page limits"
+ ],
+ "profile": {
+  "dorm": "Miho Dorm (美浦寮)",
+  "grade": "Middle School Division (中等部)",
+  "birthday": "March 22 (3月22日)",
+  "height": "166 cm (166cm)",
+  "voice_actor": "Akina (秋奈)"
+ },
+ "relationships": [
+  {
+   "id": 1018,
+   "name_en": "Air Groove",
+   "nature": "'Guru-nee' (グル姉): admired elder figure; taught her makeup, helped pick her clothes, inspired her outfit's shoulder feathers; real-life granddam (general knowledge)",
+   "evidence": "home scenes x5; voice_id 91000: グル姉の花壇が好きだ; 10027; 91007; identity of グル姉 per web: https://umamusu.wiki/Duramente"
+  },
+  {
+   "id": 1118,
+   "name_en": "Admire Groove",
+   "nature": "'Aru-senpai' (アルヴ先輩): senpai she respects and serves tea to; real-life dam",
+   "evidence": "home scenes x2; mentions in voice x3 (voice_id 91029: グル姉とアルヴ先輩が一緒に選んでくれた); web: https://umamusu.wiki/Duramente"
+  },
+  {
+   "id": 1088,
+   "name_en": "Satono Crown",
+   "nature": "Roommate; eats breakfast with her, helps her English, says good morning in Cantonese, practices acting with her",
+   "evidence": "home scenes x4; mentions in voice x5 (voice_id 91009: クラウンが時々寝ぼけながら、広東語で話してくる); roommate per web: https://umamusu.wiki/Duramente"
+  },
+  {
+   "id": 1068,
+   "name_en": "Kitasan Black",
+   "nature": "Changed her view of summer as festival season",
+   "evidence": "home scenes x3; mentions in voice x1 (voice_id 90007)"
+  },
+  {
+   "id": 1089,
+   "name_en": "Cheval Grand",
+   "nature": "Fishing companion",
+   "evidence": "home scenes x2; mentions in voice x2 (voice_id 91022)"
+  },
+  {
+   "id": 1067,
+   "name_en": "Satono Diamond",
+   "nature": "Offered to guide her around France",
+   "evidence": "home scenes x1; mentions in voice x1 (voice_id 90018)"
+  },
+  {
+   "id": 1039,
+   "name_en": "Kawakami Princess",
+   "nature": "Fell from the sky into her arms (comic)",
+   "evidence": "home scenes x1; voice_id 91002: 空からカワカミが降ってきた"
+  },
+  {
+   "id": 1144,
+   "name_en": "Rose Kingdom",
+   "nature": "Silent gym-training companion",
+   "evidence": "mentions in voice x1 (voice_id 90014)"
+  },
+  {
+   "id": 1145,
+   "name_en": "Rulership",
+   "nature": "Chess opponent she finally beat",
+   "evidence": "mentions in voice x1 (voice_id 91019)"
+  },
+  {
+   "id": 1099,
+   "name_en": "Hokko Tarumae",
+   "nature": "Recommended haskap berries with nutrition data",
+   "evidence": "mentions in voice x1 (voice_id 91003)"
+  },
+  {
+   "id": 1142,
+   "name_en": "Logotype",
+   "nature": "Toured traditional architecture together",
+   "evidence": "voice_id 91020: ロゴと以前、伝統的な建築物巡りをした"
+  }
+ ],
+ "groups": [
+  "Miho Dorm",
+  "Air Groove / Admire Groove bloodline (real-life family line; in-game shown as respected elders)"
+ ],
+ "story_arc": {
+  "summary": "Born into a famous clan, Duramente sets out to prove herself 'the strongest' rather than merely a winner. Her career covers the Kyodo News Hai, Satsuki Sho, Japanese Derby and Kikuka Sho (titled 'first/second/third crown'), then the Nakayama Kinen, Osaka Hai, Takarazuka Kinen, Tenno Sho (Autumn) and Japan Cup ('crystal of feelings'). Chapter titles move from 'crystal' and 'fighting spirit' toward 'the truth is...' and 'being together', suggesting she learns that strength need not mean perfection or solitude. In real life she won the Satsuki Sho and Derby in 2015 but was injured before the Kikuka Sho.",
+  "source": "event titles; character story titles; model knowledge (unverified) for real-horse history"
+ },
+ "sample_lines": [
+  {
+   "voice_id": 10011,
+   "jp": "君、誕生日らしいな。おめでとう。\n親戚が運営するジムの招待券を用意\nした。トレーナーは私が務めよう。",
+   "en": "I hear it's your birthday. Congratulations. I got you a pass to a gym my relatives run. I will be your trainer."
+  },
+  {
+   "voice_id": 10002,
+   "jp": "…………。\n…いや。今も\n君がいるなと、思っただけだ。",
+   "en": "..........No. I was just thinking that you're still here."
+  },
+  {
+   "voice_id": 10010,
+   "jp": "年末年始は太りやすいらしいな。\n簡単な運動を考えてきた。君の場合\n2000キロカロリー消費が目標だ。",
+   "en": "I hear people gain weight over the holidays. I've devised some light exercise. Your target is 2,000 kilocalories burned."
+  },
+  {
+   "voice_id": 40004,
+   "jp": "何者も、私を止めることはできない。\n見るがいい！――私こそが、“最強”だ。",
+   "en": "No one can stop me. Watch! I am the 'strongest'."
+  },
+  {
+   "voice_id": 90015,
+   "jp": "図書室からドラキュラの本を\n借りたんだ。夜に、その…\n少しずつ読むようにしている。",
+   "en": "I borrowed a Dracula book from the library. I'm reading it at night, um... a little at a time."
+  },
+  {
+   "voice_id": 93000,
+   "jp": "一族に誇りたい。この結果と、君のことを。",
+   "en": "I want to be proud before my family: of this result, and of you."
+  }
+ ],
+ "timer_line_ideas": [
+  "{user}. The independent run is complete. Efficiently, and without waste. Review the results promptly; that is how one grows strongest. ...That is all.",
+  "The training has run its full course, {user}. I did what had to be done, as my blood demands. Come and see it. ...I would like you to."
+ ],
+ "data_gaps": [
+  "No dialogue for career events (titles only)",
+  "Identity of 'タイホ' in voice_id 91018 not resolved",
+  "Whether Air Groove/Admire Groove are framed as actual family in-game is uncertain; wiki calls them friend/upperclassmen",
+  "Fact-check: removed weak_spots 'ghosts' (91025 asks for a winning strategy, shows no fear) and 'autumn makes her restless' (no supporting line; 90007 is about summer). 'Childhood friend' for Air Groove was unsupported by data and removed"
+ ]
+}

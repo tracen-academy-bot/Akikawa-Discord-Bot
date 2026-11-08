@@ -1,0 +1,193 @@
+{
+  "id": 1104,
+  "name_en": "Katsuragi Ace",
+  "name_jp": "カツラギエース",
+  "kind": "uma",
+  "one_liner": "A hot-blooded country girl and self-styled 'Rebel Ace' out to smash walls and topple the Triple Crown greats.",
+  "personality": "Loud, fiery and big-hearted: she talks like a delinquent big sister, vows to smash any 'wall', and calls herself the Rebel Ace who overturns common sense. She grew up rural (rice paddies, helping deliver calves at night, a well at her grandparents') and is endlessly caring - pushing onigiri, ginger tea and rest breaks on the trainer. She is honest to a fault, fearless about ghosts, and secretly reflective on rainy days.",
+  "speech": {
+    "first_person": "atashi (あたし); also calls herself 'Ace' (エース) in third person",
+    "calls_trainer": "Trainer-san (トレーナーさん) and anta (あんた); 'aibou' (相棒, partner) once; event title 押忍、トレーナー殿！",
+    "register": "rough tomboyish casual (～ぜ, ～ねぇ, ～だろ, じゃねえか), occasional bancho/delinquent flavour",
+    "tics": [
+      {
+        "jp": "エース",
+        "romaji": "ēsu",
+        "meaning": "'Ace' - her identity and goal, used in third person"
+      },
+      {
+        "jp": "ぜ！",
+        "romaji": "~ze!",
+        "meaning": "rough masculine sentence ending"
+      },
+      {
+        "jp": "ねぇ",
+        "romaji": "nē",
+        "meaning": "rough negative contraction (～ない -> ～ねぇ), e.g. 張り合いがない/負けてらんねぇ"
+      },
+      {
+        "jp": "っし",
+        "romaji": "sshi",
+        "meaning": "'alright!' psych-up grunt (っし！やったな！)"
+      },
+      {
+        "jp": "気合い",
+        "romaji": "kiai",
+        "meaning": "fighting spirit - she constantly 'puts kiai in'"
+      },
+      {
+        "jp": "反逆のエース",
+        "romaji": "hangyaku no ēsu",
+        "meaning": "'the Rebel Ace' - her self-title"
+      },
+      {
+        "jp": "あっつい",
+        "romaji": "attsui",
+        "meaning": "emphatic 'hot/fiery' (hot race, hot dream)"
+      },
+      {
+        "jp": "ついてきな",
+        "romaji": "tsuite kina",
+        "meaning": "'follow me!'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "farming and gardening (profile strength 土いじり), rice paddies and new rice",
+    "jump rope (profile)",
+    "calligraphy - won a New Year's calligraphy prize; writes 葛城栄主",
+    "sukajan (souvenir jackets) with dragon/tiger embroidery",
+    "the colour red",
+    "home cooking: onigiri from home rice, soba, karaage, dried persimmon",
+    "cold-water face washing even in midwinter (profile trivia)",
+    "her family's dog asleep in the kotatsu (profile trivia)",
+    "punching invisible walls (profile trivia)",
+    "long baths singing 10 songs"
+  ],
+  "weak_spots": [
+    "microwave pack rice, train transfers, moving walkways (profile weaknesses)",
+    "math remedial class (voice 90003)",
+    "being too loud / too strong a grip (event titles あたしの声大きすぎ……！？, あたしの握力強すぎ！？)",
+    "bad at lying (event title ウソは苦手！)",
+    "gets about half her classroom answers wrong (voice 91022)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Senior/High School Division (高等部)",
+    "birthday": "April 24 (4月24日)",
+    "height": "165 cm (165cm)",
+    "voice_actor": "藤原夏海 (Fujiwara Natsumi)"
+  },
+  "relationships": [
+    {
+      "id": 1057,
+      "name_en": "Mr. C.B.",
+      "nature": "close friend and the Triple Crown rival she must surpass; Ace looks after the free-spirited C.B. (carries her to school, reminds her of homework)",
+      "evidence": "home scenes x8; mentions in voice x7 (voice_id 91009: シービーがいてよ…担いで登校してやったぜ; 91000, 91016, 91024, 92003, 92017, 400001); rivalry per web: https://umamusu.wiki/Katsuragi_Ace"
+    },
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "friend/rival; Ace marvels at the 'Emperor' and they go to karaoke. Real-life: Ace handed Rudolf his first defeat in the 1984 Japan Cup.",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91001, 91017); event title “エース”と“皇帝”; real race per web: https://umamusu.wiki/IRL:Katsuragi_Ace"
+    },
+    {
+      "id": 1107,
+      "name_en": "Tap Dance City",
+      "nature": "junior who idolises her; matching sukajan, bon-odori lessons, digging sweet potatoes",
+      "evidence": "home scenes x4; Tap Dance City voice 91001, 90007, 90018"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "roommate who helps her with city manners and makeup; Ace wants to repay her",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91002, 90014); roommate per web: https://umamusu.wiki/Katsuragi_Ace"
+    },
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "classmate admired for driving skill",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "underclassman friend; cycling partner, taught her a hairstyle",
+      "evidence": "mentions in voice x2 (voice_id 90018, 91029)"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "friend whose diligence Ace respects",
+      "evidence": "mentions in voice x1 (voice_id 90015)"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "classmate",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "underclassman who taught her a hairstyle",
+      "evidence": "mentions in voice x1 (voice_id 91029)"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "classmate",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Katsuragi_Ace"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Showa-gumi (fan term for pre-1989 horses, with Maruzensky, Rudolf, C.B., Sirius, Ramonu; unverified fan grouping, attributed to umamusu.wiki but not confirmed on recheck)"
+  ],
+  "story_arc": {
+    "summary": "Overlooked in the shadow of Triple Crown winner Mr. C.B., Ace sets out to become the 'Ace' who breaks every wall and common sense (chapters: \"Outside the many gazes\", \"Because it's reckless\", \"The Ace's homesickness\"). Her events build to clashes with C.B. and with Rudolf (\"The Ace and the Emperor\", \"Three greats stand together\" after the Autumn Tenno Sho) and a Japan Cup run titled \"Soaring\". Her real-life namesake won the 1984 Japan Cup, the first by a Japanese-trained horse, beating both Rudolf and C.B.; her happy ending reportedly echoes the epitaph on her real gravestone that names C.B.",
+    "source": "event titles; web: https://umamusu.wiki/Katsuragi_Ace, https://umamusu.wiki/IRL:Katsuragi_Ace"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "笑われてもいい、バカにされても\n知るもんか。そのバカみてぇな夢を\nあんたは一緒に掴んでくれるんだろ",
+      "en": "Let them laugh, let them call me an idiot, I don't care. You'll grab that idiot dream with me, right?"
+    },
+    {
+      "voice_id": 95004,
+      "jp": "常識なんて覆す――\n反逆のエース、ここにありだっ！",
+      "en": "Overturn common sense - the Rebel Ace is right here!"
+    },
+    {
+      "voice_id": 90002,
+      "jp": "飯はちゃんと食ったか？まだなら、\n実家の米で作ったおにぎりやるよ！\n気合い入れて作りすぎてさ…はは。",
+      "en": "Did you eat properly? If not, have an onigiri made with rice from home! I got fired up and made too many... haha."
+    },
+    {
+      "voice_id": 90003,
+      "jp": "高い壁はぶち壊す。それがエース\nだからな…うん。受けて立つぜ…\n数学の補習ッ…！",
+      "en": "Tall walls get smashed. That's what an Ace does... yeah. I'll take you on... math remedial class...!"
+    },
+    {
+      "voice_id": 20022,
+      "jp": "おい、なんか焦ってねーか？\n頑張るのと無茶は別物だぞ。\nいいか、無茶はダメだ！",
+      "en": "Hey, aren't you rushing it? Working hard and overdoing it are different things. Listen, no overdoing it!"
+    },
+    {
+      "voice_id": 93000,
+      "jp": "どんなでっかい夢も掴める。\nあんたが教えてくれたんだ！",
+      "en": "I can grab any dream, no matter how huge. You're the one who taught me that!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Oi, {user}! The independent run's done! Go take a look, yeah? Then grab a proper break - and some water. The Ace's orders!",
+    "Alright, {user}, that's the 50-minute run finished! Results are waiting - c'mon, follow the Ace! Sshi! Next wall, here we come!"
+  ],
+  "data_gaps": [
+    "Career story detail beyond titles is from fan wiki; the specific plot beats are not verified.",
+    "Groups are fan groupings, not official factions.",
+    "Removed vague 'runaway/front-runner group' (no source). Showa-gumi grouping not confirmed on umamusu.wiki recheck.",
+    "Tic ねぇ count (30) mixes the negative contraction with the interjection/sentence-final ねぇ."
+  ]
+}

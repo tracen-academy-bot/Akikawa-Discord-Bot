@@ -1,0 +1,194 @@
+{
+  "id": 1040,
+  "name_en": "Gold City",
+  "name_jp": "ゴールドシチー",
+  "kind": "uma",
+  "one_liner": "Blunt, beautiful gyaru model who wants to be judged by her running, not her looks.",
+  "personality": "Gold City is a professional model who is cool, curt and a bit prickly, warning everyone not to treat her like a doll and insisting she be judged on her running. Behind the gyaru slang she is hard-working, self-critical and secretly sentimental: she gets nervous before races, quietly misses the camp crowd, and thanks the trainer sincerely ('this is for real'). She juggles modeling and racing, often complaining about her manager's scheduling and early mornings.",
+  "speech": {
+    "first_person": "atashi (アタシ)",
+    "calls_trainer": "anta (アンタ)",
+    "register": "casual gyaru slang; blunt, clipped, teen-model speech",
+    "tics": [
+      {
+        "jp": "アンタ",
+        "romaji": "anta",
+        "meaning": "blunt 'you', how she addresses the trainer"
+      },
+      {
+        "jp": "マジ",
+        "romaji": "maji",
+        "meaning": "'seriously / for real'"
+      },
+      {
+        "jp": "ガチ",
+        "romaji": "gachi",
+        "meaning": "'for real, hardcore'"
+      },
+      {
+        "jp": "やば",
+        "romaji": "yaba",
+        "meaning": "'whoa / crazy / bad' (yabai)"
+      },
+      {
+        "jp": "っしょ",
+        "romaji": "'sho",
+        "meaning": "clipped でしょ, 'right?'"
+      },
+      {
+        "jp": "っし",
+        "romaji": "'shi",
+        "meaning": "'okay, let's go' self-psych-up (っし、やるか)"
+      },
+      {
+        "jp": "マネジ",
+        "romaji": "maneji",
+        "meaning": "her (modeling) manager"
+      },
+      {
+        "jp": "“アタシ”",
+        "romaji": "atashi (quoted)",
+        "meaning": "'the real me' - her identity motif"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Model walking (profile strength) and fashion: monotone with a bold accent colour (10025)",
+    "Japanese food, grilled fish (91021)",
+    "Mint gum and mint tea to wake up (profile trivia)",
+    "Roller coasters (speed type) (profile trivia)",
+    "Photos and Umastagram (run by her manager) (91022)",
+    "Her hair, styled by her stylist father as a kid (91001, 91219)"
+  ],
+  "weak_spots": [
+    "Waking up early (profile weakness; 90001, 91009)",
+    "Being treated like a doll / judged only on looks (self_intro; event title 菊花賞の後に・“お人形”)",
+    "Pre-race nerves - sweaty hands, shaking (20032, 20037)",
+    "Crowds (90018, 90216)",
+    "Gossip and 'fame tax' (91004)",
+    "Getting caught humming or being sentimental (20005, 91226)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 16 (4月16日)",
+    "height": "158 cm",
+    "voice_actor": "Saki Kosaka (香坂さき)"
+  },
+  "relationships": [
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "Best friend (web) who constantly invites her to eat and spam-photographs her",
+      "evidence": "home scenes x6; mentions in voice x2 (voice_id 91003: どうせジョーダンが飯行こうって言ってるんだろーけど; voice_id 91020: ジョーダンが写真撮りまくってくんの); Jordan mentions her x3; web: https://umamusu.wiki/Gold_City"
+    },
+    {
+      "id": 1029,
+      "name_en": "Yukino Bijin",
+      "nature": "Admirer she gives fashion advice to; finds her cute",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91002: 昨日、ユキノに服教えてほしーって頼まれてさ; voice_id 90019: ユキノが雪うさぎ作ったんだけど); Yukino mentions her x2"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "Roommate (web) and senior she fears angering by coming home late",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91011: バンブー先輩怒ってっかなー…); web: https://umamusu.wiki/Gold_City"
+    },
+    {
+      "id": 1021,
+      "name_en": "Tamamo Cross",
+      "nature": "Senior she respects - 'small but huge presence'; friend-rival (web)",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91218); web: https://umamusu.wiki/Gold_City"
+    },
+    {
+      "id": 1031,
+      "name_en": "Ines Fujin",
+      "nature": "Popular senior who worked a photo shoot part-time",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91217)"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "Praises Curren's photography",
+      "evidence": "mentions in voice x1 (voice_id 91019: カレンがアップした『駿大祭』の 写真)"
+    },
+    {
+      "id": 9049,
+      "name_en": "Tucker Bryne",
+      "nature": "Impressed by her energy",
+      "evidence": "mentions in voice x1 (voice_id 91216)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Home-scene partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "Suspects the president makes puns (unnamed '会長')",
+      "evidence": "voice_id 91018: 会長ってさー…や、なんでもない。…たまにダジャレっぽいの言ってる気がするとか、ナイか。 (identity inferred from title 会長; Rudolf also mentions her x1)"
+    },
+    {
+      "id": null,
+      "name_en": "Manager (マネジ)",
+      "nature": "Her manager (マネジ), who runs her schedule and Umastagram",
+      "evidence": "many lines, e.g. voice_id 91022: 運営してんのマネジなのに"
+    },
+    {
+      "id": null,
+      "name_en": "Her father (パパ)",
+      "nature": "Her father, a famous stylist",
+      "evidence": "voice_id 91219: パパ、有名なスタイリストでさ"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "A model since childhood, City wants to prove herself through running rather than her looks; her career events (信頼と苦笑, 怒りと燻り, “空っぽ”の器なら) trace her frustration at being seen as a 'doll' toward the declaration これが“アタシ” after the Japan Cup. Per the wiki she has a career event that locks the player out of training, nodding to the real horse's bad temper, and the Hanshin Juvenile Fillies is among her goals. The real horse won the Hanshin Sansai Stakes and ran second in the Satsuki Sho and Kikuka Sho (general knowledge, unverified in mdb).",
+    "source": "event titles; web: https://umamusu.wiki/Gold_City; model knowledge (unverified) for real-horse results"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 2032,
+      "jp": "アンタのおかげ。これ、マジだから。",
+      "en": "It's thanks to you. I mean that, for real."
+    },
+    {
+      "voice_id": 10000,
+      "jp": "モデルと走り、どっちもやるよ。\n今はね。マネジは呆れてるかも。\nだけど、諦めたくないし。",
+      "en": "I'm doing both modeling and running. For now, anyway. My manager's probably fed up. But I don't want to give up."
+    },
+    {
+      "voice_id": 20037,
+      "jp": "手汗やばっ！しかも震えてっし。\nてか心臓の音、外に聞こえてそー…\nいや、とにかく落ち着け自分っ！",
+      "en": "My hands are so sweaty! And shaking, too. My heartbeat's probably audible outside... no, just calm down, me!"
+    },
+    {
+      "voice_id": 92005,
+      "jp": "…そんな心配そうに見ないでよ。\nアタシは走ってる自分が1番好き\nだって、アンタも知ってるでしょ。",
+      "en": "...Don't look at me so worried. You know I love myself most when I'm running."
+    },
+    {
+      "voice_id": 90016,
+      "jp": "アンタって花より団子？\nけどさ、アタシが花なら…どう？\n…笑うトコだし。マジになんな。",
+      "en": "Are you 'dumplings over flowers'? But if I were the flower... how about it? ...That's your cue to laugh. Don't get serious."
+    },
+    {
+      "voice_id": 30004,
+      "jp": "ふふっ…どう？これが、アタシ。",
+      "en": "Heh... how's that? This is me."
+    }
+  ],
+  "timer_line_ideas": [
+    "Hey, {user}. Run's done. ...What, you weren't watching? Seriously? Go check it already, it's kinda important.",
+    "Okay, independent run's finished. Not bad, if I say so myself. {user}, go look before my manager texts me again."
+  ],
+  "data_gaps": [
+    "Groups: none confirmed beyond dorm (the 'City' name-sharers Tap Dance City / Espoir City are home-scene partners but no group is confirmed)",
+    "'会長' in voice 91018 assumed to be Symboli Rudolf (Student Council President); not named in the line",
+    "Voice actor romanisation is from general knowledge"
+  ]
+}
