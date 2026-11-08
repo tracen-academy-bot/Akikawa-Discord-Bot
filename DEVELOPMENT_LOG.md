@@ -2927,3 +2927,10 @@ nothing calls this module yet — but the same class of latent bug.
 - `/help` updated to match.
 - Note: one local run of `test:timer` failed "delivery lag recorded (~1800s)" twice; reruns on this
   branch and on master passed 84/84. That test looks timing-sensitive; unrelated to this change.
+
+## 2026-11-08: Matikanetannhauser guaranteed for Tylina
+
+- `SPECIAL_LOCKS` entry now has `ownerChance: 1`; `chooseOpener` treats 1 or more as a guarantee:
+  the owner's next ping is the locked special on any roll. Nobody else can get it meanwhile.
+- The find is recorded on that ping, which lifts the lock; then it is a normal special (4% over all 12).
+- Test-scheduler: the 2% sweep checks became one guarantee check; the other lock checks stand.

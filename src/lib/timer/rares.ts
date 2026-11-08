@@ -131,6 +131,8 @@ async function activeLocks(guildId: string): Promise<{ text: string; owner: stri
  *     rest;
  *   - the owner gets it below `ownerChance` (2%), and the rest of the
  *     special share, up to 4%, is spread evenly over the other specials;
+ *   - an `ownerChance` of 1 or more gives the owner the special on any
+ *     roll, until they have it;
  *   - above 4%, a common line, as always.
  */
 export async function chooseOpener(guildId: string, discordUserId: string, r: number, pool: readonly string[]): Promise<string> {
@@ -138,6 +140,8 @@ export async function chooseOpener(guildId: string, discordUserId: string, r: nu
     const locked = locks.map((l) => l.text);
     const others = pool.filter((t) => !locked.includes(t));
     const mine = locks.find((l) => l.owner === discordUserId);
+    // A guarantee: the owner's next ping is theirs, whatever the roll.
+    if (mine && mine.ownerChance >= 1) return mine.text;
     if (mine && r < RARE_OPENER_CHANCE) {
         if (r < mine.ownerChance) return mine.text;
         if (others.length === 0) return pickCommon(() => (r - mine.ownerChance) / (RARE_OPENER_CHANCE - mine.ownerChance));

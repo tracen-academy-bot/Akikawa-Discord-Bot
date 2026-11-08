@@ -299,3 +299,8 @@ club fan tracker plus a self-hosted dashboard.
 - Follow-up: the bulk run worked (448 members). The staff asked to remove the command and to keep
   Member synced live. Rule chosen: club roles drive Member. A hand change to Member is reverted;
   removing Member never strips a club role.
+
+## 2026-11-08: Tylina's special
+
+- Staff: "just make the next run give Mambo guaranteed." Tylina's next timer ping is the
+  Matikanetannhauser line; after that the lock lifts. Staff asked for auto-merge on green CI.
