@@ -4,14 +4,17 @@ Decisions that changed project direction. Newest first.
 
 ---
 
-## 2026-11-08 — #OnlineSensations set written; specials get a redesign
+## 2026-11-08 — #OnlineSensations set; specials redesigned
 
-- The Curren Chan collab set is final as text:
-  `docs/special-sets/online-sensations.md`. It is not in code yet.
+- The Curren Chan collab set is final: `docs/special-sets/online-sensations.md`,
+  now in code.
 - Its opener (line 0) belongs to Set 1 and unlocks this set.
-- Specials will be redesigned before it goes in: prerequisites, toggles
-  for upcoming sets, `{set_name}`, a timed reward (line 4), and replacing
-  every `{user}`.
+- Specials are redesigned for it: locked sets (prerequisites), a Boosts
+  toggle, set boosts (Loves: +4% on the collab lines for 50 runs), the
+  Early Riser boost (+1% when the next run starts within 2 minutes; Early
+  Riser must be on), `{set_name}`, and every `{user}` filled.
+- `#SpecialCollab` means a collab line of the set; the 4% boost draws only
+  on those.
 - Curren keeps her flirty lines; that is the character. #PillowPrincess
   was dropped.
 

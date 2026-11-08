@@ -85,7 +85,7 @@ async function main() {
     check('first run is celebrated', sent[0]?.content.includes('**Debut!** Your very first run is on the record!'), true);
     const allOpeners = [...PING_OPENERS, ...RARE_PING_OPENERS];
     check('ping opens with one of the openers', allOpeners.some((o) => sent[0]?.content.includes(o.replace('{user}', '').trim().slice(0, 30))), true);
-    check('openers: every one names the trainer once', allOpeners.every((o) => o.split('{user}').length === 2), true);
+    check('openers: every one names the trainer at least once', allOpeners.every((o) => o.split('{user}').length >= 2), true);
     check('openers: below 4% a rare one, spread evenly', [pickOpener(0), pickOpener(0.0399999), pickOpener(0.02)], [RARE_PING_OPENERS[0], RARE_PING_OPENERS[RARE_PING_OPENERS.length - 1], RARE_PING_OPENERS[Math.floor(RARE_PING_OPENERS.length / 2)]]);
     check('openers: from 4% up a common one, spread evenly', [pickOpener(0.04), pickOpener(0.52), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[3], PING_OPENERS[6]]);
     let rare = 0;
@@ -106,13 +106,16 @@ async function main() {
     check('rares: tally per line, first finder kept', [tally.length, tally[1]?.count, tally[1]?.firstUserId, tally[4]?.count, tally[0]?.count], [RARE_PING_OPENERS.length, 2, 'u1', 1, 0]);
     const embed = rares.raresEmbed(tally).toJSON();
     const col = (n: number) => embed.fields?.[n]?.value.split('\n') ?? [];
-    check('specials: three columns, one row per special', [embed.title, embed.fields?.map((f) => f.name), col(0).length, col(1).length, col(2).length], [
+    const { SPECIAL_SETS: SETS } = await import('../src/lib/timer/openers');
+    check('specials: three columns per set, one row per special', [embed.title, embed.fields?.map((f) => f.name), col(0).length, col(1).length, col(2).length, col(3).length], [
         `Specials found: 2 of ${RARE_PING_OPENERS.length}`,
-        ['Special', 'Times', 'First found by'],
-        RARE_PING_OPENERS.length,
-        RARE_PING_OPENERS.length,
-        RARE_PING_OPENERS.length,
+        SETS.flatMap((set) => [set.name, 'Times', 'First found by']),
+        SETS[0]!.openers.length,
+        SETS[0]!.openers.length,
+        SETS[0]!.openers.length,
+        SETS[1]!.openers.length,
     ]);
+    check('specials: numbers run on across sets', col(3)[0], `**${SETS[0]!.openers.length + 1}.** ???`);
     check('specials: unfound rows hide the name', [col(0)[0], col(1)[0], col(2)[0]], ['**1.** ???', '—', '—']);
     check('specials: a found row shows name, count and finder', [col(0)[1], col(1)[1], col(2)[1]?.startsWith('<@u1> <t:')], [`**2.** ${RARE_OPENERS[1]!.name}`, '**×2**', true]);
     check('specials: no line text is ever shown', RARE_PING_OPENERS.some((t) => JSON.stringify(embed).includes(t.replace('{user}', '').trim().slice(0, 20))), false);
@@ -168,20 +171,95 @@ async function main() {
     check('lock: over once the owner has it, 4% over all 12 for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked < 400], [800, true, 800, true]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: LG } });
 
-    // Settings: DM me too, early riser, special sets.
+    // #OnlineSensations: locked behind Curren Chan, a collab boost, and {set_name}.
+    const XG = `test-boosts-${Date.now()}`;
+    const curren = RARE_OPENERS.find((o) => o.name === 'Curren Chan')!;
+    const loves = RARE_OPENERS.find((o) => o.name === 'Loves Only You')!;
+    check('sets: Curren Chan is the last of Set 1', [curren.set, openers.SPECIAL_SETS[0]!.openers.at(-1)?.name], ['set1', 'Curren Chan']);
+    check('fill: every {user} and {set_name}', [openers.fillOpener(loves.text, 'u9').includes('{'), openers.fillOpener(loves.text, 'u9').split('<@u9>').length - 1, openers.fillOpener(loves.text, 'u9').includes('in #OnlineSensations.')], [false, 2, true]);
+    check('locks: the set is locked until Curren Chan', await rares.lockedSetsFor(XG, 'u1'), ['online-sensations']);
+    check('locks: a locked set is out of the pool', openers.rarePoolFor([], ['online-sensations']).length, openers.SPECIAL_SETS[0]!.openers.length);
+    await rares.recordRareOpener(XG, 'u1', curren.text);
+    check('locks: open once Curren Chan is found', [await rares.lockedSetsFor(XG, 'u1'), await rares.lockedSetsFor(XG, 'u2')], [[], ['online-sensations']]);
+    const collabs = openers.boostPool('online-sensations', 'collab');
+    check('boost: draws only on the collab lines, never Loves', [collabs.length, collabs.includes(loves.text), RARE_OPENERS.filter((o) => collabs.includes(o.text)).map((o) => o.name).includes('Celebrate')], [9, false, false]);
+    check('boost: a plain special grants nothing', await rares.grantBoost(XG, 'u1', curren.text), false);
+    check('boost: Loves grants 50 runs', [await rares.grantBoost(XG, 'u1', loves.text), await rares.activeBoosts(XG, 'u1')], [true, [{ setId: 'online-sensations', runsLeft: 50 }]]);
+    await rares.spendBoosts(XG, 'u1');
+    await rares.spendBoosts(XG, 'u1');
+    check('boost: each ping spends one', (await rares.activeBoosts(XG, 'u1'))[0]?.runsLeft, 48);
+    await rares.grantBoost(XG, 'u1', loves.text);
+    check('boost: getting Loves again restarts it, no stacking', await rares.activeBoosts(XG, 'u1'), [{ setId: 'online-sensations', runsLeft: 50 }]);
+    for (let k = 0; k < 50; k += 1) await rares.spendBoosts(XG, 'u1');
+    check('boost: gone after 50', await rares.activeBoosts(XG, 'u1'), []);
+    await rares.grantBoost(XG, 'u1', loves.text);
+    const { extraChances } = await import('../src/lib/timer/scheduler');
+    const base = { dmPing: false, earlyRiser: true, boosts: true, disabledSets: [] as string[] };
+    const fullPool = openers.rarePoolFor([]);
+    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool)).map((e) => [e.chance, e.pool.length]), [[0.04, 9], [0.01, fullPool.length]]);
+    check('extras: early start needs Early Riser on', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool)).map((e) => e.chance), [0.04]);
+    check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool), []);
+    check('extras: none for a set turned off', (await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool)).length, 0);
+    // The chances add: 4% boost + 1% early + the usual 4% = 9%, the usual 4% intact.
+    const extras = await extraChances(XG, 'u1', base, [], true, fullPool);
+    const counts = new Map<string, number>();
+    const STEPS = 20000;
+    for (let k = 0; k < STEPS; k += 1) {
+        const o = await rares.chooseOpener(XG, 'someone', k / STEPS, fullPool, extras);
+        counts.set(o, (counts.get(o) ?? 0) + 1);
+    }
+    const specialCount = [...counts].filter(([o]) => rares.isRareOpener(o)).reduce((n, [, c]) => n + c, 0);
+    const collabCount = [...counts].filter(([o]) => collabs.includes(o)).reduce((n, [, c]) => n + c, 0);
+    const commonCounts = PING_OPENERS.map((o) => counts.get(o) ?? 0);
+    check('odds: special chance is 4% + 1% + 4% = 9%', Math.abs(specialCount - 1800) <= 1, true);
+    // Collab lines: all of the 4% boost, plus their share of the 1% and 4%
+    // (spread over every special but the locked Matikanetannhauser).
+    const shareOf = (n: number, of: number) => Math.round((STEPS * n * 9) / of);
+    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (800 + shareOf(0.01, fullPool.length - 1) + shareOf(0.04, fullPool.length - 1))) <= 3, true);
+    // The sweep is discrete, so step boundaries can shift a count by one either way.
+    check('odds: common lines stay even (2600 each)', commonCounts.every((c) => Math.abs(c - 2600) <= 1), true);
+    const personal = rares.raresEmbed(await rares.rareTally(XG, 'u2'), true, { lockedSets: ['online-sensations'], boosts: await rares.activeBoosts(XG, 'u1'), boostsOn: false }).toJSON();
+    check('specials: a locked set shows one Locked row', personal.fields?.[3]?.value, '*Locked: find Curren Chan*');
+    check('specials: your boost is in the footer', personal.footer?.text.split('\n')[1], 'Boost: +4% #OnlineSensations for 50 more runs (paused: Boosts are off).');
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: XG } });
+    await prisma.timerSpecialBoost.deleteMany({ where: { guildId: XG } });
+
+    // Early start: within 2 minutes of the last ping, with Early Riser on.
+    const svc = await import('../src/lib/timer/service');
+    const EG = `test-early-${Date.now()}`;
+    const ago = (s: number) => new Date(Date.now() - s * 1000);
+    await prisma.trainingRun.create({ data: { guildId: EG, discordUserId: 'e1', startedAt: ago(3060), completedAt: ago(60) } });
+    await prisma.trainingRun.create({ data: { guildId: EG, discordUserId: 'e2', startedAt: ago(3180), completedAt: ago(180) } });
+    await prisma.trainingRun.create({ data: { guildId: EG, discordUserId: 'e3', startedAt: ago(3600), completedAt: ago(600), deliveryLagS: 540 } });
+    check('early: within the window', await svc.inEarlyWindow(EG, 'e1', new Date()), true);
+    check('early: past the window', await svc.inEarlyWindow(EG, 'e2', new Date()), false);
+    check('early: counted from a late ping, not the scheduled end', await svc.inEarlyWindow(EG, 'e3', new Date()), true);
+    check('early: no last run, no window', await svc.inEarlyWindow(EG, 'nobody', new Date()), false);
+    const s1 = await svc.startTimer(EG, 'c', null, 'e1', 49, true);
+    const s2 = await svc.startTimer(EG, 'c', null, 'e2', 49, true);
+    const s3 = await svc.startTimer(EG, 'c', null, 'e3', 50, false);
+    check('early: a start marks the run only with Early Riser on and in time', [s1.timer.earlyStart, s2.timer.earlyStart, s3.timer.earlyStart], [true, false, false]);
+    check('early: a reset keeps the mark', (await svc.startTimer(EG, 'c', null, 'e1', 49, true)).timer.earlyStart, true);
+    await prisma.trainingTimer.deleteMany({ where: { guildId: EG } });
+    await prisma.trainingRun.deleteMany({ where: { guildId: EG } });
+
+    // Settings: DM me too, early riser, boosts, special sets.
     const us = await import('../src/lib/timer/userSettings');
     const SG = `test-usettings-${Date.now()}`;
-    check('settings: defaults', await us.getUserSettings(SG, 'u1'), { dmPing: false, earlyRiser: false, disabledSets: [] });
+    check('settings: defaults', await us.getUserSettings(SG, 'u1'), { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] });
     check('settings: default run and ping times', [us.runMinutes(await us.getUserSettings(SG, 'u1')), us.pingMinutes(await us.getUserSettings(SG, 'u1'))], [50, 3]);
     await us.toggleSetting(SG, 'u1', 'dm');
     await us.toggleSetting(SG, 'u1', 'early');
     const on = await us.toggleSetting(SG, 'u1', 'set:set1');
-    check('settings: each toggle flips', on, { dmPing: true, earlyRiser: true, disabledSets: ['set1'] });
+    check('settings: each toggle flips', on, { dmPing: true, earlyRiser: true, boosts: true, disabledSets: ['set1'] });
+    check('settings: boosts flip off and back', [(await us.toggleSetting(SG, 'u1', 'boosts')).boosts, (await us.toggleSetting(SG, 'u1', 'boosts')).boosts], [false, true]);
     check('settings: early riser runs 49 and clears in 2', [us.runMinutes(on), us.pingMinutes(on)], [49, 2]);
     check('settings: an unknown set is ignored', (await us.toggleSetting(SG, 'u1', 'set:nope')).disabledSets, ['set1']);
     check('settings: a set flips back on', (await us.toggleSetting(SG, 'u1', 'set:set1')).disabledSets, []);
     const view = JSON.stringify(us.settingsView(on));
-    check('settings: the screen shows each setting\'s state', [view.includes('DM Me Too: On'), view.includes('Early Riser: On'), view.includes('Set 1: Off')], [true, true, true]);
+    check('settings: the screen shows each setting\'s state', [view.includes('DM Me Too: On'), view.includes('Early Riser: On'), view.includes('Boosts: On'), view.includes('Set 1: Off')], [true, true, true, true]);
+    const lockedView = us.settingsView(on, ['online-sensations']).components.flatMap((row) => row.toJSON().components) as { label?: string; disabled?: boolean }[];
+    check('settings: a locked set is greyed out', lockedView.find((b) => b.label?.startsWith('#OnlineSensations'))?.disabled && lockedView.find((b) => b.label?.startsWith('#OnlineSensations'))?.label, '#OnlineSensations: Locked');
     await prisma.timerUserSettings.deleteMany({ where: { guildId: SG } });
     const { BUTTON_SETTINGS } = await import('../src/lib/timer/panel');
     check('panel: has the Settings button', panelJson.includes(BUTTON_SETTINGS) || JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_SETTINGS), true);

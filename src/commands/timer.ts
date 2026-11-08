@@ -1,6 +1,7 @@
 import type { StringSelectMenuInteraction } from 'discord.js';
 import { SETTINGS_PREFIX, getUserSettings, runMinutes, settingsView, toggleSetting } from '../lib/timer/userSettings';
-import { READ_MENU_ID, rareTally, raresEmbed, readMenuRow, readSpecial, specialEmbed } from '../lib/timer/rares';
+import { READ_MENU_ID, activeBoosts, lockedSetsFor, rareTally, raresEmbed, readMenuRow, readSpecial, specialEmbed } from '../lib/timer/rares';
+import { EARLY_RISER_BOOST } from '../lib/timer/openers';
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
@@ -461,39 +462,51 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
     // A setting flipped on the Settings screen: redraw it in place.
     if (interaction.customId.startsWith(SETTINGS_PREFIX)) {
         const settings = await toggleSetting(guildId, interaction.user.id, interaction.customId.slice(SETTINGS_PREFIX.length));
-        await interaction.update(settingsView(settings));
+        await interaction.update(settingsView(settings, await lockedSetsFor(guildId, interaction.user.id)));
         return;
     }
 
     switch (interaction.customId) {
         case BUTTON_SETTINGS: {
-            await interaction.reply({ ...settingsView(await getUserSettings(guildId, interaction.user.id)), flags: MessageFlags.Ephemeral });
+            const [settings, locked] = await Promise.all([getUserSettings(guildId, interaction.user.id), lockedSetsFor(guildId, interaction.user.id)]);
+            await interaction.reply({ ...settingsView(settings, locked), flags: MessageFlags.Ephemeral });
             break;
         }
 
         case BUTTON_SPECIALS: {
             // The same hidden list as /timer specials: your own finds only.
-            const tally = await rareTally(guildId, interaction.user.id);
+            const [tally, lockedSets, boosts, settings] = await Promise.all([
+                rareTally(guildId, interaction.user.id),
+                lockedSetsFor(guildId, interaction.user.id),
+                activeBoosts(guildId, interaction.user.id),
+                getUserSettings(guildId, interaction.user.id),
+            ]);
             const menu = readMenuRow(tally);
-            await interaction.reply({ embeds: [raresEmbed(tally, true)], components: menu ? [menu] : [], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+            await interaction.reply({ embeds: [raresEmbed(tally, true, { lockedSets, boosts, boostsOn: settings.boosts })], components: menu ? [menu] : [], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
             break;
         }
 
         case BUTTON_START: {
-            const minutes = runMinutes(await getUserSettings(guildId, interaction.user.id));
+            const settings = await getUserSettings(guildId, interaction.user.id);
+            const minutes = runMinutes(settings);
             const { timer, wasReset } = await startTimer(
                 guildId,
                 interaction.channelId,
                 interaction.message.id,
                 interaction.user.id,
                 minutes,
+                settings.earlyRiser,
             );
 
             const endsAt = `<t:${Math.floor(timer.expiresAt.getTime() / 1000)}:R>`;
+            const early =
+                !wasReset && timer.earlyStart && settings.boosts
+                    ? `\n**Early start!** This run's ping has +${EARLY_RISER_BOOST.chance * 100}% special chance.`
+                    : '';
             await interaction.reply({
                 content: wasReset
                     ? `Timer reset. Your ${minutes}-minute run now ends ${endsAt}.`
-                    : `Timer started. Your ${minutes}-minute run ends ${endsAt}.`,
+                    : `Timer started. Your ${minutes}-minute run ends ${endsAt}.${early}`,
                 flags: MessageFlags.Ephemeral,
             });
             await refreshFromInteraction(interaction, guildId);

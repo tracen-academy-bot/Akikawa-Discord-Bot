@@ -1,7 +1,8 @@
-# Special set draft: #OnlineSensations
+# Special set: #OnlineSensations
 
-Status: final text, not in code yet. It waits for the specials redesign
-(see "Needs from the code" below). `{user}` is the trainer's mention.
+Status: in code (`src/lib/timer/openers.ts`, set id `online-sensations`).
+This file is the source text; keep the two in step. `{user}` is the
+trainer's mention, `{set_name}` the set's name.
 
 - **Theme:** Curren Chan drags the trainer, her "best manager", through a
   week of collabs with Tracen's online stars.
@@ -12,7 +13,7 @@ Status: final text, not in code yet. It waits for the specials redesign
 ## Line 0 (in Set 1): Curren Chan
 
 ```text
-{user}-channnn~! Here you are! Heard you've been handling #Trainee runs, but see, Curren has #DefinitelyAccidentally leaked that you're #TheBestManager that Tracen has so... You're coming with me, #Collabs full week! #LookAtCurren #ManagerDebut
+{user}-channnn~! Here you are! Heard you've been handling #Trainee runs, but see, Curren has #DefinitelyAccidentally leaked that you're #TheBestManager that Tracen has so... You're coming with me, #SpecialCollabs full week! #LookAtCurren #ManagerDebut
 ```
 
 ## Lines 1-12
@@ -64,7 +65,7 @@ Status: final text, not in code yet. It waits for the specials redesign
 8. Smart Falcon
 
    ```text
-   #TwoTrillionFans has become so popular #OhMyFreakinGod! Smart Falcon is so #UmadolFamoussss it's insane! {user}, we have to come support one of her #GrandLive concerts, please please-please #PWEASE! I will even do #ProperTraining this time! #FalconConcertIncoming #MoodBoost
+   #TwoTrillionFans has become so popular #OhMyFreakinGod! Smart Falcon is so #UmadolFamoussss it's insane! {user}, we have to come support one of her #GrandLive concerts, please please-please#PWEASE! I will even do #ProperTraining this time! #FalconConcertIncoming #MoodBoost
    ```
 
 9. Hishi Akebono
@@ -107,13 +108,14 @@ Voice ids are from the JP master data (see `docs/uma-reference/`).
 | 11 Biko | Hero and sentai motif: many lines. UmaTok animations: wiki only. |
 | 12 Helios | Zombie makeup with Gold City: 10007. Ruby as "お嬢": 91001. Calls the trainer トレぴ. |
 
-## Needs from the code (the specials redesign)
+## How it works in the bot
 
-- Replace every `{user}`, not only the first (`.replace` to `.replaceAll`
-  in `src/lib/timer/rares.ts` and `src/lib/timer/scheduler.ts`). Lines 4
-  and 9 use it twice.
-- A prerequisite: line 0 in Set 1 unlocks this set for that trainer.
-- `{set_name}` substitution (line 4 footer).
-- Line 4's reward: a 4% `#SpecialCollab` chance for the next 50 runs. What
-  a SpecialCollab gives is not decided yet.
-- Toggles for upcoming sets, per the owner.
+- **Locked** until the trainer has found line 0, "Curren Chan", in Set 1.
+  While locked, its lines never come up, its Settings toggle is greyed out
+  ("Locked"), and the trainer's Specials list shows one "Locked: find
+  Curren Chan" row for it.
+- **Collab lines** (tag `collab`): 3, 5-12. Not 1 (Celebrate), 2 (For Your
+  Eyes Only) or 4 (Loves, which grants the boost).
+- **Loves Only You's boost:** for the trainer's next 50 pings, +4% chance of
+  a collab line, on top of the usual 4% for any special. Getting Loves again
+  restarts the 50; it does not stack. Boosts off pauses it.

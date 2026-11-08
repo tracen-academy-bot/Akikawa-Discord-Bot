@@ -4,6 +4,47 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-08 — Specials: locked sets, boosts, #OnlineSensations
+
+- **Sets can be locked.** `SpecialSet.requires` names a special in another
+  set; until the trainer has found it (`lockedSetsFor`, from their
+  `RareOpenerHit` rows), the set is out of their pool, its Settings button
+  is disabled ("Locked"), and their Specials list shows one Locked row.
+  The server-wide `/timer specials` shows every set as usual.
+- **Boosts.** A special can carry `boost: { tag, chance, runs }`. Getting
+  it gives the trainer that boost (`TimerSpecialBoost`, one row per trainer
+  and set) for `runs` pings: extra `chance` drawn from the same set's lines
+  with `tag`, never the granting line itself. Getting it again resets the
+  count. Each ping with Boosts on spends one run; the granting ping's
+  boost starts after it.
+- **Early Riser boost.** With Early Riser on, a new run started within 2
+  minutes of the trainer's last ping (scheduled end plus delivery lag, so
+  downtime does not cost it) is marked `TrainingTimer.earlyStart`. Its ping
+  gets +1% special chance from the usual pool. A reset keeps the mark. The
+  Start reply says so.
+- **Boosts toggle** (`TimerUserSettings.boosts`, default on). Off: no boost
+  applies and set boosts do not tick down.
+- **Odds add.** `chooseOpener` cuts the random range into one slice per
+  extra (width = its chance), then the usual 4%, then the common lines,
+  stretching only the common part. So a ping is special with probability
+  $\sum_i c_i + 0.04$; Loves plus an early start gives $0.04 + 0.01 + 0.04 = 0.09$.
+  The lock (Matikanetannhauser) still works inside the usual 4%, and a
+  locked special never comes from an extra.
+- **Text fill.** `fillOpener` replaces every `{user}` (it was only the
+  first) and `{set_name}`; the ping and the read view both use it.
+- **Specials list** is now per set (three fields per set, numbers running
+  on), with active boosts in the personal footer.
+- New set `online-sensations` (#OnlineSensations, 12 lines) and Set 1's
+  13th line, "Curren Chan", which unlocks it. Text source:
+  `docs/special-sets/online-sensations.md`.
+- Migration `20261108120000_add_special_boosts`.
+- Limits to know: the read menu holds 25 options and there are now exactly
+  25 specials, so the next set needs the menu split (e.g. per set). Finds are
+  keyed by the line's text, so editing a live special's text loses its finds
+  (and, for "Curren Chan", re-locks #OnlineSensations).
+
+---
+
 ## 2026-11-08 — Uma reference from the JP master data
 
 - `scripts/uma-reference/extract_umas.py` reads a JP `master.mdb` into one
