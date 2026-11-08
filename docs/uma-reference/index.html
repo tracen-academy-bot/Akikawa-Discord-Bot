@@ -113,6 +113,11 @@ details .cols div { break-inside: avoid; margin-bottom: 3px; }
 .canvasbox { width: 100%; overflow: hidden; border-radius: 10px; background: var(--bg); }
 canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: pointer; }
 #graphInfo { margin-top: 10px; font-size: 14px; min-height: 2em; }
+.graphbar input[type="search"], .graphbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--sheet); max-width: 100%; }
+.graphbar .find input { width: 190px; }
+.zoom { display: inline-flex; gap: 4px; }
+.zoom button { border: 1px solid var(--line); background: var(--sheet); border-radius: 6px; padding: 1px 10px; cursor: pointer; }
+canvas.grab { cursor: grabbing; }
 
 .groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
 .group { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--sheet); min-width: 0; }
@@ -159,15 +164,20 @@ canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: 
 <main id="graphView" hidden>
   <div class="sheet full">
     <div class="graphbar">
+      <label class="find">Find <input id="gFind" type="search" list="gNames" placeholder="Name, EN or JP" autocomplete="off"></label>
+      <datalist id="gNames"></datalist>
+      <label>Highlight <select id="gGroup"><option value="">No group</option></select></label>
       <label>Edges <select id="gMode">
         <option value="home">Home-screen conversations</option>
         <option value="mention">Name drops in voice lines</option>
       </select></label>
-      <label>Min weight <input id="gMin" type="range" min="1" max="6" value="2" style="width:110px"><span id="gMinV">2</span></label>
+      <label>Min weight <input id="gMin" type="range" min="1" max="6" value="2" style="width:90px"><span id="gMinV">2</span></label>
+      <label><input id="gAll" type="checkbox"> All names</label>
+      <span class="zoom"><button type="button" id="zIn" aria-label="Zoom in">+</button><button type="button" id="zOut" aria-label="Zoom out">&minus;</button><button type="button" id="zReset">Reset view</button></span>
       <span class="legend" id="legend"></span>
     </div>
     <div class="canvasbox"><canvas id="cv" width="1200" height="860"></canvas></div>
-    <div id="graphInfo" class="note">Tap a node to see who she shares scenes with. Double-tap opens her dossier.</div>
+    <div id="graphInfo" class="note">Hover a dot to see her name. Click one to see who she shares scenes with; click her name to open her dossier. Scroll or pinch to zoom, drag to pan.</div>
   </div>
 </main>
 
@@ -198,7 +208,7 @@ fetch('uma-data.json').then((r) => r.json()).then((d) => {
   const fromHash = Number(location.hash.replace('#u', ''));
   const saved = Number(store('uma-current'));
   show(BY.get(fromHash) || BY.get(saved) || d.charas[0]);
-  buildGraph(); renderGroups();
+  fillGraphControls(); buildGraph(); renderGroups();
 }).catch((e) => { $('#sheet').innerHTML = `<p>Could not load the data file (${esc(e.message)}). Reload the page to try again.</p>`; });
 
 function matches(c, q) {
@@ -350,45 +360,133 @@ function buildGraph() {
     }
   }
   const ranked = [...nodes].sort((a, b) => b.deg - a.deg); ranked.forEach((n, i) => { n.top = i < 24; });
-  G = { nodes, edges: E, sel: G.sel };
+  G = { ...G, nodes, edges: E, hover: null };
   $('#legend').innerHTML = Object.entries(DORM_COLORS).map(([k]) => `<span><i style="background:${dormColor(k)}"></i>${esc(k)}</span>`).join('') + `<span><i style="background:${css('--line')}"></i>Other</span>`;
   drawGraph();
 }
 function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 function dormColor(d) { const m = DORM_COLORS[d]; return m ? css(m.slice(4, -1)) : css('--line'); }
+function neighbours(i) { const n = new Set(); G.edges.forEach((e) => { if (e.s === i) n.add(e.t); if (e.t === i) n.add(e.s); }); return n; }
 function drawGraph() {
   const cv = $('#cv'); if (!cv || $('#graphView').hidden) return;
-  const ctx = cv.getContext('2d'); ctx.clearRect(0, 0, cv.width, cv.height);
-  const sel = G.sel; const near = new Set();
-  if (sel != null) G.edges.forEach((e) => { if (e.s === sel) near.add(e.t); if (e.t === sel) near.add(e.s); });
-  const ink = css('--ink'), muted = css('--muted'), rose = css('--rose'), line = css('--line');
+  const ctx = cv.getContext('2d'); const V = G.view;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(V.k, 0, 0, V.k, V.tx, V.ty);
+  const sel = G.sel; const near = sel != null ? neighbours(sel) : new Set();
+  const grp = G.group; const focus = (i) => (sel == null || i === sel || near.has(i)) && (!grp || grp.has(G.nodes[i].id));
+  const ink = css('--ink'), rose = css('--rose'), line = css('--line'), bg = css('--bg');
   G.edges.forEach((e) => {
-    const a = G.nodes[e.s], b = G.nodes[e.t]; const on = sel != null && (e.s === sel || e.t === sel);
-    ctx.strokeStyle = on ? rose : line; ctx.globalAlpha = sel != null && !on ? 0.25 : 0.9; ctx.lineWidth = on ? 1 + e.w : Math.min(4, 0.6 + e.w * 0.4);
+    const a = G.nodes[e.s], b = G.nodes[e.t];
+    const on = (sel != null && (e.s === sel || e.t === sel)) || (grp && sel == null && grp.has(a.id) && grp.has(b.id));
+    const dim = (sel != null || grp) && !on;
+    ctx.strokeStyle = on ? rose : line; ctx.globalAlpha = dim ? 0.18 : 0.9;
+    ctx.lineWidth = (on ? 1 + e.w : Math.min(4, 0.6 + e.w * 0.4)) / Math.sqrt(V.k);
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   });
-  ctx.globalAlpha = 1;
+  const radius = (n) => 4 + Math.sqrt(n.deg) * 1.6;
   G.nodes.forEach((n, i) => {
-    const c = BY.get(n.id); const r = 4 + Math.sqrt(n.deg) * 1.6; const dim = sel != null && i !== sel && !near.has(i);
-    ctx.globalAlpha = dim ? 0.3 : 1; ctx.fillStyle = dormColor(c.profile_en_dorm); ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill();
-    if (i === sel) { ctx.strokeStyle = rose; ctx.lineWidth = 3; ctx.stroke(); }
-    if (!dim && ((sel == null && n.top) || i === sel || near.has(i))) { ctx.fillStyle = i === sel ? rose : ink; ctx.font = `${i === sel ? 700 : 500} 13px ${css('--body')}`; ctx.fillText(c.name_en, n.x + r + 3, n.y + 4); }
+    const c = BY.get(n.id); const r = radius(n);
+    ctx.globalAlpha = focus(i) ? 1 : 0.22; ctx.fillStyle = dormColor(c.profile_en_dorm);
+    ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill();
+    if (i === sel || i === G.hover || (grp && grp.has(n.id))) { ctx.strokeStyle = rose; ctx.lineWidth = 3 / V.k; ctx.stroke(); }
   });
-  ctx.globalAlpha = 1; ctx.fillStyle = muted;
+  // Labels: highest priority first, skipped when they would overlap one already drawn.
+  const fs = 13 / V.k; const placed = [];
+  const order = G.nodes.map((n, i) => i).filter(focus).sort((x, y) => prio(y) - prio(x));
+  function prio(i) { const n = G.nodes[i]; return (i === G.hover ? 1e9 : 0) + (i === sel ? 1e8 : 0) + (grp && grp.has(n.id) ? 1e7 : 0) + (near.has(i) ? 1e6 : 0) + n.deg; }
+  ctx.globalAlpha = 1; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  for (const i of order) {
+    const n = G.nodes[i]; const must = i === G.hover || i === sel || (grp && grp.has(n.id));
+    const wanted = must || near.has(i) || (grp && grp.has(n.id)) || G.allNames || (sel == null && !grp && n.top);
+    if (!wanted) continue;
+    const c = BY.get(n.id); const bold = i === sel || i === G.hover;
+    ctx.font = `${bold ? 700 : 500} ${fs}px ${css('--body')}`;
+    const w = ctx.measureText(c.name_en).width; const x = n.x + radius(n) + 3 / V.k, y = n.y;
+    const box = [x - 2 / V.k, y - fs * 0.7, x + w + 2 / V.k, y + fs * 0.7];
+    if (!must && placed.some((p) => box[0] < p[2] && box[2] > p[0] && box[1] < p[3] && box[3] > p[1])) continue;
+    placed.push(box);
+    ctx.strokeStyle = bg; ctx.lineWidth = 4 / V.k; ctx.strokeText(c.name_en, x, y);
+    ctx.fillStyle = bold ? rose : ink; ctx.fillText(c.name_en, x, y);
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+function toWorld(ev) {
+  const cv = $('#cv'); const rect = cv.getBoundingClientRect();
+  const sx = (ev.clientX - rect.left) * cv.width / rect.width, sy = (ev.clientY - rect.top) * cv.height / rect.height;
+  return { sx, sy, x: (sx - G.view.tx) / G.view.k, y: (sy - G.view.ty) / G.view.k };
 }
 function pick(ev) {
-  const cv = $('#cv'); const rect = cv.getBoundingClientRect();
-  const x = (ev.clientX - rect.left) * cv.width / rect.width, y = (ev.clientY - rect.top) * cv.height / rect.height;
-  let best = null, bd = 400; G.nodes.forEach((n, i) => { const d = (n.x - x) ** 2 + (n.y - y) ** 2; if (d < bd) { bd = d; best = i; } }); return best;
+  const p = toWorld(ev); let best = null, bd = (22 / G.view.k) ** 2;
+  G.nodes.forEach((n, i) => { const d = (n.x - p.x) ** 2 + (n.y - p.y) ** 2; if (d < bd) { bd = d; best = i; } }); return best;
 }
-$('#cv').addEventListener('click', (ev) => {
-  const i = pick(ev); G.sel = i; drawGraph();
-  if (i == null) { $('#graphInfo').textContent = 'Tap a node to see who she shares scenes with. Double-tap opens her dossier.'; return; }
+function select(i) {
+  G.sel = i; drawGraph();
+  if (i == null) { $('#graphInfo').textContent = 'Hover a dot to see her name. Click one to see who she shares scenes with; click her name to open her dossier. Scroll or pinch to zoom, drag to pan.'; return; }
   const c = BY.get(G.nodes[i].id);
   const ps = G.edges.filter((e) => e.s === i || e.t === i).map((e) => ({ id: G.nodes[e.s === i ? e.t : e.s].id, w: e.w })).sort((a, b) => b.w - a.w);
-  $('#graphInfo').innerHTML = `<b>${link(c.id, c.name_en)}</b>: ${ps.map((p) => `${link(p.id, BY.get(p.id).name_en)} <span class="src">x${p.w}</span>`).join(', ')}`;
+  const unit = $('#gMode').value === 'home' ? 'shared scenes' : 'name drops';
+  $('#graphInfo').innerHTML = `<b>${link(c.id, c.name_en)}</b> <span class="src">${esc(c.name_jp)} · ${ps.length} links, ${unit}</span><br>${ps.map((p) => `${link(p.id, BY.get(p.id).name_en)} <span class="src">x${p.w}</span>`).join(', ') || 'No links at this weight.'}`;
+}
+function zoomAt(f, sx, sy) {
+  const V = G.view; const k = Math.max(0.5, Math.min(6, V.k * f)); f = k / V.k;
+  V.tx = sx - (sx - V.tx) * f; V.ty = sy - (sy - V.ty) * f; V.k = k; drawGraph();
+}
+function centerOn(i, k) { const n = G.nodes[i]; const cv = $('#cv'); G.view.k = k; G.view.tx = cv.width / 2 - n.x * k; G.view.ty = cv.height / 2 - n.y * k; }
+G.view = { k: 1, tx: 0, ty: 0 };
+let drag = null;
+const cvEl = $('#cv');
+cvEl.addEventListener('pointerdown', (ev) => { const p = toWorld(ev); drag = { sx: p.sx, sy: p.sy, tx: G.view.tx, ty: G.view.ty, moved: false, id: ev.pointerId }; });
+cvEl.addEventListener('pointermove', (ev) => {
+  if (drag && drag.id === ev.pointerId && ev.buttons) {
+    const p = toWorld(ev); const dx = p.sx - drag.sx, dy = p.sy - drag.sy;
+    if (Math.abs(dx) + Math.abs(dy) > 6) { drag.moved = true; cvEl.classList.add('grab'); try { cvEl.setPointerCapture(ev.pointerId); } catch (e) {} }
+    if (drag.moved) { G.view.tx = drag.tx + dx; G.view.ty = drag.ty + dy; drawGraph(); }
+    return;
+  }
+  const h = pick(ev); if (h !== G.hover) { G.hover = h; cvEl.style.cursor = h == null ? 'default' : 'pointer'; drawGraph(); }
 });
-$('#cv').addEventListener('dblclick', (ev) => { const i = pick(ev); if (i != null) { setTab('roster'); show(BY.get(G.nodes[i].id)); } });
+cvEl.addEventListener('pointerup', (ev) => {
+  cvEl.classList.remove('grab');
+  if (drag && !drag.moved) { const i = pick(ev); select(i); }
+  drag = null;
+});
+cvEl.addEventListener('pointerleave', () => { if (G.hover != null) { G.hover = null; drawGraph(); } });
+cvEl.addEventListener('wheel', (ev) => { ev.preventDefault(); const p = toWorld(ev); zoomAt(ev.deltaY < 0 ? 1.15 : 1 / 1.15, p.sx, p.sy); }, { passive: false });
+cvEl.addEventListener('dblclick', (ev) => { const i = pick(ev); if (i != null) { setTab('roster'); show(BY.get(G.nodes[i].id)); } });
+$('#zIn').addEventListener('click', () => { const cv = $('#cv'); zoomAt(1.3, cv.width / 2, cv.height / 2); });
+$('#zOut').addEventListener('click', () => { const cv = $('#cv'); zoomAt(1 / 1.3, cv.width / 2, cv.height / 2); });
+$('#zReset').addEventListener('click', () => { G.view = { k: 1, tx: 0, ty: 0 }; drawGraph(); });
+$('#gAll').addEventListener('input', drawGraph);
+function findChara(q) {
+  q = q.trim().toLowerCase(); if (!q) return null;
+  const all = DATA.charas;
+  return all.find((c) => c.name_en.toLowerCase() === q || c.name_jp === q)
+    || all.find((c) => c.name_en.toLowerCase().startsWith(q) || c.name_jp.startsWith(q))
+    || all.find((c) => c.name_en.toLowerCase().includes(q) || c.name_jp.includes(q));
+}
+$('#gFind').addEventListener('change', () => {
+  const c = findChara($('#gFind').value); if (!c) { $('#graphInfo').textContent = `Nobody called "${$('#gFind').value}". Try part of the name.`; return; }
+  let i = G.nodes.findIndex((n) => n.id === c.id);
+  if (i < 0 && $('#gMin').value !== '1') { $('#gMin').value = '1'; buildGraph(); i = G.nodes.findIndex((n) => n.id === c.id); }
+  if (i < 0) { G.sel = null; drawGraph(); $('#graphInfo').innerHTML = `${link(c.id, c.name_en)} has no ${$('#gMode').value === 'home' ? 'home-screen scenes' : 'name drops'} in the data.`; return; }
+  centerOn(i, Math.max(G.view.k, 1.8)); select(i);
+});
+$('#gGroup').addEventListener('input', () => {
+  const v = $('#gGroup').value; const g = GROUP_LIST[Number(v)];
+  G.group = v === '' ? null : new Set(g.ids); G.sel = null; drawGraph();
+  if (g) {
+    const missing = g.ids.filter((id) => !G.nodes.some((n) => n.id === id));
+    $('#graphInfo').innerHTML = `<b>${esc(g.name)}</b>: ${g.ids.map((id) => link(id, BY.get(id)?.name_en || id)).join(', ')}${missing.length ? ` <span class="src">(${missing.length} not in the graph at this weight)</span>` : ''}`;
+  } else select(null);
+});
+let GROUP_LIST = [];
+function fillGraphControls() {
+  $('#gNames').innerHTML = DATA.charas.map((c) => `<option value="${esc(c.name_en)}">${esc(c.name_jp)}</option>`).join('');
+  const g = DATA.groups || {};
+  GROUP_LIST = [...(g.suggested_next_sets || []).map((s) => ({ name: 'Suggested: ' + s.name, ids: s.member_ids })),
+    ...(g.groups || []).map((x) => ({ name: x.name, ids: x.members.map((m) => (typeof m === 'object' ? m.id : m)) }))];
+  $('#gGroup').innerHTML = '<option value="">No group</option>' + GROUP_LIST.map((x, i) => `<option value="${i}">${esc(x.name)}</option>`).join('');
+}
 $('#gMode').addEventListener('input', () => { G.sel = null; buildGraph(); });
 $('#gMin').addEventListener('input', () => { G.sel = null; buildGraph(); });
 new MutationObserver(drawGraph).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
