@@ -111,9 +111,9 @@ Voice ids are from the JP master data (see `docs/uma-reference/`).
 ## How it works in the bot
 
 - **Locked** until the trainer has found line 0, "Curren Chan", in Set 1.
-  While locked, its lines never come up, its Settings toggle is greyed out
-  ("Locked"), and the trainer's Specials list shows one "Locked: find
-  Curren Chan" row for it.
+  While locked, its lines never come up, and its page in the trainer's
+  Specials list says "Locked: find Curren Chan", with the On/Off button
+  greyed out.
 - **Collab lines** (tag `collab`): 3, 5-12. Not 1 (Celebrate), 2 (For Your
   Eyes Only) or 4 (Loves, which grants the boost).
 - **Loves Only You's boost:** for the trainer's next 50 pings, +4% chance of

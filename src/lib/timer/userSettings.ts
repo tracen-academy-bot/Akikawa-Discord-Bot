@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_RISER_BOOST, SPECIAL_SETS } from './openers';
+import { EARLY_START, SPECIAL_SETS } from './openers';
 import { NOTIFICATION_LIFETIME_MINUTES, TRAINING_MINUTES } from './service';
 
 /**
@@ -9,10 +9,10 @@ import { NOTIFICATION_LIFETIME_MINUTES, TRAINING_MINUTES } from './service';
  *   - DM me too: the expiry ping also goes to their DMs.
  *   - Early riser: 49-minute runs instead of 50, and their pings are cleared
  *     sooner (2 minutes instead of 3), to suit someone who is there on time.
- *   - Boosts: on by default. Off, no boost applies (a set's boost, the
- *     Early Riser boost) and a set boost's remaining runs are paused.
- *   - Special sets: each can be turned off; a set turned off never comes up.
- *     A set still locked for the trainer shows greyed out.
+ *   - Boosts: on by default. Off, no boost applies (a set's boost, early
+ *     start) and a set boost's remaining runs are paused.
+ *   - Special sets: each can be turned off, on its page of the Specials
+ *     list (`set:<id>` here); a set turned off never comes up.
  *
  * Shown only to the trainer, as buttons that flip each setting in place.
  */
@@ -71,17 +71,16 @@ export async function toggleSetting(guildId: string, discordUserId: string, key:
     return next;
 }
 
-/** A settings button: green and "On" when on, grey and "Off" when off, greyed out and "Locked" when locked. */
-function toggleButton(key: string, label: string, on: boolean, locked = false): ButtonBuilder {
+/** A settings button: green and "On" when on, grey and "Off" when off. */
+function toggleButton(key: string, label: string, on: boolean): ButtonBuilder {
     return new ButtonBuilder()
         .setCustomId(`${SETTINGS_PREFIX}${key}`)
-        .setLabel(`${label}: ${locked ? 'Locked' : on ? 'On' : 'Off'}`)
-        .setStyle(on && !locked ? ButtonStyle.Success : ButtonStyle.Secondary)
-        .setDisabled(locked);
+        .setLabel(`${label}: ${on ? 'On' : 'Off'}`)
+        .setStyle(on ? ButtonStyle.Success : ButtonStyle.Secondary);
 }
 
-/** The Settings screen: what each setting does, and a button to flip each. `lockedSets` are the sets still locked for the trainer. */
-export function settingsView(settings: UserSettings, lockedSets: readonly string[] = []) {
+/** The Settings screen: what each setting does, and a button to flip each. Special sets are turned on and off in the Specials list. */
+export function settingsView(settings: UserSettings) {
     const embed = new EmbedBuilder()
         .setColor(0xf2a87a)
         .setTitle('Your Trainer Timer settings')
@@ -89,20 +88,13 @@ export function settingsView(settings: UserSettings, lockedSets: readonly string
             [
                 `**DM Me Too**: the pings arrive here *and* in your DMs. Double efficiency!`,
                 `**Early Riser**: You get notified after ${EARLY_RISER_MINUTES} minutes. To encourage your punctuality, your pings clear after ${EARLY_RISER_NOTIFICATION_MINUTES} minutes instead of ${NOTIFICATION_LIFETIME_MINUTES}!`,
-                `**Boosts**: some specials give a boost, extra special chance for your next runs. Early risers who start their next run within ${EARLY_RISER_BOOST.windowMinutes} minutes of their ping get +${EARLY_RISER_BOOST.chance * 100}% on that run. Turn Boosts off to pause them.`,
-                `**Special sets**: turn a set off and its specials never come up for you. A locked set opens once you find its special.`,
+                `**Boosts**: some specials raise your special chance for a while. Start your next run within ${EARLY_START.windowMinutes} minutes of a ping (${EARLY_START.earlyRiserWindowMinutes} for early risers) for +${EARLY_START.chance * 100}% on it. Off pauses them.`,
+                `**Special sets**: turn them on or off in **Specials**.`,
                 '-# Changes apply from your next run.',
             ].join('\n'),
         );
     const rows: ActionRowBuilder<ButtonBuilder>[] = [
         new ActionRowBuilder<ButtonBuilder>().addComponents(toggleButton('dm', 'DM Me Too', settings.dmPing), toggleButton('early', 'Early Riser', settings.earlyRiser), toggleButton('boosts', 'Boosts', settings.boosts)),
     ];
-    for (let i = 0; i < SPECIAL_SETS.length && rows.length < 5; i += 5) {
-        rows.push(
-            new ActionRowBuilder<ButtonBuilder>().addComponents(
-                ...SPECIAL_SETS.slice(i, i + 5).map((set) => toggleButton(`set:${set.id}`, set.name, !settings.disabledSets.includes(set.id), lockedSets.includes(set.id))),
-            ),
-        );
-    }
     return { embeds: [embed], components: rows };
 }

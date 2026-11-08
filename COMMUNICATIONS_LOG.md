@@ -10,9 +10,13 @@ Decisions that changed project direction. Newest first.
   now in code.
 - Its opener (line 0) belongs to Set 1 and unlocks this set.
 - Specials are redesigned for it: locked sets (prerequisites), a Boosts
-  toggle, set boosts (Loves: +4% on the collab lines for 50 runs), the
-  Early Riser boost (+1% when the next run starts within 2 minutes; Early
-  Riser must be on), `{set_name}`, and every `{user}` filled.
+  toggle, set boosts (Loves: +4% on the collab lines for 50 runs), early
+  start for everyone (+1% when the next run starts within 3 minutes of the
+  ping, 4 for early risers), `{set_name}`, and every `{user}` filled.
+- The Specials list pages through sets with Back/Next, and each set's
+  On/Off lives on its page instead of in Settings.
+- Matikanetannhauser's special is reworded ("Wasshoi~ ... *tears up,
+  sniffles*, I'm okay"); her finds carry over.
 - `#SpecialCollab` means a collab line of the set; the 4% boost draws only
   on those.
 - Curren keeps her flirty lines; that is the character. #PillowPrincess

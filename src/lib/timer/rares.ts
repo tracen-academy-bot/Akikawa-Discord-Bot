@@ -1,4 +1,5 @@
-import { ActionRowBuilder, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
+import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
 import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener } from './openers';
 
@@ -44,80 +45,126 @@ export async function rareTally(guildId: string, discordUserId?: string): Promis
     });
 }
 
-/** What a trainer's own Specials list adds: their locked sets and their boosts. */
+/** What a trainer's own Specials pages add: their locks, sets turned off, and boosts. */
 export interface PersonalExtras {
     lockedSets: readonly string[];
+    disabledSets: readonly string[];
     boosts: readonly ActiveBoost[];
     /** False when the trainer turned Boosts off. */
     boostsOn: boolean;
 }
 
-/**
- * The `/timer specials` embed: per set, three columns (the special's name,
- * how many times it came up, who found it first, or when for a trainer's
- * own list), one row per special. A special nobody has had yet shows as
- * "???"; a set still locked for the trainer shows one "Locked" row. Names
- * are short, so the columns stay lined up. Numbers run on across sets, as
- * in the read menu.
- */
-export function raresEmbed(tally: RareTally[], personal = false, extras?: PersonalExtras): EmbedBuilder {
-    const found = tally.filter((t) => t.count > 0).length;
-    const total = tally.reduce((sum, t) => sum + t.count, 0);
-    const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
-    const embed = new EmbedBuilder()
-        .setColor(0xf2a87a)
-        .setTitle(personal ? `Your specials: ${found} of ${tally.length}` : `Specials found: ${found} of ${tally.length}`);
-    // Discord allows 25 fields: 3 per set, so up to 8 sets.
-    for (const set of SPECIAL_SETS.slice(0, 8)) {
-        const rows = tally.map((t, i) => ({ t, i })).filter(({ t }) => t.set === set.id);
-        if (rows.length === 0) continue;
-        const locked = personal && (extras?.lockedSets.includes(set.id) ?? false);
-        const names = locked
-            ? [`*Locked: find ${set.requires ?? 'its special'}*`]
-            : rows.map(({ t, i }) => `**${i + 1}.** ${t.count > 0 ? t.name : '???'}`);
-        const counts = locked ? ['—'] : rows.map(({ t }) => (t.count > 0 ? `**×${t.count}**` : '—'));
-        const firsts = locked
-            ? ['—']
-            : rows.map(({ t }) => (t.count > 0 && t.firstUserId && t.firstAt ? (personal ? when(t) : `<@${t.firstUserId}> ${when(t)}`) : '—'));
-        embed.addFields(
-            { name: set.name, value: names.join('\n').slice(0, 1024), inline: true },
-            { name: 'Times', value: counts.join('\n').slice(0, 1024), inline: true },
-            { name: personal ? 'First got' : 'First found by', value: firsts.join('\n').slice(0, 1024), inline: true },
-        );
-    }
-    const pings = `${total} special ping${total === 1 ? '' : 's'}`;
-    const footer = [
-        `${personal ? `${pings} for you so far` : `${pings} on the server so far`}. Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a special line.`,
-    ];
-    if (personal && extras) {
-        for (const b of extras.boosts) {
-            const set = SPECIAL_SETS.find((s) => s.id === b.setId);
-            const boost = set?.openers.find((o) => o.boost)?.boost;
-            if (!set || !boost) continue;
-            footer.push(`Boost: +${Math.round(boost.chance * 100)}% ${set.name} for ${b.runsLeft} more run${b.runsLeft === 1 ? '' : 's'}${extras.boostsOn ? '' : ' (paused: Boosts are off)'}.`);
-        }
-    }
-    return embed.setFooter({ text: footer.join('\n') });
-}
+/** Custom ID prefix of the Specials Back/Next buttons: `<prefix><mine|all>:<page>`. */
+export const SPECIALS_PAGE_PREFIX = 'timer:specials:page:';
+
+/** Custom ID prefix of the On/Off button on a trainer's Specials page: `<prefix><set id>`. */
+export const SPECIALS_SET_PREFIX = 'timer:specials:set:';
 
 /** The "Read a special" menu's custom ID; `index.ts` routes it to `handleSpecialRead`. */
 export const READ_MENU_ID = 'timer:specials:read';
 
 /**
- * A menu of the specials in `tally` that were found (a trainer's own tally:
- * those they unlocked), to read in full. Null when none are. Each option's
- * value is the special's place in `RARE_OPENERS`.
+ * One page of the Specials list: one set per page, with Back and Next.
+ *
+ *   - Three columns (the special's name, how many times it came up, who
+ *     found it first, or when for a trainer's own list), one row per
+ *     special, numbered within the set. A special not found yet is "???".
+ *   - On a trainer's own page (`extras` given): the set's On/Off button,
+ *     greyed out and "Locked" while the set is locked (its rows are then
+ *     hidden), and a menu to read the specials they found in this set.
+ *   - The footer has the ping count, the base chance, the trainer's boosts,
+ *     and the page number.
+ *
+ * `page` is clamped to the sets there are. Never shows a line's text.
  */
-export function readMenuRow(tally: RareTally[]): ActionRowBuilder<StringSelectMenuBuilder> | null {
-    const options = tally
-        .map((t, i) => ({ t, i }))
-        .filter(({ t }) => t.count > 0)
-        .slice(0, 25)
-        .map(({ t, i }) => ({ label: `${i + 1}. ${t.name}`.slice(0, 100), value: String(i) }));
-    if (options.length === 0) return null;
-    return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-        new StringSelectMenuBuilder().setCustomId(READ_MENU_ID).setPlaceholder('Read a special').addOptions(options),
+export function specialsView(tally: RareTally[], page: number, extras?: PersonalExtras) {
+    const personal = extras !== undefined;
+    const p = Math.max(0, Math.min(SPECIAL_SETS.length - 1, Number.isInteger(page) ? page : 0));
+    const set = SPECIAL_SETS[p]!;
+    const rows = tally.map((t, i) => ({ t, i })).filter(({ t }) => t.set === set.id);
+    const found = tally.filter((t) => t.count > 0).length;
+    const foundHere = rows.filter(({ t }) => t.count > 0).length;
+    const total = tally.reduce((sum, t) => sum + t.count, 0);
+    const locked = extras?.lockedSets.includes(set.id) ?? false;
+    const off = extras?.disabledSets.includes(set.id) ?? false;
+
+    const status = locked ? `\nLocked: find **${set.requires ?? 'its special'}** to open it.` : off ? '\nOff: these never come up for you.' : '';
+    const embed = new EmbedBuilder()
+        .setColor(0xf2a87a)
+        .setTitle(personal ? `Your specials: ${found} of ${tally.length}` : `Specials found: ${found} of ${tally.length}`)
+        .setDescription(`**${set.name}**: ${foundHere} of ${rows.length} found${status}`);
+    if (!locked) {
+        const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
+        const names = rows.map(({ t }, n) => `**${n + 1}.** ${t.count > 0 ? t.name : '???'}`);
+        const counts = rows.map(({ t }) => (t.count > 0 ? `**×${t.count}**` : '—'));
+        const firsts = rows.map(({ t }) => (t.count > 0 && t.firstUserId && t.firstAt ? (personal ? when(t) : `<@${t.firstUserId}> ${when(t)}`) : '—'));
+        embed.addFields(
+            { name: 'Special', value: names.join('\n').slice(0, 1024), inline: true },
+            { name: 'Times', value: counts.join('\n').slice(0, 1024), inline: true },
+            { name: personal ? 'First got' : 'First found by', value: firsts.join('\n').slice(0, 1024), inline: true },
+        );
+    }
+
+    const pings = `${total} special ping${total === 1 ? '' : 's'}`;
+    const footer = [`${personal ? `${pings} for you so far` : `${pings} on the server so far`}. Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a special line.`];
+    for (const b of extras?.boosts ?? []) {
+        const boostSet = SPECIAL_SETS.find((s) => s.id === b.setId);
+        const boost = boostSet?.openers.find((o) => o.boost)?.boost;
+        if (!boostSet || !boost) continue;
+        footer.push(`Boost: +${Math.round(boost.chance * 100)}% ${boostSet.name} for ${b.runsLeft} more run${b.runsLeft === 1 ? '' : 's'}${extras!.boostsOn ? '' : ' (paused: Boosts are off)'}.`);
+    }
+    footer.push(`Page ${p + 1} of ${SPECIAL_SETS.length}`);
+    embed.setFooter({ text: footer.join('\n') });
+
+    const mode = personal ? 'mine' : 'all';
+    const nav = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId(`${SPECIALS_PAGE_PREFIX}${mode}:${p - 1}`).setLabel('Back').setStyle(ButtonStyle.Secondary).setDisabled(p === 0),
     );
+    if (personal) {
+        nav.addComponents(
+            new ButtonBuilder()
+                .setCustomId(`${SPECIALS_SET_PREFIX}${set.id}`)
+                .setLabel(`${set.name}: ${locked ? 'Locked' : off ? 'Off' : 'On'}`)
+                .setStyle(!locked && !off ? ButtonStyle.Success : ButtonStyle.Secondary)
+                .setDisabled(locked),
+        );
+    }
+    nav.addComponents(
+        new ButtonBuilder()
+            .setCustomId(`${SPECIALS_PAGE_PREFIX}${mode}:${p + 1}`)
+            .setLabel('Next')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(p >= SPECIAL_SETS.length - 1),
+    );
+    const components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = [nav];
+    // Reading in full is for a trainer's own finds, a set's worth at a time.
+    const options = personal
+        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, i, n }) => ({ label: `${n + 1}. ${t.name}`.slice(0, 100), value: String(i) }))
+        : [];
+    if (options.length > 0) {
+        components.push(
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+                new StringSelectMenuBuilder().setCustomId(READ_MENU_ID).setPlaceholder(`Read a special from ${set.name}`).addOptions(options),
+            ),
+        );
+    }
+    return { embeds: [embed], components };
+}
+
+/** A trainer's own Specials page `page`, from the database. */
+export async function mySpecialsView(guildId: string, discordUserId: string, page: number) {
+    const [tally, lockedSets, boosts, settings] = await Promise.all([
+        rareTally(guildId, discordUserId),
+        lockedSetsFor(guildId, discordUserId),
+        activeBoosts(guildId, discordUserId),
+        getUserSettings(guildId, discordUserId),
+    ]);
+    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, boosts, boostsOn: settings.boosts });
+}
+
+/** The page of `setId` in the Specials list, or 0. */
+export function pageOfSet(setId: string): number {
+    return Math.max(0, SPECIAL_SETS.findIndex((s) => s.id === setId));
 }
 
 /**

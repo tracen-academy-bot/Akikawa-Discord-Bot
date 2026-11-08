@@ -1,7 +1,7 @@
 import type { StringSelectMenuInteraction } from 'discord.js';
 import { SETTINGS_PREFIX, getUserSettings, runMinutes, settingsView, toggleSetting } from '../lib/timer/userSettings';
-import { READ_MENU_ID, activeBoosts, lockedSetsFor, rareTally, raresEmbed, readMenuRow, readSpecial, specialEmbed } from '../lib/timer/rares';
-import { EARLY_RISER_BOOST } from '../lib/timer/openers';
+import { READ_MENU_ID, SPECIALS_PAGE_PREFIX, SPECIALS_SET_PREFIX, lockedSetsFor, mySpecialsView, pageOfSet, rareTally, readSpecial, specialEmbed, specialsView } from '../lib/timer/rares';
+import { EARLY_START } from '../lib/timer/openers';
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
@@ -204,7 +204,7 @@ async function handleSpecials(interaction: ChatInputCommandInteraction) {
         return;
     }
     const tally = await rareTally(interaction.guildId!);
-    await interaction.reply({ embeds: [raresEmbed(tally, false)], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+    await interaction.reply({ ...specialsView(tally, 0), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 /** Posts a fresh control panel. */
@@ -462,27 +462,44 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
     // A setting flipped on the Settings screen: redraw it in place.
     if (interaction.customId.startsWith(SETTINGS_PREFIX)) {
         const settings = await toggleSetting(guildId, interaction.user.id, interaction.customId.slice(SETTINGS_PREFIX.length));
-        await interaction.update(settingsView(settings, await lockedSetsFor(guildId, interaction.user.id)));
+        await interaction.update(settingsView(settings));
+        return;
+    }
+
+    // Back/Next in a Specials list: the trainer's own (`mine`), or the
+    // server's (`all`, Club Managers only, as for /timer specials).
+    if (interaction.customId.startsWith(SPECIALS_PAGE_PREFIX)) {
+        const [mode, page] = interaction.customId.slice(SPECIALS_PAGE_PREFIX.length).split(':');
+        if (mode === 'all') {
+            if (!isOfficer(interaction.member as GuildMember)) {
+                await interaction.reply({ content: 'Only Club Managers can see the whole server\'s specials.', flags: MessageFlags.Ephemeral });
+                return;
+            }
+            await interaction.update({ ...specialsView(await rareTally(guildId), Number(page)), allowedMentions: { parse: [] } });
+        } else {
+            await interaction.update({ ...(await mySpecialsView(guildId, interaction.user.id, Number(page))), allowedMentions: { parse: [] } });
+        }
+        return;
+    }
+
+    // A set's On/Off on the trainer's own Specials page. A locked set's
+    // button is disabled; a forged press on one changes nothing.
+    if (interaction.customId.startsWith(SPECIALS_SET_PREFIX)) {
+        const setId = interaction.customId.slice(SPECIALS_SET_PREFIX.length);
+        if (!(await lockedSetsFor(guildId, interaction.user.id)).includes(setId)) await toggleSetting(guildId, interaction.user.id, `set:${setId}`);
+        await interaction.update({ ...(await mySpecialsView(guildId, interaction.user.id, pageOfSet(setId))), allowedMentions: { parse: [] } });
         return;
     }
 
     switch (interaction.customId) {
         case BUTTON_SETTINGS: {
-            const [settings, locked] = await Promise.all([getUserSettings(guildId, interaction.user.id), lockedSetsFor(guildId, interaction.user.id)]);
-            await interaction.reply({ ...settingsView(settings, locked), flags: MessageFlags.Ephemeral });
+            await interaction.reply({ ...settingsView(await getUserSettings(guildId, interaction.user.id)), flags: MessageFlags.Ephemeral });
             break;
         }
 
         case BUTTON_SPECIALS: {
             // The same hidden list as /timer specials: your own finds only.
-            const [tally, lockedSets, boosts, settings] = await Promise.all([
-                rareTally(guildId, interaction.user.id),
-                lockedSetsFor(guildId, interaction.user.id),
-                activeBoosts(guildId, interaction.user.id),
-                getUserSettings(guildId, interaction.user.id),
-            ]);
-            const menu = readMenuRow(tally);
-            await interaction.reply({ embeds: [raresEmbed(tally, true, { lockedSets, boosts, boostsOn: settings.boosts })], components: menu ? [menu] : [], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+            await interaction.reply({ ...(await mySpecialsView(guildId, interaction.user.id, 0)), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
             break;
         }
 
@@ -501,7 +518,7 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
             const endsAt = `<t:${Math.floor(timer.expiresAt.getTime() / 1000)}:R>`;
             const early =
                 !wasReset && timer.earlyStart && settings.boosts
-                    ? `\n**Early start!** This run's ping has +${EARLY_RISER_BOOST.chance * 100}% special chance.`
+                    ? `\n**Early start!** This run's ping has +${EARLY_START.chance * 100}% special chance.`
                     : '';
             await interaction.reply({
                 content: wasReset

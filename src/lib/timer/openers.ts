@@ -64,7 +64,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         id: 'set1',
         name: 'Set 1',
         openers: [
-        { name: 'Matikanetannhauser', text: "Wassho~ *trips* Oooooow!...  ooh- My nose? It's fine, {user}! You're here now! Please come take a look at your trainee!" },
+        { name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
         { name: 'Overslept?!', text: '{user} zzzzzzzzz- OOOH AEUHHHH! Oh, right. Trainer, trainer, the timer!' },
         { name: 'Agnes Tachyon', text: '{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food! And then some guinea pigging activities too...' },
         { name: 'Mihono Bourbon', text: "{user} Master-san, I have been provided intel of your underling's completion. Please proceed at haste. I will provide chocolate afterwards." },
@@ -112,12 +112,13 @@ export const RARE_PING_OPENERS: readonly string[] = RARE_OPENERS.map((o) => o.te
 export const RARE_OPENER_CHANCE = 0.04;
 
 /**
- * The Early Riser boost: a trainer with Early Riser on who starts their next
- * run within `windowMinutes` of their last ping gets `chance` more special
- * chance on that run's ping. The window is how long an early riser's ping
- * stays up.
+ * Early start: a trainer who starts their next run within the window after
+ * their last ping gets `chance` more special chance on that run's ping. The
+ * window is `windowMinutes`, or `earlyRiserWindowMinutes` with Early Riser
+ * on: a minute more, to reward the trainer who chose to be on time. It
+ * leaves time to finish picking in game.
  */
-export const EARLY_RISER_BOOST = { chance: 0.01, windowMinutes: 2 } as const;
+export const EARLY_START = { chance: 0.01, windowMinutes: 3, earlyRiserWindowMinutes: 4 } as const;
 
 /**
  * Fills an opener for a trainer: every `{user}` becomes their mention, and

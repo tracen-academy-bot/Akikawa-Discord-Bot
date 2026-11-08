@@ -13,7 +13,7 @@ import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
 import { activeBoosts, chooseOpener, grantBoost, isRareOpener, lockedSetsFor, recordRareOpener, spendBoosts, type ExtraChance } from './rares';
-import { EARLY_RISER_BOOST, SPECIAL_SETS, boostPool, fillOpener, pickOpener, rarePoolFor } from './openers';
+import { EARLY_START, SPECIAL_SETS, boostPool, fillOpener, pickOpener, rarePoolFor } from './openers';
 import type { UserSettings } from './userSettings';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
@@ -90,8 +90,8 @@ export function buildPingContent(
  *
  *   - each set boost they hold, for a set they have on and unlocked: its
  *     chance, drawn from that set's lines with the boost's tag;
- *   - the Early Riser boost, when the run was an early start and Early Riser
- *     is still on: its chance, drawn from their usual special pool.
+ *   - early start, when the run was one: its chance, drawn from their usual
+ *     special pool.
  */
 export async function extraChances(
     guildId: string,
@@ -108,7 +108,7 @@ export async function extraChances(
         const boost = SPECIAL_SETS.find((s) => s.id === held.setId)?.openers.find((o) => o.boost)?.boost;
         if (boost) extras.push({ chance: boost.chance, pool: boostPool(held.setId, boost.tag) });
     }
-    if (earlyStart && settings.earlyRiser) extras.push({ chance: EARLY_RISER_BOOST.chance, pool });
+    if (earlyStart) extras.push({ chance: EARLY_START.chance, pool });
     return extras;
 }
 

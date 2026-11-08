@@ -17,11 +17,11 @@ Newest first. Each entry records what changed and, more importantly, why.
   with `tag`, never the granting line itself. Getting it again resets the
   count. Each ping with Boosts on spends one run; the granting ping's
   boost starts after it.
-- **Early Riser boost.** With Early Riser on, a new run started within 2
-  minutes of the trainer's last ping (scheduled end plus delivery lag, so
-  downtime does not cost it) is marked `TrainingTimer.earlyStart`. Its ping
-  gets +1% special chance from the usual pool. A reset keeps the mark. The
-  Start reply says so.
+- **Early start** (`EARLY_START`). A new run started soon after the
+  trainer's last ping (scheduled end plus delivery lag, so downtime does not
+  cost it) is marked `TrainingTimer.earlyStart`: within 3 minutes, or 4 with
+  Early Riser on. Its ping gets +1% special chance from the usual pool. A
+  reset keeps the mark. The Start reply says so.
 - **Boosts toggle** (`TimerUserSettings.boosts`, default on). Off: no boost
   applies and set boosts do not tick down.
 - **Odds add.** `chooseOpener` cuts the random range into one slice per
@@ -32,16 +32,24 @@ Newest first. Each entry records what changed and, more importantly, why.
   locked special never comes from an extra.
 - **Text fill.** `fillOpener` replaces every `{user}` (it was only the
   first) and `{set_name}`; the ping and the read view both use it.
-- **Specials list** is now per set (three fields per set, numbers running
-  on), with active boosts in the personal footer.
+- **Specials list is paged**, one set per page (`specialsView`): Back and
+  Next, numbers within the set, the trainer's boosts and the page number in
+  the footer. A trainer's own page also has the set's On/Off button
+  (disabled and "Locked" while locked, rows hidden) and a read menu for that
+  set's finds, so the 25-option menu limit is per set now. Managers' `/timer
+  specials` pages too (Back/Next re-check the role). Set toggles left the
+  Settings screen, which keeps DM Me Too, Early Riser and Boosts.
 - New set `online-sensations` (#OnlineSensations, 12 lines) and Set 1's
   13th line, "Curren Chan", which unlocks it. Text source:
   `docs/special-sets/online-sensations.md`.
-- Migration `20261108120000_add_special_boosts`.
-- Limits to know: the read menu holds 25 options and there are now exactly
-  25 specials, so the next set needs the menu split (e.g. per set). Finds are
-  keyed by the line's text, so editing a live special's text loses its finds
-  (and, for "Curren Chan", re-locks #OnlineSensations).
+- Matikanetannhauser's line reworded. Migration
+  `20261108130000_reword_matikane_special` moves her existing finds to the
+  new text (checked on a scratch database).
+- Migrations `20261108120000_add_special_boosts`,
+  `20261108130000_reword_matikane_special`.
+- Limit to know: finds are keyed by the line's text, so rewording a live
+  special needs a migration like Matikane's, or its finds are lost (and for
+  "Curren Chan", #OnlineSensations re-locks).
 
 ---
 
