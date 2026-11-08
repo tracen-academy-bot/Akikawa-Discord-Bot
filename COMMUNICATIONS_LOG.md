@@ -304,3 +304,9 @@ club fan tracker plus a self-hosted dashboard.
 
 - Staff: "just make the next run give Mambo guaranteed." Tylina's next timer ping is the
   Matikanetannhauser line; after that the lock lifts. Staff asked for auto-merge on green CI.
+
+## 2026-11-08: Rigil left Tracen
+
+- Plan: staff delete the Rigil role in Discord, after this change deploys; the bot then removes Member
+  from anyone left with no club role. No Tracen Applicant role (staff: "doesn't matter").
+- Staff to remove 1393416636136161340 from CLUB_ROLE_IDS and Rigil from tracked clubs if tracked.

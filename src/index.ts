@@ -14,7 +14,7 @@ import { startScheduler } from './lib/timer/scheduler';
 import { startFanScheduler } from './lib/fans/scheduler';
 import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
-import { syncMemberRole } from './lib/roleAssignment';
+import { handleClubRoleDeleted, syncMemberRole } from './lib/roleAssignment';
 import { connect } from './lib/startup';
 import { runMigrations } from './lib/migrate';
 import { handleSpecialRead, handleTimerButton, isSpecialReadMenu, isTimerButton } from './commands/timer';
@@ -111,6 +111,11 @@ client.on(Events.GuildMemberUpdate, (before, after) => {
     if (!before.partial && startedBoosting(before, after)) void thankBooster(after);
     // The Member role follows the club roles, whoever changed them.
     void syncMemberRole(after);
+});
+
+// A club role deleted (a club leaving): members it leaves with no club role lose Member.
+client.on(Events.GuildRoleDelete, (role) => {
+    void handleClubRoleDeleted(role);
 });
 
 client.on(Events.MessageCreate, (message) => {
