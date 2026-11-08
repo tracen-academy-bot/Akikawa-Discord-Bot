@@ -1,0 +1,212 @@
+{
+  "id": 1100,
+  "name_en": "Wonder Acute",
+  "name_jp": "ワンダーアキュート",
+  "kind": "uma",
+  "one_liner": "A grandmotherly, unhurried dirt racer who cooks, knits and soaks in hot springs, and never gives up.",
+  "personality": "Wonder Acute talks and acts like a kindly grandma: she feeds everyone pickles and pies, knits belly-warmers for her friends, loves period dramas, enka karaoke and baths, and fumbles with 'touch-panel' gadgets and trendy loanwords. Behind the slow pace is real grit; she likes hard training, trusts steady, patient effort and treats persistence as her weapon. She is quietly perceptive: she spoke up to her trainer first because the trainer looked so troubled.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also anata (あなた)",
+    "register": "gentle, elderly-sounding regional speech (じゃ, ～んよ, ～ねぇ, よろしゅう, ～かね); exact dialect unverified",
+    "tics": [
+      {
+        "jp": "ねぇ",
+        "romaji": "nee",
+        "meaning": "drawn-out softening sentence ending"
+      },
+      {
+        "jp": "じゃ",
+        "romaji": "ja",
+        "meaning": "regional/elderly copula 'it is'"
+      },
+      {
+        "jp": "～んよ",
+        "romaji": "-n yo",
+        "meaning": "regional explanatory ending (得意なんよ)"
+      },
+      {
+        "jp": "よぉ",
+        "romaji": "yoo",
+        "meaning": "stretched 'yo' ending"
+      },
+      {
+        "jp": "ぽりぽりさん",
+        "romaji": "poripori-san",
+        "meaning": "her cute name for crunchy pickles (daikon)"
+      },
+      {
+        "jp": "コツコツ",
+        "romaji": "kotsu-kotsu",
+        "meaning": "'steadily, bit by bit', her motto"
+      },
+      {
+        "jp": "気張って",
+        "romaji": "kibatte",
+        "meaning": "'let's put our backs into it'"
+      },
+      {
+        "jp": "どっこいしょ",
+        "romaji": "dokkoisho",
+        "meaning": "old-person grunt when getting up"
+      },
+      {
+        "jp": "はて",
+        "romaji": "hate",
+        "meaning": "'hmm, now then?' puzzled grandma interjection"
+      },
+      {
+        "jp": "ぽんぽん",
+        "romaji": "ponpon",
+        "meaning": "childish 'tummy'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Daikon in every form (pickles, decorative cuts, buri daikon); nukazuke",
+    "Baking pies, cookies, scones",
+    "Bead-work, knitting, patchwork (profile strength: beadwork)",
+    "Hot springs and baths; her 'Acute no yu' stage persona",
+    "Period dramas (jidaigeki), yokai stories, karaoke (her signature song 『あゝ、湯の花旅情』, voice_id 90013)",
+    "Her father's boxing classes; her mother's steady character",
+    "Hard training and patience"
+  ],
+  "weak_spots": [
+    "Trendy loanwords and high-tech gadgets (profile; event title たっちぱねるの罠！？)",
+    "Massage chairs: even the 'strongest' setting isn't enough for her (voice_id 91023)",
+    "Forgetfulness on off days (voice_id 20011)",
+    "As a child she hated hospitals (web: https://umamusu.wiki/Wonder_Acute, 'Secrets')"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Senior Division / high school (高等部)",
+    "birthday": "March 14 (3月14日)",
+    "height": "159cm",
+    "voice_actor": "Kanoko Sudo per umamusu.wiki (須藤叶希); romanisation unverified"
+  },
+  "relationships": [
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "Roommate and close friend who helps her with 'beep-boop' gadgets",
+      "evidence": "home scenes x8; mentions in voice x2 (voice_id 91016: トランさんは、ピコピコで困ってるあたしをいつも助けてくれるの); roommate per web: https://umamusu.wiki/Wonder_Acute"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "Close friend and rival; they cook together and plan a Tomakomai trip",
+      "evidence": "home scenes x5; mentions in voice x5 (voice_id 91002, 91017: タルマエちゃんとの苫小牧旅行、楽しみだよぉ)"
+    },
+    {
+      "id": 1098,
+      "name_en": "Copano Rickey",
+      "nature": "Close friend and rival who shares lucky menus and recipes",
+      "evidence": "home scenes x3; mentions in voice x6 (voice_id 90002, 91003, 91012, 10026)"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Rival and close friend (her character story title calls her 'the sand umadol rival')",
+      "evidence": "home scenes x3; chara story title ライバルは砂のウマドルさん; Smart Falcon mentions her x1 (mentioned_by); web: https://umamusu.wiki/Wonder_Acute ('Rival and close friend')"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "Friend she plans dorm skits with ('samurai musical')",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91001, 91018)"
+    },
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "Rival and friend",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Wonder_Acute"
+    },
+    {
+      "id": 1079,
+      "name_en": "Furioso",
+      "nature": "Rival and friend she helps feel at home",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Wonder_Acute"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "Classmate who taught her nail painting",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91029: コツを教えてくれたジョーダンちゃん); classmate per web: https://umamusu.wiki/Wonder_Acute"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "Classmate; both like the bitter part of saury",
+      "evidence": "mentions in voice x1 (voice_id 90018: ナカヤマちゃんと秋刀魚を食べたら苦いところが一番おいしいって); classmate per web: https://umamusu.wiki/Wonder_Acute"
+    },
+    {
+      "id": 1095,
+      "name_en": "Believe",
+      "nature": "Always finishes her pickles",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1084,
+      "name_en": "Tanino Gimlet",
+      "nature": "Praised her painting as 'chaotic freedom'",
+      "evidence": "mentions in voice x1 (voice_id 91020)"
+    },
+    {
+      "id": 9050,
+      "name_en": "Hoshina Kiyoko",
+      "nature": "NPC: proprietress (女将) of the Yukoma inn, the 'hot-spring goddess' of the onsen scenario (her profile); Acute sings the Yukoma onsen song (voice_id 90011)",
+      "evidence": "home scenes x1; NPC profile 9050 self_intro/tagline"
+    }
+  ],
+  "groups": [
+    "Dirt-racing friend circle with Copano Rickey, Hokko Tarumae and Smart Falcon (home scenes and voice mentions)",
+    "Tetra Mystics idol unit with Wonder Acute, Copano Rickey and Hokko Tarumae (web: https://umamusu.wiki/Wonder_Acute; not in the mdb; fourth member not confirmed)"
+  ],
+  "story_arc": {
+    "summary": "Acute reached out to a trainer who looked overwhelmed (voice_id 70001) and sets out on a long dirt campaign: Japan Dirt Derby, Sirius Stakes, Tokyo Daishoten, Kawasaki Kinen, Kashiwa Kinen, Teio Sho, JBC Classic and Champions Cup, with Smart Falcon as the 'sand idol' rival. Event titles (おばあちゃんよ、永遠なれ, しずみゆく夕日, 砂浜のラストらん, めでたしはまだ遠く) suggest a theme of a veteran who keeps running long past when others fade. The real Wonder Acute raced into old age and won the Teio Sho at eight (model knowledge, unverified).",
+    "source": "event titles and voice lines; web: https://umamusu.wiki/Wonder_Acute; model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "ワンダーアキュートじゃよぉ。\nコツコツやっていこうねぇ。",
+      "en": "It's Wonder Acute. Let's take it steady, bit by bit."
+    },
+    {
+      "voice_id": 2033,
+      "jp": "万全のコンディションじゃよ。\n大根のぽりぽりさん食べて、\n腹ごしらえもばっちりじゃ。",
+      "en": "In perfect condition. I had my daikon poripori-san, so my belly's all set too."
+    },
+    {
+      "voice_id": 20034,
+      "jp": "諦めないのは得意だからねぇ。\n勝ちを目指して、がんばるよぉ。",
+      "en": "Not giving up is my specialty, you see. I'll aim to win, so here goes."
+    },
+    {
+      "voice_id": 91016,
+      "jp": "トランさんは、ピコピコで困ってる\nあたしをいつも助けてくれるの。\n…本当に素直でいい子だよぉ。",
+      "en": "Tran-san always helps me when I'm stuck with the beep-boop gadgets. ...She's such an honest, good girl."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "ほっと癒されるのも、心がぽかぽか\nになるのも同じ…トレーナーさんは\nあたしの温泉なんだねぇ。",
+      "en": "Feeling soothed, feeling all warm in the heart... it's the same thing. Trainer-san, you're my hot spring, aren't you."
+    },
+    {
+      "voice_id": 90016,
+      "jp": "遠山桜を見ると、時代劇の名場面を\n思い出すね。『この桜吹雪、忘れた\nとは言わせないよぉ！』…ふふ♪",
+      "en": "Seeing Toyama cherry blossoms reminds me of that big period-drama scene. 'Don't you tell me you've forgotten these cherry blossoms!' ...Heehee."
+    }
+  ],
+  "timer_line_ideas": [
+    "Oh my, {user}, your independent run's all done, dear. Steady and patient, just as it should be. Come have a look, then rest a spell with some pickles.",
+    "Well now, {user}, the run's finished. You worked hard, didn't you? Go check it, then off to a nice hot bath. That's the secret to winning, you know."
+  ],
+  "data_gaps": [
+    "Exact dialect not identified in the data",
+    "Mention of Satono Diamond (x1) is a false match on ダイヤの編み目 (voice_id 10025); not listed",
+    "Roommate (Transcend) from web only",
+    "Voice actor 須藤叶希: umamusu.wiki gives 'Kanoko Sudo'; an earlier draft had 'Kanoki'; not in the mdb",
+    "Career story content beyond titles unknown"
+  ]
+}

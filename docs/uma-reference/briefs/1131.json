@@ -1,0 +1,174 @@
+{
+  "id": 1131,
+  "name_en": "Gran Alegria",
+  "name_jp": "グランアレグリア",
+  "kind": "uma",
+  "one_liner": "Hyper-cheerful self-declared future Mile Queen who measures everything in miles and lives by her \"MiRules\".",
+  "personality": "Bright, sporty and relentlessly upbeat, she runs her life on self-made \"MiRules\" (マイルール, a pun on \"my rule\"/\"mile\") and quantifies feelings in miles (\"happiness at 100 miles\"). Underneath the bubbliness she is proud and stubborn about proving milers are the strongest, and when off-form she gets quiet and blunt (\"You're not someone who needs to be told, are you?\"). She is open with her trainer, insists on sharing worries and complaints, and dreams of a \"three-division conquest\".",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also anata (あなた)",
+    "register": "Energetic polite (desu/masu with genki casual bursts), lots of exclamation; casual \"~yo/~zo\" toward rivals",
+    "tics": [
+      {
+        "jp": "マイルール",
+        "romaji": "mairuuru",
+        "meaning": "\"MiRule\" - her personal rules, pun on my rule / mile rule"
+      },
+      {
+        "jp": "おはマイルー",
+        "romaji": "oha-mairuu",
+        "meaning": "her \"good morning\" greeting (ohayou + mile)"
+      },
+      {
+        "jp": "100マイル",
+        "romaji": "hyaku mairu",
+        "meaning": "\"100 miles\" - unit for how strongly she feels something"
+      },
+      {
+        "jp": "なんマイル",
+        "romaji": "nan mairu",
+        "meaning": "\"how many miles?\""
+      },
+      {
+        "jp": "えへへ",
+        "romaji": "ehehe",
+        "meaning": "happy giggle"
+      },
+      {
+        "jp": "ぱんぱかぱーん",
+        "romaji": "panpakapaan",
+        "meaning": "fanfare sound effect"
+      },
+      {
+        "jp": "最強マイラー",
+        "romaji": "saikyou mairaa",
+        "meaning": "\"strongest miler\""
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "miles: mile races AND airline miles; flying (91000)",
+    "salads, especially the \"finishing salad\" after races and at day's end (90005, 2033)",
+    "soba and takoyaki (91010, 91011)",
+    "sports and swirling soft-serve neatly (profile)",
+    "handmade \"Oha-Mile\" patch (70015, 91008)",
+    "pedometer, go-kart videos (90001, 90002)",
+    "flower-bed care with Bouquet (91004)",
+    "spring mile season: Oka Sho, NHK Mile, Yasuda Kinen, Victoria Mile (90006)",
+    "her family's \"English Day\" (profile)"
+  ],
+  "weak_spots": [
+    "deep-sea fish, quiet places, hide-and-seek (profile)",
+    "gets instantly sleepy when her ears are massaged (profile)",
+    "finds dance class boring because she learns choreography at a glance (91005)",
+    "loses her spark when entered in races she isn't excited about (20021)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Junior High Division (中等部)",
+    "birthday": "January 24 (1月24日)",
+    "height": "160 cm (160cm)",
+    "voice_actor": "Hina Natsume (夏目妃菜)"
+  },
+  "relationships": [
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "Close friend; Gran watches her streams after homework (a MiRule)",
+      "evidence": "home scenes x5; voice_id 91003 (ラヴちゃんの配信を見るのは、宿題やってから！); Loves mentions her x4 (1132.json voice_id 91001, 91021)"
+    },
+    {
+      "id": 1133,
+      "name_en": "Chrono Genesis",
+      "nature": "Close friend and classmate; Chrono praised her build as mile-suited",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "Upperclass rival she admires but vows to beat at the mile",
+      "evidence": "voice_id 91001 (アイ先輩の走りは…でも、マイルではあたしが勝ちますよ); home scenes x1"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Friend; tends flower beds together",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91004)"
+    },
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "Friend; worked out a trick with her to avoid half-closed eyes in photos (squeeze eyes shut right before the shot)",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 400002: ダイヤさんと対策済みです！)"
+    },
+    {
+      "id": 1091,
+      "name_en": "Vivlos",
+      "nature": "Snowman, sled race and snowball buddy",
+      "evidence": "mentions in voice x1 (voice_id 90009)"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "Fellow miler and senior; Taiki is strict with her in training and hugs her, and has picked up her 'oha-mile' greeting",
+      "evidence": "home scenes x1; Taiki voice_id 91217 (同じマイラーですカラ！グランにはいつも、ビシバシ！) and 91221 (1010.json)"
+    },
+    {
+      "id": 1109,
+      "name_en": "Rhein Kraft",
+      "nature": "Shared home conversations; nature not stated",
+      "evidence": "home scenes x2"
+    }
+  ],
+  "groups": [
+    "Miho Dorm",
+    "Mile racers / \"mile comrades\" (マイル仲間, her own term, voice 91006)"
+  ],
+  "story_arc": {
+    "summary": "Aiming to be the true \"Mile Queen\", she goes from debut (\"Genius miler\") through the Asahi Hai FS, Oka Sho and an NHK Mile CS whose post-race title is \"Bewildered by a phantom\", then the Hanshin Cup, Takamatsunomiya Kinen (\"Vow of master and pupil\"), Yasuda Kinen (\"I'm the strongest!\"), Sprinters Stakes (\"Toward a three-division conquest\"), Tenno Sho (Autumn) and Mile CS. Her arc is about proving milers are the strongest and conquering sprint, mile and intermediate distances with her trainer.",
+    "source": "event titles; web check only gave minor details: https://umamusu.wiki/Gran_Alegria"
+  },
+  "timer_line_ideas": [
+    "Oha-miiile! {user}, your independent run is done! MiRule: always check results right away. Shall we? Excitement at 100 miles!",
+    "Trainer-san... I mean {user}! The run's finished! Hehe, how many miles was that? Let's go look, and then a finishing salad. That's a MiRule!"
+  ],
+  "data_gaps": [
+    "umamusu.wiki gives no full career story summary; arc is inferred from event titles.",
+    "No team/faction in source.",
+    "Sweep Tosho's 10 'mentions' of Gran are all false positives (グランマ = grandma); relationship removed.",
+    "NHK Mile 'setback' is inferred from the post-race title 幻に惑う ('Bewildered by a phantom'); outcome not confirmed."
+  ],
+  "sample_lines": [
+    {
+      "voice_id": 90000,
+      "jp": "おはマイルー！えへへ…これは宣言\nなんです。この挨拶が似合う、真の\nマイル女王にあたしはなるので！",
+      "en": "Oha-miiile! Hehe... it's a declaration. I'm going to be the true Mile Queen this greeting suits!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "不安や不満も必ず伝え合う！これも\nマイルール！だから言いますけど…\n信頼度100マイルですっ☆",
+      "en": "We always share our worries and complaints! That's a MiRule too! So I'll say it... my trust in you is at 100 miles!"
+    },
+    {
+      "voice_id": 91000,
+      "jp": "飛行機、大好きなんです！だって\n貯まりますから。――マイルが！\nふふっ、また乗る機会ないかな～♪",
+      "en": "I love airplanes! Because you rack them up. Miles, that is! Hehe, I wonder when I'll get to fly again~"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "アイ先輩の走りは、なんかもう\n圧巻！って感じで！…でも、マイル\nではあたしが勝ちますよ。絶対に☆",
+      "en": "Ai-senpai's running is just, like, overwhelming! ...But at the mile, I'll win. Absolutely."
+    },
+    {
+      "voice_id": 20022,
+      "jp": "…トレーナーさん。\n言わなきゃわからない人じゃ\nないですよね？",
+      "en": "...Trainer-san. You're not someone who has to be told, are you?"
+    },
+    {
+      "voice_id": 400006,
+      "jp": "…三階級制覇だってできる。\n超えたいものは、超えられる。\nあたしがあたしで、い続ける限り！",
+      "en": "...I can even conquer three divisions. What I want to surpass, I can surpass. As long as I keep being me!"
+    }
+  ]
+}

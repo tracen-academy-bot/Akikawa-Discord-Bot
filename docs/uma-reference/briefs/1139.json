@@ -1,0 +1,115 @@
+{
+  "id": 1139,
+  "name_en": "Casino Drive",
+  "name_jp": "カジノドライヴ",
+  "kind": "npc",
+  "one_liner": "Polished project leader who talks like a business consultant, recruiting trainers for a Breeders' Cup dream.",
+  "personality": "Composed, upbeat and businesslike: she frames everything as investments, partnerships and plans (self-intro: 'I await your courageous investment'). Her few lines are about planning race schedules carefully around a Breeders' Cup goal. Optimistic about reaching any summit if you just take the step.",
+  "speech": {
+    "first_person": "unknown",
+    "calls_trainer": "anata (貴方) - only in self-intro",
+    "register": "polite (desu/masu), corporate/business jargon",
+    "tics": [
+      {
+        "jp": "シナジー",
+        "romaji": "shinajii",
+        "meaning": "synergy (ともにシナジーを！ 'Synergy together!')"
+      },
+      {
+        "jp": "パートナーシップ、ですね。",
+        "romaji": "paatonaashippu, desu ne",
+        "meaning": "'A partnership, then.'"
+      },
+      {
+        "jp": "包括的業務提携です！",
+        "romaji": "houkatsuteki gyoumu teikei desu",
+        "meaning": "'A comprehensive business alliance!'"
+      },
+      {
+        "jp": "投資",
+        "romaji": "toushi",
+        "meaning": "investment (self-intro)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "business/project language (synergy, partnership, investment, plans)",
+    "Breeders' Cup (BC) races",
+    "summits / roadmaps to glory (support event 栄光へのロードマップ)",
+    "English phrases in event titles (You did it!, My Own Trail, Unwavering Drive)"
+  ],
+  "weak_spots": [
+    "unknown - no strengths/weaknesses in profile"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "March 7 (3月7日)",
+    "height": "unknown",
+    "voice_actor": "Manami (愛美)"
+  },
+  "relationships": [
+    {
+      "id": 1138,
+      "name_en": "Forever Young",
+      "nature": "fellow cast member, shares a home scene",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1140,
+      "name_en": "Marche Lorraine",
+      "nature": "fellow member of her DREAMS / Beyond Dreams cast",
+      "evidence": "home scenes x1; web: https://www.gamespark.jp/article/2026/02/23/163119.html"
+    },
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "fellow cast member, shares a home scene",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "DREAMS Breeders' Cup expedition project (leader) - scenario 'Beyond Dreams' (web, unverified details)"
+  ],
+  "story_arc": {
+    "summary": "Not a trainee; she is a scenario/support character. In the 'Beyond Dreams' scenario (set in America) she launches the Breeders' Cup expedition project 'DREAMS' and recruits trainers and Uma Musume who chase dreams, with a Breeders' Cup win as the goal. Her support events (e.g. 栄光へのロードマップ 'Roadmap to Glory', アメリカンAfter School!, You did it!) follow that project.",
+    "source": "web: https://www.gamespark.jp/article/2026/02/23/163119.html ; event titles ; web: https://automaton-media.com/articles/newsjp/20260128-412926/ (confirms Casino Drive founds the BC expedition project, team DREAMS)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "ともにシナジーを！",
+      "en": "Let's create synergy together!"
+    },
+    {
+      "voice_id": 23020,
+      "jp": "どのレースを目標にしますか？\nウマ娘の適性を考慮して\n決めましょうね！",
+      "en": "Which race shall we target? Let's decide with the Uma Musume's aptitudes in mind!"
+    },
+    {
+      "voice_id": 23022,
+      "jp": "目標のBCレースを前提に計画を\n立てます。慎重に決定しましょう。",
+      "en": "We'll build the plan around the target BC race. Let's decide carefully."
+    },
+    {
+      "voice_id": 70000,
+      "jp": "パートナーシップ、ですね。",
+      "en": "A partnership, then."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "包括的業務提携です！",
+      "en": "A comprehensive business alliance!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Project update, {user}: your Independent Training run has reached completion! Shall we review the results together and plan the next phase? Synergy, after all.",
+    "The run is finished, {user}. A splendid return on your investment of time! Let's look at the numbers carefully before we set the next goal."
+  ],
+  "data_gaps": [
+    "Only 6 voice lines; no first-person pronoun or trainer address in lines (anata only in self-intro)",
+    "No dorm, grade, height, strengths/weaknesses in profile",
+    "Not playable; chara_category 1 (likely scenario/staff-type character)",
+    "Scenario role taken from a single web preview article"
+  ]
+}

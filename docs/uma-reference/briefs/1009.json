@@ -1,0 +1,178 @@
+{
+  "id": 1009,
+  "name_en": "Daiwa Scarlet",
+  "name_jp": "ダイワスカーレット",
+  "kind": "uma",
+  "one_liner": "Prideful honour student who must be number one at everything; sweet in public, tsundere in private.",
+  "personality": "Scarlet is driven and perfectionist: her whole identity is being 'number one' (1番), and she refuses to compromise in races, study or housework. She keeps up a polite honour-student image in public but is bossy and tsundere with her trainer, denying any softness right after showing it. She deeply loves and misses her hard-working mother, and her rivalry with Vodka annoys and fascinates her.",
+  "speech": {
+    "first_person": "atashi (アタシ)",
+    "calls_trainer": "Anta (アンタ) / Trainer (トレーナー); 'Trainer-san (トレーナーさん)' only in her public good-girl act (voice 90002)",
+    "register": "casual feminine with tsundere bossiness (～わよ, ～なさい, ～んだから); polite desu/masu in public",
+    "tics": [
+      {
+        "jp": "1番",
+        "romaji": "ichiban",
+        "meaning": "'number one' - her constant goal"
+      },
+      {
+        "jp": "～んだから",
+        "romaji": "~ndakara",
+        "meaning": "emphatic 'I'm telling you!' ending"
+      },
+      {
+        "jp": "～なさい",
+        "romaji": "~nasai",
+        "meaning": "bossy imperative ('watch me', 'get ready')"
+      },
+      {
+        "jp": "ふふん",
+        "romaji": "fufun",
+        "meaning": "smug 'hmph~' (voice 20023, 90019); the plain 'ふんっ！' appears only in her profile self-intro"
+      },
+      {
+        "jp": "別に",
+        "romaji": "betsu ni",
+        "meaning": "'it's not like...' tsundere denial"
+      },
+      {
+        "jp": "アイツ",
+        "romaji": "aitsu",
+        "meaning": "'that girl' - usually Vodka"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "being number one; red pen for goals, blue pen for reflection (trivia)",
+    "studying and housework (profile strengths); baking for others",
+    "her mother (Mama): flowers, tiara gift, Christmas memories",
+    "white-and-blue clothes with frills",
+    "early morning training; bananas for nutrition",
+    "aroma candles"
+  ],
+  "weak_spots": [
+    "compromising (profile weakness)",
+    "admitting she's tired or cold (voice 20001, 91015)",
+    "her true feelings leak through her ears (profile)",
+    "fear of disappointing her mother (voice 400002)",
+    "her twin tails needing long care (event title がっかりツインテール; voice 90011)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School division (中等部)",
+    "birthday": "May 13 (5月13日)",
+    "height": "163 cm (163cm)",
+    "voice_actor": "Chisaki Kimura (木村千咲)"
+  },
+  "relationships": [
+    {
+      "id": 1008,
+      "name_en": "Vodka",
+      "nature": "rival and roommate; annoying yet impossible to ignore",
+      "evidence": "home scenes x8; mentioned_by x4; mentions in voice x3 (voice_id 91011: ウオッカがやめろって言うのよね; 91029; 10027); event titles アイツの存在, 1番のライバルとして, 天皇賞（秋）の後に・いつもの二人"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "kind senior (to Scarlet) who shares tea; role model per wiki",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 91002: タキオンさんって優しいわよね。; 91022; 1026); role model per web: https://umamusu.wiki/Daiwa_Scarlet"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "senior she admires",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91000: エアグルーヴ先輩って/ちょっとおっかないけど; 91017)"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "friend",
+      "evidence": "home scenes x4; web: https://umamusu.wiki/Daiwa_Scarlet"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "friend/classmate",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91024)"
+    },
+    {
+      "id": 1039,
+      "name_en": "Kawakami Princess",
+      "nature": "home-screen partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "friend who tutors her (wiki)",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Daiwa_Scarlet"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "friend she toasts with",
+      "evidence": "mentions in voice x1 (voice_id 90014: テイオーたちと乾杯しようっと！)"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "senior who teaches her taping",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "senior who held a door for her",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    }
+  ],
+  "groups": [
+    "Team Spica (anime only)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Scarlet aims for the Triple Tiara (Oka Sho, Oaks, Shuka Sho) while Vodka goes to the Derby; after the Oaks she feels hollow and the 'empty room' without her rival weighs on her. Their rivalry builds through the Queen Elizabeth Cup, Osaka Hai and a showdown at the Tenno Sho (Autumn), and she finishes by proving herself the number-one Umamusume at the Arima Kinen.",
+    "source": "event titles (オークスの後に・空っぽ, 空っぽの部屋, 大阪杯の後に・そして決着へ, 天皇賞（秋）の後に・いつもの二人, 有馬記念の後に・“1番”のウマ娘！) + web: https://umamusu.wiki/Daiwa_Scarlet (default goal Oaks) + model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10001,
+      "jp": "アタシは1番のウマ娘になる。\nアンタも1番のトレーナーになって\nしっかりついてきなさい！",
+      "en": "I'm going to be the number-one Umamusume. So you become the number-one trainer and keep up with me!"
+    },
+    {
+      "voice_id": 90002,
+      "jp": "トレーナーさん、こんにちは♪\n…ちょっと、調子合わせなさいよ！\n他の子が見てるでしょっ！",
+      "en": "Hello, Trainer-san! ...Hey, play along! The other girls are watching!"
+    },
+    {
+      "voice_id": 10005,
+      "jp": "あげる。バレンタインのチョコ。\nい、言っとくけど義理だから！\n…まぁ、ちょっとだけ特別だけど。",
+      "en": "Here. Valentine's chocolate. J-just so you know, it's obligation chocolate! ...Well, maybe a little special."
+    },
+    {
+      "voice_id": 90005,
+      "jp": "1番遅く寝て、1番早く起きる。\n頂点を目指すんだもの、当然よ！\n…無理なんてしてないってば！",
+      "en": "Last to bed, first to rise. I'm aiming for the top, so of course! ...I'm NOT overdoing it!"
+    },
+    {
+      "voice_id": 20037,
+      "jp": "ただでは終わらないわよ…！\n当たって砕けろ！\nついでに相手も砕いてやるわ！",
+      "en": "I won't go down quietly...! Go for broke! And break my opponents while I'm at it!"
+    },
+    {
+      "voice_id": 93005,
+      "jp": "ありがとう。…今日くらいは、ね。",
+      "en": "Thank you. ...Just for today, okay?"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}! Your independent run is over. Check the results right now - number one doesn't wait around! ...I-it's not like I was timing it for you.",
+    "Hmph. The training's finished, {user}. Don't keep me waiting. Get over here and look, and it'd better be number-one quality!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice false matches: Seeking the Pearl x1 is 'パール' (a hair pearl, voice 91029); Mejiro Ryan x1 not found in any line",
+    "Winning Ticket appears as 'チケゾーさん' in voice 91027 but is not in mentions_in_voice",
+    "Story arc beyond titles is model knowledge, unverified"
+  ]
+}

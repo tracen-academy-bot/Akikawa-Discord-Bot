@@ -1,0 +1,160 @@
+{
+  "id": 1143,
+  "name_en": "Victoire Pisa",
+  "name_jp": "ヴィクトワールピサ",
+  "kind": "uma",
+  "one_liner": "Gentle 'angel' who wants to erase loneliness by linking everyone in a ring of hope.",
+  "personality": "Soft-spoken, warm and deeply caring: she greets lonely people, talks to strangers on trains, and prays with her turquoise stone that every runner finishes safely. Her worldview is about connection - rings, threads, knots, bonds - to the point that unplugged outlets and lone socks look 'lonely' to her. Calm and composed, she says she is tougher than she looks, and enjoys art museums, math study groups and quiet gestures.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (あなた)",
+    "register": "polite / soft keigo (〜ます, 〜でしょうか, まいりましょう)",
+    "tics": [
+      {
+        "jp": "繋ぐ / 繋げましょう",
+        "romaji": "tsunagu / tsunagemashou",
+        "meaning": "to connect/link - her core word ('Let's connect!')"
+      },
+      {
+        "jp": "希望の輪",
+        "romaji": "kibou no wa",
+        "meaning": "'ring/circle of hope'"
+      },
+      {
+        "jp": "笑顔の輪",
+        "romaji": "egao no wa",
+        "meaning": "'ring of smiles'"
+      },
+      {
+        "jp": "ふふ / ふふっ",
+        "romaji": "fufu",
+        "meaning": "soft giggle"
+      },
+      {
+        "jp": "〜ますように",
+        "romaji": "-masu you ni",
+        "meaning": "'May it be that...' - prayer-like endings"
+      },
+      {
+        "jp": "〜さん",
+        "romaji": "-san",
+        "meaning": "addresses friends with -san (アースさん, ローズさん)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "rings, threads, knots and bonds",
+    "turquoise (hair tie, prayer stone)",
+    "trumpet (strength)",
+    "dividing sweets equally (strength)",
+    "art museums, paintings of hope and light, art books before bed",
+    "math and study groups",
+    "mackerel sandwiches (鯖サンド), kebabs, ayran, dried figs, tea",
+    "knitting",
+    "simple clothes",
+    "talking to strangers, animals (cats, sparrows)"
+  ],
+  "weak_spots": [
+    "solving puzzle rings (知恵の輪)",
+    "spacing out - tying her shoelaces oddly when unwell",
+    "lonely things (unplugged outlets, single socks) tug at her heart"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 31 (3月31日)",
+    "height": "161 cm",
+    "voice_actor": "Hana Shimano (嶋野花)"
+  },
+  "relationships": [
+    {
+      "id": 1102,
+      "name_en": "Sounds of Earth",
+      "nature": "close friend; music partner - concerts, tail care and humming together",
+      "evidence": "mentions in voice x3 (voice_id 91000: アースさんの音楽は、いつも胸が弾むんです); home scenes x2"
+    },
+    {
+      "id": 1144,
+      "name_en": "Rose Kingdom",
+      "nature": "friend; Pisa plans to invite her to a kebab stall, and Rose keeps relying on Pisa to chase bugs out",
+      "evidence": "home scenes x3; voice_id 90003: ローズさんをケバブの屋台にお誘いしようかと; Rose voice 91000"
+    },
+    {
+      "id": 1145,
+      "name_en": "Rulership",
+      "nature": "board-game friend; Rulership finds her draw luck 'angelic'",
+      "evidence": "home scenes x2; voice_id 91010; Rulership voice 91001, 91011, 10013"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "baked Lebkuchen together, chatting about foreign sweets",
+      "evidence": "home scenes x2; voice_id 10008"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "made Valentine chocolate together",
+      "evidence": "home scenes x1; voice_id 10004: トランさん、ブエナさんと一緒にチョコを作りました"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "made Valentine chocolate together",
+      "evidence": "home scenes x1; voice_id 10004"
+    },
+    {
+      "id": 1105,
+      "name_en": "Neo Universe",
+      "nature": "made her a jewel-like birthday cake",
+      "evidence": "home scenes x1; voice_id 10013: ユニヴァースさんたちが、誕生会に宝石を模したケーキをくださって"
+    }
+  ],
+  "groups": [],
+  "story_arc": {
+    "summary": "Playable from March 2026. Her chapters ('Nestling close to pain', 'Wiping away loneliness', 'Hearts, connected') and events follow her mission to end loneliness. Career goals include Hopeful S, Satsuki Sho, Japan Derby, Nakayama Kinen, Japan Cup and Arima Kinen; titles like 塗りつぶされた空 ('the blacked-out sky') and 8000kmの彼方へ ('8000 km away') echo her namesake's 2011 Dubai World Cup win just after the Great East Japan Earthquake, and the game warns her events contain earthquake disaster scenes. Endings: a ring of hope linking people.",
+    "source": "event titles; web: https://dengekionline.com/article/202603/69211 (release + earthquake content warning); Dubai World Cup parallel is general knowledge (unverified in-game)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "繋げましょう、心を！",
+      "en": "Let's connect our hearts!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "希望はどんなときも、あなたのすぐそばに。\nさあ、繋ぎましょう。希望の、大きな“輪”を――！",
+      "en": "Hope is always right beside you. Now, let's link it - a great 'ring' of hope!"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "靴下は、いつもクリップで留めて\nからしまいます。片方だけになって\nしまっては、かわいそうですから…",
+      "en": "I always clip my socks together before putting them away. It would be sad if one were left all alone..."
+    },
+    {
+      "voice_id": 92002,
+      "jp": "どんなトレーニングでも\n大丈夫ですよ。\nこう見えて私、タフですので。",
+      "en": "Any training is fine. I may not look it, but I'm tough."
+    },
+    {
+      "voice_id": 70000,
+      "jp": "独りで無理しちゃ、ダメですよ？",
+      "en": "Don't push yourself too hard alone, okay?"
+    },
+    {
+      "voice_id": 10015,
+      "jp": "お知らせが届いていますよ。\nよろしければ、私も隣で拝見して\n構いませんか？",
+      "en": "A notice has arrived. If it's all right, may I look at it beside you?"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your Independent Training run has finished. Shall we look at the results together? Fufu... may this effort link to your next hope.",
+    "The run is complete, {user}. Please don't review it all alone - may I sit beside you while we look? Let's connect it to tomorrow."
+  ],
+  "data_gaps": [
+    "Story arc from event titles plus release coverage; dialogue not verified",
+    "mentions_in_voice for Manhattan Cafe is a false positive (カフェテリア) and was dropped",
+    "Roommate unknown",
+    "No group/faction affiliation found in data"
+  ]
+}

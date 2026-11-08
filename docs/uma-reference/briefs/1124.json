@@ -1,0 +1,199 @@
+{
+  "id": 1124,
+  "name_en": "Bubble Gum Fellow",
+  "name_jp": "バブルガムフェロー",
+  "kind": "uma",
+  "one_liner": "Upbeat, gum-popping spearhead of the 'Four Heavenly Kings' who makes formal 'declarations' and always wants to be first.",
+  "personality": "Bubble Gum Fellow is breezy, confident and sporty. She loves being first to class, first with New Year greetings and first to try the new cafeteria menu. She hypes herself up by announcing 'declarations' in quotation marks. She is generous and well-off (family villa, ballroom dance, golf, winter sports), adores sweet things, fluffy animals and anything 'kawaii', and is a mature, caring voice to the trainer. When she warns against overwork, she says that recklessness is not the same as the courage to charge in. When she is off form her confidence drains away: her nose gets blocked, she runs out of gum, and she can't bring herself to declare anything.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also 貴方 (anata)",
+    "register": "Casual, friendly and slightly boyish (〜だよ, 〜だね, 〜さ, 〜じゃないか, よーし), with a cheerful ♪ lilt",
+    "tics": [
+      {
+        "jp": "宣言する",
+        "romaji": "sengen suru",
+        "meaning": "'I declare': she announces her goals in 『』 quotation marks"
+      },
+      {
+        "jp": "切り込み隊長",
+        "romaji": "kirikomi taichou",
+        "meaning": "'spearhead / vanguard captain', her self-image"
+      },
+      {
+        "jp": "切り開く",
+        "romaji": "kirihiraku",
+        "meaning": "'cut open (a path)'"
+      },
+      {
+        "jp": "ハジけ",
+        "romaji": "hajike(ru)",
+        "meaning": "'pop / burst', as in bubble gum, also 'let loose'"
+      },
+      {
+        "jp": "膨らま",
+        "romaji": "fukuramaseru",
+        "meaning": "'inflate': dreams to be blown up bigger, like a gum bubble"
+      },
+      {
+        "jp": "1番乗り",
+        "romaji": "ichiban nori",
+        "meaning": "'first one there'"
+      },
+      {
+        "jp": "カワイイ",
+        "romaji": "kawaii",
+        "meaning": "'cute', said gushingly"
+      },
+      {
+        "jp": "爆風",
+        "romaji": "bakufuu",
+        "meaning": "'blast wind': she wants to cause a blast/whirlwind in racing"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Bubble gum: always stocked in her waist pouch; mint gum for drowsiness; blows huge bubbles and pops them",
+    "Balloon art (squirrels, rabbits, toy poodles) and a cappella Western music (profile strengths)",
+    "Sweets and patisserie: strawberry snacks, Montblanc, afternoon tea, matcha ordered from Kyoto; her mother sends new sweets from the confectionery company she works at",
+    "Fireworks: she ordered custom fireworks for the trainer's birthday",
+    "Being first; early mornings; opening the classroom windows first thing (trivia)",
+    "Blue and yellow; pastel tail accessories",
+    "Fluffy creatures and 'yume-kawa' things",
+    "Sport and travel: tennis, golf, skiing and skating, Oceania holidays, a summer villa in the highlands",
+    "Childhood friends she studies English with and plans a pineapple-and-coconut yami-nabe with",
+    "Toothbrushing and nasal strips (health conscious)"
+  ],
+  "weak_spots": [
+    "Hamsters, which make her sneeze (profile weakness; voice_id 91020)",
+    "Spicy snacks, which hurt her tongue",
+    "Blocked nose / dusty rooms; her nose clogs when she is in bad form",
+    "Running out of gum",
+    "Cavities (she would hate having to give up sweets)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 11 (4月11日)",
+    "height": "166 cm (166cm)",
+    "voice_actor": "Sayaka Kamitani (神谷早矢佳) per umamusu.wiki; reading not confirmed by game data"
+  },
+  "relationships": [
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Rival and friend she studies with before tests and chats with at the flower beds before morning training. Air Groove treated her normally at school after 'the hospital-room incident' (per the web, Air Groove visited her in hospital after her injury), and Bubble wants to catch up with her",
+      "evidence": "home scenes x5; mentions in voice x3 (voice_id 91000 study; 90010 flowerbed; 400008: 病室での一件の後もエアグルーヴは学園では普通に接してくれたんだ); top affinity 30; hospital visit per web: https://umamusu.wiki/Bubble_Gum_Fellow"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "Roommate (per web). Bubble plans to make her coffee when she gets back from late patrols; Fenomeno says she sorts out stalled cases by talking with Bubble (over gum) and that Bubble's 'magic hands' tame her curly hair",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 90014: フェノーメノ、こんな時間まで見回りしているみたい); mentioned by Fenomeno x2 (Fenomeno's voice_id 91002, 91019); roommate per web: https://umamusu.wiki/Bubble_Gum_Fellow"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "Appears together in home conversations; nature unknown",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1043,
+      "name_en": "Shinko Windy",
+      "nature": "Appears together in home conversations; nature unknown",
+      "evidence": "home scenes x2"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "Friend she deeply admires (per the web, because Laurel also came back from a classic-year injury to win a G1); brings her French macarons and teaches her French",
+      "evidence": "mentions in voice x2 (voice_id 91002, 91018: ローレルからフランス語を教わっているんだ); web: https://umamusu.wiki/Bubble_Gum_Fellow"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "Calls her by first name; relates to her urge to run at dawn",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 90009)"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "Appreciates how quick on the uptake she is",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91003)"
+    },
+    {
+      "id": 1055,
+      "name_en": "Marvelous Sunday",
+      "nature": "Finds her 'yume-kawa' and wants to hug her",
+      "evidence": "mentions in voice x1 (voice_id 91001)"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "Admires her energy when hunting new ramen shops",
+      "evidence": "mentions in voice x1 (voice_id 91016)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Admires her follow-through as a manager",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": null,
+      "name_en": "Waltz of Shadow (NPC)",
+      "nature": "Fellow member of the 'Four Heavenly Kings' (based on Dance in the Dark, per web); in the career story she suffers an injury that ends her racing, which hits Bubble before the Japan Cup",
+      "evidence": "web: https://umamusu.wiki/Bubble_Gum_Fellow"
+    }
+  ],
+  "groups": [
+    "'Four Heavenly Kings' (四天王): with the NPCs Waltz of Shadow, Sol Lapis and Holy Cure (names per web: https://umamusu.wiki/Bubble_Gum_Fellow). Whether her 'childhood friends' are the same group is unverified",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "Bubble Gum Fellow bursts in as the self-declared spearhead of the 'Four Heavenly Kings' (event 'その名は四天王'), aiming to start a whirlwind in racing with her trainer. In the career she can run the Satsuki Sho and the Derby (events 'Victory as promised', 'The best race'), although the real horse missed them through injury. A shadow falls over the group ('重なる影', '暗雲'): per the web, her friend Waltz of Shadow retires injured and Bubble is shaken before the Japan Cup. She recovers ('何度でも', '消えない炎') and proves herself in the Tenno Sho (Autumn) against rivals like Air Groove. The real horse won the 1996 Tenno Sho (Autumn) as a three-year-old (web).",
+    "source": "event titles; web: https://umamusu.wiki/Bubble_Gum_Fellow"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20024,
+      "jp": "トレーナーさん、宣言するよ。\n『私は、絶対に勝ってくる！』\n信じて見守っていて。",
+      "en": "Trainer-san, I declare it: 'I am absolutely coming back with a win!' Believe in me and watch."
+    },
+    {
+      "voice_id": 10000,
+      "jp": "新人だからとか関係ないよ。\nチャンスがあったら踏み込む。\n夢は、大きく膨らませてこそだ！",
+      "en": "Being a rookie doesn't matter. If there's a chance, you charge in. Dreams are meant to be blown up big!"
+    },
+    {
+      "voice_id": 20010,
+      "jp": "ううーん、ガム、ガム…、\nあぁ切らしてた…はあぁ～～…。",
+      "en": "Uuuh, gum, gum... ah, I'm out... haaaah..."
+    },
+    {
+      "voice_id": 20021,
+      "jp": "トレーナーさん、\n焦って無茶するのは、\n切り込む勇気とは別だよ。",
+      "en": "Trainer-san, rushing into something reckless isn't the same as the courage to charge in."
+    },
+    {
+      "voice_id": 10003,
+      "jp": "あけましておめでとう！…って、\n1番乗りで言えたかな？貴方に\n最初に言うのは私がいいんだ。",
+      "en": "Happy New Year! ...Did I manage to say it first? I want to be the first one to say it to you."
+    },
+    {
+      "voice_id": 91020,
+      "jp": "ふわふわな生き物はどれも大好き！\nただ、ハムスターだけはどうしても\nくしゃみが出ちゃうんだよね…。",
+      "en": "I love every fluffy creature! Only hamsters, no matter what, make me sneeze..."
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer-san, I declare: 'Your independent run is done!' Was I first to tell you? Come on {user}, let's check it and blow that dream up bigger!",
+    "Pop! That's the sound of your training run finishing, {user}. The spearhead says no hesitating, check it first thing! Want some mint gum while you look?"
+  ],
+  "data_gaps": [
+    "Voice actor reading: umamusu.wiki gives 'Sayaka Kamitani' (神谷 could also be read Kamiya); not confirmed from an official source",
+    "Extracted mention data counts Manhattan Cafe x3 and Daring Heart x1, but these are false positives ('カフェ' = cafe/cafeteria, 'ハート型' = heart-shaped) and were excluded",
+    "Names of the other 'Four Heavenly Kings' and their link to her 'childhood friends' come only from the web",
+    "No dialogue for the training events; the arc relies on titles plus the wiki"
+  ]
+}

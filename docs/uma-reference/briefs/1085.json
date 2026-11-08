@@ -1,0 +1,168 @@
+{
+  "id": 1085,
+  "name_en": "Daiichi Ruby",
+  "name_jp": "ダイイチルビー",
+  "kind": "uma",
+  "one_liner": "Tiny, icy heiress of the 'Illustrious Family' who treats victory as duty and lives by 'Be elegant. Be supreme.'",
+  "personality": "Formal, cool and exacting, she sees everything through her family's code and her own duty (責務), and expects her trainer to meet the same standard, sometimes bluntly ('Do you even realise?'). She is literal and baffled by casual fun (Helios's invitations, Santa, Valentine's), yet quietly courteous: she sends gifts, thanks people for their consideration, and respects friends like Bamboo Memory and K.S. Miracle. Beneath the calm is a hidden 'blue flame' of passion and a longing to match her mother and grandmother.",
+  "speech": {
+    "first_person": "watashi/watakushi (私; reading not given in text)",
+    "calls_trainer": "anata (貴方, formal kanji)",
+    "register": "very formal keigo / ojousama (ございます, 存じます, くださいませ, 参ります), clipped and businesslike",
+    "tics": [
+      {
+        "jp": "華麗であれ。至上であれ。",
+        "romaji": "karei de are. shijou de are.",
+        "meaning": "'Be elegant. Be supreme.' - her family's creed, continued 常に最たる輝きを ('always the utmost brilliance')"
+      },
+      {
+        "jp": "責務",
+        "romaji": "sekimu",
+        "meaning": "'duty/responsibility' - her most frequent word (己の責務を果たす)"
+      },
+      {
+        "jp": "一族",
+        "romaji": "ichizoku",
+        "meaning": "'the family/clan' (我が華麗なる一族)"
+      },
+      {
+        "jp": "背を丸めず",
+        "romaji": "se wo marumezu",
+        "meaning": "'without hunching' - posture as dignity; also 背筋を伸ばし"
+      },
+      {
+        "jp": "参ります",
+        "romaji": "mairimasu",
+        "meaning": "humble 'I will go / here I come'"
+      },
+      {
+        "jp": "かと",
+        "romaji": "...ka to",
+        "meaning": "clipped formal ending '(I believe it is) ...' e.g. 当然の結果かと。"
+      },
+      {
+        "jp": "お母様",
+        "romaji": "okaasama",
+        "meaning": "how she refers to her mother; also おばあ様, お父様"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "fountain pens and chess (profile strengths)",
+    "her family's code, recited before bed and before races",
+    "rubies and the colour deep red; the 'blue flame' (Flowing Blue card)",
+    "scorpion fire / Antares imagery (story title アンタレス)",
+    "music and dance; her mother's dancing",
+    "her mansion library; languages with an online tutor",
+    "her clever dog Sapphy (サフィー)",
+    "parasol from her mother; never a wrinkle in her clothes (trivia)"
+  ],
+  "weak_spots": [
+    "sunshower rain and ill-fitting clothes (profile weaknesses)",
+    "casual, spontaneous invitations (from Helios) she doesn't understand",
+    "birthday parties that aren't social functions ('unnecessary')",
+    "emotional swings she finds 'bothersome' (20009)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 15 (4月15日)",
+    "height": "141 cm (141cm)",
+    "voice_actor": "Karin Isobe (礒部花凜)"
+  },
+  "relationships": [
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "persistent admirer/rival whose invitations she keeps declining but whose passion she acknowledges",
+      "evidence": "home scenes x5; mentions in voice x5 (voice_id 91000: 突発的なお誘いにはお応えしかねる …ヘリオスさんには何度も、 そうご説明しているのですが。; voice_id 91016: ヘリオスさんの 情熱だけは確かに感じとれます。)"
+    },
+    {
+      "id": 1093,
+      "name_en": "K.S.Miracle",
+      "nature": "roommate (per wiki) and friend whose deep words she values",
+      "evidence": "home scenes x6; mentions in voice x4 (voice_id 91017: ミラクルさんの言葉は深く、 新たな発見があります。); roommate per web: https://umamusu.wiki/Daiichi_Ruby"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "respected for her sense of justice",
+      "evidence": "mentions in voice x2 (voice_id 91018: バンブーさんからは己の正義を 全うしようという信念を感じます。)"
+    },
+    {
+      "id": 1057,
+      "name_en": "Mr. C.B.",
+      "nature": "upperclassman who baffles her; same real-life sire (Tosho Boy)",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91014: 先ほどシービーさんが枯れ葉に 埋まっておられました。); web: https://umamusu.wiki/Daiichi_Ruby"
+    },
+    {
+      "id": 1078,
+      "name_en": "Yamanin Zephyr",
+      "nature": "rival whose wind metaphors she decodes",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91019: ゼファーさんは物事を風の名前に たとえられますが、)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "friend (both had leg trouble growing up, per wiki)",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Daiichi_Ruby"
+    },
+    {
+      "id": null,
+      "name_en": "Her mother and grandmother",
+      "nature": "great racers whose legacy she must prove; mother is her ideal",
+      "evidence": "voice_id 91002: お母様もおばあ様も、レースで 偉業を果たされました。; voice_id 400003: ――私の、憧れ。; event title: 高松宮記念の後に・3代制覇"
+    }
+  ],
+  "groups": [
+    "The 'Illustrious Family' (華麗なる一族) - her lineage",
+    "Ritto Dorm",
+    "Sprinters' Story stage play cast with Helios, K.S. Miracle, Yamanin Zephyr (per wiki, unverified)"
+  ],
+  "story_arc": {
+    "summary": "As the latest scion of the 'Illustrious Family', Ruby treats winning as a duty and chose her trainer through a selection test. Her career runs the Fillies' Revue, Oka Sho, Oaks, Rose Stakes, then sprint/mile goals: Takamatsunomiya Kinen ('three-generation conquest'), Yasuda Kinen, Sprinters Stakes, Swan Stakes and Mile CS ('Utmost Brilliance'). Titles like 'Graceful Transformation' and 'Crimson Is the Colour of Passion' track her turning from obligation toward her own burning passion.",
+    "source": "event titles; web: https://umamusu.wiki/Daiichi_Ruby"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 2033,
+      "jp": "全ては我が華麗なる一族のために。 お母様方…行って参ります。",
+      "en": "All for my Illustrious Family. Mother, all of you... I'm off."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "『華麗であれ。至上であれ。 常に最たる輝きを』…。 即ち鮮烈なる勝利を、この手に！",
+      "en": "'Be elegant. Be supreme. Always the utmost brilliance'... Which is to say: a vivid victory, in my hands!"
+    },
+    {
+      "voice_id": 20022,
+      "jp": "ローテーションの調整は、 貴方が最低限果たすべき責務。 …そのご自覚は？おありでないと？",
+      "en": "Adjusting the rotation is the bare minimum of your duty. ...Are you aware of that? Or are you not?"
+    },
+    {
+      "voice_id": 10009,
+      "jp": "サンタクロースを信じるか…？ …どういった観点で？ 質問の意図が不明です。",
+      "en": "Do I believe in Santa Claus...? ...From what standpoint? The intent of the question is unclear."
+    },
+    {
+      "voice_id": 91016,
+      "jp": "仰っていることの多くは理解が できませんが、ヘリオスさんの 情熱だけは確かに感じとれます。",
+      "en": "I can't understand most of what she says, but Helios-san's passion, at least, I can certainly feel."
+    },
+    {
+      "voice_id": 15,
+      "jp": "明日はこちらを。お忘れなきよう。",
+      "en": "Tomorrow, this. Please do not forget."
+    }
+  ],
+  "timer_line_ideas": [
+    "The independent training has concluded, {user}. Kindly review the results without delay. Fulfilling one's duty is, after all, only natural.",
+    "Straighten your back, {user}. The run is complete. Be elegant, be supreme -- and confirm the results promptly, if you would."
+  ],
+  "data_gaps": [
+    "mentions_in_voice of King Halo is a false positive (ハイキング = hiking); excluded",
+    "Reading of 私 (watashi vs watakushi) unknown from text",
+    "K.S. Miracle roommate and Sprinters' Story cast are wiki-only; wiki's 'Team Regulus' claim excluded as doubtful",
+    "Career story dialogue not in mdb; summary from titles"
+  ]
+}

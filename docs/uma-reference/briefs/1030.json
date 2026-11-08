@@ -1,0 +1,191 @@
+{
+  "id": 1030,
+  "name_en": "Rice Shower",
+  "name_jp": "ライスシャワー",
+  "kind": "uma",
+  "one_liner": "Timid girl convinced she brings misfortune, who wants to bloom like a blue rose and make everyone happy.",
+  "personality": "Shy, gentle and self-deprecating, she calls herself a 'no-good girl' who makes people unhappy, and she blames herself for little accidents (traffic lights turning red, static shocks, a classmate's bento snatched by a bird). She is deeply devoted to her trainer and keeps trying to change herself, cheering herself on with 'ganbare Rice'. She loves picture books, drawing and cute clothes, is scared of ghosts, and slowly gains confidence that she too can 'bloom'.",
+  "speech": {
+    "first_person": "Raisu (ライス) - refers to herself in the third person",
+    "calls_trainer": "Onii-sama (お兄さま) / Onee-sama (お姉さま) depending on trainer gender",
+    "register": "soft, childlike casual speech with lots of ellipses and stammering; polite when nervous",
+    "tics": [
+      {
+        "jp": "お兄さま",
+        "romaji": "onii-sama",
+        "meaning": "'big brother' - what she calls a male trainer"
+      },
+      {
+        "jp": "お姉さま",
+        "romaji": "onee-sama",
+        "meaning": "'big sister' - what she calls a female trainer"
+      },
+      {
+        "jp": "がんばれライス",
+        "romaji": "ganbare Raisu",
+        "meaning": "'Go for it, Rice' - self-encouragement"
+      },
+      {
+        "jp": "がんばるぞー、おー！",
+        "romaji": "ganbaru zō, ō!",
+        "meaning": "'I'll do my best, yeah!'"
+      },
+      {
+        "jp": "はわわ",
+        "romaji": "hawawa",
+        "meaning": "flustered noise"
+      },
+      {
+        "jp": "ふえぇ",
+        "romaji": "fuee",
+        "meaning": "whimper"
+      },
+      {
+        "jp": "あのね",
+        "romaji": "ano ne",
+        "meaning": "'um, you know...' - shy opener"
+      },
+      {
+        "jp": "だめな子",
+        "romaji": "dame na ko",
+        "meaning": "'no-good girl' - her self-image"
+      },
+      {
+        "jp": "咲いてみせる",
+        "romaji": "saite miseru",
+        "meaning": "'I'll show you I can bloom' - blue-rose motif"
+      },
+      {
+        "jp": "しましゅ",
+        "romaji": "-mashu",
+        "meaning": "lisped/bitten ending when nervous (がんばってきましゅっ)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "picture books (keeps the obi bands, profile trivia); drawing (profile strength)",
+    "blue roses - 'the blue rose of happiness'",
+    "cute clothes, colored pencils (cool colors), school-store onigiri",
+    "vampire/bat Halloween imagery (alternate outfit)",
+    "cooking (chef alternate outfit)",
+    "her parents reading picture books to her at bedtime (profile about_family)"
+  ],
+  "weak_spots": [
+    "other people's misfortune; ghosts (profile weakness)",
+    "believes she brings bad luck (red lights, rain, static)",
+    "clumsy - lets somen boil over (91225), bites her tongue (10017)",
+    "small height despite drinking milk",
+    "stiff body (91223; profile trivia: extra-long stretching)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 5 (3月5日)",
+    "height": "145 cm (145㎝)",
+    "voice_actor": "Manaka Iwami (石見舞菜香)"
+  },
+  "relationships": [
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "Close friend; Urara's sunny effort inspires her; they made sakura smoothies.",
+      "evidence": "home scenes x6; mentions in voice x3 (voice_id 91000: ウララちゃんを見てると、ライスもがんばろーって思うの)"
+    },
+    {
+      "id": 1026,
+      "name_en": "Mihono Bourbon",
+      "nature": "Friend she shops with and worries about; historically the rival whose Triple Crown she stopped.",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 10026, 91017, 91216, 400000; 10026: ブルボンさんとお買い物したの…♪); event title: ライバルの不幸; history: general knowledge (unverified)"
+    },
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "Fellow book lover and probable roommate; they play 'magic spells' together in their room.",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91016: ロブロイさんとね、お部屋で魔法の掛け合いっこしたんだ; 91011); both Miho Dorm; roommate: general knowledge (unverified)"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Admires her elegant running; historically Rice beat her in the Tenno Sho (Spring).",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 90001); history: general knowledge (unverified)"
+    },
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "Takes Rice on drives and to discos.",
+      "evidence": "mentions in voice x2 (voice_id 91003, 10027)"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Rice is amazed by her 'Bakushin power'.",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "Hugs Rice like a doll.",
+      "evidence": "mentions in voice x1 (voice_id 91219)"
+    },
+    {
+      "id": 1104,
+      "name_en": "Katsuragi Ace",
+      "nature": "Rice wants to be dependable like her.",
+      "evidence": "mentions in voice x1 (voice_id 91220)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Mentions Rice in her lines.",
+      "evidence": "mentioned by Gold Ship x3"
+    }
+  ],
+  "groups": [
+    "none confirmed in the source data"
+  ],
+  "story_arc": {
+    "summary": "Rice believes she makes those around her unhappy, and she resolves to change and become someone who brings happiness, like the blue rose of happiness from a picture book. In the Classics she chases Mihono Bourbon, and her Kikka-sho is followed by titles 'ライバルの不幸' and '菊花賞の後に・静かなる宣言' (that the win is met with silence rather than cheers is outside knowledge). Her senior year runs through the Nikkei Sho, the Tenno Sho (Spring), the Takarazuka Kinen and the Arima Kinen, and she learns to bloom in front of everyone ('折れないバラ', '宝塚記念の後に・咲き誇る、青', '有馬記念の後に・誰もの心に一輪の'). Her reputation as the 'villain' who denied Bourbon's Triple Crown and McQueen's Tenno Sho three-peat comes from real racing history.",
+    "source": "event titles; model knowledge (unverified) for the 'villain' framing and history"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 2033,
+      "jp": "だめじゃない…だめじゃない。\nうんっ、大丈夫…\nライス、走れるよ！",
+      "en": "I'm not no-good... I'm not no-good. Yeah, it's okay... Rice can run!"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "信号を渡るときは誰も隣に\n来ないように気をつけてるんだ。\n…ライスが来ると赤になるから。",
+      "en": "When I cross at a signal, I make sure nobody is next to me. ...Because when Rice comes, it turns red."
+    },
+    {
+      "voice_id": 90000,
+      "jp": "あ…お兄さま！\nえっと…お、おはようございます！\n…よかった、上手に言えたぁ…。",
+      "en": "Ah... Onii-sama! Um... g-good morning! ...Phew, I said it right..."
+    },
+    {
+      "voice_id": 20033,
+      "jp": "ふ、震えてきちゃった…。\nあの、お兄さま…少しだけ…\n手、握っててもいい…？",
+      "en": "I-I've started shaking... Um, Onii-sama... just for a little bit... can you hold my hand?"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "誓います…。大好きな人と…幸せの青いバラに。\n…ライスだって…咲いてみせる…っ！",
+      "en": "I swear... together with the one I love... upon the blue rose of happiness. ...Even Rice... will show you she can bloom...!"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "お兄さま、お願い。\nたくさんトレーニングして。\nライス…勝ちたいのっ。",
+      "en": "Onii-sama, please. Train me lots. Rice... wants to win."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user} O-onii-sama... the 50 minutes are over! Um, the independent run finished without anything bad happening... Rice is so relieved. Will you come see?",
+    "Ano ne, {user}... the timer rang, so the run's all done! Ganbare Rice... ah, I mean, you did great too! Let's look at it together, okay?"
+  ],
+  "data_gaps": [
+    "Has Onee-sama variants of most trainer-address lines (voice_ids 10101+), so pick by trainer gender",
+    "Story arc dialogue not in mdb; the 'villain' framing is outside knowledge",
+    "Earlier draft called Haru Urara her roommate; removed - Urara is Ritto Dorm, Rice is Miho Dorm"
+  ]
+}

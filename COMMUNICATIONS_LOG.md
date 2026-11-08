@@ -4,6 +4,40 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-08 — #OnlineSensations set; specials redesigned
+
+- The Curren Chan collab set is final: `docs/special-sets/online-sensations.md`,
+  now in code.
+- Its opener (line 0) belongs to Set 1 and unlocks this set.
+- Specials are redesigned for it: locked sets (prerequisites), a Boosts
+  toggle, set boosts (Loves: +4% on the collab lines for 50 runs), early
+  start for everyone (+1% when the next run starts within 3 minutes of the
+  ping, 4 for early risers), `{set_name}`, and every `{user}` filled.
+- The Specials list pages through sets with Back/Next, and each set's
+  On/Off lives on its page instead of in Settings.
+- Matikanetannhauser's special is reworded ("Wasshoi~ ... *tears up,
+  sniffles*, I'm okay"); her finds carry over.
+- `#SpecialCollab` means a collab line of the set; the 4% boost draws only
+  on those.
+- Curren keeps her flirty lines; that is the character. #PillowPrincess
+  was dropped.
+
+---
+
+## 2026-11-08 — Special sets will grow; a reference to write them from
+
+- More special sets are planned. Mejiro Family is next; others follow.
+- Set 1 leans on well-known umas because the staff know few of the
+  others. The JP `master.mdb` (supplied by the owner) is the source for a
+  reference covering every character, so later sets can cover more of the
+  roster.
+- The Global mdb is not needed: JP data already has English names for all
+  but 22 (mostly NPCs).
+- The mdb and the full voice dump stay out of git; the English briefs and
+  the scripts are in. The viewer is dark by default.
+
+---
+
 ## 2026-11-04 — #recruitment is a board; pings are per tier
 
 - #recruitment shows only who is available (30-day pace, time open, post)

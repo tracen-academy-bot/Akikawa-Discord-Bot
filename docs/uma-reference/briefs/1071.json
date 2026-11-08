@@ -1,0 +1,187 @@
+{
+  "id": 1071,
+  "name_en": "Mejiro Ardan",
+  "name_jp": "メジロアルダン",
+  "kind": "uma",
+  "one_liner": "Fragile-legged Mejiro lady who treasures every fleeting moment and wants to shine, even if only briefly.",
+  "personality": "Graceful, gentle and very polite. She calls her legs 'glass' and plans training around her health, yet she is quietly stubborn: she refuses to show weakness and will not let fragility stop her from shining 'now'. She loves history, dancing, tea and medicinal cooking. Her humour is soft and teasing, and she gets openly excited by little everyday detours with friends.",
+  "speech": {
+    "first_person": "watashi/watakushi (私); the reading is not shown in the kanji text",
+    "calls_trainer": "Trainer-san (トレーナーさん); also anata (貴方) and once 'my partner' (私のパートナーさん)",
+    "register": "Refined, formal keigo (参ります, いたしましょう, ご清覧ください). Ojousama-polite but without the ですわ ending. Calls her sister 姉様.",
+    "tics": [
+      {
+        "jp": "参りましょう",
+        "romaji": "mairimashou",
+        "meaning": "Shall we go (humble); her usual 'let's go'"
+      },
+      {
+        "jp": "『今』",
+        "romaji": "ima",
+        "meaning": "'Now': her core motif of the present moment, often put in quotes"
+      },
+      {
+        "jp": "輝き",
+        "romaji": "kagayaki",
+        "meaning": "Radiance/shine, which she says constantly"
+      },
+      {
+        "jp": "刹那",
+        "romaji": "setsuna",
+        "meaning": "A fleeting instant"
+      },
+      {
+        "jp": "ふふっ",
+        "romaji": "fufu",
+        "meaning": "Soft, refined giggle"
+      },
+      {
+        "jp": "姉様",
+        "romaji": "neesama",
+        "meaning": "Older sister (Mejiro Ramonu)"
+      },
+      {
+        "jp": "めっ",
+        "romaji": "me!",
+        "meaning": "Cute scolding 'no!', which she says is a trick learned from Super Creek (voice 90004)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Glass (glass legs, glass wings, glass stars)",
+    "Shining in the present moment, fleeting beauty (cherry blossoms, autumn leaves, Tanabata)",
+    "Dance (waltz, tango)",
+    "Tea and herbal tea",
+    "Medicinal cooking (yakuzen); buys ingredients at a favourite Chinese grocer",
+    "Konpeito sweets",
+    "History (voice 110001: 共に歴史を見つめ直しましょう; voice 70004; event title 史を顧みて)",
+    "Detours (寄り道) after training with friends",
+    "Light, airy clothes and her brooch based on a necklace from her father",
+    "Wrapping bandages neatly (profile strength)",
+    "Her nanny ばあや and her handmade sweets"
+  ],
+  "weak_spots": [
+    "Fragile legs and health; she is a regular at the infirmary",
+    "Fights and quarrels (profile)",
+    "Cherries (profile)",
+    "The sound of breaking glass makes her ears fold back (profile; voice 91002)",
+    "Waking up in the morning: roommate Chiyono O says she struggles to get up (Chiyono O voice 90010)",
+    "Gets embarrassed by being called 'Shirayuki no Kimi' (Snow-white Lady) and by photos of herself"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "March 28 (3月28日)",
+    "height": "162 cm",
+    "voice_actor": "Saya Aizawa (会沢紗弥)"
+  },
+  "relationships": [
+    {
+      "id": 1069,
+      "name_en": "Sakura Chiyono O",
+      "nature": "Roommate and close friend; she wakes Chiyono O every morning and they dance together",
+      "evidence": "home scenes x6; mentions in voice x6 (voice_id 91009: チヨノオーさんを揺り起こす、毎朝の何気ない日常); roommate per Chiyono O voice 90010 (同室のアルダンさん)"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "Older sister (姉様), whom she admires deeply; their relationship is a little distant",
+      "evidence": "home scenes x4; voice_id 91000/91017 (姉様); event title: 前門の母、後門の姉; affinity 31 (highest)"
+    },
+    {
+      "id": 1072,
+      "name_en": "Yaeno Muteki",
+      "nature": "Classmate and friend of the same generation; they did New Year calligraphy together",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 10003: ヤエノさんたちと書初めをしまして; 91027 skating rink)"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Mejiro relative she addresses without an honorific; they go out for crepes",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 10027: 先日パーマーに誘われてクレープを)"
+    },
+    {
+      "id": 1045,
+      "name_en": "Super Creek",
+      "nature": "Taught her the 'me!' scolding trick",
+      "evidence": "home scenes x1; voice_id 90004 (クリークさん直伝の夜ふかし防止策)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Friend who tells her about new tapioca shops",
+      "evidence": "home scenes x3; voice_id 91003"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Mejiro relative she addresses without an honorific; admires her rivalry with Teio",
+      "evidence": "home scenes x2; voice_id 91018"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "No real relationship: the 3 counted mentions are the common noun cafe",
+      "evidence": "mentions in voice x3 are false positives (voice_id 10001, 90003, 90013 use カフェ = cafe)"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "Fellow health-committee member",
+      "evidence": "Sakura Laurel voice 90017 (アルダンさんと配ってるんです、塩飴)"
+    }
+  ],
+  "groups": [
+    "Mejiro family",
+    "Health committee (保健委員), per Sakura Laurel voice 90017",
+    "Victory Club (ヴィクトリー倶楽部), mentioned in voice 91025 (unverified as a membership)",
+    "Appears in the Cinderella Gray anime and manga (web: umamusu.wiki)"
+  ],
+  "story_arc": {
+    "summary": "Ardan's legs are as fragile as glass. She has spent long stretches in hospital and wants to leave proof that she lived by shining, even briefly. She races against her own generation (Sakura Chiyono O, Yaeno Muteki) through the Satsuki Sho, Japanese Derby and Kikuka Sho or Tenno Sho (Autumn), while living in the shadow of her sister Ramonu ('前門の母、後門の姉'). The real horse fractured a leg after the 1988 Derby.",
+    "source": "event titles + web: https://umamusu.wiki/Mejiro_Ardan"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "全ては『今』――この瞬間の\n輝きのために。私と貴方が重ねた\n覚悟を、この軌跡に刻みましょう。",
+      "en": "Everything is for 'now', for the shine of this one instant. Let us carve the resolve you and I have built into this path."
+    },
+    {
+      "voice_id": 92000,
+      "jp": "ガラスと呼ばれたこの脚ですが、\nそう簡単には砕けません。\nこの覚悟、お受け取りください。",
+      "en": "These legs may be called glass, but they will not shatter so easily. Please accept this resolve of mine."
+    },
+    {
+      "voice_id": 90004,
+      "jp": "トレーナーさん、無理は…めっ！\n…いかがでしょう？クリークさん\n直伝の夜ふかし防止策なのですが。",
+      "en": "Trainer-san, no overdoing it... me! How was that? It's Creek-san's own method for stopping late nights."
+    },
+    {
+      "voice_id": 91009,
+      "jp": "チヨノオーさんを揺り起こす、\n毎朝の何気ない日常…これもまた、\n私にとって幸せなひと時なのです。",
+      "en": "Shaking Chiyono O-san awake every morning, just an ordinary routine... this too is a happy moment for me."
+    },
+    {
+      "voice_id": 20022,
+      "jp": "覚悟と無謀は違うものです。\nこれ以上無理をして、一体\nなにを得られるのでしょうか。",
+      "en": "Resolve and recklessness are different things. What could we possibly gain by pushing any further?"
+    },
+    {
+      "voice_id": 40000,
+      "jp": "ガラスの翼、輝かせて！",
+      "en": "Glass wings, shine!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent training has come to an end. Fifty minutes, each one a moment that shone. Shall we look back on it together, Trainer-san? Over a cup of tea, perhaps.",
+    "The run is complete, carefully, one step at a time. Now then, {user}, please don't overdo it yourself... me! Shall we go see the results?"
+  ],
+  "data_gaps": [
+    "Reading of her first person (私) is not given in the text",
+    "Main story arc is only partly covered by the web source; the Ura/career summary is based on event titles",
+    "The mentions_in_voice counter for Manhattan Cafe (x3) is a false positive from the word カフェ",
+    "Source contradiction: her voice 91009 says she shakes Chiyono O awake every morning, while Chiyono O voice 90010 says Ardan is the one who struggles to get up",
+    "Real-horse detail (leg fracture after the 1988 Derby) was not re-verified in this check"
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "id": 9050,
+  "name_en": "Hoshina Kiyoko",
+  "name_jp": "保科健子",
+  "kind": "npc",
+  "one_liner": "Gracious hot-spring inn proprietress whose polite hostess act keeps slipping into brisk, gruff plain talk.",
+  "personality": "Proprietress of Yukoma Inn who preaches that hot springs heal fatigue and injury and that good rest brings results. Her self-intro shows the gag: a refined okami greeting that slips into a gruff 'That's right, health comes first!' before she covers with 'oh-ho-ho'. Her other lines are terse, easygoing older-woman talk ('Well, shall we get to it', 'Don't overdo it').",
+  "speech": {
+    "first_person": "unknown (self-intro uses name only)",
+    "calls_trainer": "unknown in source; 若人 used in event title 純情すぎる若人に",
+    "register": "two-layer: polite inn-hostess keigo (申します, ようございます) slipping into a gruff, clipped older-woman casual (〜かね, 〜な, 〜さ)",
+    "tics": [
+      {
+        "jp": "ようございますよ",
+        "romaji": "you gozaimasu yo",
+        "meaning": "old-fashioned polite 'it is good (for you)' (self-intro)"
+      },
+      {
+        "jp": "ほほほ",
+        "romaji": "hohoho",
+        "meaning": "refined laugh to cover a slip (self-intro)"
+      },
+      {
+        "jp": "そうとも",
+        "romaji": "sou tomo",
+        "meaning": "gruff 'that's right!' (self-intro)"
+      },
+      {
+        "jp": "〜かね",
+        "romaji": "~ka ne",
+        "meaning": "easygoing 'shall I...' (voice 20051 さて、やるかね。)"
+      },
+      {
+        "jp": "〜んな",
+        "romaji": "~n na",
+        "meaning": "clipped imperative (頑張んな 'give it your best') (voice 70000)"
+      },
+      {
+        "jp": "〜のさ",
+        "romaji": "~no sa",
+        "meaning": "assertive explanatory ending (voice 95006)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "hot springs / onsen",
+    "rest and recuperation (保養)",
+    "health first (健康第一)",
+    "mahjong (event title 牌で語る)",
+    "hula dance classes (web)"
+  ],
+  "weak_spots": [
+    "her rough real voice slipping through the polite hostess act (self-intro)"
+  ],
+  "profile": {
+    "dorm": "n/a (runs Yukoma Inn)",
+    "grade": "n/a (adult)",
+    "birthday": "April 7 (4月7日)",
+    "height": "170 cm - web only",
+    "voice_actor": "Ayahi Takagaki (高垣彩陽)"
+  },
+  "relationships": [
+    {
+      "id": 9051,
+      "name_en": "Yunohana Bloom",
+      "nature": "her former trainee and current apprentice young proprietress",
+      "evidence": "home scenes x2; event title: 若女将見守り記; web: https://umamusu.wiki/Kiyoko_Hoshina"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "shares a home conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1100,
+      "name_en": "Wonder Acute",
+      "nature": "shares a home conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Yukoma Inn (ゆこま旅館) / Paradise Yukoma Hot Springs scenario"
+  ],
+  "story_arc": {
+    "summary": "Proprietress of the URA-run Yukoma Inn in the 'Paradise Yukoma Hot Springs' scenario. Her support events run from 'Invitation to paradise' and 'Talking through tiles' (mahjong) through 'Those smoky days' and 'Bond with Kiyoko: New Year hot spring struggle' to 'She was a stylish woman' and 'Watching over the young proprietress'. Rumour (wiki) says she was a legendary figure in racing, unconfirmed.",
+    "source": "event titles; web: https://umamusu.wiki/Kiyoko_Hoshina"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "さて、やるかね。",
+      "en": "Well now, shall we get to it."
+    },
+    {
+      "voice_id": 70000,
+      "jp": "気負わず頑張んな。",
+      "en": "Don't tense up - just do your best."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "いい休みが、結果を出すのさ！",
+      "en": "Good rest is what brings results!"
+    }
+  ],
+  "timer_line_ideas": [
+    "The independent run is finished, {user}. Do take a look, and then a good soak would do her well - good rest brings results, that's right! ...Ah, oh-ho-ho.",
+    "Well now, the run's done. Fifty minutes, not bad. Go check on her, {user}, and don't tense up about it."
+  ],
+  "data_gaps": [
+    "Human, not an Umamusume (wiki category); kind 'npc'",
+    "First person and trainer address unknown",
+    "Height from wiki only",
+    "name_en 'Hoshina Kiyoko' is from source (wiki uses 'Kiyoko Hoshina')",
+    "Mahjong comes only from the event title 牌で語る; the wiki does not mention it"
+  ]
+}

@@ -1,0 +1,217 @@
+{
+  "id": 1004,
+  "name_en": "Maruzensky",
+  "name_jp": "マルゼンスキー",
+  "kind": "uma",
+  "one_liner": "Glamorous 'Supercar' big sister who drives a red sports car and speaks in hopelessly retro bubble-era slang.",
+  "personality": "Confident, fun-loving and generous, she acts as everyone's cool 'onee-san', doting on her 'cute kouhai-chan' and refusing to show them a tired or uncool face. She races for the joy of it and wants everyone, rivals included, to have fun. Her slang is gloriously outdated Showa/bubble-era (cho-beri-gu, nau-i, batchi-guu), and she flirts teasingly with her trainer, usually by offering a terrifying drive in her car.",
+  "speech": {
+    "first_person": "atashi (あたし); also calls herself onee-san (お姉さん)",
+    "calls_trainer": "Trainer-kun (トレーナー君) / Trainer-chan (トレーナーちゃん) depending on trainer variant; also kimi (君) / anata (あなた)",
+    "register": "Casual big-sister speech packed with 1980s-90s Japanese 'dead slang' (shigo)",
+    "tics": [
+      {
+        "jp": "チョベリグ",
+        "romaji": "cho-beri-gu",
+        "meaning": "'super very good' (bubble-era slang)"
+      },
+      {
+        "jp": "バッチグー",
+        "romaji": "batchi-guu",
+        "meaning": "'perfect, A-OK'"
+      },
+      {
+        "jp": "かっ飛ばす",
+        "romaji": "kattobasu",
+        "meaning": "'floor it, blast off' - driving/racing"
+      },
+      {
+        "jp": "ナウい",
+        "romaji": "naui",
+        "meaning": "'trendy, now' (dated slang)"
+      },
+      {
+        "jp": "イケイケ",
+        "romaji": "ikeike",
+        "meaning": "'hot, go-go, flashy'"
+      },
+      {
+        "jp": "だいじょうブイ",
+        "romaji": "daijoubui",
+        "meaning": "'no problem-V!' pun on daijoubu"
+      },
+      {
+        "jp": "よろぴく",
+        "romaji": "yoropiku",
+        "meaning": "cutesy 'yoroshiku'"
+      },
+      {
+        "jp": "レッツラゴー",
+        "romaji": "rettsura goo",
+        "meaning": "'let's go!'"
+      },
+      {
+        "jp": "マブい",
+        "romaji": "mabui",
+        "meaning": "'gorgeous, awesome'"
+      },
+      {
+        "jp": "後輩ちゃん",
+        "romaji": "kouhai-chan",
+        "meaning": "how she refers to juniors"
+      },
+      {
+        "jp": "サ店",
+        "romaji": "saten",
+        "meaning": "old slang for a café (kissaten)"
+      },
+      {
+        "jp": "フィーバー",
+        "romaji": "fiibaa",
+        "meaning": "'fever' - party, go wild"
+      },
+      {
+        "jp": "お疲れちゃん",
+        "romaji": "otsukare-chan",
+        "meaning": "cutesy 'good work'"
+      },
+      {
+        "jp": "任せてちょんまげ",
+        "romaji": "makasete chonmage",
+        "meaning": "silly 'leave it to me'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Her red supercar 'Tacchan' (タッちゃん), a hand-me-down from her father; never scratched",
+    "Driving fast: night views, mountain passes, seaside roads",
+    "Eurobeat (makes her want to floor it)",
+    "Disco and 'Bubbly Land' (バブリーランド)",
+    "Morning shampoo followed by coffee milk",
+    "Cafés, tiramisu, nata de coco, pudding a la mode",
+    "Doting on and inspiring juniors",
+    "Ballet, taught by her father (voice 91015)",
+    "Lipstick bought matching with her mother; friend-like mother",
+    "Drifting (listed strength: ドリフト)"
+  ],
+  "weak_spots": [
+    "Driving slowly (listed weakness: 徐行運転)",
+    "Showing a tired or uncool side to juniors (voices 20000, 20009, 30003)",
+    "Being pushed into back-to-back races (voices 20021, 20022)",
+    "Event title hints 'even the reliable onee-san is actually...' (頼れるお姉さんも、実は……) - content unknown"
+  ],
+  "profile": {
+    "dorm": "Lives alone off-campus (一人暮らし)",
+    "grade": "High school division (高等部)",
+    "birthday": "May 19 (5月19日)",
+    "height": "164 cm (164㎝)",
+    "voice_actor": "Lynn (Lynn)"
+  },
+  "relationships": [
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "Peer/friend; calls her plain 'Rudolf', finds her 'surprisingly cute' for earnestly asking how to treat kouhai, and Rudolf laughed hard at Maruzen's pun",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 91002: ルドルフって案外可愛いのよね♪; 90217; 91224)"
+    },
+    {
+      "id": 1069,
+      "name_en": "Sakura Chiyono O",
+      "nature": "Kouhai who adores her ('Chiyo-chan'); Maruzen's outfit nods to her. Real-life Chiyono O is a son of the horse Maruzensky",
+      "evidence": "home scenes x3; mentioned by Chiyono O x6; voice 91228: 腰の桜、チヨちゃんっぽいでしょ！; 91223; 400003; real-life link is general knowledge (unverified)"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "Cute kouhai she cheers on; Spe thinks offerings to Maruzen bring more food",
+      "evidence": "voices 91000, 91018, 91226: スペちゃん…あたしにお供えものしたら食べ物が増えると思ってるみたい; mentioned by Spe x3"
+    },
+    {
+      "id": 1057,
+      "name_en": "Mr. C.B.",
+      "nature": "Shares home scenes; also lives alone off-campus per her profile. Peer from an older racing generation (general knowledge, unverified)",
+      "evidence": "home scenes x3; mentioned by Mr. C.B. x2"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Shares home scenes; nature not shown in her lines",
+      "evidence": "home scenes x3 (the mentions_in_voice x1 hit is a false positive: サングラス in voice 91028)"
+    },
+    {
+      "id": 1104,
+      "name_en": "Katsuragi Ace",
+      "nature": "Friend who makes great oden daikon ('Ace-chan')",
+      "evidence": "home scenes x2; voice 90219: エースちゃん特製の大根って、食べ応えがあるのよ"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Kouhai who recommended her morning toast and rose tea",
+      "evidence": "mentions in voice x2 (voice_id 91221: ライスちゃんイチオシのトースト＆ローズティー; 1016)"
+    },
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "Kouhai she can't leave alone because she's so diligent",
+      "evidence": "voice 91020"
+    },
+    {
+      "id": 9001,
+      "name_en": "Hayakawa Tazuna",
+      "nature": "Academy staff member",
+      "evidence": "home scenes x1; voice 90006: たづなさんも張り切ってたわ"
+    }
+  ],
+  "groups": [
+    "Team Rigil (anime only - general knowledge, unverified)",
+    "Off-campus residents (lives alone, like Mr. C.B. and Furioso per their profiles)"
+  ],
+  "story_arc": {
+    "summary": "Already a legendary, overwhelmingly fast 'Supercar', Maruzensky wants racing to be fun for everyone and to be a senpai juniors can look up to. Her career spans the Asahi Hai FS, Spring Stakes, Satsuki Sho ('the idol of all Uma Musume') and Japan Derby ('a stage to share its appeal'), then the Arima Kinen, Osaka Hai, Yasuda Kinen and Autumn Tenno Sho. The real horse was barred from the Classics as an imported-in-utero foal, which the game lets her run (model knowledge, unverified).",
+    "source": "event titles (皐月賞の後に・すべてのウマ娘の憧れ, 日本ダービーの後に・魅力を伝える舞台, 背中を見せてあげる, もっと憧れへ, 楽しいレース); real-life context from model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 2034,
+      "jp": "調子はどうかって？\nモチのロンで最高よ！\nすっごく気持ちよく走れそうだわ♪",
+      "en": "How am I feeling? Mochi-no-ron, the best! I'm gonna have such a great run♪"
+    },
+    {
+      "voice_id": 20002,
+      "jp": "調子はチョベリグよ！\nブレーキなんて踏まないから、\n君もちゃんとついてきてね！",
+      "en": "I'm feeling cho-beri-gu! I'm not touching the brakes, so you'd better keep up!"
+    },
+    {
+      "voice_id": 90013,
+      "jp": "お疲れちゃんっ♪お昼まだなら、\nイタ飯、トゥギャザーしようぜっ！",
+      "en": "Otsukare-chan♪ If you haven't had lunch, let's do Italian, together-ze!"
+    },
+    {
+      "voice_id": 91009,
+      "jp": "朝シャンは欠かしたことないわ。\nほら、尻尾の毛並みもサラサラ！\n触ってみたい？…ふふ、ダ～メっ♪",
+      "en": "I've never skipped a morning shampoo. See, my tail's silky smooth! Wanna touch? ...Fufu, nope♪"
+    },
+    {
+      "voice_id": 92009,
+      "jp": "あたしがスーパーカーなら、\n君はドライバーね。最高速で\n走るためのトレーニングをお願い！",
+      "en": "If I'm the supercar, you're the driver. Give me training for top speed!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "エンジンの違い、見せてあげるわ。\nこれが！あたしの！フルスロットルよ！",
+      "en": "I'll show you the difference in engines. This is! My! Full throttle!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Haai, {user}! The independent run's over, and it was cho-beri-gu! Onee-san kept the pedal floored all 50 minutes. Come check it, Trainer-kun~ yoropiku!",
+    "Ring ring~ time's up! Fifty minutes of training, batchi-guu! {user}, come take a peek, then let's hit a saten. My treat, okay?"
+  ],
+  "data_gaps": [
+    "Story arc beyond titles from model knowledge (unverified)",
+    "mentions_in_voice lists Daring Heart x2, but matches are the word 'ハート' (heart) in voices 91028/400011 - false positives",
+    "Nature of Grass Wonder and Mr. C.B. home-scene ties not supported by her lines; Grass Wonder mention x1 is the false positive サングラス (voice 91028)",
+    "Tazuna has no name_en in the source; 'Hayakawa Tazuna' is a standard romanisation",
+    "Trainer-chan variants appear to be the alternate (female trainer) line set - inferred, not labelled in data"
+  ]
+}

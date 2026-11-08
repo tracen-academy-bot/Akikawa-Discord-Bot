@@ -1,0 +1,140 @@
+{
+  "id": 1075,
+  "name_en": "Daring Tact",
+  "name_jp": "デアリングタクト",
+  "kind": "uma",
+  "one_liner": "Polite, strong-willed child of the wilderness who trains in the mountains to make history for her hometown.",
+  "personality": "Earnest and polite, devoted to the home that raised her 'strictly but warmly'. Her dream is to 'become an Uma Musume who goes down in history'. Her few lines talk about 'warrior training' and shutting herself away in the mountains, and she treats Daring Heart's courage and shine as something to carry on. She is thoughtful about others, worrying over what apology gift to bring (not a whole napa cabbage).",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "unknown",
+    "register": "Polite desu/masu",
+    "tics": [
+      {
+        "jp": "修行",
+        "romaji": "shugyou",
+        "meaning": "Training/ascetic practice"
+      },
+      {
+        "jp": "武者修行",
+        "romaji": "musha shugyou",
+        "meaning": "Warrior's training journey"
+      },
+      {
+        "jp": "ハートさん",
+        "romaji": "Haato-san",
+        "meaning": "How she addresses Daring Heart"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Her hometown and its dreams",
+    "Mountain training retreats",
+    "Matching little-bird brooches with Daring Heart",
+    "Courage and shine (勇気と輝き)",
+    "Little birds and a handmade wooden flute (web, unverified in source)"
+  ],
+  "weak_spots": [
+    "unknown (the profile's weaknesses field is empty)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 15 (4月15日)",
+    "height": "unknown in source; 158 cm per web (umamusu.wiki)",
+    "voice_actor": "Hina Yomiya (羊宮妃那)"
+  },
+  "relationships": [
+    {
+      "id": 1112,
+      "name_en": "Daring Heart",
+      "nature": "Senior friend and role model; they wear matching bird brooches and shop together",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 400014: ハートさんと同じ色の、勇気と輝きを); Daring Heart voice 10026; her voice 400007 (お揃いの、小鳥のブローチ); Daring Heart voice 10026 (shopping for paired clothes and accessories)"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "Shares home scenes; the nature of the relationship is unknown",
+      "evidence": "home scenes x2"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "Friend and rival; Almond Eye notes Tact is unfazed by loud noises",
+      "evidence": "home scenes x1; Almond Eye voice 91006; web: https://umamusu.wiki/Daring_Tact"
+    },
+    {
+      "id": 1110,
+      "name_en": "Cesario",
+      "nature": "Joins her mountain training",
+      "evidence": "Cesario voice 91017 (タクトさんの山籠もりの鍛錬に、お付き合いする)"
+    },
+    {
+      "id": 1141,
+      "name_en": "Epiphaneia",
+      "nature": "Friend who feels their bond is carried by fate (web, unverified in source)",
+      "evidence": "home scenes x1; nature from web: https://umamusu.wiki/Daring_Tact (not in source lines; IRL Epiphaneia is her sire)"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "Friend (web, unverified in source)",
+      "evidence": "home scenes x1; nature from web: https://umamusu.wiki/Daring_Tact (not in source lines; IRL Symboli Kris S is her grandsire)"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Is studying Tact's mix of boldness and elegance",
+      "evidence": "Sakura Bakushin O voice 91217"
+    },
+    {
+      "id": 1082,
+      "name_en": "North Flight",
+      "nature": "Gave matching accessories to Daring Heart and Tact",
+      "evidence": "North Flight voice 91017 (ハートちゃんとタクトちゃんに、おそろいのアクセを贈った)"
+    }
+  ],
+  "groups": [
+    "unknown"
+  ],
+  "story_arc": {
+    "summary": "She is not playable, so there is no career story in the data. Her support-card events (私が育った場所 / 私を育てた場所, 'the place where I grew up / the place that raised me') centre on her hometown. The real horse was the first undefeated winner of the Japanese Triple Tiara (2020).",
+    "source": "event titles + web: https://umamusu.wiki/Daring_Tact"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "故郷の夢は私の夢、ですから。",
+      "en": "My hometown's dream is my dream, after all."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "山に籠ったおかげかな？",
+      "en": "Maybe it's thanks to shutting myself away in the mountains?"
+    },
+    {
+      "voice_id": 400002,
+      "jp": "飛び入り参加のお詫び、なにが\nよいでしょうか？…白菜丸ごとは、\n恐らく困らせてしまいますよね…。",
+      "en": "What would make a good apology for joining in unannounced? ...A whole napa cabbage would probably just cause trouble, wouldn't it..."
+    },
+    {
+      "voice_id": 400014,
+      "jp": "私はまとい続けます…ハートさんと\n同じ色の、勇気と輝きを。そして\nいつか――ターフから祝福の花束を",
+      "en": "I will keep wearing it... the same colour of courage and shine as Heart-san. And someday, a bouquet of blessings from the turf."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run is complete! I hope it shows the fruits of my warrior training. Shall we go look at the results together?",
+    "Training's over! Maybe it's thanks to all that time in the mountains... Anyway, {user}, the independent run is done. Please take a look!"
+  ],
+  "data_gaps": [
+    "Not playable: only 7 voice lines and no training events or aptitudes",
+    "How she addresses the trainer is unknown",
+    "Height, strengths, weaknesses, ears, tail, shoe size and family are null in the source",
+    "release_unix is a placeholder (2049)",
+    "Groups and team affiliations are unknown",
+    "mentioned_by lists Royce and Royce x1, but that line (91015) is a false positive (コンタクト = contact lens)",
+    "Home scene partner タッカーブライン (Tucker Bryne, id 9049, NPC) not described",
+    "Height 158 cm and the wooden-flute/little-birds trivia were spot-checked on umamusu.wiki but are not in the source"
+  ]
+}

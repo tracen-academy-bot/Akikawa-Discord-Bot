@@ -1,0 +1,204 @@
+{
+  "id": 1132,
+  "name_en": "Loves Only You",
+  "name_jp": "ラヴズオンリーユー",
+  "kind": "uma",
+  "one_liner": "Idol-streamer who frames everything as two-way \"love\" with her fans and wants to carry it worldwide.",
+  "personality": "A warm, affectionate streamer who sees love as something given and returned, and treats her trainer as her \"bridge\" to her dreams. She talks in stream lingo, plans broadcasts for every holiday, and treats races as a chance to \"return the love\" of her community. She can be mischievous (\"pranks must be repaid in kind\") and admits when she is putting on a brave face for her viewers, but she is also clear-eyed: \"Being kind isn't the only kind of love.\"",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "kimi (君) / Trainer-kun (トレーナーくん); alternate lines use anata (あなた) / Trainer-chan (トレーナーちゃん)",
+    "register": "Casual, affectionate feminine speech (~wa, ~ne, ~yo) mixed with streamer slang",
+    "tics": [
+      {
+        "jp": "ラヴミー♡ラヴユー♡",
+        "romaji": "ravu mii ravu yuu",
+        "meaning": "\"Love me, love you\" - her stream greeting"
+      },
+      {
+        "jp": "ラヴ",
+        "romaji": "ravu",
+        "meaning": "\"love\" in katakana, used as a noun for everything"
+      },
+      {
+        "jp": "“愛”",
+        "romaji": "ai",
+        "meaning": "\"love\" in quotes, in serious moments"
+      },
+      {
+        "jp": "おつ",
+        "romaji": "otsu",
+        "meaning": "streamer \"good work / thanks for watching\""
+      },
+      {
+        "jp": "枠",
+        "romaji": "waku",
+        "meaning": "a stream slot"
+      },
+      {
+        "jp": "コミュメン",
+        "romaji": "komyumen",
+        "meaning": "her community members (fans)"
+      },
+      {
+        "jp": "架け橋",
+        "romaji": "kakehashi",
+        "meaning": "\"bridge\" - what she calls her trainer"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "streaming, video editing, collabs (profile)",
+    "hearts: heart-shaped letters, 26 hearts on her outfit, heart-beam pose (trivia, 91008, 91006)",
+    "raspberry anything: cookies, ice cream (90014, 91013)",
+    "fighting games (20001, 91018)",
+    "cherry-blossom petals (they look like hearts, 90016)",
+    "fan art and fan messages (trivia, 91005)",
+    "the world / going overseas (91029, 95009)",
+    "cocoa and cosy long chat streams (91015)"
+  ],
+  "weak_spots": [
+    "drawing, horror games, idle days off (profile weaknesses)",
+    "umeboshi (wants to like them, 90013)",
+    "dentists (event title 歯医者さんと……『愛』？; wiki: dislikes hospitals)",
+    "falls asleep mid-hobby with Chrono (91023)",
+    "sometimes fakes \"I'm in top form\" on stream (20009)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior High Division (中等部)",
+    "birthday": "March 26 (3月26日)",
+    "height": "158 cm (158cm)",
+    "voice_actor": "Miyu Kubota (久保田未夢)"
+  },
+  "relationships": [
+    {
+      "id": 1133,
+      "name_en": "Chrono Genesis",
+      "nature": "Roommate (per wiki) and close friend; dries her hair while she reads",
+      "evidence": "home scenes x7; mentions in voice x4 (voice_id 91011: 読書に夢中なクロノちゃんの髪を乾かすのが日課なのよ)"
+    },
+    {
+      "id": 1131,
+      "name_en": "Gran Alegria",
+      "nature": "Close friend; tries all her MiRules, eats salads with her",
+      "evidence": "home scenes x5; mentions in voice x4 (voice_id 91001, 91021)"
+    },
+    {
+      "id": 1140,
+      "name_en": "Marche Lorraine",
+      "nature": "Long-time friend ('now and before'); designed the flower patterns on her racewear",
+      "evidence": "home scenes x2; voice_id 70017, 91016 (今も昔も、ラヴちゃんの絵が一番好き), 91028; trivia (マルシュロレーヌと手で作ったハートの写真); 'childhood' not stated explicitly"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Friend who makes her flower fragrances and stickers",
+      "evidence": "home scenes x2; mentions in voice x3 (voice_id 90004, 91002)"
+    },
+    {
+      "id": 1128,
+      "name_en": "Blast Onepiece",
+      "nature": "Friend; Loves wants to join Blast's 'people-watching autumn'",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 90018 and its alt 90118)"
+    },
+    {
+      "id": 1138,
+      "name_en": "Forever Young",
+      "nature": "\"Yan-ko-san\"; old movie buddy of Loves's older sister",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91019: ヤン子さんとお姉ちゃん、昔からの映画友だちなの)"
+    },
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "Fighting-game sparring partner",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1136,
+      "name_en": "Red Desire",
+      "nature": "Friend whose overseas ambition she supports",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1137,
+      "name_en": "Kiseki",
+      "nature": "Manga-loving friend",
+      "evidence": "mentions in voice x1 (voice_id 91020)"
+    },
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "Gives her tsukkomi lessons for variety streams",
+      "evidence": "voice_id 91022 (ララさんからツッコミ指導を受けてるの)"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "Friend and rival; teaches her yoga (wiki); in voice 91026 Loves plans to ask 'Ai-san' for diet-yoga lessons",
+      "evidence": "voice_id 91026 (アイさんにダイエットヨガ教えてもらおう); rival/yoga per web: https://umamusu.wiki/Loves_Only_You"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "Watches her streams anonymously",
+      "evidence": "home scenes x1; nature per web: https://umamusu.wiki/Loves_Only_You"
+    },
+    {
+      "id": null,
+      "name_en": "Older sister (お姉ちゃん) and parents",
+      "nature": "Parents give feedback after every stream",
+      "evidence": "voice_id 91019, 91004"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Streamer/\"idol streamer\" persona with her own fan community (コミュメン)"
+  ],
+  "story_arc": {
+    "summary": "From debut (\"Love begins\") she targets the Oka Sho or the Wasurenagusa Sho, then the Oaks, Shuka Sho and Queen Elizabeth II Cup, and later the Kyoto Kinen, Victoria Mile, Takarazuka Kinen and Japan Cup. Per the wiki, a leg infection in her classic year forces a choice between the Oka Sho and the Wasurenagusa Sho, and in her senior year a pandemic forces her home from Dubai (title \"The world was closed off\"). Her arc is about turning one-way fan love into two-way love and carrying it to the world stage.",
+    "source": "event titles + web: https://umamusu.wiki/Loves_Only_You"
+  },
+  "timer_line_ideas": [
+    "Love me, love you! {user}, your independent run just wrapped. Otsu~! Come check the results with me? It's your love that makes the numbers go up.",
+    "Ah, the run's over! I almost read it out on stream... Fufu. {user}, my dear bridge, go take a look, okay? I'll have some love waiting as a thank-you."
+  ],
+  "data_gaps": [
+    "Two address sets exist (君/トレーナーくん and あなた/トレーナーちゃん), likely by trainer gender; not confirmed in source.",
+    "Mentions extractor false positives: Daring Heart x4 (matches ハート \"heart\"), Manhattan Cafe x2 (カフェ \"cafe\"), Samson Big x1 (ビッグラヴ) - dropped.",
+    "No support cards (support_card_count 0).",
+    "Older sister's identity unknown."
+  ],
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "ラヴミー♡ラヴユー♡\nラヴズオンリーユーでーす♡",
+      "en": "Love me, love you! I'm Loves Only You!"
+    },
+    {
+      "voice_id": 10002,
+      "jp": "君はいつだって、私の\n“架け橋”さん。私の幸せは\n君とともにあるの。…ずっとね",
+      "en": "You're always my \"bridge\". My happiness is with you. ...Always."
+    },
+    {
+      "voice_id": 10007,
+      "jp": "ラヴは与え与えられるもの…。\nイタズラも、された分だけ返さ\nなきゃ♪さ、なにしようかな～♪",
+      "en": "Love is something you give and receive... So pranks have to be returned in kind too. Now, what shall I do~?"
+    },
+    {
+      "voice_id": 20001,
+      "jp": "う～ん。格ゲーで言うと、\n体力ゲージがもう数ドットよ…。",
+      "en": "Hmm. In fighting-game terms, my health bar is down to a few pixels..."
+    },
+    {
+      "voice_id": 92001,
+      "jp": "優しいだけが愛じゃない。\n勝って、勝って…みんなと愛を\n分け合う日まで、遠慮はいらないわ",
+      "en": "Being kind isn't the only kind of love. Win, and win... no holding back until the day I share love with everyone."
+    },
+    {
+      "voice_id": 20009,
+      "jp": "配信ではみんなに『絶好調！』って\n言っちゃったけど…ごめん。\nちょっぴり強がっちゃったかも。",
+      "en": "I told everyone on stream I was in top form, but... sorry. I might have been putting on a brave face."
+    }
+  ]
+}

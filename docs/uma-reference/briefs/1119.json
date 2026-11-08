@@ -1,0 +1,194 @@
+{
+  "id": 1119,
+  "name_en": "Dream Journey",
+  "name_jp": "ドリームジャーニー",
+  "kind": "uma",
+  "one_liner": "A tiny, impeccably courteous fixer who plans everyone's journeys, dotes on sister Oru, and hides something behind the smile.",
+  "personality": "Dream Journey is smooth, attentive and always several steps ahead: she plans trips, books chocolatiers, sends gifts to the trainer's parents and offers to handle 'everything'. She is gently condescending in an affectionate way, calling the trainer pure and 'adorable' (おかわいらしい). Family comes first: she dotes on her younger sister Orfevre ('Oru') and reveres Stay Gold ('Anego'). Hints of a hidden side - ears and tail off limits, unexplained absences, a 'please keep tonight a secret' manner and mafia-like phrasing ('ブツ', 'オールイン') - give her a quietly menacing edge.",
+  "speech": {
+    "first_person": "watashi (私) - reading not confirmable from text",
+    "calls_trainer": "anata (貴方); occasionally Trainer-san (トレーナーさん, voice 70001)",
+    "register": "formal, gentlemanly keigo (〜ですよ, 参りましょう) with occasional masculine plain asides (〜だ, 〜だな, 仕方のない人だ)",
+    "tics": [
+      {
+        "jp": "ふふ",
+        "romaji": "fufu",
+        "meaning": "soft, knowing chuckle"
+      },
+      {
+        "jp": "おかわいらしい",
+        "romaji": "okawairashii",
+        "meaning": "'how adorable' - said of the trainer and others"
+      },
+      {
+        "jp": "参りましょう",
+        "romaji": "mairimashou",
+        "meaning": "humble 'shall we go'"
+      },
+      {
+        "jp": "旅路",
+        "romaji": "tabiji",
+        "meaning": "'journey' - she frames everything as a trip"
+      },
+      {
+        "jp": "アネゴ",
+        "romaji": "anego",
+        "meaning": "'Big Sis' (yakuza-flavoured) - what she calls Stay Gold"
+      },
+      {
+        "jp": "オル",
+        "romaji": "Oru",
+        "meaning": "her pet name for Orfevre"
+      },
+      {
+        "jp": "極上",
+        "romaji": "gokujou",
+        "meaning": "'the finest' - as in 'the finest journey/dream'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Travel planning and expeditions; packing (profile strength)",
+    "Counselling people's worries (profile strength)",
+    "Tea: gyokuro, iron-kettle tea, chamomile and Nilgiri lemon tea for Oru",
+    "Light-roast coffee in the morning; sea-bream ochazuke",
+    "Always keeps dolce in her dorm fridge (profile trivia)",
+    "Black clothes; carefully maintained shoes",
+    "Reading broadly ('knowledge is power')",
+    "Her family; Stay Gold's mysterious travels",
+    "Parties and 'eternal' fun shared with others"
+  ],
+  "weak_spots": [
+    "Fruit flies (profile weakness: コバエ)",
+    "Snow - she dislikes how quiet it makes things (voice 91027)",
+    "Ears and tail must not be touched (profile)",
+    "Being called 'plucky' for her small size on stage embarrasses her (voice 91006)",
+    "Long straightaways (per umamusu.wiki, unverified)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "February 24 (2月24日)",
+    "height": "144cm",
+    "voice_actor": "Mayu Yoshioka (吉岡茉祐)"
+  },
+  "relationships": [
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "Younger sister and roommate whom she dotes on; she brews her tea and watches her sleep",
+      "evidence": "home scenes x11; voice uses pet name 'オル' x10 (e.g. voice_id 90000: オルの寝顔を見ていたら; 91014: オルに淹れてあげよう); web: https://umamusu.wiki/Dream_Journey"
+    },
+    {
+      "id": 1135,
+      "name_en": "Stay Gold",
+      "nature": "'Anego' - revered mentor whose journey's end she wants to see",
+      "evidence": "home scenes x3; voice uses 'アネゴ' x7 (voice_id 91000, 91017, 91025, 20002); not in her mentioned_by list; web: https://umamusu.wiki/Dream_Journey"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "Friend she credits with entertaining Oru; picks their lunches",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91003, 91022: ええ、ナカヤマさんのご提案です)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Entertains Oru; challenged Journey to a 'whiteness' contest",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91003, 92018: 白さで勝るのはどちらか勝負だと、ゴルシさんから宣戦布告を)"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "Valued for zeal in keeping school order (likely the 'メノさん' of voice 91016)",
+      "evidence": "home scenes x2; voice_id 91016: メノさんは校内の治安維持に熱心で (name match inferred)"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "Teaches her gyaru culture, which fascinates her",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "Admires her unique creativity",
+      "evidence": "mentions in voice x1 (voice_id 91018: マーチャンさんの独創性は、私にはないものです)"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "Finds her dazzlingly sweet and good-natured",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1130,
+      "name_en": "Lucky Lilac",
+      "nature": "Tea companion she and Oru both enjoy",
+      "evidence": "home scenes x1; voice_id 91020: 本日はララさんとお茶の予定です ('ララ' is Lucky Lilac's short_name)"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Asked by Stay Gold to look after her before she entered Tracen",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Dream_Journey"
+    },
+    {
+      "id": null,
+      "name_en": "Her parents",
+      "nature": "A loving mother and a father who gave the sisters matching Christmas jewellery",
+      "evidence": "voice_id 91001: 母はとても愛情深い人でして; 91029: 父からのクリスマスプレゼントです"
+    }
+  ],
+  "groups": [
+    "Expedition Support Committee (遠征支援委員会) - voice 91026, event title 『遠征支援委員会』へようこそ"
+  ],
+  "story_arc": {
+    "summary": "Inspired by a streak of gold she saw at the end of a journey, she runs to see the 'end of the journey' Stay Gold spoke of. Her career goes Asahi Hai FS, Satsuki Sho, Japanese Derby and Kikuka Sho, with branching titles about bad weather and 'inheriting destruction' ('破壊を継ぐ者'). As a senior she targets the Osaka Hai, Tenno Sho (Spring), Takarazuka Kinen ('夢の旅人'), All Comers and Arima Kinen ('一筋の黄金'), mirroring the real Dream Journey's 2009 Takarazuka and Arima wins.",
+    "source": "event titles; web: https://umamusu.wiki/Dream_Journey; real-race results are model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10012,
+      "jp": "こんな日でさえ私を気にかけますか\n…仕方のない人だ。――では私が、\n極上の夢を見せて差し上げますよ。",
+      "en": "Even on a day like this, you're worried about me...? What a hopeless person. Then I shall show you the finest dream."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "頃合いですね。夢のような…極上の旅路へと\nお連れしましょう。さあ――",
+      "en": "It's time. Let me take you on a dreamlike, exquisite journey. Now -"
+    },
+    {
+      "voice_id": 90015,
+      "jp": "おや、見つかってしまいましたか。\n内緒にしていただけますか？\n今宵、ここで私と会ったことは。",
+      "en": "Oh my, I've been found. Would you keep it a secret? That you met me here tonight."
+    },
+    {
+      "voice_id": 91003,
+      "jp": "ゴルシさんやナカヤマさんは\n本当によくオルを楽しませて\nくれる…微笑ましい限りですね。",
+      "en": "Gold Ship-san and Nakayama-san really do keep Oru entertained... it warms my heart."
+    },
+    {
+      "voice_id": 20031,
+      "jp": "緊張、ですか。\nふ…かわいいことを仰る。\nただ実力を示す、それだけですよ。",
+      "en": "Nervous, you say? Heh... what an adorable thing to say. I'm only going to show what I can do, that's all."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "お困りごとがあれば、どうぞ私に。\n“すべて”…お任せください。",
+      "en": "If anything troubles you, come to me. Leave 'everything' to me."
+    }
+  ],
+  "timer_line_ideas": [
+    "Our little journey has reached its end, {user}: the independent run is complete. Shall I brew some tea while you review the results? Fufu.",
+    "The run has finished right on schedule, {user}. I took care of everything, as promised. Now, come and see... fufu, what an adorable face you're making."
+  ],
+  "data_gaps": [
+    "First-person reading not confirmable",
+    "'メノさん' assumed to be Fenomeno (not her short_name in source)",
+    "Hidden side is hinted only (profile trivia obscured by 'peep-prevention film'); details from fan wiki",
+    "mentions_in_voice for Winning Ticket and Manhattan Cafe are likely false positives (e.g. 'ペアチケット' in voice 91001)",
+    "Event titles like 'パリの街にて' and BC specials appear scenario-specific; not explained",
+    "Voice actor romanisation is not in the source; taken from umamusu.wiki/web search where available, otherwise general knowledge (unverified)"
+  ]
+}

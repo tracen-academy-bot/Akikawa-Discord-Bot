@@ -1,0 +1,65 @@
+{
+  "id": 1148,
+  "name_en": "Titleholder",
+  "name_jp": "タイトルホルダー",
+  "kind": "uma",
+  "one_liner": "Unreleased Uma Musume based on the front-running 2021 Kikuka Sho and 2022 Takarazuka Kinen winner; almost no in-game data.",
+  "personality": "unknown - the mdb has no profile text or voice lines for her. Her only character note on the web is that checking her older sister's Umastagram is the quickest way to find out how she is doing (web: gametora secret), which hints at a low-key personality but is not enough to describe her.",
+  "speech": {
+    "first_person": "unknown",
+    "calls_trainer": "unknown",
+    "register": "unknown",
+    "tics": []
+  },
+  "likes_and_motifs": [],
+  "weak_spots": [],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "unknown in mdb; February 10 per web: https://gametora.com/umamusume/characters/titleholder (verified)",
+    "height": "unknown in mdb; 155 cm per web: https://gametora.com/umamusume/characters/titleholder (verified)",
+    "voice_actor": "華成結 (romanisation unknown; gametora gives JP only - 'Yui Hanase' is a guess)"
+  },
+  "relationships": [
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "real-life sire (father); in-game relationship unknown",
+      "evidence": "web: https://gametora.com/umamusume/characters/titleholder (pedigree lists Duramente, verified)"
+    },
+    {
+      "id": 1146,
+      "name_en": "Efforia",
+      "nature": "real-life same-generation rival",
+      "evidence": "general knowledge (unverified): 2021 Satsuki Sho and 2022 Takarazuka Kinen"
+    },
+    {
+      "id": null,
+      "name_en": "older sister (unnamed)",
+      "nature": "has an older sister whose Umastagram is 'faster' for checking on her; unnamed in source (real-life older half-sister is Melody Lane - general knowledge, unverified)",
+      "evidence": "web: https://gametora.com/umamusume/characters/titleholder (secret)"
+    },
+    {
+      "id": 1118,
+      "name_en": "Admire Groove",
+      "nature": "real-life paternal grandmother (dam of Duramente); in-game relationship unknown",
+      "evidence": "web: https://gametora.com/umamusume/characters/titleholder (pedigree)"
+    }
+  ],
+  "groups": [],
+  "story_arc": {
+    "summary": "No in-game story: not playable, no cards, no event titles. In real life she won the 2021 Kikuka Sho, 2022 Tenno Sho (Spring) and 2022 Takarazuka Kinen.",
+    "source": "web: gametora pedigree page; real-life race record: general knowledge (unverified - not shown in fetched gametora text)"
+  },
+  "sample_lines": [],
+  "timer_line_ideas": [
+    "{user}, the independent run is over. The results are waiting, so go take a look.",
+    "Run complete, {user}. Head over and check how it went."
+  ],
+  "data_gaps": [
+    "The mdb has only her name, voice actor and image colour: no dorm, grade, birthday, height, profile text or voice lines.",
+    "No voice lines, so speech style, first person, how she calls the trainer and tics are all unknown; timer drafts are deliberately neutral and should not be used until she has lines.",
+    "Voice actor romanisation (Hanase Yui) is a guess.",
+    "Personality is unknown."
+  ]
+}

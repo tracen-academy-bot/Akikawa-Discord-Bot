@@ -1,0 +1,71 @@
+{
+  "id": 1142,
+  "name_en": "Logotype",
+  "name_jp": "ロゴタイプ",
+  "kind": "npc",
+  "one_liner": "Unreleased Uma Musume known in-game so far as a skilled fixer of shoes and clothes.",
+  "personality": "Almost nothing is in the data. Epiphaneia calls her a master at repairs who leaves worn shoes and clothes better than new, and Duramente mentions touring traditional buildings with her, suggesting an interest in history and preservation.",
+  "speech": {
+    "first_person": "unknown",
+    "calls_trainer": "unknown",
+    "register": "unknown",
+    "tics": []
+  },
+  "likes_and_motifs": [
+    "repairing shoes and clothes (per Epiphaneia voice 91000)",
+    "traditional architecture / history (per Duramente voice 91020)"
+  ],
+  "weak_spots": [
+    "unknown"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "unknown",
+    "height": "unknown",
+    "voice_actor": "Miku Takahashi (髙橋美空)"
+  },
+  "relationships": [
+    {
+      "id": 1141,
+      "name_en": "Epiphaneia",
+      "nature": "friend; Epi admires her repair skills; real-life 2013 Satsuki Sho rival (general knowledge, unverified)",
+      "evidence": "home scenes x1; Epiphaneia voice 91000: ロゴは名人だな～！"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "toured traditional buildings together",
+      "evidence": "Duramente voice 91020: ロゴと以前、伝統的な建築物巡りをした"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "shares a home scene",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1098,
+      "name_en": "Copano Rickey",
+      "nature": "shares a home scene",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [],
+  "story_arc": {
+    "summary": "No story data: not playable, no support cards, no event titles. Her namesake horse won the 2013 Satsuki Sho and was a miler/middle-distance type.",
+    "source": "model knowledge (unverified); web: https://game8.jp/umamusume/763720"
+  },
+  "sample_lines": [],
+  "timer_line_ideas": [
+    "{user}, the Independent Training run is finished. Come take a look at it.",
+    "Run complete, {user}. Everything held together nicely this time - let's check it over."
+  ],
+  "data_gaps": [
+    "No voice lines, no profile fields beyond voice actor",
+    "First person, trainer address, register, tics all unknown",
+    "Timer lines are generic placeholders, not in her voice",
+    "Personality inferred only from two other characters' lines",
+    "Both timer lines are generic placeholders (no source lines to model her voice on); replace once she gets voice lines"
+  ]
+}

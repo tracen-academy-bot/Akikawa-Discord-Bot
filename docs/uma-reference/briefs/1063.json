@@ -1,0 +1,181 @@
+{
+  "id": 1063,
+  "name_en": "Ikuno Dictus",
+  "name_jp": "イクノディクタス",
+  "kind": "uma",
+  "one_liner": "Bespectacled, iron-willed manager type who plans everything and wants to keep racing for as long as possible.",
+  "personality": "Calm, formal and meticulous: she speaks in careful keigo, reports her condition like a status readout, and keeps schedules, nutrition and sleep under strict management. Beneath the analysis she is warm and quietly passionate, likening herself to iron that gets stronger the more it is forged and loving sports manga. She is an eldest sister who looks after friends like Twin Turbo, and is a little awkward with selfies, facial expressions and showing she is happy.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "mostly anata written 貴方 (x7+); Trainer-san (トレーナーさん) only once (voice 90001)",
+    "register": "formal polite keigo (~です/~ます, ~かと, ~いただけますと)",
+    "tics": [
+      {
+        "jp": "想定",
+        "romaji": "soutei",
+        "meaning": "'projection/expectation' - 'as projected', 'beyond projections'"
+      },
+      {
+        "jp": "かと",
+        "romaji": "~ka to",
+        "meaning": "clipped polite ending 'I believe...' (from ~かと思います)"
+      },
+      {
+        "jp": "万全",
+        "romaji": "banzen",
+        "meaning": "'fully prepared / all in order'"
+      },
+      {
+        "jp": "マネジメント",
+        "romaji": "manejimento",
+        "meaning": "'management' - her identity"
+      },
+      {
+        "jp": "鉄",
+        "romaji": "tetsu",
+        "meaning": "'iron' - recurring self-metaphor (forging, iron flower)"
+      },
+      {
+        "jp": "承知です",
+        "romaji": "shouchi desu",
+        "meaning": "'Understood.'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "cycling (bike parts, long rides to see autumn leaves)",
+    "tools - her father taught her (wrenches)",
+    "green tea every morning",
+    "sports manga (スポ根漫画)",
+    "braiding her hair / knitting",
+    "nutrition-balanced cooking (hot pot, vegetable cake)",
+    "karuta (百人一首)",
+    "iron and forging imagery"
+  ],
+  "weak_spots": [
+    "gambling and selfies (profile)",
+    "facial-expression lessons (voice 70014)",
+    "eating hamburgers neatly (voice 90003)",
+    "very spicy food (voice 91020)",
+    "glasses fogging up (voice 91015)",
+    "looking shady in sunglasses (voice 91013)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 16 (4月16日)",
+    "height": "163cm",
+    "voice_actor": "Masumi Tazawa (田澤茉純)"
+  },
+  "relationships": [
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "Friend she manages and frets over (diet, eating shaved ice too fast)",
+      "evidence": "mentions in voice x5 (voice_id 91010: ターボさんの昼食は栄養が偏りすぎていて…); home scenes x3"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Roommate (per wiki); evening tea companion",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 90015: 夜は時折、マックイーンさんとお茶を。); roommate per web: https://umamusu.wiki/Ikuno_Dictus; voice_id 91004: 静かすぎて、マックイーンさんに呼吸を確認されたこともありました (supports sharing a room)"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Friend whose thoughtfulness amazes her",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91000: ネイチャさんは心が読めるのでは？); top affinity 36"
+    },
+    {
+      "id": 1062,
+      "name_en": "Matikanetannhauser",
+      "nature": "Friend whose positivity saves everyone",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91003)"
+    },
+    {
+      "id": 1031,
+      "name_en": "Ines Fujin",
+      "nature": "Fellow eldest sister",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91017: アイネスさんと長女トークをしました。)"
+    },
+    {
+      "id": 1055,
+      "name_en": "Marvelous Sunday",
+      "nature": "Outings with her feel like adventures",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 90013)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Baffled by her gyaru vocabulary",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91018: ヘリオスさんの語彙の豊富さには)"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "'Mirako-san', bedding expert she learns from",
+      "evidence": "home scenes x1; voice_id 90014: ミラ子さんは寝具に造詣が深く"
+    },
+    {
+      "id": 1104,
+      "name_en": "Katsuragi Ace",
+      "nature": "Senior she goes cycling in the mountains with; taught Ace a hairstyle",
+      "evidence": "Katsuragi Ace's own voice (1104 voice_id 90018: イクノと行った山、紅葉キレーでさ / 91029: タルマエやイクノに教わってさ); mentioned_by x2"
+    },
+    {
+      "id": 1078,
+      "name_en": "Yamanin Zephyr",
+      "nature": "Friend she taught to ride a bike",
+      "evidence": "Yamanin Zephyr's own voice (1078 voice_id 91016: イクノさんに自転車の乗り方を教わりまして。)"
+    }
+  ],
+  "groups": [
+    "General Affairs Committee (総務委員) (voice 90008)",
+    "Team Canopus with Nice Nature, Twin Turbo, Matikanetannhauser (anime-only; web: umamusu.wiki)"
+  ],
+  "story_arc": {
+    "summary": "Ikuno manages herself with iron discipline, aiming not for a single brilliant win but to keep running strong for a long, injury-free career (chara story '堅固なる意志', ending '継がれし鉄花の咲く未来'). Her path runs from the Tiara races (Oka Sho, Oaks, Shuka Sho) through older-division races like the Takarazuka Kinen and All Comers, testing whether careful management can stand against brilliant rivals ('明暗', '悲哀と、憧れと'). It culminates in an Arima Kinen 'miracle of the unbreakable' ('有馬記念の後に・不壊の奇跡').",
+    "source": "event titles + model knowledge (unverified); web wiki had no plot detail: https://umamusu.wiki/Ikuno_Dictus"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20002,
+      "jp": "この軽やかさ…！グリスアップを\n施した翌日に匹敵しますよ！\nあ…つまりは絶好調という事です。",
+      "en": "This lightness...! It rivals the day after a grease-up! Ah... that is to say, I'm in peak condition."
+    },
+    {
+      "voice_id": 90001,
+      "jp": "…トレーナーさんの昼食の傾向は\n炭水化物に偏っていました。朝食は\n野菜を中心にしてみるとよいかと。",
+      "en": "...Trainer-san, your lunches have been skewed toward carbohydrates. I suggest a vegetable-centred breakfast."
+    },
+    {
+      "voice_id": 92003,
+      "jp": "鉄は熱され何度も打たれ、\n強くなるものです。私も…\n鉄のように、鍛えていきます。",
+      "en": "Iron grows stronger by being heated and struck again and again. I too... will forge myself like iron."
+    },
+    {
+      "voice_id": 91001,
+      "jp": "『ターボはターボ』\n…実に、真理をついた発言です。\nターボさんから学ぶことは多い。",
+      "en": "'Turbo is Turbo'... a statement that truly gets to the heart of things. There is much to learn from Turbo-san."
+    },
+    {
+      "voice_id": 400003,
+      "jp": "『チャンネル登録、よろイクノ♪』\n…さすがに文脈がないでしょうか。\n『チャンネル登録にイクノ』…か？",
+      "en": "'Please subscribe, yorosh-Ikuno♪'... that lacks context, perhaps. 'Subscribe to Ikuno'... perhaps?"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "貴方とならば、長く強く走って\n行ける…。そう思うのです。経験と\n信頼から導き出した絶対の答えです",
+      "en": "With you, I can keep running long and strong... I believe so. It is the absolute answer derived from experience and trust."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the 50-minute independent run has concluded exactly as projected. I have organised the results for review. Shall we confirm them now?",
+    "Trainer-san, it is time. The independent training has ended on schedule. Recovery is also part of management, so please review it promptly, {user}."
+  ],
+  "data_gaps": [
+    "Career story plot details not verified on the web; built from event titles",
+    "Team Canopus is anime-only",
+    "Grade listed as middle school in the mdb (中等部)"
+  ]
+}

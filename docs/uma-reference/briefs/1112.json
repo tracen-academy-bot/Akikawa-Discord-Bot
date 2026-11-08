@@ -1,0 +1,177 @@
+{
+  "id": 1112,
+  "name_en": "Daring Heart",
+  "name_jp": "デアリングハート",
+  "kind": "uma",
+  "one_liner": "Bold, English-peppered girl raised in America who declares herself the future Queen of the Tiara.",
+  "personality": "Daring Heart is confident, flashy and a natural leader who loves being watched, mixing English into almost every line. She is also serious about steady self-improvement ('always be the best me') and refuses to indulge herself when off form, hating to show weakness. She flirts and teases the trainer, praising their analysis and claiming she was the one who 'noticed' them first, and she looks after friends like her roommate Pandora (hairbrush, homework) and Kraft, who dozes off to her guitar.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer (トレーナー, no -san); usually anata (あなた); also 'My best buddy', 'partner'",
+    "register": "casual feminine Japanese (～わ, ～わよ, ～かしら) with heavy English code-switching",
+    "tics": [
+      {
+        "jp": "Follow my lead!",
+        "romaji": "(English)",
+        "meaning": "her self-intro catchphrase (profile self_intro only; does not occur in her voice lines)"
+      },
+      {
+        "jp": "Be bold, be brave!",
+        "romaji": "(English)",
+        "meaning": "her pre-race mantra (voice 20030)"
+      },
+      {
+        "jp": "フフッ",
+        "romaji": "fufu'",
+        "meaning": "confident little laugh (voice 10002, 20003, 91004; plain フフ in 20027)"
+      },
+      {
+        "jp": "わよ / かしら",
+        "romaji": "~wa yo / ~kashira",
+        "meaning": "feminine sentence endings (voice 10011, 20001)"
+      },
+      {
+        "jp": "クイーン / Queendom",
+        "romaji": "kuiin",
+        "meaning": "queen; 'This is my Queendom!' (voice 30004)"
+      },
+      {
+        "jp": "Let's do this! / C'mon! / Chop-chop!",
+        "romaji": "(English)",
+        "meaning": "English hype phrases (voice 20040, 10016, 10019)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Improvised songwriting on acoustic guitar; learned guitar from her mother (profile strengths, voice 91012)",
+    "Tail brushing / hair brushing to calm down (profile, voice 91001)",
+    "Shark films and horror films (voice 20002, 90004; event title 彼女がサメ映画を愛するわけ)",
+    "Mountain trips and outdoor survival (voice 10008, 90008, 20026; event title サバイバーズハート)",
+    "Vivid primary colours, blue and yellow (voice 10025, 70009)",
+    "Family cherry pie, cereal breakfasts, ugly Christmas sweaters, Thanksgiving (voice 90006, 91009, 91015, 91014)",
+    "Her teddy bear from her dad (voice 10013)",
+    "Hachimi drink: soft, strong, whipped lemon (voice 90003)",
+    "Yoga before bed (voice 90005)",
+    "Capybaras and meat (event titles CAPYBARA, 肉の魔力に誘われて)"
+  ],
+  "weak_spots": [
+    "Smell of newspaper ink (profile weaknesses: 新聞のインクの匂い)",
+    "Hates showing weakness or being 'spoiled' when off form (voice 20008)",
+    "Afraid of ghosts per web (https://umamusu.wiki/Daring_Heart) - unverified vs event 彼女が怖がるモノ; note she still enjoys horror films (voice 90004)",
+    "Lost to Air Messiah at basketball and wants revenge (voice 91002)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "March 9 (3月9日)",
+    "height": "165 cm (165cm)",
+    "voice_actor": "Shio Kisui (希水しお) - romanisation unverified"
+  },
+  "relationships": [
+    {
+      "id": 1109,
+      "name_en": "Rhein Kraft",
+      "nature": "Same-year friend/rival; fell asleep listening to Heart's guitar; highest affinity",
+      "evidence": "home scenes x5; named in 3 voice lines (source mentions_in_voice field says 2) (voice_id 91004: クラフトったら、私の弾き語りを聞いてるうちに寝ちゃったのよ); top affinity 34; web: https://umamusu.wiki/Daring_Heart (Heart teaches her English)"
+    },
+    {
+      "id": 1111,
+      "name_en": "Air Messiah",
+      "nature": "Same-year friend; basketball rival; does Heart's yukata dressing",
+      "evidence": "home scenes x6; mentions in voice x2 (voice_id 91002: メサイアったら、本当にバスケが強いのよね！…リベンジしなきゃ。)"
+    },
+    {
+      "id": 1075,
+      "name_en": "Daring Tact",
+      "nature": "Close friend she shops and parties with; web says a mentor figure (real-life granddaughter)",
+      "evidence": "home scenes x3; named as タクト in 2 voice lines, not counted in source mentions_in_voice (voice_id 10026: タクトとは、よく一緒に服やアクセサリーを買いに行くの。; 10008 party in the mountains); web: https://umamusu.wiki/Daring_Heart (Heart is 'some sort of mentor' to her); real-life granddaughter (general knowledge)"
+    },
+    {
+      "id": 1110,
+      "name_en": "Cesario",
+      "nature": "Same-year rival whose training theory she respects; English study partner",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 20006: シーザリオのトレーニング理論は完璧よ。尊敬に値する…); (voice_id 91003: 今日もシーザリオと英語の勉強会。)"
+    },
+    {
+      "id": 1113,
+      "name_en": "Fusaichi Pandora",
+      "nature": "Roommate (web) whose late-night habit she notes; Pandora complains Heart drags her up mountains and nags about homework",
+      "evidence": "home scenes x1; named in 1 voice line, not in source mentions_in_voice (voice_id 91001: パンドラの夜更かし癖♪); Pandora's own voice 90002: ハートちゃんに山連れてかれる～！ and 90015; web: https://umamusu.wiki/Daring_Heart (roommate)"
+    },
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "Test-score rival",
+      "evidence": "named as スカーレット in 1 voice line, not in source mentions_in_voice (voice_id 91010: スカーレットも、小テストで満点！テスト対決、またまた引き分け！); top affinity 30"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "Admired as a towering goal",
+      "evidence": "mentions in voice x1 (voice_id 400010: 圧倒的だったわ、ラモーヌさん…。――最高ね。)"
+    },
+    {
+      "id": null,
+      "name_en": "Her mother (unnamed)",
+      "nature": "Her idol - racewear and singing voice modelled on her",
+      "evidence": "mentions in voice (voice_id 91007: 目指したのは、私の憧れの人。ずっとチャーミングな、ママよ。)"
+    },
+    {
+      "id": null,
+      "name_en": "Her father (unnamed)",
+      "nature": "Works at 'Hill Esta Academy', which she attended",
+      "evidence": "mentions in voice (voice_id 91000: パパは、ヒルエスタ・アカデミーで今も働いているの。)"
+    }
+  ],
+  "groups": [
+    "Her generation's Tiara cohort with Air Messiah, Rhein Kraft and Cesario - 同期 star-circle (voice 91006, 90007; exact grouping general knowledge, unverified)",
+    "Former student of Hill Esta Academy (ヒルエスタ・アカデミー), apparently abroad (voice 91000)"
+  ],
+  "story_arc": {
+    "summary": "Raised in the United States, Heart comes to Tracen aiming to become the Queen of the Triple Tiara. Her goals run Hanshin JF, Fillies' Review, Oka Sho, NHK Mile Cup, Shuka Sho, Hanshin Uma Musume S, Victoria Mile, Queen S, Fuchu Uma Musume S and Mile CS, with event titles like 'My Brilliant Rivals', 'Becoming Someone New?' and 'Just the Way I Am'. Her character story titles ('Moon in the Sunshine', 'Eclipse of Sun and Moon') suggest a sun/moon rivalry theme; details are not in the mdb.",
+    "source": "event titles + web: https://umamusu.wiki/Daring_Heart"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20030,
+      "jp": "Be bold, be brave!\nGo, Daring Heart!\n…フフッ、精神統一完了よ。",
+      "en": "Be bold, be brave! Go, Daring Heart! ...Fufu, focus complete."
+    },
+    {
+      "voice_id": 30004,
+      "jp": "This is my Queendom!貫いてみせるわ！",
+      "en": "This is my Queendom! I'll see it through!"
+    },
+    {
+      "voice_id": 10000,
+      "jp": "小心者、なんてあなたは言うけど、\n慎重さは美点でもあるわ！勇敢な\n私と合わせれば…完全無欠でしょ？",
+      "en": "You call yourself timid, but caution is a virtue too! Put it together with brave me and... we're flawless, right?"
+    },
+    {
+      "voice_id": 91012,
+      "jp": "花が咲く庭で、ママからギターを\n教わったの。…とっても綺麗に歌う\nのよ。私が目指す、最高の声なの。",
+      "en": "My mom taught me guitar in a garden full of flowers. ...She sings so beautifully. That's the voice I'm aiming for."
+    },
+    {
+      "voice_id": 90004,
+      "jp": "…ねぇ、夜が深まると\n人気が消えて…明かりも消えて…\nホラー映画鑑賞に、ぴったりよね！",
+      "en": "...Hey, as the night gets deeper, everyone's gone... the lights go out... perfect for a horror movie, right?"
+    },
+    {
+      "voice_id": 70001,
+      "jp": "見初めたのはあなただと思ってる？\nNope,あなたに気づいたのは私…\nその分析力、逃がさないってね♪",
+      "en": "You think you're the one who picked me? Nope - I'm the one who noticed you... and I wasn't letting that analytical mind get away."
+    }
+  ],
+  "timer_line_ideas": [
+    "Hey {user}! Your independent run is done - chop-chop! Be bold, be brave, and come check it with me. Fufu, a queen doesn't wait forever, you know?",
+    "Fufu, time's up! The 50-minute run is all wrapped up, my best buddy. C'mon, {user}, let's go look at it together. Follow my lead!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice counts for Kawakami Princess, Manhattan Cafe and Gran Alegria are false positives (substring matches on プリンセス, カフェ, グランマ) - not used",
+    "Voice actor romanisation unverified",
+    "No dialogue for story events; arc is from titles + fan wiki",
+    "Mentions counts in source miss short names (タクト, パンドラ, スカーレット) and over-count Kraft (field 2, lines 3); counts in evidence now state both",
+    "Fear of ghosts is from fan wiki only"
+  ]
+}

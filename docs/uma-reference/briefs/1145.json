@@ -1,0 +1,189 @@
+{
+  "id": 1145,
+  "name_en": "Rulership",
+  "name_jp": "ルーラーシップ",
+  "kind": "uma",
+  "one_liner": "Grandiose board-game strategist who 'rules the board' - until her glass heart cracks and she wants to go home.",
+  "personality": "A self-styled master strategist who frames everything as a game: races are matches, training is a build, and the trainer is her 'right hand'. She talks big with chess and gaming jargon, but her official tagline says her heart is made of glass, and when things go wrong she collapses into whiny, lazy slang ('I wanna go home', 'all of creation is a trash game'). She is a nocturnal indoor gamer who hates going out, yet she is fond of her friends and is quietly considerate toward the trainer, for example by booking a dinner on their birthday.",
+  "speech": {
+    "first_person": "ore (俺)",
+    "calls_trainer": "kimi (君); 'Trainer' (トレーナー) when lecturing; calls them her 'right hand' (右腕 / 我が右腕)",
+    "register": "two modes: grandiose, theatrical strategist speech full of chess/shogi/go and gaming loanwords; when demotivated, slack internet-gamer casual (マジで, っすわ, ～じゃんか)",
+    "tics": [
+      {
+        "jp": "フッ",
+        "romaji": "fu",
+        "meaning": "smug chuckle"
+      },
+      {
+        "jp": "チェックメイト",
+        "romaji": "chekkumeito",
+        "meaning": "'checkmate' - her winning line"
+      },
+      {
+        "jp": "最善手",
+        "romaji": "saizenshu",
+        "meaning": "'the best move'"
+      },
+      {
+        "jp": "盤面",
+        "romaji": "banmen",
+        "meaning": "'the board' - how she sees races and the world"
+      },
+      {
+        "jp": "右腕",
+        "romaji": "migiude",
+        "meaning": "'right hand' - her title for the trainer"
+      },
+      {
+        "jp": "詰んだ",
+        "romaji": "tsunda",
+        "meaning": "'I'm checkmated / it's over'"
+      },
+      {
+        "jp": "クソゲー",
+        "romaji": "kusoge",
+        "meaning": "'trash game' - her meltdown word"
+      },
+      {
+        "jp": "帰りたい / 帰らせろ",
+        "romaji": "kaeritai / kaerasero",
+        "meaning": "'I want to go home / let me go home'"
+      },
+      {
+        "jp": "マジで",
+        "romaji": "maji de",
+        "meaning": "'seriously' (casual slang)"
+      },
+      {
+        "jp": "タクティクス",
+        "romaji": "takutikusu",
+        "meaning": "'tactics' - favoured loanword"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "board games of all kinds: chess, reversi, go, shogi, werewolf variants, horror board games (profile + voice lines)",
+    "online games; night-time play (she is nocturnal)",
+    "psychology and swimming (profile strengths)",
+    "Hong Kong-style milk tea in the morning (voice 90000)",
+    "sweets in winter; Eishin Flash's homemade apple pie (voice 91015)",
+    "monochrome (モノトーン) style, a favourite casual-urban clothing brand (voice 10025); staying indoors in her 'lair' (根城)",
+    "her younger brother's piano helps her focus (profile)"
+  ],
+  "weak_spots": [
+    "cats, crowds, flying insects (profile weaknesses)",
+    "a fragile 'glass' heart: melts down after small setbacks (voices 20011, 20033)",
+    "hates going out; 'outing capacity' of once a week (voice 10027)",
+    "gate nerves before races (voice 20035)",
+    "fails to sleep normally; all-nighters (voice 90001)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 15 (5月15日)",
+    "height": "160 cm (160cm)",
+    "voice_actor": "Mizutama Unno (海野水玉)"
+  },
+  "relationships": [
+    {
+      "id": 1144,
+      "name_en": "Rose Kingdom",
+      "nature": "close friend and chess rival; Rulership thinks Rose's 'just a hobby' modesty is a bluff",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91000: ローズはチェスの腕ならなかなかの ものでね。“嗜み程度”などと謙遜 しているが…あれはブラフだな。)"
+    },
+    {
+      "id": 1143,
+      "name_en": "Victoire Pisa",
+      "nature": "friend and gaming buddy whose 'angelic' luck frustrates her; throws her birthday party",
+      "evidence": "home scenes x2; voice_id 91001: ピサめ…天使みたいな顔しておいて つくづくドロー運がエグいな…！; voice_id 10013 (birthday party)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "nags her constantly by LANE messages (lunch, homework); she calls her 'Air Groove-san' (エアグルーヴサン). Real-life dam of Rulership (web)",
+      "evidence": "home scenes x2; voice_id 91010: エアグルーヴサンからめちゃくちゃ LANE来る…; Air Groove mentions her x2 (mentioned_by); pedigree: web: https://gametora.com/umamusume/characters/rulership"
+    },
+    {
+      "id": 1141,
+      "name_en": "Epiphaneia",
+      "nature": "dorm-mate who worries about her curfew and wakes her with a loud voice; possibly roommate (unverified)",
+      "evidence": "voice_id 90005: 越えるとエピが心配だなんだ 騒ぎ出してアレだからさ…; voice_id 91009"
+    },
+    {
+      "id": 1137,
+      "name_en": "Kiseki",
+      "nature": "friend who says a vampire costume suits her; real-life son of Rulership (web, unverified)",
+      "evidence": "mentions in voice x1 (voice_id 10007: キセキ曰く俺はダークファンタジー の吸血鬼キャラが似合いだそうだ。); event title: その名はキセキ; real-life link: web: https://dic.nicovideo.jp/a/ルーラーシップ(ウマ娘) (search snippet)"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "senior whose homemade apple pie she covets ('Flash-san')",
+      "evidence": "mentions in voice x1 (voice_id 91015: フラッシュサンの手作り アップルパイ宅配システムだ…！); event title: 日本ダービーの後に・“閃光”封じ"
+    },
+    {
+      "id": 1118,
+      "name_en": "Admire Groove",
+      "nature": "home-screen partner; real-life half-sister (both out of Air Groove) - general knowledge (unverified)",
+      "evidence": "home scenes x1; general knowledge (unverified)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "home-screen partner; nature unknown",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Air Groove's family line (real life; web: gametora pedigree)",
+    "the Rose Kingdom / Victoire Pisa / Eishin Flash friend circle (from home scenes and voice lines; not an official named group)"
+  ],
+  "story_arc": {
+    "summary": "A gamer who treats the Twinkle Series as a board to conquer, she recruits the trainer as her 'right hand'. Event titles show early overconfidence and blunders (毎日杯の後に・やっちまったぁ～！, 日本ダービーの後に・策士、策に溺れる - 'the schemer drowns in her own scheme'), a turn toward real stakes ('Not a Game', 揺れ動く世界の上で), and a finale tied to Kiseki and Rose Kingdom (その名はキセキ, 有馬記念の後に・薔薇の行方, 'Next Stage!').",
+    "source": "event titles; character summary (strategist with very weak mentality): web: https://dic.nicovideo.jp/a/ルーラーシップ(ウマ娘) (search snippet only, page fetch returned 403); deeper plot not verified"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 40001,
+      "jp": "盤面は掌握した…君たちの思考は読めている。\nさあて――チェックメイトだ。",
+      "en": "I have seized the board... I can read your thoughts. Well then-- checkmate."
+    },
+    {
+      "voice_id": 20011,
+      "jp": "チェスも負けたし小指もぶつけたし\nモチベも枯れたしも～全部がダメ、\n森羅万象クソゲーっすわ！！",
+      "en": "Lost at chess, stubbed my pinky, my motivation's dried up, ugh, everything sucks. All of creation is a trash game!!"
+    },
+    {
+      "voice_id": 10005,
+      "jp": "チョコではなく、チェスセットを\n君に。一時の甘美より、長く続け\nられる対局の方が価値があるだろう",
+      "en": "Not chocolate - a chess set, for you. Rather than a moment's sweetness, a match we can keep playing for a long time is worth more, isn't it?"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "ピサめ…天使みたいな顔しておいて\nつくづくドロー運がエグいな…！\nいや、天使だから豪運なのか…！？",
+      "en": "Pisa... with that angel face, her draw luck is ridiculous...! Wait, is she that lucky *because* she's an angel...!?"
+    },
+    {
+      "voice_id": 20035,
+      "jp": "正直ゲートん中で2年くらい\n暮らしたい…………ウソ、出る出る\nちゃんと出る。出るから褒めて…。",
+      "en": "Honestly I'd like to live inside the starting gate for about two years... kidding, I'll come out, I'll come out properly. I'll come out, so praise me..."
+    },
+    {
+      "voice_id": 90007,
+      "jp": "紫外線、熱中症、脱水…あらゆる\n詰みを防ぐ究極の術がある――\n穴熊囲い、つまりインドアだ！",
+      "en": "UV rays, heatstroke, dehydration... there's an ultimate technique that blocks every checkmate - the Anaguma castle. In other words: staying indoors!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Game over - the independent run is done, {user}. A clean line from opening to endgame, exactly as I read it. Fu... now, my right hand, come review the board with me.",
+    "{user}, run's finished. Checkmate, basically. ...So can I go home now? Kidding. Mostly. Go check the results, will you?"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists King Halo x1, but it is a false positive: voice 91005 says チェスのキング (the chess king).",
+    "Whether Epiphaneia is her roommate is not confirmed; voice lines only show they share a dorm routine.",
+    "Who 'domi-san' (憧れのdomiさん, voice 10004) is could not be identified.",
+    "Full training story dialogue not available; arc built from event titles. nicovideo returned 403, gametora has no story text."
+  ]
+}

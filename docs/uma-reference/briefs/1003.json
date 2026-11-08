@@ -1,0 +1,196 @@
+{
+  "id": 1003,
+  "name_en": "Tokai Teio",
+  "name_jp": "トウカイテイオー",
+  "kind": "uma",
+  "one_liner": "Cocky, adorable 'Teio-sama' who worships Kaichou Rudolf and swears she'll be the undefeated Triple Crown winner.",
+  "personality": "Bubbly, boastful and attention-loving, she refers to herself as 'Teio-sama', plays at being a pompous lord ('...zoyo~', 'de aaru') and insists everything is 'yoyuu' (easy). She makes friends with anyone, loves games and dancing, and lives for praise, especially from her idol Symboli Rudolf, whom she means to inherit from and surpass. Under the bravado is a fierce, almost desperate refusal to lose and a stubborn 'never give up' streak.",
+  "speech": {
+    "first_person": "boku (ボク); also mock-pompous 'wagahai (ワガハイ)'",
+    "calls_trainer": "Trainer (トレーナー, no honorific); also kimi (キミ)",
+    "register": "Casual, cheeky tomboy speech with playful mock-archaic/lordly endings",
+    "tics": [
+      {
+        "jp": "テイオー様",
+        "romaji": "Teio-sama",
+        "meaning": "refers to herself as 'Lord Teio'"
+      },
+      {
+        "jp": "カイチョー",
+        "romaji": "Kaichou",
+        "meaning": "'Prez' - her name for Symboli Rudolf"
+      },
+      {
+        "jp": "はちみー",
+        "romaji": "hachimii",
+        "meaning": "her beloved honey drink (はちみつドリンク); also sings 'はちみ～、はちみ～'"
+      },
+      {
+        "jp": "ヨユー",
+        "romaji": "yoyuu",
+        "meaning": "'easy, no sweat'"
+      },
+      {
+        "jp": "無敵の",
+        "romaji": "muteki no",
+        "meaning": "'invincible' (無敵のテイオー様, 無敵のテイオー伝説)"
+      },
+      {
+        "jp": "テイオーステップ",
+        "romaji": "Teio Step",
+        "meaning": "her signature dance-like stride"
+      },
+      {
+        "jp": "ぞよ",
+        "romaji": "zoyo",
+        "meaning": "mock-noble sentence ending"
+      },
+      {
+        "jp": "であ～る",
+        "romaji": "de aaru",
+        "meaning": "pompous 'it is so' ending"
+      },
+      {
+        "jp": "えっへん",
+        "romaji": "ehhen",
+        "meaning": "'ahem!' - smug boast"
+      },
+      {
+        "jp": "にしし",
+        "romaji": "nishishi",
+        "meaning": "mischievous giggle"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Honey drinks (hachimii) in good times and bad",
+    "Symboli Rudolf (2-shot photos, matching outfit colours)",
+    "Games, arcades, karaoke",
+    "Dancing and the Teio Step",
+    "Praise and being the centre of attention (her ears never miss praise or Kaichou's voice)",
+    "Napping on the Student Council room sofa (voice 91010)",
+    "Being looked up to by kouhai (Kitasan Black)"
+  ],
+  "weak_spots": [
+    "Doctors (listed weakness), vaccinations, hospitals (voices 91015, 91026)",
+    "Bitter food: seven-herb porridge (voice 91012)",
+    "Her parents dote on her: they cried when she tried to stop calling them Papa/Mama (profile about_family)",
+    "Being ignored by Kaichou (voice 90006)",
+    "Insists she isn't scared of ghosts - twice in one line (voice 90215)",
+    "Knees: stretching 'focusing on the knees' (trivia), linked to her injury arc"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 20 (4月20日)",
+    "height": "150 cm (150㎝)",
+    "voice_actor": "Machico (Machico)"
+  },
+  "relationships": [
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "Idol and goal; she calls her 'Kaichou' and vows to succeed and surpass her",
+      "evidence": "home scenes x6; mentioned by Rudolf x4; voice 400061: カイチョーの後を継ぐのはボク！カイチョーを超えるのもボク！; 90003; 10018"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Same-year top rival and friend in tests and races",
+      "evidence": "mentions in voice x6 (voice_id 91000: 特にマックイーンには負けたくないんだ; 91022; 91218); top affinity 36; event title: 地VS天 (general knowledge: McQueen is the 'Heaven' side - unverified)"
+    },
+    {
+      "id": 1024,
+      "name_en": "Mayano Top Gun",
+      "nature": "Close friend she games with late at night and looks after (general knowledge: roommates, unverified)",
+      "evidence": "mentions in voice x4 (voice_id 91009: マヤノとゲームしてたらつい夜更かし; 91221; 10010); event title: ボクとマヤノとオトナの時間"
+    },
+    {
+      "id": 1073,
+      "name_en": "Tsurumaru Tsuyoshi",
+      "nature": "Close friend; matching outfits, 'nikoichi' (inseparable pair)",
+      "evidence": "home scenes x4; voice 91228: ツルちゃんの勝負服とお揃いなの！えへへ、ニコイチ～♪; 10026"
+    },
+    {
+      "id": 1068,
+      "name_en": "Kitasan Black",
+      "nature": "Kouhai who idolises her; Teio wants to look cool for her",
+      "evidence": "home scenes x2; mentioned by Kitasan x5; voice 91020: キタちゃんがボクを見る時の目見た？; 91226"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "Challenges her to contests without saying what/when",
+      "evidence": "home scenes x4; voice 91018"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Peer she's envious of for being looked up to by kouhai (classmate status not stated in her lines)",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91016: ネイチャってけっこう後輩たちに慕われてるみたい…)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Scolds her for napping in the Student Council room",
+      "evidence": "voice 91010; event title: “女帝”vs.“帝王”"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "Someone she'd let into the kotatsu along with Kaichou and Tsuru-chan; no deeper tie shown in her lines",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91227: カイチョー、ツルちゃん…シリウスも入れてあげよっかな！)"
+    }
+  ],
+  "groups": [
+    "Team Spica (anime only)",
+    "Close to the Student Council via Rudolf (not a member - inferred from voice 91010/90013)"
+  ],
+  "story_arc": {
+    "summary": "Dreaming of becoming an undefeated Triple Crown winner like Kaichou, Teio storms through her debut, Wakakoma Stakes, Satsuki Sho and the Derby. Her Kikuka Sho ambition ('I'm going to run the Kikuka Sho!') and later setbacks (Spring Tenno Sho 'Why?', 'overcoming defeat', 'what's missing') reflect the real horse's repeated leg fractures, before she reigns at the Arima Kinen as a true 'Teio' (Emperor).",
+    "source": "event titles (菊花賞に出るんだ！, 負けを乗り越えて, 欠けているもの, 天皇賞（春）の後に・どうして？, 有馬記念の後に・“帝王”君臨); injury context from model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90011,
+      "jp": "はちみ～、はちみ～、はちみ～♪\nやっぱり朝は、\nはちみつドリンクだよね～！",
+      "en": "Hachimii, hachimii, hachimii~♪ Mornings just gotta start with a honey drink!"
+    },
+    {
+      "voice_id": 20027,
+      "jp": "ふふんっ、この無敵のテイオー様に\n挑もうなんておろかなり～♪\n全員置き去りにしてあげよ～！",
+      "en": "Hmph, challenging the invincible Teio-sama? How foolish~♪ I'll leave every one of you in the dust~!"
+    },
+    {
+      "voice_id": 10013,
+      "jp": "ふっふっふ～。何を隠そう、\n今日はボクの誕生日！さぁさぁ、\n盛大に祝うといいぞよ～♪",
+      "en": "Fufufu~. Behold, today is MY birthday! Come now, celebrate me lavishly, zoyo~♪"
+    },
+    {
+      "voice_id": 400061,
+      "jp": "カイチョーの後を継ぐのはボク！\nカイチョーを超えるのもボク！\n誰にも譲らないもんね。",
+      "en": "The one who inherits from Kaichou is me! The one who surpasses Kaichou is me too! I won't hand that to anyone."
+    },
+    {
+      "voice_id": 91019,
+      "jp": "テイオーステップのコツか～…。\nタン、タン、タタンって感じで、\n動けばいいんだよ！簡単でしょ？",
+      "en": "Tips for the Teio Step? Just move like tan, tan, ta-tan! Easy, right?"
+    },
+    {
+      "voice_id": 90215,
+      "jp": "この時間、幽霊が出るらしいよ…？\nボクは平気だけど～、一緒に帰って\nあげよっか？…ボクは平気だけど！",
+      "en": "They say ghosts come out around now...? I'm fine, but~ want me to walk you home? ...I'm fine, though!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}~! The independent run's done! Teio-sama cleared it with total yoyuu, obviously. Now hurry up and come praise me, Trainer! Ehhen!",
+    "Ding ding~! Fifty minutes, finished! Behold the invincible Teio legend, zoyo~! Come check the results, {user}, and maybe bring a hachimii?"
+  ],
+  "data_gaps": [
+    "Story arc beyond titles from model knowledge (unverified)",
+    "Roommate status with Mayano Top Gun is general knowledge, not stated in the data",
+    "mentions_in_voice lists Manhattan Cafe x2, but matches are 'カフェ' (a café, voice 10026) and 'カフェテリア' (voice 91012) - false positives",
+    "Fear of ghosts is only implied by one line (90215)",
+    "Removed unsupported 'Symboli circle' framing for Sirius Symboli; voice 91227 only shows a kotatsu invite"
+  ]
+}

@@ -1,0 +1,197 @@
+{
+  "id": 1047,
+  "name_en": "Zenno Rob Roy",
+  "name_jp": "ゼンノロブロイ",
+  "kind": "uma",
+  "one_liner": "Shy, bespectacled bookworm who wants to become a hero worthy of a legend, like Scotland's Rob Roy.",
+  "personality": "Timid, polite and easily flustered, she sees the world through stories: training is a 'chapter', races are 'episodes', and her trainer is her 'reader'. She dreams of writing her own heroic epic but often fears being a background character, unnoticed and 'never quite winning'. Gentle and generous with book recommendations and trivia, she becomes surprisingly stubborn and resolute when chasing her hero ideal.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also 'my reader' (私の読者さん, voice 20024)",
+    "register": "polite (desu/masu), hesitant with trailing ellipses and stammers",
+    "tics": [
+      {
+        "jp": "英雄",
+        "romaji": "eiyuu",
+        "meaning": "hero - her central word"
+      },
+      {
+        "jp": "英雄譚",
+        "romaji": "eiyuutan",
+        "meaning": "heroic tale/epic"
+      },
+      {
+        "jp": "物語",
+        "romaji": "monogatari",
+        "meaning": "story"
+      },
+      {
+        "jp": "エピソード",
+        "romaji": "episoodo",
+        "meaning": "episode (she frames events as episodes)"
+      },
+      {
+        "jp": "読者さん",
+        "romaji": "dokusha-san",
+        "meaning": "'reader', how she sees her trainer"
+      },
+      {
+        "jp": "あの…",
+        "romaji": "ano...",
+        "meaning": "um... (hesitant opener)"
+      },
+      {
+        "jp": "…っ！",
+        "romaji": "...!",
+        "meaning": "clipped, nervous exclamations"
+      },
+      {
+        "jp": "“ロブ・ロイ”",
+        "romaji": "Rob Roy",
+        "meaning": "her namesake Scottish hero"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "reading (always carries a paperback in her bag)",
+    "hero stories, legends, fantasy, myths, star lore and flower language",
+    "Rob Roy and Scotland/Britain (Loch Katrine photo in trivia)",
+    "library committee work",
+    "singing story-like ballads",
+    "quiet autumn, fireplaces in snow"
+  ],
+  "weak_spots": [
+    "humidity and goats (profile)",
+    "ghosts/horror (reads horror only in bright, lively places)",
+    "low stamina and big meals",
+    "fashion (feels out of place in nice clothes)",
+    "being unnoticed / low presence (automatic doors don't open for her, voice 91018; overlooked at entrance ceremony)",
+    "crowds (tail freezes)",
+    "tripping in the crowded cafeteria"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "March 27 (3月27日)",
+    "height": "140 cm (140cm)",
+    "voice_actor": "Haruka Terui (照井春佳)"
+  },
+  "relationships": [
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Close friend, probably roommate: worries when Rob Roy reads late; draws warm pictures",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 91011: 夜更かしをすると、ライスさんが…とても心配そうな顔をなさる; 91020: 寮の部屋…ライスさんに相談); roommate status suggested by 91020 and general knowledge (unverified)"
+    },
+    {
+      "id": 1105,
+      "name_en": "Neo Universe",
+      "nature": "Friend ('Uni-san') who picked her outfit; matching glasses",
+      "evidence": "home scenes x4; Neo Universe mentions Rob Roy x7 in her own lines (mentioned_by); Rob Roy calls her 'Uni-san' (ユニさん) in voice_id 91019 (matching glasses), 91029/70016 (Uni picked her outfit), 90012, 91018 - not counted in mentions_in_voice because of the nickname"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "Her admired idol of 'showing it through strength'",
+      "evidence": "home scenes x3; voice_id 91001: クリスエスさんは私の憧れで"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "Library buddy whose 'smile magic' cheers her up",
+      "evidence": "home scenes x3; voice_id 91003, 10027"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "Library buddy who pairs coffees with books",
+      "evidence": "home scenes x2; voice_id 91000"
+    },
+    {
+      "id": 1097,
+      "name_en": "Still in Love",
+      "nature": "Part of a trio with Neo Universe",
+      "evidence": "home scenes x3; voice_id 91018"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "Shares home scenes",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1033,
+      "name_en": "Admire Vega",
+      "nature": "Started talking more after Rob Roy recommended a star book",
+      "evidence": "voice_id 91002"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "Finds her soothing",
+      "evidence": "home scenes x1; voice_id 91017"
+    },
+    {
+      "id": 1107,
+      "name_en": "Tap Dance City",
+      "nature": "She can't narrow down book picks for her",
+      "evidence": "home scenes x1; voice_id 91022"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "The 'Haou' (overlord) of an event pairing",
+      "evidence": "home scenes x1; event title: 英雄と覇王 ('Haou' matches Opera O's 世紀末覇王 epithet - general knowledge, unverified)"
+    }
+  ],
+  "groups": [
+    "Miho Dorm",
+    "Library committee (図書委員, voice 92002)"
+  ],
+  "story_arc": {
+    "summary": "A shy bookworm with almost no presence, Rob Roy meets a trainer searching for a 'hero' and decides to write her own heroic tale on the track. Her goals run Aoba Sho, Japan Derby, Kikuka Sho and Arima Kinen, then Tenno Sho (Spring), Takarazuka Kinen, Tenno Sho (Autumn) and Japan Cup. She fights her image of 'never quite winning' and aims to sweep the autumn senior triple crown, ending with the realisation of what she truly wanted to become.",
+    "source": "event titles (ほんとうになりたかったもの, 遅れてきた英雄, カーテンコール、あるいは幕開け) + voice 400000/400010 (秋シニア三冠); framing model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20024,
+      "jp": "トレーナーさん…私の読者さん。\n英雄に至る物語を\nどうか見届けてください…！",
+      "en": "Trainer-san... my reader. Please watch over the story of how I become a hero...!"
+    },
+    {
+      "voice_id": 10000,
+      "jp": "トレーナーさんの探す英雄が\n私だったなんて…運命的で、\n忘れられないエピソードです。",
+      "en": "To think the hero you were searching for was me... It's a fateful episode I'll never forget."
+    },
+    {
+      "voice_id": 91012,
+      "jp": "入学式の日…影が薄くて、案内の\n先輩に気づかれなかったんです…。\n今は…そうじゃないといいなぁ。",
+      "en": "On entrance day... my presence was so faint the senior guiding us didn't notice me... I hope that's not the case now."
+    },
+    {
+      "voice_id": 90005,
+      "jp": "妖精や精霊は好きですけど、\nおばけは…ちょっと…\nいえ、かなり…遠慮したいです…。",
+      "en": "I like fairies and spirits, but ghosts are... a little... no, quite a lot... something I'd rather pass on..."
+    },
+    {
+      "voice_id": 400000,
+      "jp": "『勝ち切れない』『目立たない』\n『善戦』…不甲斐ないこれまでを\n払拭します。この秋に、必ず…！",
+      "en": "'Never wins outright', 'Unremarkable', 'A good effort'... I'll wipe away that disappointing past. This autumn, for sure...!"
+    },
+    {
+      "voice_id": 30005,
+      "jp": "めでたしめでたしです。\n…えへっ。",
+      "en": "And they lived happily ever after. ...Ehe."
+    }
+  ],
+  "timer_line_ideas": [
+    "U-um, {user}... the Independent Training chapter has reached its end. Every hero's tale needs its reader to turn the page... would you check the results...?",
+    "{user}, the fifty minutes are over...! This episode of your training is complete. Shall we, um, read how the story turned out together?"
+  ],
+  "data_gaps": [
+    "Rice Shower as roommate is inferred, not stated",
+    "Identity of 覇王 in event 英雄と覇王 not confirmed",
+    "Story arc details beyond titles are unverified",
+    "Neo Universe (1105) is absent from mentions_in_voice despite 5+ lines naming 'ユニさん'; the mention counter likely misses nicknames"
+  ]
+}

@@ -85,6 +85,9 @@ model TrainingTimer {
     discordUserId  String
     startedAt      DateTime @default(now())
     expiresAt      DateTime
+    /// Started within the Early Riser window after the trainer's last ping,
+    /// with Early Riser on: this run's ping gets the Early Riser boost.
+    earlyStart     Boolean  @default(false)
 
     /// One active timer per trainer per guild. Pressing Start again resets the
     /// existing row rather than stacking a second countdown.
@@ -169,6 +172,8 @@ model TimerUserSettings {
     earlyRiser    Boolean  @default(false)
     /// Special sets they turned off (ids from `SPECIAL_SETS`).
     disabledSets  String[] @default([])
+    /// Boosts (a set's boost, the Early Riser boost) apply. Off pauses them.
+    boosts        Boolean  @default(true)
     updatedAt     DateTime @updatedAt
 
     @@id([guildId, discordUserId])
@@ -185,6 +190,19 @@ model RareOpenerHit {
     at            DateTime @default(now())
 
     @@index([guildId])
+}
+
+/// A set boost a trainer holds: for `runsLeft` more pings, extra special
+/// chance on that set's tagged lines (see `SpecialBoost` in openers.ts).
+/// Getting the granting special again resets `runsLeft`.
+model TimerSpecialBoost {
+    guildId       String
+    discordUserId String
+    setId         String
+    runsLeft      Int
+    updatedAt     DateTime @updatedAt
+
+    @@id([guildId, discordUserId, setId])
 }
 
 /// Who placed 1st to 3rd in a week, so the role comes off exactly the people

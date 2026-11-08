@@ -1,0 +1,221 @@
+{
+  "id": 1024,
+  "name_en": "Mayano Top Gun",
+  "name_jp": "マヤノトップガン",
+  "kind": "uma",
+  "one_liner": "Genius pilot's daughter who 'gets everything' instantly and is desperate to be a grown-up lady.",
+  "personality": "A bubbly, moody girl who calls herself 'Maya' and peppers her speech with aviation lingo from her pilot father. She understands things intuitively ('wakacchatta!') and is good at nearly everything, but gets bored fast and sulks when nothing is exciting. She constantly flirts with her trainer in a childish way (dates, blown kisses) because she wants to be an 'otona no onna' (grown-up woman), yet she is terrified of injections and can't keep secrets.",
+  "speech": {
+    "first_person": "Maya (マヤ) - third person; also 'Maya-chin' (マヤちん)",
+    "calls_trainer": "Trainer-chan (トレーナーちゃん, x42 in voice lines); kimi (キミ) only rarely (x2: voice_id 10009, 20021)",
+    "register": "very casual, childish and genki; aviation and English loanwords",
+    "tics": [
+      {
+        "jp": "テイクオフ",
+        "romaji": "teikuofu",
+        "meaning": "'Take off!' - her go-to for starting anything"
+      },
+      {
+        "jp": "アイ・コピー",
+        "romaji": "ai kopii",
+        "meaning": "'I copy' - pilot acknowledgement"
+      },
+      {
+        "jp": "ユー・コピー？",
+        "romaji": "yuu kopii?",
+        "meaning": "'You copy?'"
+      },
+      {
+        "jp": "わかっちゃった☆",
+        "romaji": "wakacchatta",
+        "meaning": "'I've got it!' - her genius intuition"
+      },
+      {
+        "jp": "ワクワク",
+        "romaji": "wakuwaku",
+        "meaning": "'Excited / thrilling'"
+      },
+      {
+        "jp": "キラキラ",
+        "romaji": "kirakira",
+        "meaning": "'Sparkly' - what she wants to be"
+      },
+      {
+        "jp": "大人のオンナ",
+        "romaji": "otona no onna",
+        "meaning": "'A grown-up woman' - her goal"
+      },
+      {
+        "jp": "トレーナーちゃん",
+        "romaji": "toreenaa-chan",
+        "meaning": "Her name for the trainer"
+      },
+      {
+        "jp": "マヤちん",
+        "romaji": "Maya-chin",
+        "meaning": "Her cutesy self-name"
+      },
+      {
+        "jp": "シゲキ",
+        "romaji": "shigeki",
+        "meaning": "'Stimulation / thrill'"
+      },
+      {
+        "jp": "～ちゃん",
+        "romaji": "-chan",
+        "meaning": "Suffix for friends (ネイチャちゃん, テイオーちゃん)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "airplanes, airports, pilots, her father",
+    "anything exciting and stimulating",
+    "dates with Trainer-chan, weddings, bouquets",
+    "fashion, trendy drinks, gloss, photos for Umastagram",
+    "cats (cat-themed outfit)",
+    "rock music (her dad's influence)"
+  ],
+  "weak_spots": [
+    "keeping secrets (official weakness; her tail shakes when she lies)",
+    "injections / vaccinations",
+    "boredom - loses interest fast"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "March 24 (3月24日)",
+    "height": "143 cm (143㎝)",
+    "voice_actor": "Mio Hoshitani (星谷美緒)"
+  },
+  "relationships": [
+    {
+      "id": 1055,
+      "name_en": "Marvelous Sunday",
+      "nature": "Best friend and partner in mischief ('Mabe-chin'); they invent catchphrases together",
+      "evidence": "home scenes x9; voice_id 91000, 91010, 400003 (マベちん)"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Friend who advises her on clothes; gets flustered by Maya's cat outfit",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 10026, 91217, 1125)"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Close friend; stay up late together, play guitar together (roommate per general knowledge)",
+      "evidence": "home scenes x1; mentions in voice x3 (voice_id 91009, 91025, 91219); Teio mentions her x4"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "Maya teases her; thinks Brian is like a cat and would look cute in skirts",
+      "evidence": "home scenes x2; voice_id 10027, 91019, 91216"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1028,
+      "name_en": "Hishi Akebono",
+      "nature": "Friend ('Bono-chan'); central in a wedding-dress story event",
+      "evidence": "home scenes x2; voice_id 1055, 400006, 400007 (ボーノちゃん)"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "Friend",
+      "evidence": "home scenes x2; voice_id 1056"
+    },
+    {
+      "id": 1012,
+      "name_en": "Hishi Amazon",
+      "nature": "Baked pumpkin pie for a party",
+      "evidence": "home scenes x2; voice_id 91226"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "Senior who crashed their jam session",
+      "evidence": "home scenes x2; voice_id 91219 (フジ先輩)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Gave her heat packs, 'like my mom'",
+      "evidence": "voice_id 90019"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "Teaches her table manners ('McQueen-sensei')",
+      "evidence": "voice_id 91018"
+    },
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Feels Rice watching her, maybe wanting to play wedding",
+      "evidence": "voice_id 91017"
+    },
+    {
+      "id": null,
+      "name_en": "Her father (pilot)",
+      "nature": "Airports were her playground with her pilot father (profile); source of her aviation talk and love of rock",
+      "evidence": "profile about_family; voice_id 91003, 91028, 91220"
+    }
+  ],
+  "groups": [
+    "unknown (no team/faction in source)"
+  ],
+  "story_arc": {
+    "summary": "A prodigy who can do anything but quickly gets bored; the trainer must keep her excited and help her find what real 'grown-up' sparkle means. Her career is Kikka Sho, Arima Kinen, Hanshin Daishoten, Tenno Sho Spring, Takarazuka and Tenno Sho Autumn; event titles use flight metaphors ('Code: Fire!', 'Landing not yet scheduled', 'Emergency', 'Final Approach'). Chapter titles frame it as a 'date take-off' leading to 'spreading her wings wide'.",
+    "source": "event titles; chara_story_titles; model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90000,
+      "jp": "おっはよー！\n今日も元気に！\nマヤちん、テイクオーフ！",
+      "en": "Mornin'! Lots of energy today! Maya-chin, take ooff!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "マヤ、キラキラな大人のウマ娘に\n絶対なるから！だから、1番近くで\nマヤのこと、見ててね！",
+      "en": "Maya's definitely gonna become a sparkly grown-up Uma Musume! So watch Maya from the closest spot, okay?"
+    },
+    {
+      "voice_id": 20002,
+      "jp": "燃料満タン！離陸準備オーライ！\nいつでもテイクオフいけるよ！\n今なら本当に飛べちゃうかも！？",
+      "en": "Fuel full! Ready for takeoff! I can take off anytime! I feel like I could really fly right now!?"
+    },
+    {
+      "voice_id": 20011,
+      "jp": "今はがんばる気分じゃないの！\n誰がなんて言っても！\nムリなものはムーリーっ！",
+      "en": "I'm not in the mood to try right now! No matter who says what! If it's impossible, it's im-poss-i-ble!"
+    },
+    {
+      "voice_id": 91015,
+      "jp": "よ、予防接種…？\nヤダヤダヤダヤダぁ～っ！！\n注射だけは絶対イヤ～っ！！",
+      "en": "V-vaccinations...? No no no no nooo!! Anything but shots!!"
+    },
+    {
+      "voice_id": 40000,
+      "jp": "むむむ～、わかっちゃった☆",
+      "en": "Mmmm~, I've got it!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer-chan! Touchdown~! {user}, your independent run just landed! Maya wakacchatta, it went super kira-kira! Come look, come look!",
+    "I copy! Mission complete, {user}! The run's all done, so praise Maya lots, okay? A grown-up lady deserves a reward~!"
+  ],
+  "data_gaps": [
+    "'mentions_in_voice' has many false positives: Daring Heart x5 (ハート), Mejiro Ryan x3 (ブライアン), Katsuragi Ace x2 (エース), Curren Bouquetd'or x2 (ブーケ), North Flight (ナイスフライト), Jungle Pocket (ポッケ); omitted.",
+    "Hishi Akebono appears only by nickname ボーノちゃん, so not in the mention counts.",
+    "'ユキっぺ' (voice_id 91001) is probably Yukino Bijin but unconfirmed.",
+    "Teio being her roommate is general knowledge, not in the source.",
+    "Story arc specifics are model knowledge plus titles.",
+    "Fact-check: removed 'spoiled youngest child' (no source evidence of birth order) and 'being treated like a child' weak spot (no line supports it). Profile says only 'pilot', not 'airline pilot'."
+  ]
+}

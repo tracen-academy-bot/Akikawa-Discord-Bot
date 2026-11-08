@@ -1,0 +1,182 @@
+{
+  "id": 1034,
+  "name_en": "Inari One",
+  "name_jp": "イナリワン",
+  "kind": "uma",
+  "one_liner": "Pint-sized, hot-blooded self-proclaimed Edokko who lives for festivals, fights and doing everything with 'iki' style.",
+  "personality": "Loud, brash and generous, she talks in rough old-Tokyo 'beranmee' slang ('teyandei!') and calls herself 'Inari-sama'. She treats races as festivals and brawls, wants the toughest training, and hates fuss, flattery and queues. She is warm-hearted and sentimental underneath, loving tradition, shrines and the people around her, and calls the trainer her 'partner' (相方).",
+  "speech": {
+    "first_person": "atashi (あたし); also 'Inari-sama' (イナリ様) in third person",
+    "calls_trainer": "omae-san (お前さん); Danna (ダンナ) for a male trainer / Anego (アネゴ) for a female trainer; 'Trainer-san yo' (トレーナーさんよ)",
+    "register": "Edo / Shitamachi 'beranmee' dialect (rough old-Tokyo working-class speech)",
+    "tics": [
+      {
+        "jp": "てやんでい",
+        "romaji": "teyandei",
+        "meaning": "Edokko exclamation ('what the heck!/ hmph!')"
+      },
+      {
+        "jp": "でい",
+        "romaji": "~dei",
+        "meaning": "Edo-style copula ending ('...it is!')"
+      },
+      {
+        "jp": "粋",
+        "romaji": "iki",
+        "meaning": "stylish, chic Edo spirit, her core value"
+      },
+      {
+        "jp": "いなせ",
+        "romaji": "inase",
+        "meaning": "dashing, gallant"
+      },
+      {
+        "jp": "江戸っ子",
+        "romaji": "Edokko",
+        "meaning": "'true Tokyoite', her identity"
+      },
+      {
+        "jp": "こちとら",
+        "romaji": "kochitora",
+        "meaning": "'yours truly / we'"
+      },
+      {
+        "jp": "こんちきしょう",
+        "romaji": "konchikishou",
+        "meaning": "'dammit!'"
+      },
+      {
+        "jp": "ってな",
+        "romaji": "~tte na",
+        "meaning": "'...as they say!' tag"
+      },
+      {
+        "jp": "御覧じろ",
+        "romaji": "goranjiro",
+        "meaning": "archaic 'behold!'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "festivals, portable shrines (mikoshi), festival music, fireworks",
+    "the color purple",
+    "scalding-hot baths and sento (locker 177)",
+    "shooting galleries, katanuki, goldfish scooping (profile strength)",
+    "inari sushi, soba, monja, wagashi",
+    "tatami naps",
+    "DIY carpentry learned from her dad",
+    "shrines and the Three Goddesses"
+  ],
+  "weak_spots": [
+    "waiting in lines (profile)",
+    "flattery / saying compliments (profile)",
+    "gets teary when remembering her hometown friends (voice 10013)",
+    "small stature (139 cm), though she vows to become the 'biggest' Umamusume"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 7 (5月7日)",
+    "height": "139 cm",
+    "voice_actor": "Haruno Inoue (井上遥乃)"
+  },
+  "relationships": [
+    {
+      "id": 1021,
+      "name_en": "Tamamo Cross",
+      "nature": "rival: Osaka representative vs. Edo representative; Inari respects her as a natural leader",
+      "evidence": "voice lines (not counted in mdb mentions list) (voice_id 91002: タマが浪花代表なら、/こちとら華のお江戸代表よ！; 400003: そういう所が大将の器なのかもな！); home scenes x3; affinity 43 (highest)"
+    },
+    {
+      "id": 1045,
+      "name_en": "Super Creek",
+      "nature": "rival and frequent companion; Heisei Big Three member",
+      "evidence": "home scenes x7; mentions in voice x1 (voice_id 91004: クリークあたりが/見たらぶっ倒れるかもしれねえな！); web: https://umamusu.wiki/Inari_One"
+    },
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "rival she wants to beat; fellow local-racing star; she admires her eating",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91003: オグリの食いっぷりは、なんとも/景気がいいねえ！; 91017)"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "roommate",
+      "evidence": "home scenes x2; roommate per web: https://umamusu.wiki/Inari_One"
+    },
+    {
+      "id": 1072,
+      "name_en": "Yaeno Muteki",
+      "nature": "drummed at a festival for her dancing",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "turned a shrine festival into a history lecture",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": null,
+      "name_en": "her 'underlings' from Oi",
+      "nature": "gave her the waist ribbon",
+      "evidence": "voice_id 10026: 大井の子分が『姐さんに/似合う』ってくれたのさ。"
+    }
+  ],
+  "groups": [
+    "Heisei Big Three (with Oguri Cap and Super Creek) - web: https://umamusu.wiki/Inari_One",
+    "Oi (local racing) origin - voice 10026 and event title ジャパンダートダービーの後に・大井魂"
+  ],
+  "story_arc": {
+    "summary": "A local star from Oi who comes to Tracen to become 'the biggest Umamusume of all', she treats her career as a festival and a brawl (story titles こちとら江戸っ子でい！, いつか咲かすぜ江戸の華！). Her event titles run through the Japan Dirt Derby and Tokyo Daishoten (地方の“テッペン”) and then central races like the Tenno Sho, Takarazuka Kinen and Arima Kinen, where she meets 'monster'-level rivals (天皇賞（秋）の後に・これが“怪物”よ). It ends with a festival-like Arima (有馬記念の後に・祭だ祭だわあっしょい).",
+    "source": "event titles + web: https://umamusu.wiki/Inari_One (career details partly model knowledge, unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95004,
+      "jp": "粋でいなせな江戸っ子娘！\nイナリワンたあ、あたしのことさ",
+      "en": "A stylish, dashing Edokko girl! Inari One, that's me!"
+    },
+    {
+      "voice_id": 10000,
+      "jp": "なんだかんだ言って、面白れえ舞台\nに連れ出してくれやがって。ったく\nお前さんは大した人たらしさ！",
+      "en": "Say what you like, you dragged me out onto a hell of a fun stage. Geez, you're a real charmer, you are!"
+    },
+    {
+      "voice_id": 92006,
+      "jp": "ダンナとは、なんだかず～っと\nうまくやってける気がするぜ。ま、\nこれからも祭りは一緒に…ってね！",
+      "en": "Danna, I've got a feeling we'll get along forever. Well, let's keep doing festivals together... y'know!"
+    },
+    {
+      "voice_id": 20000,
+      "jp": "か～っ、こんちきしょーめ！\nどうにも力が入らねえ…！",
+      "en": "Ka~, dammit! I just can't put any strength into it...!"
+    },
+    {
+      "voice_id": 90004,
+      "jp": "風呂といったらとびっきり熱いのに\n尽きるってもんよ。寮の風呂も、\nもちっと熱くていいんだがねえ。",
+      "en": "When it comes to baths, it's gotta be scalding hot. The dorm bath could stand to be a bit hotter, y'know."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "華のお江戸のいなせな娘！\nイナリ様の大立ち回り、とくと見やがれい！",
+      "en": "The dashing daughter of flowery Edo! Behold Inari-sama's grand performance!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Teyandei! Your independent run's done and dusted, {user}! Come take a gander at the results, Danna. Checkin' 'em while they're hot, that's the Edokko way!",
+    "Oi oi, {user}! The run's wrapped up quick as lightning! No dawdlin' now, partner, a stylish Edokko don't keep a finished job waitin'. Inari-sama's got your back!"
+  ],
+  "data_gaps": [
+    "'神馬駆' and '想撚' (voices 90010, 90014, 91020, 91027, 400001) are a story event/scenario she took part in; not identified from mdb",
+    "The Tamamo Cross mention count in her voice is not in the mdb list (only shows Tamamo mentioning her x3); the quotes are verbatim though",
+    "Transfer from Oi to central is general knowledge plus voice hints, not stated in profile"
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "id": 9001,
+  "name_en": "Tazuna Hayakawa",
+  "name_jp": "駿川たづな",
+  "kind": "npc",
+  "one_liner": "The Chairwoman's smiling, ever-polite secretary who guides trainers through every menu and event.",
+  "personality": "Warm, courteous and dependable: she keeps encouraging the trainer ('期待していますよ、トレーナーさん♪') and offers help ('なんでも聞いてくださいね'). She is practical about rest and recovery ('しっかり休息をとることも、重要なことです') and stays gently upbeat, often finishing lines with ♪ or a soft 'ふふっ'. Her profile frames her as someone who supports everyone's school life.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also anata (あなた)",
+    "register": "polite (desu/masu, keigo such as 参ります / お越しください), cheerful",
+    "tics": [
+      {
+        "jp": "～ですよ♪",
+        "romaji": "~desu yo♪",
+        "meaning": "friendly informative ending, often with a music note (e.g. 'フォトを撮影することができますよ♪')"
+      },
+      {
+        "jp": "～くださいね",
+        "romaji": "~kudasai ne",
+        "meaning": "soft request: 'please do ~, okay?'"
+      },
+      {
+        "jp": "ふふっ",
+        "romaji": "fufu",
+        "meaning": "small amused laugh"
+      },
+      {
+        "jp": "お疲れ様です",
+        "romaji": "otsukaresama desu",
+        "meaning": "thanks for your hard work"
+      },
+      {
+        "jp": "ご注意ください",
+        "romaji": "go-chuui kudasai",
+        "meaning": "please be careful (about deadlines / irreversible choices)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "the shop and exchanges ('ただ今セール中です')",
+    "reminders about deadlines and events",
+    "support event titles hint at milk and apples ('牛乳ときどきリンゴ'), old films ('キネマの思ひ出'), a 'usual' order ('『いつもの』ください！')",
+    "event title '驚異の逃げ脚？' (an amazing front-runner's legs?) hints at surprising speed; web says she can catch Taiki Shuttle (umamusu.wiki)"
+  ],
+  "weak_spots": [
+    "unknown from source"
+  ],
+  "profile": {
+    "dorm": "n/a (staff)",
+    "grade": "n/a (staff; Chairwoman's secretary)",
+    "birthday": "May 2 (5月2日)",
+    "height": "166 cm (web: umamusu.wiki; not in mdb)",
+    "voice_actor": "Yukiyo Fujii (藤井ゆきよ)"
+  },
+  "relationships": [
+    {
+      "id": 9002,
+      "name_en": "Yayoi Akikawa (Chairwoman)",
+      "nature": "her boss; she is the Chairwoman's secretary",
+      "evidence": "home scenes x2; profile self_intro '理事長秘書'"
+    },
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "friend; the wiki says they go out to bars and lounges after school",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Hayakawa_Tazuna"
+    },
+    {
+      "id": 9003,
+      "name_en": "Etsuko Otonashi (reporter)",
+      "nature": "fellow staff-side NPC",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1035,
+      "name_en": "Winning Ticket",
+      "nature": "mentioned once",
+      "evidence": "mentions in voice x1 (source counts it, but no line naming her appears in the extracted voice_lines)"
+    },
+    {
+      "id": 9006,
+      "name_en": "Riko Kashimoto",
+      "nature": "Tazuna served as her secretary while Kashimoto was acting director",
+      "evidence": "web: https://umamusu.wiki/Hayakawa_Tazuna"
+    }
+  ],
+  "groups": [
+    "Tracen Academy staff (Chairwoman's office)"
+  ],
+  "story_arc": {
+    "summary": "She has no career story; she is a support-card NPC and the game's guide. Her support event titles go from greetings ('理事長秘書のたづなさん', 'お疲れ様です♪') through small personal glimpses ('牛乳ときどきリンゴ', 'キネマの思ひ出', 'ため息と絆創膏') to a bond event about entrusting her dreams to someone ('たづなとの絆・憧れを託して'). A popular fan theory says she is secretly an Umamusume modelled on the 'Phantom Horse' Tokino Minoru; this is not confirmed.",
+    "source": "event titles; web: https://umamusu.wiki/Hayakawa_Tazuna"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "期待していますよ、トレーナーさん♪",
+      "en": "I'm counting on you, Trainer-san♪"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "なんでも聞いてくださいね、トレーナーさん。",
+      "en": "Ask me anything, Trainer-san."
+    },
+    {
+      "voice_id": 200001,
+      "jp": "ふふっ♪\nウマ娘たちのヒミツが\n気になりますか？",
+      "en": "Hehe♪ Curious about the Umamusume's secrets?"
+    },
+    {
+      "voice_id": 23012,
+      "jp": "しっかり休息をとることも、\n重要なことです。",
+      "en": "Getting proper rest is important, too."
+    },
+    {
+      "voice_id": 400013,
+      "jp": "イベント期間は終了しました。\nトレーナーさん、\nお疲れ様でした♪",
+      "en": "The event period has ended. Thank you for your hard work, Trainer-san♪"
+    },
+    {
+      "voice_id": 2001,
+      "jp": "決定すると次のエントリーまで\n変更できないので、\nご注意くださいね！",
+      "en": "Once you decide, you can't change it until the next entry, so please be careful!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Thank you for your hard work, {user}! The Independent Training run has finished. Please come check the results, okay?",
+    "Hehe, {user}, your 50-minute run is all done! Getting proper rest is important too, so please take a short break before the next one, okay?"
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Tazuna Hayakawa' is the standard EN name (umamusu.wiki: 駿川たづな, romaji Hayakawa Tazuna).",
+    "Height comes from the wiki, not the mdb.",
+    "Source counts 1 mention of Winning Ticket, but no line naming her is in voice_lines (it may be in a line the extract did not include).",
+    "No weaknesses or likes in the profile; the motifs are inferred from event titles only.",
+    "Her support-event dialogue is not in the mdb extract.",
+    "Relationship notes for Maruzensky (bars/lounges) and Kashimoto (secretary while acting director) are wiki-only and not in the mdb."
+  ]
+}

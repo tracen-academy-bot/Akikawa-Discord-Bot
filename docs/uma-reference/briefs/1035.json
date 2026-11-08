@@ -1,0 +1,173 @@
+{
+  "id": 1035,
+  "name_en": "Winning Ticket",
+  "name_jp": "ウイニングチケット",
+  "kind": "uma",
+  "one_liner": "Loud, crybaby, all-out sports girl whose single dream is winning the Japanese Derby with her trainer.",
+  "personality": "Explosively emotional: she roars 'uoooh!', bawls with joy or frustration until her words blur ('guyajii', 'arigadoo'), and does everything at full power (全力). She is honest, kind, a little scatterbrained (forgets things, fails make-up tests), and constantly thanks the trainer for believing in her Derby dream. She adores her BNW friends Biwa Hayahide and Narita Taishin and is quick to cheer on anyone.",
+  "speech": {
+    "first_person": "atashi (アタシ, katakana); calls herself 'Chikezou' (チケゾー)",
+    "calls_trainer": "Trainer-san (トレーナーさん); kimi (キミ) occasionally",
+    "register": "casual, loud and childlike; sobbing-distorted speech when emotional",
+    "tics": [
+      {
+        "jp": "うおおお",
+        "romaji": "uooo",
+        "meaning": "battle-cry roar"
+      },
+      {
+        "jp": "全力",
+        "romaji": "zenryoku",
+        "meaning": "'full power', her core word"
+      },
+      {
+        "jp": "ぐやじい",
+        "romaji": "guyajii",
+        "meaning": "'it's so frustrating' sobbed through tears (くやしい)"
+      },
+      {
+        "jp": "ありがどぉ",
+        "romaji": "arigadoo",
+        "meaning": "tearful 'thank you'"
+      },
+      {
+        "jp": "宣誓",
+        "romaji": "sensei",
+        "meaning": "'I solemnly swear', sports-oath framing"
+      },
+      {
+        "jp": "チケゾー",
+        "romaji": "Chikezou",
+        "meaning": "her nickname for herself"
+      },
+      {
+        "jp": "ねーちゃん",
+        "romaji": "neechan",
+        "meaning": "her older sisters"
+      },
+      {
+        "jp": "勝利のチケット",
+        "romaji": "shouri no chiketto",
+        "meaning": "'the winning ticket', her pun motif"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "the Japanese Derby (watching past Derby footage, family Derby-viewing tradition)",
+    "all sports and physical activity (parkour, flips, skiing, paramotor with her dad)",
+    "cheering for and being moved by others (profile strength)",
+    "BNW: Biwa Hayahide and Narita Taishin",
+    "courier/delivery motif (配達人) from an alt outfit and games",
+    "chocolate with rice in it",
+    "tissue boxes and colour pens (trivia)"
+  ],
+  "weak_spots": [
+    "not giving full effort - the one thing she can't stand (profile)",
+    "studying; needs Hayahide to tutor her for make-up exams",
+    "ghosts at night (voice 91011)",
+    "laundry (Taishin scolds her, voice 91216)",
+    "forgetful and easily embarrassed when thanking people (voices 10005, 91004)",
+    "ears so active even her best friend calls them annoying (profile)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 21 (3月21日)",
+    "height": "157 cm",
+    "voice_actor": "Yui Watanabe (渡部優衣)"
+  },
+  "relationships": [
+    {
+      "id": 1050,
+      "name_en": "Narita Taishin",
+      "nature": "BNW best friend and rival; curt but warming to her",
+      "evidence": "home scenes x6; mentions in voice x6 (voice_id 91013: 今日は『うるさい』だけじゃなく/『おはよう』って返してくれたよ！); mentioned by her x10"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "BNW best friend and rival; patient tutor",
+      "evidence": "home scenes x4; mentions in voice x6 (voice_id 91001: ハヤヒデはいっつも丁寧に厳しく/教えてくれて…優しいよぉおおお！); mentioned by her x7"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "roommate who does her hair",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91221: 髪、今日はジョーダンに/結んでもらったからさ！); roommate per web: https://umamusu.wiki/Winning_Ticket"
+    },
+    {
+      "id": 1029,
+      "name_en": "Yukino Bijin",
+      "nature": "friend; snow and skating buddy",
+      "evidence": "home scenes x4; voice_ids 90009, 90017, 91227, 400005 (ユキちゃん)"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "gateball rival",
+      "evidence": "mentions in voice x1 (voice_id 91223)"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "gave Ticket calligraphy",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "Ticket cheers 'Yo, City Girl!'",
+      "evidence": "mentions in voice x1 (voice_id 1063: よっ、“シチーガール”！)"
+    }
+  ],
+  "groups": [
+    "BNW (Biwa Hayahide, Narita Taishin, Winning Ticket) - voice 92220 and trivia",
+    "Main Story Act 1 Chapter 3 protagonist - web: https://umamusu.wiki/Winning_Ticket",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Ticket's whole career is aimed at the Japanese Derby, a dream sworn with her trainer, while competing with her BNW friends Hayahide and Taishin (story titles 全力でダービーを目指すなら, 2人で全力で走っていけるから). Event titles show her losing ground at the Satsuki Sho to a 'demon' (皐月賞の後に・鬼、炸裂), then winning the Derby (日本ダービーの後に・完走、完勝！). In the senior year she struggles to keep up with her rivals (大阪杯の後に・遠くなった背中, 宝塚記念の後に・君はもう――) before a 'Chikezou call' at the Arima Kinen.",
+    "source": "event titles + web: https://umamusu.wiki/Winning_Ticket"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "はいっ！ウイニングチケットですっ！",
+      "en": "Yes! I'm Winning Ticket!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "トレーナーさんへのありがとうは\nいくら言っても足りないよ！！\nありがとうありがとうありがとー！",
+      "en": "No matter how many times I say thank you to you, Trainer-san, it's not enough!! Thank you thank you thank youuu!"
+    },
+    {
+      "voice_id": 1002,
+      "jp": "ぐやじいぃー！！",
+      "en": "So frustratiiing!!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "追試のたびに勉強教わってるのに、\nハヤヒデはいっつも丁寧に厳しく\n教えてくれて…優しいよぉおおお！",
+      "en": "Even though she tutors me every time I have a make-up exam, Hayahide always teaches me so carefully and strictly... she's so kiiind!"
+    },
+    {
+      "voice_id": 90212,
+      "jp": "ウイニングチケットが\nお昼を宣誓しまぁぁぁぁぁす！\n…あれ？宣言だっけ？",
+      "en": "Winning Ticket solemnly swears to have luuunch! ...Huh? Was it 'declare'?"
+    },
+    {
+      "voice_id": 10000,
+      "jp": "アタシ、めげないし！諦めないよ！\nだってダービーを取るって\n約束したからね！！",
+      "en": "I won't lose heart! I won't give up! Because I promised to win the Derby!!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Uoooh! {user}! Trainer-san! The independent run is DONE!! I watched the whole time and I'm so moved I'm crying again! Come look, come look, full power!!",
+    "Delivery for {user}! Courier Chikezou here: your independent run just finished! I solemnly swear the results are worth it! Go check them at full power!!"
+  ],
+  "data_gaps": [
+    "mdb lists no Jungle Pocket mention despite a hit on ポッケ (pocket) - not a relationship",
+    "'エルフィー' (voice 90214) is unidentified",
+    "Post-Derby decline details (real horse's late career) are only inferred from event titles"
+  ]
+}

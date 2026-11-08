@@ -1,0 +1,174 @@
+{
+  "id": 1088,
+  "name_en": "Satono Crown",
+  "name_jp": "サトノクラウン",
+  "kind": "uma",
+  "one_liner": "Energetic Hong Kong-raised Satono elite who plans everything and burns brighter in adversity.",
+  "personality": "Crown is a bright, capable 'reliable elite big sister' who loves schedules, multitasking and business talk (sales opportunities, presentations, marketing). She thrives on adversity ('a pinch is a chance'), though her nervous lines show she pushes herself and can buckle under pressure. She code-switches between Japanese, Cantonese and English, is warm and attentive to friends like Cheval Grand and Duramente, and is a touch scatterbrained (forgetting her drink, morning language mix-ups).",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (あなた)",
+    "register": "casual feminine (〜わ, 〜わよ, 〜じゃない) with Cantonese and English interjections",
+    "tics": [
+      {
+        "jp": "多謝",
+        "romaji": "dō jeh (Cantonese)",
+        "meaning": "'thanks!'"
+      },
+      {
+        "jp": "無問題",
+        "romaji": "mou man tai (Cantonese)",
+        "meaning": "'no problem'"
+      },
+      {
+        "jp": "太好拉",
+        "romaji": "taai hou laa (Cantonese)",
+        "meaning": "'great!'"
+      },
+      {
+        "jp": "好♪",
+        "romaji": "hou (Cantonese)",
+        "meaning": "'good!'"
+      },
+      {
+        "jp": "I'm confident!",
+        "romaji": "(English)",
+        "meaning": "her confidence catchphrase (also an event title)"
+      },
+      {
+        "jp": "Perfect!",
+        "romaji": "(English)",
+        "meaning": "'perfect!'"
+      },
+      {
+        "jp": "逆境",
+        "romaji": "gyakkyou",
+        "meaning": "'adversity' - she thrives on it"
+      },
+      {
+        "jp": "商機",
+        "romaji": "shouki",
+        "meaning": "'business opportunity'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "(especially large-scale) magic tricks (profile; 'The Crown's Show!')",
+    "multitasking, schedules, to-do lists (profile, trivia)",
+    "Hong Kong: tea leaves, mooncakes, night views, Half Moon Bay, yum cha",
+    "resorts, vacations, swimming, pools",
+    "fashion tailored by her family's company",
+    "keyboard/music",
+    "Hong Kong beaches - recommends Half Moon Bay (voice line)"
+  ],
+  "weak_spots": [
+    "the midsummer sun (profile)",
+    "holidays with no plans (profile)",
+    "Japanese winters (voice 91015)",
+    "weight control under temptation (voice 90008)",
+    "flubbing dance steps (voice 70014)",
+    "being overheard humming Hong Kong pop (voice 91017)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "March 10 (3月10日)",
+    "height": "163 cm (163cm)",
+    "voice_actor": "Sayumi Suzushiro (鈴代紗弓)"
+  },
+  "relationships": [
+    {
+      "id": 1089,
+      "name_en": "Cheval Grand",
+      "nature": "close friend and rival; Crown loves talking to her and gets seashells from her",
+      "evidence": "home scenes x5; mentions in voice x3 (voice_id 91002: 「シュヴァルを見ると」); affinity top (32); web: https://umamusu.wiki/Satono_Crown"
+    },
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "fellow Satono; unspoken understanding, similar goals",
+      "evidence": "home scenes x5; mentions in voice x2 (voice_id 91000: 「ダイヤとは、お互い口にしなくても」)"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "roommate she looks after (warms the room for her)",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 90019: 「部屋を暖めておいてあげなくちゃ」); web: https://umamusu.wiki/Satono_Crown"
+    },
+    {
+      "id": 1068,
+      "name_en": "Kitasan Black",
+      "nature": "friend; Crown observes her with Diamond",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91004: 「ダイヤといる時のキタサンは」)"
+    },
+    {
+      "id": 1091,
+      "name_en": "Vivlos",
+      "nature": "younger friend who loves Crown's vacation and trend stories",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91018: 「ヴィブロスに」)"
+    },
+    {
+      "id": 1117,
+      "name_en": "Win Variation",
+      "nature": "'Sion-san'; VR tightrope rival and yum-cha friend who taught her stretches",
+      "evidence": "mentions in voice x2 (voice_id 91016: 「シオンさんとのVR綱渡り対決」)"
+    },
+    {
+      "id": 1102,
+      "name_en": "Sounds of Earth",
+      "nature": "acquaintance whose music she enjoys",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 90006: 「アースさんの」)"
+    }
+  ],
+  "groups": [
+    "Satono family/group (self-intro 'サトノに栄冠を'; event '私たちはサトノのウマ娘だから')",
+    "Team Capella with Satono Diamond (anime-only, Season 3; web: https://umamusu.wiki/Satono%20Crown)"
+  ],
+  "story_arc": {
+    "summary": "Crown races to bring 'a crown to Satono', going through the Tokyo Sports Hai, Yayoi Sho and the Classic Crown races before Kyoto Kinen, Osaka Hai, Takarazuka Kinen, Tenno Sho (Autumn) and Japan Cup. Event titles frame her as a planner who must learn to show raw passion ('the monster's mouth', 'ignition', 'awakening', 'pupation'), with Hong Kong and Paris memories in the opening events and a finale 'a crown for the noble you'. Her real-life model won the Hong Kong Vase and the Takarazuka Kinen.",
+    "source": "event titles; web: https://umamusu.wiki/Satono_Crown; real-horse facts are model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "どんな逆境でも乗り越えてみせる。\nあなたの信頼と情熱を\n追い風にして、ね！",
+      "en": "I'll overcome any adversity - with your trust and passion as my tailwind!"
+    },
+    {
+      "voice_id": 20023,
+      "jp": "少しの不安もなく言えるわ――！\nI'm confident!",
+      "en": "I can say it without a shred of doubt - I'm confident!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "The Crown's Show!\nご覧いただくのは最高のスペクタクル！\n私が王冠を手にする瞬間よ！",
+      "en": "The Crown's Show! What you're about to witness is the greatest spectacle - the moment I take the crown!"
+    },
+    {
+      "voice_id": 90011,
+      "jp": "Good morning…あ、早晨！\n…じゃなくって、おはよう！\nあはは、起きがけは混乱するのよ。",
+      "en": "Good morning... ah, jou san! ...no wait, ohayou! Haha, I get mixed up right after waking."
+    },
+    {
+      "voice_id": 92020,
+      "jp": "私が休暇を楽しめるのは、あなたが\n毎日サポートしてくれるおかげ。\n好多謝你！…気持ち、伝わってる？",
+      "en": "I can enjoy my holidays because you support me every day. Hou do je nei! ...Did my feelings come across?"
+    },
+    {
+      "voice_id": 20037,
+      "jp": "無問題…\n絶対に、絶対に…！",
+      "en": "Mou man tai... absolutely, absolutely...!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Perfect! {user}, the independent run wrapped up right on schedule. Mou man tai! Let's review the results and plan the next move together!",
+    "Do jeh for waiting, {user}! The independent run is complete. Results check first, then the next item on the list. I'm confident it went well!"
+  ],
+  "data_gaps": [
+    "Career story plot not in the mdb; summary built from event titles",
+    "No support card (support_card_count 0)",
+    "Cantonese romanisations are approximate (Jyutping-ish), not from the source",
+    "Family members referenced only generically (mother, father, older sister 姐姐)",
+    "Removed TCM self-care 'trivia' (qi-blood-water, Hegu, jasmine) and a spicy-food event title '神辛昇天ランチタイム！': neither appears in the source file"
+  ]
+}

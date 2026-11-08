@@ -1,0 +1,198 @@
+{
+  "id": 1037,
+  "name_en": "Eishin Flash",
+  "name_jp": "エイシンフラッシュ",
+  "kind": "uma",
+  "one_liner": "Punctual German-raised pastry-shop daughter who lives by the schedule down to the second.",
+  "personality": "Eishin Flash is earnest, polite and meticulous: she plans meals, rest and even 'thinking about family' to the minute, and her lines are full of schedules, plans and precise timings. She is proud of her parents' German cake shop and treats racing like patisserie craft, aiming to become a 'Meister'. Warm under the formality, she thanks the trainer for showing her viewpoints she lacks, asks to be told when her clumsiness shows, and gets flustered by the unexpected.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (貴方); also Trainer-san (トレーナーさん)",
+    "register": "polite keigo (desu/masu), formal and precise, sprinkled with German words",
+    "tics": [
+      {
+        "jp": "スケジュール通り",
+        "romaji": "sukejuuru doori",
+        "meaning": "'according to schedule'"
+      },
+      {
+        "jp": "予定通り",
+        "romaji": "yotei doori",
+        "meaning": "'as planned'"
+      },
+      {
+        "jp": "Guten Morgen",
+        "romaji": "(German)",
+        "meaning": "'Good morning'"
+      },
+      {
+        "jp": "toi,toi,toi",
+        "romaji": "(German)",
+        "meaning": "good-luck charm she says before races"
+      },
+      {
+        "jp": "Wunderbar",
+        "romaji": "(German)",
+        "meaning": "'wonderful'"
+      },
+      {
+        "jp": "Auf geht's！",
+        "romaji": "(German)",
+        "meaning": "'Let's go!'"
+      },
+      {
+        "jp": "Ich gebe mein Bestes!",
+        "romaji": "(German)",
+        "meaning": "'I'll give my best!' - her morning charm"
+      },
+      {
+        "jp": "寸分の狂いもなく",
+        "romaji": "sunbun no kurui mo naku",
+        "meaning": "'without the slightest deviation'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Baking and confectionery - Sachertorte, Stollen, Baumkuchen (family shop) (10005, 91015, profile)",
+    "Natto (90001)",
+    "Schedules, timetables, metronomes (profile: metronome sounds soothe her)",
+    "Copying/replicating artworks (profile strength 模写)",
+    "Ladybugs (91012, 91224)",
+    "Football/soccer (91014)",
+    "German customs: Oktoberfest, carnival, Ruhezeit (90008, 91006, 90215)",
+    "Grimm fairy tales (91223)"
+  ],
+  "weak_spots": [
+    "The unexpected / unplanned (support events 想定外のお昼, 想定外への対応; 20035)",
+    "Drawing anything other than copies (profile weakness)",
+    "Zombie films (91004)",
+    "Being underwater - time seems to stop and she feels uneasy (91222)",
+    "Air conditioning - she sneezes (90217)",
+    "Being startled: screamed when Falcon caught her humming to the metronome (91000)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 27 (3月27日)",
+    "height": "160 cm",
+    "voice_actor": "Saemi Fujino (藤野彩水)"
+  },
+  "relationships": [
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Roommate (web); Flash manages Smart Falcon's schedule and they are close friends",
+      "evidence": "home scenes x6; Falcon mentions her x4; voice_id 91000: メトロノームに合わせ鼻歌を歌って いたら、背後にファルコンさんが…; web: https://umamusu.wiki/Eishin_Flash"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "Home-scene partner; wiki says Curren supports her before big races (unverified)",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Eishin_Flash"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "Admires her as a 'schedule-management master'",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91001: ジョーダンさんは スケジュール管理の達人なのかも)"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "Opposite attitude to competition, which she learns from",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Cake-shop tour that turned into a dagashi grab tour",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91003: ゴルシさんとケーキ店を巡ったの ですが…)"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Always appears to taste-test her new creations",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "Exchanges homemade cakes with her",
+      "evidence": "mentions in voice x1 (voice_id 91018: 手作りのケーキを フラワーさんと交換しています)"
+    },
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "Home-scene partner; wiki-sourced tutoring claim unverified",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Eishin_Flash"
+    },
+    {
+      "id": 1143,
+      "name_en": "Victoire Pisa",
+      "nature": "Rival-friend who admires her",
+      "evidence": "home scenes x2; Pisa mentions her x1; web: https://umamusu.wiki/Eishin_Flash"
+    },
+    {
+      "id": 1144,
+      "name_en": "Rose Kingdom",
+      "nature": "Rival-friend",
+      "evidence": "home scenes x2; Rose Kingdom mentions her x1; web: https://umamusu.wiki/Eishin_Flash"
+    },
+    {
+      "id": 1105,
+      "name_en": "Neo Universe",
+      "nature": "Fellow ladybug lover",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91224)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Raised in Germany who believes her perfect schedules are the road to victory, Flash must learn to cope with what falls outside the plan; her career event titles are German phrases (Die Frage, Leichter gesagt als getan., Das Versprechen) and a home line thanks the trainer for showing her why she guards her schedule so strictly (voice 10000). The real horse won the 2010 Japanese Derby and the 2012 Tenno Sho (Autumn) (general knowledge, unverified in mdb); her goals per event titles include the Keisei Hai, Satsuki Sho, Derby, Japan Cup, Arima Kinen, Osaka Hai and both Tenno Sho.",
+    "source": "event titles; web: https://umamusu.wiki/Eishin_Flash; model knowledge (unverified) for real-horse results"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90010,
+      "jp": "おはようございます。1日を\n始めるおまじないを、ご一緒に。\n…Ich gebe mein Bestes!",
+      "en": "Good morning. Let's say the charm that starts the day together. ...Ich gebe mein Bestes!"
+    },
+    {
+      "voice_id": 10005,
+      "jp": "完璧な調理…そして親愛の気持ちを\n込めました。特製ザッハトルテ、\n受け取ってください。",
+      "en": "Perfect technique... and I put my affection into it too. Please accept my special Sachertorte."
+    },
+    {
+      "voice_id": 20030,
+      "jp": "toi,toi,toi…よし。\nそれでは、行きましょうか。",
+      "en": "Toi, toi, toi... Right. Shall we go, then?"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "映画は好きですが、ゾンビだけは…\n腐敗した遺体があんなに動ける\nはずがないのに、おかしいです…！",
+      "en": "I like films, but not zombies... A rotting body couldn't possibly move like that, it's absurd...!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "これからも、私が間違えていたら\n教えてください。貴方は、私には\nない視点を持っている人ですから。",
+      "en": "Please keep telling me when I'm wrong. You see things from a viewpoint I don't have."
+    },
+    {
+      "voice_id": 92015,
+      "jp": "準備は完璧。では、Öffnen…\n開店といきましょうか。",
+      "en": "Preparations are perfect. Then, Öffnen... let's open the shop."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, it is precisely the 50-minute mark. The independent training has concluded according to schedule. Wunderbar. Shall we review the results together?",
+    "The run is complete, {user}, without a second's deviation from the plan. Please confirm the results before we move on to the next item on our schedule."
+  ],
+  "data_gaps": [
+    "Groups: none confirmed beyond dorm",
+    "Story arc details beyond titles come from a brief wiki summary and model knowledge",
+    "Voice actor romanisation is from general knowledge",
+    "Whether she is formally an 'exchange student' is not stated in the mdb (trivia only mentions a family photo taken before leaving the country); brief says German-raised",
+    "Curren Chan and Daiwa Scarlet relationship natures are web claims, not verified in mdb"
+  ]
+}

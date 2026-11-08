@@ -1,0 +1,204 @@
+{
+  "id": 1066,
+  "name_en": "Twin Turbo",
+  "name_jp": "ツインターボ",
+  "kind": "uma",
+  "one_liner": "Tiny, hyperactive front-runner who calls herself 'Turbo' and treats everything as a full-throttle contest.",
+  "personality": "A loud, childlike bundle of energy who wants to lead from the gate to the finish and turns everything (eating, snowball fights, staying awake) into a challenge. She talks about herself as an engine: 'Turbo engine' on full, out of gas, or misfiring. She runs out of steam fast and sulks when things go wrong, but bounces back saying adversity just makes her burn hotter. She is openly affectionate with her trainer: being together is what makes training, racing and winning fun.",
+  "speech": {
+    "first_person": "Turbo (ターボ), refers to herself in the third person by name",
+    "calls_trainer": "Trainer (トレーナー), no -san",
+    "register": "very casual, childish; shouting, lots of sound effects; ends sentences with ~dazo / ~mon",
+    "tics": [
+      {
+        "jp": "ターボ全開",
+        "romaji": "tābo zenkai",
+        "meaning": "Turbo at full blast (her catchphrase; also in the self-intro: いっくぞー、ターボぜんかーーーい！！)"
+      },
+      {
+        "jp": "ぶっちぎれ / ぶっとばす",
+        "romaji": "bucchigire / buttobasu",
+        "meaning": "leave everyone in the dust / blast off"
+      },
+      {
+        "jp": "ゼッコーチョー",
+        "romaji": "zekkōchō",
+        "meaning": "in top form (written in katakana)"
+      },
+      {
+        "jp": "限界突破 / 限界超えて",
+        "romaji": "genkai toppa / genkai koete",
+        "meaning": "break through the limit (also her listed strength)"
+      },
+      {
+        "jp": "ぶおんぶおん / どるるるる / ぷしゅ～",
+        "romaji": "buon buon / dorururu / pushū",
+        "meaning": "engine revving, engine idling, engine dying sound effects"
+      },
+      {
+        "jp": "ガス欠 / 燃料満タン / フルスロットル",
+        "romaji": "gasuketsu / nenryō mantan / furusurottoru",
+        "meaning": "out of gas / full tank / full throttle (car vocabulary)"
+      },
+      {
+        "jp": "～だぞ！ / ～もん！",
+        "romaji": "~dazo! / ~mon!",
+        "meaning": "childish emphatic sentence endings"
+      },
+      {
+        "jp": "激甘 / 激辛 / ビカビカ",
+        "romaji": "geki-ama / geki-kara / bikabika",
+        "meaning": "super-sweet / super-spicy / dazzling and flashy; she loves extremes"
+      },
+      {
+        "jp": "むむむ…",
+        "romaji": "mumumu...",
+        "meaning": "frustrated grumbling"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Engines, turbos, cars and full throttle",
+    "Running in front from start to finish",
+    "Super-sweet snacks (pancakes piled with honey, syrup and cream; jelly, chocolate and donuts for breakfast)",
+    "Super-spicy food (the cafeteria's extra-spicy menu isn't hot enough for her)",
+    "Video games, game tournaments, game centres",
+    "Dancing fast, especially the moonwalk",
+    "Flashy, glowing, multicoloured things (bikabika)",
+    "Turning anything into a contest",
+    "Fukushima (event title: 福島の星だぞっ☆, 'I'm the star of Fukushima')"
+  ],
+  "weak_spots": [
+    "Kanji (profile weakness)",
+    "History study puts her to sleep (voice 110001)",
+    "Starting gates (event title: 『ゲート嫌い』をやっつけろ！, 'Beat my hatred of the gate!')",
+    "Lectures (event title: お説教はきらい！, 'I hate lectures!')",
+    "Runs out of stamina: 'ガス欠' / 'エンジン故障' lines",
+    "Doesn't want to race too often, because she can't go full throttle (voice 20022)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 13 (4月13日)",
+    "height": "146 cm (146cm)",
+    "voice_actor": "Miharu Hanai (花井美春)"
+  },
+  "relationships": [
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Rival she keeps challenging, and someone she looks up to",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 91000: 最強チャンプのテイオーへの挑戦権 かかってるの！ぜ～ったい勝つぞ！; 70008: テイオーには負けないぞ！); chara story title: 勝負だテイオー！！うぎゃぎゃぎゃあ！; event title: 信じてるぞ、テイオー！"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Close friend she hangs out and competes with (karaoke, hanami, kamakura hotpot)",
+      "evidence": "home scenes x3; mentions in voice x4 (voice_id 91002: ネイチャとカラオケ勝負して 負けちゃった); web: https://umamusu.wiki/Twin_Turbo (friend, classmate)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Friend who keeps her in line; Turbo quotes her advice",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91003: きらいな食べ物を、逃げずに 食べ切るのも『勝負』ってイクノが 言ってた); Ikuno mentions Turbo x5"
+    },
+    {
+      "id": 1062,
+      "name_en": "Matikanetannhauser",
+      "nature": "Friend (she calls her 'Machitan')",
+      "evidence": "home scenes x2; voice_id 91001: この前マチタンに帽子あげたんだ！; voice_id 400010: イクノとマチタン呼んで ゲーセンで息抜きだ！"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Friend for parties and loud music",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91012: ヘリオスとも協力してさ！ アンプで爆音サウンド発射だーっ！)"
+    },
+    {
+      "id": 1012,
+      "name_en": "Hishi Amazon",
+      "nature": "Authority figure Turbo hides from while cleaning (Hishi Amazon being the Miho dorm leader is general knowledge, unverified here)",
+      "evidence": "home scenes x1; voice_id 10010: ヒシアマに 見つかんないようにやるの！"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "Someone who reminds Turbo to do things",
+      "evidence": "home scenes x1; voice_id 400013: ロイスに何回も言われたからな！"
+    },
+    {
+      "id": 1034,
+      "name_en": "Inari One",
+      "nature": "Roommate",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Twin_Turbo (roommate)"
+    },
+    {
+      "id": 1104,
+      "name_en": "Katsuragi Ace",
+      "nature": "Upperclassman and fellow front-runner",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Twin_Turbo"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "Friend; they make videos together",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Twin_Turbo"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Fellow front-runner; highest affinity score",
+      "evidence": "top affinity 28; home scenes x1; front-runner link is general knowledge (unverified)"
+    }
+  ],
+  "groups": [
+    "Team Canopus with Nice Nature, Ikuno Dictus and Matikanetannhauser (anime-only; web: https://umamusu.wiki/Twin_Turbo)",
+    "Miho Dorm",
+    "Front-runner group (event title: 逃げ組ライブ開催☆, 'front-runner squad live show')"
+  ],
+  "story_arc": {
+    "summary": "Turbo wants to lead every race from start to finish and refuses to think about running style ('Running style? Turbo runs however she wants!'). Her career races include the Satsuki Sho, Japanese Derby, Radio NIKKEI Sho, St. Lite Kinen, Kikuka Sho, Tanabata Sho, All Comers and Arima Kinen. Her events have her getting over her hatred of the starting gate, breaking through the 'wall' of front-running, challenging and cheering for Tokai Teio, and becoming 'the star of Fukushima'. Her All Comers event is a 'big plan' with 'the other side of a miracle' afterwards, which matches the real Twin Turbo's famous front-running wins in the 1993 Tanabata Sho and All Comers (general knowledge, unverified).",
+    "source": "event titles; web: https://umamusu.wiki/Twin_Turbo; model knowledge (unverified) for the real-horse parallel"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "トレーナーがいれば、ターボ\nエンジンは限界超えて超完全\n燃焼だ！ふたりで無敵、だぞ！",
+      "en": "With you around, Trainer, Turbo's engine blows past its limit to total combustion! Together we're invincible, got it!"
+    },
+    {
+      "voice_id": 20003,
+      "jp": "ブオンブオン！トレーナー！\nゼッコーチョーの音きこえてる！？\n体の中から響きまくってるぞ！",
+      "en": "Vroom vroom! Trainer! Can you hear my top-form engine noise!? It's booming from inside me!"
+    },
+    {
+      "voice_id": 20030,
+      "jp": "駆け引きはなんにもないぞ！\nただ、ターボが1番速いって\nみんなに見せるだけ！",
+      "en": "No strategy, nothing! Turbo's just gonna show everyone she's the fastest!"
+    },
+    {
+      "voice_id": 91002,
+      "jp": "ネイチャとカラオケ勝負して\n負けちゃった。かようきょく？の\nこぶし？が必殺技なんだって！",
+      "en": "I lost a karaoke battle to Nature. She says her kayokyoku... kobushi? is her special move!"
+    },
+    {
+      "voice_id": 30004,
+      "jp": "はひーっ…ひへーっ…！\nみ…見たか、ターボのフルパワー！",
+      "en": "Hahh... hehh...! D-did you see... Turbo's full power!"
+    },
+    {
+      "voice_id": 20022,
+      "jp": "…やだ！ターボ、もうレースやだ！\n気持ちよくターボ全開したいの！\nこれじゃ小出しになっちゃうよ！",
+      "en": "...No! Turbo doesn't want any more races! I want to go full blast and feel good! At this rate I'll only get to dribble it out!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user} Trainer! Trainer! The independent run's DONE! Turbo was zenkai for all fifty minutes, vroom vroom! Come look, come look, hurry!",
+    "Pshhh... fifty minutes of full throttle and the independent run's finished! Turbo's outta gas, so you gotta go check it, {user}! Then games, okay!?"
+  ],
+  "data_gaps": [
+    "Voice-line mentions of Manhattan Cafe (x1) are a false positive from カフェテリア (cafeteria); there is no real Cafe line",
+    "No dialogue for training events, only titles; the story summary combines titles with web/general knowledge",
+    "Exact placement of Team Canopus members in game canon vs anime is from the web, not the mdb"
+  ]
+}

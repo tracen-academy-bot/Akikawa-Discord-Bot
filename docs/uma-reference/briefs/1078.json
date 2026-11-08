@@ -1,0 +1,190 @@
+{
+  "id": 1078,
+  "name_en": "Yamanin Zephyr",
+  "name_jp": "ヤマニンゼファー",
+  "kind": "uma",
+  "one_liner": "Dreamy forest child who speaks entirely in wind metaphors and wants to become a gale on the track.",
+  "personality": "Serene, airy and unhurried, she lives at her own pace among birds, insects and forest animals, naming them and treating them as friends. Almost everything she says is framed through dozens of different words for wind (凱風, 恵風, 光風, 颯...), and she drifts off mid-conversation. Beneath the gentle breeze is a fierce racer: she vows to grow from a soft breeze into a storm, and in races she becomes sharp and intense.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (あなた); also Trainer-san (トレーナーさん)",
+    "register": "Soft, refined polite speech (～ですね、～かしら、～でしょうか), poetic and slightly old-fashioned vocabulary",
+    "tics": [
+      {
+        "jp": "風",
+        "romaji": "kaze",
+        "meaning": "'wind' - in nearly every line, with rare compound words (凱風 gaifuu 'gentle south wind', 恵風 keifuu 'blessed wind', 光風, 颯 hayate, 烈風 reppuu 'gale')"
+      },
+      {
+        "jp": "凱風",
+        "romaji": "gaifuu",
+        "meaning": "used as a compliment for kind people, including the trainer"
+      },
+      {
+        "jp": "恵風",
+        "romaji": "keifuu",
+        "meaning": "'blessing wind' - what she calls the trainer's support"
+      },
+      {
+        "jp": "嵐へ至る、その日まで",
+        "romaji": "arashi e itaru, sono hi made",
+        "meaning": "'until the day I become a storm' - her motto"
+      },
+      {
+        "jp": "ふー",
+        "romaji": "fuu",
+        "meaning": "a soft exhale/breath, sometimes 'sending feelings on the wind'"
+      },
+      {
+        "jp": "かしら",
+        "romaji": "kashira",
+        "meaning": "soft feminine 'I wonder'"
+      },
+      {
+        "jp": "ふふっ",
+        "romaji": "fufu",
+        "meaning": "gentle giggle"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "wind in all its forms; profile strengths: tonguing (タンギング), kite-flying, improvised singing and dancing",
+    "forests, mountains, birds, insects (ladybug 'Star-san'), and naming animals",
+    "sweets baking: scones, figs with chocolate, chocolate ice cream; gathering nuts, chestnuts, mushrooms and other autumn produce (voice 91014, 91018)",
+    "her mother's flower brooch",
+    "night walks, lunch outside in the breeze",
+    "beige - 'the colour of sunlit earth'"
+  ],
+  "weak_spots": [
+    "air conditioners (profile)",
+    "smartphones and notifications feel 'cramped' (voice 10027)",
+    "wearing coats - wants to feel the wind (voice 91015)",
+    "spaces out; wind 'blows away' class content and her book page (voice 90012, 91003)",
+    "didn't realise a night walk was a test of courage (voice 91013)",
+    "trends/streaming jargon (voice 400100)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "May 27 (5月27日)",
+    "height": "154 cm (154cm)",
+    "voice_actor": "Riona Imaizumi (今泉りおな)"
+  },
+  "relationships": [
+    {
+      "id": 1093,
+      "name_en": "K.S.Miracle",
+      "nature": "Close friend; Zephyr gathers nuts for the children at the hospital Miracle visits (web: she worries about Miracle's health)",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91018: ミラクルさんが通う病院の子ども たちに、緑風を届けたくて…); worry for her health per web: https://umamusu.wiki/Yamanin_Zephyr"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "Friend; Zephyr admires her flowers",
+      "evidence": "home scenes x4; voice_id 90006 (フラワーさんが 育てたお花でしょうか？); top affinity 33"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Sprint friend/rival whose voice 'pierces even a nap'",
+      "evidence": "home scenes x4; voice_id 90003"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Same-generation friend; Zephyr looks out for Teio and empathises with her fractures (web; nothing in Zephyr's own lines)",
+      "evidence": "home scenes x3; web: https://umamusu.wiki/Yamanin_Zephyr"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Friend; Zephyr imitates her slang greeting",
+      "evidence": "home scenes x2; voice_id 400001 (ヘリオスさん流のご挨拶)"
+    },
+    {
+      "id": 1085,
+      "name_en": "Daiichi Ruby",
+      "nature": "Tea-party friend (Zephyr brings chocolate, Ruby brings tea)",
+      "evidence": "home scenes x1; voice_id 91019"
+    },
+    {
+      "id": 1066,
+      "name_en": "Twin Turbo",
+      "nature": "Energetic friend whose 'wind' she senses on the track",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91002, 91021)"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "Ally; invites the trainer to a forest-animal night party with her (web: 'Mazepha' alliance)",
+      "evidence": "mentions in voice x1 (voice_id 90015: マーチャンさんと森の動物たちの夜会に参加しようかと); 'Mazepha' alliance per web: https://umamusu.wiki/Yamanin_Zephyr"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Taught her to ride a bicycle",
+      "evidence": "voice_id 91016"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Shared her special oden broth",
+      "evidence": "home scenes x1; voice_id 90019"
+    },
+    {
+      "id": 1134,
+      "name_en": "Curren Bouquetd'or",
+      "nature": "Roommate (web)",
+      "evidence": "home scenes x1; mentioned_by x3 (Curren Bouquetd'or mentions Zephyr 3 times); roommate per web: https://umamusu.wiki/Yamanin_Zephyr"
+    }
+  ],
+  "groups": [
+    "Yamanin name family - general knowledge (unverified as an in-game group)",
+    "Sprint/mile circle with Bakushin O, Nishino Flower, Daiichi Ruby, Daitaku Helios, K.S.Miracle - web"
+  ],
+  "story_arc": {
+    "summary": "A sprint-mile runner who wants to become 'a wind faster and freer than anything'. Titles follow her from 『風のはじまり』 through the NZT and Aoi Stakes to the Sprinters Stakes and Mile CS, then the Yasuda Kinen (『強く鋭く』) and a step up to the Autumn Tenno Sho (『そして、烈風』), ending at the Arima with 『吹き続け、どこまでも』. Per the wiki she was inspired by an unnamed 'Emperor of Miles' and recovered from childhood injuries in nature; per the wiki this figure corresponds to her real sire Nihon Pillow Winner. Real-life Zephyr won the Yasuda Kinen in 1992 and 1993 and the 1993 Autumn Tenno Sho (web).",
+    "source": "event titles; web: https://umamusu.wiki/Yamanin_Zephyr, https://en.wikipedia.org/wiki/Yasuda_Kinen (real-horse results)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95000,
+      "jp": "そよ風も、吹き続ければ…\nいつかは嵐になるでしょう。",
+      "en": "Even a breeze, if it keeps blowing... will one day become a storm."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "風は形ないもの、自由なもの…\nそれを好む私たちは、実は少しだけ\n似ているのかもしれません。",
+      "en": "Wind is formless and free... perhaps you and I, who love it, are a little alike."
+    },
+    {
+      "voice_id": 20009,
+      "jp": "ボタン…かりんとう…しおまめ…\nあ、すみません、ぼーっと。\n鳥たちに、名前をつけていました。",
+      "en": "Button... karinto... shiomame... oh, forgive me, I was spacing out. I was naming the birds."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "もっと自由に、もっと高く、もっと速く。\n――そして、私は風になる…。",
+      "en": "Freer, higher, faster. -- And then, I become the wind..."
+    },
+    {
+      "voice_id": 92006,
+      "jp": "向かい風でも、きっと大丈夫。\n今はトレーナーさんが\n私の追い風ですから。",
+      "en": "Even against a headwind, I'll be fine. Right now, Trainer-san, you are my tailwind."
+    },
+    {
+      "voice_id": 10027,
+      "jp": "スマホはあまり見ないのです。\n通知などが…少々、窮屈で。",
+      "en": "I don't look at my phone much. The notifications and such... feel a little cramped."
+    }
+  ],
+  "timer_line_ideas": [
+    "The run is done, {user}. A gentle breeze, blowing for fifty minutes... shall we go feel the wind it left behind? Fufu.",
+    "{user}... the wind has turned. Your independent run is over. Please come see - a keifuu like you should not miss it."
+  ],
+  "data_gaps": [
+    "Matikanetannhauser mention is about an animal ('モサモサさん') liking her (voice 91017) - not a real relationship; omitted.",
+    "Story beats inferred from event titles; dialogue not available.",
+    "Curren Bouquetd'or roommate and Aston Machan alliance come from the web only."
+  ]
+}

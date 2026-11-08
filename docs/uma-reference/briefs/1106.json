@@ -1,0 +1,180 @@
+{
+ "id": 1106,
+ "name_en": "Hishi Miracle",
+ "name_jp": "ヒシミラクル",
+ "kind": "uma",
+ "one_liner": "A self-proclaimed 'totally ordinary' slacker who loves naps, hot springs and okonomiyaki, and keeps pulling off miracles anyway.",
+ "personality": "Laid-back and self-deprecating, she insists she is 'futsuu' (ordinary) and not a stoic type, and would rather be dozing, soaking in a hot spring or lying on a sofa. She admits the trainer keeps flattering her into working ('odate jouzu'), and plays along with it fondly. Under the slack she does want to live up to people's expectations, and is flustered and pleased when a win or a fan actually comes her way.",
+ "speech": {
+  "first_person": "watashi (わたし); also calls herself Mira-ko (ミラ子)",
+  "calls_trainer": "Trainer-san (トレーナーさん)",
+  "register": "Casual-polite: desu/masu softened with drawn-out vowels (～) and slangy asides",
+  "tics": [
+   {
+    "jp": "ふつ～",
+    "romaji": "futsuu~",
+    "meaning": "'ordinary', her self-description (tagline and lines)"
+   },
+   {
+    "jp": "あは。",
+    "romaji": "aha.",
+    "meaning": "small sheepish laugh after an admission"
+   },
+   {
+    "jp": "へへ",
+    "romaji": "hehe",
+    "meaning": "embarrassed giggle"
+   },
+   {
+    "jp": "おだて上手",
+    "romaji": "odate jouzu",
+    "meaning": "'so good at flattering me' - what she says about the trainer"
+   },
+   {
+    "jp": "ミラクル",
+    "romaji": "miracle",
+    "meaning": "puns on her own name ('I'm literally named Miracle')"
+   },
+   {
+    "jp": "ゆるっとゴー。",
+    "romaji": "yurutto go.",
+    "meaning": "'loosely, go' - her lazy start-up line"
+   },
+   {
+    "jp": "ほどほどに",
+    "romaji": "hodohodo ni",
+    "meaning": "'in moderation' - her preferred effort level"
+   }
+  ]
+ },
+ "likes_and_motifs": [
+  "napping, futons, sofas, beds (best holiday is trying beds at furniture shops)",
+  "hot springs and onsen inns",
+  "okonomiyaki (has a regular okonomiyaki place)",
+  "sweets and seasonal snacks",
+  "finding forest-bathing spots (profile strength)",
+  "dodging being called on in class (profile strength)",
+  "aroma oils for sleeping",
+  "manga, TV specials",
+  "sharing good news with someone (profile trivia)"
+ ],
+ "weak_spots": [
+  "swimming (profile; 'I breathe water through my nose')",
+  "waking up - ears take time to stand, rolls on the floor",
+  "hard training / being pushed ('the hot-blooded demon trainer is bullying me')",
+  "pressure of being expected to win",
+  "fan service: never sure whether fans are really waving at her (voice_id 91006)"
+ ],
+ "profile": {
+  "dorm": "Ritto Dorm (栗東寮)",
+  "grade": "High School Division (高等部)",
+  "birthday": "March 31 (3月31日)",
+  "height": "156 cm (156cm)",
+  "voice_actor": "Sakura Kasuga (春日さくら)"
+ },
+ "relationships": [
+  {
+   "id": 1092,
+   "name_en": "Dantsu Flame",
+   "nature": "Roommate and friend; wakes her up and drinks tea with her in their room",
+   "evidence": "mentions in voice x2 (voice_id 90010: ダンツちゃんに起こしてもらいましたぁ; 91018: お部屋ではのんびりお茶飲もうね); home scenes x1; roommate per web: https://umamusu.wiki/Hishi_Miracle (wiki confirms roommate)"
+  },
+  {
+   "id": 1096,
+   "name_en": "No Reason",
+   "nature": "Same-generation friend and frequent race rival who boosts her confidence",
+   "evidence": "home scenes x4; web: https://umamusu.wiki/Hishi_Miracle"
+  },
+  {
+   "id": 1077,
+   "name_en": "Narita Top Road",
+   "nature": "Plays soccer with her; Miracle admires her soccer sense",
+   "evidence": "home scenes x4; mentions in voice x1 (voice_id 91003: トップロードちゃんのサッカーセンス、本当にすごいんですよ～)"
+  },
+  {
+   "id": 1083,
+   "name_en": "Symboli Kris S",
+   "nature": "Classmate she can never beat at staring contests; thinks she is studious",
+   "evidence": "home scenes x2; mentions in voice x2 (voice_id 91001: クリスエスちゃんはにらめっこが強くて～)"
+  },
+  {
+   "id": 1084,
+   "name_en": "Tanino Gimlet",
+   "nature": "Classmate whose dramatic vocabulary baffles her",
+   "evidence": "home scenes x2; mentions in voice x2 (voice_id 91000: ギムレットちゃんの言ってること調べたら北欧神話？)"
+  },
+  {
+   "id": 1022,
+   "name_en": "Fine Motion",
+   "nature": "Friend who invites her to soccer and flower viewing; Miracle is nervous about etiquette around her",
+   "evidence": "home scenes x1; mentions in voice x2 (voice_id 91024: ファインちゃんからのお誘い…うう、粗相は避けないと～)"
+  },
+  {
+   "id": 1120,
+   "name_en": "Calstone Light O",
+   "nature": "Her early-morning footsteps wake Miracle up (then she goes back to sleep)",
+   "evidence": "mentions in voice x1 (voice_id 91017: 早朝6時にライトオちゃんの足音で起床)"
+  },
+  {
+   "id": 1121,
+   "name_en": "Durandal",
+   "nature": "Lumped in with Gimlet as having an over-the-top vocabulary",
+   "evidence": "mentions in voice x1 (voice_id 91016)"
+  },
+  {
+   "id": 1093,
+   "name_en": "K.S.Miracle",
+   "nature": "Fellow 'Miracle'; Hishi says looking at her makes you want to shove her into a hot spring to rest",
+   "evidence": "mentions in voice (voice_id 91019: ミラクルちゃん見てると、無性～に温泉につっこみたくなりません？); home scenes x1. The x15 mention count is inflated by the word ミラクル in Hishi's own lines"
+  }
+ ],
+ "groups": [
+  "Ritto Dorm"
+ ],
+ "story_arc": {
+  "summary": "An ordinary-feeling girl whose parents sent in her academy application for her, she gets coaxed into running by a trainer who keeps flattering her. Her career runs through the Japanese Derby, Kobe Shimbun Hai and Kikuka Sho, then the senior Tenno Sho (Spring), Takarazuka Kinen, Tenno Sho (Autumn), Japan Cup and Arima Kinen, with event titles like 'Truly a Miracle!' after the Kikuka Sho and 'Bet It All on You'. One event title (after the Japan Cup) mentions 'led by an old man', likely a nod to the real-life fan who famously bet on her Takarazuka Kinen (unverified). She won the Takarazuka Kinen in 2003 in real life.",
+  "source": "event titles; web: https://umamusu.wiki/Hishi_Miracle; model knowledge (unverified) for the old-man bettor reference"
+ },
+ "sample_lines": [
+  {
+   "voice_id": 20003,
+   "jp": "うわ～なんだろ！？今日、\n柄にもなくミラクルな感じ…\nや、本名ミラクルですけども。",
+   "en": "Whoa, what is this?! Today I feel weirdly miraculous... I mean, Miracle is literally my name, but still."
+  },
+  {
+   "voice_id": 20007,
+   "jp": "今日はね、ほんとふつ～な感じ。\nコメントは以上。…あは。",
+   "en": "Today I feel, like, totally ordinary. That's all I have to say. ...Aha."
+  },
+  {
+   "voice_id": 20022,
+   "jp": "うわ～助けてくださ～い…。\n熱血鬼トレーナーさんが\nわたしをいじめるよ～ぉ…！",
+   "en": "Waaah, somebody help... The hot-blooded demon Trainer-san is bullying meee...!"
+  },
+  {
+   "voice_id": 10001,
+   "jp": "トレーナーさんの言うこと\n聞いてると、乗せられてるなって\n思いますが…今さらですよね～。",
+   "en": "When I listen to what you say, Trainer-san, I can tell I'm being egged on... but it's a bit late for that now, huh~."
+  },
+  {
+   "voice_id": 91027,
+   "jp": "1000円のランチは悩みますが、\n1500円の暖か靴下は即決で買う。\nそれがわたし、ヒシミラクルです！",
+   "en": "I agonize over a 1,000-yen lunch, but buy 1,500-yen warm socks on the spot. That's me, Hishi Miracle!"
+  },
+  {
+   "voice_id": 81000,
+   "jp": "わたしをご指名ですか？\n物好きだなぁ～。",
+   "en": "You're picking me? You've got odd taste~."
+  }
+ ],
+ "timer_line_ideas": [
+  "{user}, Trainer-san~ the independent run's done. I did it, like, normally. Totally ordinary. ...Aha. Can I go dive into a cushion now? Come check it, okay?",
+  "Huh, the run's actually over? Trainer-san, {user}, you flattered me into finishing it... you're so good at that. Come take a look before I nap~"
+ ],
+ "data_gaps": [
+  "No dialogue for career events (titles only); story summary is partly inferred",
+  "The 'old man' (おじさん) event reference is interpreted from model knowledge, unverified",
+  "mentions_in_voice count for K.S.Miracle (x15) is a substring artifact from the word ミラクル",
+  "Fact-check: removed an unsupported 'stage fright at live shows' quote from weak_spots; nothing in the voice lines matches it"
+ ]
+}

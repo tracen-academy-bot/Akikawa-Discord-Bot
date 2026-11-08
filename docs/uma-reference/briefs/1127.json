@@ -1,0 +1,219 @@
+{
+  "id": 1127,
+  "name_en": "Fenomeno",
+  "name_jp": "フェノーメノ",
+  "kind": "uma",
+  "one_liner": "Scary-faced, justice-obsessed 'police officer' who calls her trainer Boss and ends everything with de arimasu.",
+  "personality": "Fenomeno acts like a beat cop. She runs greeting campaigns and patrols, writes safety slogans, gives out thank-you certificates and sniffs out 'crimes' like litter and late-night gaming. She dreams of being a true 'ally of justice' to inspire children, but her intense, fierce face keeps frightening them, which genuinely hurts her. She is wholeheartedly devoted to her trainer ('Boss'), whom she sees as the mentor who showed her real justice. Behind the stern front she is soft: scared of ghosts on night patrol, can't relax in the bath, gets choked up when locals give her presents, and has a sweet tooth.",
+  "speech": {
+    "first_person": "honkan (本官, 'this officer') x18; also watashi (私) x16, used about as often",
+    "calls_trainer": "Boss (ボス); once 貴方 (anata, voice_id 92022)",
+    "register": "Military/police polite speech (であります, 〜いたします, 出動, 任務完了), loud and earnest; growls and sniffs",
+    "tics": [
+      {
+        "jp": "であります",
+        "romaji": "de arimasu",
+        "meaning": "stiff military/police copula ending"
+      },
+      {
+        "jp": "本官",
+        "romaji": "honkan",
+        "meaning": "'this officer', police first person"
+      },
+      {
+        "jp": "ボス",
+        "romaji": "bosu",
+        "meaning": "'Boss', her name for the trainer"
+      },
+      {
+        "jp": "出動",
+        "romaji": "shutsudou",
+        "meaning": "'dispatch / move out!'"
+      },
+      {
+        "jp": "規範",
+        "romaji": "kihan",
+        "meaning": "'model / standard of conduct', her favourite word"
+      },
+      {
+        "jp": "正義の味方",
+        "romaji": "seigi no mikata",
+        "meaning": "'ally of justice', hero"
+      },
+      {
+        "jp": "くんくん",
+        "romaji": "kunkun",
+        "meaning": "sniff sniff, as she 'investigates' smells (also スンスン)"
+      },
+      {
+        "jp": "任務完了",
+        "romaji": "ninmu kanryou",
+        "meaning": "'mission complete'"
+      },
+      {
+        "jp": "グルル",
+        "romaji": "gururu",
+        "meaning": "a growl when frustrated with herself"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Justice, police work, patrols, traffic safety, crime-prevention slogans and posters",
+    "Children: she reads a book a month on how to interact with them (trivia)",
+    "Calligraphy and writing letters of appreciation (profile strengths); wrote 'Justice' (正義) for her first calligraphy of the year",
+    "Anpan and milk (the trainer gave her these when she was lost); stakeout anpan",
+    "Cake with sliced strawberries; vegetables cut into rounds remind her of her mother's cooking; her family all prefer tsubuan",
+    "Her father: his old watch, wishing to be photographed with him in a suit, his patterned clothes",
+    "Sense of smell / 'sniff forensics' (秘技・クンクン鑑識ッ!)",
+    "The Carrotman hero show: she asks Biko Pegasus about justice and evil after watching it (voice_id 91016)"
+  ],
+  "weak_spots": [
+    "Her fierce, scary face frightens children and fans (voice_id 20035, 70017)",
+    "Ghosts and night patrols ('the creepy tree shadow is not a ghost!')",
+    "Hair wax and mint candy (profile weaknesses)",
+    "Getting the rhythm in dance ('nori' is hard for her)",
+    "Relaxing: she struggles to soak in the bath for even 100 seconds",
+    "Strong smells overwhelm her nose (deodorant, Valentine sweets); pollen",
+    "Embarrassed about her brightly coloured ear covers / dressing up"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 20 (4月20日)",
+    "height": "171 cm (171cm)",
+    "voice_actor": "Yurika Hibi (日比優理香); umamusu.wiki writes 'Yuriko Hibi', so the reading is unconfirmed"
+  },
+  "relationships": [
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Friend and comic rival she is always chasing ('Golshi-san'); suspects her of running a secret plastic-wrap-tube organisation. Per the web Gold Ship likes to prank her because she reacts so strongly",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91000: ゴルシさんがラップの空芯を密かに回収する秘密組織を作ったとの噂が…; 91018); top affinity 25; web: https://umamusu.wiki/Fenomeno"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "Troublemaker who won't listen to her warnings; Fenomeno wonders if she must crown herself 'Police King' to get through",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91001: オルフェさんに注意を聞き入れてもらうには…); top affinity 24"
+    },
+    {
+      "id": 1124,
+      "name_en": "Bubble Gum Fellow",
+      "nature": "Roommate (per web) and confidante: she sorts out stalled cases by talking with Bubble over gum, and Bubble's 'magic hands' tame her curly hair",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 91002: 捜査に行き詰まったときは、バブルさんと話しつつ…; 91019: バブルさんの手は、魔法の手なのであります！); top affinity 23; roommate per web: https://umamusu.wiki/Fenomeno"
+    },
+    {
+      "id": 1119,
+      "name_en": "Dream Journey",
+      "nature": "Friend per web (the most polite of the group in the Expeditionary Support Committee room); appears together in home conversations",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Fenomeno"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "Rival; per the web Fenomeno acknowledges her as a strong rival she must face in races (the real horses met five times)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Fenomeno"
+    },
+    {
+      "id": 1090,
+      "name_en": "Verxina",
+      "nature": "Appears together in home conversations; nature unknown",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "Gambles in plain sight; Fenomeno suspects she treats her patrols as part of the game",
+      "evidence": "mentions in voice x1 (voice_id 91003)"
+    },
+    {
+      "id": 1043,
+      "name_en": "Shinko Windy",
+      "nature": "Prankster whose traps she sniffs out",
+      "evidence": "mentions in voice x1 (voice_id 91022: ウインディさん、昼休みにまた罠を仕掛けましたね！)"
+    },
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "Her smile soothes Fenomeno after chasing Gold Ship",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1054,
+      "name_en": "Biko Pegasus",
+      "nature": "Fenomeno is moved by Carrotman and asks Biko-san to teach her what justice and evil really are",
+      "evidence": "mentions in voice x1 (voice_id 91016: ああ！教えて下さい、ビコーさん！)"
+    },
+    {
+      "id": 1101,
+      "name_en": "Samson Big",
+      "nature": "Wants to be 'big'; Fenomeno answers with a wholehearted piggyback",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1141,
+      "name_en": "Epiphaneia",
+      "nature": "'Epi-san' (taken to be Epiphaneia; the mention extractor did not catch it), whose unintentional, fate-driven antics Fenomeno considers a real threat",
+      "evidence": "mentions in voice x1, not counted by the extractor (voice_id 91020: エピさんの運命的行動は、時に脅威なのであります…)"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "Chair of the Public Discipline Committee Fenomeno belongs to",
+      "evidence": "web: https://umamusu.wiki/Fenomeno"
+    }
+  ],
+  "groups": [
+    "Public Discipline Committee (風紀委員), per web: https://umamusu.wiki/Fenomeno",
+    "'Star Investigation Squad' story event (web)",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "Her career is framed as a police procedural ('CASE.' events: Hope, Traffic Enforcement, Interviews, Special Orders, Profiling, Task Force). The post-race titles read like case files: 'profiling' after the Satsuki Sho, 'interrogation rooms G and O' (probably Gold Ship and Orfevre, unverified) after the Japan Cup, and 'bomb squad' after the Takarazuka Kinen. Her chapters are seven rules for an ally of justice: help the weak, be a model, guide juniors, keep the school safe. They culminate in doing justice together with her Boss. Opening events set in Paris ('In the streets of Paris', 'Memories of that city') are not explained by the titles alone; the real horse won the Aoba Sho and twice won the Tenno Sho (Spring) in 2013 and 2014 (model knowledge, unverified).",
+    "source": "event titles; real-horse results: model knowledge (unverified); web: https://umamusu.wiki/Fenomeno (no career-story detail)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "あの日、道に迷いかけていた本官に\nボスがくれたあんぱんと牛乳の味…\n一生忘れないであります！",
+      "en": "The taste of the anpan and milk you gave me that day, Boss, when I was nearly lost... I will never forget it!"
+    },
+    {
+      "voice_id": 20035,
+      "jp": "うぅむ…またファンの方を\n怖がらせてしまった…焦りが、\n顔に出ているのだろうか…。",
+      "en": "Hmmm... I frightened a fan again... is my impatience showing on my face..."
+    },
+    {
+      "voice_id": 90005,
+      "jp": "そろそろ夜の見回りに出ねば…\n…大丈夫。怖くない…！不気味な\n木の影はお化けにあらず…！",
+      "en": "Time to head out on night patrol... It's fine. I'm not scared...! That eerie tree shadow is no ghost...!"
+    },
+    {
+      "voice_id": 90015,
+      "jp": "夜更かし警察であります！\n過度な業務は厳禁！そろそろ、\nトレーナー寮で休息願います！",
+      "en": "This is the Stay-Up-Late Police! Excessive work is strictly prohibited! Please retire to the trainer dorm and rest!"
+    },
+    {
+      "voice_id": 91022,
+      "jp": "…スンスンスンスン。この匂い…\nウインディさん、昼休みにまた罠を\n仕掛けましたね！巡回しなくては！",
+      "en": "*sniff sniff sniff* This smell... Windy-san, you've set another trap during lunch break! I must patrol!"
+    },
+    {
+      "voice_id": 40004,
+      "jp": "周囲に異常なし…ボスッ！\n本日はどちらに…ハッ、危ない！\n…安全確保！ご無事ですか、ボス？",
+      "en": "No abnormalities in the area... Boss! Where to today... ah, look out! ...Area secured! Are you unharmed, Boss?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Report! Boss {user}, your independent training run is complete, de arimasu! Please proceed to inspect the results. This officer will stand guard!",
+    "*sniff sniff* ...This is the smell of a finished training run! Mission complete, de arimasu! Boss {user}, your inspection is requested at once!"
+  ],
+  "data_gaps": [
+    "Voice actor reading: 日比優理香 is usually read Yurika, but umamusu.wiki writes 'Yuriko Hibi'; not confirmed",
+    "Mention data counts Transcend x1, but that is a false positive ('トランプ' = playing cards, voice_id 90004) and was excluded",
+    "Who 'G' and 'O' in the event titles are, and what the Paris events cover, is inferred and not confirmed",
+    "Her father is a police officer per the web; the source only shows his watch, suit and patterned clothes",
+    "Rice Shower and Symboli Rudolf (top affinity 29) were removed from relationships: affinity alone is not evidence of a relationship",
+    "What the Paris events ('パリの街にて', '彼の都の思い出は') are about is unknown; umamusu.wiki does not mention Paris"
+  ]
+}

@@ -1,0 +1,190 @@
+{
+ "id": 1110,
+ "name_en": "Cesario",
+ "name_jp": "シーザリオ",
+ "kind": "uma",
+ "one_liner": "A stern, knightly competitor on the track and a doting, motherly caretaker off it, building foundations for the future.",
+ "personality": "She has two faces, as her tagline says: on duty she is severe and self-commanding ('Don't stop here, Cesario'), speaking of being a 'foundation' (礎) for the future and aiming to be a mentor. Off duty she is warm, playful and endlessly caring, cooking too much, packing bentos, offering coffee and spare hand warmers, and treating her trainer as 'the person of fate'. She loves comedies and disguises (her name comes from Viola's male alias in Twelfth Night) but is crushed by tragic romances.",
+ "speech": {
+  "first_person": "watashi (私)",
+  "calls_trainer": "Trainer (トレーナー, no -san) and anata (貴方)",
+  "register": "Two modes: refined polite keigo (~mairimashou, ~itashimasu) with ♪ when cheerful; clipped plain-form self-command (~da, ~ka) when serious",
+  "tics": [
+   {
+    "jp": "参りましょう",
+    "romaji": "mairimashou",
+    "meaning": "humble 'let us go'"
+   },
+   {
+    "jp": "礎",
+    "romaji": "ishizue",
+    "meaning": "'foundation/cornerstone' - her mission word"
+   },
+   {
+    "jp": "未来",
+    "romaji": "mirai",
+    "meaning": "'the future' - constant theme"
+   },
+   {
+    "jp": "貴方",
+    "romaji": "anata",
+    "meaning": "formal 'you' for the trainer"
+   },
+   {
+    "jp": "ふふ",
+    "romaji": "fufu",
+    "meaning": "soft laugh, often with ♪"
+   },
+   {
+    "jp": "スッ、スッ、ハ～",
+    "romaji": "su, su, haa",
+    "meaning": "breathing routine to calm herself"
+   },
+   {
+    "jp": "連綿と",
+    "romaji": "renmen to",
+    "meaning": "'unbroken, continuing on' (lineage/legacy)"
+   }
+  ]
+ },
+ "likes_and_motifs": [
+  "cooking for others (glazed carrots from her mother's recipe), sweets, meringue",
+  "eel (wishes there were more Ushi no Hi)",
+  "comedies, plays, musicals; duet comedy scripts",
+  "disguise (profile strength); her name is Viola's male alias in Twelfth Night (general knowledge)",
+  "singing (profile)",
+  "church visits after school; dress and veil imagery (voice_id 90013, 91023)",
+  "great rivers flowing to the sea; oak ('strong like an oak' - she won the Oaks in real life)",
+  "mentoring juniors; keeps notes for successors"
+ ],
+ "weak_spots": [
+  "tragic love stories (profile)",
+  "winter mornings (profile)",
+  "ears droop when she isn't allowed to dote on people (profile)",
+  "drowsy in spring"
+ ],
+ "profile": {
+  "dorm": "Ritto Dorm (栗東寮)",
+  "grade": "Middle School Division (中等部)",
+  "birthday": "March 31 (3月31日)",
+  "height": "167 cm (167cm)",
+  "voice_actor": "Haruka Sato (佐藤榛夏)"
+ },
+ "relationships": [
+  {
+   "id": 1109,
+   "name_en": "Rhein Kraft",
+   "nature": "Roommate and best friend; she looks after her like a big sister",
+   "evidence": "home scenes x5; mentions in voice x5 (voice_id 70004: クラフト、宿題終わったかな？; 91012); roommate per web: https://umamusu.wiki/Cesario"
+  },
+  {
+   "id": 1083,
+   "name_en": "Symboli Kris S",
+   "nature": "Chats with her in English; serves her tea (real-life mate, sire of Epiphaneia)",
+   "evidence": "home scenes x4; mentions in voice x2 (voice_id 91019: クリスエスさん、私の紅茶を褒めてくれて); real-life link per web: https://umamusu.wiki/Cesario"
+  },
+  {
+   "id": 1001,
+   "name_en": "Special Week",
+   "nature": "Admired senpai; makes her diet sweets; dream of a serious practice run together; real-life sire of Cesario (general knowledge, unverified in mdb)",
+   "evidence": "home scenes x3; voice_id 10013: スペさんと本気の併走…; 91004; 92002"
+  },
+  {
+   "id": 1141,
+   "name_en": "Epiphaneia",
+   "nature": "Home-screen partner; her real-life son",
+   "evidence": "home scenes x1; mentioned by Epiphaneia x2; real-life relation per web: https://umamusu.wiki/Cesario"
+  },
+  {
+   "id": 1111,
+   "name_en": "Air Messiah",
+   "nature": "Test-score rival (record tied)",
+   "evidence": "home scenes x2; mentions in voice x1 (voice_id 91003)"
+  },
+  {
+   "id": 1112,
+   "name_en": "Daring Heart",
+   "nature": "Friend who loves shark movies",
+   "evidence": "home scenes x2; mentions in voice x1 (voice_id 91002)"
+  },
+  {
+   "id": 1061,
+   "name_en": "King Halo",
+   "nature": "Helped her wear her dress; she admires King's care for juniors",
+   "evidence": "home scenes x2; mentions in voice x1 (voice_id 91016)"
+  },
+  {
+   "id": 1114,
+   "name_en": "Buena Vista",
+   "nature": "Friend she goes out with (worries Buena will get lost looking for her)",
+   "evidence": "home scenes x1; mentions in voice x1 (voice_id 91001)"
+  },
+  {
+   "id": 1086,
+   "name_en": "Mejiro Ramonu",
+   "nature": "Admires her passionate running; fellow 'Muse'",
+   "evidence": "mentions in voice x2 (voice_id 91018; 400001)"
+  },
+  {
+   "id": 1075,
+   "name_en": "Daring Tact",
+   "nature": "Accompanies her mountain training as a guide",
+   "evidence": "mentions in voice x1 (voice_id 91017)"
+  },
+  {
+   "id": 1008,
+   "name_en": "Vodka",
+   "nature": "She coaches/tutors Vodka for a quiz contest ('being a teacher is nerve-wracking', voice_id 91010)",
+   "evidence": "mentions in voice x1 (voice_id 91010)"
+  }
+ ],
+ "groups": [
+  "Ritto Dorm",
+  "Team Ascella (with Rhein Kraft; per web: https://umamusu.wiki/Cesario)"
+ ],
+ "story_arc": {
+  "summary": "Cesario wants to win the Tiara and become a cornerstone for future generations, and frames her career as a play with the trainer as her destined partner. Her goals run through the Flower Cup, Oka Sho, NHK Mile Cup, Oaks ('Prompter'), Shuka Sho, Victoria Mile, Queen Elizabeth II Cup and finally the Japan Cup ('Curtain Call'). Chapter and event titles are Shakespeare-style lines, fitting her name from Twelfth Night. She is also the protagonist of Act 2 Chapter 2 of the main story.",
+  "source": "event titles; character story titles; web: https://umamusu.wiki/Cesario"
+ },
+ "sample_lines": [
+  {
+   "voice_id": 20011,
+   "jp": "ふー…。\n…この程度で立ち止まるな、\nシーザリオ。",
+   "en": "Hoo... Don't stop at something like this, Cesario."
+  },
+  {
+   "voice_id": 90004,
+   "jp": "トレーナー、お腹空いてませんか？\n冷蔵庫に夜食を入れておいたので…\nあっ、でも…無理は禁物、ですよ？",
+   "en": "Trainer, aren't you hungry? I put a late-night snack in the fridge... ah, but no overworking, okay?"
+  },
+  {
+   "voice_id": 2033,
+   "jp": "スッ、スッ、ハ～。…気持ちが\n高ぶりすぎないよう、調整中です。\nスッ、スッ、ハ～…。",
+   "en": "Sss, sss, haa. ...Just adjusting so I don't get too worked up. Sss, sss, haa..."
+  },
+  {
+   "voice_id": 10007,
+   "jp": "Trick or Treat!\nトレーナー、お仕事ばかりしてると\n悪戯しちゃいますよ？ふふ♪",
+   "en": "Trick or treat! Trainer, if all you do is work, I'll play a prank on you, okay? Fufu."
+  },
+  {
+   "voice_id": 20030,
+   "jp": "調子は可もなく不可もなく…だが\n『良い』以外は全て『悪い』だ。\n慢心せず、挑もう。",
+   "en": "My condition is neither good nor bad... but anything short of 'good' is 'bad'. No complacency. Let's take it on."
+  },
+  {
+   "voice_id": 92007,
+   "jp": "トレーナー。\n私の未来を変えた運命の人。\n今日はどんな未来を紡ぎましょう。",
+   "en": "Trainer. The person of fate who changed my future. What future shall we weave today?"
+  }
+ ],
+ "timer_line_ideas": [
+  "Trainer, {user}, the independent run has concluded. Another stone laid for the foundation. Shall we review it together? I've made coffee, too.",
+  "Fufu, time's up, {user}. The run is done, and well done. Please come check it, Trainer. Then rest; your future needs looking after too."
+ ],
+ "data_gaps": [
+  "No dialogue for career events (titles only)",
+  "Exact Shakespeare sources of chapter titles not verified",
+  "Fact-check: 'cross-dressing pranks' and the 'Twinbell Queen' card name were not supported by the mdb and were removed; Team Ascella, roommate and Act 2 Chapter 2 protagonist checked on umamusu.wiki"
+ ]
+}

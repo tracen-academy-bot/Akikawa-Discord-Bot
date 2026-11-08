@@ -1,0 +1,203 @@
+{
+  "id": 1094,
+  "name_en": "Jungle Pocket",
+  "name_jp": "ジャングルポケット",
+  "kind": "uma",
+  "one_liner": "Charismatic ex-street-racing gang boss chasing 'the strongest' title, all loud bravado and big-sister heart.",
+  "personality": "A loud, cocky 'charisma yankee' who used to lead freestyle (unofficial) racers and now aims to be the strongest, inspired by Fuji Kiseki. She trash-talks, loves duels and comedy shows, and treats the Trainer as her 相棒 (partner), but she is fiercely loyal: she checks on gloomy dormmates, protects friends and dotes on her little sister. Hates looking weak and thrives when the odds are bad.",
+  "speech": {
+    "first_person": "ore (俺)",
+    "calls_trainer": "omae (お前, x7) and anta (あんた, x8) most often; aibō (相棒, 'partner', x5) as her term of endearment; 'Trainer' (トレーナー, x3) without -san",
+    "register": "rough delinquent (yankee) slang, slurred -ee/-nee endings, shouting",
+    "tics": [
+      {
+        "jp": "最強",
+        "romaji": "saikyō",
+        "meaning": "'the strongest' -- her goal ('目指すぞ、最強！')"
+      },
+      {
+        "jp": "テッペン",
+        "romaji": "teppen",
+        "meaning": "'the top/summit' (yankee slang)"
+      },
+      {
+        "jp": "相棒",
+        "romaji": "aibō",
+        "meaning": "'partner' -- what she calls the Trainer"
+      },
+      {
+        "jp": "ブッちぎ",
+        "romaji": "bucchigiru",
+        "meaning": "'blow past/leave in the dust'"
+      },
+      {
+        "jp": "ぶち抜",
+        "romaji": "buchinuku",
+        "meaning": "'smash through/overtake'"
+      },
+      {
+        "jp": "特服",
+        "romaji": "tokufuku",
+        "meaning": "biker/yankee gang uniform; she calls her racing outfit this"
+      },
+      {
+        "jp": "上等",
+        "romaji": "jōtō",
+        "meaning": "'bring it on' (トレーニング上等！, レース上等！); also ジョートー"
+      },
+      {
+        "jp": "オラァ",
+        "romaji": "oraa",
+        "meaning": "delinquent battle shout"
+      },
+      {
+        "jp": "しゃーねぇ",
+        "romaji": "shā nē",
+        "meaning": "'can't be helped' (rough)"
+      },
+      {
+        "jp": "ヘヘッ",
+        "romaji": "hehe'",
+        "meaning": "cocky grin laugh"
+      },
+      {
+        "jp": "ねー",
+        "romaji": "-nē (for -nai)",
+        "meaning": "slurred tough-girl negatives (ぜってー, わかんねぇ)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "huddles/team circles, tree climbing, going first at karaoke (profile)",
+    "fire, crimson, kanji embroidery on her jacket (dragon or tiger?)",
+    "comedy shows (manzai, 'Bakushō-ō')",
+    "strawberry parfaits and sweets",
+    "lion biscuits ('a lion is a win')",
+    "freestyle racing days and her old boots",
+    "her little sister (videos of her singing)",
+    "Fuji Kiseki (tail wags hard around her)",
+    "duels, chicken races, 1-on-1 basketball with Tosen Jordan",
+    "sweet potato roasting"
+  ],
+  "weak_spots": [
+    "gloomy/sentimental talk (profile)",
+    "mint candy (profile)",
+    "Halloween ghost costumes -- she insists the Trainer is the one scared and sticks close (voice 10007); her own fear is implied, not stated",
+    "keeps licking off her lip balm (voice 91015)",
+    "hates showing weakness (voice 20001)",
+    "gets called in by teachers for street trouble"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "May 7 (5月7日)",
+    "height": "158cm",
+    "voice_actor": "Yuri Fujimoto (藤本侑里)"
+  },
+  "relationships": [
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "idol and inspiration ('フジさん'); wants to surpass her someday",
+      "evidence": "home scenes x4; mentioned_by x4; voice 400009; profile about_tail; web: https://umamusu.wiki/Jungle_Pocket"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "rival she's determined to drag out and beat",
+      "evidence": "mentions in voice x3 (voice_id 91001: '首洗って待っとけよ、タキオン…！'); home scenes x3; web: https://umamusu.wiki/Jungle_Pocket"
+    },
+    {
+      "id": 1092,
+      "name_en": "Dantsu Flame",
+      "nature": "same-generation rival/friend; sees fight in her eyes after losing",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91000); event title '日本ダービーの後に・断然ダンツ！'"
+    },
+    {
+      "id": 1077,
+      "name_en": "Narita Top Road",
+      "nature": "roommate; says goodnight every night",
+      "evidence": "mentions in voice x2 (voice_id 90005, 90014); web: https://umamusu.wiki/Jungle_Pocket (roommate)"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "friend; spooks her by smiling at things behind her",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91022)"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "pal; 1-on-1 basketball and 'teaching her how to dodge teachers'",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 90003, 91026)"
+    },
+    {
+      "id": 1082,
+      "name_en": "North Flight",
+      "nature": "'Flight'; wore Pocket's tokufuku perfectly",
+      "evidence": "home scenes x1; mentions in voice x2 (voice_id 90017, 91002)"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "a strength she vows to crush",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1111,
+      "name_en": "Air Messiah",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x3"
+    }
+  ],
+  "groups": [
+    "L/Roars (her team, voice 91004; event title '新チーム結成！')",
+    "former leader (総長) of a freestyle racing crew",
+    "'JAMD' quartet with Agnes Tachyon, Manhattan Cafe, Dantsu Flame (web: https://umamusu.wiki/Dantsu_Flame)"
+  ],
+  "story_arc": {
+    "summary": "A former street-racing gang boss who joins Tracen to become the strongest, forming a new team ('新チーム結成！') with her Trainer. She runs the Classic line (Hopeful S, Satsuki Sho, Derby, Kikka Sho) with Agnes Tachyon as the dazzling light she must beat ('皐月賞の後に・光をブチのめす！'), then the Japan Cup, Hanshin Daishoten, Tenno Sho (Spring), Takarazuka and Arima Kinen, chasing Fuji Kiseki's back as her ideal.",
+    "source": "event titles + voice lines + web: https://umamusu.wiki/Jungle_Pocket"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10002,
+      "jp": "お前は、やる時はやるヤツだ。\nもっと胸張れよ――相棒！",
+      "en": "You're the type who comes through when it counts. Stick your chest out more -- partner!"
+    },
+    {
+      "voice_id": 90000,
+      "jp": "なんだ、眠ぃのかよ？\n…ワァァァァ！！っと。\nハハッ、どうだ？目ェ覚めたろ。",
+      "en": "What, sleepy? ...WAAAAH!! Hah, how's that? Bet you're awake now."
+    },
+    {
+      "voice_id": 90016,
+      "jp": "妹が柏餅を半分にしてよ…\nくれたんだよ。俺に。でかいほう！\nくっ…成長したよなぁ…！",
+      "en": "My little sister split a kashiwa-mochi in half... and gave it to me. The BIG half! Ugh... she's grown up so much...!"
+    },
+    {
+      "voice_id": 91015,
+      "jp": "んぐ…またやっちまったー！\n俺を止めてくれ…塗ったそばから\nリップクリームなめちまうんだよ！",
+      "en": "Ngh... did it again! Stop me... I lick off my lip balm right after I put it on!"
+    },
+    {
+      "voice_id": 10017,
+      "jp": "ミッションクリアか、やるなー。\nさっすが俺の相棒だ！",
+      "en": "Mission clear, huh? Nice. That's my partner!"
+    },
+    {
+      "voice_id": 92007,
+      "jp": "“最強”の俺！\n“最強の相棒”のお前！\nへへッ、俺たち無敵だな！",
+      "en": "Me, 'the strongest'! You, 'the strongest partner'! Heh, we're unbeatable!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Oi, {user}! Your solo run's done, partner. Not bad -- but the strongest don't stop here. Go check it, then we're hittin' the next one!",
+    "Heh, 50 minutes, done and dusted. {user}, quit slackin' and come see the results. What, you thought I'd let you nap? Not on my watch!"
+  ],
+  "data_gaps": [
+    "L/Roars membership beyond Pocket unknown from source",
+    "Who 'the dorm leader' / 同室のヤツ in event voice refer to is unclear",
+    "Voice actor romanisation is standard reading, not checked against official EN credits"
+  ]
+}

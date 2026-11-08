@@ -1,0 +1,146 @@
+{
+  "id": 9047,
+  "name_en": "Speed Symboli",
+  "name_jp": "スピードシンボリ",
+  "kind": "uma",
+  "one_liner": "Symboli-family pioneer who first took Japan to the world stage; a warm mentor who believes in young runners' limitless potential.",
+  "personality": "An encouraging, big-hearted senior who believes in the 'limitless potential' living in young runners and wants to 'turn the world upside down'. Her lines are about supporting the listener, never-ending challenge, and lending her strength to the next generation, whom she calls the 'dream' itself. The wiki adds she heads URA's Global Business Division and cares deeply for Symboli relatives.",
+  "speech": {
+    "first_person": "watashi (私) (self-intro); wiki also lists ore (俺)",
+    "calls_trainer": "kimi (君); 諸君 / 若人よ for groups",
+    "register": "casual, warm senior / mentor with a slightly theatrical, grand tone",
+    "tics": [
+      {
+        "jp": "君",
+        "romaji": "kimi",
+        "meaning": "'you' to the listener (voice 20051, 95006, self-intro 君たち)"
+      },
+      {
+        "jp": "〜さ",
+        "romaji": "~sa",
+        "meaning": "casual assertive ending ('...that's who I am') (self-intro)"
+      },
+      {
+        "jp": "さあ、",
+        "romaji": "saa,",
+        "meaning": "'well then, shall we...' (self-intro: 世界をひっくり返そうか)"
+      },
+      {
+        "jp": "若人よ",
+        "romaji": "wakoudo yo",
+        "meaning": "'O youth!' grand address (voice 910100)"
+      },
+      {
+        "jp": "諸君",
+        "romaji": "shokun",
+        "meaning": "'you all, ladies' (voice 910100)"
+      },
+      {
+        "jp": "胸を貸そう",
+        "romaji": "mune wo kasou",
+        "meaning": "'I'll be your sparring partner' (voice 910100)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "dreams and endless challenge",
+    "the world stage / overseas racing (Arc pioneer, web)",
+    "supporting and following up on juniors",
+    "believing in others' potential"
+  ],
+  "weak_spots": [
+    "cried after reaching the finish line in her racing days (web)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown (graduated; URA Global Business Division chief per wiki)",
+    "birthday": "May 3 (5月3日)",
+    "height": "170 cm - web only",
+    "voice_actor": "Miyuki Sawashiro (沢城みゆき)"
+  },
+  "relationships": [
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "Symboli relative; per wiki she looks up to Speed, though in her own line she grumbles that Speed gave her 'stylish pajamas' she won't open because they'd make her feel old",
+      "evidence": "home scenes x1; mentioned in Sirius's voice x1 (voice_id 91018: スピードシンボリに『ハイカラな寝巻』とやらを贈られたんだが…老いそうで箱を開ける気にならねぇ); web: https://umamusu.wiki/Speed_Symboli"
+    },
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "Symboli junior who looks up to her (IRL Rudolf's damsire)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Speed_Symboli"
+    },
+    {
+      "id": 9046,
+      "name_en": "Saint Lite",
+      "nature": "fellow Twinkle Legend and friend",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 9048,
+      "name_en": "Haiseiko",
+      "nature": "fellow Twinkle Legend and friend",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "friend; they sometimes have late-night chats (web)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Speed_Symboli"
+    },
+    {
+      "id": 9043,
+      "name_en": "Sadake Mei (佐岳メイ; romanisation, name_en null)",
+      "nature": "shares a home conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Symboli family",
+    "The Twinkle Legends (scenario legends trio)",
+    "URA Global Business Division (web)"
+  ],
+  "story_arc": {
+    "summary": "One of the three Legends of 'The Twinkle Legends' scenario (JP, Feb 2025), recruited by Chairwoman Akikawa to revive the racing boom. As Japan's first Arc de Triomphe runner she 'built the road to the world', and in-game she mentors with a belief in juniors' potential. She also has 1 support card in the source.",
+    "source": "web: https://umamusu.wiki/Speed_Symboli, https://umamusu.wiki/Game:The_Twinkle_Legends"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "君を支えたいんだ。",
+      "en": "I want to support you."
+    },
+    {
+      "voice_id": 70000,
+      "jp": "夢見る限り、挑戦は止まない。",
+      "en": "As long as we dream, the challenge never ends."
+    },
+    {
+      "voice_id": 95005,
+      "jp": "もっとフォローさせてくれ。",
+      "en": "Let me back you up some more."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "大いなる飛躍を君に！",
+      "en": "A great leap forward, for you!"
+    },
+    {
+      "voice_id": 910100,
+      "jp": "若人よ、胸を貸そう！\n諸君こそが――\n“夢”なのだから。",
+      "en": "Come, youngsters, I'll take you on! For you, all of you, are the 'dream' itself."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your independent run is done. Fifty minutes closer to the world stage. Let me follow up on it with you - a great leap starts here!",
+    "Run's over, {user}. As long as we dream, the challenge never ends... so come check the results, and then shall we turn the world upside down?"
+  ],
+  "data_gaps": [
+    "Trainer address is 君 from lines; wiki does not state it",
+    "Height from wiki only",
+    "Support card events not in source (support_event_titles empty despite support_card_count 1)",
+    "佐岳メイ name_en is null; 'Sadake Mei' is a romanisation",
+    "Wiki lists both watashi (私) and ore (俺) as first person; only 私 appears in source"
+  ]
+}

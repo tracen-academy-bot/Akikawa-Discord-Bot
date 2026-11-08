@@ -1,0 +1,137 @@
+{
+  "id": 1101,
+  "name_en": "Samson Big",
+  "name_jp": "サムソンビッグ",
+  "kind": "uma",
+  "one_liner": "A tiny girl with huge dreams who calls herself \"Big-san\" and turns everything into something BIG.",
+  "personality": "Upbeat, earnest and relentlessly ambitious: her self-intro says she will try anything and become a BIG Umamusume who echoes around the world, and her tagline calls her a \"little giant who keeps challenging\". She cheers herself on in the third person (\"Go, Big-san!\") and is eager to help others (\"rely on Big-san\"). She also has a sleepy, easygoing side, dozing off next to her friend Buu-chan.",
+  "speech": {
+    "first_person": "atashi (あたし) in her self-intro; very often refers to herself in the third person as Big-san (ビッグさん)",
+    "calls_trainer": "unknown",
+    "register": "casual, cheerful, slightly childlike; polite desu/masu only in set phrases",
+    "tics": [
+      {
+        "jp": "ビッグ",
+        "romaji": "biggu",
+        "meaning": "\"big\" - attached to everything (big results, big dreams)"
+      },
+      {
+        "jp": "ビッグさん",
+        "romaji": "Biggu-san",
+        "meaning": "how she refers to herself"
+      },
+      {
+        "jp": "すごいぞ、ビッグさん！",
+        "romaji": "sugoi zo, Biggu-san!",
+        "meaning": "\"Amazing, Big-san!\" - self-praise"
+      },
+      {
+        "jp": "おー！",
+        "romaji": "oo!",
+        "meaning": "rallying cheer, \"yeah!\""
+      },
+      {
+        "jp": "～",
+        "romaji": "(drawn-out vowels)",
+        "meaning": "stretched, sing-song endings like なろ～ / ね～"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "being BIG / big achievements",
+    "trying every challenge",
+    "napping beside Buu-chan (Narita Brian) on the grass",
+    "eating a lot (support event title: いっぱい食べるぞ、ビッグさん！)",
+    "boxing-style racing outfit, cyan beanie (web: umamusu.wiki)"
+  ],
+  "weak_spots": [
+    "her small stature versus her big dreams (tagline: 小さな巨人, \"little giant\"); web lists height 143 cm",
+    "falls asleep easily (voice 400002)",
+    "talks loudly in her sleep (per Phalaenopsis voice 91002)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Senior/High School Division (高等部)",
+    "birthday": "April 14 (4月14日)",
+    "height": "unknown in source (null); 143 cm per web: https://umamusu.wiki/Samson_Big",
+    "voice_actor": "根本京里 (romanisation unverified, likely Nemoto Kyori)"
+  },
+  "relationships": [
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "friend, role model and (real-life 1994 generation) rival she naps beside and calls Buu-chan (ブーちゃん)",
+      "evidence": "mentions in voice x1 (voice_id 400002: ブーちゃんの隣に寝転ぶとね…); Buu-chan = Narita Brian and 'friend, role model and rival' per web: https://umamusu.wiki/Samson_Big (not in mdb)"
+    },
+    {
+      "id": 1149,
+      "name_en": "Phalaenopsis",
+      "nature": "roommate and friend; puts up with Big's sleep-talking",
+      "evidence": "home scenes x1; Phalaenopsis voice 91002 (ビッグ殿は寝言もビッグでな); roommate per web: https://umamusu.wiki/Samson_Big"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "friend she admires for her discipline; Fenomeno offers her a 'serious shoulder ride' to make her big",
+      "evidence": "mentions in voice x1 (voice_id 400005: フェノーメノちゃんはすごい！); Fenomeno voice 91017"
+    },
+    {
+      "id": 1043,
+      "name_en": "Shinko Windy",
+      "nature": "friend; they built a snow 'demon king castle' together, Big recommends her senbei",
+      "evidence": "Shinko Windy voice 90019 and 91022 (mentions ビッグ)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Not a playable trainee: she has no career story and no trainee events in the mdb, only two support-card events (\"Eat lots, Big-san!\" and \"Big after all, Big-san!\"). She debuted in Star Blossom and appears in the story event \"Go, Go, Star Investigation Squad!\"; her SSR support card is titled \"The World's Smallest Big Bang\".",
+    "source": "event titles; web: https://umamusu.wiki/Samson_Big, https://gamewith.jp/uma-musume/article/show/574468"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "一緒にビッグになろ～！",
+      "en": "Let's get BIG together~!"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "夢はビッグなウマ娘！です！",
+      "en": "My dream is to be a BIG Umamusume! That's it!"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "どんどんビッグさんを頼ってねっ",
+      "en": "Go ahead and rely on Big-san as much as you like!"
+    },
+    {
+      "voice_id": 400009,
+      "jp": "ビッグさん史上、上位に食い込む\nビッグな成果を上げられたかも！\nすごいぞ、ビッグさん！",
+      "en": "That might be one of the BIGgest results in Big-san history! Amazing, Big-san!"
+    },
+    {
+      "voice_id": 400012,
+      "jp": "イベントミッションだって！\nビッグな成果を目指そう、おー！",
+      "en": "An event mission! Let's aim for BIG results, yeah!"
+    },
+    {
+      "voice_id": 400002,
+      "jp": "ブーちゃんの隣に寝転ぶとね、\n視界のはしっこではっぱが揺れて…\nすぐに眠くなっちゃうんだよね～。",
+      "en": "When I lie down next to Buu-chan, the leaves sway at the edge of my vision... and I get sleepy right away~."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}! The independent run is done~! Go check the results - they might be some of the BIGgest in Big-san history! Amazing, Big-san... er, amazing, you! Yeah!",
+    "Report from Big-san! Your 50-minute independent run has finished, {user}! If the rewards are too BIG to carry, I'll help, so come check them!"
+  ],
+  "data_gaps": [
+    "Only 8 voice lines (all short misc/event lines); no home, race or training dialogue, so how she addresses the trainer is unknown.",
+    "Height is null in the mdb; 143 cm comes from the web.",
+    "Voice actor romanisation not confirmed.",
+    "Not playable (no cards); release_unix is a placeholder (year 2050).",
+    "mentioned_by counts are inflated by the plain word ビッグ (e.g. Hishi Akebono x16, Taiki Shuttle, Seeking the Pearl, Epiphaneia, Loves Only You, Satono Crown use 'big' as an adjective, not her name).",
+    "SSR support card title 'The World's Smallest Big Bang' is from gamewith only; not confirmed on umamusu.wiki or in the mdb.",
+    "Buu-chan = Narita Brian rests only on umamusu.wiki; the mdb never names Brian in her lines."
+  ]
+}

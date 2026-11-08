@@ -1,0 +1,184 @@
+{
+  "id": 1033,
+  "name_en": "Admire Vega",
+  "name_jp": "アドマイヤベガ",
+  "kind": "uma",
+  "one_liner": "Aloof, prickly loner racing to shine as a first-magnitude star for the twin sister she lost.",
+  "personality": "Cold, terse and solitary: her lines are clipped, full of ellipses and sighs ('haa'), and she brushes off help, celebrations and noisy people. She carries a heavy sense of duty to 'that child' (あの子), her twin, and pushes herself to overwork, refusing rest. Yet she quietly cares, leaving chocolate, sharing cookies, scolding Top Road for not resting, and has a soft spot for fluffy bedding, stars and the trainer who keeps holding her cold hand.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (あなた); also 'Trainer' in passing",
+    "register": "cool, curt feminine standard Japanese (〜わ, 〜のよ, 〜でしょう); formal greeting おはようございます",
+    "tics": [
+      {
+        "jp": "…はぁ",
+        "romaji": "...haa",
+        "meaning": "weary sigh she ends lines with"
+      },
+      {
+        "jp": "あの子",
+        "romaji": "ano ko",
+        "meaning": "'that child', her late twin sister"
+      },
+      {
+        "jp": "お姉ちゃん",
+        "romaji": "onee-chan",
+        "meaning": "she calls herself the big sister of 'that child'"
+      },
+      {
+        "jp": "一等星",
+        "romaji": "ittousei",
+        "meaning": "'first-magnitude star', her goal"
+      },
+      {
+        "jp": "わ",
+        "romaji": "~wa",
+        "meaning": "feminine sentence ending"
+      },
+      {
+        "jp": "ばかね",
+        "romaji": "baka ne",
+        "meaning": "soft 'silly' / 'you fool'"
+      },
+      {
+        "jp": "不要よ",
+        "romaji": "fuyou yo",
+        "meaning": "'not needed', her favourite brush-off"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "stars, constellations, planetariums (Vega, Lyra, the Summer Triangle)",
+    "reading aloud (profile strength)",
+    "the cold (profile strength)",
+    "fluffy bedding: her futon dryer, soft fabrics, bead cushions, good fabric softener",
+    "her twin sister ('that child')",
+    "the 'Ice Queen' role (winter outfit)",
+    "the beach and starry sky as her phone wallpaper (trivia)"
+  ],
+  "weak_spots": [
+    "noisy, crowded places (profile)",
+    "being hugged by Curren Chan, celebrations and fuss",
+    "resting / admitting fatigue: refuses breaks",
+    "perks up at the word 'onee-chan' (profile about_ears)",
+    "grips her tail in her sleep (profile)",
+    "slips into 'nya' when flustered (voice 91025)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 12 (3月12日)",
+    "height": "157 cm",
+    "voice_actor": "Hitomi Sasaki (咲々木瞳)"
+  },
+  "relationships": [
+    {
+      "id": null,
+      "name_en": "her late twin sister ('あの子')",
+      "nature": "the person she races for; she must shine for both",
+      "evidence": "voice_id 20011: あの子のお姉ちゃんに/相応しくない…！; profile: two birthday cakes every year; web: https://umamusu.wiki/Admire_Vega"
+    },
+    {
+      "id": 1077,
+      "name_en": "Narita Top Road",
+      "nature": "classmate and rival whose persistence softens her; once the only one who called her 'Ayabe-san' (a nickname that has since spread)",
+      "evidence": "home scenes x6; mentions in voice x4 (voice_id 91017: 『アヤベさん』って呼んでいたの、/トップロードさんくらいだったのに); mentioned by her x8"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "roommate who hugs her and looks out for her",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 91009: お姉ちゃんみたいだなんて…変よ。); roommate per web: https://umamusu.wiki/Admire_Vega"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "rival whose grandiose antics annoy her",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91002: …無視しなさい。/余興に巻き込まれるのは嫌よ。; 91008 calls her 'that ridiculous king')"
+    },
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "junior-ish rival she worries about",
+      "evidence": "home scenes x2; mentions in voice x4 (voice_id 400003: ドトウって…時々、頑張りすぎ。)"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "baked cookies together",
+      "evidence": "mentions in voice x1 (voice_id 91022)"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "overreacts to Vega's good-morning",
+      "evidence": "mentions in voice x1 (voice_id 90011)"
+    },
+    {
+      "id": 1095,
+      "name_en": "Believe",
+      "nature": "Vega respects her late-night training",
+      "evidence": "mentions in voice x1 (voice_id 91019)"
+    },
+    {
+      "id": 1091,
+      "name_en": "Vivlos",
+      "nature": "sparkly-eyed acquaintance",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1050,
+      "name_en": "Narita Taishin",
+      "nature": "no known direct link in Vega's own lines; Taishin mentions Vega once",
+      "evidence": "mentioned_by x1 (Narita Taishin's voice lines); affinity 32 (highest); not in Vega's home scenes or voice mentions"
+    }
+  ],
+  "groups": [
+    "1999 classic-generation trio with Narita Top Road and T.M. Opera O (Opera O is the 'king' she refuses to crown, voice 91008) - general knowledge (unverified as a named group)",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Vega was born a twin and her sister died, so she believes she must win and become a first-magnitude star for both of them, refusing rest and help (story titles 輝けるノヴァ, 欠けたジェミニ). Curren Chan catches her secretly overtraining and asks the trainer to step in. She targets the Derby (event title: 日本ダービーの後に・運命の明星), struggles after the Kikka-sho (菊花賞の後に・堕ちゆく), and gradually learns to run for herself too, with Top Road and Opera O as rivals (title: 繋がる天の橋).",
+    "source": "event titles + web: https://umamusu.wiki/Admire_Vega"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 95003,
+      "jp": "…アドマイヤベガ。とっとと始めて。",
+      "en": "...Admire Vega. Hurry up and start."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "…放っておいてなんて言っても、\nあなたには無駄でしょう？\nわかっているわ、それくらい。",
+      "en": "...Even if I say 'leave me alone', it's no use with you, is it? I know that much."
+    },
+    {
+      "voice_id": 20011,
+      "jp": "ダメ。こんな気持ちじゃ…。\nあの子のお姉ちゃんに\n相応しくない…！",
+      "en": "No. Feeling like this... I'm not worthy of being that child's big sister...!"
+    },
+    {
+      "voice_id": 91015,
+      "jp": "…どんなに寒くとも、布団乾燥機を\n持つ私に死角はないわ。今晩も\nふわふわの布団が待っているもの。",
+      "en": "...No matter how cold it gets, I have a futon dryer, so I have no blind spots. Tonight, too, a fluffy futon awaits me."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "私の手…氷みたいだったと思う。\nそれでも、あなたは掴んだ。\nいつでも離せるというのに…ばかね",
+      "en": "My hand... must have been like ice. Even so, you held it. Even though you could let go any time... you fool."
+    },
+    {
+      "voice_id": 90002,
+      "jp": "昼食を取るなら…今？\nでもまたあの騒々しい人たちに\n捕まったなら…はぁ。",
+      "en": "Should I have lunch... now? But if those noisy people catch me again... haa."
+    }
+  ],
+  "timer_line_ideas": [
+    "...{user}. Your independent run is over. I'm only telling you because you'd forget otherwise. Go check it. ...Haa. And rest a little afterward.",
+    "The run has ended, {user}. ...Don't look at me like that, I just happened to be watching the clock. Go see the results. Then take a break, would you."
+  ],
+  "data_gaps": [
+    "The name of the 'trio' with Top Road/Opera O is not in the mdb",
+    "Details of her post-Kikka-sho decline (real horse's injury) not verified from game dialogue"
+  ]
+}

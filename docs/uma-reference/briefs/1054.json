@@ -1,0 +1,161 @@
+{
+  "id": 1054,
+  "name_en": "Biko Pegasus",
+  "name_jp": "ビコーペガサス",
+  "kind": "uma",
+  "one_liner": "Pint-sized tokusatsu fanatic who lives as the masked hero 'Justice Biko' and wants to give kids courage.",
+  "personality": "An earnest, boisterous little hero who narrates her life like a Sunday-morning sentai show: henshin poses, named special attacks, 'next episode' previews at bedtime. She sincerely wants to protect people and inspire the kids who watch her, and treats her trainer as a fellow hero and partner ('Commander'). Under the bravado she is a small kid who dreads the barber's scissors, ghosts and spicy curry.",
+  "speech": {
+    "first_person": "atashi (アタシ); styles herself 'Justice Biko (ジャスティス・ビコー)'",
+    "calls_trainer": "Trainer (トレーナー), 'omae (オマエ)', jokingly 'Commander Trainer (トレーナー長官)'",
+    "register": "boyish casual: ～だぞ, ～だな, ～だっ, hero-show announcer narration",
+    "tics": [
+      {
+        "jp": "参上 / 見参",
+        "romaji": "sanjō / kenzan",
+        "meaning": "'here I am!' hero entrance"
+      },
+      {
+        "jp": "ジャスティス・ビコー",
+        "romaji": "Jasutisu Bikō",
+        "meaning": "her hero alter ego"
+      },
+      {
+        "jp": "ペガサス〇〇",
+        "romaji": "Pegasasu ~",
+        "meaning": "named attacks: ペガサスキーック, ペガサス・パーンチ, ペガサスマッハストラーイク"
+      },
+      {
+        "jp": "とうっ",
+        "romaji": "tō!",
+        "meaning": "hero jump shout"
+      },
+      {
+        "jp": "～だぞ",
+        "romaji": "-da zo",
+        "meaning": "boyish emphatic ending"
+      },
+      {
+        "jp": "カロテンエネルギー",
+        "romaji": "karoten enerugī",
+        "meaning": "'carotene energy' — her power gauge"
+      },
+      {
+        "jp": "よい子のみんな",
+        "romaji": "yoi ko no minna",
+        "meaning": "'all you good boys and girls' — kids-show address"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "tokusatsu/sentai, Sunday-morning hero shows watched with her family (profile)",
+    "Carrotman (キャロットマン), her favourite hero",
+    "henshin items and hero suits",
+    "tree climbing (profile strength)",
+    "patrolling the academy",
+    "yogurt; Hishi Amazon's apple pie",
+    "being a role model for little fans"
+  ],
+  "weak_spots": [
+    "eats a lot without realising (profile weakness)",
+    "spicy cafeteria curry (voice 90002)",
+    "barber/hair-salon scissors near her ears (voice 91004)",
+    "ghosts (voice 91011)",
+    "running out of energy/sleepy (voice 90004, 91010)",
+    "toy temptations (event title: 恐怖！おもちゃの誘惑！)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "February 8 (2月8日)",
+    "height": "144 cm (144cm)",
+    "voice_actor": "Aimi Tanaka (田中あいみ)"
+  },
+  "relationships": [
+    {
+      "id": 1028,
+      "name_en": "Hishi Akebono",
+      "nature": "roommate; taught her chocolate-making, cooks summer meals for her",
+      "evidence": "home scenes x6; voice_id 91000: ボノは高いとこに手が届くだろ？…寮の部屋の収納は、そんな感じだ！; 10005; 91013; mentioned_by x3 (Akebono voice_id 90011: early to bed together; 91000: they play Carrotman together)"
+    },
+    {
+      "id": 1012,
+      "name_en": "Hishi Amazon",
+      "nature": "big-sister figure ('Hishiama-nee-san'); they bake apple pie",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91001: ヒシアマ姐さんのアップルパイはすっごく美味しいんだぞ！)"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "senior she wants to emulate as an honour student; sprint rival",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91002: アタシもバクシンオー先輩を見習って優等生になる！); event title: スプリンターズSの後に・バクシン伝説"
+    },
+    {
+      "id": 1043,
+      "name_en": "Shinko Windy",
+      "nature": "'villain' to her hero; senior whose pranks she shrugs off",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 400001: ウインディ先輩のワナってさ、かかってもケガをしないんだよ！); hero/villain duo per web: https://umamusu.wiki/Biko_Pegasus"
+    },
+    {
+      "id": 1082,
+      "name_en": "North Flight",
+      "nature": "admires her hero work and wants to help",
+      "evidence": "home scenes x3; mentioned_by x1 (North Flight voice_id 90003: ビコーちゃん、お昼にも人助けを…忙しいヒーローのため、わたしもなにかお手伝いしたいです。)"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "rival/friend",
+      "evidence": "home scenes x2; 'rival and friend' per web (unverified): https://umamusu.wiki/Biko_Pegasus"
+    },
+    {
+      "id": 1127,
+      "name_en": "Fenomeno",
+      "nature": "friend; sparring at the dojo",
+      "evidence": "mentioned_by x1 (Fenomeno voice_id 91016: …教えて下さい、ビコーさん！ asking about Carrotman); dojo sparring per web (unverified): https://umamusu.wiki/Biko_Pegasus"
+    }
+  ],
+  "groups": [
+    "Tracen Academy Security Squad (event title 我ら、トレセン学園警備隊; event-only, unverified as a standing group)"
+  ],
+  "story_arc": {
+    "summary": "The smallest girl around ('smallest body, biggest courage'), Biko enters Tracen to become a real hero who gives everyone courage, inspired by the Carrotman show. Her career aims at the NZT, Sprinters S, Mile CS, February S, Takamatsunomiya Kinen, Yasuda Kinen and Centaur S, with a Sprinters S showdown against the 'Bakushin legend'. Along the way she wrestles with 'what makes a hero' and ends 'Be a Hero!' — realising she can be one in her own way.",
+    "source": "event titles; web: https://umamusu.wiki/Biko_Pegasus"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20023,
+      "jp": "シャキーン☆正義の味方、\nジャスティス・ビコー、参上っ！\nヒーローは、必ず勝ーーつ！",
+      "en": "Shakiin☆ Ally of justice, Justice Biko, has arrived! A hero always wiiins!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "お父ちゃんは超強い警察官だけど、\n非番の日は全然そうは見えない…。\nヒーローって、普段は平凡なんだ！",
+      "en": "My dad's a super-strong police officer, but on his days off he doesn't look like it at all... Heroes are ordinary most of the time!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "アタシとオマエはヒーロー同士、\n共に正義を志す仲間だ！力を\n合わせれば、できないことはない！",
+      "en": "You and I are fellow heroes, comrades who strive for justice! If we join forces, there's nothing we can't do!"
+    },
+    {
+      "voice_id": 90004,
+      "jp": "ふわあぁ～、エネルギー切れが…\nヒーローは…1日に戦える時間が…\n決まってる…から…。",
+      "en": "Fwaah~, I'm running out of energy... a hero can only... fight for so long... each day..."
+    },
+    {
+      "voice_id": 91004,
+      "jp": "美容院ってドキドキするよな？\n耳元でハサミの音がして…ううぅ！\n目をつむって歌えば大丈夫だけど…",
+      "en": "Hair salons are scary, right? The sound of scissors right by my ears... ugh! I'm fine if I close my eyes and sing, though..."
+    }
+  ],
+  "timer_line_ideas": [
+    "Beep beep! Emergency report! {user}, your independent run is complete! Justice Biko has arrived to tell you! Let's go check it, Trainer!",
+    "The run is over... but the battle continues! {user}, come see the results! Next time: 'The Trainer Checks In!' Don't miss it!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Kawakami Princess x1, but the only match is voice_id 70014 (ハチミープリンセス, a fictional show character) — likely a false positive, so no relationship listed",
+    "Only one playable card; trivia list empty in source",
+    "Real-horse race details not verified"
+  ]
+}

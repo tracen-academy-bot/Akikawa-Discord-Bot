@@ -1,0 +1,192 @@
+{
+  "id": 1019,
+  "name_en": "Agnes Digital",
+  "name_jp": "アグネスデジタル",
+  "kind": "uma",
+  "one_liner": "'Digi-tan', the hyperventilating Uma Musume otaku who races on turf and dirt mostly to get closer to her idols.",
+  "personality": "An all-consuming fangirl of every Uma Musume. She narrates imaginary 'two-person stories', breaks down screaming at 'precious' (尊い) moments, and draws doujinshi. She is strict about fan etiquette: she tries to be 'a wall', never to disturb her idols, and do her duties before fan activity. On the track she is a capable all-rounder who treats racing seriously out of respect for her 'oshi', and she sees the trainer as a fellow comrade (同志) in the fandom.",
+  "speech": {
+    "first_person": "atashi (あたし); refers to herself as Digi-tan (デジたん)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also 同志 (doushi, 'comrade') and 道士 (Taoist priest) in her jiangshi outfit",
+    "register": "hyper polite-casual otaku speak: desu/masu mixed with mock-archaic ですぞ / ますぞ / ゆえ, internet slang, screams and elongated vowels",
+    "tics": [
+      {
+        "jp": "ウマ娘ちゃん",
+        "romaji": "Umamusume-chan",
+        "meaning": "her affectionate word for all Uma Musume"
+      },
+      {
+        "jp": "尊い / 尊み",
+        "romaji": "toutoi / toutomi",
+        "meaning": "precious / 'preciousness' (fandom slang)"
+      },
+      {
+        "jp": "推し",
+        "romaji": "oshi",
+        "meaning": "her favourite(s) / idols"
+      },
+      {
+        "jp": "しゅき",
+        "romaji": "shuki",
+        "meaning": "lisped 'suki' (I love it)"
+      },
+      {
+        "jp": "むふふ",
+        "romaji": "mufufu",
+        "meaning": "giddy giggle"
+      },
+      {
+        "jp": "ですぞ",
+        "romaji": "desu zo",
+        "meaning": "mock-old-fashioned emphatic ending"
+      },
+      {
+        "jp": "萌え",
+        "romaji": "moe",
+        "meaning": "moe / adorable-feelings power (萌えパワー)"
+      },
+      {
+        "jp": "同志",
+        "romaji": "doushi",
+        "meaning": "comrade (how she sees the trainer)"
+      },
+      {
+        "jp": "オゥフ",
+        "romaji": "oufu",
+        "meaning": "otaku 'oof' noise"
+      },
+      {
+        "jp": "壁",
+        "romaji": "kabe",
+        "meaning": "'wall', wanting to watch unnoticed"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "watching and 'shipping' Uma Musume relationships",
+    "doujinshi / creative work, deadlines (10010; profile 'deadline calendar')",
+    "fan gear: uchiwa fans and penlights (2034, 10018)",
+    "pilgrimages to 'holy sites' (聖地巡礼)",
+    "massage technique (profile strength)",
+    "family camping trips (10027)",
+    "jiangshi / Halloween costume motif (Halloween card lines)"
+  ],
+  "weak_spots": [
+    "coupling/shipping wars (profile weakness)",
+    "being stared at herself (91008)",
+    "failing to stay unnoticed (91003, 91022)",
+    "'light-type' extroverts like Helios and Palmer are too stimulating (91017)",
+    "losing stamina from over-excitement (20000, 20024)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "May 15 (5月15日)",
+    "height": "143cm (143cm)",
+    "voice_actor": "Minori Suzuki (鈴木みのり)"
+  },
+  "relationships": [
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "upperclassman she worships, especially with Doto",
+      "evidence": "home scenes x2; voice 91002, 91016; web: https://umamusu.wiki/Agnes_Digital"
+    },
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "upperclassman she idolizes; the Opera O x Doto pair sends her over the edge",
+      "evidence": "home scenes x2; voice 91002: オペラオーさんがドトウさんの手を取ってコースへっ！？"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "roommate she admires",
+      "evidence": "home scenes x2; voice 90001: 今朝もタキオンさんがお目覚めの前に寮を出てきましたとも！; voice 91020; roommate per web: https://umamusu.wiki/Agnes_Digital"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "idol whose live shows she attends",
+      "evidence": "home scenes x3; voice 91000: いつライブに行ってもファル子さんは笑顔で手を振ってくださり…もしや、神様？"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "subject of her curiosity (that smile at the PC shop)",
+      "evidence": "home scenes x3; voice 10026"
+    },
+    {
+      "id": 1043,
+      "name_en": "Shinko Windy",
+      "nature": "friend",
+      "evidence": "home scenes x4 (her top partner); friendly per web: https://umamusu.wiki/Agnes_Digital"
+    },
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "adored from afar",
+      "evidence": "home scenes x2; voice 91010: にんじんパンを笑顔で食べるウララさん…永遠に見てられる…。しゅき…。"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "oshi whose social posts she follows",
+      "evidence": "voice 91011"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "upperclassman who tutors her; they become friends",
+      "evidence": "event title: マイルCSの後に・キングの訓示 (King's lecture); she is mentioned by King Halo x1; tutoring/friendship per web: https://umamusu.wiki/Agnes_Digital (not in her own voice lines)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "She considers herself a plain fan who just wants to be close to as many Uma Musume as possible, until the trainer proposes she become an 'all-rounder' racing on both turf and dirt (event 世界のオールラウンダー). Events include 宝塚決戦！ and 万能を超えて (Beyond All-Round). The wiki notes a Tenno Sho (Autumn) storyline involving entry limits for foreign-bred runners, and a Mile Championship Nambu Hai win. Her character story titles also stress that 'a hero can't be a hero alone'.",
+    "source": "event titles; web: https://umamusu.wiki/Agnes_Digital"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "まさかオールラウンダーとか\n言いだすなんて！予想以上の\n変た…天才です、あなたは！",
+      "en": "Who'd have thought you'd suggest I go all-rounder! You're more of a perv... I mean genius than I expected!"
+    },
+    {
+      "voice_id": 91002,
+      "jp": "オペラオーさんがドトウさんの手を\n取ってコースへっ！？こここんなの\n無料で見ていいんですかぁっ…！？",
+      "en": "Opera O-san taking Doto-san's hand and leading her onto the course!? I-is it really okay to watch this for free...!?"
+    },
+    {
+      "voice_id": 40000,
+      "jp": "よきみ！尊み！マイ女神！",
+      "en": "So good! So precious! My goddess!"
+    },
+    {
+      "voice_id": 70010,
+      "jp": "…あたし、壁になれてますかね？\nスッと溶け込めてますかね？",
+      "en": "...Am I being a proper wall? Am I blending in smoothly?"
+    },
+    {
+      "voice_id": 91010,
+      "jp": "にんじんパンを笑顔で食べる\nウララさん…永遠に見てられる…。\nしゅき…。",
+      "en": "Urara-san smiling while eating a carrot bun... I could watch forever... wuv it..."
+    },
+    {
+      "voice_id": 20007,
+      "jp": "推し活はキッチリやること\nやってから！さ、始めましょう！",
+      "en": "Fan activities only after I've done what I'm supposed to! Okay, let's get started!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}! The independent run is over! Fifty whole minutes of precious Uma Musume effort... so precious! P-please go check the results! I'll just be a wall over here, mufufu~",
+    "Comrade {user}, report! The independent run has finished! Proper etiquette says we review the results right away, so let's go, let's go!"
+  ],
+  "data_gaps": [
+    "No official home-screen title line naming her trainer by anything other than トレーナーさん / 同志 / 道士.",
+    "Detailed career plot (Opera O showdown etc.) only partly verified via the wiki.",
+    "Groups: she belongs to no clear faction in the data."
+  ]
+}

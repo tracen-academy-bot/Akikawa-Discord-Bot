@@ -1,0 +1,205 @@
+{
+  "id": 1001,
+  "name_en": "Special Week",
+  "name_jp": "スペシャルウィーク",
+  "kind": "uma",
+  "one_liner": "Big-hearted, always-hungry country girl from Hokkaido racing to become Japan's No.1 Uma Musume for her two mothers.",
+  "personality": "Earnest, cheerful and polite, she throws herself at everything with 'kepparu' gusto and wears her heart on her sleeve (her tail gives her away at poker). Food is never far from her mind, and she is endearingly naive about city life, crowds and tests. Underneath the goofiness is a serious, stubborn dream: to be Nihon-ichi and make her mother(s) proud, and she leans on her trainer and friends to get there.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "Polite desu/masu by default; slips into Hokkaido dialect (dosanko-ben) when excited or flustered",
+    "tics": [
+      {
+        "jp": "けっぱるべ",
+        "romaji": "kepparu-be",
+        "meaning": "Hokkaido dialect: 'let's do our best / I'll give it my all' (her signature)"
+      },
+      {
+        "jp": "なまら",
+        "romaji": "namara",
+        "meaning": "Hokkaido dialect: 'really, super' (なまらすごいべ, なまらめんこい)"
+      },
+      {
+        "jp": "めんこい",
+        "romaji": "menkoi",
+        "meaning": "Hokkaido dialect: 'cute'"
+      },
+      {
+        "jp": "だべ",
+        "romaji": "dabe",
+        "meaning": "dialect sentence ending, roughly 'right?/y'know' (初めてのことがいっぱいだべ)"
+      },
+      {
+        "jp": "お母ちゃん",
+        "romaji": "okaa-chan",
+        "meaning": "how she refers to her mom; constant point of reference"
+      },
+      {
+        "jp": "日本一",
+        "romaji": "Nihon-ichi",
+        "meaning": "'No.1 in Japan', her dream and favourite boast"
+      },
+      {
+        "jp": "えへへ",
+        "romaji": "ehehe",
+        "meaning": "bashful giggle"
+      },
+      {
+        "jp": "総大将",
+        "romaji": "soudaishou",
+        "meaning": "'commander-in-chief' (日本総大将, 'Japan's Commander-in-Chief'), alt-outfit persona"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Eating anything and lots of it: carrots, corn (eats it in silent focus), baked sweet potatoes, onigiri, cafeteria daily specials (guesses them right 70%+)",
+    "Her mother(s) back in Hokkaido: letters, care packages of vegetables, photos together",
+    "Hokkaido: snow, milk ('Hokkaido campaign Uma Musume')",
+    "Detailed, vivid food reviews (listed strength)",
+    "Stargazing",
+    "Swimming (summer outfit lines)",
+    "Being 'Nihon-ichi'"
+  ],
+  "weak_spots": [
+    "Ticket-gate tap-and-go at stations (listed weakness)",
+    "Poker: her tail moves with her emotions",
+    "Overeating and worrying about her belly / New Year weight",
+    "Tests: failed a pop quiz and needs Grass Wonder to tutor her (voice 91010)",
+    "Getting lost on the huge campus (voice 91004)",
+    "Nerves before races and lives (voices 20031, 60000)",
+    "Dozing off (voices 90004, 90213)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "May 2 (5月2日)",
+    "height": "158 cm (158㎝)",
+    "voice_actor": "Azumi Waki (和氣あず未)"
+  },
+  "relationships": [
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "Senpai she idolises and (by implication) her roommate; stays up chatting with her, wants to catch up to her",
+      "evidence": "home scenes x4; mentions in voice x6 (voice_id 400005: …スズカさん、ひとり部屋のほうが静かでよかったなーとか、思ってたりしないかなぁ…？; 91002: 夜中までスズカさんとお喋りしちゃって)"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Classmate friend and rival; tutors her ('グラスちゃん')",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 91010: またグラスちゃんに教わらなきゃ)"
+    },
+    {
+      "id": 1014,
+      "name_en": "El Condor Pasa",
+      "nature": "Friend/rival; morning training buddy who keeps challenging her to pro-wrestling ('エルちゃん')",
+      "evidence": "home scenes x3; voice 91017: エルちゃんにプロレス勝負を仕掛けられるんです; event title: “怪鳥”、そして“怪物” (El's nickname is 'Monster Bird' - general knowledge)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Friend who teases her (pokes her back); fishing buddy ('セイちゃん')",
+      "evidence": "home scenes x2; voice 91019: セイちゃんが背中つつーってするんですよ; voice 91226"
+    },
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "Admired senpai; gives her dance lessons",
+      "evidence": "mentions in voice x3 (voice_id 91000: マルゼンさんとお話できちゃったんです！やっぱり素敵な方ですね; 91018)"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "Classmate who points out her bed-hair ('キングちゃん')",
+      "evidence": "voice 91221: キングちゃんに言われるまで寝癖に気づきませんでした"
+    },
+    {
+      "id": 1073,
+      "name_en": "Tsurumaru Tsuyoshi",
+      "nature": "Friend she admires for staying bright despite poor health ('ツルちゃん')",
+      "evidence": "home scenes x4; voice 91218"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "Fan who scrapbooks Spe's articles",
+      "evidence": "voice 91220: デジタルさんのノートを…私の記事もスクラップされてて"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "Senpai she thinks is small, bright and cool",
+      "evidence": "home scenes x1; voice 400007: テイオーさんって、ちっちゃくて元気で…とってもカッコいいんだなぁ"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "Shares home scenes; nature not shown in her lines. Real-life Buena Vista is a daughter of the racehorse Special Week",
+      "evidence": "home scenes x4; general knowledge (unverified)"
+    },
+    {
+      "id": 1110,
+      "name_en": "Cesario",
+      "nature": "Shares home scenes; nature not shown in her lines. Real-life Cesario is also by Special Week",
+      "evidence": "home scenes x3; general knowledge (unverified)"
+    },
+    {
+      "id": null,
+      "name_en": "Her mothers",
+      "nature": "Raised by a mother in Hokkaido; she also has a birth mother whose eye colour she inherited. Making them proud is her core motivation",
+      "evidence": "profile about_family: 瞳の色は、産んでくれた母親譲り; event title: もう1人のお母ちゃんへ; voice 91216"
+    }
+  ],
+  "groups": [
+    "Golden Generation / 1998 Classic class with Seiun Sky, King Halo, Grass Wonder, El Condor Pasa (general knowledge, unverified as an in-game label)",
+    "Team Spica (anime only)"
+  ],
+  "story_arc": {
+    "summary": "A transfer student from Hokkaido who arrives at Tracen to become Japan's No.1 Uma Musume for her mothers. Her career runs debut -> Kisaragi Sho -> Japan Derby -> Kikuka Sho -> Spring Tenno Sho -> Japan Cup -> Arima Kinen, with Seiun Sky, Grass Wonder ('Monster') and El Condor Pasa ('Monster Bird') as rivals, and a Derby press conference along the way. The Japan Cup is framed as her standing as 'Japan's Commander-in-Chief' against overseas competition, and she learns what 'Nihon-ichi' really means to her.",
+    "source": "event titles (ダービー記者会見！, “怪鳥”、そして“怪物”, ジャパンCの後に・頂点へ！, 総大将の貫禄, もう1人のお母ちゃんへ) + voice 70001; Commander-in-Chief framing from model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90001,
+      "jp": "日本一のウマ娘を目指して！\n今日も1日、けっぱるべ～！",
+      "en": "Aiming to be Japan's No.1 Uma Musume! Let's kepparu today too!"
+    },
+    {
+      "voice_id": 70018,
+      "jp": "なまらすごいべ～……！",
+      "en": "That's namara amazing~...!"
+    },
+    {
+      "voice_id": 91008,
+      "jp": "お母ちゃんに勝負服の写真を\n送ったら、すぐ電話が来ました！\nふふ…ずびー！って泣いてました。",
+      "en": "I sent Mom a photo of my racing outfit and she called right away! Hehe... she was sobbing, all sniffly."
+    },
+    {
+      "voice_id": 90018,
+      "jp": "お腹、普通ですよね？\n焼き芋3つ食べただけだし、\nきっと大丈夫…！大丈夫…。",
+      "en": "My belly looks normal, right? I only ate three baked sweet potatoes, so it's surely fine...! Fine..."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "私たちの夢は、日本一のウマ娘っ！\n一緒に叶えましょうね、\nトレーナーさん！",
+      "en": "Our dream is to be Japan's No.1 Uma Musume! Let's make it come true together, Trainer-san!"
+    },
+    {
+      "voice_id": 40204,
+      "jp": "行きます…！\n日本総大将、いざ出陣っ！",
+      "en": "Here I go...! Japan's Commander-in-Chief, marching out!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer-san, {user}! The independent run is all finished! I kepparu'd the whole way, ehehe. Will you come look at the results with me? ...And maybe grab a snack after?",
+    "{user}, it's done! Fifty whole minutes of training, namara tough! Okaa-chan would be proud... Let's go check it together, Trainer-san!"
+  ],
+  "data_gaps": [
+    "Story arc details beyond event titles come from model knowledge (unverified); mdb holds no event dialogue",
+    "Roommate status with Suzuka is implied by voice 400005/91002, not stated outright in the data",
+    "mentions_in_voice lists Manhattan Cafe x1, but the only match is 'カフェテリア' (cafeteria) in voice 10011 - false positive",
+    "Voice 1212 'はい、女王さん！' (team line to a 'Queen') - target character unknown",
+    "Birth-mother backstory is only hinted by profile/event title; details unverified"
+  ]
+}

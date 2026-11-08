@@ -1,0 +1,177 @@
+{
+  "id": 1032,
+  "name_en": "Agnes Tachyon",
+  "name_jp": "アグネスタキオン",
+  "kind": "uma",
+  "one_liner": "Mad-scientist prodigy who treats her trainer as a guinea pig in her quest for the limits of Umamusume speed.",
+  "personality": "Theatrical, self-assured and gleefully unethical in a comic way: she cackles ('kukuk'), muses 'fuun...', and talks like a lecturer, ordering the trainer around with '-tamae'. Everything is an experiment, from glowing cold medicine to blood tests at breakfast, and she happily neglects chores, clothing and sleep for research. Beneath it she is driven by a genuine obsession with 'possibility' (可能性) and grows to see the trainer as a partner and assistant, not just a test subject.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-kun (トレーナー君), Guinea Pig-kun (モルモット君), kimi (君)",
+    "register": "pompous, professorial; masculine-ish lecturer imperatives (〜たまえ, 〜だろう)",
+    "tics": [
+      {
+        "jp": "ふぅン",
+        "romaji": "fuun",
+        "meaning": "her signature thoughtful hum"
+      },
+      {
+        "jp": "ククッ",
+        "romaji": "kukuk",
+        "meaning": "sly chuckle"
+      },
+      {
+        "jp": "たまえ",
+        "romaji": "~tamae",
+        "meaning": "lordly imperative ('do it, will you')"
+      },
+      {
+        "jp": "モルモット君",
+        "romaji": "morumotto-kun",
+        "meaning": "'Guinea Pig-kun', her name for the trainer"
+      },
+      {
+        "jp": "可能性",
+        "romaji": "kanousei",
+        "meaning": "'possibility', her recurring obsession"
+      },
+      {
+        "jp": "ねぇ",
+        "romaji": "~nee",
+        "meaning": "drawn-out musing ending"
+      },
+      {
+        "jp": "アーッハッハッハ",
+        "romaji": "aahhahhahha",
+        "meaning": "mad-scientist laugh"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "research and experiments (profile strength)",
+    "sweets and black tea (profile)",
+    "'possibility' and the limit of speed; tachyon = faster-than-light particle (voice 91001)",
+    "test tubes, drugs, glowing potions",
+    "guinea pigs / test subjects",
+    "huge tubes of sickly-sweet whipped cream and gallon cans of ethanol (trivia)"
+  ],
+  "weak_spots": [
+    "having her research interrupted (profile)",
+    "bitter things (profile)",
+    "refuses to let anyone touch her ears or forehead (profile)",
+    "cold and summer heat both wreck her focus (voices 91013, 91015)",
+    "self-care: wears clothes backwards, nearly drowned in the bath after an all-nighter (voices 10026, 90011)",
+    "can never sneak an experiment past Manhattan Cafe (voice 91000)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 13 (4月13日)",
+    "height": "159 cm",
+    "voice_actor": "Sumire Uesaka (上坂すみれ)"
+  },
+  "relationships": [
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "classmate, rival and friend; they share an abandoned classroom as a hangout/lab (not a dorm room), and Cafe always sees through her schemes",
+      "evidence": "home scenes x9; mentions in voice x6 (voice_id 91000: こっそり実験しようとしても、/カフェにはいつもバレてしまう…; 400001: カフェは相変わらず私に詳しいな。); web: https://umamusu.wiki/Agnes_Tachyon"
+    },
+    {
+      "id": 1094,
+      "name_en": "Jungle Pocket",
+      "nature": "rival who burns to beat her; Tachyon treats her as a fun research subject",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91217: ポッケ君…ああ、ポッケ君！; 400131: 単にポッケ君が燃えやすいだけか); affinity 31"
+    },
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "admirer and volunteer test subject",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91220: 私を見るスカーレット君の/目が生物発光さながらに輝いて); web: https://umamusu.wiki/Agnes_Tachyon"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "roommate; makes Tachyon feel 'observed' for once",
+      "evidence": "mentions in voice x2 (voice_id 91002: デジタル君といると、観察される/側の気持ちがわかって新鮮だよ); roommate per web: https://umamusu.wiki/Agnes_Tachyon"
+    },
+    {
+      "id": 1092,
+      "name_en": "Dantsu Flame",
+      "nature": "helps haul her research materials",
+      "evidence": "mentions in voice x1 (voice_id 91219)"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x2"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "prospective glow-in-the-dark swimsuit customer",
+      "evidence": "mentions in voice x1 (voice_id 91016)"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "wants to 'remodel' her to run on water",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "curious about her test tubes; potential test subject",
+      "evidence": "mentions in voice x1 (voice_id 91019); home scenes x1"
+    }
+  ],
+  "groups": [
+    "Agnes name; from a family famed in the racing world, of which she is the black sheep (profile about_family)"
+  ],
+  "story_arc": {
+    "summary": "Tachyon's legs are fragile, so she plans to stop racing and pursue the limits of speed through other runners, using the trainer as a guinea pig (story titles ツァイガルニク効果, 問・実験体か相棒か？). After the Satsuki Sho her real-life counterpart retired, and in the game she wavers between hiatus and continuing; her 'Report' events (Report『不確定な約束』 ... Report『最後の要素』) track her deciding to test her own possibility. A climax event is 現【うつつ】の三冠ウマ娘 ('a Triple Crown Umamusume in reality').",
+    "source": "event titles + web: https://umamusu.wiki/Agnes_Tachyon"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10001,
+      "jp": "君は私のモルモットではあるが、\n同時に助手でもあるんだ。\nしっかり働いてくれたまえよ？",
+      "en": "You are my guinea pig, but at the same time you are also my assistant. Do work hard, won't you?"
+    },
+    {
+      "voice_id": 90000,
+      "jp": "おはよう、トレーナー君。\nさぁ、腕を出して。\n今日は血液検査から始めよう。",
+      "en": "Good morning, Trainer-kun. Now, hold out your arm. We'll start today with a blood test."
+    },
+    {
+      "voice_id": 90009,
+      "jp": "風邪の予防薬を用意してみたんだ。\n遠慮なく飲んでくれたまえ。\n体が発光したら効いてる証拠だ。",
+      "en": "I've prepared a cold-prevention medicine. Drink it without hesitation. If your body starts glowing, that's proof it's working."
+    },
+    {
+      "voice_id": 91001,
+      "jp": "タキオンとは『超光速の粒子』を\n意味するものだが…私が目指す\n果ては、更にその先にあるのさ。",
+      "en": "'Tachyon' means a faster-than-light particle... but the end I'm aiming for lies even beyond that."
+    },
+    {
+      "voice_id": 2032,
+      "jp": "研究に終わりはないよ、モルモット君！",
+      "en": "Research never ends, Guinea Pig-kun!"
+    },
+    {
+      "voice_id": 91221,
+      "jp": "眠気覚ましに特別なお茶を用意して\nあげたよ！…なんだい、今日こそは\n普通のお茶さ！失礼だなー君は！",
+      "en": "I've prepared a special tea to wake you up! ...What? Today it really is ordinary tea! How rude you are!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Fuun... the experiment has concluded, {user}. Fifty minutes of data, all yours to examine. Come along, Trainer-kun, a guinea pig mustn't keep the results waiting. Kukuk.",
+    "Kukuk... time's up, Guinea Pig-kun. Your independent run has produced results, {user}. Review them promptly, won't you? I have a new tonic that needs testing afterward."
+  ],
+  "data_gaps": [
+    "'キー君' (voice 40004, 91028, 92018) is a companion tied to one outfit; identity unknown from mdb",
+    "Roommate (Agnes Digital) comes from the wiki; the mdb only shows mention counts",
+    "How her career story resolves (continuing to race vs. research) is summarised from event titles and the wiki, not dialogue"
+  ]
+}

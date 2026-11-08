@@ -1,0 +1,198 @@
+{
+  "id": 1116,
+  "name_en": "Gentildonna",
+  "name_jp": "ジェンティルドンナ",
+  "kind": "uma",
+  "one_liner": "An imperious, fearsomely strong ojousama who believes the winner is always right and treats power as elegance.",
+  "personality": "Gentildonna is a haughty, supremely confident lady for whom only victory has value ('勝利以外は無価値'). She speaks to the trainer as a patron testing a servant, setting challenges and demanding to be entertained, yet she is openly curious about the trainer's ideas and grants grudging approval. Her refinement (couture, tea, cosmetics, etiquette) sits side by side with comic feats of raw strength: dumbbells while watching snow, splitting watermelons with one finger, parasols weighing 20 kg. Underneath the arrogance she is teasing and playful, and some late lines speak of loving herself as a form of strength.",
+  "speech": {
+    "first_person": "watashi (私) - written only in kanji, so watakushi vs watashi cannot be confirmed from text",
+    "calls_trainer": "anata (貴方); once 'Trainer' (トレーナー, voice 90018)",
+    "register": "ojousama: elegant feminine keigo with -wa / -te yo endings, imperious commands (〜なさい, 傅きなさいな)",
+    "tics": [
+      {
+        "jp": "ですわ",
+        "romaji": "desu wa",
+        "meaning": "refined feminine sentence ending"
+      },
+      {
+        "jp": "でしてよ",
+        "romaji": "deshite yo",
+        "meaning": "haughty ojousama ending ('I'll have you know')"
+      },
+      {
+        "jp": "よろしくて？",
+        "romaji": "yoroshikute?",
+        "meaning": "'Is that understood?' / 'Do you agree?'"
+      },
+      {
+        "jp": "ほほほ",
+        "romaji": "hohoho",
+        "meaning": "ojousama laugh"
+      },
+      {
+        "jp": "ごきげんよう",
+        "romaji": "gokigenyou",
+        "meaning": "posh greeting"
+      },
+      {
+        "jp": "ごめんあそばせ",
+        "romaji": "gomen asobase",
+        "meaning": "mock-polite 'pardon me' after winning"
+      },
+      {
+        "jp": "なさいな",
+        "romaji": "nasai na",
+        "meaning": "lofty command ending"
+      },
+      {
+        "jp": "勝者",
+        "romaji": "shousha",
+        "meaning": "'the winner' - her recurring keyword, along with 強者 (kyousha, the strong) and 最強 (saikyou, the strongest)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Strength, power and 'the strongest' (最強) as an aesthetic",
+    "Diving, horseshoeing, mascara (profile strengths)",
+    "Chocolatiers, carrot tarts, scones, afternoon tea (SFTGFOP1 grade), autumn salmon terrine",
+    "Red/vermilion (朱色) and pink; tiaras; crown motif",
+    "Weight training everywhere: dumbbells, 10 km walks, gyms on holiday",
+    "Sculpting bears, lions and dragons as a hobby",
+    "Fine bedding, cosmetics, casein protein before bed",
+    "Ear covers chosen with great care; outfits coordinated to her ear covers (profile)",
+    "Garden parties, etiquette, curtsies"
+  ],
+  "weak_spots": [
+    "Leopard print (profile weakness: ヒョウ柄)",
+    "Tapioca (profile weakness: タピオカ)",
+    "Boredom: perfection bores her and she wants someone to entertain her (voice 40004)",
+    "Finds it dull that most rivals are simply intimidated by her racewear and running (voice 91007)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "February 20 (2月20日)",
+    "height": "167cm",
+    "voice_actor": "Yu Serizawa (芹澤優)"
+  },
+  "relationships": [
+    {
+      "id": 1090,
+      "name_en": "Verxina",
+      "nature": "Persistent rival who keeps challenging her; Gentildonna teases her fondly",
+      "evidence": "home scenes x5; mentions in voice x2 (voice_id 91001: ヴィルシーナさん、私の陰口を仰った方に怒ったそうよ; 91018: ヴィルシーナさん…私に見惚れていたのよ); web: https://umamusu.wiki/Gentildonna (finished 2nd to her in all three Triple Tiara legs IRL)"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "Fellow apex rival; their mere presence together makes onlookers hold their breath",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91003: オルフェさんと帰り際にばったり。…周りが固唾を呑むのよ); web: https://umamusu.wiki/Gentildonna (2012 Japan Cup clash)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Chaotic classmate whose stunts she judges by training value",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91000: ゴルシさんが考案された鉄アレイジャグリング。微塵も負荷が足りませんわ)"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "Adoring roommate who calls her a real princess and wants to brush her hair; Gentil finds her sweet",
+      "evidence": "mentions in voice x2 (voice_id 90010, 91002: ブエナさん、私の髪を梳きたいといつも仰るの); home scenes x1; roommate per web: https://umamusu.wiki/Gentildonna"
+    },
+    {
+      "id": 1141,
+      "name_en": "Epiphaneia",
+      "nature": "Junior who is desperate to out-duel her in practice runs",
+      "evidence": "mentions in voice x1 (voice_id 91022: 午後はエピさんと併走しても？どうしても私に競り勝ちたいようで); 'エピ' is Epiphaneia's short_name in the source"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "Recommends intense paintings to her; mentions Gentildonna in her own lines",
+      "evidence": "mentions in voice x1 (voice_id 90012: カフェさんの薦めて下さる絵画); mentioned_by x3"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "Has arranged trips (a German autumn festival) for her",
+      "evidence": "mentions in voice x1 (voice_id 91014: ドイツの秋祭り旅行、またフラッシュさんに組んでいただこうかしら)"
+    },
+    {
+      "id": 1131,
+      "name_en": "Gran Alegria",
+      "nature": "Someone whose bodily sense she wants to measure against her own power",
+      "evidence": "mentions in voice x1 (voice_id 91016: 私のパワー、グランさんの身体感覚…どちらがより強大な力なのか)"
+    },
+    {
+      "id": null,
+      "name_en": "Her younger brother",
+      "nature": "Overprotective little brother who insists on vetting any partner of hers",
+      "evidence": "voice_id 91019: 『家に相応しい者か自分が必ず審査する』…ですって。烏滸がましい弟だこと"
+    },
+    {
+      "id": null,
+      "name_en": "Her older sister",
+      "nature": "Gentle older sister (family has an older sister and younger brother)",
+      "evidence": "event title: 剛毅な妹と優しい姉 ('The fierce younger sister and the kind older sister'); web: https://umamusu.wiki/Gentildonna"
+    },
+    {
+      "id": 1117,
+      "name_en": "Win Variation",
+      "nature": "Shares a home scene (no further evidence in source)",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Gentildonna family/household (wealthy house with servants and a mansion; 'family rule' to summit Mt. Fuji by age 7, per profile)",
+    "Sunday Racing horses (IRL owner shared with Orfevre and Buena Vista - real-world only, per umamusu.wiki)"
+  ],
+  "story_arc": {
+    "summary": "She enters as a self-declared absolute power ('世界は全て、貴婦人の掌のなか') and sweeps the Triple Tiara (Oka Sho, Oaks, Shuka Sho - event titles 'ティアラ', 'ダブルティアラ', 'トリプルティアラ'), with Verxina finishing behind her each time. She then takes on the strongest of all ages, beating Orfevre in the Japan Cup ('当代最強') and later winning it again ('連覇達成'). The career culminates in the Arima Kinen as 'the strongest one' ('『最も強き者』'); per the wiki her father asks the trainer to resign after the senior-year Japan Cup, which forms part of her late-career drama.",
+    "source": "event titles; web: https://umamusu.wiki/Gentildonna"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 30006,
+      "jp": "勝者はだぁれ？…そう、貴方のレディよ。",
+      "en": "Who's the winner? ...That's right, your lady."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "強さとは即ち、私そのもの。\n何者も届かない絶対の力。\nさあ、蹂躙の時間ですわ。",
+      "en": "Strength is none other than me. An absolute power no one can reach. Now, it is time to trample."
+    },
+    {
+      "voice_id": 91013,
+      "jp": "スイカ割りで、力の扱い様を\n鍛えられましたわ。今となっては、\n指1本で真っ二つでしてよ。",
+      "en": "Splitting watermelons taught me how to handle my power. These days, I can cut one in half with a single finger."
+    },
+    {
+      "voice_id": 90009,
+      "jp": "降り積もる雪をゆるりと\n眺めるつもりが、ついダンベルに\n手が伸びますのよ…ほほほ。",
+      "en": "I meant to gaze leisurely at the falling snow, but my hand reaches for the dumbbell instead... ohoho."
+    },
+    {
+      "voice_id": 10016,
+      "jp": "贈答品が届いていますわ。\n鬼が出るか蛇が出るか…。\nおほほ、冗談ですわ。",
+      "en": "A gift has arrived. Will a demon pop out, or a snake...? Ohoho, I jest."
+    },
+    {
+      "voice_id": 40000,
+      "jp": "ごめんあそばせ。",
+      "en": "Pardon me."
+    }
+  ],
+  "timer_line_ideas": [
+    "The independent run has concluded, {user}. Fifty minutes of strength, not a wrinkle out of place. Do come and inspect it... you would not keep your lady waiting, would you? Ohoho.",
+    "Who is the winner? ...Your independent run, of course. It is finished, {user}. Now, present your next plan - one that will satisfy me, if you please."
+  ],
+  "data_gaps": [
+    "First-person reading (watashi vs watakushi) not determinable from text",
+    "Story dialogue not in mdb; arc built from event titles plus umamusu.wiki",
+    "Mentions_in_voice entries for Kawakami Princess and Transcend appear to be false positives (e.g. 'プリンセス' in voice 91028); not listed as relationships",
+    "Elder sister's name unknown",
+    "Voice actor romanisation is not in the source; taken from umamusu.wiki/web search where available, otherwise general knowledge (unverified)"
+  ]
+}

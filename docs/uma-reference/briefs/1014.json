@@ -1,0 +1,205 @@
+{
+  "id": 1014,
+  "name_en": "El Condor Pasa",
+  "name_jp": "エルコンドルパサー",
+  "kind": "uma",
+  "one_liner": "Masked luchador-girl from North America, shouting 'World's Strongest!' with Spanish flair and extra-spicy food.",
+  "personality": "El Condor Pasa is loud, theatrical and endlessly energetic, narrating herself like a wrestling ring announcer and aiming to be the 'world's strongest'. She idolises her wrestler father, whose mask she inherited and never takes off, and sprinkles Spanish into everything. Under the bravado she can falter (dropping to plain アタシ and serious tones when out of form), and she leans heavily on roommate Grass for homework and massages.",
+  "speech": {
+    "first_person": "El (エル) mostly; atashi (アタシ) in emphatic or vulnerable moments",
+    "calls_trainer": "Trainer-san (トレーナーさん) x8; also anata (アナタ), e.g. voice 10000, 10012, 10014",
+    "register": "Hyper, wrestling-announcer polite speech with foreign accent katakana endings (デス/デース), Spanish loanwords, three-word chants",
+    "tics": [
+      {
+        "jp": "デース",
+        "romaji": "deesu",
+        "meaning": "stretched katakana desu - her signature ending"
+      },
+      {
+        "jp": "デェェス",
+        "romaji": "deeesu",
+        "meaning": "shouted extra-long version"
+      },
+      {
+        "jp": "参・上",
+        "romaji": "san-jou",
+        "meaning": "'has arrived!' wrestler entrance, syllables split by dots"
+      },
+      {
+        "jp": "入・場",
+        "romaji": "nyuu-jou",
+        "meaning": "'enters the ring!'"
+      },
+      {
+        "jp": "世界最強",
+        "romaji": "sekai saikyou",
+        "meaning": "world's strongest - her goal"
+      },
+      {
+        "jp": "ブエノ",
+        "romaji": "bueno",
+        "meaning": "Spanish 'good'"
+      },
+      {
+        "jp": "グラシアス",
+        "romaji": "gracias",
+        "meaning": "Spanish 'thanks'"
+      },
+      {
+        "jp": "ブエナスディアース",
+        "romaji": "buenas diaasu",
+        "meaning": "her rendering of Spanish 'buenos dias' (good morning); also ブエナスタルデス (buenas tardes)"
+      },
+      {
+        "jp": "ウノ、ドス、トレス",
+        "romaji": "uno, dos, tres",
+        "meaning": "Spanish counting"
+      },
+      {
+        "jp": "ウルティモ",
+        "romaji": "ultimo",
+        "meaning": "from Spanish 'ultimo' (literally 'last'); she uses it as 'ultimate'/super (ウルティモ・トレーニング, ウルティモにかっこいい)"
+      },
+      {
+        "jp": "上々、良好、絶好調",
+        "romaji": "joujou, ryoukou, zekkouchou",
+        "meaning": "example of her three-word chant pattern"
+      },
+      {
+        "jp": "コンドル",
+        "romaji": "kondoru",
+        "meaning": "condor - puns like 一石二コンドル"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "pro wrestling / lucha libre (profile strengths; voice 91002, 10027)",
+    "her mask from Papa, worn even off-duty (voice 91003, 70021)",
+    "spicy food: hot sauce, jalapeno tacos, chili tortillas, homemade sauce (voice 10005, 10007, 90002)",
+    "her hawk Mambo, raised like a sibling (profile family)",
+    "red and yellow - colours of passion and so Papa can spot her (voice 10026)",
+    "languages: Japanese, English, Spanish, studying French (voice 91004)",
+    "'Condor martial arts' and RPG monk persona (alt costume lines)",
+    "cactus flowers (voice 90006)"
+  ],
+  "weak_spots": [
+    "being quiet (profile weakness)",
+    "forgetting homework (voice 90005; Grass voice 91018)",
+    "Japanese kotatsu traps her (voice 90009)",
+    "cold - always sneezes after claiming she's fine (voice 90019, 91027)",
+    "Japanese calligraphy brush (voice 10003)",
+    "flinches at a referee count (profile ears)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle division (中等部)",
+    "birthday": "March 17 (3月17日)",
+    "height": "163 cm (163cm)",
+    "voice_actor": "Minami Takahashi (髙橋ミナミ)"
+  },
+  "relationships": [
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Roommate, best friend and rival; El relies on her and teases her",
+      "evidence": "home scenes x10; mentions in voice x5 (voice 90005: …グラス～！！どこデスか～～！？, 90011, 90018, 10003, 90006); top affinity 38; roommate per web: https://umamusu.wiki/Grass_Wonder"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "Senior she must surpass to prove she is world's strongest",
+      "evidence": "home scenes x1; voice 91000"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "Same-year friend and friendly rival (rock-paper-scissors over the last matsutake rice; Umanest adventures)",
+      "evidence": "home scenes x3; voice 91014, 91017"
+    },
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1010,
+      "name_en": "Taiki Shuttle",
+      "nature": "Senior whose BBQ reminds her of America",
+      "evidence": "voice 91001"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "Peer who watched her dance lesson",
+      "evidence": "home scenes x1; voice 91019"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "Senior who scolds her for noise (not scary)",
+      "evidence": "home scenes x1; voice 400029"
+    },
+    {
+      "id": 1054,
+      "name_en": "Biko Pegasus",
+      "nature": "Junior who gets excited by her outfit",
+      "evidence": "voice 91016"
+    },
+    {
+      "id": null,
+      "name_en": "Papa (her father)",
+      "nature": "Masked wrestler she idolises; source of her mask and sauce",
+      "evidence": "voice 91003, 10008, 10005; chara story title: マスクの誓い！父の想いをこの胸に！"
+    }
+  ],
+  "groups": [
+    "Golden Generation (with Special Week, Grass Wonder, Seiun Sky, King Halo) - general knowledge (unverified in mdb)",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "El declares she will become the world's strongest (デビュー戦の後に・突然の大宣言！) and chases it through the NHK Mile Cup, Japan Derby and Mainichi Okan, where she pushes too hard and suffers a painful setback (猛追の代償, 溶け落ちた翼). She rebounds with revenge in the Takarazuka Kinen, then the Japan Cup and Arima Kinen (情熱を世界に！); other titles (剥がれた仮面, 明日へのカルナバル) suggest her masked persona cracks before she reaffirms her resolve. Real-life El ran in France (Arc de Triomphe runner-up), which her overseas ambitions reference (unverified for the game).",
+    "source": "event titles; model knowledge (unverified) for the France/Arc detail"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "最速、最高、世界最強！\nそして…アナタの担当ウマ娘！\nエルコンドルパサー、ここに入場！",
+      "en": "Fastest, greatest, world's strongest! And... your assigned Uma Musume! El Condor Pasa, enters the ring!"
+    },
+    {
+      "voice_id": 90005,
+      "jp": "ケ？明日の授業で提出する宿題が、\nウノ、ドス、トレス…。\n…グラス～！！どこデスか～～！？",
+      "en": "Que? The homework due in tomorrow's class, uno, dos, tres... ...Grass~!! Where are youuu?!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "パパから受け継いだこのマスク…\nこれにこもる熱い意思のおかげで、\nアタシは世界・最・強！なんデス！",
+      "en": "This mask I inherited from Papa... thanks to the burning will inside it, I am the world's. Strongest!"
+    },
+    {
+      "voice_id": 20002,
+      "jp": "上々、良好、絶好調！\nトレーナーさんっ、最高にハードな\nトレーニングをお願いします！",
+      "en": "Superb, excellent, in top form! Trainer-san, give me the hardest training there is!"
+    },
+    {
+      "voice_id": 90009,
+      "jp": "…日本のコタツは危険デス。\n1度入ったらもう出ることはない、\nまさに魔の蟻地獄デスマッチ…！",
+      "en": "...Japanese kotatsu are dangerous. Once you get in you never come out - a true antlion-pit deathmatch...!"
+    },
+    {
+      "voice_id": 20011,
+      "jp": "アタシの体、\nこんなに動かなかったっけ…？\nどうしちゃったんだろう…。",
+      "en": "Was my body always this slow to move...? What's wrong with me...?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Finished, complete, PERFECTO! {user}, your Independent Training run is over, deeesu! Come check the results with El, the world's strongest!",
+    "Uno, dos, tres... DING DING DING! The gong has rung, {user}! Fifty minutes of training, ended! Bueno! Come see, come see, deesu!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice Manhattan Cafe x2 and Buena Vista x2 look like false substring hits (カフェ, ブエナスディアース/ブエナスタルデス); Sounds of Earth and Daring Heart hits are also false (アース in ブエナスディアース, ハート in voice 20000)",
+    "Career story dialogue not in mdb; arc from event titles",
+    "Golden Generation grouping not stated in source"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "id": 1138,
+  "name_en": "Forever Young",
+  "name_jp": "フォーエバーヤング",
+  "kind": "uma",
+  "one_liner": "Charismatic gyaru who talks startup jargon and wants to bring 'innovation' to the Uma Musume world.",
+  "personality": "Upbeat, trendy gyaru who mixes English business buzzwords ('roadmap', 'innovation', 'synergy', 'blue ocean') into slangy speech. She hates limits and is eager for rivals. Only 4 voice lines exist, so deeper personality is unknown.",
+  "speech": {
+    "first_person": "uchi (ウチ) - seen as 'ウチら' (we)",
+    "calls_trainer": "unknown",
+    "register": "casual gyaru slang with business-English loanwords",
+    "tics": [
+      {
+        "jp": "～っしょ",
+        "romaji": "~ssho",
+        "meaning": "slangy 'right? / gotta' ('起こすしかないっしょ！')"
+      },
+      {
+        "jp": "じゃーん",
+        "romaji": "ja-n",
+        "meaning": "slangy 'isn't it!' ('神オポチュニティじゃーん！')"
+      },
+      {
+        "jp": "～系？",
+        "romaji": "~kei?",
+        "meaning": "'the ___ type?' ('走る系？')"
+      },
+      {
+        "jp": "イノベーション",
+        "romaji": "inobeeshon",
+        "meaning": "'innovation' - her keyword"
+      },
+      {
+        "jp": "盛ってこ",
+        "romaji": "motte ko",
+        "meaning": "'let's pile it on' ('シナジー盛ってこ！')"
+      },
+      {
+        "jp": "神",
+        "romaji": "kami",
+        "meaning": "slang 'god-tier'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "innovation, roadmaps, synergy",
+    "finding a 'blue ocean' (support event title)",
+    "rivals",
+    "reading trends (guessed a cafe's new menu items in a row, per Loves Only You voice 90012); sci-fi movies with friends (Loves voice 91019)"
+  ],
+  "weak_spots": [
+    "unknown"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "February 24 (2月24日)",
+    "height": "unknown",
+    "voice_actor": "Shuri Umiyumi (海弓シュリ) - romanisation unverified"
+  },
+  "relationships": [
+    {
+      "id": 1132,
+      "name_en": "Loves Only You",
+      "nature": "friend; Loves admires her trend-reading, and she is a longtime movie friend of Loves's older sister",
+      "evidence": "home scenes x1; mentioned_by Loves Only You x2 (Loves voice_id 90012: ヤン子さん、連続でカフェの新メニューを言い当てたそうよ！; 91019: ヤン子さんとお姉ちゃん、昔からの映画友だちなの)"
+    },
+    {
+      "id": 1139,
+      "name_en": "Casino Drive",
+      "nature": "shares home conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1140,
+      "name_en": "Marche Lorraine",
+      "nature": "shares home conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "shares home conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Not playable yet; no career events. Her support card events are 'Found it! Blue Ocean' (見つけた！ブルーオーシャン) and 'Let's do it! Innovation!' (やっちゃお！イノベーション！).",
+    "source": "event titles"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "ウチらでやっちゃおっか、イノベーション♪",
+      "en": "Shall we do it, us girls - innovation~"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "リミットとかナンセンスっしょ！",
+      "en": "Limits are, like, total nonsense!"
+    },
+    {
+      "voice_id": 910100,
+      "jp": "お、走る？走る系？\n神オポチュニティじゃーん！\nライバル、募集してたんだ♪",
+      "en": "Oh, you running? The running type? That's a god-tier opportunity! I was looking for rivals~"
+    },
+    {
+      "voice_id": 20051,
+      "jp": "シナジー盛ってこ！",
+      "en": "Let's stack up that synergy!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Hi, {user}! Your independent run's done~ Results check is a must, right? Let's stack up that synergy and go innovate!",
+    "Oh, {user}, timer's up! Independent run, complete. Limits are total nonsense - so go check it and hit the next roadmap step!"
+  ],
+  "data_gaps": [
+    "Not playable; no cards, training events or character story",
+    "Height, strengths, weaknesses, ears/tail/family trivia all null",
+    "Only 4 voice lines; how she addresses the trainer is unknown",
+    "First person inferred from 'ウチら'",
+    "Release timestamp is a placeholder (2050), likely unreleased",
+    "Nickname ヤン子 (short_name) used by others; 'Loves's older sister' not identified by id"
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "id": 1114,
+  "name_en": "Buena Vista",
+  "name_jp": "ブエナビスタ",
+  "kind": "uma",
+  "one_liner": "Sweet, easily-teary childhood friend of her trainer, chasing the 'breathtaking view' she promised to reach.",
+  "personality": "Buena Vista is warm, helpful and pure-hearted: she lends sunscreen, helps in the dorm cafeteria, shovels snow and guides lost first-years. She is the trainer's childhood friend, still gets a thrill saying 'Trainer-san' and still calls them 'Onii-chan/Onee-chan' at times, sometimes by accident. She cries easily (even at live MCs) but keeps smiling so others won't worry, and everything she does is aimed at keeping a promise to reach a zekkei - a breathtaking view - together.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "anata (貴方, ~20 lines) and Trainer-san (トレーナーさん, 7 lines, still makes her heart race - 10001); also Onii-chan (お兄ちゃん) / Onee-chan (お姉ちゃん) by trainer gender - both as a slip (90001/90101) and openly (10005, 10012, 92006)",
+    "register": "gentle casual with the trainer, polite -san to friends; soft feminine",
+    "tics": [
+      {
+        "jp": "絶景",
+        "romaji": "zekkei",
+        "meaning": "breathtaking view - her dream motif (voice 95004, 93000)"
+      },
+      {
+        "jp": "約束",
+        "romaji": "yakusoku",
+        "meaning": "promise (voice 92007: …約束だよ。)"
+      },
+      {
+        "jp": "ぶぅちゃん",
+        "romaji": "Buu-chan",
+        "meaning": "her childhood nickname for herself (voice 20011, 92002)"
+      },
+      {
+        "jp": "えへへ / ふふっ",
+        "romaji": "ehehe / fufu",
+        "meaning": "shy, happy laughs (voice 20006, 10012)"
+      },
+      {
+        "jp": "ぁ…じゃなくて！トレーナーさん！",
+        "romaji": "a... ja nakute! toreenaa-san!",
+        "meaning": "her trademark slip (voice 90001)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Making bento and kyudo (profile strengths)",
+    "Cooking: zoni, stollen with her German grandmother's flavour, healthy sweets, salads and dressings (voice 10003, 10008, 91003, 20033)",
+    "Ribbons and cute clothes; wants more grown-up clothes to walk beside someone (voice 10026, 10025)",
+    "Special Week's racewear (voice 91007)",
+    "Sunflower fields, cherry blossoms in front of her home (voice 91013, 90006)",
+    "TV dramas and chatting with dormmates (voice 90004, 90005)",
+    "A brooch the trainer gave her long ago (voice 91008)"
+  ],
+  "weak_spots": [
+    "Traffic jams and suspense movies (profile weaknesses)",
+    "Terrible sense of direction - got lost with Special Week (voice 10027, 91012)",
+    "Cries easily, e.g. at live MCs; used to cry at Halloween decorations (voice 91006, 10007)",
+    "Hair gets frizzy when she's off form (voice 20008)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "March 14 (3月14日)",
+    "height": "159 cm (159cm)",
+    "voice_actor": "Fuka Izumi (和泉風花)"
+  },
+  "relationships": [
+    {
+      "id": null,
+      "name_en": "The Trainer",
+      "nature": "Childhood friend; neighbour-like family closeness, the promise to see the zekkei",
+      "evidence": "voice_id 90001: おはよう…お兄ちゃん…。ぁ…じゃなくて！トレーナーさん！; voice_id 10004 (chocolate from the trainer's family); web: https://umamusu.wiki/Buena_Vista (only Uma explicitly stated as trainer's childhood friend)"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "Idol; showed her the 'zekkei'; real-life sire (general knowledge)",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 20037: スペさんが見せてくれた“絶景”は見えないから…。; 91007 admires her racewear; 10027 got lost together); web: https://umamusu.wiki/Buena_Vista"
+    },
+    {
+      "id": 1049,
+      "name_en": "Nakayama Festa",
+      "nature": "Gruff friend who rescued her when lost in a back alley",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91002: 路地裏で迷っていたらナカヤマさんが助けてくれたの。); web: https://umamusu.wiki/Buena_Vista"
+    },
+    {
+      "id": 1136,
+      "name_en": "Red Desire",
+      "nature": "Same-generation friend and Tiara rival",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91014: ディザイアちゃんと作ったんだ！); web: https://umamusu.wiki/Buena_Vista (rival)"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "Roommate (web); they make athlete-friendly sweets together; per web Buena admires Gentildonna's strength",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91003: ジェンティルさんと一緒にアスリート向けのおいしいスイーツを作ってるの。); web: https://umamusu.wiki/Buena_Vista (roommate confirmed on wiki)"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "'Tran-san' - seems to know everything, even Buena's childhood",
+      "evidence": "mentions in voice x2 (voice_id 91004: トランさん、なんでも知ってるね。)"
+    },
+    {
+      "id": 1113,
+      "name_en": "Fusaichi Pandora",
+      "nature": "Friend who holds Buena's hands because they are warm like a heat pack",
+      "evidence": "mentions in voice x2 (voice_id 90009: 最近よく、パンドラちゃんに手をぎゅっとされるの。)"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "Fashionable senior she secretly admires",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91001)"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "Helped her bake stollen",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 10008)"
+    },
+    {
+      "id": 1119,
+      "name_en": "Dream Journey",
+      "nature": "Buena envies Journey and Orfevre's sisterly teatimes (she is an only child)",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91010: ジャーニーさんとオルフェさん、いつも楽しそうにお茶してるね。一人っ子だからたまに羨ましいかも)"
+    },
+    {
+      "id": 1100,
+      "name_en": "Wonder Acute",
+      "nature": "Gave her a buckwheat pillow",
+      "evidence": "mentions in voice x1 (voice_id 91011)"
+    }
+  ],
+  "groups": [
+    "None confirmed in the source; 2009 Tiara generation with Red Desire (web)"
+  ],
+  "story_arc": {
+    "summary": "Watching a race as a child, Buena saw a breathtaking view and promised her childhood friend - now her trainer - that she would reach it; she is signed under a provisional contract at first (voice 10000). Her goals span Hanshin JF, Oka Sho, Oaks, Shuka Sho, Queen Elizabeth II Cup, Arima Kinen, Victoria Mile, Takarazuka Kinen, Tenno Sho (Autumn) and Japan Cup, with event titles all built on 'views' (e.g. 'The Triple Tiara View', 'Everyone's View', 'Our View'). The fan wiki notes a Tiara rivalry with Red Desire.",
+    "source": "event titles + web: https://umamusu.wiki/Buena_Vista"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90001,
+      "jp": "おはよう…お兄ちゃん…。\nぁ…じゃなくて！トレーナーさん！\n…………もう、笑わないで。",
+      "en": "Good morning... Onii-chan... ah - I mean! Trainer-san! ...Geez, don't laugh."
+    },
+    {
+      "voice_id": 92007,
+      "jp": "貴方が忘れられない、\n世界一綺麗な景色を見せるから。\n…約束だよ。",
+      "en": "I'll show you the most beautiful view in the world, one you'll never forget. ...That's a promise."
+    },
+    {
+      "voice_id": 10027,
+      "jp": "スペさんとお出かけしたら、\n二人して迷子になっちゃって…。\nうぅ～、方向音痴、治したいっ…！",
+      "en": "When I went out with Spe-san, we both got lost together... Uuu, I want to fix my bad sense of direction...!"
+    },
+    {
+      "voice_id": 91002,
+      "jp": "路地裏で迷っていたらナカヤマさん\nが助けてくれたの。アンタが来る所\nじゃねえって…どういう意味だろう",
+      "en": "I was lost in a back alley and Nakayama-san helped me. She said 'This ain't a place for you'... what did she mean?"
+    },
+    {
+      "voice_id": 20011,
+      "jp": "ダメだよ、ぶぅちゃん。\nちゃんと…しっかりしなきゃ…。",
+      "en": "Come on, Buu-chan. You have to... pull yourself together..."
+    },
+    {
+      "voice_id": 30004,
+      "jp": "貴方にも“絶景”、見えたよね…！…ぐすっ…。",
+      "en": "You saw the 'zekkei' too, right...! ...sniff..."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your independent run is finished! You worked so hard... ehehe. Come look at the results with me? Ah - Onii-chan - I mean, Trainer-san! Don't laugh!",
+    "The 50 minutes are up, {user}! That's one more step toward the breathtaking view, right? Let's go check it together. ...That's a promise!"
+  ],
+  "data_gaps": [
+    "No story dialogue in mdb; arc from titles + fan wiki",
+    "No group/faction evidence in source"
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "id": 1074,
+  "name_en": "Mejiro Bright",
+  "name_jp": "メジロブライト",
+  "kind": "uma",
+  "one_liner": "Drowsy, slow-paced Mejiro ojousama with an iron will who patiently waits for her moment to bloom.",
+  "personality": "Extremely laid-back, sleepy and forgetful. She does everything at her own pace and is proud of being good at waiting. Beneath the dreaminess is a firm will and a hidden competitive fire ('a voice in my heart says win'); she believes her 'spring' will come if she keeps going. She adores dolls, frills and lolita fashion, and she is doted on by, and dotes on, her Mejiro relatives.",
+  "speech": {
+    "first_person": "watakushi (わたくし)",
+    "calls_trainer": "Trainer-sama (トレーナーさま); also anata-sama (あなたさま)",
+    "register": "Ojousama speech with drawn-out sentence endings (～ですわ～, ～ますの～); she adds -sama to many friends' names",
+    "tics": [
+      {
+        "jp": "ですわ～",
+        "romaji": "desu wa~",
+        "meaning": "Elongated ladylike sentence ending"
+      },
+      {
+        "jp": "ますの",
+        "romaji": "masu no",
+        "meaning": "Soft ojousama ending"
+      },
+      {
+        "jp": "うふふ",
+        "romaji": "ufufu",
+        "meaning": "Gentle giggle"
+      },
+      {
+        "jp": "のんびり",
+        "romaji": "nonbiri",
+        "meaning": "Leisurely, at her own pace"
+      },
+      {
+        "jp": "ライアンお姉さま",
+        "romaji": "Raian onee-sama",
+        "meaning": "'Big sister Ryan': how she addresses Mejiro Ryan"
+      },
+      {
+        "jp": "さま",
+        "romaji": "-sama",
+        "meaning": "Honorific she attaches to friends (フクキタルさま, スカイさま, ツルちゃんさま)"
+      },
+      {
+        "jp": "めっ",
+        "romaji": "me!",
+        "meaning": "Cute 'no!' scolding (voice 20033)"
+      },
+      {
+        "jp": "ふわぁ",
+        "romaji": "fuwaa",
+        "meaning": "Yawn"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Dolls, especially 'Maki-chan' and 'Kyuu-chan'; sewing doll clothes (profile strength)",
+    "Frills, lace, silk, sweet lolita fashion",
+    "Naps, sunbathing, floating on the sea",
+    "Spring and buds waiting to bloom; light and shining",
+    "Knitting (very slowly)",
+    "Folding endless paper cranes (profile trivia)",
+    "Studying a foreign language to correspond with overseas doll makers ('bonjour', voice 10027); the profile trivia also lists 歴史、英語 (history, English) without a label, though voice 110001 says history study makes her sleepy",
+    "Christmas and Santa (her Santa outfit)"
+  ],
+  "weak_spots": [
+    "Eating ice cream before it melts (profile)",
+    "Falls asleep easily; ear-cleaning knocks her out (profile)",
+    "Slow at everything: always last to finish lunch, late with chocolates and resolutions",
+    "Spicy food (voice 91003)",
+    "Doesn't notice when she sits on her own tail (profile)",
+    "Busy race schedules (voice 20021)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 19 (4月19日)",
+    "height": "157 cm",
+    "voice_actor": "Ayaka Ohnishi (大西綺華)"
+  },
+  "relationships": [
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "Beloved 'big sister' figure whose dream she inherits",
+      "evidence": "home scenes x3; mentions_in_voice counter x1, but 5 voice lines name her as ライアンお姉さま (10013, 10026, 91001, 91013, 91027; e.g. 91001: ライアンお姉さまと、お散歩♪); event title: 貴方の夢を受け継いで"
+    },
+    {
+      "id": 1059,
+      "name_en": "Mejiro Dober",
+      "nature": "Mejiro relative she addresses without an honorific; fixes Bright's hair and matches earrings with her",
+      "evidence": "home scenes x4; mentions_in_voice counter x1, but 5 voice lines name her (10026, 90013, 90215, 91008, 91027; e.g. 91008: 耳飾り、ドーベルと一緒なのです; 90013: ドーベルに髪を直してもらった)"
+    },
+    {
+      "id": 1073,
+      "name_en": "Tsurumaru Tsuyoshi",
+      "nature": "Roommate ('Tsuru-chan-sama'), who wakes her and curls her hair",
+      "evidence": "home scenes x4; voice_id 90010, 90211"
+    },
+    {
+      "id": 1064,
+      "name_en": "Mejiro Palmer",
+      "nature": "Mejiro relative; they golf at the family's summer retreat",
+      "evidence": "mentions in voice x2 (voice_id 91225)"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "Mejiro relative she keeps losing track of while walking",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Fellow sunbathing and fishing buddy ('Sky-sama')",
+      "evidence": "mentions in voice x2 (voice_id 90003: ぽかぽかタイム)"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "Friend",
+      "evidence": "home scenes x2; voice_id 90002"
+    },
+    {
+      "id": 1113,
+      "name_en": "Fusaichi Pandora",
+      "nature": "Junior who leans on her and reminds her of her younger sisters",
+      "evidence": "mentions in voice x2 (voice_id 91218)"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "Rival she chases in her story",
+      "evidence": "home scenes x2; event title: 逃げゆく風を追いかけて (the link to Suzuka is my inference, unverified)"
+    },
+    {
+      "id": 1007,
+      "name_en": "Gold Ship",
+      "nature": "Gave her lots of sweet potatoes",
+      "evidence": "voice_id 91014"
+    }
+  ],
+  "groups": [
+    "Mejiro family",
+    "Umayuru spin-off anime appearance (web: umamusu.wiki; unverified, and whether she appears in the main anime was not checked)"
+  ],
+  "story_arc": {
+    "summary": "Bright is the slowest, sleepiest Mejiro, but she believes in blooming at her own pace and inherits Mejiro Ryan's dream. She races the classics (Satsuki Sho, Derby, Kikuka Sho) and then grows into a true stayer through the Stayers Stakes and Tenno Sho (Spring), facing a shifting era in races such as the Takarazuka Kinen and Tenno Sho (Autumn). Her later chapters center on the 'story called Mejiro' and carrying the family's legacy, and some events start in Paris. The real horse won the 1998 Tenno Sho (Spring).",
+    "source": "event titles + web: https://umamusu.wiki/Mejiro_Bright + general knowledge (unverified for the real-horse record)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 13,
+      "jp": "本日のログインボーナスですわ～。",
+      "en": "Here is today's login bonus~."
+    },
+    {
+      "voice_id": 2034,
+      "jp": "今、とても落ち着いておりますの。\nでも、心の1番奥が熱くって～…\n『勝て』と、声が聞こえますのよ。",
+      "en": "I'm very calm right now. But deep inside my heart it's so hot~... I can hear a voice saying 'Win'."
+    },
+    {
+      "voice_id": 20007,
+      "jp": "今日はどんなメニューでしょう～？\nゆっくり決めて大丈夫ですのよ、\n待つのは得意ですから～。",
+      "en": "What's today's menu~? Take your time deciding, I'm good at waiting~."
+    },
+    {
+      "voice_id": 20010,
+      "jp": "…すぅ、すぅ…あら？\nまあ、大変。\n眠ってしまっておりましたわ～…。",
+      "en": "...zzz, zzz... oh? My, how dreadful. I seem to have fallen asleep~..."
+    },
+    {
+      "voice_id": 20033,
+      "jp": "弱音は、めっ、ですのよ。\n自分の言葉で落ち込んでいては\n勝てるものも勝てませんもの～。",
+      "en": "Whining is a no-no, me! If you let your own words get you down, you can't win even the races you could have~."
+    },
+    {
+      "voice_id": 91001,
+      "jp": "ふん、ふふん、ふ～ん♪\nライアンお姉さまと、お散歩♪\n腕を組んで、手も繋ぎましょう～♪",
+      "en": "Hmm, hmm-hmm, hmm~♪ A walk with big sister Ryan♪ Let's link arms and hold hands too~♪"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}~ It seems the independent training has finished~. No need to hurry, Trainer-sama. I'm very good at waiting~. Shall we look at it together, slowly~?",
+    "Oh my~, is it over already? ...ah, I must have dozed off~. Trainer-sama, {user}, the independent run is done, desu wa~. Ufufu."
+  ],
+  "data_gaps": [
+    "The link between Silence Suzuka and the event title 逃げゆく風を追いかけて is my inference",
+    "Paris events (パリの街にて etc.) are listed as trainee events but their context is unknown",
+    "Profile trivia 歴史、英語 is unlabelled (could be favourite or weak subjects)"
+  ]
+}

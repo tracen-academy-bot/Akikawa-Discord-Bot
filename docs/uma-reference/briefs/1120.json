@@ -1,0 +1,167 @@
+{
+  "id": 1120,
+  "name_en": "Calstone Light O",
+  "name_jp": "カルストンライトオ",
+  "kind": "uma",
+  "one_liner": "A deadpan speed-freak who worships straight lines, races imaginary animals and does everything - even birthdays - at 'light speed'.",
+  "personality": "Calstone Light O is an earnest, deadpan oddball whose whole worldview is speed and straightness: she wants to update her top speed, hates curves, keeps her bangs ruler-straight and claims she finished the year's cleaning a month early. She narrates her own exploits with cool 'Fuh' bravado, but crumbles comically when tired ('I want to roll around and think about nothing!'). She is sincere and affectionate toward the trainer, whom she needs as her 'observer', and melts completely at the mention of cats.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer (トレーナー, no -san) or anata (貴方)",
+    "register": "polite desu/masu delivered deadpan, dropping into plain dramatic-hero speech (〜だな, くっ, 〜か！) for bravado",
+    "tics": [
+      {
+        "jp": "フッ",
+        "romaji": "fu'",
+        "meaning": "cool smirk 'Heh'"
+      },
+      {
+        "jp": "最高速",
+        "romaji": "saikousoku",
+        "meaning": "'top speed' - her goal"
+      },
+      {
+        "jp": "一直線",
+        "romaji": "icchokusen",
+        "meaning": "'in a straight line' - her ideal"
+      },
+      {
+        "jp": "光速",
+        "romaji": "kousoku",
+        "meaning": "'light speed' - her favourite exaggeration"
+      },
+      {
+        "jp": "くっ",
+        "romaji": "ku'",
+        "meaning": "dramatic frustrated gasp"
+      },
+      {
+        "jp": "脳内",
+        "romaji": "nounai",
+        "meaning": "'in my head' - her imaginary races vs. gazelles, cheetahs, jaguars"
+      },
+      {
+        "jp": "ニャンコ",
+        "romaji": "nyanko",
+        "meaning": "'kitty' - she loves cats"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Straight lines: ruler-straight hair and bangs, creases, pointed shoes, tail combed with a ruler (profile)",
+    "Top speed and light; being the first to do anything",
+    "Cats (can hear a meow from any distance, profile; 'Nyanko!' for her birthday)",
+    "Racing animals in her head (gazelles, giraffes, cheetahs, pronghorn, jaguars)",
+    "Floor-wiping races and dizzy-bat races (profile strengths)",
+    "Waking at exactly 6:00 because the clock hands form a straight line",
+    "Roasted sweet potatoes, limited-time cafeteria menus",
+    "Sakura Bakushin O-style speed rivalry; Believe's straight posture"
+  ],
+  "weak_spots": [
+    "Quadratic functions - maths 'betrayed' her with curves (profile; voice 91001)",
+    "Diving and swimming - she floats too much (profile; voice 92011)",
+    "Curves of any kind",
+    "Getting worn out by too many races; craves onsen and naps (voice 20021, 20022)",
+    "Sleepiness after lunch"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 3 (5月3日)",
+    "height": "159cm",
+    "voice_actor": "Yumiko Mochizuki (望月ゆみこ)"
+  },
+  "relationships": [
+    {
+      "id": 1095,
+      "name_en": "Believe",
+      "nature": "Classmate and friend she holds up as a model of straightness",
+      "evidence": "home scenes x7; mentions in voice x1 (voice_id 91003: 皆、ビリーヴを規範とすべきです); web: https://umamusu.wiki/Calstone_Light_O"
+    },
+    {
+      "id": 1121,
+      "name_en": "Durandal",
+      "nature": "Roommate and rival; they spar with brooms and Durandal always parries her",
+      "evidence": "home scenes x5; mentions in voice x2 (voice_id 91002: デュランダルと箒とかで戦うのですが; 400008); mentioned_by x3; roommate per web: https://umamusu.wiki/Calstone_Light_O"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Speed rival and training partner",
+      "evidence": "home scenes x3; mentioned_by x1; web: https://umamusu.wiki/Calstone_Light_O"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "Friend whose 'light' experiments she volunteers for",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91004: タキオンが“光”に関係する実験をしていると聞きました)"
+    },
+    {
+      "id": 1093,
+      "name_en": "K.S.Miracle",
+      "nature": "Friend whose health she worries about bluntly",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Calstone_Light_O"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "Shares a home scene",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": null,
+      "name_en": "Her mother",
+      "nature": "First cut her hair straight when she was little; she has kept it that way since",
+      "evidence": "voice_id 91000: 小さい頃お母さんが初めて整えてくれた時から、ずっと"
+    }
+  ],
+  "groups": [
+    "None confirmed in source data"
+  ],
+  "story_arc": {
+    "summary": "She arrives as a girl who is simply 'too fast' (カルストンライトオは速すぎる), with the single dream of updating her top speed. Abandoning other paths after the Asahi Hai FS ('捨てる道、貫く道'), she commits to sprinting: the Aoi Stakes, the straight 1000 m Ibis Summer Dash (where she sets a record, per the wiki) and the Summer Sprint Series. She then targets the Sprinters' Stakes ('光を超えた先') and Takamatsunomiya Kinen ('王と王'), with Durandal and Believe as friends and rivals.",
+    "source": "event titles; web: https://umamusu.wiki/Calstone_Light_O"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10011,
+      "jp": "はい、おめでとー！…ビックリ\nしましたか？したでしょうが。\n私はおめでとうも最高速なんです。",
+      "en": "Happy birthdaaay! ...Surprised you? You were, weren't you. Even my congratulations come at top speed."
+    },
+    {
+      "voice_id": 10003,
+      "jp": "ようやく正月気分ですか。…遅い。\n遅すぎる。私なんて12月上旬には\n新年に到達していましたよ。",
+      "en": "Only now getting into the New Year mood? ...Slow. Far too slow. I reached the New Year back in early December."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "風よりも、音よりも、光よりも…私はッ！\n…速い。",
+      "en": "Faster than the wind, than sound, than light... I am...! ...fast."
+    },
+    {
+      "voice_id": 91001,
+      "jp": "昔は算数や数学が好きだったのに、\n裏切られました。内容が進むたびに\n曲線が出しゃばってきて…！",
+      "en": "I used to love arithmetic and maths, but they betrayed me. Every time we moved on, curves came barging in...!"
+    },
+    {
+      "voice_id": 20002,
+      "jp": "フッ、貴方が来る前にガゼル、\nキリン、パタスモンキーを倒して\nしまいましたよ。脳内レースで。",
+      "en": "Heh. Before you even arrived, I'd already beaten a gazelle, a giraffe and a patas monkey. In a race in my head."
+    },
+    {
+      "voice_id": 92006,
+      "jp": "私には見えますよ。トレーナーの\n心はハート型じゃない…私と同じ\n直線定規の形をしている！",
+      "en": "I can see it. Trainer, your heart isn't heart-shaped... it's shaped like a straight ruler, same as mine!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Fuh. Independent run: complete. Probably before the timer even rang. {user}, come check the results at top speed - in a straight line, please!",
+    "Fifty minutes? I'd have done it at light speed. ...But the run is over, {user}! Checking it right away is the true straight-line way. Let's go, Trainer!"
+  ],
+  "data_gaps": [
+    "Groups unknown",
+    "mentions_in_voice for Daring Heart (ハート in voice 92006) and Manhattan Cafe (カフェテリア in voice 91010) are false positives",
+    "Story dialogue not in mdb; arc from event titles and fan wiki",
+    "Voice actor romanisation is not in the source; taken from umamusu.wiki/web search where available, otherwise general knowledge (unverified)"
+  ]
+}

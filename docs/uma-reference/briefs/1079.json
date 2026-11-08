@@ -1,0 +1,169 @@
+{
+  "id": 1079,
+  "name_en": "Furioso",
+  "name_jp": "フリオーソ",
+  "kind": "uma",
+  "one_liner": "Stoic Funabashi exchange student fiercely devoted to proving her hometown's local racing can beat the Central academy.",
+  "personality": "Quiet, formal and intensely proud of Funabashi, she frames everything as 'Funabashi vs. Central' and refuses to 'get chummy' with Central girls - then keeps getting won over anyway (helping with homework, accepting food). Thrifty and practical (she treats the night supermarket's discount side dishes as a battlefield), she lives alone and cooks simple home food. With the trainer she is unusually earnest: she calls them her comrade (同志) and repeatedly, sincerely says she chose them and won't change her mind.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Anata (貴方); Trainer (トレーナー) once; also 'comrade' (同志)",
+    "register": "Formal, stiff polite speech; drops to curt plain form (～だ、～するな) when talking to herself; slightly samurai-like ('いざ、尋常に！')",
+    "tics": [
+      {
+        "jp": "船橋",
+        "romaji": "Funabashi",
+        "meaning": "her hometown - mentioned constantly ('船橋最強', '船橋一色')"
+      },
+      {
+        "jp": "中央",
+        "romaji": "Chuuou",
+        "meaning": "'Central' (Tracen/JRA) - her rival institution"
+      },
+      {
+        "jp": "打倒中央！船橋最強！",
+        "romaji": "datou Chuuou! Funabashi saikyou!",
+        "meaning": "'Down with Central! Funabashi is strongest!' - her battle cry"
+      },
+      {
+        "jp": "同志",
+        "romaji": "doushi",
+        "meaning": "'comrade' - how she thinks of the trainer"
+      },
+      {
+        "jp": "絆されないでくださいね",
+        "romaji": "hodasarenaide kudasai ne",
+        "meaning": "'don't get won over' - her fear of being softened by Central"
+      },
+      {
+        "jp": "むう",
+        "romaji": "muu",
+        "meaning": "grumpy/pouting grunt"
+      },
+      {
+        "jp": "ふなっこ",
+        "romaji": "funakko",
+        "meaning": "'Funabashi kid' - local pride term"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Funabashi: its sea, beaches, Sanbanze tidal flats and oystercatchers, its agriculture-and-fisheries festival (voice 91014)",
+    "giving Funabashi tours with her own hand-made map (profile)",
+    "pear tart for every family birthday (profile)",
+    "sauce ramen (Funabashi local dish), komatsuna ohitashi",
+    "practical, easy-to-move-in clothes",
+    "the 'F' on her racing outfit"
+  ],
+  "weak_spots": [
+    "jellyfish (profile)",
+    "being softened by kindness: her tail slaps her leg to scold herself (profile)",
+    "Wonder Acute's 'home-like' comfort is 'the most dangerous' (voice 91004)",
+    "can't stop chatting on LANE at night (voice 91011)",
+    "fashion - admits she doesn't really get it (voice 10025)",
+    "keeps being tricked into helping No Reason with homework (voice 91000)"
+  ],
+  "profile": {
+    "dorm": "Lives alone (一人暮らし) - not in a dorm",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 1 (5月1日)",
+    "height": "161 cm (161cm)",
+    "voice_actor": "Aki Sairenji (西連寺亜希)"
+  },
+  "relationships": [
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "Rival turned friend; keeps giving Furioso 'leftover side dishes'",
+      "evidence": "home scenes x8; voice_id 91003 (エスポさん、『余ったおかず』を数日おきにくださる); web: https://umamusu.wiki/Furioso"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "Friend; trades Funabashi souvenirs for Transcend's info ('give and take, not a snack party'); Transcend finds Furioso's hometown smile adorable",
+      "evidence": "home scenes x4; voice_id 91002; Transcend's voice_id 91000; web: https://umamusu.wiki/Furioso"
+    },
+    {
+      "id": 1096,
+      "name_en": "No Reason",
+      "nature": "Schemer who keeps getting Furioso to help with homework",
+      "evidence": "home scenes x3; voice_id 91000"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Dirt rival she considers formidable behind the cute image",
+      "evidence": "home scenes x2; voice_id 91001; web: https://umamusu.wiki/Furioso"
+    },
+    {
+      "id": 1100,
+      "name_en": "Wonder Acute",
+      "nature": "Friend whose comforting presence Furioso finds 'dangerous'",
+      "evidence": "home scenes x2; voice_id 91004; web: https://umamusu.wiki/Furioso"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "Fellow hometown-ambassador; friend (web)",
+      "evidence": "top affinity 37; mentioned_by x1; web: https://umamusu.wiki/Furioso"
+    },
+    {
+      "id": null,
+      "name_en": "Crimson Nova (NPC)",
+      "nature": "Career-story rival she wants to defeat on dirt",
+      "evidence": "web: https://umamusu.wiki/Furioso"
+    }
+  ],
+  "groups": [
+    "Funabashi (local/NAR) racing - special exchange student (profile)",
+    "Dirt division circle with Espoir City, Smart Falcon, Transcend, Wonder Acute, Copano Rickey - home scenes"
+  ],
+  "story_arc": {
+    "summary": "Furioso comes to Central as a Funabashi exchange student to prove local racing's strength. Her titles run through local and dirt graded races - Zen-Nippon Junior Yushun, Japan Dirt Derby (『雪辱へ』), JBC Classic (『血闘の幕開け』), Champions Cup, Tokyo Daishoten, February Stakes, Kashiwa Kinen (『新たなる船出』) and Teio Sho - and NAR year-end awards. Character story titles ('出会いの日、血のダイオライト', '鉄の絆は分かたれて') suggest a bond-break-and-reunion arc with her trainer and hometown, and the wiki names an NPC rival, Crimson Nova.",
+    "source": "event titles; web: https://umamusu.wiki/Furioso"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "私は、貴方がいい。今も気持ちは\n変わりません。…これからも、\n変わることはありません。",
+      "en": "It's you I want. I still feel the same. ...And that will never change."
+    },
+    {
+      "voice_id": 92003,
+      "jp": "始める前に気合いを入れましょう。\nさあ、一緒に――\n『打倒中央！船橋最強！』",
+      "en": "Let's fire ourselves up before we start. Come on, together - 'Down with Central! Funabashi is strongest!'"
+    },
+    {
+      "voice_id": 10004,
+      "jp": "日頃のお礼にチョコを――はっ！\n中央の子からもらっていませんか？\n絆されないでくださいね？？",
+      "en": "Chocolate, as thanks for everything - ah! Haven't you gotten some from the Central girls? Don't let them win you over, okay??"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "アキュートさんは…ある意味、\n最も危険です。あの実家のような\n安心感…抗いがたい…。",
+      "en": "Acute-san is... in a sense, the most dangerous of all. That feeling of being at home... so hard to resist..."
+    },
+    {
+      "voice_id": 30004,
+      "jp": "船橋、最強ーーーーー！\n……ふうっ。",
+      "en": "Funabashi, strongest!!!!! ......phew."
+    },
+    {
+      "voice_id": 20011,
+      "jp": "…船橋の砂に、触れたい。",
+      "en": "...I want to touch the sand of Funabashi."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}. The independent run is complete. A respectable result - worthy of Funabashi. Please review it, comrade. ...Don't slack off.",
+    "Fifty minutes of training, done. Down with Central, Funabashi is strongest! ...Ahem. {user}, please come look at the results."
+  ],
+  "data_gaps": [
+    "Only one card; card title is JP only ([衣錦還郷の瑞星]); no support cards.",
+    "mentions_in_voice Manhattan Cafe x1 is a false positive (カフェ in voice_id 90002).",
+    "No home-scene evidence for Hokko Tarumae; relationship comes from affinity + web.",
+    "Voice actor romanisation (Sairenji Aki) is a standard reading, not confirmed from an official EN source.",
+    "Story arc details beyond titles are thin; Crimson Nova from web only.",
+    "Removed 'budget-minding her parents', 'clam digging' and 'Funabashi sweets': not found in her lines, profile or the wiki."
+  ]
+}

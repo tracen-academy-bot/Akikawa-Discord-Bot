@@ -1,0 +1,187 @@
+{
+  "id": 1121,
+  "name_en": "Durandal",
+  "name_jp": "デュランダル",
+  "kind": "uma",
+  "one_liner": "Self-styled knight who serves her trainer as \"my liege\" and names her finishing kick after a holy sword.",
+  "personality": "Durandal plays the chivalric knight completely: she pledges herself as her trainer's sword and shield, speaks in stiff, archaic courtly Japanese and shouts invented attack names with her finishing kick. The polish slips whenever she is tired, scared or praised. She drops into ordinary girlish speech (わよ, なくっちゃ), dodges the headless-horseman costume because it is scary, and gets visibly flustered and happy at compliments. Underneath, she is earnest, protective and hard-working. She also has a domestic side: lots of siblings, a mother who taught her hoof and nail care, and a father who works in a bookshop.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Waga kimi (我が君, 'my liege'); also 貴方 (anata) and occasionally 主君/我が主",
+    "register": "Archaic, theatrical knightly polite speech (ございます, 参りましょう, ご照覧あれ). She drops into casual feminine speech (わよ, なくっちゃ, よね) when flustered, tired or talking to herself",
+    "tics": [
+      {
+        "jp": "我が君",
+        "romaji": "waga kimi",
+        "meaning": "'my liege', her usual way of addressing the trainer"
+      },
+      {
+        "jp": "『聖剣』",
+        "romaji": "seiken",
+        "meaning": "'holy sword', her running metaphor for herself and her kick"
+      },
+      {
+        "jp": "騎士",
+        "romaji": "kishi",
+        "meaning": "'knight', the word she uses for herself constantly"
+      },
+      {
+        "jp": "いざ",
+        "romaji": "iza",
+        "meaning": "'now then / have at it!', an archaic call to action"
+      },
+      {
+        "jp": "ご照覧あれ",
+        "romaji": "goshouran are",
+        "meaning": "'behold!', archaic"
+      },
+      {
+        "jp": "パラティヌス・ルクス",
+        "romaji": "Paratinusu Rukusu",
+        "meaning": "(Palatinus Lux) the invented technique name she shouts in her special race line"
+      },
+      {
+        "jp": "なくちゃ / なくっちゃ / よね / かしら",
+        "romaji": "nakucha / nakuccha / yo ne / kashira",
+        "meaning": "casual feminine endings she slips into when her knightly act drops (voice_id 20009, 90002, 91005, 400005, 70010)"
+      },
+      {
+        "jp": "くっ",
+        "romaji": "ku'",
+        "meaning": "a frustrated grunt"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Knights, chivalry, oaths and a holy sword (聖剣); she makes up attack names such as Palatinus Lux and the 'Thunder Halberd of Dionysius'",
+    "Lawn mowing and writing long analytical reviews of romance dramas (profile strengths)",
+    "Serving and protecting her trainer: she offers to guard their sleep, carry them and challenge General Winter",
+    "Her outfit: white for purity, red for passion",
+    "Imagining uniforms for her own knightly order (騎士団)",
+    "A large family: lots of eccentric siblings, a mother who taught her hoof, leg, nail and skin care, and a father who works in a bookshop",
+    "Being one of the 'fastest trio' (最速トリオ) of sprinters",
+    "Household chores in her family are decided by 'acchi muite hoi' (profile)"
+  ],
+  "weak_spots": [
+    "Staring contests (nirameko), travelling alone, and the word 'surrender' (profile weaknesses)",
+    "Scary things: she refuses to dress as a headless knight for Halloween and stops herself mid-word ('kowa...'). Per the web she is secretly afraid of the dark (web: https://umamusu.wiki/Durandal, unverified in game data)",
+    "Keeping up her elegant act when hungry; she is mortified by a growling stomach",
+    "Fatigue makes her drop the knightly speech",
+    "Being told she isn't needed (the trainer turning down her offer to guard their sleep)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 25 (5月25日)",
+    "height": "162 cm (162cm)",
+    "voice_actor": "Kana Nogi (野木奏) per umamusu.wiki; reading not confirmed by game data"
+  },
+  "relationships": [
+    {
+      "id": 1120,
+      "name_en": "Calstone Light O",
+      "nature": "Close friend and fellow sprinter; per the web she is also her roommate. Durandal is amused and baffled by her obsession with straight lines",
+      "evidence": "home scenes x5; mentions in voice x3 (voice_id 90003: ライトオさんは総菜を器にとる時、全て直線になるように置くのです; 10013 ruler birthday gift; 91009 'bashun' bedhead tip); top affinity 25; roommate per web: https://umamusu.wiki/Durandal"
+    },
+    {
+      "id": 1095,
+      "name_en": "Believe",
+      "nature": "Friend she respects for being sincere and earnest, and fellow sprint rival",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 91000: ビリーヴさんは口数が多い方ではありませんが…; 10008 tree decorating; 400005)"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "Rival she treats as royalty. The '殿下' (Your Highness) in her lines may refer to Fine Motion, but that is unverified",
+      "evidence": "home scenes x3; web: https://umamusu.wiki/Durandal (rival she respects as a sovereign)"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "Appears together in home conversations; nature unknown",
+      "evidence": "home scenes x2"
+    },
+    {
+      "id": 1093,
+      "name_en": "K.S.Miracle",
+      "nature": "Game rival; Durandal lost a game to 'Miracle-san' 300 million to 3 and vows a rematch. The data credits this mention to K.S.Miracle, though Hishi Miracle is also a 'Miracle'",
+      "evidence": "mentions in voice x1 (voice_id 400010: 必ず再戦しましょうミラクルさん！)"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "Friend whom she respects as a 'king'",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Durandal"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "Friend whom she reveres as a 'witch'",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Durandal"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "Friend; per the web they sometimes stream together",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Durandal"
+    },
+    {
+      "id": 1096,
+      "name_en": "No Reason",
+      "nature": "Friend",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Durandal"
+    }
+  ],
+  "groups": [
+    "'Fastest trio' (最速トリオ) of sprinters. She names it in voice_id 92000; the other members are probably Believe and Calstone Light O, but that is unverified",
+    "Ritto Dorm"
+  ],
+  "story_arc": {
+    "summary": "Durandal arrives as a knight in search of a 'king' worth serving and chooses her trainer as her liege. Her chapters run from finding that liege, through a knighting ceremony, to tests of her resolve ('Thou shalt not waver'). Her career runs through NHK Mile C, the Centaur S, the Sprinters S, Mile CS, the Takamatsunomiya Kinen and the Yasuda Kinen. The post-race event titles cast her rivals as fantasy figures (a twice-fallen angel, a sneering demon prince, an anxious princess, a king's great decision). Late events such as 'Duel! Ligne Droite', 'Awakening of the Avatar of Light' and 'Sword that guards eternity' build up to her signature holy-sword finish. The real horse won the 2003 Sprinters S and the Mile CS in 2003 and 2004 (model knowledge, unverified).",
+    "source": "event titles (chara_story_titles, trainee_event_titles); real-horse results: model knowledge (unverified); web: https://umamusu.wiki/Durandal (no story detail there)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "貴方は私の運命の始まり…。\n主君を得た騎士の喜び、\n言葉だけでは表現できません。",
+      "en": "You are where my destiny begins... The joy of a knight who has found her liege cannot be expressed in words alone."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "我が聖剣は雷より眩く、\n闇をも切り拓く鋭さを持つ…\nご照覧あれ！パラティヌス・ルクス！",
+      "en": "My holy sword shines brighter than lightning, keen enough to cleave the very darkness... Behold! Palatinus Lux!"
+    },
+    {
+      "voice_id": 20009,
+      "jp": "気合いを入れなくちゃ…\nこんなんじゃ騎士なんて\n呼べないわよ…！",
+      "en": "I have to get fired up... nobody could call me a knight like this...!"
+    },
+    {
+      "voice_id": 10007,
+      "jp": "ハロウィンは首なし騎士に…？\nい、いえ、騎士は仮装でするもの\nではないし何よりこわ…こほんっ。",
+      "en": "A headless knight for Halloween...? N-no, a knight is not something one dresses up as, and above all it's scar-- ahem."
+    },
+    {
+      "voice_id": 90004,
+      "jp": "我が君の眠りを守るために\nお傍で警護をしたいのに、\n不要だなんて…うう…。",
+      "en": "I wish to stand guard at your side to protect my liege's sleep, yet you say it is unnecessary... uuu..."
+    },
+    {
+      "voice_id": 91009,
+      "jp": "ライトオさんから寝ぐせを直す\nコツは『ばしゅん』だと教わり\nました。…ばしゅんとは、一体…。",
+      "en": "Light O-san taught me that the trick to fixing bedhead is 'bashun'. ...What on earth is 'bashun'..."
+    }
+  ],
+  "timer_line_ideas": [
+    "My liege {user}! Your independent training has reached its conclusion. Your knight Durandal stands ready to escort you to the results. Iza, let us go!",
+    "A report, my liege: the run is complete. A knight must never panic... b-but please come and see it quickly, {user}! My holy sword is trembling!"
+  ],
+  "data_gaps": [
+    "Voice actor reading: umamusu.wiki gives 'Kana Nogi' for 野木奏; not confirmed from an official source",
+    "Story arc is built from event titles; no event dialogue was available, and the web page has no career-story summary",
+    "Who '殿下' (Your Highness, voice_id 1214) refers to is not stated in the data",
+    "'Miracle-san' (voice_id 400010) could be K.S.Miracle or Hishi Miracle; the extracted mention data says K.S.Miracle",
+    "Members of the 'fastest trio' are not named in her lines",
+    "Top affinity partners (Buena Vista 27, Daiichi Ruby 24, etc.) have no supporting lines and are not listed as relationships"
+  ]
+}

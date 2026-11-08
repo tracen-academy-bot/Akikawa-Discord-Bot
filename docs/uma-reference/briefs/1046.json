@@ -1,0 +1,226 @@
+{
+  "id": 1046,
+  "name_en": "Smart Falcon",
+  "name_jp": "スマートファルコン",
+  "kind": "uma",
+  "one_liner": "Self-proclaimed future top 'Umadol' (uma idol) who runs dirt races and never stops performing fan service.",
+  "personality": "Relentlessly bubbly and idol-minded: she refers to herself in the third person as Falko, punctuates everything with sparkles, and treats every race, training session and street live as a stage for her fans. Underneath the cuteness she is a hard worker with a serious will ('this is my resolve as an Umadol'), keeps going through empty street lives, and calls her trainer her very first fan. She is a little scatterbrained (bad at studying and tidying) and vain about her image, but genuinely kind and community-minded.",
+  "speech": {
+    "first_person": "Falko (ファル子) in the third person almost always; watashi (私) in serious moments",
+    "calls_trainer": "Trainer-san (トレーナーさん); also 'fan No. 1' (ファン1号さん) in voice 92222",
+    "register": "casual, cutesy idol talk; stretched vowels, ☆/♪ endings, onomatopoeia",
+    "tics": [
+      {
+        "jp": "ファル子",
+        "romaji": "Faruko",
+        "meaning": "her self-name, used instead of 'I'"
+      },
+      {
+        "jp": "ウマドル",
+        "romaji": "umadoru",
+        "meaning": "'Uma-idol', her dream job and constant word"
+      },
+      {
+        "jp": "キラキラ",
+        "romaji": "kirakira",
+        "meaning": "sparkly/shining; her main image word"
+      },
+      {
+        "jp": "トップウマドル",
+        "romaji": "toppu umadoru",
+        "meaning": "top uma-idol, her stated goal"
+      },
+      {
+        "jp": "いっくよー",
+        "romaji": "ikku yo-",
+        "meaning": "here I go!"
+      },
+      {
+        "jp": "はうぅ～",
+        "romaji": "hauu~",
+        "meaning": "whimper when tired/upset"
+      },
+      {
+        "jp": "しょぼ～ん",
+        "romaji": "shobo~n",
+        "meaning": "sulky 'droop' sound"
+      },
+      {
+        "jp": "えへへ",
+        "romaji": "ehehe",
+        "meaning": "bashful giggle"
+      },
+      {
+        "jp": "でーっす",
+        "romaji": "de-ssu",
+        "meaning": "stretched idol-style 'desu'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "being an idol (Umadol): street lives, fan service, autographs",
+    "dirt racing",
+    "pink (her image color) and her hair ornament made by her mother",
+    "dance and voice lessons, vocal practice by the riverbank",
+    "sparkle, stages, parades and baton twirling (later outfits)",
+    "watching other idols for 'research'",
+    "local gourmet food from regional dirt tracks (Monbetsu jingisukan, Saga)"
+  ],
+  "weak_spots": [
+    "studying (profile weakness; red-mark test event 赤点でがっくり)",
+    "tidying up (voice 91022)",
+    "late-night snacks and calorie temptation (Eishin Flash keeps her in check)",
+    "bold swimsuits (voice 91013)",
+    "being seen with a 'defenseless' sleeping face (voice 90003)",
+    "street lives nobody attends (voice 91217)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 4 (4月4日)",
+    "height": "156 cm (156cm)",
+    "voice_actor": "Hitomi Owada (大和田仁美)"
+  },
+  "relationships": [
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "Roommate (an exchange student per her own line) who manages her calories and recommends cake shops",
+      "evidence": "home scenes x6; mentions in voice x4 (voice_id 91001: フラッシュさんが止めてくれる; 400008: 留学生と同室); roommate status also general knowledge (unverified)"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "Fellow front-runner she sees as a quiet rival with hidden 'idol heat'; part of her 'Nige-Sis' circle (unverified membership)",
+      "evidence": "home scenes x4; voice_id 91016: スズカちゃんは ウマドルの“熱”を内に秘めてる"
+    },
+    {
+      "id": 1038,
+      "name_en": "Curren Chan",
+      "nature": "Cuteness rival: Curren is 'demonic' cute, Falko is 'pure' cute",
+      "evidence": "home scenes x3; voice_id 91002"
+    },
+    {
+      "id": 1026,
+      "name_en": "Mihono Bourbon",
+      "nature": "Friend; Falko was amazed by the noise when Bourbon held a mic",
+      "evidence": "home scenes x3; voice_id 91017"
+    },
+    {
+      "id": 1098,
+      "name_en": "Copano Rickey",
+      "nature": "Dirt friend; did a 'feng shui live' together",
+      "evidence": "home scenes x3; voice_id 91219; top affinity 43"
+    },
+    {
+      "id": 1099,
+      "name_en": "Hokko Tarumae",
+      "nature": "Dirt friend; Falko calls her cute and 'pushable' as an idol",
+      "evidence": "home scenes x3; voice_id 400010"
+    },
+    {
+      "id": 1100,
+      "name_en": "Wonder Acute",
+      "nature": "Dirt peer whose early-rising advice she half-follows",
+      "evidence": "home scenes x3; voice_id 90215"
+    },
+    {
+      "id": 1081,
+      "name_en": "Espoir City",
+      "nature": "Dirt peer who sometimes leaves candy at her empty street lives",
+      "evidence": "home scenes x3; voice_id 91217"
+    },
+    {
+      "id": 1079,
+      "name_en": "Furioso",
+      "nature": "Dirt peer who gave her vegetables from Funabashi",
+      "evidence": "home scenes x2; voice_id 90213"
+    },
+    {
+      "id": 1080,
+      "name_en": "Transcend",
+      "nature": "Information broker who got her a rare Haiseiko CD",
+      "evidence": "home scenes x1; voice_id 91218"
+    },
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "Senior who dances with her when they meet",
+      "evidence": "home scenes x1; voice_id 90011"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "Wants to use her racing outfit for phosphorescence experiments; Falko objects",
+      "evidence": "voice_id 91019"
+    },
+    {
+      "id": 1114,
+      "name_en": "Buena Vista",
+      "nature": "Seen as an 'orthodox' idol-aura rival",
+      "evidence": "voice_id 91220"
+    },
+    {
+      "id": 9048,
+      "name_en": "Haiseiko",
+      "nature": "Idol she admires (rare CD)",
+      "evidence": "voice_id 91218"
+    },
+    {
+      "id": 9008,
+      "name_en": "Light Hello (romanised; name_en null)",
+      "nature": "Talked idol lives with her for 8 hours",
+      "evidence": "home scenes x1; voice_id 91018: ハローさんと語った ライブのお話"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "'Nige-Sis' (逃げシス, front-runner sisters) - she says it now has 5 members and she must be its leader (voice 91216); full membership unverified",
+    "Dirt-racer circle (Copano Rickey, Hokko Tarumae, Wonder Acute, Espoir City, Furioso, Transcend) - inferred from home scenes"
+  ],
+  "story_arc": {
+    "summary": "Falko dreams of becoming the top Umadol through dirt racing, and the trainer becomes her first fan. Her career runs through dirt targets (Japan Dirt Derby, JBC Classic, Tokyo Daishoten, February Stakes, Teio Sho, Champions Cup, Kawasaki Kinen) plus the Satsuki Sho, while she works to make dirt racing and her street lives popular. Events cover center-position battles, a 'Connect Live' in fans' hometowns and finally being the center of everyone's heart.",
+    "source": "event titles (e.g. ジャパンダートダービーにむけて, あなたの街で、Connect Live☆, みんなの心のセンターは☆) + voice lines; framing is model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10001,
+      "jp": "ファル子が逃げたら、\n1番に追いかけてきてくれる\nファンはトレーナーさんだよねっ☆",
+      "en": "When Falko runs out in front, the first fan to chase after her is you, Trainer-san, right?☆"
+    },
+    {
+      "voice_id": 92022,
+      "jp": "1人なら憧れは夢で終わってた。\n一緒にウマドルを輝かせてくれて\nありがとう、トレーナーさん♪",
+      "en": "Alone, my dream would have stayed a dream. Thank you for making this Umadol shine, Trainer-san♪"
+    },
+    {
+      "voice_id": 91028,
+      "jp": "これはね、私の意志なの。\nトップウマドルになるために、\n誰よりも輝きたいっていう意志…！",
+      "en": "This is my will. The will to shine brighter than anyone, so I can become the top Umadol...!"
+    },
+    {
+      "voice_id": 90017,
+      "jp": "ファル子、クワガタついてない！？\nさっきから集まってきちゃうの…！\nう～ファル子は蜂蜜じゃないよ～！",
+      "en": "Does Falko have a stag beetle on her!? They keep gathering around me...! Uuu, Falko isn't honey~!"
+    },
+    {
+      "voice_id": 91217,
+      "jp": "お客さんゼロの路上ライブも寂しく\nないよっ♪たまーにエスポさんが\n飴の差し入れ置いてってくれるし♪",
+      "en": "Street lives with zero audience aren't lonely♪ Every so often Espo-san leaves me some candy♪"
+    },
+    {
+      "voice_id": 20011,
+      "jp": "はぅ…今日はダメダメかも。\nウマドルにも、どーしようも\nない時ってあるんだよぅ…。",
+      "en": "Hau... today's a total flop. Even Umadols have times when nothing can be done..."
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer-saaan☆ {user}! Your Independent Training is all done! Falko watched the whole thing as your No. 1 fan, so come see how kirakira it went~♪",
+    "Ehehe, curtain call! {user}, the 50-minute run is over☆ Falko says: smile, check the results, then let's do one more stage together!"
+  ],
+  "data_gaps": [
+    "Light Hello (9008) has no name_en in source; romanised",
+    "Story arc dialogue not in mdb; summary built from event titles and model knowledge",
+    "Full membership of 'Nige-Sis' not in source"
+  ]
+}

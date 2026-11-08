@@ -1,0 +1,201 @@
+{
+  "id": 1061,
+  "name_en": "King Halo",
+  "name_jp": "キングヘイロー",
+  "kind": "uma",
+  "one_liner": "Haughty, ohoho-laughing self-styled 'first-class' ojousama who grinds harder than anyone to prove her worth to her mother.",
+  "personality": "Loudly proud and theatrical: she calls herself King, laughs 'o-hohoho', and frames every favour as 'granting you the right' to serve her. Under the bluster she is diligent and caring, insisting that effort nobody sees is what earns recognition, and she fusses over the trainer's posture, health and sleepiness. Her mother is a sore spot she refuses to discuss directly ('that person'), and she is fiercely determined never to give up.",
+  "speech": {
+    "first_person": "watashi (私); also refers to herself in third person as 'King' (キング)",
+    "calls_trainer": "Trainer (トレーナー) or anata (あなた); no -san",
+    "register": "ojousama / imperious feminine (~わ, ~なさい, ~じゃない), haughty but not archaic",
+    "tics": [
+      {
+        "jp": "おーっほっほっほ",
+        "romaji": "o-hohoho",
+        "meaning": "her signature haughty ojousama laugh"
+      },
+      {
+        "jp": "一流",
+        "romaji": "ichiryuu",
+        "meaning": "'first-class'; her constant standard for everything"
+      },
+      {
+        "jp": "権利をあげる",
+        "romaji": "kenri wo ageru",
+        "meaning": "'I grant you the right (to...)' - how she phrases requests/favours"
+      },
+      {
+        "jp": "なさい",
+        "romaji": "~nasai",
+        "meaning": "imperative ending: 'do it' (commanding)"
+      },
+      {
+        "jp": "キングに相応しい",
+        "romaji": "King ni fusawashii",
+        "meaning": "'befitting King'"
+      },
+      {
+        "jp": "フレっ、フレっ",
+        "romaji": "fure, fure",
+        "meaning": "cheer-squad chant 'hurray, hurray'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "fashion and clothing design (designed her own racing outfit)",
+    "fashion magazines, overseas TV drama DVDs (profile)",
+    "the colour green (her mother said it suits her)",
+    "being cheered / leading a cheer squad (応援団長)",
+    "keeping up with trends",
+    "sweets with the trainer",
+    "Kawakami Princess's manners lessons"
+  ],
+  "weak_spots": [
+    "crowds and heat (profile: things unbefitting King)",
+    "dirt tracks ('the dust flies too much', voice 91002)",
+    "ghost stories (voice 91013 threatens never to speak to you again)",
+    "her mother's opinion of her",
+    "cold - sneezes 'kuchun' mid-boast (voice 91015)",
+    "getting nervous before races while denying it (voice 20034)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "April 28 (4月28日)",
+    "height": "159cm",
+    "voice_actor": "Iori Saeki (佐伯伊織)"
+  },
+  "relationships": [
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "Roommate she looks after; Urara crawls into her bed half-asleep",
+      "evidence": "mentions in voice x2 (voice_id 91009: ウララさんったら、また寝ぼけて人のベッドに入ってきたのよ！？); home scenes x2; roommate per web: https://umamusu.wiki/King_Halo"
+    },
+    {
+      "id": 1020,
+      "name_en": "Seiun Sky",
+      "nature": "Rival she keeps trying to drag to joint practice",
+      "evidence": "home scenes x8; mentions in voice x1 (voice_id 91010: スカイさんを見つけたら言って。); mentioned_by x5"
+    },
+    {
+      "id": 1039,
+      "name_en": "Kawakami Princess",
+      "nature": "Junior she mentors in manners and dresses; Kawakami mentions her a lot",
+      "evidence": "home scenes x4; mentioned_by x10; voice_id 91001: カワカミさんにマナー指導を頼まれたの。"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "Friend she can't take her eyes off; she has tutored her (and Kawakami) for make-up exams",
+      "evidence": "mentions in voice x1 (voice_id 91004: スペシャルウィークさんってなんか目が離せないのよ); voice_id 91020: スぺさんとカワカミさん、さすがに今度の追試は受かっているわよね…もう次は勉強付き合わないわよ; home scenes x1"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Same-generation rival",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/King_Halo"
+    },
+    {
+      "id": 1014,
+      "name_en": "El Condor Pasa",
+      "nature": "Same-generation rival/friend",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/King_Halo"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "Admirer who stares at her with odd intensity (asks about her second button)",
+      "evidence": "mentions in voice x1 (voice_id 91027: デジタルさんがまた妙に熱い視線で)"
+    },
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "Strong senior she respects after joint practice",
+      "evidence": "mentions in voice x1 (voice_id 91018: パール先輩とバンブーさん、両者アクは強いけど実力は確かよ。)"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "Strong upperclassman whose ability she acknowledged after joint practice (with Seeking the Pearl)",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1109,
+      "name_en": "Rhein Kraft",
+      "nature": "Junior she worries over (Team Ascella in the game)",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91216); team per web: https://umamusu.wiki/King_Halo; Rhein Kraft's own voice 90014/91018 quote 'King-san' sayings and King covering her with a blanket"
+    },
+    {
+      "id": 1110,
+      "name_en": "Cesario",
+      "nature": "Junior whose off-duty side flusters her",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91217)"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Lunch companion",
+      "evidence": "mentions in voice x1 (voice_id 90012: 今日はネイチャさんと…)"
+    },
+    {
+      "id": null,
+      "name_en": "Her mother",
+      "nature": "Former G1-winning racer (per wiki) whose approval she craves; called 'あの人' (that person)",
+      "evidence": "voice_id 91229: たとえあの人がなんと言おうとね。; profile about_family; web: https://umamusu.wiki/King_Halo; G1 career per web (Air Groove's remark quoted on umamusu.wiki)"
+    }
+  ],
+  "groups": [
+    "1998 Classic generation with Special Week, Seiun Sky, El Condor Pasa, Grass Wonder (general knowledge, unverified)",
+    "Team Ascella with Cesario, Rhein Kraft, Fusaichi Pandora (game; web: umamusu.wiki)",
+    "Cheer squad leader (応援団長) in a story event (voice 400000)",
+    "her entourage 'Torimakis' (取り巻きーズ) (profile trivia)"
+  ],
+  "story_arc": {
+    "summary": "King Halo enters Tracen insisting she will prove herself a first-class Uma Musume, against the wishes of her famous mother, who phones to urge her to give up (event 'デビュー戦の後に・1本の電話'). She chases the Classics (Satsuki Sho, Derby, Kikuka Sho) and repeatedly falls short of her generation's stars, which tests her pride and resolve (events '一流の覚悟', '私の脚'). She finally proves her talent at the Takamatsunomiya Kinen sprint ('高松宮記念の後に・才能の証明') and finishes by thanking the trainer and swearing to keep going.",
+    "source": "event titles + web: https://umamusu.wiki/King_Halo + model knowledge (unverified) for plot details"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20002,
+      "jp": "おーっほっほっほっ！\nこのキングに不可能なんて\nないんだから！",
+      "en": "O-hohoho! There is nothing impossible for this King!"
+    },
+    {
+      "voice_id": 90002,
+      "jp": "さあ、トレーニングの時間よ。\nあなたにはトレーナーとして\n存分に活躍する権利をあげるわ！",
+      "en": "Now, it's training time. I grant you the right to do your very utmost as a trainer!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "…あなたはこの私が認めた\n私のトレーナーなのよ？\nもっと誇りを持って行動なさい。",
+      "en": "...You're the trainer I, of all people, acknowledged, you know? Act with more pride."
+    },
+    {
+      "voice_id": 90010,
+      "jp": "おはよう、まだ眠いとかはナシよ。\nほら、応援してあげるから。\n目を開けなさい！フレっ、フレっ！",
+      "en": "Morning. No saying you're still sleepy. Come on, I'll cheer for you. Open your eyes! Hurray, hurray!"
+    },
+    {
+      "voice_id": 92006,
+      "jp": "誰からも認められるためには、\n誰からも見られていない時の\n努力も必要なの。",
+      "en": "To be acknowledged by everyone, you also need the effort you make when no one is watching."
+    },
+    {
+      "voice_id": 91229,
+      "jp": "まだ成長の余地のあるデザインよ…\nでも『私』は気に入っているの！\nたとえあの人がなんと言おうとね。",
+      "en": "It's a design with room to grow... but 'I' love it! No matter what that person says."
+    }
+  ],
+  "timer_line_ideas": [
+    "O-hohoho! {user}, the independent run is complete, first-class as expected! I grant you the right to come admire the results. Don't keep King waiting!",
+    "{user}! The independent training is finished. Now come review it with me... and no sleepy face, understood? Shape up, Trainer!"
+  ],
+  "data_gaps": [
+    "Career story dialogue not in mdb; plot details beyond event titles are from wiki/model knowledge",
+    "No explicit 'Trainer-san'; she uses トレーナー / あなた",
+    "Team Ascella membership is from the wiki, not the mdb",
+    "Mother as a designer is not supported by the mdb; wiki only says she won several G1s"
+  ]
+}

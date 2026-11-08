@@ -1,0 +1,189 @@
+{
+  "id": 1020,
+  "name_en": "Seiun Sky",
+  "name_jp": "セイウンスカイ",
+  "kind": "uma",
+  "one_liner": "Lazy-looking cat-like fisher-girl who naps everywhere, but is a scheming trickster when it's time to catch a 'big one'.",
+  "personality": "Breezy and teasing, she drawls everything, skips work, angles for treats and naps on fallen leaves. She calls her plan 'try hard, in moderation'. The laziness is partly a lure: she talks about racing like fishing, waiting patiently for the 'big catch', and loves the idea of springing a surprise upset. Every so often she drops the act with a quietly sincere line ('This win is for you... I'm not lying'), then retreats back into jokes.",
+  "speech": {
+    "first_person": "watashi (私); often refers to herself in third person as Sei-chan (セイちゃん)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "casual, lazy drawl with stretched vowels (〜ましょーか, らしーよ, でーす), playful teasing; slips into polite forms jokingly",
+    "tics": [
+      {
+        "jp": "セイちゃん",
+        "romaji": "Sei-chan",
+        "meaning": "how she refers to herself"
+      },
+      {
+        "jp": "にゃはは",
+        "romaji": "nyahaha",
+        "meaning": "cat-like laugh"
+      },
+      {
+        "jp": "にひひ",
+        "romaji": "nihihi",
+        "meaning": "mischievous giggle"
+      },
+      {
+        "jp": "テキトー",
+        "romaji": "tekitoo",
+        "meaning": "whatever / half-hearted, done loosely"
+      },
+      {
+        "jp": "のんびり",
+        "romaji": "nonbiri",
+        "meaning": "laid-back, taking it easy"
+      },
+      {
+        "jp": "大物",
+        "romaji": "oomono",
+        "meaning": "the 'big catch' (fishing and race metaphor)"
+      },
+      {
+        "jp": "〜でーす",
+        "romaji": "-deesu",
+        "meaning": "drawled polite ending"
+      },
+      {
+        "jp": "ちら",
+        "romaji": "chira",
+        "meaning": "'*glance*', fishing for a favour (ちらちらー, ちら♪)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "fishing with her grandfather (profile, 400004, 91225)",
+    "afternoon naps, anywhere (profile strength)",
+    "cats (10027, 91015, 91221)",
+    "eating every grain of rice and everything but the fish bones (profile trivia)",
+    "spotting good vegetables (profile trivia)",
+    "seafood: sanma, seaside grills (91014, 90212)",
+    "sky, cloud, sea imagery; her name means 'blue cloud sky'"
+  ],
+  "weak_spots": [
+    "cramped, narrow places, especially the starting gate (profile weakness; 91002)",
+    "piled-up unread messages (91001)",
+    "choreographed rhythm dancing (91020)",
+    "making Grass Wonder angry (91004)",
+    "heat and cold (90007, 90009, 91027)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "April 26 (4月26日)",
+    "height": "155cm (155cm)",
+    "voice_actor": "Akari Kito (鬼頭明里)"
+  },
+  "relationships": [
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "classmate rival she teases; Sky openly admires her stubbornness",
+      "evidence": "home scenes x8 (her top partner); voice 91003, 90019, 400003: 知ってるよ、キングが諦め悪いってことくらい。; voice 400080: …かっこよかったよ、キング。; Golden Generation rivals per web: https://umamusu.wiki/Seiun_Sky"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "close friend who nags her about bedtime",
+      "evidence": "home scenes x4; voice 91011: 早く寝ないと…とか、フラワーみたいな小言は聞かないよ; web: https://umamusu.wiki/Seiun_Sky"
+    },
+    {
+      "id": 1001,
+      "name_en": "Special Week",
+      "nature": "classmate and rival; Sky marvels at her appetite",
+      "evidence": "home scenes x2; voice 91010, 91017"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "classmate and rival she knows not to anger",
+      "evidence": "home scenes x2; voice 91004: グラスちゃんを怒らせてはいけない…"
+    },
+    {
+      "id": 1014,
+      "name_en": "El Condor Pasa",
+      "nature": "classmate and rival who is always out running early",
+      "evidence": "home scenes x1; voice 91009 ('エル')"
+    },
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "roommate (per web)",
+      "evidence": "home scenes x2; mentioned by her x2; roommate per web: https://umamusu.wiki/Seiun_Sky"
+    },
+    {
+      "id": 1073,
+      "name_en": "Tsurumaru Tsuyoshi",
+      "nature": "friend she wants to take to the sea",
+      "evidence": "home scenes x2; voice 91216 ('ツルちゃん')"
+    },
+    {
+      "id": 1074,
+      "name_en": "Mejiro Bright",
+      "nature": "pushes white tights on her and invites her on a Mejiro cruise",
+      "evidence": "voice 90018, 91219"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "keeps inviting her to dance; Sky hides from her",
+      "evidence": "voice 91018, 400001"
+    },
+    {
+      "id": null,
+      "name_en": "her grandfather",
+      "nature": "fishing mentor; beat her in the tournament that got her into fishing",
+      "evidence": "profile about_family; voice 400004, 90218, 91225"
+    }
+  ],
+  "groups": [
+    "Golden Generation / 'strongest generation' with Special Week, King Halo, Grass Wonder, El Condor Pasa (event title: “最強世代”; web: https://umamusu.wiki/Seiun_Sky)",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "She coasts along acting lazy while scheming to land the Triple Crown, the 'big catch' (event 三冠、釣り上げ！). Along the way she faces her 'strongest generation' rivals (“最強世代”, 策士VS王 'Schemer vs King', “東”VS“西”) and a duel with 'the otherworldly escapist' (VS“異次元の逃亡者”). Fishing events ('Zero catch', 'Catch!') mirror her progress. Per the wiki, winning the Triple Crown triggers an event where her grandfather sends her fishing gear and sea bream.",
+    "source": "event titles; web: https://umamusu.wiki/Seiun_Sky (grandfather Triple Crown gift event spot-checked and confirmed)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 90000,
+      "jp": "トレーナーさん、朝から奇跡だよ！\n見て…なんとっ！\nセイちゃんが学校に来ています！",
+      "en": "Trainer-san, a miracle first thing in the morning! Look... gasp! Sei-chan has come to school!"
+    },
+    {
+      "voice_id": 10002,
+      "jp": "おや、セイちゃんの好感度が…？\nぴろぴろぴ…ぶぶー、ざんねーん。\nそんな簡単にあがりませんよーだ。",
+      "en": "Oh? Sei-chan's affection level is...? Beep-boop-bee... bzzt, too bad. It doesn't go up that easily~"
+    },
+    {
+      "voice_id": 20024,
+      "jp": "作戦名は『一生懸命、ほどほどに』\nです。油断を誘いながら、\n勝ちに行きましょー。",
+      "en": "The operation is called 'Do your best, in moderation'. We'll lure them off guard and go for the win."
+    },
+    {
+      "voice_id": 91002,
+      "jp": "ゲートに入る時間って無駄\nじゃない？なんか変に\n閉鎖的で窮屈だし…はぁ。",
+      "en": "Isn't the time spent going into the gate a waste? It's weirdly closed-in and cramped... sigh."
+    },
+    {
+      "voice_id": 30006,
+      "jp": "この勝利を、キミに。\n…ウソじゃないよ？",
+      "en": "This victory is for you. ...I'm not lying, okay?"
+    },
+    {
+      "voice_id": 400080,
+      "jp": "あんなに堂々とされたら\nみんな認めるしかないんじゃない？\n…かっこよかったよ、キング。",
+      "en": "When she's that bold about it, everyone's got no choice but to accept it, right? ...You were cool, King."
+    }
+  ],
+  "timer_line_ideas": [
+    "Heyy, {user}~ the independent run's done, apparently. Fifty minutes, wow. Go check it for me? Sei-chan's gonna take a little nap now~ nyahaha.",
+    "Ding~ {user}, the run's over. Results are in, so go take a peek. ...If it's a big catch, a reward for Sei-chan would be nice~ *glance glance*"
+  ],
+  "data_gaps": [
+    "'アイ' in voice 91218 is unidentified (Almond Eye mentions her once, but the link is unverified).",
+    "'VS“異次元の逃亡者”' is presumably Silence Suzuka (model knowledge, unverified).",
+    "Detailed career plot not in the mdb; summary built from titles plus the wiki."
+  ]
+}

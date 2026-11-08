@@ -1,0 +1,188 @@
+{
+  "id": 1077,
+  "name_en": "Narita Top Road",
+  "name_jp": "ナリタトップロード",
+  "kind": "uma",
+  "one_liner": "Earnest, clumsy class president who runs to live up to everyone's expectations - destined for 'supporting role' luck.",
+  "personality": "A diligent, sunny honor student and class rep who is obsessed with 'meeting expectations' (期待に応える) - of fans, classmates and especially the trainer. She is energetic and sporty (soccer, futsal, morning runs), but admits she is clumsy with both words and running, overuses intensifiers like すごく/すっごく, and gets flustered when her prepared speeches fall apart. She looks after everyone (waking Jungle Pocket, guiding classmates) and has a fierce competitive streak toward her generation rivals Admire Vega and T.M. Opera O.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-san (トレーナーさん); sometimes anata (あなた)",
+    "register": "Polite, peppy desu/masu; earnest and slightly over-enthusiastic, little vocabulary flair",
+    "tics": [
+      {
+        "jp": "期待に応え",
+        "romaji": "kitai ni kotae(ru)",
+        "meaning": "'live up to expectations' - her core phrase"
+      },
+      {
+        "jp": "期待以上",
+        "romaji": "kitai ijou",
+        "meaning": "'beyond expectations'"
+      },
+      {
+        "jp": "すっごく",
+        "romaji": "suggoku",
+        "meaning": "'super' - she repeats intensifiers when words fail her (すごく、すっごくうずうずです！)"
+      },
+      {
+        "jp": "一生懸命頑張ります！",
+        "romaji": "isshoukenmei ganbarimasu!",
+        "meaning": "'I'll do my very best!'"
+      },
+      {
+        "jp": "よし！",
+        "romaji": "yoshi!",
+        "meaning": "'Alright!' - self-pep"
+      },
+      {
+        "jp": "委員長",
+        "romaji": "iinchou",
+        "meaning": "'class president' - her identity/nickname"
+      },
+      {
+        "jp": "恩返し",
+        "romaji": "ongaeshi",
+        "meaning": "'repaying kindness' (ramen-shop costume lines)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "soccer / futsal (strength: ultra-long passes), juggling the ball in her head",
+    "making vocabulary flashcards (profile)",
+    "morning runs and early-to-bed routine",
+    "milk (keeps 3x 1L cartons in her dorm fridge)",
+    "carrot stick salad at the cafeteria",
+    "ramen in all its regional varieties (studying light ramen for Admire Vega)",
+    "teru-teru bozu, aroma oils her mother blends",
+    "stargazing with Admire Vega",
+    "her father's sporting goods store, which has a running-goods corner she recommends (voice 91014)"
+  ],
+  "weak_spots": [
+    "cats and crows (profile); got surrounded by cats and by crows (voice 90211, 91002)",
+    "clumsy with words - her prepared speeches collapse (voice 10012, 92007)",
+    "takes wide turns in live formations; tends to get small bruises (voice 91005, 91001)",
+    "grips her skirt hem when nervous (voice 91007)",
+    "her tail fluffs out in humidity and she worries about it (profile: about_tail)",
+    "finds T.M. Opera O's flowery speech a bit hard and wants to watch more operas (voice 400002), though elsewhere she says Opera O isn't that hard to understand (voice 91004)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 4 (4月4日)",
+    "height": "166 cm (166cm)",
+    "voice_actor": "Kanna Nakamura (中村カンナ)"
+  },
+  "relationships": [
+    {
+      "id": 1033,
+      "name_en": "Admire Vega",
+      "nature": "Close friend and generation rival ('Ayabe-san'); stargazing and night runs together, Ayabe gives her sheep-print plasters",
+      "evidence": "home scenes x6; mentions in voice x8 (voice_id 91023: アヤベさんの隣で天体観測を してるんです); web: https://umamusu.wiki/Narita_Top_Road"
+    },
+    {
+      "id": 1015,
+      "name_en": "T.M. Opera O",
+      "nature": "Generation rival and friend; Top Road is often called in as her 'translator', they rehearse plays together",
+      "evidence": "home scenes x3; mentions in voice x5 (voice_id 91004: オペラオーちゃんの翻訳係); web: https://umamusu.wiki/Narita_Top_Road"
+    },
+    {
+      "id": 1094,
+      "name_en": "Jungle Pocket",
+      "nature": "Roommate (per web) and friend she wakes every morning after training; bought her lavender aroma to stop her staying up late; Pocket chased crows away for her",
+      "evidence": "home scenes x1; mentions in voice x3 (voice_id 91000: ポッケちゃん、朝弱いみたいで…; 90215; 91221); roommate per web: https://umamusu.wiki/Narita_Top_Road"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "Futsal and snowman buddy ('Mirako-chan')",
+      "evidence": "home scenes x4; voice_id 91017, 91227"
+    },
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "Friend; when Doto tripped, Top Road caught her and ended up diving into the fallen leaves herself",
+      "evidence": "home scenes x3; voice_id 90018"
+    },
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "Cheerful friend whose 'うっらら～♪' trick she borrows",
+      "evidence": "home scenes x2; voice_id 91218"
+    },
+    {
+      "id": 1022,
+      "name_en": "Fine Motion",
+      "nature": "Friend; snow play, shopping and tsukemen outings",
+      "evidence": "mentions in voice x2 (voice_id 90219, 91229)"
+    },
+    {
+      "id": 1083,
+      "name_en": "Symboli Kris S",
+      "nature": "Friend she wants to show Japan to (nagashi somen) and learn training efficiency from",
+      "evidence": "mentions in voice x2 (voice_id 90017, 91217)"
+    },
+    {
+      "id": 1063,
+      "name_en": "Ikuno Dictus",
+      "nature": "Futsal teammate",
+      "evidence": "home scenes x1; voice_id 91017"
+    },
+    {
+      "id": 1092,
+      "name_en": "Dantsu Flame",
+      "nature": "Top Road draws motivation from her hard work",
+      "evidence": "home scenes x1; voice_id 92217"
+    }
+  ],
+  "groups": [
+    "Class president (学級委員長) - voice lines 70004, 91009",
+    "1999 generation trio with T.M. Opera O and Admire Vega (OVA 'ROAD TO THE TOP' protagonists) - web: https://umamusu.wiki/Narita_Top_Road",
+    "Narita name family (Narita Brian / Narita Taishin) - name only; no in-game family relation evidenced"
+  ],
+  "story_arc": {
+    "summary": "Top Road runs the 1999-style Classic season against T.M. Opera O and Admire Vega: titles show Opera O taking the Satsuki Sho (『伏王、戴冠せり！』), a fierce Derby, and Top Road's own Kikuka Sho moment (『菊花賞の後に・掲げられた左手』, 『道半ばの3人』). Her senior year faces Opera O's 'absolute rule' (『絶対支配の始まり』, 『世紀末ネヴァーダイ』) as she keeps trying to step out of the supporting role, ending with 『有馬記念の後に・忘れえぬ眺望』. Real-life Top Road won the 1999 Kikuka Sho (web).",
+    "source": "event titles; web: https://umamusu.wiki/Narita_Top_Road"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20002,
+      "jp": "すごく脚がうずうずしてます！\nどれくらいかと言うと…こう…\nすごく、すっごくうずうずです！",
+      "en": "My legs are all twitchy! How twitchy, you ask...? Like... super, super twitchy!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "私の考えてることなんて、本当に\n単純で…いかにトレーナーさんの\n期待に応えるか！ってことです！",
+      "en": "What I'm thinking is really simple... it's how to live up to your expectations, Trainer-san!"
+    },
+    {
+      "voice_id": 10012,
+      "jp": "…あ、あれ？お祝いの文章、\n考えてきたんですが…ええと…その\nとにかく！おめでとうございます！",
+      "en": "...Huh? I prepared a congratulations speech, but... um... anyway! Happy birthday!"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "時々オペラオーちゃんの翻訳係で\n呼ばれることがあって…そんなに\nわかり辛いと思わないんですけど…",
+      "en": "Sometimes I get called in as Opera O-chan's translator... I don't think she's that hard to understand, though..."
+    },
+    {
+      "voice_id": 92221,
+      "jp": "私がメンマなら、トレーナーさんは\nナルトで…って、んん？\nと、とにかく相性抜群なんです！",
+      "en": "If I'm the menma, then you're the naruto, Trainer-san... wait, huh? A-anyway, we're a perfect match!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "みんなの期待に力をもらって――\n駆け抜けます！頂点への道を！",
+      "en": "Powered by everyone's expectations - I'll run it! The road to the top!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, Trainer-san! The independent run is finished! I hope it lived up to your expectations... no, went beyond them! Let's go check it together!",
+    "{user}, um, I prepared a proper report, but... anyway! The run is done! It went super, super well, I think!"
+  ],
+  "data_gaps": [
+    "Many mentions_in_voice entries are single-line cameos (Agnes Digital, Curren Chan, Calstone Light O, Tap Dance City, etc.) not listed individually.",
+    "Jungle Pocket as roommate comes from the web, not the mdb.",
+    "Story beats inferred from event titles; actual race outcomes in-game unverified."
+  ]
+}

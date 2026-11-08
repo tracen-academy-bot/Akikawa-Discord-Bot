@@ -1,0 +1,84 @@
+{
+  "id": 9045,
+  "name_en": "Sugar Lights",
+  "name_jp": "シュガーライツ",
+  "kind": "npc",
+  "one_liner": "Wheelchair-using genius scientist who built the full-dive robot ST-2 and recruits Tracen helpers for her research.",
+  "personality": "Per the wiki, she devotes herself to research day and night and came to Tracen Academy to recruit assistants to finish her full-dive robot ST-2 ('Saty'). The source file contains no voice lines or profile text, so her speaking manner cannot be verified from the mdb.",
+  "speech": {
+    "first_person": "watashi (私) - web only (umamusu.wiki), not seen in source",
+    "calls_trainer": "Trainer (トレーナー) - web only (umamusu.wiki), not seen in source",
+    "register": "unknown (no voice lines in source)",
+    "tics": []
+  },
+  "likes_and_motifs": [
+    "robotics / her invention ST-2 'Saty' (web)",
+    "research (web)",
+    "online shopping (wiki 'secret', web)"
+  ],
+  "weak_spots": [
+    "uses a wheelchair due to a past injury (web)",
+    "bad at online shopping despite loving it (web)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "June 10 (6月10日) - web only",
+    "height": "157 cm - web only",
+    "voice_actor": "Yui Ishikawa (石川由依)"
+  },
+  "relationships": [
+    {
+      "id": null,
+      "name_en": "ST-2 ('Saty')",
+      "nature": "her invention, a full-dive type robot",
+      "evidence": "web: https://umamusu.wiki/Sugar_Lights"
+    },
+    {
+      "id": 9051,
+      "name_en": "Yunohana Bloom",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "shares a home-screen conversation (context unknown)",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "shares a home-screen conversation; per gamer.ne.jp her [Engineered Victory] outfit launched alongside Sugar Lights' scenario (not re-verified)",
+      "evidence": "home scenes x1; web: https://www.gamer.ne.jp/news/202410290003/"
+    },
+    {
+      "id": 1050,
+      "name_en": "Narita Taishin",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Hashire! Mecha Umamusume -Yume Tsunagu Hatsumei- scenario (web)"
+  ],
+  "story_arc": {
+    "summary": "Scenario character of 'Hashire! Mecha Umamusume -Yume Tsunagu Hatsumei-' (JP, Oct 29 2024). She is the inventor of the full-dive robot ST-2 and seeks Tracen assistants to complete it; she is not playable and cannot be trained due to her condition. She is not based on a real racehorse.",
+    "source": "web: https://umamusu.wiki/Sugar_Lights, https://www.gamer.ne.jp/news/202410290003/"
+  },
+  "sample_lines": [],
+  "timer_line_ideas": [
+    "{user}, the 50-minute independent run has concluded. The data is in. Would you review it with me, Trainer? I expect it to be... illuminating.",
+    "Run complete. ST-2 logged everything, so there is no excuse to skip the debrief, {user}. Come, Trainer - let us see what the numbers say."
+  ],
+  "data_gaps": [
+    "No voice lines, self-intro, tagline, birthday or height in the source; all profile/personality facts are from umamusu.wiki",
+    "No support or event titles in source",
+    "Speech register and tics unknown; timer drafts use only generic scientist framing and 'Trainer' (wiki), not verified tics",
+    "name_en is null in source; 'Sugar Lights' is the umamusu.wiki/standard romanisation",
+    "release_unix in source is a placeholder (2030), so mdb gives no release info",
+    "kind 'npc' per chara_category 1 / non-playable; she is an Umamusume by species",
+    "umamusu.wiki does not list Biwa Hayahide, Air Shakur, Narita Taishin or Yunohana Bloom as relationships; those come only from home_scene_partners x1",
+    "Wiki confirms wheelchair use but the earlier claim that she 'can walk but tires quickly' was not found and was removed"
+  ]
+}

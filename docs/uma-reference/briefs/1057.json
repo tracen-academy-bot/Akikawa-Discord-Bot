@@ -1,0 +1,189 @@
+{
+  "id": 1057,
+  "name_en": "Mr. C.B.",
+  "name_jp": "ミスターシービー",
+  "kind": "uma",
+  "one_liner": "Free-spirited, unbound wanderer who runs for the wind, the scenery and the pure fun of it.",
+  "personality": "Laid-back, poetic and utterly unbound by rules, she lives alone off campus, sleeps on rooftops, goes fishing or wanders off to see the sunrise on a whim, and lets the mood decide where she runs. She dislikes lining up, haste and dishonest excuses, and gently pushes back when made to race too often ('I have my own pace'). Warm and unhurried with her trainer, she wants their dreams to overlap without either losing their freedom, and she slips into theatrical, kabuki-flavoured flourishes ('めでたや天下の傾き者').",
+  "speech": {
+    "first_person": "atashi (アタシ) — x37",
+    "calls_trainer": "Kimi (キミ) x26; never uses 'トレーナー' as an address in her lines",
+    "register": "casual, soft and relaxed; poetic, occasionally archaic/kabuki phrasing in costume lines",
+    "tics": [
+      {
+        "jp": "〜よね / 〜だよね",
+        "romaji": "~yo ne / ~da yo ne",
+        "meaning": "gentle agreement-seeking ending (よね x30, of which だよね x17)"
+      },
+      {
+        "jp": "ふふ",
+        "romaji": "fufu",
+        "meaning": "soft laugh (x13)"
+      },
+      {
+        "jp": "〜しようか / 行こうか",
+        "romaji": "~shiyō ka / ikō ka",
+        "meaning": "easy-going 'shall we...' (しようか x1 voice 20007, 行こうか x2; also 浸ろうか 400014)"
+      },
+      {
+        "jp": "気まま",
+        "romaji": "kimama",
+        "meaning": "'as one pleases' (x2 in lines, e.g. voice 10001 お互い気ままでいられるなら; also in self_intro 自由気まま)"
+      },
+      {
+        "jp": "傾き者 / 傾き翔けましょう",
+        "romaji": "kabukimono / kabuki kakemashō",
+        "meaning": "kabuki 'eccentric dandy' flourish (x1 each: race result 30006, New Year line 95009)"
+      },
+      {
+        "jp": "天衣無縫",
+        "romaji": "ten'i muhō",
+        "meaning": "'flawless and natural/unaffected' — her self-description (95010)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "tanka poetry, wandering journeys, poker (profile strengths)",
+    "wind, sky, sunrises, snow, stars (voice 90001, 90019, 91023, 91021)",
+    "naps in rooftop shade, hammocks (voice 90016, 20001)",
+    "fishing; char-grilled iwana/yamame (voice 90017)",
+    "solo karaoke — her parents' duet song (voice 91016)",
+    "jackets and denim (voice 10025, 10027)",
+    "calligraphy performance (voice 91028, 91029, 93004)"
+  ],
+  "weak_spots": [
+    "lining up / formation (profile weakness)",
+    "lies and sloppy excuses (profile weakness)",
+    "sitting still in class (voice 90013)",
+    "being rushed / too many races (voice 20021, 20022)",
+    "forgets homework deadlines (voice 91000)"
+  ],
+  "profile": {
+    "dorm": "Lives alone, off-dorm (一人暮らし)",
+    "grade": "Senior Division / high school (高等部)",
+    "birthday": "April 7 (4月7日)",
+    "height": "166 cm (166cm)",
+    "voice_actor": "Yurina Amami (天海由梨奈)"
+  },
+  "relationships": [
+    {
+      "id": 1104,
+      "name_en": "Katsuragi Ace",
+      "nature": "close friend and rival who looks after her (reminds her of homework, brings spare clothes); real-life rival (Ace won the 1984 Japan Cup; general knowledge, unverified)",
+      "evidence": "home scenes x8; mentions in voice x4 (voice_id 91000: エースって優しいんだよね; 91025; 20004; 400003); Ace mentions her x7"
+    },
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "friend who doesn't quite get her; real-life successor Triple Crown winner (general knowledge, unverified)",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91001: ルドルフにはなかなか伝わらないんだよね; 10026); Rudolf mentions her x1 (Rudolf 91020)"
+    },
+    {
+      "id": 1085,
+      "name_en": "Daiichi Ruby",
+      "nature": "friend she chats with",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91003: ルビーやスイープとは時々話をするんだ); Ruby mentions her x1 (found her buried in dead leaves)"
+    },
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "friend who drives her to school",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 90010: マルゼンの車で登校した; 91014)"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "she tags along and gets ditched, for fun",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 90014)"
+    },
+    {
+      "id": 1044,
+      "name_en": "Sweep Tosho",
+      "nature": "friend",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91003)"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "comfortable silent rooftop companion",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91022)"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "gave her a charm",
+      "evidence": "mentions in voice x1 (voice_id 91024)"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "she calms her with chocolate",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "acquaintance who called her love 'love from the heavens'",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "opposite yet similar at the root",
+      "evidence": "mentions in voice x1 (voice_id 91019: ロイスって…根っこが似てる気もする)"
+    },
+    {
+      "id": 1071,
+      "name_en": "Mejiro Ardan",
+      "nature": "quietly helpful companion",
+      "evidence": "mentions in voice x1 (voice_id 91020)"
+    }
+  ],
+  "groups": [
+    "none confirmed in source"
+  ],
+  "story_arc": {
+    "summary": "A girl who only runs where 'the wind' calls her, she pairs with a trainer who respects her freedom and races the Kyodo News Hai, then sweeps the Satsuki Sho, Derby and Kikka Sho to become a Triple Crown winner. As a senior she races the Takarazuka Kinen, Tenno Sho (Autumn) and Japan Cup ('Who will be Japan's first winner'), ending with an Arima Kinen run 'freer than anyone'. Her real namesake won the 1983 Japanese Triple Crown (general knowledge, unverified).",
+    "source": "event titles; model knowledge (unverified) for real-horse notes"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10001,
+      "jp": "キミは自由の価値を知ってる。\nお互い気ままでいられるなら、\n近くにいるのも楽しいよね。",
+      "en": "You know the value of freedom. If we can both stay as we please, being close to you is fun, isn't it?"
+    },
+    {
+      "voice_id": 20022,
+      "jp": "…せわしないのは好きじゃないな。\nアタシのペースがあるって、\nキミならわかってると思ってた。",
+      "en": "...I don't like being rushed. I thought you of all people understood that I have my own pace."
+    },
+    {
+      "voice_id": 91002,
+      "jp": "ひとり暮らしでよかったよ。寮なら\nルール違反で毎日叱られてたかも。",
+      "en": "Glad I live alone. In the dorm I'd probably be scolded every day for breaking the rules."
+    },
+    {
+      "voice_id": 91025,
+      "jp": "湖って、気持ちよさそうだよね。\n…って言ったら、エースが『着替え\nは用意してある』だって。ふふっ！",
+      "en": "Lakes look so pleasant, right? ...When I said that, Ace said 'I've got a change of clothes ready.' Fufu!"
+    },
+    {
+      "voice_id": 92022,
+      "jp": "飛ぶ準備はできてる？\nついてくるんでしょ、アタシに。\nなら、行こうよ。空の果てまで！",
+      "en": "Ready to fly? You're coming with me, aren't you? Then let's go. To the end of the sky!"
+    },
+    {
+      "voice_id": 95004,
+      "jp": "ルールも、タブーもない。\nアタシの道はアタシが決める！",
+      "en": "No rules, no taboos. I decide my own path!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Hm, the independent run's done already? Time flies with the wind. {user}, come take a look whenever you feel like it, okay? Fufu, no rush.",
+    "{user}, your independent run just finished. Today's run can only happen today, so don't miss it. Shall we go see how it went?"
+  ],
+  "data_gaps": [
+    "Real-horse rivalry notes (Katsuragi Ace, Rudolf) are general knowledge, unverified",
+    "Second timer idea paraphrases voice 20030 (今日の走りは今日だけしかできない。見逃さないでね。)"
+  ]
+}

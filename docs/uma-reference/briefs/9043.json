@@ -1,0 +1,103 @@
+{
+  "id": 9043,
+  "name_en": "Mei Satake",
+  "name_jp": "佐岳メイ",
+  "kind": "npc",
+  "one_liner": "Fired-up leader of Project L'Arc, chasing Japan's never-achieved dream of winning the Prix de l'Arc de Triomphe.",
+  "personality": "Energetic and blunt, with a team-captain swagger: she opens with 'I'm Satake Mei!' and offers her European race analysis. Her lines are rallying cries ('Get fired up!', 'over hills and valleys') and she happily takes the back-office role ('leave the behind-the-scenes to me'). Web sources describe her as close to Chairwoman Akikawa, almost like a sister.",
+  "speech": {
+    "first_person": "watashi (私) (self_intro: 私と一緒に叶えよう)",
+    "calls_trainer": "unknown",
+    "register": "casual, energetic, tomboyish",
+    "tics": [
+      {
+        "jp": "〜ぜ！",
+        "romaji": "~ze!",
+        "meaning": "rough, hyped-up ending (気合い、入れてこうぜ！)"
+      },
+      {
+        "jp": "任しとけ",
+        "romaji": "makashitoke",
+        "meaning": "slangy 'leave it to me' (裏方は任しとけ。)"
+      },
+      {
+        "jp": "〜か！",
+        "romaji": "~ka!",
+        "meaning": "decisive 'shall we ~!' (頂点を目指すか！)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "the Prix de l'Arc de Triomphe (self_intro)",
+    "analysing European races (self_intro)",
+    "reaching the summit (voice 95006)",
+    "football: event title 'サッカーしよう！'",
+    "sumo (web, unverified)"
+  ],
+  "weak_spots": [
+    "event title hints at something to overcome: '克服は近い未来に？' (unknown what)",
+    "'『夢』は難しい' bond event title suggests the dream weighs on her"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "April 11 (4月11日)",
+    "height": "unknown",
+    "voice_actor": "Yui Horie (堀江由衣)"
+  },
+  "relationships": [
+    {
+      "id": 9002,
+      "name_en": "Chairwoman Akikawa (Akikawa Yayoi)",
+      "nature": "close friend, described as like sisters",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Satake_Mei (close friend 'like sisters')"
+    },
+    {
+      "id": 9047,
+      "name_en": "Speed Symboli",
+      "nature": "shares a home scene; likely linked through overseas / Arc ambitions (unverified)",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Project L'Arc (founder / leader)",
+    "URA Tracen enhancement division (web, unverified)"
+  ],
+  "story_arc": {
+    "summary": "Scenario NPC, not a trainee. In Project L'Arc she founds and leads the team aiming to make a Japanese Uma Musume win the Prix de l'Arc de Triomphe, a goal she has chased before with other participants (web). Her event titles run from team routines to the Arc ('星の凱旋門', 'Arc of Stars'), an early toast ('祝杯の前払い') and a vow under the stars ('結ぶは、星空の誓い').",
+    "source": "event titles; web: https://umamusu.wiki/Satake_Mei , https://gametora.com/umamusume/project-larc"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "気合い、入れてこうぜ！",
+      "en": "Let's get fired up!"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "山も谷も、越えていこうぜ！",
+      "en": "Over the hills and through the valleys, let's push on!"
+    },
+    {
+      "voice_id": 95005,
+      "jp": "裏方は任しとけ。",
+      "en": "Leave the behind-the-scenes stuff to me."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "頂点を目指すか！",
+      "en": "Shall we aim for the top?"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}! The independent run's done! I've already got the analysis ready, so leave that to me. Now go check on her, the Arc won't wait for us!",
+    "Run complete, {user}! One more hill climbed on the road to the Arc. Come take a look at the results, and then let's get fired up for the next one!"
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Mei Satake' is the EN-wiki name (word order varies: 'Satake Mei')",
+    "How she addresses the trainer is unknown",
+    "Dorm, grade, height null (adult human staff)",
+    "Contents behind event titles like '克服は近い未来に？' are unknown",
+    "Speed Symboli connection is only a home scene; nature unverified"
+  ]
+}

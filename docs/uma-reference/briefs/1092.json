@@ -1,0 +1,171 @@
+{
+  "id": 1092,
+  "name_en": "Dantsu Flame",
+  "name_jp": "ダンツフレーム",
+  "kind": "uma",
+  "one_liner": "Kind-hearted pushover who can't say no, quietly burning to finally be the 'lead role' for once.",
+  "personality": "A soft, helpful 'nice girl' (tagline: お人よし) who gets dragged around by her flashier friends, does their chores, and keeps the peace with sweets. Beneath that she is fixated on becoming the 主役 -- the star of the story -- and keeps psyching herself up while admitting she was once cast as a tree in a school play. Polite and self-deprecating, she relies on effort ('my only strength is that I can keep trying') and lights up into a genuine fire when racing.",
+  "speech": {
+    "first_person": "watashi (わたし, in hiragana)",
+    "calls_trainer": "Trainer-san (トレーナーさん); anata (あなた) in heartfelt lines",
+    "register": "polite desu/masu with the Trainer, slipping into soft casual self-talk (～かな, ～なぁ); friends get -chan (カフェちゃん, タキオンちゃん, ポッケちゃん)",
+    "tics": [
+      {
+        "jp": "主役",
+        "romaji": "shuyaku",
+        "meaning": "'the lead/protagonist' -- her obsession; she wants to be the star, fears being a 脇役 (supporting role)"
+      },
+      {
+        "jp": "脇役",
+        "romaji": "wakiyaku",
+        "meaning": "'supporting role/bit part' -- her self-doubt word"
+      },
+      {
+        "jp": "えへへ",
+        "romaji": "ehehe",
+        "meaning": "sheepish giggle"
+      },
+      {
+        "jp": "あはは",
+        "romaji": "ahaha",
+        "meaning": "awkward laugh after self-deprecation"
+      },
+      {
+        "jp": "マイ",
+        "romaji": "mai",
+        "meaning": "'my-' prefix on her own gear: マイ粉チーズ (my grated cheese), マイミルクパン, マイシャベル"
+      },
+      {
+        "jp": "マシマシ",
+        "romaji": "mashimashi",
+        "meaning": "'extra-extra' (ミルクマシマシ, 自信マシ気味)"
+      },
+      {
+        "jp": "みたいな？",
+        "romaji": "mitai na?",
+        "meaning": "trailing 'sort of, y'know?' (self-intro) -- NOTE: only in her profile self_intro, not in any voice_lines entry"
+      },
+      {
+        "jp": "まあまあ、ケンカしないでさ",
+        "romaji": "maa maa, kenka shinaide sa",
+        "meaning": "'now now, don't fight' -- peacemaker (self-intro) -- NOTE: only in her profile self_intro, not in any voice_lines entry"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "milk in everything (protein with milk, hot milk, 'milk-sommelier' for Manhattan Cafe's café au lait)",
+    "cheese (carries her own grated cheese; cheese snacks)",
+    "sweets, cakes (shortcake vs rare cheesecake), cream soda",
+    "spotlights, centre stage, birthday candles (feeling like the star)",
+    "ghost-story nights in the dorm (tail twitches)",
+    "helping others: tanabata, dorm cleaning, friends' homework",
+    "loose, comfy clothes; the hidden embroidery inside her hood",
+    "drama/TV shows"
+  ],
+  "weak_spots": [
+    "picking clothes for herself (profile weakness)",
+    "saying no to requests (event title '断りの練習'; K.S.Miracle's voice 91018)",
+    "spicy food (voice 91004)",
+    "self-confidence: fears she's only a supporting character",
+    "nerves before races (writes 'ウマ' on her palm and swallows it)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "April 19 (4月19日)",
+    "height": "163cm",
+    "voice_actor": "Haruna Fukushima (福嶋晴菜)"
+  },
+  "relationships": [
+    {
+      "id": 1094,
+      "name_en": "Jungle Pocket",
+      "nature": "friend and rival of her generation; invites her to freestyle races ('ポッケちゃん')",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91002); Jungle Pocket's trainee event title (in 1094 source) '日本ダービーの後に・断然ダンツ！'; web: https://umamusu.wiki/Dantsu_Flame"
+    },
+    {
+      "id": 1032,
+      "name_en": "Agnes Tachyon",
+      "nature": "friend/rival; Dantsu ends up cooking for her and promoting her experiments",
+      "evidence": "mentions in voice x2 (voice_id 91001; 900004); home scenes x1"
+    },
+    {
+      "id": 1025,
+      "name_en": "Manhattan Cafe",
+      "nature": "friend; Dantsu became her 'personal milk selector' for café au lait",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91000)"
+    },
+    {
+      "id": 1095,
+      "name_en": "Believe",
+      "nature": "frequent home-screen partner; Believe admires Dantsu's round, open handwriting",
+      "evidence": "home scenes x5; Believe's voice 91004"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "senpai she calls 'Mira-ko senpai'; very likely roommate",
+      "evidence": "voice_id 400013 ('ミラ子先輩'); mentioned_by x2: Hishi Miracle voice 90010 ('ダンツちゃんに起こしてもらいましたぁ') and 91018 ('お部屋ではのんびりお茶飲もうね'); web: https://umamusu.wiki/Dantsu_Flame (roommate)"
+    },
+    {
+      "id": 1093,
+      "name_en": "K.S.Miracle",
+      "nature": "worries Dantsu takes on too much because she can't refuse",
+      "evidence": "K.S.Miracle voice 91018"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x2"
+    }
+  ],
+  "groups": [
+    "'JAMD' quartet with Jungle Pocket, Agnes Tachyon, Manhattan Cafe (web: https://umamusu.wiki/Dantsu_Flame)"
+  ],
+  "story_arc": {
+    "summary": "Dantsu runs the Classic route (Kisaragi Sho, Satsuki Sho, Japan Derby, Kikka Sho) against a dazzling generation, with event titles framing her as the 'shadow lead' ('菊花賞の後に・影の主役'). In her senior year she targets the Mile CS, Niigata Daishoten, Yasuda Kinen, Takarazuka Kinen, Tenno Sho (Autumn) and Japan Cup, building toward the spotlight ('宝塚記念の後に・スポットライトの輝き', 'ジャパンCの後に・“時代の主役”') -- the story of a supporting character becoming the protagonist.",
+    "source": "event titles; real-life Takarazuka Kinen win is general knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20011,
+      "jp": "舞台の真ん中に立つイメージ…！\n…ダメだぁ。小さい頃、劇で木の役\nだったの思い出しちゃった…。",
+      "en": "Picturing myself at centre stage...! ...Nope. Now I remember I played a tree in a school play when I was little..."
+    },
+    {
+      "voice_id": 20006,
+      "jp": "やるぞ！未来の主役はわたし！\n…その、毎日言っていれば、きっと\n本当にできるかな、なんて。",
+      "en": "Let's go! The future star is me! ...Um, if I say it every day, maybe it'll actually come true."
+    },
+    {
+      "voice_id": 90002,
+      "jp": "マイ粉チーズが、お昼のいい味変に\nなるんですよね～。よかったら、\nトレーナーさんも試してみません？",
+      "en": "My own grated cheese makes a nice flavour change for lunch~. Want to try some too, Trainer-san?"
+    },
+    {
+      "voice_id": 91004,
+      "jp": "ときどき『ダンツは甘い！』って\n言われるんです。そうかな…？\n確かに辛いものは苦手だけど…。",
+      "en": "People sometimes tell me 'Dantsu, you're too sweet!' Am I...? I mean, I'm definitely bad with spicy (karai) things... (pun: amai = sweet/soft-hearted vs karai = spicy/strict)"
+    },
+    {
+      "voice_id": 30004,
+      "jp": "今日の主役はわたし！…え、えへへ…！",
+      "en": "Today's star is me! ...E-ehehe...!"
+    },
+    {
+      "voice_id": 40000,
+      "jp": "わたしが、主役になるッ！",
+      "en": "I'm going to be the lead!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Um, {user}? Your independent run just finished! It's not a big stage or anything, but... you were the star of these 50 minutes. Shall we check the results together?",
+    "{user}, the run's done! I already tidied up and warmed some milk, so... ehehe, come take a look when you're ready, Trainer-san."
+  ],
+  "data_gaps": [
+    "No story dialogue; arc inferred from event titles",
+    "Roommate (Hishi Miracle) only from wiki",
+    "Voice actor romanisation is standard reading, not checked against official EN credits"
+  ]
+}

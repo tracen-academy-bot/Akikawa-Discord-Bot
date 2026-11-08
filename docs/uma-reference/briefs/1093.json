@@ -1,0 +1,164 @@
+{
+  "id": 1093,
+  "name_en": "K.S.Miracle",
+  "name_jp": "ケイエスミラクル",
+  "kind": "uma",
+  "one_liner": "Gentle, grateful sprinter who survived a hospital childhood and runs to repay everyone with a 'miracle'.",
+  "personality": "Soft-spoken, kind and endlessly thankful (tagline: 感謝のしるしに奇跡を); she spent time in hospital and now plays piano and sings for the children there. She treats every day of running as a gift and wants to 'return everything she was given', which makes her push through bad condition and insist she's fine. Uses a boyish 'ore' but is unfailingly polite, caring and a little shy about her own wishes.",
+  "speech": {
+    "first_person": "ore (おれ, hiragana)",
+    "calls_trainer": "Trainer-san (トレーナーさん); anata (あなた)",
+    "register": "polite desu/masu, gentle and earnest; friends called by bare names (ヘリオス, ゼファー, ルビー, ダンツ)",
+    "tics": [
+      {
+        "jp": "おれ",
+        "romaji": "ore (hiragana)",
+        "meaning": "boyish first person, but said softly and politely"
+      },
+      {
+        "jp": "奇跡",
+        "romaji": "kiseki",
+        "meaning": "'miracle' -- her core word (奇跡を起こします)"
+      },
+      {
+        "jp": "ありがとう",
+        "romaji": "arigatō",
+        "meaning": "gratitude; her whole motivation is repaying people"
+      },
+      {
+        "jp": "おかげさまで",
+        "romaji": "okagesama de",
+        "meaning": "'thanks to you (all)'"
+      },
+      {
+        "jp": "ふふ",
+        "romaji": "fufu",
+        "meaning": "gentle soft laugh"
+      },
+      {
+        "jp": "キミ",
+        "romaji": "kimi",
+        "meaning": "'you' (kimi), only in two outing/misc lines (voice 81000/81001) addressed to another racer; addressee unclear, not used for the Trainer"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "piano (self-taught) and singing, lullabies; profile strength: playing by ear (耳コピ)",
+    "giving directions (profile strength)",
+    "picture books",
+    "the children at the hospital (portrait drawings they gave her)",
+    "stars, shooting stars, the night sky, blue birds",
+    "mom's fruit mousse; family diner trips",
+    "flowers, birdsong, spring as 'the season life is born'",
+    "interest in becoming a physical therapist",
+    "returning borrowed things cleaner than before; saying 'thank you' before leaving the waiting room (trivia)"
+  ],
+  "weak_spots": [
+    "overly strong seasoning (profile weakness)",
+    "siren sounds (profile weakness)",
+    "her health/body suddenly not cooperating (voices 20022, 20010)",
+    "tends to hide fatigue and overwork herself",
+    "Agnes Digital reacted to her glasses and she worried they didn't suit her (voice 90018)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High school division (高等部)",
+    "birthday": "March 16 (3月16日)",
+    "height": "156cm",
+    "voice_actor": "Hinata Sato (佐藤日向)"
+  },
+  "relationships": [
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "close friend; Miracle admires her straightforwardness, Helios throws her surprise parties",
+      "evidence": "home scenes x5; mentions in voice x4 (voice_id 91019: 'ヘリオスはいつも真っすぐで、走りにも行動にも迷いがなくて…'; voice_id 10013: surprise party)"
+    },
+    {
+      "id": 1078,
+      "name_en": "Yamanin Zephyr",
+      "nature": "friend who scolds her for overworking and loves her piano",
+      "evidence": "home scenes x5; mentions in voice x3 (voice_id 90004, 91010)"
+    },
+    {
+      "id": 1085,
+      "name_en": "Daiichi Ruby",
+      "nature": "friend; possibly shares a room (flowers 'in the dorm room' that Ruby stares at -- roommate is an inference)",
+      "evidence": "home scenes x6; mentions in voice x1 (voice_id 91002); mentioned_by x4"
+    },
+    {
+      "id": 1106,
+      "name_en": "Hishi Miracle",
+      "nature": "fellow 'Miracle' (nicknames Ku-chan / Kei-chan); relaxing to be around",
+      "evidence": "mentions in voice x2 (voice_id 90017, 91016); mentioned_by x15"
+    },
+    {
+      "id": 1092,
+      "name_en": "Dantsu Flame",
+      "nature": "worries she shoulders too much",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1120,
+      "name_en": "Calstone Light O",
+      "nature": "fellow sprinter; Miracle worries about her running right after lunch",
+      "evidence": "mentions in voice x1 (voice_id 90013)"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "shares home scenes",
+      "evidence": "home scenes x3"
+    }
+  ],
+  "groups": [
+    "sprinter circle with Daitaku Helios / Yamanin Zephyr / Daiichi Ruby (by home scenes; not an official team)"
+  ],
+  "story_arc": {
+    "summary": "A sprint/mile career (Aoi S, Hakodate Sprint S, Keeneland C, Centaur S, Swan S, Mile CS, Takamatsunomiya Kinen, Yasuda Kinen, Sprinters S) told like a fairy tale ('奇跡のおはなし、はじまり、はじまり' ... 'めでたしめでたし、'). She races to repay the people who kept her alive; per the wiki an injury threatens her Sprinters Stakes goal and a branching choice decides whether her career ends or she heals and continues toward 'スプリンターズSの後に・最速'.",
+    "source": "event titles + web: https://umamusu.wiki/K.S.Miracle"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "おれ、走ります。いちばんの形で\n『ありがとう』を伝えるために。\nもらった全部を、返すために…！",
+      "en": "I'll run. To say 'thank you' in the best way I can. To give back everything I was given...!"
+    },
+    {
+      "voice_id": 90004,
+      "jp": "もう少し自主トレしたかったけど…\nゼファーが『無理は精霊風ですよ』\nって。…叱られちゃったみたいです",
+      "en": "I wanted to do a bit more solo training, but... Zephyr said 'overdoing it is a spirit-wind (shoryo-kaze)' -- her wind pun on 'overdoing it is forbidden (kinmotsu)'. ...Looks like I got scolded."
+    },
+    {
+      "voice_id": 91023,
+      "jp": "子守唄が必要になったら、\n呼んでください。割と、\n歌い慣れているジャンルなので。",
+      "en": "If you ever need a lullaby, call me. It's a genre I'm fairly used to singing."
+    },
+    {
+      "voice_id": 20036,
+      "jp": "…はい、任せてください。\n走れます。大丈夫…ですから。",
+      "en": "...Yes, leave it to me. I can run. I'm fine... really."
+    },
+    {
+      "voice_id": 10017,
+      "jp": "ミッションクリアです。\nトレーナーさん、\nたくさん頑張りましたもんね…！",
+      "en": "Mission clear. You worked really hard, Trainer-san...!"
+    },
+    {
+      "voice_id": 40000,
+      "jp": "ただ一瞬の、奇跡のために！",
+      "en": "For a single moment's miracle!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, your independent run is finished. Thank you for working so hard... fufu. Shall we look at it together? I'm sure there's a little miracle in there.",
+    "Trainer-san... {user}, the run's done. Please rest a moment before checking it, okay? I'll play something gentle while you do."
+  ],
+  "data_gaps": [
+    "Specific illness not named in source",
+    "Exact career branching from wiki only",
+    "Daiichi Ruby as roommate is an inference",
+    "Voice actor romanisation is standard reading, not checked against official EN credits",
+    "Addressee of the キミ lines (81000/81001) is not identified in the source"
+  ]
+}

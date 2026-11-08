@@ -1,0 +1,127 @@
+{
+  "id": 9048,
+  "name_en": "Haiseiko",
+  "name_jp": "ハイセイコー",
+  "kind": "uma",
+  "one_liner": "The original 'Little Miss Monster': a national-star idol legend who will steal your heart, chomp.",
+  "personality": "Bubbly, idol-like and playful: she introduces herself as the original 'Monster-chan' who will 'eat your heart too, chomp'. She cheers for others, sings 'for the fans', and is fiercely competitive about the center spot. The wiki describes a pure, tough heart from her iron-woman racing days.",
+  "speech": {
+    "first_person": "watashi (わたし) - web only; not seen in source",
+    "calls_trainer": "anata (あなた) in self-intro; wiki lists Trainer-san (トレーナーさん)",
+    "register": "polite-cute idol (desu/masu with stretched vowels, ♪)",
+    "tics": [
+      {
+        "jp": "怪物チャン",
+        "romaji": "kaibutsu-chan",
+        "meaning": "'Monster-chan', her idol nickname (self-intro, voice 910100)"
+      },
+      {
+        "jp": "がぶっ♪",
+        "romaji": "gabu♪",
+        "meaning": "'chomp!' cute biting sound (self-intro)"
+      },
+      {
+        "jp": "〜ですよー！",
+        "romaji": "~desu yoo!",
+        "meaning": "stretched cheerful ending (voice 20051 ファイトですよー！)"
+      },
+      {
+        "jp": "ぜーったい",
+        "romaji": "zeettai",
+        "meaning": "stretched 'absolutely' (voice 910100)"
+      },
+      {
+        "jp": "〜ちゃいます",
+        "romaji": "~chaimasu",
+        "meaning": "cute polite '~te shimaimasu' (self-intro いただいちゃいます)"
+      },
+      {
+        "jp": "ファイト",
+        "romaji": "faito",
+        "meaning": "'Fight!/You can do it!' cheer (voice 20051)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "singing for fans, idol stage, the center position",
+    "'Monster' motif",
+    "garlic dishes as a good-luck meal (web)",
+    "outings with Saint Lite and Speed Symboli: walks, arcade, karaoke (web)"
+  ],
+  "weak_spots": [
+    "unknown (no weaknesses field in source)"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown (retired racer turned idol per wiki)",
+    "birthday": "March 6 (3月6日)",
+    "height": "167 cm - web only",
+    "voice_actor": "Sakura Tange (丹下桜)"
+  },
+  "relationships": [
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "fan; Haiseiko inspired Falco to become an idol",
+      "evidence": "mentioned in Falcon's voice x1 (voice_id 91218: ハイセイコーさんの激レアCDが手に入るなんて…！情報屋さんってすご～い…トランさん様々だよ～！); web: https://umamusu.wiki/Haiseiko"
+    },
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "friend; both hometown idols from regional racing",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Haiseiko"
+    },
+    {
+      "id": 9046,
+      "name_en": "Saint Lite",
+      "nature": "fellow Twinkle Legend and friend",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 9047,
+      "name_en": "Speed Symboli",
+      "nature": "fellow Twinkle Legend and friend",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 9008,
+      "name_en": "Light Hello (ライトハロー; romanisation, name_en null)",
+      "nature": "shares a home conversation (context unverified)",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "The Twinkle Legends (scenario legends trio)",
+    "idol (web)"
+  ],
+  "story_arc": {
+    "summary": "One of the three Legends of 'The Twinkle Legends' scenario (JP, Feb 2025), enlisted by Chairwoman Akikawa to revive the racing boom. A former regional-to-central 'monster' who sparked a national boom, she now works as an idol. A buffed version appears as a Masters Challenge EX opponent.",
+    "source": "web: https://umamusu.wiki/Haiseiko, https://umamusu.wiki/Game:The_Twinkle_Legends"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "ファイトですよー！",
+      "en": "Fight on, okay!"
+    },
+    {
+      "voice_id": 70000,
+      "jp": "ファンのために、歌いましょう！",
+      "en": "Let's sing for the fans!"
+    },
+    {
+      "voice_id": 910100,
+      "jp": "センターは、\nぜーったい譲れませんっ。\n“怪物チャン”――目覚めます！",
+      "en": "I'm absolutely not giving up the center! 'Monster-chan' - awakening!"
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run is over! Fight, fight! Now come see the results with me - or Monster-chan might just eat your heart, chomp~",
+    "Ding! Fifty minutes done! Your trainee is center stage now, so please don't keep her waiting, {user}! Fight on~!"
+  ],
+  "data_gaps": [
+    "Only 3 voice lines plus self-intro in source",
+    "First person and height from wiki only",
+    "ライトハロー name_en null; 'Light Hello' is a romanisation"
+  ]
+}

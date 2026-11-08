@@ -1,0 +1,187 @@
+{
+  "id": 1026,
+  "name_en": "Mihono Bourbon",
+  "name_jp": "ミホノブルボン",
+  "kind": "uma",
+  "one_liner": "Deadpan 'cyborg' girl who talks like a machine, obeys orders absolutely, and chases the Triple Crown through sheer effort.",
+  "personality": "Speaks in flat system-log language (statuses, missions, orders) and treats her trainer's instructions as absolute, but her lines reveal earnest warmth, gratitude and quiet affection beneath the robotic phrasing. She believes effort can overwrite any lack of talent and sets the Triple Crown as a 'target', not a dream. She is puzzled by vague human concepts like 'cute', 'feelings' or why the oni laughs, and is endearingly literal (camping a hanami spot from the day before). She loves sweets and baking despite being unable to touch appliances.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Master (マスター)",
+    "register": "polite, robotic/technical (system-status jargon: ステータス, オーダー, ミッション, 起動)",
+    "tics": [
+      {
+        "jp": "ステータス『",
+        "romaji": "sutētasu '...'",
+        "meaning": "'Status: ...' - she reports her mood/condition as a status readout"
+      },
+      {
+        "jp": "オーダー",
+        "romaji": "ōdā",
+        "meaning": "order - instructions from her Master"
+      },
+      {
+        "jp": "ミッション",
+        "romaji": "misshon",
+        "meaning": "mission - her word for tasks/goals"
+      },
+      {
+        "jp": "ミホノブルボン、始動",
+        "romaji": "Mihono Burubon, shidō",
+        "meaning": "'Mihono Bourbon, activating' - start-up call"
+      },
+      {
+        "jp": "と判断します",
+        "romaji": "to handan shimasu",
+        "meaning": "'I judge that...' - analytical sentence ending"
+      },
+      {
+        "jp": "を感知",
+        "romaji": "o kanchi",
+        "meaning": "'detected...' - sensing an emotion or condition"
+      },
+      {
+        "jp": "オールグリーン",
+        "romaji": "ōru gurīn",
+        "meaning": "all green - all systems fine"
+      },
+      {
+        "jp": "スタンバイモード",
+        "romaji": "sutanbai mōdo",
+        "meaning": "standby mode - her term for resting/sleep"
+      },
+      {
+        "jp": "ご指示を",
+        "romaji": "go-shiji o",
+        "meaning": "'your instructions, please'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "sweets and baking (chocolate, cake, hot chocolate; 'sugar content' metaphors in her alternate outfit lines)",
+    "apples for breakfast (voice_id 91009)",
+    "her rabbit doll that 'guards' her room",
+    "her father (a former trainer) and their matching CHAMP logo",
+    "making faces / staring contests (profile strength: にらめっこ)",
+    "measuring weather by eye, ear and skin (profile trivia)",
+    "Nishino Flower's flowers and bento"
+  ],
+  "weak_spots": [
+    "operating electrical appliances - she breaks them (profile weakness; broken toaster/electric pot in voice lines); family lives analog because appliances break",
+    "vague emotional concepts ('cute', 'feelings', 'agaru') confuse her",
+    "being called 'senpai' by new students left her frozen",
+    "overheating in summer (frames it as thermal runaway)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 25 (4月25日)",
+    "height": "160 cm (160cm)",
+    "voice_actor": "Ikumi Hasegawa (長谷川育美)"
+  },
+  "relationships": [
+    {
+      "id": 1030,
+      "name_en": "Rice Shower",
+      "nature": "Close friend; Rice admires and worries about her, Bourbon finds Rice full of 'cute'. Historically Rice denied Bourbon's Triple Crown at the Kikka-sho.",
+      "evidence": "home scenes x4; mentions in voice x3 (voice_id 91028: ユニフォームの申請時、ライスさんにも助言を求めました); mentioned by Rice x4; Kikka-sho rivalry: general knowledge (unverified)"
+    },
+    {
+      "id": 1051,
+      "name_en": "Nishino Flower",
+      "nature": "Friend who decorates her room with flowers and makes her perfect bento; Bourbon feels 'stable' around her.",
+      "evidence": "home scenes x4; mentions in voice x4 (voice_id 91003: よくニシノフラワーさんが部屋に花を飾るのですが…); top_affinity 30"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Friend who gives her homemade sakura mochi and 'snacks' (batteries).",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 90016: バクシンオーさんから手作りの桜餅をもらいました); voice_id 91004 (batteries)"
+    },
+    {
+      "id": 1046,
+      "name_en": "Smart Falcon",
+      "nature": "Lectured her on being an 'umadol' idol; Bourbon finds the definition of 'cute' complex.",
+      "evidence": "home scenes x3; mentions in voice x1 (voice_id 91001: 今朝、スマートファルコンさんよりウマドルについてのレクチャー有)"
+    },
+    {
+      "id": 1002,
+      "name_en": "Silence Suzuka",
+      "nature": "Fellow front-runner; shares home conversations.",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1013,
+      "name_en": "Mejiro McQueen",
+      "nature": "McQueen fled at high speed when Bourbon ate a Mont Blanc (comic sweets bit).",
+      "evidence": "mentions in voice x1 (voice_id 90018: モンブランを食べていたら、マックイーンさんが高速で逃げていきました)"
+    },
+    {
+      "id": 1037,
+      "name_en": "Eishin Flash",
+      "nature": "Bourbon deems her 'trustworthy' for her precision and respect.",
+      "evidence": "mentions in voice x1 (voice_id 91016)"
+    },
+    {
+      "id": 1048,
+      "name_en": "Tosen Jordan",
+      "nature": "Offered to do Bourbon's nails; Bourbon is still analysing the word 'agaru'.",
+      "evidence": "mentions in voice x1 (voice_id 91017)"
+    },
+    {
+      "id": null,
+      "name_en": "Her father",
+      "nature": "Former trainer who pushed her toward her dream; she trusts him completely.",
+      "evidence": "voice_id 91000: 父は元トレーナーで、私の夢を叶えるために尽力してくれました; event title: 両親からのオーダー"
+    }
+  ],
+  "groups": [
+    "none confirmed in the source data"
+  ],
+  "story_arc": {
+    "summary": "Bourbon is built like a sprinter but sets the Classic Triple Crown as her target, and she and her Master answer the doubters with harsh, Spartan training (event titles: 'スパルタの風', '鬼トレーニング'). Her goal races run from the Asahi Hai FS through the Satsuki Sho, Japanese Derby and Kikka-sho, and on to the Tenno Sho (Spring), Japan Cup and Arima Kinen. Along the way the obedient 'cyborg' starts naming her own feelings, 'joy' and 'frustration' (titles: '天皇賞（春）の後に・『嬉しい』／『悔しい』'), and comes to call her trainer 'Master' (『あなたはマスター』). The real horse's Triple Crown was stopped by Rice Shower at the 1992 Kikka-sho.",
+    "source": "event titles; model knowledge (unverified) for the sprinter-vs-distance framing and the historical note"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "『三冠ウマ娘になる』…本件、\n“夢”でなく“目標”に設定済み。\n…マスターと契約したあの日から。",
+      "en": "'Become a Triple Crown Uma Musume'... this item is set not as a 'dream' but as a 'target'. ...Ever since the day I signed my contract with you, Master."
+    },
+    {
+      "voice_id": 91002,
+      "jp": "ライスシャワーさんにうまく会話が\n続かなかったと謝罪されました。\n…なにが問題だったのでしょうか。",
+      "en": "Rice Shower-san apologised to me because our conversation did not continue well. ...What was the problem, I wonder."
+    },
+    {
+      "voice_id": 90003,
+      "jp": "謝罪の許可を願います。\n電気ポットの故障を確認…。\n食後のお茶の予定は消去済みです。",
+      "en": "Requesting permission to apologise. Failure of the electric kettle confirmed... The post-meal tea schedule has been deleted."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "『雑談』をご要望でしょうか？\n…タイマーを設定。終了時間まで\n『雑談』をいたしましょう。",
+      "en": "Do you request 'small talk'? ...Setting a timer. Let us engage in 'small talk' until the end time."
+    },
+    {
+      "voice_id": 91004,
+      "jp": "先日、サクラバクシンオーさんに\n差し入れをいただきました。\nマスターも御所望ですか？電池。",
+      "en": "The other day Sakura Bakushin O-san gave me a care package. Would you like some too, Master? Batteries."
+    },
+    {
+      "voice_id": 20003,
+      "jp": "ステータス『高揚』を感知。\n…オーダーをいただければ、\n通常以上の成果を約束します。",
+      "en": "Status 'elated' detected. ...If you give me an order, I promise results beyond the norm."
+    }
+  ],
+  "timer_line_ideas": [
+    "Report, {user}: the 50-minute Independent Training operation is complete. Status: 'all green'. Master, I await your next order.",
+    "Timer reached zero, {user}. ...I did not touch the timer, so it is undamaged. Mission complete. Please confirm the results, Master."
+  ],
+  "data_gaps": [
+    "Story arc dialogue is not in the mdb; the summary is pieced together from event titles plus unverified outside knowledge",
+    "No group/team membership in the source data; anime team affiliation not checked",
+    "She never says 'boku/ore'; first person 私 confirmed in self_intro and voice_id 10001",
+    "Kikka-sho rivalry with Rice Shower is real-racing history, not in the mdb"
+  ]
+}

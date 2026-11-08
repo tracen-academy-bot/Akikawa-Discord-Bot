@@ -1,0 +1,118 @@
+{
+  "id": 9005,
+  "name_en": "Sasami Anshinzawa",
+  "name_jp": "安心沢刺々美",
+  "kind": "npc",
+  "one_liner": "A dubious, gleeful bamboo-needle 'acupuncturist' (apprentice) whose every promise ends in 'Wao, anshiin~!'.",
+  "personality": "Breezy, boastful and alarmingly confident. She brushes off failure ('失敗？しないしない！'), promises a 'stab' of power-up, and calls herself a genius needle master (or rather, its apprentice). Event titles admit she looks suspicious ('不審者だけど、あんし～ん！？'), and the joke is her constant reassurance.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "unknown (not in her lines)",
+    "register": "casual, flamboyant, feminine (～わよ, ～しましょ)",
+    "tics": [
+      {
+        "jp": "ワォ、あんし～ん♪",
+        "romaji": "wao, anshiin♪",
+        "meaning": "'Wow, no worries~!' (plays on her name 安心 = peace of mind)"
+      },
+      {
+        "jp": "ワォワォ！",
+        "romaji": "wao wao!",
+        "meaning": "'Wow wow!'"
+      },
+      {
+        "jp": "ブスっと",
+        "romaji": "busutto",
+        "meaning": "onomatopoeia for a needle jab: 'stab!'"
+      },
+      {
+        "jp": "～わよ～！",
+        "romaji": "~wa yo~!",
+        "meaning": "flamboyant feminine ending"
+      },
+      {
+        "jp": "しないしない！",
+        "romaji": "shinai shinai!",
+        "meaning": "'Nope, nope!' (dismissing failure)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "sasabari (bamboo-needle acupuncture, 笹針)",
+    "sunglasses ('あんし～ん☆サングラス')",
+    "hot springs trip ('湯けむり☆あんし～ん旅情')",
+    "drinking (bond event '刺々美との絆・酔えばあんし～ん？')",
+    "makes her own clothes; heart-tipped needles (web: umamusu.wiki)"
+  ],
+  "weak_spots": [
+    "her success is not guaranteed (in-game her needles can fail; she denies it)",
+    "looks like a suspicious person (event title '不審者だけど、あんし～ん！？')",
+    "jealous of her more successful sister (web: umamusu.wiki)"
+  ],
+  "profile": {
+    "dorm": "n/a (outsider)",
+    "grade": "n/a (bamboo-needle practitioner's apprentice)",
+    "birthday": "November 11 (11月11日)",
+    "height": "unknown",
+    "voice_actor": "Kikuko Inoue (井上喜久子)"
+  },
+  "relationships": [
+    {
+      "id": 9007,
+      "name_en": "Beauty Anshinzawa (ビューティー安心沢; no EN name in source)",
+      "nature": "her sister, per the wiki (the wiki says Beauty is the younger one and they don't get along)",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Sasami_Anshinzawa"
+    },
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1092,
+      "name_en": "Dantsu Flame",
+      "nature": "shares a home-screen conversation",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "Anshinzawa family (web: umamusu.wiki)"
+  ],
+  "story_arc": {
+    "summary": "She has no career story; she is a support-card NPC (the in-game needle/acupuncture event character). Her support event titles play on 'あんし～ん': she claims all roads lead to sasabari, uses the trainer as practice ('あんし～んの練習台？'), takes a hot-spring trip, deals with inheritance of the craft ('あんし～んな継承！？'), and ends with a 'final battle' ('決戦☆あんし～んよ永遠に！').",
+    "source": "event titles; web: https://umamusu.wiki/Sasami_Anshinzawa"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 70000,
+      "jp": "失敗？しないしない！ワォ、あんし～ん♪",
+      "en": "Failure? Nope, nope! Wao, no worries♪"
+    },
+    {
+      "voice_id": 20051,
+      "jp": "ブスっと♪いくわよ～！",
+      "en": "One little jab♪ Here I gooo!"
+    },
+    {
+      "voice_id": 95005,
+      "jp": "成功率、上がっちゃうかも～！？",
+      "en": "Your success rate might just go up~!?"
+    },
+    {
+      "voice_id": 95006,
+      "jp": "ワォワォ！これで超あんし～ん！！",
+      "en": "Wao wao! Now it's super no-worries!!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Wao! {user}, your Independent Training run is done! Failed? Nope, nope! Go check it, and maybe one little jab to celebrate? Wao, no worries~!",
+    "Ding, time's up, {user}! The 50-minute run is over. Your results might've gone up~!? Wao wao, super no-worries!"
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Sasami Anshinzawa' is the EN name on umamusu.wiki.",
+    "Only 4 voice lines; how she addresses the trainer is unknown. First person あたし is from her self_intro only.",
+    "Her sister relationship with Beauty Anshinzawa, and which of them is older, comes from the wiki and is not confirmed in the mdb.",
+    "Height unknown."
+  ]
+}

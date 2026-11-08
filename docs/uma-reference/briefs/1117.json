@@ -1,0 +1,185 @@
+{
+  "id": 1117,
+  "name_en": "Win Variation",
+  "name_jp": "ウインバリアシオン",
+  "kind": "uma",
+  "one_liner": "A hardworking ex-ballet girl who keeps losing to geniuses but swears she'll seize the lead role through effort.",
+  "personality": "Win Variation is earnest, polite and relentlessly self-critical: she believes enough effort will one day overtake talent ('膨大な努力は、いつか必ず才能を凌駕する') and blames losses on her own weakness. She is surrounded by 'monsters' like Orfevre and burns with envy, frustration and longing, yet channels all of it into running. Her dream, inherited from her father's ballet school, is to be the principal - the star at center stage. She is shy and easily flustered by praise, and gets embarrassed when she pirouettes in the street out of habit.",
+  "speech": {
+    "first_person": "atashi (あたし)",
+    "calls_trainer": "Trainer-san (トレーナーさん); also anata (貴方) in serious moments",
+    "register": "casual-polite junior speech with the sporty '-ssu' contraction of desu",
+    "tics": [
+      {
+        "jp": "っす",
+        "romaji": "-ssu",
+        "meaning": "clipped, sporty 'desu' - on almost every line"
+      },
+      {
+        "jp": "っすね",
+        "romaji": "-ssu ne",
+        "meaning": "'isn't it' with the -ssu tic"
+      },
+      {
+        "jp": "っすか",
+        "romaji": "-ssu ka",
+        "meaning": "question form with -ssu"
+      },
+      {
+        "jp": "へへ",
+        "romaji": "hehe",
+        "meaning": "embarrassed little laugh"
+      },
+      {
+        "jp": "主役",
+        "romaji": "shuyaku",
+        "meaning": "'the lead role' - her goal"
+      },
+      {
+        "jp": "プリンシパル",
+        "romaji": "purinshiparu",
+        "meaning": "'principal' (ballet lead dancer)"
+      },
+      {
+        "jp": "努力",
+        "romaji": "doryoku",
+        "meaning": "'effort' - her core value"
+      },
+      {
+        "jp": "恥ず…",
+        "romaji": "hazu...",
+        "meaning": "clipped 'so embarrassing...'"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Ballet: principal, tutus, pirouettes, The Nutcracker march, tights (habit from ballet)",
+    "Shijimi (freshwater clam) onigiri and miso soup",
+    "Apples - which she loves but feels she doesn't 'deserve' yet",
+    "Watermelon splitting, stretching (profile strengths)",
+    "Steady effort: morning training and study every day; core training in spare minutes",
+    "Flowerbeds that bloom slowly after putting down roots; clear winter mornings",
+    "Nail care learned from her mother (profile)"
+  ],
+  "weak_spots": [
+    "Contemporary dance and model walking (profile weaknesses)",
+    "Ad-libs and doing fan service while walking the live stage (voice 70014, 91005)",
+    "Doing nothing / idle time (voice 91010)",
+    "Cats' punches - she can't dodge them (voice 91004)",
+    "Horror movies (watches anyway, voice 91013)",
+    "Pirouetting in public when happy, then being embarrassed (voice 10026)",
+    "Harsh self-blame when she loses or feels unmotivated (voice 20011)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "April 10 (4月10日)",
+    "height": "159cm",
+    "voice_actor": "Hika Tsukishiro (月城日花)"
+  },
+  "relationships": [
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "The dazzling genius she keeps losing to and longs to be seen as a rival by",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91002: オルフェさんってなんか常に金ぴかって感じっすよね…眩しい、な); event title: あいつがいたから; web: https://umamusu.wiki/Win_Variation"
+    },
+    {
+      "id": 1060,
+      "name_en": "Nice Nature",
+      "nature": "Friend she admires for quiet, hidden effort",
+      "evidence": "home scenes x3; mentions in voice x2 (voice_id 91001: ネイチャさんが走ってたんすよ。見えない所で地道に努力してる; 400010)"
+    },
+    {
+      "id": 1089,
+      "name_en": "Cheval Grand",
+      "nature": "Roommate; they end up praising each other; Win worries she studies too late",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 10027: シュヴァルさんと褒め合いみたいになって; 91011: シュヴァルさん、遅くまで偉いな); roommate per web: https://umamusu.wiki/Win_Variation"
+    },
+    {
+      "id": 1090,
+      "name_en": "Verxina",
+      "nature": "Kindred spirit; they encourage each other in hard times (both are the eldest of three sisters, per wiki)",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Win_Variation"
+    },
+    {
+      "id": 1027,
+      "name_en": "Mejiro Ryan",
+      "nature": "Study-group friend",
+      "evidence": "mentions in voice x1 (voice_id 90003: たまにライアンさんたちと勉強会するんす)"
+    },
+    {
+      "id": 1065,
+      "name_en": "Daitaku Helios",
+      "nature": "Classmate who drags everyone to autumn sweets binges",
+      "evidence": "mentions in voice x1 (voice_id 90008)"
+    },
+    {
+      "id": 1116,
+      "name_en": "Gentildonna",
+      "nature": "Shares a home scene",
+      "evidence": "home scenes x1"
+    },
+    {
+      "id": 1119,
+      "name_en": "Dream Journey",
+      "nature": "Friend who recognizes her talent and envies her chance to race Orfevre",
+      "evidence": "web: https://umamusu.wiki/Win_Variation"
+    },
+    {
+      "id": null,
+      "name_en": "Her father",
+      "nature": "Runs a ballet school; the dancer whose back she grew up watching and wants to shine like",
+      "evidence": "voice_id 10010: 父さんのバレエ教室; 20026: 父さんの背中…ずっと見てきたんです"
+    }
+  ],
+  "groups": [
+    "None confirmed in game; cameo only in the Cinderella Gray manga (per umamusu.wiki; she is NOT on Kitahara's team, which is Daiwa Scarlet, Believe and Buena Vista)"
+  ],
+  "story_arc": {
+    "summary": "A former ballet girl who gave up the stage, she enters as the 'unyielding principal' (不屈のプリンシパル) and runs the Classic route - Satsuki Sho, Aoba Sho, Japanese Derby, Kikuka Sho - always chasing Orfevre, the 'born star' (天性のスター). Through repeated second places and self-doubt she learns to turn envy and frustration into strength with her trainer's support. Her senior year runs through the Nikkei Sho ('アンコール'), Tenno Sho (Spring) ('怒りと祈り'), Takarazuka Kinen and a final Arima Kinen ('ラストダンス').",
+    "source": "event titles; web: https://umamusu.wiki/Win_Variation and anibase.net/en/character/lenPV/Win-Variation"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 40001,
+      "jp": "悔しくても、妬ましくても、情けなくても…\nそれでも！…立ちたいんだ！舞台の真ん中に！",
+      "en": "Even if I'm frustrated, jealous, pathetic... even so! I want to stand there! At the center of the stage!"
+    },
+    {
+      "voice_id": 20027,
+      "jp": "膨大な努力は、\nいつか必ず才能を凌駕する。\n――今日が、その時っす。",
+      "en": "Enough effort will surely surpass talent someday. Today is that day."
+    },
+    {
+      "voice_id": 10026,
+      "jp": "うう…また街中でピルエット\n回っちゃった…気分よくなると\nついやっちゃうんす…恥ず…。",
+      "en": "Ugh... I spun a pirouette in the middle of town again... I do it without thinking when I'm in a good mood... so embarrassing..."
+    },
+    {
+      "voice_id": 91003,
+      "jp": "りんごは好きっす！好きっすけど…\nただ…今のあたしは、りんごに\n相応しくないかなって…思うと…。",
+      "en": "I do like apples! I like them, but... I just feel like the me right now doesn't deserve apples..."
+    },
+    {
+      "voice_id": 10002,
+      "jp": "実はですね、購買で売ってるしじみ\nおにぎりがすごく美味しくて…！\nあ、えと…雑談…っす！――えへへ",
+      "en": "Actually, the shijimi onigiri at the school store are really good...! Ah, um... that was just small talk...! Ehehe."
+    },
+    {
+      "voice_id": 30005,
+      "jp": "今日だけは――あたしが主役っす…！",
+      "en": "Just for today... I'm the lead!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer-san, the independent run's done-ssu! {user}, could you check how it went? Fifty minutes of effort, piled up one step at a time... ehehe.",
+    "{user}! Timer's up-ssu! I gave it everything I had... Did I look a little like a principal out there? Please take a look, Trainer-san!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice entry for Manhattan Cafe is a false positive (カフェテリア, voice 90002)",
+    "Story dialogue not in mdb; arc from event titles plus web summaries",
+    "Voice actor romanisation is not in the source; taken from umamusu.wiki/web search where available, otherwise general knowledge (unverified)",
+    "Fact-check: earlier draft wrongly placed her on Kitahara's team in Cinderella Gray; corrected per umamusu.wiki"
+  ]
+}

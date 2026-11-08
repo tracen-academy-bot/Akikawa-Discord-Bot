@@ -12,8 +12,9 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { chooseOpener, isRareOpener, recordRareOpener } from './rares';
-import { pickOpener, rarePoolFor } from './openers';
+import { activeBoosts, chooseOpener, grantBoost, isRareOpener, lockedSetsFor, recordRareOpener, spendBoosts, type ExtraChance } from './rares';
+import { EARLY_START, SPECIAL_SETS, boostPool, fillOpener, pickOpener, rarePoolFor } from './openers';
+import type { UserSettings } from './userSettings';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
 
@@ -60,7 +61,7 @@ export function buildPingContent(
     random: () => number = Math.random,
     opener?: string,
 ): string {
-    const lines = [(opener ?? pickOpener(random())).replace('{user}', `<@${discordUserId}>`)];
+    const lines = [fillOpener(opener ?? pickOpener(random()), discordUserId)];
 
     if (lagSeconds > LATE_DELIVERY_THRESHOLD_S) {
         const minutes = Math.round(lagSeconds / 60);
@@ -82,6 +83,33 @@ export function buildPingContent(
     if (milestoneRoleId) lines.push(`**Promotion!** **${summary.totalRuns} runs** reached, and <@&${milestoneRoleId}> is yours!`);
 
     return lines.join('\n');
+}
+
+/**
+ * The extra special chances on one trainer's ping, when their Boosts are on:
+ *
+ *   - each set boost they hold, for a set they have on and unlocked: its
+ *     chance, drawn from that set's lines with the boost's tag;
+ *   - early start, when the run was one: its chance, drawn from their usual
+ *     special pool.
+ */
+export async function extraChances(
+    guildId: string,
+    discordUserId: string,
+    settings: UserSettings,
+    lockedSets: readonly string[],
+    earlyStart: boolean,
+    pool: readonly string[],
+): Promise<ExtraChance[]> {
+    if (!settings.boosts) return [];
+    const extras: ExtraChance[] = [];
+    for (const held of await activeBoosts(guildId, discordUserId)) {
+        if (settings.disabledSets.includes(held.setId) || lockedSets.includes(held.setId)) continue;
+        const boost = SPECIAL_SETS.find((s) => s.id === held.setId)?.openers.find((o) => o.boost)?.boost;
+        if (boost) extras.push({ chance: boost.chance, pool: boostPool(held.setId, boost.tag) });
+    }
+    if (earlyStart) extras.push({ chance: EARLY_START.chance, pool });
+    return extras;
 }
 
 /** A guild the bot is in, from the cache or Discord; null when it is not. */
@@ -142,11 +170,20 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // The opener is picked once, from the sets the trainer has on,
                 // so the line posted is the one recorded.
                 const settings = await getUserSettings(timer.guildId, timer.discordUserId);
-                const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), rarePoolFor(settings.disabledSets));
+                const lockedSets = await lockedSetsFor(timer.guildId, timer.discordUserId);
+                const pool = rarePoolFor(settings.disabledSets, lockedSets);
+                const extras = await extraChances(timer.guildId, timer.discordUserId, settings, lockedSets, timer.earlyStart, pool);
+                const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras);
                 const content = buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, Math.random, opener);
                 const message = await channel.send({ content, allowedMentions: { users: [timer.discordUserId] } });
                 await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));
-                if (isRareOpener(opener)) await recordRareOpener(timer.guildId, timer.discordUserId, opener);
+                // Boosts tick down only while on (off pauses them). A boost
+                // this ping grants starts after it, with its full count.
+                if (settings.boosts) await spendBoosts(timer.guildId, timer.discordUserId);
+                if (isRareOpener(opener)) {
+                    await recordRareOpener(timer.guildId, timer.discordUserId, opener);
+                    await grantBoost(timer.guildId, timer.discordUserId, opener);
+                }
                 if (settings.dmPing) {
                     // A copy in their DMs; it pings nobody else and is not deleted.
                     await client.users

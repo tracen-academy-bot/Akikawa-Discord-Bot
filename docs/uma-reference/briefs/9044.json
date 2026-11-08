@@ -1,0 +1,99 @@
+{
+  "id": 9044,
+  "name_en": "Ryoka Tsurugi",
+  "name_jp": "都留岐涼花",
+  "kind": "npc",
+  "one_liner": "Cool-headed, highly capable producer running the U.A.F. sports festival, devoted to delivering the best entertainment.",
+  "personality": "Professional and composed, with polished business keigo: she introduces herself as a content producer who will deliver 'the greatest emotion' to everyone. Her lines are all about doing excellent, efficient work together. Event titles like '忙しいは楽しい！' ('Busy is fun!') and '意外な素顔？' ('An unexpected true face?') hint at a workaholic with a hidden softer side.",
+  "speech": {
+    "first_person": "unknown",
+    "calls_trainer": "unknown (event title uses 貴方, 'anata': 『貴方のおっしゃる通りでした』)",
+    "register": "polite business keigo",
+    "tics": [
+      {
+        "jp": "〜ましょう",
+        "romaji": "~mashou",
+        "meaning": "polite 'let's ~' (最高の仕事にしましょう。)"
+      },
+      {
+        "jp": "共に",
+        "romaji": "tomo ni",
+        "meaning": "formal 'together' (新たなエンターテインメントを、共に。)"
+      },
+      {
+        "jp": "最高の / 素晴らしい仕事",
+        "romaji": "saikou no / subarashii shigoto",
+        "meaning": "'the best / wonderful work', her work-pride vocabulary"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "entertainment and producing (tagline, self_intro)",
+    "efficiency (voice 95005)",
+    "'busy is fun' (event title 忙しいは楽しい！)",
+    "sashimi with wasabi only (web, unverified)"
+  ],
+  "weak_spots": [
+    "unknown; event title '意外な素顔？' suggests a hidden side"
+  ],
+  "profile": {
+    "dorm": "unknown",
+    "grade": "unknown",
+    "birthday": "September 30 (9月30日)",
+    "height": "unknown",
+    "voice_actor": "Rina Sato (佐藤利奈)"
+  },
+  "relationships": [
+    {
+      "id": 2007,
+      "name_en": "Sonon Elfie",
+      "nature": "partner; co-founded the U.A.F. with her",
+      "evidence": "home scenes x2; web: https://umamusu.wiki/Ryoka_Tsurugi ('She and her partner, Sonon Elfie, launched' U.A.F.)"
+    },
+    {
+      "id": 9008,
+      "name_en": "Light Hello",
+      "nature": "shares a home scene; both are event/content producers (nature of their relation unverified)",
+      "evidence": "home scenes x1"
+    }
+  ],
+  "groups": [
+    "U.A.F. Ready GO! scenario (operations lead of U.A.F.)"
+  ],
+  "story_arc": {
+    "summary": "Scenario NPC, not a trainee. In U.A.F. Ready GO! she runs operations for the Umamusume Athletic Festival, an all-round sports tournament she launched with Sonon Elfie; her real reasons for hosting it are kept secret. Her event titles move from work routines ('忙しいは楽しい！') to a glimpse of her true face ('意外な素顔？'), admitting the trainer was right ('『貴方のおっしゃる通りでした』') and a blessing on the runners ('そして彼女らに光あれ、と').",
+    "source": "event titles; web: https://umamusu.wiki/Ryoka_Tsurugi"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "最高の仕事にしましょう。",
+      "en": "Let's make this our finest work."
+    },
+    {
+      "voice_id": 70000,
+      "jp": "新たなエンターテインメントを、共に。",
+      "en": "A new kind of entertainment, together."
+    },
+    {
+      "voice_id": 95005,
+      "jp": "より効率的に動けますね。",
+      "en": "We can work more efficiently now."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "素晴らしい仕事ができそうです。",
+      "en": "I think we can do wonderful work."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run has concluded on schedule. Please review the results at your convenience. Efficient work makes for the best entertainment.",
+    "Thank you for your patience, {user}. The run is complete. Shall we look at the results together and make the next one even finer work?"
+  ],
+  "data_gaps": [
+    "name_en is null in source; 'Ryoka Tsurugi' is the EN-wiki name (涼花 reading Ryōka per wiki)",
+    "First person and trainer address unknown (only 4 short lines; 貴方 appears in an event title only)",
+    "Dorm, grade, height null (adult human staff)",
+    "Family details (web mentions younger siblings on anibase) unverified and omitted"
+  ]
+}

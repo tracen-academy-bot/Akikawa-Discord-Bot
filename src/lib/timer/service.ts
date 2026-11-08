@@ -1,5 +1,6 @@
 import type { TrainingTimer } from '@prisma/client';
 import { prisma } from '../../db/prisma';
+import { EARLY_START } from './openers';
 
 /**
  * Independent Training timer domain logic.
@@ -140,10 +141,32 @@ export interface StartResult {
 }
 
 /**
+ * True when a new run (not a reset) starting at `now` is an early start:
+ * within `windowMinutes` of when the trainer's last ping was posted. The ping's time is the run's scheduled end
+ * plus its delivery lag, so a late ping (bot downtime) still gives the full
+ * window.
+ */
+export async function inEarlyWindow(guildId: string, discordUserId: string, now: Date, windowMinutes: number = EARLY_START.windowMinutes): Promise<boolean> {
+    const last = await prisma.trainingRun.findFirst({
+        where: { guildId, discordUserId },
+        orderBy: { completedAt: 'desc' },
+        select: { completedAt: true, deliveryLagS: true },
+    });
+    if (!last) return false;
+    const pingedAt = last.completedAt.getTime() + last.deliveryLagS * 1000;
+    const since = now.getTime() - pingedAt;
+    return since >= 0 && since <= windowMinutes * 60_000;
+}
+
+/**
  * Starts a run, or resets the trainer's existing one back to a full duration.
  *
  * Matches the established behaviour of pressing Start twice: a trainer never
  * accumulates two concurrent countdowns.
+ *
+ * A new run started inside the early-start window (shorter with
+ * `earlyRiser`, see `EARLY_START`) is marked `earlyStart`. A reset keeps the
+ * run's mark as it was.
  */
 export async function startTimer(
     guildId: string,
@@ -151,6 +174,7 @@ export async function startTimer(
     panelMessageId: string | null,
     discordUserId: string,
     minutes = TRAINING_MINUTES,
+    earlyRiser = false,
 ): Promise<StartResult> {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + minutes * 60_000);
@@ -159,9 +183,12 @@ export async function startTimer(
         where: { guildId_discordUserId: { guildId, discordUserId } },
     });
 
+    const window = earlyRiser ? EARLY_START.earlyRiserWindowMinutes : EARLY_START.windowMinutes;
+    const earlyStart = existing ? existing.earlyStart : await inEarlyWindow(guildId, discordUserId, now, window);
+
     const timer = await prisma.trainingTimer.upsert({
         where: { guildId_discordUserId: { guildId, discordUserId } },
-        create: { guildId, channelId, panelMessageId, discordUserId, startedAt: now, expiresAt },
+        create: { guildId, channelId, panelMessageId, discordUserId, startedAt: now, expiresAt, earlyStart },
         update: { channelId, panelMessageId, startedAt: now, expiresAt },
     });
 

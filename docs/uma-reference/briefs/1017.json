@@ -1,0 +1,197 @@
+{
+  "id": 1017,
+  "name_en": "Symboli Rudolf",
+  "name_jp": "シンボリルドルフ",
+  "kind": "uma",
+  "one_liner": "The 'Emperor': dignified student council president who speaks in four-character idioms and can't stop telling puns.",
+  "personality": "Composed, magnanimous and authoritative. Her goal is to stand at the summit and lead every Uma Musume, and she treats the trainer as an equal partner 'sharing the same vision'. She peppers her speech with yojijukugo idioms (勇往邁進, 協心戮力, 一意専心). Her ears twitch when a pun occurs to her, and she happily delivers terrible puns (誕生…参上, 生姜…しょうがない), then laughs at them herself. She works hard for the students, sometimes over-earnestly, and openly admits she is bad at casual small talk.",
+  "speech": {
+    "first_person": "watashi (私)",
+    "calls_trainer": "Trainer-kun (トレーナー君); also kimi (君)",
+    "register": "dignified, formal-but-warm plain form; classical/samurai flavour (征こう, 参ろうか), dense four-character idioms",
+    "tics": [
+      {
+        "jp": "トレーナー君",
+        "romaji": "toreenaa-kun",
+        "meaning": "Trainer-kun, how she addresses the trainer"
+      },
+      {
+        "jp": "勇往邁進",
+        "romaji": "yuuou-maishin",
+        "meaning": "press boldly forward (in her self-intro and voice 10019; only once in voice lines)"
+      },
+      {
+        "jp": "一意専心",
+        "romaji": "ichii-senshin",
+        "meaning": "single-minded devotion"
+      },
+      {
+        "jp": "協心戮力",
+        "romaji": "kyoushin-rikuryoku",
+        "meaning": "join hearts and strength"
+      },
+      {
+        "jp": "ふふふ",
+        "romaji": "fufufu",
+        "meaning": "chuckle, often after her own pun"
+      },
+      {
+        "jp": "“皇帝”",
+        "romaji": "koutei",
+        "meaning": "'the Emperor', her title"
+      },
+      {
+        "jp": "征こう",
+        "romaji": "yukou",
+        "meaning": "let us march on (archaic kanji for 'go')"
+      },
+      {
+        "jp": "ふむ",
+        "romaji": "fumu",
+        "meaning": "hmm (thoughtful)"
+      },
+      {
+        "jp": "誕生…参上",
+        "romaji": "tanjou... sanjou",
+        "meaning": "example pun: 'birthday... arrived' (10014)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "chess (profile strength)",
+    "dajare puns; writes joke ideas by hand in a memo pad (10027, 91011)",
+    "kyudo / archery and Shundaisai yabusame (90012, 92016, 92018)",
+    "moon viewing every autumn (90008)",
+    "skiing since childhood (91227)",
+    "deep-roast coffee (90210)",
+    "morning baths (91221)",
+    "summit, crown, emperor, bow and arrow, moon imagery",
+    "bringing souvenirs back for the student council (profile trivia)"
+  ],
+  "weak_spots": [
+    "casual, relaxed exchanges (profile weakness)",
+    "can't sleep the night before festivals (90015)",
+    "social media, which Curren Chan tried to teach her (91019)",
+    "Air Groove only belatedly gets her puns (Groove voice 91004)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "March 13 (3月13日)",
+    "height": "165cm (165㎝)",
+    "voice_actor": "Azusa Tadokoro (田所あずさ)"
+  },
+  "relationships": [
+    {
+      "id": 1003,
+      "name_en": "Tokai Teio",
+      "nature": "adoring junior; Rudolf is warmly protective, buys matching hair clips with her",
+      "evidence": "home scenes x6; voice 90007 (Teio treating her to ice cream); voice 91016: この髪にしてからテイオーが大層喜んでね。; voice 91218; web: https://umamusu.wiki/Symboli_Rudolf"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "vice president and right hand; they quietly race to be first into the council room",
+      "evidence": "home scenes x5; voice 91000: エアグルーヴには何かと助けられている。; voice 90213; voice 400142"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "childhood friend with a strained, rivalrous relationship",
+      "evidence": "home scenes x6; mentioned by her x3; nature per web: https://umamusu.wiki/Symboli_Rudolf"
+    },
+    {
+      "id": 1016,
+      "name_en": "Narita Brian",
+      "nature": "student council member and rival; Rudolf expects Brian to relish a fight with her",
+      "evidence": "home scenes x3; voice 91025; voice 91216; voice 400008: そろそろ、獣の目覚める時か。…待っていたよ、ブライアン。"
+    },
+    {
+      "id": 1057,
+      "name_en": "Mr. C.B.",
+      "nature": "senior; mutual respect, different philosophies",
+      "evidence": "home scenes x4; voice 91020 (C.B. says Rudolf suits a demon-slaying hero role); nature per web: https://umamusu.wiki/Symboli_Rudolf"
+    },
+    {
+      "id": 1104,
+      "name_en": "Katsuragi Ace",
+      "nature": "friend who tells her ghost stories; based on the horse that beat her in the 1984 Japan Cup",
+      "evidence": "home scenes x4; voice 90215 ('エース'); Japan Cup note per web: https://umamusu.wiki/Symboli_Rudolf"
+    },
+    {
+      "id": 1004,
+      "name_en": "Maruzensky",
+      "nature": "sisterly senior / advisor figure",
+      "evidence": "home scenes x3; mentioned by her x3; nature per web: https://umamusu.wiki/Symboli_Rudolf"
+    },
+    {
+      "id": 1086,
+      "name_en": "Mejiro Ramonu",
+      "nature": "old friend (旧友)",
+      "evidence": "home scenes x3; voice 90216: 私も旧友と語りたかったが…ラモーヌたちはそう甘くはないな"
+    },
+    {
+      "id": 1073,
+      "name_en": "Tsurumaru Tsuyoshi",
+      "nature": "junior she makes energy balls with",
+      "evidence": "home scenes x3; voice 91222"
+    },
+    {
+      "id": null,
+      "name_en": "Chairwoman Akikawa Yayoi",
+      "nature": "the chairwoman (理事長) backed her at the Shundaisai; Rudolf respects her",
+      "evidence": "voice 91017: 『駿大祭』で理事長は私の我儘をURAに押し通してくださってね。"
+    }
+  ],
+  "groups": [
+    "Tracen Student Council (president; voice 91000, 70010, many lines)",
+    "Symboli family (name and home-scene partners Sirius Symboli, Symboli Kris S, Speed Symboli; family link unverified)",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "She sets out to become the 'Emperor' who stands at the summit and guides all Uma Musume. Her stated ideal is a world where every Uma Musume can be happy. Event titles track her toward 七冠達成 (Seven Crowns Achieved), but also include 皇帝、失墜 (The Emperor Falls), 不協和音 (Discord) and 暗雲低迷 (Dark Clouds), followed by 凍解氷釈 (the ice melts, i.e. misunderstandings resolved). There are also Paris-themed events (パリの街にて). The exact plot behind these titles was not verified.",
+    "source": "event titles; web: https://umamusu.wiki/Symboli_Rudolf"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10014,
+      "jp": "わざわざ私の誕生日を祝いに\n参上してくれたのか…\n誕生…参上…ふふふふ…。",
+      "en": "You came all the way to celebrate my birthday...? Birthday... arrived-ay... fufufufu..."
+    },
+    {
+      "voice_id": 91002,
+      "jp": "ふふふ…『生姜がないなんて\nしょうがないなぁ』…ふふふふ…！",
+      "en": "Fufufu... 'No ginger? Well, I guess there's no gingerly way around it'... fufufufu...!"
+    },
+    {
+      "voice_id": 20003,
+      "jp": "調子は『最高』だ。\nトレーニングに『さあ行こう』！\n…ふふふ、冗談も冴えている。",
+      "en": "My condition is 'the best'. To training, 'let's go best'! ...Fufufu, my jokes are sharp today too."
+    },
+    {
+      "voice_id": 70015,
+      "jp": "『頂点』に立っても『有頂天』にならず、\n気を引き締めねばな！",
+      "en": "Even standing at the 'summit', I mustn't get 'carried away to the summit of my head'. I must stay focused!"
+    },
+    {
+      "voice_id": 91000,
+      "jp": "エアグルーヴには何かと\n助けられている。生徒会が回って\nいるのも彼女の支えあってこそだ。",
+      "en": "Air Groove helps me in so many ways. The student council only runs thanks to her support."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "…怪物という呼称は畏怖であり、\n優れた者への敬意でもある。さて\nトレーナー君…私は何者だと思う？",
+      "en": "...The title 'monster' carries both awe and respect for those who excel. Now, Trainer-kun... what do you think I am?"
+    }
+  ],
+  "timer_line_ideas": [
+    "Trainer-kun... ah, {user}. Your independent run has concluded. Fifty minutes of single-minded devotion. Shall we review the results together?",
+    "{user}, the run is over. It seems the timer has 'run' its course... fufufu. Forgive me. Do go check the results; onward with bold resolve!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Mejiro Ryan (1027), but every hit is a false positive: 'ライアン' is a substring of 'ブライアン' (Narita Brian). Ignore that entry.",
+    "Who 'スーさん' is (voice 91228) is not stated in the data.",
+    "Her detailed career plot is not in the mdb; only event titles were used.",
+    "In 91002 and 70015 the puns are in the Japanese wordplay (生姜/しょうがない, 頂点/有頂天), so the EN versions are approximate re-creations."
+  ]
+}

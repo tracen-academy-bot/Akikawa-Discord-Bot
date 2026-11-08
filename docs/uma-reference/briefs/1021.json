@@ -1,0 +1,204 @@
+{
+  "id": 1021,
+  "name_en": "Tamamo Cross",
+  "name_jp": "タマモクロス",
+  "kind": "uma",
+  "one_liner": "Tiny, broke, loud Kansai girl who races as the 'White Lightning' to support her many little siblings.",
+  "personality": "A fast-talking Naniwa girl who plays the straight man (tsukkomi) to everyone else's nonsense and laughs at her own jokes. She grew up poor and is fiercely frugal: perks up at sales, frets about the school's electricity bill and still picks up ginkgo nuts. Underneath the bluster she is a doting big sister ('Tama-neene') who runs to repay her family, and she is touchy about being small. Warm and generous with her time, she offers to carry the trainer's burdens with them.",
+  "speech": {
+    "first_person": "uchi (ウチ)",
+    "calls_trainer": "anta (アンタ, x5 in voice lines); 'Trainer' (トレーナー) only once (voice_id 70000); also calls the trainer her 相方 'partner' (voice_id 93000)",
+    "register": "casual Kansai (Osaka/Naniwa) dialect",
+    "tics": [
+      {
+        "jp": "なんでやねん！",
+        "romaji": "nande yanen!",
+        "meaning": "Classic Kansai retort: 'Why the heck?!' / 'Come on!' - her tsukkomi"
+      },
+      {
+        "jp": "あかん",
+        "romaji": "akan",
+        "meaning": "Kansai 'no good / can't / don't'"
+      },
+      {
+        "jp": "ホンマ",
+        "romaji": "honma",
+        "meaning": "Kansai 'really / seriously'"
+      },
+      {
+        "jp": "めっちゃ",
+        "romaji": "meccha",
+        "meaning": "'super / really'"
+      },
+      {
+        "jp": "ほな",
+        "romaji": "hona",
+        "meaning": "Kansai 'well then / okay, let's go'"
+      },
+      {
+        "jp": "～へん",
+        "romaji": "-hen",
+        "meaning": "Kansai negative ending (e.g. 負けへん 'won't lose', 出えへん)"
+      },
+      {
+        "jp": "やで",
+        "romaji": "ya de",
+        "meaning": "Kansai sentence ending, 'you know' (copula や + で)"
+      },
+      {
+        "jp": "任しとき",
+        "romaji": "makashitoki",
+        "meaning": "'Leave it to me'"
+      },
+      {
+        "jp": "だぁ～はっはっは！",
+        "romaji": "daa~ hahhahha!",
+        "meaning": "Her big belly laugh after her own jokes"
+      },
+      {
+        "jp": "チビたち",
+        "romaji": "chibi-tachi",
+        "meaning": "'The little ones' - her younger siblings"
+      },
+      {
+        "jp": "白い稲妻",
+        "romaji": "shiroi inazuma",
+        "meaning": "'White Lightning', her racing title"
+      },
+      {
+        "jp": "浪速のド根性",
+        "romaji": "Naniwa no dokonjou",
+        "meaning": "'Osaka guts' - her fighting spirit"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "lightning / thunder (her tail crackles when angry, 'White Lightning')",
+    "bargains and sales (ears perk up at 安売り / セール)",
+    "mental arithmetic, but only for money",
+    "udon (eaten with just soy sauce), takoyaki, ika-yaki, hiyashi-ame",
+    "her younger siblings and parents back home",
+    "shrines / her 'shinme' (sacred horse) shrine-priestess outfit",
+    "Kansai comedy shows (Namba theater)",
+    "growing taller"
+  ],
+  "weak_spots": [
+    "kotatsu (official weakness - she melts into it)",
+    "natto (the sliminess)",
+    "being short / small - jokes about her height and clothes size",
+    "spending money on herself ('I hate how stingy I am')",
+    "huge portions - she has a small appetite (Oguri's lunches make her full just watching)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 23 (5月23日)",
+    "height": "140 cm (140cm)",
+    "voice_actor": "Naomi Oozora (大空直美)"
+  },
+  "relationships": [
+    {
+      "id": 1006,
+      "name_en": "Oguri Cap",
+      "nature": "Close friend and great rival; banters about Oguri's appetite, Oguri ties her hair and borrows her shirts",
+      "evidence": "home scenes x6; mentions in voice x6 (voice_id 1049: 行くで、オグリ！; 10026; 90003; 91019)"
+    },
+    {
+      "id": 1045,
+      "name_en": "Super Creek",
+      "nature": "Friend; Creek's endless candy pockets and coddling baffle her",
+      "evidence": "home scenes x4; mentions in voice x2 (voice_id 91000, 91017)"
+    },
+    {
+      "id": 1040,
+      "name_en": "Gold City",
+      "nature": "Friend she relies on for cheap but stylish clothes shops",
+      "evidence": "home scenes x4; mentions in voice x1 (voice_id 91002)"
+    },
+    {
+      "id": 1034,
+      "name_en": "Inari One",
+      "nature": "Fellow small, hot-tempered rival; refuses to lose to her at body measurements; they bicker",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 90006, 91020, 400009); top affinity 43"
+    },
+    {
+      "id": 1017,
+      "name_en": "Symboli Rudolf",
+      "nature": "Rudolf laughed at her 'shinme' (神馬) comment as if it were a pun",
+      "evidence": "mentions in voice x1 (voice_id 91018)"
+    },
+    {
+      "id": 1070,
+      "name_en": "Sirius Symboli",
+      "nature": "Saw her kicking things in the gym in the morning",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91009)"
+    },
+    {
+      "id": 1053,
+      "name_en": "Bamboo Memory",
+      "nature": "Wonders what Bamboo and Bakushin O are up to",
+      "evidence": "mentions in voice x1 (voice_id 91003)"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "As above",
+      "evidence": "mentions in voice x1 (voice_id 91003)"
+    },
+    {
+      "id": null,
+      "name_en": "Her younger siblings ('chibi-tachi') and parents",
+      "nature": "She races for them; becomes 'Tama-neene' around them",
+      "evidence": "profile about_family; voice_id 10008, 20035, 91011, 91016"
+    }
+  ],
+  "groups": [
+    "Late-1980s rival generation with Oguri Cap, Super Creek and Inari One (fan grouping, unverified)"
+  ],
+  "story_arc": {
+    "summary": "A tiny girl from a poor Osaka family who came to Tracen to win, make a name and send money home. Her career runs through the classic and senior races (Satsuki Sho, Derby, Kikka Sho, then Hanshin Daishoten, Tenno Sho Spring/Autumn, Takarazuka, Japan Cup, Arima); event titles trace a climb 'from rock bottom' (ドン底から上を) to becoming the 'White Lightning', a 'father to child' Takarazuka and a Japan Cup duel 'with you forever' (オマエと永遠に) that fans read as her rivalry with Oguri Cap. Her late-career theme is carrying everyone's hopes; her alternate outfit casts her as a shrine 'shinme' (sacred horse).",
+    "source": "event titles; model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "上ばっか見とったら、大事なもん\n忘れてまう。自分の気持ちも、\nちゃんと大切にせなあかんよな。",
+      "en": "If you only ever look up, you forget the stuff that matters. Gotta take care of your own feelings properly too, y'know."
+    },
+    {
+      "voice_id": 10001,
+      "jp": "まだ…まだ慣れへんねん…！\n自分へのご褒美…！くぅ～っ、\nみみっちい自分が憎い…っ！",
+      "en": "I'm still... still not used to it...! Treatin' myself...! Ughhh, I hate how stingy I am...!"
+    },
+    {
+      "voice_id": 10006,
+      "jp": "もっと背ぇ伸びますように――\nうわ！？おったんかい！今のは\nアレやで！その、アレや…アレ！",
+      "en": "Please let me grow taller-- Whoa!? You were here!? That was, uh, y'know! That thing... that thing!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "ボケに対してツッコミが圧倒的に\n足りてへんねん…そもそもみんな\nボケの質が独特すぎんねん…！！",
+      "en": "There ain't nearly enough straight men for all the gags around here... and everyone's gags are way too weird to begin with...!!"
+    },
+    {
+      "voice_id": 90014,
+      "jp": "夜までお疲れさん！困った時の\nなんとやらや！手伝えることが\nあったら、一緒に背負ったるで！",
+      "en": "Good work till this late! Y'know what they say about times of trouble! If there's anything I can help with, I'll carry it with ya!"
+    },
+    {
+      "voice_id": 40001,
+      "jp": "行くで、行くで、行くで――！！\n電光石火の“白い稲妻”とは、ウチのことや！！",
+      "en": "Here I go, here I go, here I go--!! The lightning-fast 'White Lightning'? That's me!!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Oi, {user}! Yer independent run's done! Fifty minutes, finished quick as lightnin'. C'mon, come take a look, don't keep the White Lightning waitin'!",
+    "Run's over, {user}! Ya stuck with it the whole way? Honma, not bad! Now go check it 'fore I hit ya with a proper tsukkomi. Nande yanen, still sittin' there?!"
+  ],
+  "data_gaps": [
+    "Story arc details (her family situation, exact plot) are from model knowledge; the mdb only has event titles.",
+    "'mentions_in_voice' lists Manhattan Cafe and Rice Shower, but these are substring false positives (カフェテリア in voice_id 10011, チキンライス in 10008); omitted from relationships.",
+    "The group label for the Tamamo/Oguri/Creek/Inari era is fan convention, not confirmed in source.",
+    "Fact-check: race list in story_arc comes from '...にむけて' goal-event titles; whether these are all her actual in-game career objectives is unverified."
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "id": 1126,
+  "name_en": "Sakura Chitose O",
+  "name_jp": "サクラチトセオー",
+  "kind": "uma",
+  "one_liner": "Calm, sage-like herbalist who believes 'food is medicine' and nudges everyone toward healthier eating.",
+  "personality": "Her profile tagline calls her a composed, magnanimous 'sennin' (Taoist sage) who treats food as medicine. Her self-introduction notices the listener's poor complexion and suggests rethinking their diet to balance ki, blood and fluids (気血水), the basis of daily vitality. Her few voice lines are terse, serene four-character idioms. Per the web she is known among the Sakura girls for being mature and aloof.",
+  "speech": {
+    "first_person": "unknown in source (umamusu.wiki says watashi 私)",
+    "calls_trainer": "unknown in source (umamusu.wiki says sonata そなた)",
+    "register": "Calm, formal and literary, with classical Chinese-style idioms (四字熟語) and traditional-medicine vocabulary",
+    "tics": [
+      {
+        "jp": "同気相求む",
+        "romaji": "douki aimotomu",
+        "meaning": "idiom: 'like attracts like / kindred spirits seek each other'"
+      },
+      {
+        "jp": "雲外蒼天",
+        "romaji": "ungai souten",
+        "meaning": "idiom: 'blue sky beyond the clouds', i.e. hardship overcome"
+      },
+      {
+        "jp": "千歳の道行き",
+        "romaji": "chitose no michiyuki",
+        "meaning": "'a journey of a thousand years', a pun on her own name Chitose"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Food as medicine (食を以て薬とす); diet and complexion",
+    "Traditional Chinese / Kampo concepts: ki-blood-fluids (気血水)",
+    "Sage / hermit (仙者) imagery and Taoist ideas: 'the way of the world is wu wei' (support event title 世の理は無為自然なり)",
+    "Candle collecting and cleaning her shoes every day (web: https://umamusu.wiki/Sakura_Chitose_O, not in game data)",
+    "Kampo herbal tea and preventing illness before it starts (未病), via North Flight's voice_id 92015"
+  ],
+  "weak_spots": [
+    "unknown (profile weakness field is empty in the mdb)"
+  ],
+  "profile": {
+    "dorm": "Miho Dorm (美浦寮)",
+    "grade": "High School Division (高等部)",
+    "birthday": "May 11 (5月11日)",
+    "height": "unknown in mdb; 164 cm per umamusu.wiki",
+    "voice_actor": "Riko Akechi (明智璃子)"
+  },
+  "relationships": [
+    {
+      "id": 1076,
+      "name_en": "Sakura Laurel",
+      "nature": "Fellow Sakura girl; fellow Victory Club member per web",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Sakura_Chitose_O"
+    },
+    {
+      "id": 1069,
+      "name_en": "Sakura Chiyono O",
+      "nature": "Fellow Sakura girl; fellow Victory Club member per web",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Sakura_Chitose_O"
+    },
+    {
+      "id": 1041,
+      "name_en": "Sakura Bakushin O",
+      "nature": "Fellow Sakura girl and Victory Club member; roommate per web",
+      "evidence": "home scenes x1; web: https://umamusu.wiki/Sakura_Chitose_O"
+    },
+    {
+      "id": 1082,
+      "name_en": "North Flight",
+      "nature": "Takes her Kampo health advice: North Flight warms up with herbal tea because Chitose O told her to keep her organs from getting cold",
+      "evidence": "mentioned_by x1 (North Flight's voice_id 92015: チトセオーさんが『未病は腑を冷やさぬように』と…)"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "Friend and rival whose skill she admires",
+      "evidence": "web: https://umamusu.wiki/Sakura_Chitose_O"
+    },
+    {
+      "id": 1103,
+      "name_en": "Royce and Royce",
+      "nature": "Friend; per the web Chitose O gives her medical advice and helps her keep a healthy diet",
+      "evidence": "web: https://umamusu.wiki/Sakura_Chitose_O"
+    }
+  ],
+  "groups": [
+    "Victory Club with Sakura Laurel, Sakura Chiyono O and Sakura Bakushin O (per web: https://umamusu.wiki/Sakura_Chitose_O; the shared home scenes fit)",
+    "Team Alkes (manga-only, per web: https://umamusu.wiki/Sakura_Chitose_O)",
+    "Miho Dorm"
+  ],
+  "story_arc": {
+    "summary": "She is not playable: no trainee card or career story exists in the mdb, and her only events are two support-card events about health ('Being healthy is auspicious') and Taoist natural order. The real horse won the 1995 Tenno Sho (Autumn) (model knowledge, unverified).",
+    "source": "event titles (support_event_titles); model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20051,
+      "jp": "同気相求む…。",
+      "en": "Kindred spirits seek one another..."
+    },
+    {
+      "voice_id": 70000,
+      "jp": "千歳の道行きを、共に…。",
+      "en": "Let us walk the thousand-year road together..."
+    },
+    {
+      "voice_id": 95006,
+      "jp": "雲外蒼天の心地にて…。",
+      "en": "I feel as though I have passed through the clouds into blue sky..."
+    }
+  ],
+  "timer_line_ideas": [
+    "Your independent run has reached its end, {user}. ...Your complexion seems a little tired. Perhaps a nourishing meal, then we review the results together?",
+    "Beyond the clouds lies blue sky. Your training run is complete, {user}. Come, let us see what it has brought, and mind your ki, blood and fluids."
+  ],
+  "data_gaps": [
+    "Only 3 voice lines in the source; first person and form of address for the trainer are not evidenced (the web says watashi / sonata)",
+    "Height, strengths, weaknesses, ears/tail/family trivia are null in the mdb",
+    "No trainee card, career story or affinity data (not playable); release_unix is a placeholder (2050)",
+    "Real-horse result is from model knowledge",
+    "The name_en 'Sakura Chitose O' is taken from the source"
+  ]
+}

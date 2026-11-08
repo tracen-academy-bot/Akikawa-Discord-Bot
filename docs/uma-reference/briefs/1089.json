@@ -1,0 +1,177 @@
+{
+  "id": 1089,
+  "name_en": "Cheval Grand",
+  "name_jp": "シュヴァルグラン",
+  "kind": "uma",
+  "one_liner": "Painfully shy middle sister who quietly dreams of becoming a 'great Umamusume'.",
+  "personality": "Cheval is timid, self-deprecating and stammers constantly, apologising and sighing about how far behind her glamorous sisters she feels. She avoids crowds and spotlight, preferring fishing, baseball on the radio and wall-ball alone, yet a stubborn ambition burns under it: 'me too - a great Umamusume!'. She is deeply grateful to the trainer for 'finding' her, and slowly learns to trust herself.",
+  "speech": {
+    "first_person": "boku (僕)",
+    "calls_trainer": "Trainer-san (トレーナーさん)",
+    "register": "hesitant polite desu/masu, slipping into casual self-talk; heavy stammering",
+    "tics": [
+      {
+        "jp": "うぅ",
+        "romaji": "uu",
+        "meaning": "groan of embarrassment/anxiety"
+      },
+      {
+        "jp": "はぁ",
+        "romaji": "haa",
+        "meaning": "sigh"
+      },
+      {
+        "jp": "えっと",
+        "romaji": "etto",
+        "meaning": "'um...'"
+      },
+      {
+        "jp": "偉大なウマ娘",
+        "romaji": "idai na umamusume",
+        "meaning": "'a great Umamusume' - her dream"
+      },
+      {
+        "jp": "僕だって",
+        "romaji": "boku datte",
+        "meaning": "'even I... / I can too!'"
+      },
+      {
+        "jp": "無理無理無理",
+        "romaji": "muri muri muri",
+        "meaning": "'no way no way no way'"
+      },
+      {
+        "jp": "集中、集中",
+        "romaji": "shuuchuu, shuuchuu",
+        "meaning": "'focus, focus'"
+      },
+      {
+        "jp": "すみません",
+        "romaji": "sumimasen",
+        "meaning": "'sorry' (frequent)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "sea fishing (profile; counts fish to fall asleep, ice fishing with her dad)",
+    "baseball - listens on radio, wall-ball, batting centre",
+    "killing time alone (profile)",
+    "the sea, beaches, seashells, sparklers by the shore",
+    "her cap / hat (shades her from the sun; 'hats are great', voice 90019)",
+    "pork buns and food in general"
+  ],
+  "weak_spots": [
+    "introducing herself (profile)",
+    "weight management (profile)",
+    "crowds and being the centre of attention / live centre position",
+    "flashy outfits and swimsuits Vivlos picks",
+    "cooking her catch well (voice 90012)",
+    "bright morning sun without her cap"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle School Division (中等部)",
+    "birthday": "March 14 (3月14日)",
+    "height": "160 cm (160cm)",
+    "voice_actor": "Yuko Natsuyoshi (夏吉ゆうこ)"
+  },
+  "relationships": [
+    {
+      "id": 1090,
+      "name_en": "Verxina",
+      "nature": "older sister ('nee-san') whose success she measures herself against",
+      "evidence": "home scenes x5; voice_id 91004: 「また姉さんが大きく載ってた」; Verxina mentions her x9; story title '家族構成：父、母、姉、僕、妹'; web: https://umamusu.wiki/Cheval_Grand"
+    },
+    {
+      "id": 1091,
+      "name_en": "Vivlos",
+      "nature": "teasing younger sister who stuffs sweets in her hood and buys her flashy swimsuits",
+      "evidence": "home scenes x5; mentions in voice x4 (voice_id 10026: 「絶対ヴィブロスの仕業だ」); event title: 我ら長女、次女、三女！"
+    },
+    {
+      "id": 1088,
+      "name_en": "Satono Crown",
+      "nature": "friend/rival who helps her; Cheval wants to help her back",
+      "evidence": "home scenes x5; mentions in voice x3 (voice_id 91017: 「クラウンさんの助けになりたい」)"
+    },
+    {
+      "id": 1068,
+      "name_en": "Kitasan Black",
+      "nature": "popular friend who invites her places; Cheval is too shy to approach the crowd around her",
+      "evidence": "home scenes x7; voice_id 91000: 「キタさんにハンカチ返さなきゃ」"
+    },
+    {
+      "id": 1108,
+      "name_en": "Duramente",
+      "nature": "admired peer who taught her a warm-up; went fishing together",
+      "evidence": "home scenes x2; mentions in voice x3 (voice_id 92018: 「ドゥラメンテさんに教わった」)"
+    },
+    {
+      "id": 1117,
+      "name_en": "Win Variation",
+      "nature": "'Sion-san', friend with similar tastes (dogs, sports manga)",
+      "evidence": "home scenes x2; mentions in voice x2 (voice_id 91016: 「シオンさんとは、結構好みが」)"
+    },
+    {
+      "id": 1067,
+      "name_en": "Satono Diamond",
+      "nature": "calls Cheval her 'fishing master'",
+      "evidence": "home scenes x1; mentions in voice x1 (voice_id 91001: 「ダイヤさん」)"
+    },
+    {
+      "id": 1129,
+      "name_en": "Almond Eye",
+      "nature": "'Ai-san', whose direct eye contact overwhelms her",
+      "evidence": "voice_id 91020: 「アイさん、じーっと目を見て」; not in the mdb mentions table - identifying 'Ai-san' as Almond Eye is inference (unverified)"
+    },
+    {
+      "id": 1102,
+      "name_en": "Sounds of Earth",
+      "nature": "acquaintance whose music she admires",
+      "evidence": "home scenes x2; voice_id 91010: 「アースさん」"
+    }
+  ],
+  "groups": [
+    "the three sisters with Verxina and Vivlos (event title '我ら長女、次女、三女！'; story title on family)"
+  ],
+  "story_arc": {
+    "summary": "Cheval runs the Classic Crown route (Satsuki Sho, Derby, Kikuka Sho) and then staying races like the Hanshin Daishoten, Tenno Sho (Spring), Takarazuka Kinen, Kyoto Daishoten and Japan Cup. Event titles track her lacking 'resolve' against the overwhelming 'great wave' of her generation, finding a rival to chase, receiving bad news after the Kyoto Daishoten (per wiki, linked to her childhood friend's injury in Australia) and finally becoming a 'great Umamusume' at the Japan Cup. Her real-life model won the 2017 Japan Cup.",
+    "source": "event titles; web: https://umamusu.wiki/Cheval_Grand; Japan Cup fact is model knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10004,
+      "jp": "トレーナーさん…！今日は、バ…\nバレン、バレ…………いえ、\nすみません、なんでもないです…。",
+      "en": "Trainer-san...! Today is, um, Va... Valen, Vale... no, sorry, it's nothing..."
+    },
+    {
+      "voice_id": 40001,
+      "jp": "僕だって――…僕だって――…僕だって――…\n僕だって――…っ！“偉大なウマ娘”に…！！",
+      "en": "Even I - even I - even I - even I...! Will become a 'great Umamusume'...!!"
+    },
+    {
+      "voice_id": 91003,
+      "jp": "キャッチボールしたいな…。\nけど声をかけるのは…はぁ。\n…今日も、壁当てしよう…。",
+      "en": "I want to play catch... but asking someone is... sigh. ...Wall-ball again today..."
+    },
+    {
+      "voice_id": 92007,
+      "jp": "その…ありがとうございます。\n僕を、選んでくれて。僕の…\nトレーナーさんでいてくれて。",
+      "en": "Um... thank you. For choosing me. For being... my trainer."
+    },
+    {
+      "voice_id": 93000,
+      "jp": "ありがとう…\n僕の、『偉大なトレーナーさん』。",
+      "en": "Thank you... my 'great Trainer-san'."
+    }
+  ],
+  "timer_line_ideas": [
+    "U-um, {user}... the independent run is over. I-I think I did my best... could you take a look? Only if you're not busy, I mean...",
+    "Th-the training's done, {user}! Sorry, um... I think I got a little stronger. One step closer to being a 'great Umamusume'... right?"
+  ],
+  "data_gaps": [
+    "Career story dialogue not in the mdb; summary built from event titles and wiki",
+    "Childhood friend (in Australia) appears in voice lines unnamed; wiki names her Shine Praise",
+    "'Ai-san' (voice 91020) assumed to be Almond Eye; unconfirmed"
+  ]
+}

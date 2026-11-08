@@ -1,0 +1,189 @@
+{
+  "id": 1015,
+  "name_en": "T.M. Opera O",
+  "name_jp": "テイエムオペラオー",
+  "kind": "uma",
+  "one_liner": "Self-proclaimed 'Haou' (Supreme King) who treats life as her opera and every compliment as her due.",
+  "personality": "T.M. Opera O is a grandiose, theatrical narcissist who laughs 'Ha-ha-ha!', improvises operas about herself, and interprets everything - mosquitoes, static shocks, averted eyes - as tribute to her radiance. Her vanity is oddly sincere and generous: she invites Doto because she wants her specifically, gives out signed photos, and openly says the trainer is essential because 'a Haou is always lonely'. When out of form she drops the act and urges herself on by name.",
+  "speech": {
+    "first_person": "boku (ボク)",
+    "calls_trainer": "Trainer-kun (トレーナー君); also kimi (君)",
+    "register": "Grandiloquent stage-actor speech, masculine-leaning (～さ, ～だね, ～たまえ), sprinkled with musical/theatre terms",
+    "tics": [
+      {
+        "jp": "はーっはっはっは",
+        "romaji": "haa-hahhahha",
+        "meaning": "her signature haughty laugh"
+      },
+      {
+        "jp": "嗚呼",
+        "romaji": "aa",
+        "meaning": "theatrical 'Ah!' / 'Alas!'"
+      },
+      {
+        "jp": "“覇王”",
+        "romaji": "Haou",
+        "meaning": "'Supreme King', her self-title; also 世紀末覇王 (End-of-Century Haou)"
+      },
+      {
+        "jp": "たまえ",
+        "romaji": "tamae",
+        "meaning": "lordly imperative (見届けたまえ = behold it)"
+      },
+      {
+        "jp": "トレーナー君",
+        "romaji": "Toreenaa-kun",
+        "meaning": "how she addresses the trainer"
+      },
+      {
+        "jp": "輝き",
+        "romaji": "kagayaki",
+        "meaning": "radiance - her favourite word"
+      },
+      {
+        "jp": "眩しすぎる",
+        "romaji": "mabushisugiru",
+        "meaning": "too dazzling (about herself)"
+      },
+      {
+        "jp": "エチュード",
+        "romaji": "echuudo",
+        "meaning": "etude - calls training this; also プレリュード, アンダンテ, エネルジコ"
+      },
+      {
+        "jp": "開演だ",
+        "romaji": "kaien da",
+        "meaning": "the curtain rises!"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "improvised opera about herself (profile strengths; voice 10009, 90005)",
+    "herself / her own radiance and beauty (pervasive)",
+    "theatre: sends flower stands, watches each audience face (trivia)",
+    "roses - baths with rose petals, a 'rose pose' (voice 91011, 91018)",
+    "mineral water - very particular about it (voice 91000)",
+    "New Year 'shinshun' performances and her haregi (festive kimono) (voice 90015, 90019, 91020, 93005)",
+    "the trainer as indispensable partner (voice 92007, 93000)"
+  ],
+  "weak_spots": [
+    "plain, unglamorous tasks (profile weakness)",
+    "Agnes Digital's intense staring gives her chills (voice 91010)",
+    "Fuji Kiseki outshining her in charm (voice 91004)",
+    "losing to herself - 'how do I win?' (voice 10002)",
+    "event titles hint at catching a cold from dancing in the rain (雨に踊れば、風邪となる)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle division (中等部)",
+    "birthday": "March 13 (3月13日)",
+    "height": "156 cm (156cm)",
+    "voice_actor": "Sora Tokui (徳井青空)"
+  },
+  "relationships": [
+    {
+      "id": 1058,
+      "name_en": "Meisho Doto",
+      "nature": "Closest companion and devoted rival; Opera O chooses her deliberately",
+      "evidence": "home scenes x10; voice 91001 (ボクは彼女だから誘ったのにね), 91017"
+    },
+    {
+      "id": 1033,
+      "name_en": "Admire Vega",
+      "nature": "Peer ('Ayabe-san') who loves stars and averts her eyes; Classic-year rivalry is general knowledge (unverified)",
+      "evidence": "home scenes x4; voice 91003, 91016"
+    },
+    {
+      "id": 1077,
+      "name_en": "Narita Top Road",
+      "nature": "Same-generation peer/rival",
+      "evidence": "home scenes x3; event title: ボクたちの1年戦争 (inferred, unverified)"
+    },
+    {
+      "id": 1052,
+      "name_en": "Haru Urara",
+      "nature": "Junior she taught the 'rose pose'",
+      "evidence": "home scenes x3; voice 91018"
+    },
+    {
+      "id": 1019,
+      "name_en": "Agnes Digital",
+      "nature": "Fan whose staring unnerves her",
+      "evidence": "home scenes x2; voice 91010, 400007"
+    },
+    {
+      "id": 1023,
+      "name_en": "Biwa Hayahide",
+      "nature": "Morning-routine companion fighting her hair",
+      "evidence": "home scenes x2; voice 91009"
+    },
+    {
+      "id": 1056,
+      "name_en": "Matikanefukukitaru",
+      "nature": "Drew great-luck fortunes together",
+      "evidence": "voice 91019"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "Ritto Dorm senior ('Fuji-senpai') whose charm she refuses to be outshone by; her dorm-head role is general knowledge (unverified in mdb)",
+      "evidence": "voice 91004 (フジ先輩)"
+    },
+    {
+      "id": 1011,
+      "name_en": "Grass Wonder",
+      "nature": "Acquaintance who finds her words deep",
+      "evidence": "Grass's voice 91217, 91223 (mentions in voice x1 here is a false hit on サングラス)"
+    }
+  ],
+  "groups": [
+    "Ritto Dorm",
+    "Opera O's 1999 Classic generation with Admire Vega and Narita Top Road - general knowledge (unverified)"
+  ],
+  "story_arc": {
+    "summary": "Opera O sets out on her 'Victory Road', winning the Satsuki Sho, then learning from Derby defeat (散華の歓び) before rising through the Arima Kinen, Spring Tenno Sho, Takarazuka Kinen and Japan Cup. Her titles build to the Autumn Senior Triple Crown and the birth of the 'End-of-Century Haou' (有馬記念の後に・世紀末覇王、爆誕！), with rivals eyeing her throne along the way (“覇王”を睨む目, 愛すべき好敵手). Real Opera O was unbeaten through 2000, which this mirrors (unverified for game details).",
+    "source": "event titles; model knowledge (unverified) for the 2000 season reference"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 10000,
+      "jp": "はーっはっはっは！“覇王”である\nボクのトレーナーになれるだなんて\n君は本っっっ当に運がいい！！",
+      "en": "Ha-ha-ha-ha! Getting to be the trainer of the 'Haou' - you are tremendously lucky!!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "ドトウを併走に誘ったら、『私で\nいいんですか』だってさ。ふふっ、\nボクは彼女だから誘ったのにね。",
+      "en": "I asked Doto to run with me and she said 'Are you sure you want me?' Fufu, I invited her precisely because she's her."
+    },
+    {
+      "voice_id": 92007,
+      "jp": "“覇王”には孤独がつきもの…\nだからこそ、君の存在が重要に\nなってくるのさ。わかるだろう？",
+      "en": "Loneliness always accompanies a 'Haou'... which is exactly why your presence matters. You understand, don't you?"
+    },
+    {
+      "voice_id": 20032,
+      "jp": "頑張れ…頑張るんだ…！\n“覇王”テイエムオペラオーッ…！",
+      "en": "Hang in there... hang in there...! 'Haou' T.M. Opera O...!"
+    },
+    {
+      "voice_id": 91013,
+      "jp": "くっ…蚊さえもボクの魅力に\n惹かれてやって来るなんて…！\nこれは、喜ぶべきなのか…！？",
+      "en": "Ngh... even mosquitoes are drawn by my charm...! Should I be happy about this...?!"
+    },
+    {
+      "voice_id": 20030,
+      "jp": "まずはアンダンテから。\nそして徐々にクライマックスへと\n向かうのさ。",
+      "en": "First, andante. Then gradually, toward the climax."
+    }
+  ],
+  "timer_line_ideas": [
+    "Ha-ha-ha-ha! The curtain falls on your fifty-minute etude, {user}! Your Independent Training is complete. Come, take your bow beside the Haou!",
+    "Alas, the final act has ended! {user}, your Independent Training run is done. Behold the results, as you would behold my radiance - with awe!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice Grass Wonder (サングラス) and King Halo look like false hits",
+    "Narita Top Road's role is inferred from home scenes and generation, not dialogue",
+    "Roommate unknown from source",
+    "Career story dialogue not in mdb; summary from event titles"
+  ]
+}

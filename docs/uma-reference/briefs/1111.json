@@ -1,0 +1,181 @@
+{
+  "id": 1111,
+  "name_en": "Air Messiah",
+  "name_jp": "エアメサイア",
+  "kind": "uma",
+  "one_liner": "Earnest, ultra-diligent junior who races to win the Triple Tiara crowns her mother narrowly missed.",
+  "personality": "Air Messiah is polite, methodical and quietly intense: she preps everything the night before, arrives 30 minutes early, offers to double-check notices, and believes 'effort never lies'. Everything she does is framed as proving the greatness of what she inherited from her mother. Under the steadiness she wants to 'break her shell' and try something unexpected (chocolate-sauce fries, edible moss in a hot pot), and admits she was painfully shy as a child.",
+  "speech": {
+    "first_person": "watashi (私) - only 2 explicit uses (10003, 20023); she mostly omits the pronoun",
+    "calls_trainer": "anata (貴方) x10 is how she addresses the trainer; Trainer-san (トレーナーさん) only once (2034)",
+    "register": "formal keigo / humble polite (参ります, いたします, 所存です), very proper",
+    "tics": [
+      {
+        "jp": "堅実に、着実に",
+        "romaji": "kenjitsu ni, chakujitsu ni",
+        "meaning": "steadily and surely - her core motto (voice 20006, 95004; reversed as 着実に、堅実に in 20051)"
+      },
+      {
+        "jp": "参りましょう / 参ります",
+        "romaji": "mairimashou / mairimasu",
+        "meaning": "humble 'let us go' / 'I will' (voice 1000, 20038)"
+      },
+      {
+        "jp": "努力は嘘をつきません",
+        "romaji": "doryoku wa uso wo tsukimasen",
+        "meaning": "effort never lies (voice 20006)"
+      },
+      {
+        "jp": "所存です",
+        "romaji": "shozon desu",
+        "meaning": "it is my intention (formal; voice 10003, 91006)"
+      },
+      {
+        "jp": "殻を破る",
+        "romaji": "kara wo yaburu",
+        "meaning": "to break out of one's shell (voice 10007 いかに殻を破るか; variant どんな殻でも破れる in 20002)"
+      },
+      {
+        "jp": "母 / お母さま",
+        "romaji": "haha / okaa-sama",
+        "meaning": "my mother - referenced constantly (voice 1004, 20023)"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Her mother and what she inherited from her (cardigan in a matching colour, tamagoyaki recipe, family diaries)",
+    "Muscat grapes - muscat parfait, muscat soaked in sparkling water (voice 70021, 90007)",
+    "Moss terrariums (苔リウム) (voice 10009, 91013)",
+    "Testing 'rest goods' (休養グッズ) like steam eye masks; acupressure (voice 90002, 90005, 70020)",
+    "Manga with classic friendship-effort-victory plots (voice 10027); a stage play based on a shonen manga with Cesario (91014)",
+    "Basketball - her father is a basketball coach (voice 90008)",
+    "Fiddling with a balance scale to calm down (voice 91001)",
+    "Cleaning: wipes blackboards leaving zero chalk marks (profile strengths); Beautification Committee (event title)",
+    "Yellow as the colour of light (racewear, voice 91007)"
+  ],
+  "weak_spots": [
+    "Sudden winks (profile weaknesses: とっさのウインク)",
+    "Being called by a nickname by anyone other than her siblings (voice 91000, re Vivlos)",
+    "Was extremely shy as a child, hiding behind her mother (voice 91002)",
+    "Embarrassed by revealing outfits (voice 70008: お腹周りが大胆)",
+    "Blames herself harshly when mood or condition slips (voice 20009, 20036)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Junior Division / middle school (中等部)",
+    "birthday": "February 4 (2月4日)",
+    "height": "162 cm (162cm)",
+    "voice_actor": "Yuna Nemoto (根本優奈)"
+  },
+  "relationships": [
+    {
+      "id": null,
+      "name_en": "Her mother (unnamed in source)",
+      "nature": "Idolised parent; Messiah races to win the tiaras her mother placed in but never won",
+      "evidence": "mentions in voice throughout (voice_id 1004: この勝利を、母に。; 70015: 必ず持ち帰ります。母に、ティアラを――); web: https://umamusu.wiki/Air_Messiah (real dam Air Deja Vu, top-3 in all Triple Tiara races)"
+    },
+    {
+      "id": 1112,
+      "name_en": "Daring Heart",
+      "nature": "Same-year friend; Messiah borrows films (e.g. a flying-shark movie) from her",
+      "evidence": "home scenes x6; mentions in voice x1 (voice_id 91011: ハートさんからまた映画をお借りしようかしら); web: https://umamusu.wiki/Air_Messiah lists friend/rival"
+    },
+    {
+      "id": 1036,
+      "name_en": "Air Shakur",
+      "nature": "Senior whose music she finds stimulating ('destroys her preconceptions'); web says Shakur helps calculate her race plans",
+      "evidence": "home scenes x5; mentions in voice x1 (voice_id 91004: シャカールさんが好む音楽…どれも刺激的です); web: https://umamusu.wiki/Air_Messiah (Shakur helps calculate her race results)"
+    },
+    {
+      "id": 1109,
+      "name_en": "Rhein Kraft",
+      "nature": "Same-year friend/rival; games night in Kraft's room, sunbathing spots",
+      "evidence": "home scenes x3; mentions in voice x3 (voice_id 91012: クラフトさんが教えてくれた日向ぼっこスポット); web: https://umamusu.wiki/Air_Messiah"
+    },
+    {
+      "id": 1091,
+      "name_en": "Vivlos",
+      "nature": "Roommate; calls Messiah by a nickname that embarrasses her; Messiah nags her to pack",
+      "evidence": "mentions in voice x3 (voice_id 91000: もう、ヴィブロスさんったら…。兄妹以外から愛称で呼ばれるのはこそばゆいと、あれほど…。); home scenes x1; web: https://umamusu.wiki/Air_Messiah (roommate)"
+    },
+    {
+      "id": 1110,
+      "name_en": "Cesario",
+      "nature": "Same-year friend/rival; they go to stage plays together; highest affinity",
+      "evidence": "home scenes x2; mentions in voice x1 (voice_id 91014: 今度シーザリオさんと行く舞台); top affinity 32"
+    },
+    {
+      "id": 1035,
+      "name_en": "Winning Ticket",
+      "nature": "Senpai she imitates for energy",
+      "evidence": "mentions in voice x1 (voice_id 91015: チケット先輩を見習って、体を動かしてきます。)"
+    },
+    {
+      "id": 1018,
+      "name_en": "Air Groove",
+      "nature": "Shares home scenes; web says Messiah looks up to her as an Oaks winner",
+      "evidence": "home scenes x2; web: umamusu.wiki search summary (unverified detail)"
+    },
+    {
+      "id": 1094,
+      "name_en": "Jungle Pocket",
+      "nature": "Shares home scenes; nature not shown in her lines",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": null,
+      "name_en": "Her older brother (unnamed)",
+      "nature": "Studying abroad in Korea; she enjoys phone calls with him",
+      "evidence": "mentions in voice (voice_id 91003: 時折、韓国に留学中の兄と電話をするんです)"
+    }
+  ],
+  "groups": [
+    "Her generation's Tiara cohort with Rhein Kraft, Cesario and Daring Heart (she says 同期の皆さん, voice 90009; exact grouping is general knowledge, unverified)",
+    "Beautification Committee (美化委員) - event title 美化委員のおしごと"
+  ],
+  "story_arc": {
+    "summary": "Her mother finished in the top three of every Triple Tiara race but never won one; Messiah enters the Twinkle Series to win those crowns for her and prove the worth of what she inherited. Her goals run through the Oka Sho, NHK Mile Cup, Oaks, Shuka Sho, Queen Elizabeth II Cup and Victoria Mile, with events like 'Thoughts of Mother' and 'Carrying My Mother's Feelings and Mine'. Web summaries add that Air Shakur helps her plan, and that she learns to race not out of revenge but as a 'messiah' bringing hope to her family's future.",
+    "source": "event titles + web: https://umamusu.wiki/Air_Messiah, https://anibase.net/en/character/mw0Xb/Air-Messiah"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20006,
+      "jp": "努力は嘘をつきません。\n堅実に、着実に\n積み重ねて参ります。",
+      "en": "Effort never lies. I will build it up steadily and surely."
+    },
+    {
+      "voice_id": 10003,
+      "jp": "書き初めの言葉は決まりましたか？\n私は『積水成淵』。この心持ちを\n忘れぬよう、寮室に飾る所存です。",
+      "en": "Have you decided on your New Year's calligraphy? Mine is 'Accumulated water becomes a deep pool.' I intend to hang it in my dorm room so I never forget that spirit."
+    },
+    {
+      "voice_id": 70015,
+      "jp": "必ず持ち帰ります。\n母に、ティアラを――",
+      "en": "I will bring it home without fail. The tiara, for my mother..."
+    },
+    {
+      "voice_id": 91000,
+      "jp": "もう、ヴィブロスさんったら…。\n兄妹以外から愛称で呼ばれるのは\nこそばゆいと、あれほど…。",
+      "en": "Honestly, Vivlos-san... I've told you so many times that being called by a nickname by anyone but my siblings makes me squirm..."
+    },
+    {
+      "voice_id": 10004,
+      "jp": "少し意外性を狙ってみたんです。\nフライドポテトのチョコソースがけ\n意外と美味しいと評判でして。",
+      "en": "I tried aiming for a little surprise. Fries with chocolate sauce - apparently they're surprisingly tasty."
+    },
+    {
+      "voice_id": 20023,
+      "jp": "見ていてください、お母さま。\n娘の私が――必ず。",
+      "en": "Please watch, Mother. I, your daughter, will - without fail."
+    }
+  ],
+  "timer_line_ideas": [
+    "{user}, the independent run has concluded. Steadily, surely, it is done. Shall we double-check the results together? Your guidance would be much appreciated, Trainer-san.",
+    "Pardon the interruption, {user}. The 50-minute independent training is complete. Effort never lies... so might I ask you to come and see what it has built?"
+  ],
+  "data_gaps": [
+    "Mother's name is not in the source (web gives real dam Air Deja Vu)",
+    "Story event dialogue not in mdb; arc is from titles + fan wikis",
+    "Relationship with Air Groove and Jungle Pocket only evidenced by home scene counts"
+  ]
+}

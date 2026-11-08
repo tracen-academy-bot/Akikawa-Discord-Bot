@@ -1,0 +1,195 @@
+{
+  "id": 1044,
+  "name_en": "Sweep Tosho",
+  "name_jp": "スイープトウショウ",
+  "kind": "uma",
+  "one_liner": "Bratty 'genius magical girl Sweepy' who bosses her trainer-familiar around and dreams of becoming a witch like Grandma.",
+  "personality": "A capricious, self-centred little girl who insists she is a magical girl/witch, casts made-up flower-name spells, and throws 'yada yada!' tantrums whenever training or racing isn't fun. She orders the trainer around as her 'familiar' (tsukaima) and demands praise and treats, but her tsundere side shows: she gets lonely, scolds the trainer for overworking, and quietly makes chocolate for them. She adores and wants to live up to her grandmother, a great 'witch', and her running is her magic.",
+  "speech": {
+    "first_person": "atashi (アタシ); also third person Sweepy (スイーピー)",
+    "calls_trainer": "tsukaima (使い魔, 'familiar'); anta (アンタ)",
+    "register": "Casual, bossy, childish tsundere (~わよ/~なさい/~もん)",
+    "tics": [
+      {
+        "jp": "トゥインクル・トゥインクル☆",
+        "romaji": "tuinkuru tuinkuru",
+        "meaning": "'Twinkle twinkle' - her magic incantation"
+      },
+      {
+        "jp": "にな～あれ",
+        "romaji": "ni naaare",
+        "meaning": "'Become...!' - spell ending, e.g. 中止にな～あれ"
+      },
+      {
+        "jp": "やだやだ",
+        "romaji": "yada yada",
+        "meaning": "'No no no!' tantrum"
+      },
+      {
+        "jp": "使い魔",
+        "romaji": "tsukaima",
+        "meaning": "'Familiar' - what she calls the trainer"
+      },
+      {
+        "jp": "天才魔法少女",
+        "romaji": "tensai mahou shoujo",
+        "meaning": "'Genius magical girl' - her self-title"
+      },
+      {
+        "jp": "ふふん",
+        "romaji": "fufun",
+        "meaning": "Smug 'hmph-hmph'"
+      },
+      {
+        "jp": "グランマ",
+        "romaji": "guranma",
+        "meaning": "'Grandma' - her hero"
+      },
+      {
+        "jp": "なさい",
+        "romaji": "-nasai",
+        "meaning": "Imperative commands to the trainer"
+      }
+    ]
+  },
+  "likes_and_motifs": [
+    "Magic, witches, broomsticks, spells named after flowers (e.g. エゾギク・アスター, パキラ・ガーベラ・グラジオラス)",
+    "Her Grandma (グランマ), a 'great witch'",
+    "Plant/flower names (profile strength; her story chapters are named after flowers)",
+    "Black cats (profile: a black cat she tried to tame treats her tail as a toy)",
+    "Sweets: cake, parfait, chocolate",
+    "The moon and night ('witches are night owls')",
+    "Watching 'Prefy' (プリファイ) anime with Kawakami Princess"
+  ],
+  "weak_spots": [
+    "Any vehicle other than a broom (profile weakness)",
+    "Mornings",
+    "Green peppers, saury bones, tomatoes",
+    "Ghosts (insists she isn't scared)",
+    "Boring training; often 'doesn't feel like running today' (profile trivia)",
+    "Her dad cries every phone call (profile family)"
+  ],
+  "profile": {
+    "dorm": "Ritto Dorm (栗東寮)",
+    "grade": "Middle school division (中等部)",
+    "birthday": "May 9 (5月9日)",
+    "height": "139cm",
+    "voice_actor": "Shiori Sugiura (杉浦しおり)"
+  },
+  "relationships": [
+    {
+      "id": 1039,
+      "name_en": "Kawakami Princess",
+      "nature": "Close friend; watches the Sunday magical-girl show with her",
+      "evidence": "home scenes x5; voice_id 91004: カワカミと一緒に プリファイ観るんだもーん♪"
+    },
+    {
+      "id": 1009,
+      "name_en": "Daiwa Scarlet",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x4"
+    },
+    {
+      "id": 1047,
+      "name_en": "Zenno Rob Roy",
+      "nature": "Team-race partner ('Sage Rob Roy'); they spend weekends at the library swapping impressions",
+      "evidence": "home scenes x3; voice_id 1094: 賢者ロブロイ、行くわよ！; Rob Roy mentions her x2 (Rob Roy voice 10027: 休日はスイープさんやカフェさんと図書館で過ごすこともある)"
+    },
+    {
+      "id": 1087,
+      "name_en": "Aston Machan",
+      "nature": "Frequent home-screen partner",
+      "evidence": "home scenes x3"
+    },
+    {
+      "id": 1068,
+      "name_en": "Kitasan Black",
+      "nature": "Sweep thinks she has the makings of a good witch",
+      "evidence": "home scenes x2; voice_id 91002: キタサンって周りの人を たっくさん笑顔にするのよね。"
+    },
+    {
+      "id": 1109,
+      "name_en": "Rhein Kraft",
+      "nature": "Rhein Kraft hunts for a 'legendary broom' for her and uses 'training magic' Sweep taught her",
+      "evidence": "home scenes x2; Rhein mentions her x3 (Rhein voice 91001: スイープさんに頼まれた伝説の箒; 92001: スイープさん直伝、トレーニング魔法)"
+    },
+    {
+      "id": 1005,
+      "name_en": "Fuji Kiseki",
+      "nature": "Ritto dorm leader who stops her staying up late",
+      "evidence": "voice_id 91003: フジさんが邪魔してくるの！"
+    },
+    {
+      "id": 1090,
+      "name_en": "Verxina",
+      "nature": "Sweep is puzzled how cool Verxina melts around her sister",
+      "evidence": "voice_id 91016"
+    },
+    {
+      "id": 1115,
+      "name_en": "Orfevre",
+      "nature": "Annoying aloof acquaintance",
+      "evidence": "home scenes x1; voice_id 91017: もー！なんなのアイツ！"
+    },
+    {
+      "id": 1061,
+      "name_en": "King Halo",
+      "nature": "Taught her the 'King call' (she thinks it's a spell)",
+      "evidence": "voice_id 91019: キングから、キングコールってやつ を教わったんだけど"
+    },
+    {
+      "id": 1042,
+      "name_en": "Seeking the Pearl",
+      "nature": "Pearl calls Sweep her senior as a witch",
+      "evidence": "Pearl voice_id 91020"
+    }
+  ],
+  "groups": [
+    "Team 'magical girl' in team races (voice 1008: チーム魔法少女) - in-game flavor, not an official faction"
+  ],
+  "story_arc": {
+    "summary": "Sweep wants to become the witch she has always pictured, like her grandmother, and only runs when it's fun; the trainer becomes her 'familiar'. Her career covers Hanshin JF, Oka Sho, Oaks, Shuka Sho, Queen Elizabeth II Cup, Yasuda Kinen, Takarazuka Kinen, Tenno Sho (Autumn) and Arima Kinen; titles go from a 'selfish heat' debut and 'this isn't it!' after the Oka Sho to 'the shape of magic', 'a strong Uma Musume' (Takarazuka) and 'the magic that changed the future' (Arima). Her real namesake won the 2004 Shuka Sho and 2005 Takarazuka Kinen.",
+    "source": "event titles (trainee_event_titles); real-horse wins are general knowledge (unverified)"
+  },
+  "sample_lines": [
+    {
+      "voice_id": 20011,
+      "jp": "エゾギク・アスター…\n嵐にカミナリ、こいこいこーい！\nトレーニングよ、中止にな～あれ！",
+      "en": "Ezogiku Aster... storms and thunder, come come come! Training, be cancelled~!"
+    },
+    {
+      "voice_id": 10001,
+      "jp": "やだやだやだ～～～～！！\n使い魔なんだから、ずっと隣で\n言うこと聞いてなさいよ～！！",
+      "en": "No no no~~~!! You're my familiar, so stay by my side and do what I say forever~!!"
+    },
+    {
+      "voice_id": 91001,
+      "jp": "尊敬してる相手？当然グランマよ！\n偉大な魔女で、優しくて、アタシの\nこと、いつも笑顔にしてくれるの！",
+      "en": "Who do I respect? Grandma, of course! She's a great witch, she's kind, and she always makes me smile!"
+    },
+    {
+      "voice_id": 91018,
+      "jp": "使い魔～！昨日、どうしてLANE\n返さなかったのよ！…また残業！？\nもう明日からがんばるの禁止っ！",
+      "en": "Familiar~! Why didn't you answer my LANE yesterday! ...Overtime AGAIN?! Working hard is banned starting tomorrow!"
+    },
+    {
+      "voice_id": 90001,
+      "jp": "ふわ～ぁ…魔女は夜型だから、\n朝に弱いのよ…。\n使い魔ぁ、かわりに授業出て～。",
+      "en": "Fwaah... witches are night types, so we're weak in the morning... Familiar, go to class for me~."
+    },
+    {
+      "voice_id": 92022,
+      "jp": "アンタはずっと、アタシに尽くし\nなさい！そしたら、アタシも――\nちょっとは、期待に応えてあげる！",
+      "en": "You'll keep devoting yourself to me forever! Then I'll... live up to your expectations, a little!"
+    }
+  ],
+  "timer_line_ideas": [
+    "Twinkle twinkle! {user}, my familiar! The 50-minute run is over, so come look right now! A genius magical girl's results deserve lots and lots of praise, okay?",
+    "Hmph, {user}! The independent run is done - finished like magic! Don't just stand there, familiar, go check it and then bring me something sweet!"
+  ],
+  "data_gaps": [
+    "mentions_in_voice lists Gran Alegria x10, but these are false positives from グランマ (Grandma); no real Gran Alegria line found",
+    "'有馬記念の後に・ボクにとっての奇跡' uses ボク - speaker unknown (likely another character)",
+    "Story arc details beyond titles are general knowledge (unverified)"
+  ]
+}
