@@ -17,8 +17,9 @@ Newest first. Each entry records what changed and, more importantly, why.
 - The results post names the top 5, pings them, and says which places hold
   which role. The boards' role line names both tiers ("1–2 take Abusers ·
   3–5 take Enjoyers"). `/timer rewards` shows both roles and the live top 5.
-- **The live board's Today card shows 8 rows** (was 5); it fits beside the
-  week's 10 without making the image taller.
+- **The live board's Today card is adaptive:** it shows as many trainers as
+  fit beside the week's card (`liveDayFit`), at least 5. Beside a full week
+  of 10 rows that is 8 (was a fixed 5), without making the image taller.
 - Migration `20261108150000_timer_second_role`.
 
 ---

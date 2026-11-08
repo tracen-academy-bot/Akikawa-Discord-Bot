@@ -358,6 +358,16 @@ async function main() {
     check('specials board: empty renders too', (await renderSpecialsLeaderboard(await rares.specialsBoard('nobody-here'), new Map())).subarray(1, 4).toString(), 'PNG');
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: LB } });
 
+    // The live board's Today card shows as many trainers as fit beside the week.
+    const live = await import('../src/lib/image/renderTimerLeaderboard');
+    check('today: 8 fit beside a full week, at least 5 beside a short one', [live.liveDayFit(10, true), live.liveDayFit(10, false), live.liveDayFit(3, true), live.liveDayFit(0, false)], [8, 8, 5, 5]);
+    const mkBoard = (n: number) => ({ period: 'thisweek' as const, week: '2026-11-02', rows: Array.from({ length: n }, (_, i) => ({ discordUserId: `t${i}`, runs: 50 - i, minutes: 0 })), totalRuns: 100, trainers: n });
+    const liveInfo = { topRoleName: 'A', secondRoleName: 'B', dayLabel: 'Sun Nov 8', updatedLabel: '12:00 JST' };
+    const sizeOf = (png: Buffer) => [png.readUInt32BE(16), png.readUInt32BE(20)];
+    const withFive = await live.renderLiveBoard(mkBoard(10), mkBoard(5), new Map(), liveInfo);
+    const withTwelve = await live.renderLiveBoard(mkBoard(10), mkBoard(12), new Map(), liveInfo);
+    check('today: filling to 8 does not make the image taller', sizeOf(withTwelve), sizeOf(withFive));
+
     // Settings: DM me too, early riser, boosts, special sets.
     const us = await import('../src/lib/timer/userSettings');
     const SG = `test-usettings-${Date.now()}`;

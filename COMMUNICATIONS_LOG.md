@@ -8,7 +8,8 @@ Decisions that changed project direction. Newest first.
 
 - Places 1-2 each week get Autorun Abusers, places 3-5 the new Autorun
   Enjoyers. Set the second role with `/timer rewards second_role:`.
-- The live board's Today list shows 8 instead of 5.
+- The live board's Today list fills the space beside the week: 8 when the
+  week has 10 rows, never fewer than 5.
 
 ---
 

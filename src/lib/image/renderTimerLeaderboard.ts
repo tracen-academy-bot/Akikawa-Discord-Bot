@@ -147,8 +147,31 @@ export async function renderTimerLeaderboard(
 
 /** Rows of this week shown on the live board. */
 export const LIVE_WEEK_ROWS = 10;
-/** Rows of today shown on the live board. Fits beside the week's 10 rows. */
-export const LIVE_DAY_ROWS = 8;
+/**
+ * Rows of today fetched for the live board. The board shows as many as fit
+ * beside this week's card (see `renderLiveBoard`), never fewer than
+ * `LIVE_DAY_MIN_ROWS`.
+ */
+export const LIVE_DAY_ROWS = 12;
+/** Fewest rows of today shown, even when this week's card is short. */
+export const LIVE_DAY_MIN_ROWS = 5;
+
+/** Live board row height and padding, shared by the layout and `liveDayFit`. */
+const LIVE_ROW_H = 34;
+const LIVE_PAD = PAD;
+
+/** The live board's week card height, for `weekRows` rows (with the role line or not). */
+function liveWeekHeight(weekRows: number, roleLine: boolean): number {
+    return LIVE_PAD + 18 + (roleLine ? 22 : 0) + 10 + Math.max(1, weekRows) * LIVE_ROW_H + LIVE_PAD - 6;
+}
+
+/** The today card's height without its rows: label, total, padding. */
+const LIVE_DAY_FIXED_H = LIVE_PAD + 18 + 12 + 56 + 10 + LIVE_PAD - 6;
+
+/** How many of today's trainers fit beside a week card of `weekRows` rows, at least `LIVE_DAY_MIN_ROWS`. */
+export function liveDayFit(weekRows: number, roleLine: boolean): number {
+    return Math.max(LIVE_DAY_MIN_ROWS, Math.floor((liveWeekHeight(weekRows, roleLine) - LIVE_DAY_FIXED_H) / LIVE_ROW_H));
+}
 
 /** What the live board shows beside the two boards. */
 export interface LiveBoardInfo {
@@ -165,7 +188,8 @@ export interface LiveBoardInfo {
 /**
  * The live leaderboard kept above the timer panel: this week so far on the
  * left (top 3 in their place colours, then the rest with a bar against the
- * leader), and today on the right (the day's runs, then its top 8).
+ * leader), and today on the right (the day's runs, then as many of its top
+ * trainers as fit beside the week, at least `LIVE_DAY_MIN_ROWS`).
  * Rendered at `RENDER_SCALE`.
  */
 export async function renderLiveBoard(
@@ -182,13 +206,14 @@ export async function renderLiveBoard(
     const headerH = 84;
     const dayW = 270;
     const weekW = cardW - dayW - GAP;
-    const rowH = 34;
+    const rowH = LIVE_ROW_H;
     const weekRows = week.rows.slice(0, LIVE_WEEK_ROWS);
-    const dayRows = today.rows.slice(0, LIVE_DAY_ROWS);
     const rolesText = weeklyRolesLine(info.topRoleName, info.secondRoleName ?? null, true);
     const roleLine = rolesText !== null && weekRows.length > 0;
-    const weekH = PAD + 18 + (roleLine ? 22 : 0) + 10 + Math.max(1, weekRows.length) * rowH + PAD - 6;
-    const dayH = PAD + 18 + 12 + 56 + 10 + Math.max(1, dayRows.length) * rowH + PAD - 6;
+    const weekH = liveWeekHeight(weekRows.length, roleLine);
+    // Today fills the height the week's card already takes, at least its minimum.
+    const dayRows = today.rows.slice(0, liveDayFit(weekRows.length, roleLine));
+    const dayH = LIVE_DAY_FIXED_H + Math.max(1, dayRows.length) * rowH;
     const bodyH = Math.max(weekH, dayH);
     const height = FRAME + headerH + GAP + bodyH + FRAME;
 
