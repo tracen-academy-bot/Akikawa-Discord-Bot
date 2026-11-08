@@ -4,6 +4,19 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-08 — #OnlineSensations set written; specials get a redesign
+
+- The Curren Chan collab set is final as text:
+  `docs/special-sets/online-sensations.md`. It is not in code yet.
+- Its opener (line 0) belongs to Set 1 and unlocks this set.
+- Specials will be redesigned before it goes in: prerequisites, toggles
+  for upcoming sets, `{set_name}`, a timed reward (line 4), and replacing
+  every `{user}`.
+- Curren keeps her flirty lines; that is the character. #PillowPrincess
+  was dropped.
+
+---
+
 ## 2026-11-08 — Special sets will grow; a reference to write them from
 
 - More special sets are planned. Mejiro Family is next; others follow.
