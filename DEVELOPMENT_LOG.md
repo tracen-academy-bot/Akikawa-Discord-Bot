@@ -3018,3 +3018,11 @@ nothing calls this module yet — but the same class of latent bug.
 - No Tracen Applicant role is given (staff: not wanted).
 - Tests: `scripts/test-roles.ts`, fake guild and members.
 - Rigil's role is 1393416636136161340; staff should drop it from `CLUB_ROLE_IDS` in Railway after deleting it.
+
+## 2026-11-08: Member role sync at startup
+
+- On ClientReady, after the member cache is warmed, every guild's members go through
+  `syncMemberRoles` once. This fixes role changes missed while the bot was offline, including a
+  club role deleted during a deploy (Rigil may have been deleted before #53 deployed).
+- Risk: a club role missing from `CLUB_ROLE_IDS` makes its members lose Member at every start.
+  Keep the variable in step with the real club roles.

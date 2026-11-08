@@ -14,7 +14,7 @@ import { startScheduler } from './lib/timer/scheduler';
 import { startFanScheduler } from './lib/fans/scheduler';
 import { startDashboard } from './web/server';
 import { registerCommands } from './lib/registerCommands';
-import { handleClubRoleDeleted, syncMemberRole } from './lib/roleAssignment';
+import { handleClubRoleDeleted, syncMemberRole, syncMemberRoles } from './lib/roleAssignment';
 import { connect } from './lib/startup';
 import { runMigrations } from './lib/migrate';
 import { handleSpecialRead, handleTimerButton, isSpecialReadMenu, isTimerButton } from './commands/timer';
@@ -74,12 +74,19 @@ client.once(Events.ClientReady, async (readyClient) => {
 
         // Warm the member cache so display names resolve immediately. With the
         // GuildMembers intent the cache then stays current from gateway events.
-        // Not awaited: a large guild must not delay the rest of startup.
+        // Then put every member's Member role right, catching role changes
+        // missed while the bot was offline (a club role deleted during a
+        // deploy, say). Not awaited: a large guild must not delay the rest of
+        // startup.
         void Promise.all(
             [...readyClient.guilds.cache.values()].map((guild) =>
                 guild.members
                     .fetch()
-                    .then((members) => console.log(`Cached ${members.size} members for ${guild.name}.`))
+                    .then(async (members) => {
+                        console.log(`Cached ${members.size} members for ${guild.name}.`);
+                        const { added, removed } = await syncMemberRoles(members.values());
+                        console.log(`Member role sync for ${guild.name}: added to ${added}, removed from ${removed}.`);
+                    })
                     .catch((e) => console.warn(`Could not fetch members for ${guild.name}:`, e instanceof Error ? e.message : e)),
             ),
         );
