@@ -109,6 +109,74 @@
    "set_pitch": "Lighter cameos for a social set: the fan, the lurker, the one whose sister posts for her."
   },
   {
+   "name": "Umadols (idols)",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1046,
+     "name_en": "Smart Falcon"
+    },
+    {
+     "id": 9048,
+     "name_en": "Haiseiko"
+    },
+    {
+     "id": 1132,
+     "name_en": "Loves Only You"
+    },
+    {
+     "id": 1099,
+     "name_en": "Hokko Tarumae"
+    },
+    {
+     "id": 1098,
+     "name_en": "Copano Rickey"
+    }
+   ],
+   "basis": "Game data: Smart Falcon (56 idol lines; dream in profile; support cards [ギリギリ!?UMA♡DOL] and [これが私のウマドル道☆]), Haiseiko (NPC; tagline 国民的大スター 熱狂生んだ怪物アイドル, title 現役アイドル, event “ザ・ウマドル”ハイセイコー), Loves Only You (どうも、アイドル配信者ラヴズです 70008), Hokko Tarumae (aims for 1st and centre, plans her dialect image 90004), Copano Rickey (Falco pitched her a feng-shui umadol act 91002, wants to sing feng shui 91020).",
+   "set_pitch": "Run done = showtime: centre position, fan calls, a wink at the trainer from the stage."
+  },
+  {
+   "name": "Falco's circle (umadol support and fans)",
+   "kind": "faction",
+   "members": [
+    {
+     "id": 1037,
+     "name_en": "Eishin Flash"
+    },
+    {
+     "id": 1002,
+     "name_en": "Silence Suzuka"
+    },
+    {
+     "id": 1019,
+     "name_en": "Agnes Digital"
+    },
+    {
+     "id": 1080,
+     "name_en": "Transcend"
+    },
+    {
+     "id": 1026,
+     "name_en": "Mihono Bourbon"
+    },
+    {
+     "id": 1043,
+     "name_en": "Shinko Windy"
+    },
+    {
+     "id": 1081,
+     "name_en": "Espoir City"
+    },
+    {
+     "id": 1022,
+     "name_en": "Fine Motion"
+    }
+   ],
+   "basis": "Eishin Flash acts as her manager and schedules around her fanservice (400004, 91216); Silence Suzuka has an event helping with umadol training (ウマドル☆猛特訓！) and the wiki says she helps with concerts; Agnes Digital calls her a god at lives (91000); Transcend praises her fanservice (91017); Mihono Bourbon gets umadol lectures (91001); Shinko Windy takes her live advice (91005); Espoir City was told \"live or treat\" (10007); Fine Motion wears an idol outfit for ramen (91228).",
+   "set_pitch": "The people around the idol: the manager, the fan, the reluctant backup."
+  },
+  {
    "name": "Mejiro family",
    "kind": "family",
    "members": [
