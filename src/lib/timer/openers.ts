@@ -55,6 +55,12 @@ export interface SpecialSet {
      * greyed out.
      */
     requires?: string;
+    /**
+     * For a locked set: once a trainer has unlocked it, this much extra
+     * special chance on every ping, drawn only from this set's lines. A boost
+     * like the others (Boosts off turns it off; not while the set is off).
+     */
+    unlockBonus?: number;
     openers: readonly Special[];
 }
 
@@ -89,6 +95,8 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         id: 'online-sensations',
         name: '#OnlineSensations',
         requires: 'set1.curren',
+        // Owner, 2026-11-09: +1% #OnlineSensations once unlocked.
+        unlockBonus: 0.01,
         openers: [
             { id: 'os.celebrate', name: "Celebrate", text: "{user}, it's time to #Celebrate! It took so much #Preparation but we finally got #ThreeMillionFollowers on release! Thank you for being my #FavoriteManager, and it's time to get a bazillion more! #WorkHard" },
             { id: 'os.eyes-only', name: "For Your Eyes Only", text: "{user}, it's such a long dayyyy~ #SoTired It was fun but a #DozenDresses takes so long for the producers... So I just want to *closes door behind* show you something #ForYourEyesOnly~\n...ya like it, m'fated #BelovedManager? shh, it's only for you now... and maybe when we truly #BecomeAPair~" },
@@ -134,13 +142,13 @@ export interface SeasonalBuff {
 }
 
 export const SEASONAL_BUFFS: readonly SeasonalBuff[] = [
-    // Curren Chan week (owner, 2026-11-08): +1% Curren Chan for 7 days.
-    { label: 'Curren Chan week', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-11-08T11:00:00Z'), until: new Date('2026-11-15T11:00:00Z') },
+    // Curren Chan week (+1% Curren Chan, 2026-11-08 to 11-15) was replaced
+    // on 2026-11-09 by #OnlineSensations' unlock bonus. Add new events here.
 ];
 
-/** The seasonal buffs running at `now`. */
-export function activeSeasonals(now: Date): SeasonalBuff[] {
-    return SEASONAL_BUFFS.filter((b) => b.from.getTime() <= now.getTime() && now.getTime() < b.until.getTime());
+/** The seasonal buffs (of `buffs`, by default all) running at `now`. */
+export function activeSeasonals(now: Date, buffs: readonly SeasonalBuff[] = SEASONAL_BUFFS): SeasonalBuff[] {
+    return buffs.filter((b) => b.from.getTime() <= now.getTime() && now.getTime() < b.until.getTime());
 }
 
 /**

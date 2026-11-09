@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, RARE_OPENER_CHANCE, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById } from './openers';
+import { EARLY_START, RARE_OPENER_CHANCE, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
 import { activeBoosts, lockedSetsFor, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
@@ -25,7 +25,9 @@ function percent(chance: number): string {
  *   - early start, when the run was one: its chance, drawn from their usual
  *     special pool;
  *   - each seasonal buff running at `now`, when its special's set is on and
- *     unlocked for them: its chance, drawn from that one special.
+ *     unlocked for them: its chance, drawn from that one special;
+ *   - each set with an `unlockBonus` they have unlocked and on: its bonus,
+ *     drawn from that set's lines.
  */
 export async function extraChances(
     guildId: string,
@@ -35,6 +37,7 @@ export async function extraChances(
     earlyStart: boolean,
     pool: readonly string[],
     now: Date = new Date(),
+    buffs: readonly SeasonalBuff[] = SEASONAL_BUFFS,
 ): Promise<ExtraChance[]> {
     if (!settings.boosts) return [];
     const usable = (setId: string) => !settings.disabledSets.includes(setId) && !lockedSets.includes(setId);
@@ -52,10 +55,14 @@ export async function extraChances(
         }
     }
     if (earlyStart) extras.push({ chance: EARLY_START.chance, pool, label: 'Early start, on your current run' });
-    for (const buff of activeSeasonals(now)) {
+    for (const buff of activeSeasonals(now, buffs)) {
         const special = specialById(buff.specialId);
         if (!special || !usable(special.set)) continue;
         extras.push({ chance: buff.chance, pool: [special.text], label: `${buff.label}: ${special.name} only, ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>` });
+    }
+    for (const set of SPECIAL_SETS) {
+        if (!set.unlockBonus || !set.requires || !usable(set.id)) continue;
+        extras.push({ chance: set.unlockBonus, pool: set.openers.map((o) => o.text), label: `${set.name} unlocked: any of its lines` });
     }
     return extras;
 }

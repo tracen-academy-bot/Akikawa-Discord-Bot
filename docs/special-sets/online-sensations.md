@@ -116,6 +116,9 @@ Voice ids are from the JP master data (see `docs/uma-reference/`).
   greyed out.
 - **Collab lines** (tag `collab`): 3, 5-12. Not 1 (Celebrate), 2 (For Your
   Eyes Only) or 4 (Loves, which grants the boost).
+- **Unlock bonus:** once a trainer has unlocked the set, every ping has an
+  extra 1% chance of one of its 12 lines (on top of the usual 6% for any
+  special). Boosts off turns it off.
 - **Loves Only You's boost:** for the trainer's next 50 pings, +4% chance of
   a collab line, on top of the usual 4% for any special. Getting Loves again
   restarts the 50; it does not stack. Boosts off pauses it.

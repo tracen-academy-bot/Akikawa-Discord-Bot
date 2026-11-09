@@ -4,6 +4,14 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-09 — Unlocked sets get a bonus; Curren Chan week ends early
+
+- Once #OnlineSensations is unlocked, each ping has an extra 1% chance of
+  one of its lines.
+- Curren Chan week is removed: the unlock bonus replaces it.
+
+---
+
 ## 2026-11-08 — Two weekly roles for more coverage
 
 - Places 1-2 each week get Autorun Abusers, places 3-5 the new Autorun
