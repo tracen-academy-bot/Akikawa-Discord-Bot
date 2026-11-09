@@ -541,7 +541,7 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
             const endsAt = `<t:${Math.floor(timer.expiresAt.getTime() / 1000)}:R>`;
             const early =
                 !wasReset && timer.earlyStart && settings.boosts
-                    ? `\n**Early start!** This run's ping has +${EARLY_START.chance * 100}% special chance.`
+                    ? `\n**Early Start!** +${EARLY_START.chance * 100}% on this run!`
                     : '';
             await interaction.reply({
                 content: wasReset

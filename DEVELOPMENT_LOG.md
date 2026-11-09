@@ -15,6 +15,8 @@ Newest first. Each entry records what changed and, more importantly, why.
   Ends in <countdown>.", "+1% #OnlineSensations: Curren ~~drags~~ invites
   you for her #SpecialCollabs!" (`SpecialSet.unlockBonusLabel`), and the tip
   "Early Start: start your next run quickly for +1% overall!".
+  The Start reply for an early start reads "**Early Start!** +1% on this
+  run!" (the +1% is on the ping that ends the run just started).
 - #OnlineSensations special names are hashtags (#TosenJordan,
   #ForYourEyesOnly, ...). Display only; ids and finds are unchanged.
 
