@@ -232,11 +232,12 @@ async function main() {
     const fullPool = openers.rarePoolFor([]);
     // A time with no seasonal buff running, so the checks below see only boosts.
     const OFF_SEASON = new Date('2026-01-01T00:00:00Z');
-    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON)).map((e) => [e.chance, e.pool.length]), [[0.04, 9], [0.01, fullPool.length]]);
-    check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool, OFF_SEASON)).map((e) => e.chance), [0.04, 0.01]);
+    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON)).map((e) => [e.chance, e.pool.length]), [[0.04, 9], [0.01, fullPool.length], [0.01, 12]]);
+    check('extras: the unlock bonus only once the set is unlocked', (await extraChances(XG, 'u1', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
+    check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool, OFF_SEASON)).map((e) => e.chance), [0.04, 0.01, 0.01]);
     check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool, OFF_SEASON), []);
     check('extras: none for a set turned off', (await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool, OFF_SEASON)).length, 0);
-    // The chances add: 4% boost + 1% early + the base 6% = 11%, the base intact.
+    // The chances add: 4% boost + 1% early + 1% unlock bonus + the base 6% = 12%, the base intact.
     const extras = await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON);
     const counts = new Map<string, number>();
     const STEPS = 20000;
@@ -252,13 +253,13 @@ async function main() {
         const gText = RARE_OPENERS.find((o) => o.id === guaranteed.id)!.text;
         check('lock: a guarantee beats the boosts too', await rares.chooseOpener(XG, guaranteed.owner, 0.001, fullPool, extras), gText);
     }
-    check('odds: special chance is 4% + 1% + 6% = 11%', Math.abs(specialCount - stepsOf(STEPS, 0.04 + 0.01 + P)) <= 1, true);
+    check('odds: special chance is 4% + 1% + 1% + 6% = 12%', Math.abs(specialCount - stepsOf(STEPS, 0.04 + 0.01 + 0.01 + P)) <= 1, true);
     // Collab lines: all of the 4% boost, plus their share of the 1% and 6%
     // (spread over every special but the locked Matikanetannhauser).
     const shareOf = (n: number, of: number) => Math.round((STEPS * n * 9) / of);
-    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (stepsOf(STEPS, 0.04) + shareOf(0.01, fullPool.length - 1) + shareOf(P, fullPool.length - 1))) <= 3, true);
+    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (stepsOf(STEPS, 0.04) + shareOf(0.01, fullPool.length - 1) + shareOf(P, fullPool.length - 1) + shareOf(0.01, 12))) <= 3, true);
     // The sweep is discrete, so step boundaries can shift a count by one either way.
-    const commonEach = (STEPS - stepsOf(STEPS, 0.04 + 0.01 + P)) / PING_OPENERS.length;
+    const commonEach = (STEPS - stepsOf(STEPS, 0.04 + 0.01 + 0.01 + P)) / PING_OPENERS.length;
     check('odds: common lines stay even', commonCounts.every((c) => Math.abs(c - commonEach) <= 1), true);
     const lockedPage = json(await rares.mySpecialsView(XG, 'u2', 2));
     check('pages: a locked set hides its rows, toggle greyed out', [lockedPage.embeds[0]!.description, lockedPage.embeds[0]!.fields ?? [], lockedPage.components[0]!.components[1]?.label, lockedPage.components[0]!.components[1]?.disabled], [
@@ -299,24 +300,26 @@ async function main() {
     await prisma.trainingTimer.deleteMany({ where: { guildId: EG } });
     await prisma.trainingRun.deleteMany({ where: { guildId: EG } });
 
-    // Seasonal buff: Curren Chan week, +1% flat, only ever Curren Chan.
-    const buff = openers.SEASONAL_BUFFS[0]!;
+    // Seasonal buffs: a flat slice on one special, for a time window. None run now;
+    // a sample one checks the mechanism.
+    check('season: no seasonal buff is set (Curren Chan week was removed)', openers.SEASONAL_BUFFS.length, 0);
+    const buff = { label: 'Sample week', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-12-01T00:00:00Z'), until: new Date('2026-12-08T00:00:00Z') };
     const inSeason = new Date(buff.from.getTime() + 60_000);
     const currenText = RARE_OPENERS.find((o) => o.id === buff.specialId)!.text;
     const SN = `test-season-${Date.now()}`;
     const plain = { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] as string[] };
-    check('season: Curren Chan week is +1% for 7 days', [buff.specialId, buff.chance, (buff.until.getTime() - buff.from.getTime()) / 86_400_000], ['set1.curren', 0.01, 7]);
-    const seasonal = await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason);
-    check('season: in the week, an extra 1% that only draws Curren Chan', seasonal.map((e) => [e.chance, e.pool]), [[0.01, [currenText]]]);
-    check('season: not before or after the week', [(await extraChances(SN, 's1', plain, [], false, [], new Date(buff.from.getTime() - 1))).length, (await extraChances(SN, 's1', plain, [], false, [], buff.until)).length], [0, 0]);
-    check('season: not with Set 1 off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, [], false, [], inSeason)).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, [], false, [], inSeason)).length], [0, 0]);
+    const LOCKED = ['online-sensations'];
+    const seasonal = await extraChances(SN, 's1', plain, LOCKED, false, openers.rarePoolFor([]), inSeason, [buff]);
+    check('season: in its window, an extra slice that only draws its special', seasonal.map((e) => [e.chance, e.pool]), [[0.01, [currenText]]]);
+    check('season: not before or after the window', [(await extraChances(SN, 's1', plain, LOCKED, false, [], new Date(buff.from.getTime() - 1), [buff])).length, (await extraChances(SN, 's1', plain, LOCKED, false, [], buff.until, [buff])).length], [0, 0]);
+    check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
 
     // The Boosts view: base, each boost, and the next ping's total.
     const { boostsView, BOOSTS_TOGGLE_ID } = await import('../src/lib/timer/boosts');
     await rares.grantBoost(SN, 's1', loves.text);
     await rares.recordRareOpener(SN, 's1', curren.text);
     const bv = (await boostsView(SN, 's1', inSeason)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: base, Loves, Curren Chan week, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left'), bv.includes('**+1%** Curren Chan week: Curren Chan only'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, true]);
+    check('boosts view: base, Loves, the unlock bonus, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left'), bv.includes('**+1%** #OnlineSensations unlocked: any of its lines'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, false, true]);
     await us0.toggleSetting(SN, 's1', 'boosts');
     const off = await boostsView(SN, 's1', inSeason);
     const offText = off.embeds[0]!.toJSON().description ?? '';

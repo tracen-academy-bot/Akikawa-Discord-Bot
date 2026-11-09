@@ -91,7 +91,7 @@ export function settingsView(settings: UserSettings) {
             [
                 `**DM Me Too**: the pings arrive here *and* in your DMs. Double efficiency!`,
                 `**Early Riser**: You get notified after ${EARLY_RISER_MINUTES} minutes. To encourage your punctuality, your pings clear after ${EARLY_RISER_NOTIFICATION_MINUTES} minutes instead of ${NOTIFICATION_LIFETIME_MINUTES}!`,
-                `**Boosts**: extra special chance from specials, early starts and seasonal events. Off pauses them. See yours with **Boosts**.`,
+                `**Boosts**: extra special chance from specials, unlocked sets, early starts and seasonal events. Off pauses them. See yours with **Boosts**.`,
                 `**Special sets**: turn them on or off in **Specials**.`,
                 '-# Changes apply from your next run.',
             ].join('\n'),

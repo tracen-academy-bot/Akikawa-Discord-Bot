@@ -4,6 +4,21 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-09 — #OnlineSensations unlock bonus; Curren Chan week removed
+
+- `SpecialSet.unlockBonus`: once a trainer has unlocked a locked set, every
+  ping gets that much extra chance drawn only from the set's lines. A boost
+  like the others: shown in the Boosts view, off with Boosts, not while the
+  set is off. #OnlineSensations has 1%.
+- Curren Chan week (+1% Curren Chan, a seasonal buff) is removed, replaced
+  by the unlock bonus. `SEASONAL_BUFFS` stays, empty; `extraChances` and
+  `activeSeasonals` take the buff list, so tests use a sample buff.
+- Checked the first finds on the server: Curren Chan x4 (first 15 hours
+  in), no #OnlineSensations line yet. Expected: for an unlocked trainer the
+  set was 3% a ping (6% x 12/24), and only a few trainers had unlocked it.
+
+---
+
 ## 2026-11-08 — Two weekly roles; Today shows 8
 
 - **Weekly roles in two tiers:** places 1-2 take the top role
