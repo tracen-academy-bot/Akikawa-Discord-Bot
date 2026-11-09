@@ -207,7 +207,7 @@ async function main() {
     // #OnlineSensations: locked behind Curren Chan, a collab boost, and {set_name}.
     const XG = `test-boosts-${Date.now()}`;
     const curren = RARE_OPENERS.find((o) => o.name === 'Curren Chan')!;
-    const loves = RARE_OPENERS.find((o) => o.name === 'Loves Only You')!;
+    const loves = RARE_OPENERS.find((o) => o.id === 'os.loves')!;
     check('sets: Curren Chan is the last of Set 1', [curren.set, openers.SPECIAL_SETS[0]!.openers.at(-1)?.name], ['set1', 'Curren Chan']);
     check('fill: every {user} and {set_name}', [openers.fillOpener(loves.text, 'u9').includes('{'), openers.fillOpener(loves.text, 'u9').split('<@u9>').length - 1, openers.fillOpener(loves.text, 'u9').includes('in #OnlineSensations.')], [false, 2, true]);
     check('locks: the set is locked until Curren Chan', await rares.lockedSetsFor(XG, 'u1'), ['online-sensations']);
@@ -215,7 +215,7 @@ async function main() {
     await rares.recordRareOpener(XG, 'u1', curren.text);
     check('locks: open once Curren Chan is found', [await rares.lockedSetsFor(XG, 'u1'), await rares.lockedSetsFor(XG, 'u2')], [[], ['online-sensations']]);
     const collabs = openers.boostPool('online-sensations', 'collab');
-    check('boost: draws only on the collab lines, never Loves', [collabs.length, collabs.includes(loves.text), RARE_OPENERS.filter((o) => collabs.includes(o.text)).map((o) => o.name).includes('Celebrate')], [9, false, false]);
+    check('boost: draws only on the collab lines, never Loves', [collabs.length, collabs.includes(loves.text), RARE_OPENERS.filter((o) => collabs.includes(o.text)).map((o) => o.name).includes('#Celebrate')], [9, false, false]);
     check('boost: a plain special grants nothing', await rares.grantBoost(XG, 'u1', curren.text), false);
     check('boost: Loves grants 50 runs', [await rares.grantBoost(XG, 'u1', loves.text), await rares.activeBoosts(XG, 'u1')], [true, [{ setId: 'online-sensations', runsLeft: 50 }]]);
     await rares.spendBoosts(XG, 'u1');
@@ -302,7 +302,8 @@ async function main() {
 
     // Seasonal buffs: a flat slice on one special, for a time window. None run now;
     // a sample one checks the mechanism.
-    check('season: no seasonal buff is set (Curren Chan week was removed)', openers.SEASONAL_BUFFS.length, 0);
+    const week = openers.SEASONAL_BUFFS[0]!;
+    check('season: Curren Chan week, +1% Curren Chan for 7 days', [week.specialId, week.chance, (week.until.getTime() - week.from.getTime()) / 86_400_000, week.label], ['set1.curren', 0.01, 7, 'Curren Chan: meet her in the lobby!']);
     const buff = { label: 'Sample week', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-12-01T00:00:00Z'), until: new Date('2026-12-08T00:00:00Z') };
     const inSeason = new Date(buff.from.getTime() + 60_000);
     const currenText = RARE_OPENERS.find((o) => o.id === buff.specialId)!.text;
@@ -312,6 +313,7 @@ async function main() {
     const seasonal = await extraChances(SN, 's1', plain, LOCKED, false, openers.rarePoolFor([]), inSeason, [buff]);
     check('season: in its window, an extra slice that only draws its special', seasonal.map((e) => [e.chance, e.pool]), [[0.01, [currenText]]]);
     check('season: not before or after the window', [(await extraChances(SN, 's1', plain, LOCKED, false, [], new Date(buff.from.getTime() - 1), [buff])).length, (await extraChances(SN, 's1', plain, LOCKED, false, [], buff.until, [buff])).length], [0, 0]);
+    check('season: a prerequisite buff stops once its set is unlocked; the unlock bonus takes over', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), [[0.01, 12]]);
     check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
 
     // The Boosts view: base, each boost, and the next ping's total.
@@ -319,13 +321,17 @@ async function main() {
     await rares.grantBoost(SN, 's1', loves.text);
     await rares.recordRareOpener(SN, 's1', curren.text);
     const bv = (await boostsView(SN, 's1', inSeason)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: base, Loves, the unlock bonus, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left'), bv.includes('**+1%** #OnlineSensations unlocked: any of its lines'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, false, true]);
+    check('boosts view: base, Loves, the unlock bonus, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, false, true]);
     await us0.toggleSetting(SN, 's1', 'boosts');
     const off = await boostsView(SN, 's1', inSeason);
     const offText = off.embeds[0]!.toJSON().description ?? '';
     check('boosts view: off pauses them, total is the base', [offText.includes('(paused)'), offText.includes('**Your next ping: 6% chance of a special.**'), (off.components[0]!.toJSON().components[0] as { custom_id: string; label: string }).custom_id, (off.components[0]!.toJSON().components[0] as { label: string }).label], [true, true, BOOSTS_TOGGLE_ID, 'Boosts: Off']);
     const quiet = (await boostsView(SN, 'nobody', OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: nothing running, with the early-start tip', [quiet.includes('No boosts right now.'), quiet.includes('Early start:'), quiet.includes('**Your next ping: 6% chance')], [true, true, true]);
+    check('boosts view: nothing running, with the early-start tip', [quiet.includes('No boosts right now.'), quiet.includes('-# Early Start: start your next run quickly for +1% overall!'), quiet.includes('**Your next ping: 6% chance')], [true, true, true]);
+    const inWeek = new Date(week.from.getTime() + 60_000);
+    const before = (await boostsView(SN, 'not-unlocked', inWeek)).embeds[0]!.toJSON().description ?? '';
+    check('boosts view: Curren Chan week before unlocking, total 7%', [before.includes(`**+1%** Curren Chan: meet her in the lobby! Ends <t:${Math.floor(week.until.getTime() / 1000)}:R>.`), before.includes('**Your next ping: 7% chance')], [true, true]);
+    check('names: #OnlineSensations specials are hashtags', openers.SPECIAL_SETS[1]!.openers.every((o) => /^#[A-Za-z]+$/.test(o.name)), true);
     const { BUTTON_BOOSTS } = await import('../src/lib/timer/panel');
     check('panel: has the Boosts button', JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_BOOSTS), true);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: SN } });
