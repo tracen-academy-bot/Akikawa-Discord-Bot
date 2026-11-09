@@ -4,6 +4,22 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-09 — Curren Chan week restored until unlock; Boosts wording; hashtag names
+
+- Correction to the entry below: the owner wanted Curren Chan week kept for
+  trainers who have not unlocked #OnlineSensations, and switched to the
+  set's unlock bonus once they have (I read "remove the Curren Chan one" as
+  deleting the event). Restored, 2026-11-08 11:00 to 11-15 11:00 UTC. A
+  seasonal buff on a set's prerequisite now stops once that set is unlocked.
+- Boosts view wording (owner's): "+1% Curren Chan: meet her in the lobby!
+  Ends in <countdown>.", "+1% #OnlineSensations: Curren ~~drags~~ invites
+  you for her #SpecialCollabs!" (`SpecialSet.unlockBonusLabel`), and the tip
+  "Early Start: start your next run quickly for +1% overall!".
+- #OnlineSensations special names are hashtags (#TosenJordan,
+  #ForYourEyesOnly, ...). Display only; ids and finds are unchanged.
+
+---
+
 ## 2026-11-09 — #OnlineSensations unlock bonus; Curren Chan week removed
 
 - `SpecialSet.unlockBonus`: once a trainer has unlocked a locked set, every

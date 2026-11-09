@@ -4,6 +4,16 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-09 — Curren Chan week back, until you unlock
+
+- Curren Chan week stays for trainers who have not had Curren Chan; once
+  they have, it switches to +1% #OnlineSensations. (It was removed by
+  mistake in the previous change.)
+- Boosts view lines reworded by the owner; #OnlineSensations specials are
+  named as hashtags.
+
+---
+
 ## 2026-11-09 — Unlocked sets get a bonus; Curren Chan week ends early
 
 - Once #OnlineSensations is unlocked, each ping has an extra 1% chance of
