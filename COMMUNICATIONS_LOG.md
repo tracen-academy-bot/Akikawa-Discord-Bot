@@ -4,6 +4,23 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-10 — 10% specials with soft caps
+
+- Base special chance is 10%. Totals past raw 20% count at half, past raw
+  30% at a quarter, with a 30% hard cap (owner's design). Odds tables:
+  `docs/special-sets/odds.md`.
+- Boost runs stack; the chance does not.
+
+---
+
+## 2026-11-10 — #ChuChuChallenge, with its video
+
+- #OnlineSensations gets a 13th line, #ChuChuChallenge, which posts the
+  owner's dance clip with the ping and grants the collab boost.
+- Song lyrics are not put in the bot's text; the clip carries the song.
+
+---
+
 ## 2026-11-09 — Curren Chan week back, until you unlock
 
 - Curren Chan week stays for trainers who have not had Curren Chan; once

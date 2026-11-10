@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 /** Timer-ping openers, common and rare. Kept apart so the scheduler and the rare tally share them. */
 
 /**
@@ -18,8 +20,8 @@ export const PING_OPENERS: readonly string[] = [
 /**
  * A boost a special gives the trainer who gets it: for the next `runs`
  * pings, an extra `chance` (on top of the usual special chance) of a
- * special from the same set carrying `tag`. Getting it again restarts the
- * count; it does not stack.
+ * special from the same set carrying `tag`. Getting it again adds `runs`
+ * more to what is left (the runs stack; the chance does not).
  */
 export interface SpecialBoost {
     tag: string;
@@ -41,6 +43,11 @@ export interface Special {
     /** Labels a boost can draw on, e.g. `collab`. */
     tags?: readonly string[];
     boost?: SpecialBoost;
+    /**
+     * A file in `src/assets/specials/` (a video or GIF) posted with the line:
+     * on the ping, its DM copy, and when the special is read in full.
+     */
+    media?: string;
 }
 
 /** One special set: a group of special lines that can be turned on or off. */
@@ -101,10 +108,10 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         unlockBonus: 0.01,
         unlockBonusLabel: '#OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!',
         openers: [
-            { id: 'os.celebrate', name: "#Celebrate", text: "{user}, it's time to #Celebrate! It took so much #Preparation but we finally got #ThreeMillionFollowers on release! Thank you for being my #FavoriteManager, and it's time to get a bazillion more! #WorkHard" },
-            { id: 'os.eyes-only', name: "#ForYourEyesOnly", text: "{user}, it's such a long dayyyy~ #SoTired It was fun but a #DozenDresses takes so long for the producers... So I just want to *closes door behind* show you something #ForYourEyesOnly~\n...ya like it, m'fated #BelovedManager? shh, it's only for you now... and maybe when we truly #BecomeAPair~" },
+            { id: 'os.celebrate', name: "#Celebrate", text: "{user}, it's time to #Celebrate! It took so much #Preparation but we finally got #ThreeMillionFollowers on release! Thank you for being my #FavoriteManager, and it's time to get a bazillion more! #WorkHard", tags: ['collab'] },
+            { id: 'os.eyes-only', name: "#ForYourEyesOnly", text: "{user}, it's such a long dayyyy~ #SoTired It was fun but a #DozenDresses takes so long for the producers... So I just want to *closes door behind* show you something #ForYourEyesOnly~\n...ya like it, m'fated #BelovedManager? shh, it's only for you now... and maybe when we truly #BecomeAPair~", tags: ['collab'] },
             { id: 'os.rickey', name: "#CopanoRickey", text: "Hey {user}, have you seen that #Viral Umastagram photo? The #Rickey☆Buzz one? She wanted to raise 15 million #ChristmasOrnies... Either way, that's why we're streaming with her to garner more support! Here comes the #FengShui train! #CurrenxRickey #RickeyLuckyHappy", tags: ['collab'] },
-            { id: 'os.loves', name: "#LovesOnlyYou", text: "#Woah #Surprised Loves? What are you doing here?! I'm surprised you'd be #WalkingAround- oh my god you're #LiveStreaming! {user}, get in here! Introducing to everyone, #TheBestManager that Tracen can ask for! And also mine~ #CurrensManager #CurrenxLoves\n-# {user} became so famous that even Montjeu #L'ArcChampion requested a collaboration! For the next 50 runs, gain a 4% chance of getting a #SpecialCollab in {set_name}.", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 } },
+            { id: 'os.loves', name: "#LovesOnlyYou", text: "#Woah #Surprised Loves? What are you doing here?! I'm surprised you'd be #WalkingAround- oh my god you're #LiveStreaming! {user}, get in here! Introducing to everyone, #TheBestManager that Tracen can ask for! And also mine~ #CurrensManager #CurrenxLoves\n-# {user} became so famous that even Montjeu #L'ArcChampion requested a collaboration! For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 } },
             { id: 'os.tosen', name: "#TosenJordan", text: "You know Tosen right? Yeah, her #FancyNails are amazing! Look how that fits her #CircusCostume though! We *have* to make one- yes {user}-chan... #ComeOn have you not seen Gojo-kun?! You can do the same! #CurrenxTosen #IWantGojoKun #MakeMeMarin", tags: ['collab'] },
             { id: 'os.gold-city', name: "#GoldCity", text: "Ugh, I want to actually do a #RealCollab with Gold City but she's always busy... Last time she even asked if you'd be her #UmastaCameraman; when are you doing *my* photos huh {user}-chan? Come onnn, at least act like a #RealMan~ #CityWaitingRoom #SpoilYourPrincess", tags: ['collab'] },
             { id: 'os.transcend', name: "#Transcend", text: "Transcend said thanks for the collab, {user}-chan! Her followers went #Explosive overnight, and she called Curren a total #Charisma~ Now she's offering a whole jar of #Hachimi for intel on #TheBestManager... sorry Trans-chan, that scoop is #NotForSale! #CurrenxTranscend", tags: ['collab'] },
@@ -113,6 +120,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'os.taiki', name: "#TaikiShuttle", text: "Ugh, Taiki just doesn't #NoticeMyRivalry at all! She's so #PartyFun and her Texan burgers are so #Deliciousss... That's right! {user}, time to make some noise in UmaTube! Surely we can get a collab out of her! #MakeCurrenNoticeableAgain", tags: ['collab'] },
             { id: 'os.biko', name: "#BikoPegasus", text: "Biko's got a new #UmaTokPost? Oh my GAWDDD I love Biko! Have you seen her animations? Her #PowerRanger series is also soooo cool... wait... You got me a #RangerCollab?! No weiii! (#PalmerHelios taught me that!) Thank you shooo much {user}! Time to get my #DressUp ready! #CurrenxBiko #PinkRanger", tags: ['collab'] },
             { id: 'os.helios', name: "#DaitakuHelios", text: "Wei weeeiiii! {user}, I've heard of how gyatdamnnn vibey you are! So here's the thing Torepiii *wink*: Gold City and I have been doing a pretty s'mexy looksmaxxing Zombie☆Makeover, and I think Curren be such a cutieee, frfr! I'll be looking for six or seven- HAHAH SIX SEVENNN- more ladies, so hook me up... and also ||teach me how to bag Daiichi-ojou too pweaseee!|| See ya, Helios☆Out! #LookAtHelios #ScaryCurren #DoveyVibey", tags: ['collab'] },
+            { id: 'os.chu', name: "#ChuChuChallenge", text: "{user}-chan! Everyone on UmaTok is doing the #ChuChuChallenge, so obviously Curren does it the #Kawaiiest~ Got the #FancyCam ready? Here we go! Chu♡ Chu♡ Chu♡... wait, why are you smiling at me like that?! S-stop, Curren’s supposed to be #Unshakeable! Curren is NOT ドキドキ #Flustered right now! ...Ugh, my face is so warm.. Cut, CUT! Another take! バカ！ #CurrenxTrainer #ChuChuChallenge #DummyTrainer #IHateTrainer\n-# As #Revenge, Curren Chan vows to #TireYouOut with more #SpecialCollabs. For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 }, media: 'chu-chu-challenge.mp4' },
         ],
     },
 ];
@@ -126,7 +134,30 @@ export const RARE_OPENERS: readonly (Special & { set: string })[] = SPECIAL_SETS
 export const RARE_PING_OPENERS: readonly string[] = RARE_OPENERS.map((o) => o.text);
 
 /** Chance, across all of them, that a ping opens with a rare line. */
-export const RARE_OPENER_CHANCE = 0.06;
+export const RARE_OPENER_CHANCE = 0.1;
+
+/**
+ * Soft caps on a ping's total special chance (base plus every boost), as in
+ * Uma's stat soft caps (owner, 2026-11-10). Up to 20% counts in full; the
+ * raw chance from 20% to 30% counts at half (reaching 25%); beyond that at a
+ * quarter; and the effective chance never passes the 30% hard cap (reached
+ * at a raw 50%).
+ */
+export const SPECIAL_SOFT_CAPS: readonly { from: number; rate: number }[] = [
+    { from: 0.2, rate: 1 / 2 },
+    { from: 0.3, rate: 1 / 4 },
+];
+export const SPECIAL_HARD_CAP = 0.3;
+
+/** The effective special chance for a raw total `raw`, after the soft caps and the hard cap. */
+export function effectiveChance(raw: number): number {
+    let effective = Math.min(raw, SPECIAL_SOFT_CAPS[0]!.from);
+    SPECIAL_SOFT_CAPS.forEach((cap, i) => {
+        const end = SPECIAL_SOFT_CAPS[i + 1]?.from ?? Infinity;
+        if (raw > cap.from) effective += (Math.min(raw, end) - cap.from) * cap.rate;
+    });
+    return Math.min(effective, SPECIAL_HARD_CAP);
+}
 
 /**
  * A seasonal buff: from `from` until `until`, every trainer's ping has an
@@ -200,20 +231,22 @@ export function boostOf(text: string): { set: string; boost: SpecialBoost } | un
 
 /**
  * The lines a set's boost draws on: that set's specials with the boost's
- * tag, except the one that grants it, so a boost never renews itself.
+ * tag. Every #OnlineSensations line is a collab (with the trainer, at
+ * least), so its boost covers the whole set, the lines that grant it
+ * included; landing on one of those adds another 50 runs.
  */
 export function boostPool(setId: string, tag: string): string[] {
-    return RARE_OPENERS.filter((o) => o.set === setId && o.tags?.includes(tag) && !o.boost).map((o) => o.text);
+    return RARE_OPENERS.filter((o) => o.set === setId && o.tags?.includes(tag)).map((o) => o.text);
 }
 
 /**
  * Specials locked to one trainer until that trainer has found them:
  *
- *   - nobody else can get it: their special share (6%) is spread evenly
+ *   - nobody else can get it: their special share (10%) is spread evenly
  *     over the other specials;
  *   - the owner gets it at `ownerChance` per ping (2%), and the rest of
  *     their special share (the other 2%) is spread evenly over the other
- *     specials. Their total special chance stays 6%.
+ *     specials. Their total special chance stays 10%.
  *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping
  *     is that special, whatever the roll.
  *
@@ -244,4 +277,13 @@ export function setsUnlockedBy(opener: string, lockedSets: readonly string[]): S
 /** The id of the special whose current text is `text`, or undefined. */
 export function specialIdOf(text: string): string | undefined {
     return RARE_OPENERS.find((o) => o.text === text)?.id;
+}
+
+/** Where special media files live: `src/assets/specials` in development, `dist/assets/specials` when built. */
+export const SPECIAL_MEDIA_DIR = path.join(__dirname, '..', '..', 'assets', 'specials');
+
+/** The media file posted with `opener` (a special's text), as a full path, or null. */
+export function specialMediaPath(opener: string): string | null {
+    const media = RARE_OPENERS.find((o) => o.text === opener)?.media;
+    return media ? path.join(SPECIAL_MEDIA_DIR, media) : null;
 }

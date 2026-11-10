@@ -14,7 +14,8 @@ import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } f
 import { weekResultsPost } from './boardImage';
 import { chooseOpener, grantBoost, isRareOpener, lockedSetsFor, recordRareOpener, spendBoosts } from './rares';
 import { extraChances } from './boosts';
-import { fillOpener, pickOpener, rarePoolFor, setsUnlockedBy } from './openers';
+import { fillOpener, pickOpener, rarePoolFor, setsUnlockedBy, specialMediaPath } from './openers';
+import { AttachmentBuilder } from 'discord.js';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
 
@@ -47,7 +48,7 @@ export { PING_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, pickOpener } from 
 export { extraChances } from './boosts';
 
 /**
- * Builds the message body for an expiry ping: an opener (a rare one 6% of
+ * Builds the message body for an expiry ping: an opener (a rare one 10% of
  * the time), then a bold-led line for each thing worth celebrating
  * (a special set it unlocked, the run's number, a streak, a new milestone
  * role). `milestoneRoleId` is a role the run just earned; it is mentioned
@@ -154,7 +155,10 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // The first time a trainer gets a set's prerequisite, the ping says the set opened.
                 const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
                 const content = buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, Math.random, opener, unlocked);
-                const message = await channel.send({ content, allowedMentions: { users: [timer.discordUserId] } });
+                // A special with media (e.g. #ChuChuChallenge's video) posts it with the line.
+                const media = specialMediaPath(opener);
+                const files = () => (media ? [new AttachmentBuilder(media)] : []);
+                const message = await channel.send({ content, files: files(), allowedMentions: { users: [timer.discordUserId] } });
                 await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));
                 // Boosts tick down only while on (off pauses them). A boost
                 // this ping grants starts after it, with its full count.
@@ -167,7 +171,7 @@ async function processExpiredTimers(client: Client): Promise<void> {
                     // A copy in their DMs; it pings nobody else and is not deleted.
                     await client.users
                         .fetch(timer.discordUserId)
-                        .then((user) => user.send({ content, allowedMentions: { parse: [] } }))
+                        .then((user) => user.send({ content, files: files(), allowedMentions: { parse: [] } }))
                         .catch((e) => console.warn(`Timer DM to ${timer.discordUserId} failed (DMs closed?):`, e instanceof Error ? e.message : e));
                 }
             }

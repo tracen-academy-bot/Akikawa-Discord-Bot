@@ -41,7 +41,7 @@ trainer's mention, `{set_name}` the set's name.
 
    ```text
    #Woah #Surprised Loves? What are you doing here?! I'm surprised you'd be #WalkingAround- oh my god you're #LiveStreaming! {user}, get in here! Introducing to everyone, #TheBestManager that Tracen can ask for! And also mine~ #CurrensManager #CurrenxLoves
-   -# {user} became so famous that even Montjeu #L'ArcChampion requested a collaboration! For the next 50 runs, gain a 4% chance of getting a #SpecialCollab in {set_name}.
+   -# {user} became so famous that even Montjeu #L'ArcChampion requested a collaboration! For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.
    ```
 
 5. Tosen Jordan
@@ -92,6 +92,13 @@ trainer's mention, `{set_name}` the set's name.
     Wei weeeiiii! {user}, I've heard of how gyatdamnnn vibey you are! So here's the thing Torepiii *wink*: Gold City and I have been doing a pretty s'mexy looksmaxxing Zombie☆Makeover, and I think Curren be such a cutieee, frfr! I'll be looking for six or seven- HAHAH SIX SEVENNN- more ladies, so hook me up... and also ||teach me how to bag Daiichi-ojou too pweaseee!|| See ya, Helios☆Out! #LookAtHelios #ScaryCurren #DoveyVibey
     ```
 
+13. #ChuChuChallenge (posts `src/assets/specials/chu-chu-challenge.mp4`)
+
+    ```text
+    {user}-chan! Everyone on UmaTok is doing the #ChuChuChallenge, so obviously Curren does it the #Kawaiiest~ Got the #FancyCam ready? Here we go! Chu♡ Chu♡ Chu♡... wait, why are you smiling at me like that?! S-stop, Curren’s supposed to be #Unshakeable! Curren is NOT ドキドキ #Flustered right now! ...Ugh, my face is so warm.. Cut, CUT! Another take! バカ！ #CurrenxTrainer #ChuChuChallenge #DummyTrainer #IHateTrainer
+    -# As #Revenge, Curren Chan vows to #TireYouOut with more #SpecialCollabs. For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.
+    ```
+
 ## Sources for the hooks
 
 Voice ids are from the JP master data (see `docs/uma-reference/`).
@@ -114,11 +121,17 @@ Voice ids are from the JP master data (see `docs/uma-reference/`).
   While locked, its lines never come up, and its page in the trainer's
   Specials list says "Locked: find Curren Chan", with the On/Off button
   greyed out.
-- **Collab lines** (tag `collab`): 3, 5-12. Not 1 (Celebrate), 2 (For Your
-  Eyes Only) or 4 (Loves, which grants the boost).
+- **Collab lines** (tag `collab`): all 13. Every line is a collab, with
+  the trainer at least (owner, 2026-11-10), so the boost covers the whole
+  set, the lines that grant it included (landing on one adds 50 more runs).
 - **Unlock bonus:** once a trainer has unlocked the set, every ping has an
-  extra 1% chance of one of its 12 lines (on top of the usual 6% for any
+  extra 1% chance of one of its lines (on top of the usual 10% for any
   special). Boosts off turns it off.
+- **#ChuChuChallenge** (line 13) grants the same collab boost as Loves (it
+  adds 50 runs), and posts its video with the ping, its DM copy and
+  the read view. The clip is the owner's (a fan dance video set to
+  chu♡chu♡chu by Ganeme), re-encoded to 720p30, 3.6 MB.
 - **Loves Only You's boost:** for the trainer's next 50 pings, +4% chance of
-  a collab line, on top of the usual 4% for any special. Getting Loves again
-  restarts the 50; it does not stack. Boosts off pauses it.
+  an #OnlineSensations line, on top of the usual 10% for any special. Getting
+  Loves (or #ChuChuChallenge) again adds 50 more runs to what is left; the
+  +4% does not stack. Boosts off pauses it.

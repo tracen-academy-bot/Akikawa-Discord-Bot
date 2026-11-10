@@ -619,7 +619,9 @@ export async function handleSpecialRead(interaction: StringSelectMenuInteraction
     if (!interaction.inGuild()) return;
     const special = await readSpecial(interaction.guildId, interaction.user.id, interaction.values[0] ?? '');
     await interaction.reply({
-        ...(special ? { embeds: [specialEmbed(special)] } : { content: 'You have not unlocked that special yet.' }),
+        ...(special
+            ? { embeds: [specialEmbed(special)], files: special.media ? [new AttachmentBuilder(special.media)] : [] }
+            : { content: 'You have not unlocked that special yet.' }),
         allowedMentions: { parse: [] },
         flags: MessageFlags.Ephemeral,
     });
