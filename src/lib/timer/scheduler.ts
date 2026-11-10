@@ -15,7 +15,7 @@ import { weekResultsPost } from './boardImage';
 import { chooseOpener, grantBoost, trainerPool, isRareOpener, lockedSetsFor, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances } from './boosts';
 import { commonsFor, fillOpener, pickOpener, rarePoolFor, setsUnlockedBy, specialCredit, specialMediaPath } from './openers';
-import { mediaMessage } from './mediaMessage';
+import { pingBox } from './pingBox';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
 
@@ -48,24 +48,20 @@ export { PING_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, pickOpener } from 
 export { extraChances } from './boosts';
 
 /**
- * Builds the message body for an expiry ping: an opener (a rare one 6% of
- * the time), then a bold-led line for each thing worth celebrating
- * (a special set it unlocked, the run's number, a streak, a new milestone
- * role). `milestoneRoleId` is a role the run just earned; it is mentioned
- * but, with only the user allowed to be pinged, does not notify the role.
- * `unlockedSets` are the names of sets this ping's special just unlocked.
- * `random` is injectable for tests.
+ * The bold-led lines under an expiry ping's opener, one for each thing worth
+ * celebrating: a special set it unlocked, a late delivery, the run's number,
+ * a streak, a new milestone role. `milestoneRoleId` is a role the run just
+ * earned; it is mentioned but, with only the user allowed to be pinged, does
+ * not notify the role. `unlockedSets` are the names of sets this ping's
+ * special just unlocked.
  */
-export function buildPingContent(
-    discordUserId: string,
+export function pingExtraLines(
     summary: CompletionSummary,
     lagSeconds: number,
     milestoneRoleId: string | null = null,
-    random: () => number = Math.random,
-    opener?: string,
     unlockedSets: readonly string[] = [],
-): string {
-    const lines = [fillOpener(opener ?? pickOpener(random()), discordUserId)];
+): string[] {
+    const lines: string[] = [];
     for (const name of unlockedSets) lines.push(`**Congrats!** ${name} unlocked!`);
 
     if (lagSeconds > LATE_DELIVERY_THRESHOLD_S) {
@@ -86,8 +82,25 @@ export function buildPingContent(
         lines.push(`**Persistence!** **${summary.currentStreakDays} days** straight! Keep it going!`);
     }
     if (milestoneRoleId) lines.push(`**Promotion!** **${summary.totalRuns} runs** reached, and <@&${milestoneRoleId}> is yours!`);
+    return lines;
+}
 
-    return lines.join('\n');
+/**
+ * The whole expiry ping as text: the opener (a rare one 6% of the time),
+ * then `pingExtraLines`. The ping itself posts as a box (`pingBox`); this
+ * text form is what the tests read. `random` is injectable for tests.
+ */
+export function buildPingContent(
+    discordUserId: string,
+    summary: CompletionSummary,
+    lagSeconds: number,
+    milestoneRoleId: string | null = null,
+    random: () => number = Math.random,
+    opener?: string,
+    unlockedSets: readonly string[] = [],
+): string {
+    const filled = fillOpener(opener ?? pickOpener(random()), discordUserId);
+    return [filled, ...pingExtraLines(summary, lagSeconds, milestoneRoleId, unlockedSets)].join('\n');
 }
 
 /** A guild the bot is in, from the cache or Discord; null when it is not. */
@@ -162,20 +175,15 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras, commons);
                 // The first time a trainer gets a set's prerequisite, the ping says the set opened.
                 const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
-                const content = buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, Math.random, opener, unlocked);
-                // A special with media (e.g. #ChuChuChallenge's video) posts as one
-                // Components V2 box: line, subtext, media, credit, then the extras.
-                const media = specialMediaPath(opener);
-                const filled = fillOpener(opener, timer.discordUserId);
+                // Every ping posts as one Components V2 box: line, subtext, the
+                // media and its credit when the line has them, then the extras.
                 const payload = () =>
-                    media
-                        ? mediaMessage({
-                              text: filled,
-                              mediaPath: media,
-                              credit: specialCredit(opener),
-                              extraLines: content.slice(filled.length).split('\n').filter((l) => l.length > 0),
-                          })
-                        : { content };
+                    pingBox({
+                        text: fillOpener(opener, timer.discordUserId),
+                        mediaPath: specialMediaPath(opener),
+                        credit: specialCredit(opener),
+                        extraLines: pingExtraLines(summary, lagSeconds, milestoneRoleId, unlocked),
+                    });
                 const message = await channel.send({ ...payload(), allowedMentions: { users: [timer.discordUserId] } });
                 await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));
                 // Boosts tick down only while on (off pauses them). A boost

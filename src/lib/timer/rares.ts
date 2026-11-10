@@ -221,11 +221,6 @@ export async function readSpecial(guildId: string, discordUserId: string, choice
     return { name: special.name, text: fillOpener(special.text, discordUserId), media: specialMediaPath(special.text), credit: special.credit ?? null };
 }
 
-/** The embed showing one special in full. */
-export function specialEmbed(special: { name: string; text: string }): EmbedBuilder {
-    return new EmbedBuilder().setColor(0xf2a87a).setTitle(special.name).setDescription(special.text);
-}
-
 /** The locks still on: their special, owner and owner's chance, while the owner has not found it. */
 async function activeLocks(guildId: string): Promise<{ text: string; owner: string; ownerChance: number }[]> {
     const active: { text: string; owner: string; ownerChance: number }[] = [];

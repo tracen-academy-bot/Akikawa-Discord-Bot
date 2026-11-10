@@ -68,8 +68,10 @@ instead of text plus a loose attachment:
 
 Notes: a V2 message has no `content`, so the mention sits in a text block
 (check once live that it still pings with `allowedMentions`); the DM copy
-and the read view use the same builder. Only lines with media would use the
-box; plain lines stay plain.
+and the read view use the same builder.
+
+Shipped (2026-11-10, `src/lib/timer/pingBox.ts`), and extended by the owner:
+every ping is a box, with or without media.
 
 ## 3. Lobby Loungers (Set 1) additions
 
