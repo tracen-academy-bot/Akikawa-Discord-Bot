@@ -381,7 +381,7 @@ async function main() {
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
     check('media: a line without media posts none', [openers.specialMediaPath(RARE_OPENERS[0]!.text), openers.specialMediaPath(PING_OPENERS[0]!)], [null, null]);
     check('chu: grants the collab boost like Loves, and is not in its own pool', [openers.boostOf(chu.text)?.boost, openers.boostPool('online-sensations', 'collab').includes(chu.text)], [{ tag: 'collab', chance: 0.04, runs: 50 }, false]);
-    check('chu: one {user}, and {set_name} fills in', [chu.text.split('{user}').length - 1, openers.fillOpener(chu.text, 'u1').includes('#SpecialCollab in #OnlineSensations.')], [1, true]);
+    check('chu: one {user}, and {set_name} fills in', [chu.text.split('{user}').length - 1, openers.fillOpener(chu.text, 'u1').includes('an entry in #OnlineSensations.')], [1, true]);
 
     // The live board's Today card shows as many trainers as fit beside the week.
     const live = await import('../src/lib/image/renderTimerLeaderboard');
