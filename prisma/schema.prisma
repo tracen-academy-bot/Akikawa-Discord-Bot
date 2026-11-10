@@ -176,6 +176,9 @@ model TimerUserSettings {
     disabledSets  String[] @default([])
     /// Boosts (a set's boost, the Early Riser boost) apply. Off pauses them.
     boosts        Boolean  @default(true)
+    /// Their latest reminder (common) lines, newest last; these can't come
+    /// up again yet (`COMMON_NO_REPEAT`).
+    recentOpeners String[] @default([])
     updatedAt     DateTime @updatedAt
 
     @@id([guildId, discordUserId])

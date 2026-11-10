@@ -12,9 +12,9 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { chooseOpener, grantBoost, isRareOpener, lockedSetsFor, recordRareOpener, spendBoosts } from './rares';
+import { chooseOpener, grantBoost, isRareOpener, lockedSetsFor, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances } from './boosts';
-import { fillOpener, pickOpener, rarePoolFor, setsUnlockedBy, specialMediaPath } from './openers';
+import { commonsFor, fillOpener, pickOpener, rarePoolFor, setsUnlockedBy, specialMediaPath } from './openers';
 import { AttachmentBuilder } from 'discord.js';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
@@ -151,7 +151,9 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 const lockedSets = await lockedSetsFor(timer.guildId, timer.discordUserId);
                 const pool = rarePoolFor(settings.disabledSets, lockedSets);
                 const extras = await extraChances(timer.guildId, timer.discordUserId, settings, lockedSets, timer.earlyStart, pool);
-                const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras);
+                // Reminder lines don't repeat within 4 pings in a row (see COMMON_NO_REPEAT).
+                const commons = commonsFor(await recentCommons(timer.guildId, timer.discordUserId));
+                const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras, commons);
                 // The first time a trainer gets a set's prerequisite, the ping says the set opened.
                 const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
                 const content = buildPingContent(timer.discordUserId, summary, lagSeconds, milestoneRoleId, Math.random, opener, unlocked);
@@ -163,6 +165,7 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // Boosts tick down only while on (off pauses them). A boost
                 // this ping grants starts after it, with its full count.
                 if (settings.boosts) await spendBoosts(timer.guildId, timer.discordUserId);
+                if (!isRareOpener(opener)) await rememberCommon(timer.guildId, timer.discordUserId, opener);
                 if (isRareOpener(opener)) {
                     await recordRareOpener(timer.guildId, timer.discordUserId, opener);
                     await grantBoost(timer.guildId, timer.discordUserId, opener);

@@ -15,6 +15,19 @@ export const PING_OPENERS: readonly string[] = [
     '{user} Tick tock, the clock has reached its end!',
     '{user} Your uma has been calling; get back to her soon!',
     '{user} Trainer-san, the training has been completed. Please get back to your uma soon.',
+    "{user} The Chairwoman declares this run complete! Splendid work!",
+    "{user} Tazuna-san reports your trainee is waiting by the track!",
+    "{user} Time's up! Don't keep a future champion waiting!",
+    "{user} Your trainee just crossed the line. Go see how she did!",
+    "{user} Ding! Independent Training complete. On to the next!",
+    "{user} There goes the bell! Your trainee awaits her trainer!",
+    "{user} Run finished. Your uma is cooling down; check in when you can.",
+    "{user} That's another run logged. Whenever you're ready.",
+    "{user} The stopwatch did its job. Now do yours.",
+    "{user} Your trainee is on the bench, swinging her legs and very obviously waiting.",
+    "{user} Session over. Check her condition before the next one.",
+    "{user} Your uma came back and is pretending she wasn't waiting for you.",
+    "{user} Your uma is stretching very loudly in your general direction.",
 ];
 
 /**
@@ -209,13 +222,22 @@ export function fillOpener(text: string, discordUserId: string): string {
  * Picks an opener from one random number: below `RARE_OPENER_CHANCE` a rare
  * one, else a common one, each evenly within its group.
  */
-export function pickOpener(r: number, rarePool: readonly string[] = RARE_PING_OPENERS): string {
+export function pickOpener(r: number, rarePool: readonly string[] = RARE_PING_OPENERS, commons: readonly string[] = PING_OPENERS): string {
     if (r < RARE_OPENER_CHANCE && rarePool.length > 0) {
         return rarePool[Math.min(rarePool.length - 1, Math.floor((r / RARE_OPENER_CHANCE) * rarePool.length))]!;
     }
     // A rare roll with every special set off falls back to a common line.
     const share = r < RARE_OPENER_CHANCE ? r / RARE_OPENER_CHANCE : (r - RARE_OPENER_CHANCE) / (1 - RARE_OPENER_CHANCE);
-    return PING_OPENERS[Math.min(PING_OPENERS.length - 1, Math.floor(share * PING_OPENERS.length))]!;
+    return commons[Math.min(commons.length - 1, Math.floor(share * commons.length))]!;
+}
+
+/** How many of a trainer's latest reminder lines can't come up again: none repeats within 4 pings in a row. */
+export const COMMON_NO_REPEAT = 3;
+
+/** The reminder lines a trainer can get next: all but their last `COMMON_NO_REPEAT` (all, if that left none). */
+export function commonsFor(recent: readonly string[]): string[] {
+    const left = PING_OPENERS.filter((o) => !recent.includes(o));
+    return left.length > 0 ? left : [...PING_OPENERS];
 }
 
 /** The special texts in the sets that are neither turned off (`disabledSets`) nor locked (`lockedSets`). */

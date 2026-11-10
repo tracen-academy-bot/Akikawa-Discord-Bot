@@ -4,6 +4,13 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-10 — More reminder lines, no repeats
+
+- 20 everyday reminder lines (was 7), less uniformly upbeat.
+- The same reminder line never comes up twice within 4 pings in a row.
+
+---
+
 ## 2026-11-10 — Base special chance back to 6%
 
 - The base stays 6%; the soft caps (20% / 25% / 30%) remain for later.

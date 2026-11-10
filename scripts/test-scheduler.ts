@@ -91,7 +91,7 @@ async function main() {
     check('ping opens with one of the openers', allOpeners.some((o) => sent[0]?.content.includes(o.replace('{user}', '').trim().slice(0, 30))), true);
     check('openers: every one names the trainer at least once', allOpeners.every((o) => o.split('{user}').length >= 2), true);
     check('openers: below the base chance a rare one, spread evenly', [pickOpener(0), pickOpener(P - 1e-7), pickOpener(P / 2)], [RARE_PING_OPENERS[0], RARE_PING_OPENERS[RARE_PING_OPENERS.length - 1], RARE_PING_OPENERS[Math.floor(RARE_PING_OPENERS.length / 2)]]);
-    check('openers: from the base chance up a common one, spread evenly', [pickOpener(P), pickOpener(P + (1 - P) * 0.5), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[3], PING_OPENERS[6]]);
+    check('openers: from the base chance up a common one, spread evenly', [pickOpener(P), pickOpener(P + (1 - P) * 0.5), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[Math.floor(PING_OPENERS.length / 2)], PING_OPENERS[PING_OPENERS.length - 1]]);
     let rare = 0;
     for (let i = 0; i < 100000; i += 1) if (RARE_PING_OPENERS.includes(pickOpener(i / 100000))) rare += 1;
     check('openers: the base chance is 6%, and rare ones are 6% of the range', [P, rare], [0.06, stepsOf(100000)]);
@@ -388,6 +388,19 @@ async function main() {
     const capSpecials = [...capCounts].filter(([o]) => rares.isRareOpener(o)).reduce((n, [, c]) => n + c, 0);
     check('caps: raw 36% plays as 26.5% (base whole, boosts shrunk)', Math.abs(capSpecials - stepsOf(20000, 0.265)) <= 2, true);
 
+    // Reminder lines: none repeats within 4 pings in a row.
+    check('reminders: 20 lines, each naming the trainer', [PING_OPENERS.length, PING_OPENERS.every((o) => o.includes('{user}'))], [20, true]);
+    const NR = `test-norepeat-${Date.now()}`;
+    for (const o of PING_OPENERS.slice(0, 5)) await rares.rememberCommon(NR, 'n1', o);
+    check('reminders: the latest 3 are remembered, newest last', await rares.recentCommons(NR, 'n1'), PING_OPENERS.slice(2, 5));
+    const allowed = openers.commonsFor(await rares.recentCommons(NR, 'n1'));
+    check('reminders: those 3 are left out of the next pick', [allowed.length, PING_OPENERS.slice(2, 5).some((o) => allowed.includes(o))], [PING_OPENERS.length - 3, false]);
+    const picks = new Set<string>();
+    for (let k = 0; k < 2000; k += 1) picks.add(await rares.chooseOpener(NR, 'n1', P + ((1 - P) * k) / 2000, [], [], allowed));
+    check('reminders: a common roll never lands on a recent line, and covers all the others', [PING_OPENERS.slice(2, 5).some((o) => picks.has(o)), [...picks].filter((o) => !rares.isRareOpener(o)).length], [false, PING_OPENERS.length - 3]);
+    check('reminders: with nothing recent, all are allowed', openers.commonsFor([]).length, PING_OPENERS.length);
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: NR } });
+
     // Media: #ChuChuChallenge posts its video; the file is in the repo; plain lines post nothing.
     const fs = await import('fs');
     const chu = RARE_OPENERS.find((o) => o.id === 'os.chu')!;
@@ -436,7 +449,7 @@ async function main() {
         '**Record!** A new personal best: **7 days** in a row!',
         '**Promotion!** **25 runs** reached, and <@&role-25> is yours!',
     ]);
-    check('ping: a plain run is just the opener', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => 0.5), '<@u1> Excellent! Your run is done! Rest a moment, then go again!');
+    check('ping: a plain run is just the opener', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => 0.5), PING_OPENERS[Math.floor(((0.5 - P) / (1 - P)) * PING_OPENERS.length)]!.replace('{user}', '<@u1>'));
     check('ping: an ongoing streak, first run of the day', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 4, firstOfDay: true, totalRuns: 9 } as never, 0, null, () => 0.5).split('\n')[1], '**Persistence!** **4 days** straight! Keep it going!');
 
     check('expired timer removed', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-a' } }), 0);

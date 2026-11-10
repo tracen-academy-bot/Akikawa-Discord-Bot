@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -325,6 +325,7 @@ export async function chooseOpener(
     r: number,
     pool: readonly string[],
     extras: readonly ExtraChance[] = [],
+    commons: readonly string[] = PING_OPENERS,
 ): Promise<string> {
     const locks = await activeLocks(guildId);
     const locked = locks.map((l) => l.text);
@@ -357,16 +358,32 @@ export async function chooseOpener(
     const others = pool.filter((t) => !locked.includes(t));
     if (mine && rest < p) {
         if (rest < mine.ownerChance) return mine.text;
-        if (others.length === 0) return pickCommon(() => (rest - mine.ownerChance) / (p - mine.ownerChance));
+        if (others.length === 0) return pickCommon(() => (rest - mine.ownerChance) / (p - mine.ownerChance), commons);
         const share = (rest - mine.ownerChance) / (p - mine.ownerChance);
         return others[Math.min(others.length - 1, Math.floor(share * others.length))]!;
     }
-    return pickOpener(rest, others);
+    return pickOpener(rest, others, commons);
 }
 
 /** A common opener at random, for when a locked special has no other special to become. */
-function pickCommon(random: () => number): string {
-    return PING_OPENERS[Math.min(PING_OPENERS.length - 1, Math.floor(random() * PING_OPENERS.length))]!;
+function pickCommon(random: () => number, commons: readonly string[] = PING_OPENERS): string {
+    return commons[Math.min(commons.length - 1, Math.floor(random() * commons.length))]!;
+}
+
+/** A trainer's latest reminder lines, newest last (at most `COMMON_NO_REPEAT`). */
+export async function recentCommons(guildId: string, discordUserId: string): Promise<string[]> {
+    const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } }, select: { recentOpeners: true } });
+    return row?.recentOpeners ?? [];
+}
+
+/** Remembers that a trainer just got the reminder line `opener`, keeping the latest `COMMON_NO_REPEAT`. */
+export async function rememberCommon(guildId: string, discordUserId: string, opener: string): Promise<void> {
+    const recentOpeners = [...(await recentCommons(guildId, discordUserId)), opener].slice(-COMMON_NO_REPEAT);
+    await prisma.timerUserSettings.upsert({
+        where: { guildId_discordUserId: { guildId, discordUserId } },
+        create: { guildId, discordUserId, recentOpeners },
+        update: { recentOpeners },
+    });
 }
 
 // ─── Specials leaderboard ─────────────────────────────────────────────────────
