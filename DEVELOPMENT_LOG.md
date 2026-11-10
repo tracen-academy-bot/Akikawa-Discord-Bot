@@ -16,6 +16,11 @@ Newest first. Each entry records what changed and, more importantly, why.
   player (click to play, with sound); a GIF would autoplay but be silent.
 - Tests: the media path and file, size limit, the new line's boost and fill;
   set-size counts now read the set instead of a hard-coded 12.
+- The collab boost now covers all of #OnlineSensations (owner: each line is
+  a collab with the trainer). Every line is tagged `collab`, and
+  `boostPool` no longer leaves out the lines that grant the boost; landing
+  on one restarts the 50 runs. The footers (Loves, #ChuChuChallenge) say
+  "a 4% chance of getting an entry in #OnlineSensations".
 
 ---
 

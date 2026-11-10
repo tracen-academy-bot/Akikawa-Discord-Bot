@@ -215,7 +215,7 @@ async function main() {
     await rares.recordRareOpener(XG, 'u1', curren.text);
     check('locks: open once Curren Chan is found', [await rares.lockedSetsFor(XG, 'u1'), await rares.lockedSetsFor(XG, 'u2')], [[], ['online-sensations']]);
     const collabs = openers.boostPool('online-sensations', 'collab');
-    check('boost: draws only on the collab lines, never Loves', [collabs.length, collabs.includes(loves.text), RARE_OPENERS.filter((o) => collabs.includes(o.text)).map((o) => o.name).includes('#Celebrate')], [9, false, false]);
+    check('boost: covers every #OnlineSensations line, Loves and #Celebrate included', [collabs.length, collabs.includes(loves.text), RARE_OPENERS.filter((o) => collabs.includes(o.text)).map((o) => o.name).includes('#Celebrate')], [openers.SPECIAL_SETS[1]!.openers.length, true, true]);
     check('boost: a plain special grants nothing', await rares.grantBoost(XG, 'u1', curren.text), false);
     check('boost: Loves grants 50 runs', [await rares.grantBoost(XG, 'u1', loves.text), await rares.activeBoosts(XG, 'u1')], [true, [{ setId: 'online-sensations', runsLeft: 50 }]]);
     await rares.spendBoosts(XG, 'u1');
@@ -232,7 +232,7 @@ async function main() {
     const fullPool = openers.rarePoolFor([]);
     // A time with no seasonal buff running, so the checks below see only boosts.
     const OFF_SEASON = new Date('2026-01-01T00:00:00Z');
-    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON)).map((e) => [e.chance, e.pool.length]), [[0.04, 9], [0.01, fullPool.length], [0.01, openers.SPECIAL_SETS[1]!.openers.length]]);
+    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON)).map((e) => [e.chance, e.pool.length]), [[0.04, openers.SPECIAL_SETS[1]!.openers.length], [0.01, fullPool.length], [0.01, openers.SPECIAL_SETS[1]!.openers.length]]);
     check('extras: the unlock bonus only once the set is unlocked', (await extraChances(XG, 'u1', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
     check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool, OFF_SEASON)).map((e) => e.chance), [0.04, 0.01, 0.01]);
     check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool, OFF_SEASON), []);
@@ -256,7 +256,7 @@ async function main() {
     check('odds: special chance is 4% + 1% + 1% + 6% = 12%', Math.abs(specialCount - stepsOf(STEPS, 0.04 + 0.01 + 0.01 + P)) <= 1, true);
     // Collab lines: all of the 4% boost, plus their share of the 1% and 6%
     // (spread over every special but the locked Matikanetannhauser).
-    const shareOf = (n: number, of: number) => Math.round((STEPS * n * 9) / of);
+    const shareOf = (n: number, of: number) => Math.round((STEPS * n * collabs.length) / of);
     check('odds: the collab lines get the whole boost', Math.abs(collabCount - (stepsOf(STEPS, 0.04) + shareOf(0.01, fullPool.length - 1) + shareOf(P, fullPool.length - 1) + shareOf(0.01, openers.SPECIAL_SETS[1]!.openers.length))) <= 3, true);
     // The sweep is discrete, so step boundaries can shift a count by one either way.
     const commonEach = (STEPS - stepsOf(STEPS, 0.04 + 0.01 + 0.01 + P)) / PING_OPENERS.length;
@@ -380,7 +380,7 @@ async function main() {
     check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
     check('media: a line without media posts none', [openers.specialMediaPath(RARE_OPENERS[0]!.text), openers.specialMediaPath(PING_OPENERS[0]!)], [null, null]);
-    check('chu: grants the collab boost like Loves, and is not in its own pool', [openers.boostOf(chu.text)?.boost, openers.boostPool('online-sensations', 'collab').includes(chu.text)], [{ tag: 'collab', chance: 0.04, runs: 50 }, false]);
+    check('chu: grants the collab boost like Loves, and is in its pool like every line', [openers.boostOf(chu.text)?.boost, openers.boostPool('online-sensations', 'collab').includes(chu.text)], [{ tag: 'collab', chance: 0.04, runs: 50 }, true]);
     check('chu: one {user}, and {set_name} fills in', [chu.text.split('{user}').length - 1, openers.fillOpener(chu.text, 'u1').includes('an entry in #OnlineSensations.')], [1, true]);
 
     // The live board's Today card shows as many trainers as fit beside the week.

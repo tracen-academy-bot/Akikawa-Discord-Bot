@@ -121,10 +121,11 @@ Voice ids are from the JP master data (see `docs/uma-reference/`).
   While locked, its lines never come up, and its page in the trainer's
   Specials list says "Locked: find Curren Chan", with the On/Off button
   greyed out.
-- **Collab lines** (tag `collab`): 3, 5-12. Not 1 (Celebrate), 2 (For Your
-  Eyes Only) or 4 (Loves, which grants the boost).
+- **Collab lines** (tag `collab`): all 13. Every line is a collab, with
+  the trainer at least (owner, 2026-11-10), so the boost covers the whole
+  set, the lines that grant it included (landing on one restarts the 50).
 - **Unlock bonus:** once a trainer has unlocked the set, every ping has an
-  extra 1% chance of one of its 12 lines (on top of the usual 6% for any
+  extra 1% chance of one of its lines (on top of the usual 6% for any
   special). Boosts off turns it off.
 - **#ChuChuChallenge** (line 13) grants the same collab boost as Loves (it
   restarts the 50 runs), and posts its video with the ping, its DM copy and
