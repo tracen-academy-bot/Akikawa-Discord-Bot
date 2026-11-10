@@ -31,7 +31,7 @@ export const RANK_LABELS: Record<ClubRank, string> = {
     A_PLUS: 'A',
     A: 'A',
     B_PLUS: 'B',
-    // No badge artwork exists for Casual, so it uses the drawn badge.
+    // Casual's badge is the C artwork (see loadRankIcon); this label is the fallback.
     CASUAL: 'C',
 };
 
@@ -41,7 +41,9 @@ const clubIconCache = new Map<string, Image | null>();
 export async function loadRankIcon(rank: ClubRank): Promise<Image | null> {
     if (rankIconCache.has(rank)) return rankIconCache.get(rank)!;
 
-    const filePath = path.join(__dirname, '..', '..', 'assets', 'ranks', `${rank}.png`);
+    // Casual is not an in-game rank; it wears the C badge.
+    const file = rank === 'CASUAL' ? 'C' : rank;
+    const filePath = path.join(__dirname, '..', '..', 'assets', 'ranks', `${file}.png`);
     if (!fs.existsSync(filePath)) {
         rankIconCache.set(rank, null);
         return null;
@@ -57,7 +59,21 @@ export async function loadRankIcon(rank: ClubRank): Promise<Image | null> {
     }
 }
 
+/**
+ * Draws a club's expected-rank badge centred on (cx, cy). The canvas's text
+ * and stroke settings are left as they were, so the caller's next line of
+ * text sits where it expects.
+ */
 export async function drawRankBadge(ctx: SKRSContext2D, rank: ClubRank | null, cx: number, cy: number, r: number, labelFontSize: number) {
+    ctx.save();
+    try {
+        await drawRankBadgeInner(ctx, rank, cx, cy, r, labelFontSize);
+    } finally {
+        ctx.restore();
+    }
+}
+
+async function drawRankBadgeInner(ctx: SKRSContext2D, rank: ClubRank | null, cx: number, cy: number, r: number, labelFontSize: number) {
     // A club whose rank was never set gets a plain grey dash.
     if (rank === null) {
         ctx.beginPath();

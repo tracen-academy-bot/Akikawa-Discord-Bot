@@ -310,7 +310,7 @@ async function main() {
     });
     check('card: renders with no data', emptyCard.subarray(1, 4).toString(), 'PNG');
     const poster = await renderClubPoster([
-        { id: '1', name: 'Rose', tier: 'G3', rank: 'B_PLUS', headcount: 29, quotaText: '2.0M per day', monthlyRank: 722 },
+        { id: '1', name: 'Rose', tier: 'G3', rank: 'B_PLUS', headcount: 29, quotaText: '2.0M / day', monthlyRank: 722 },
         { id: '2', name: 'Nameless Club With A Very Long Name Indeed', tier: 'DEBUT', rank: null, headcount: null, quotaText: 'Not set', monthlyRank: null },
     ]);
     check('poster: renders a PNG', poster.subarray(1, 4).toString(), 'PNG');

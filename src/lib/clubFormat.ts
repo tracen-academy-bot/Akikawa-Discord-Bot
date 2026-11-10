@@ -1,5 +1,6 @@
 import type { ClubRank, FanCountPeriod, TrackedCircle } from '@prisma/client';
-import { describeQuota, toSafeNumber } from './fans/metrics';
+import { daysInCalendarMonth, describeQuota, quotaPerDayFor, toSafeNumber } from './fans/metrics';
+import { currentGameMonth } from './fans/ingest';
 
 /**
  * How clubs' expected ranks and quotas read, shared by `/club` and the club
@@ -45,4 +46,16 @@ export function clubQuotaText(club: TrackedCircle): string {
     const quota = toSafeNumber(club.quota);
     if (quota > 0) return describeQuota(quota, club.quotaPeriod);
     return club.fanCountAmount === null ? 'Not set' : formatFanCount(club.fanCountAmount, club.fanCountPeriod);
+}
+
+/**
+ * A club's effective daily requirement: fans each member must earn per day
+ * to meet the quota, or null with no quota. A monthly quota is spread over
+ * the current game month's days; weekly and 2-week quotas over 7 and 14.
+ */
+export function clubDailyRequirement(club: Pick<TrackedCircle, 'quota' | 'quotaPeriod'>, now = new Date()): number | null {
+    const quota = toSafeNumber(club.quota);
+    if (quota <= 0) return null;
+    const { year, month } = currentGameMonth(now);
+    return quotaPerDayFor(club.quotaPeriod, quota, daysInCalendarMonth(year, month));
 }

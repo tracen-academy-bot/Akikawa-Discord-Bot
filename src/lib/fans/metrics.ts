@@ -405,9 +405,9 @@ export function periodAdjective(period: QuotaPeriod): string {
     return { DAY: 'Daily', WEEK: 'Weekly', BIWEEKLY: 'Biweekly', MONTH: 'Monthly' }[period];
 }
 
-/** e.g. "80.0M per week". */
+/** e.g. "80.0M / week". */
 export function describeQuota(quota: number, period: QuotaPeriod): string {
-    return `${formatCompactFans(quota)} per ${periodUnit(period)}`;
+    return `${formatCompactFans(quota)} / ${periodUnit(period)}`;
 }
 
 /**

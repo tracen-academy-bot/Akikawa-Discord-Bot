@@ -218,7 +218,7 @@ async function main() {
     check('period was set to weekly', afterWeekly?.quotaPeriod, 'WEEK');
     check('weekly quota stored as given', afterWeekly?.quota, BigInt(72_000_000));
     const weeklyPage = await get(`/circles/${circle.id}`, member.cookie);
-    check('circle page states the weekly quota', weeklyPage.body.includes('72.0M per week'), true);
+    check('circle page states the weekly quota', weeklyPage.body.includes('72.0M / week'), true);
     const badPeriod = await post(`/circles/${circle.id}`, { quota: '72M', period: 'FORTNIGHT', active: 'true', _csrf: officerCsrf }, officer.cookie);
     check('unknown period is rejected with a message', badPeriod.location?.includes('err='), true);
     const omitted = await post(`/circles/${circle.id}`, { quota: '70M', active: 'true', _csrf: officerCsrf }, officer.cookie);
@@ -230,7 +230,7 @@ async function main() {
     const afterBiweekly = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
     check('period was set to biweekly', afterBiweekly?.quotaPeriod, 'BIWEEKLY');
     const biweeklyPage = await get(`/circles/${circle.id}`, officer.cookie);
-    check('circle page states the biweekly quota', biweeklyPage.body.includes('150.0M per 2 weeks'), true);
+    check('circle page states the biweekly quota', biweeklyPage.body.includes('150.0M / 2 weeks'), true);
     check('settings form offers biweekly, selected', biweeklyPage.body.includes('<option value="BIWEEKLY" selected>'), true);
     await post(`/circles/${circle.id}`, { quota: '70M', period: 'WEEK', active: 'true', _csrf: officerCsrf }, officer.cookie);
 

@@ -501,7 +501,7 @@ async function main() {
     const afterQuota = await reload();
     check('/club fancount saves the quota, and not the rank', [afterQuota.rank, String(afterQuota.quota), afterQuota.quotaPeriod], ['S', '14000000', 'WEEK']);
     check('the old club fan count is cleared, not left as a second number', [afterQuota.fanCountAmount, afterQuota.fanCountPeriod], [null, null]);
-    check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M per week')], [false, true]);
+    check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M / week')], [false, true]);
     await submitClub(fancountForm.custom_id, 'u-officer', true, { 'club:quota': '15M' });
     check('not picking a period keeps the current one', [String((await reload()).quota), (await reload()).quotaPeriod], ['15000000', 'WEEK']);
     const plain = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall', 'club:alerts': 'on' });
@@ -1069,6 +1069,43 @@ async function main() {
     await prisma.trackedCircle.deleteMany({ where: { guildId: GUILD } });
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });
     await prisma.$disconnect();
+
+    // A club typed by name instead of picked from the suggestions.
+    const { findClubByIdOrName } = await import('../src/commands/club');
+    const LG = `test-lookup-${Date.now()}`;
+    const ascella = await prisma.trackedCircle.create({ data: { guildId: LG, name: 'Ascella' } });
+    await prisma.trackedCircle.create({ data: { guildId: LG, name: 'Rose' } });
+    await prisma.trackedCircle.create({ data: { guildId: LG, name: 'Primrose' } });
+    check('club lookup: by ID, by exact name ignoring case, by a single partial match', [
+        (await findClubByIdOrName(LG, ascella.id))?.name,
+        (await findClubByIdOrName(LG, 'ascella'))?.name,
+        (await findClubByIdOrName(LG, 'Asc'))?.name,
+    ], ['Ascella', 'Ascella', 'Ascella']);
+    check('club lookup: exact name wins over a longer match; ambiguous or unknown is null', [
+        (await findClubByIdOrName(LG, 'Rose'))?.name,
+        await findClubByIdOrName(LG, 'ros'),
+        await findClubByIdOrName(LG, 'Rigil'),
+    ], ['Rose', null, null]);
+    await prisma.trackedCircle.deleteMany({ where: { guildId: LG } });
+
+    // Club directory image: grouped by expected rank, highest first, names sorted within.
+    const { groupByRank } = await import('../src/lib/image/renderClubList');
+    const dc = (name: string, rank: string | null, daily: number | null = null) => ({ id: name, name, rank: rank as never, headcount: 30, quotaText: '', dailyRequirement: daily });
+    const grouped = groupByRank([
+        dc('Umbra', 'CASUAL'), dc('Tempest', null), dc('Rose', 'A', 2_000_000), dc('Spica', 'S'),
+        dc('Canopus', 'A', 2_000_000), dc('Capella', 'A', 1_500_000), dc('Cosmos', 'A', 3_000_000), dc('Ascella', 'A'), dc('Alkes', 'A_PLUS'),
+    ]);
+    check('directory: groups run S+ to Casual, then unset; empty ranks left out', grouped.map((g) => g.rank), ['S', 'A_PLUS', 'A', 'CASUAL', null]);
+    check('directory: highest daily requirement first, ties by name, no quota last', grouped[2]!.clubs.map((c) => c.name), ['Cosmos', 'Canopus', 'Rose', 'Capella', 'Ascella']);
+    const { shortDaily } = await import('../src/lib/image/renderClubList');
+    check('directory: daily figures stay short', [shortDaily(8_233_333), shortDaily(533_333), shortDaily(1_000), shortDaily(950)], ['8.2M', '533K', '1K', '950']);
+    const { clubDailyRequirement } = await import('../src/lib/clubFormat');
+    const nov = new Date('2026-11-10T12:00:00Z');
+    check('daily requirement: monthly over the game month, 2-weekly over 14, none without a quota', [
+        clubDailyRequirement({ quota: 300_000_000n as never, quotaPeriod: 'MONTH' }, nov),
+        clubDailyRequirement({ quota: 140_000_000n as never, quotaPeriod: 'BIWEEKLY' }, nov),
+        clubDailyRequirement({ quota: 0n as never, quotaPeriod: 'DAY' }, nov),
+    ], [10_000_000, 10_000_000, null]);
 
     console.log(`\n${pass} passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);

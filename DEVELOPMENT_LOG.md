@@ -3148,3 +3148,20 @@ nothing calls this module yet — but the same class of latent bug.
   club role deleted during a deploy (Rigil may have been deleted before #53 deployed).
 - Risk: a club role missing from `CLUB_ROLE_IDS` makes its members lose Member at every start.
   Keep the variable in step with the real club roles.
+
+## 2026-11-10: Club directory image grouped by expected rank
+
+- `renderClubList` groups clubs under section headers in rank order S+, S, A+, A, B+, Casual,
+  then "Rank not set"; names are sorted within a group (`groupByRank`, tested in test-commands).
+- Casual now wears the C badge artwork (`C.png`); before, it was a drawn "C" circle.
+- `drawRankBadge` saves and restores canvas state; the drawn badges left `textBaseline = middle`,
+  which pushed the next club name a few pixels down.
+- The SS, B, C+, D+ and D badges are in-game ranks for the applicant card; expected ranks have no such values.
+- Same day: quotas read "102.3M / month" everywhere (`describeQuota`). The directory image has an
+  EFF. DAILY column (`clubDailyRequirement`: monthly quota over the current game month's days,
+  weekly over 7, 2-weekly over 14), and clubs sort by it within a rank, highest first.
+  Short figures ("533K") keep the column from running into the quota.
+- Same day: `/club` commands accept a club name typed and sent without picking a suggestion
+  (`findClubByIdOrName`: ID, then exact name ignoring case, then a single partial match).
+  Staff hit "That club could not be found." twice (Rigil, Ascella) from pressing Enter on a typed name.
+  test-metrics expected the old "per 2 weeks" wording; updated.
