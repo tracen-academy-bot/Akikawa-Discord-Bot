@@ -88,7 +88,9 @@ async function main() {
     check('ping confirms it still counted', sent[0]?.content.includes('It still counts!'), true);
     check('first run is celebrated', sent[0]?.content.includes('**Debut!** Your very first run is on the record!'), true);
     const allOpeners = [...PING_OPENERS, ...RARE_PING_OPENERS];
-    check('ping opens with one of the openers', allOpeners.some((o) => sent[0]?.content.includes(o.replace('{user}', '').trim().slice(0, 30))), true);
+    const { fillOpener: fillLine } = await import('../src/lib/timer/openers');
+    // The mention can sit anywhere in a line, so compare the whole filled-in line.
+    check('ping opens with one of the openers', allOpeners.some((o) => sent[0]?.content.startsWith(fillLine(o, 'trainer-a'))), true);
     check('openers: every one names the trainer at least once', allOpeners.every((o) => o.split('{user}').length >= 2), true);
     check('openers: below the base chance a rare one, spread evenly', [pickOpener(0), pickOpener(P - 1e-7), pickOpener(P / 2)], [RARE_PING_OPENERS[0], RARE_PING_OPENERS[RARE_PING_OPENERS.length - 1], RARE_PING_OPENERS[Math.floor(RARE_PING_OPENERS.length / 2)]]);
     check('openers: from the base chance up a common one, spread evenly', [pickOpener(P), pickOpener(P + (1 - P) * 0.5), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[Math.floor(PING_OPENERS.length / 2)], PING_OPENERS[PING_OPENERS.length - 1]]);
@@ -443,7 +445,7 @@ async function main() {
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: RG } });
     const full = buildPingContent('u1', { milestone: 25, newLongestStreak: true, currentStreakDays: 7, firstOfDay: true, totalRuns: 25 } as never, 600, 'role-25', () => P);
     check('ping: every celebration on its own bold-led line', full.split('\n'), [
-        '<@u1> Time! Your Independent Training is complete!',
+        PING_OPENERS[0]!.replace('{user}', '<@u1>'),
         '*Apologies! This run ended about 10 minutes ago while I was offline. It still counts!*',
         '**Milestone!** That makes run #**25**!',
         '**Record!** A new personal best: **7 days** in a row!',

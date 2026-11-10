@@ -3,31 +3,33 @@ import * as path from 'path';
 /** Timer-ping openers, common and rare. Kept apart so the scheduler and the rare tally share them. */
 
 /**
- * Openers for an expiry ping. {user} is the trainer's mention; it leads
- * most lines but can sit anywhere. Written by the server's staff: keep the
- * wording as given.
+ * Openers for an expiry ping. {user} is the trainer's mention, placed where
+ * a person would say the name: before any "you/your" it introduces (a
+ * vocative, "{user}-san"), or as "{user}'s" in a third-person line; at the
+ * end only when nothing earlier says "you". Written with the server's staff: keep the wording as
+ * given.
  */
 export const PING_OPENERS: readonly string[] = [
-    '{user} Time! Your Independent Training is complete!',
-    '{user} The timer has reached zero! Go again?',
-    '{user} Training complete! Prepare yourself for the next one!',
-    '{user} Excellent! Your run is done! Rest a moment, then go again!',
-    '{user} Tick tock, the clock has reached its end!',
-    '{user} Your uma has been calling; get back to her soon!',
-    '{user} Trainer-san, the training has been completed. Please get back to your uma soon.',
-    "{user} The Chairwoman declares this run complete! Splendid work!",
-    "{user} Tazuna-san reports your trainee is waiting by the track!",
-    "{user} Time's up! Don't keep a future champion waiting!",
-    "{user} Your trainee just crossed the line. Go see how she did!",
-    "{user} Ding! Independent Training complete. On to the next!",
-    "{user} There goes the bell! Your trainee awaits her trainer!",
-    "{user} Run finished. Your uma is cooling down; check in when you can.",
-    "{user} That's another run logged. Whenever you're ready.",
-    "{user} The stopwatch did its job. Now do yours.",
-    "{user} Your trainee is on the bench, swinging her legs and very obviously waiting.",
-    "{user} Session over. Check her condition before the next one.",
-    "{user} Your uma came back and is pretending she wasn't waiting for you.",
-    "{user} Your uma is stretching very loudly in your general direction.",
+    "Time, {user}! Your Independent Training is complete!",
+    "The timer has reached zero, {user}. Go again?",
+    "Training complete! Prepare yourself for the next one, {user}!",
+    "Excellent work, {user}! Rest a moment, then go again!",
+    "Tick tock, {user}, the clock has reached its end!",
+    "{user}, your uma has been calling. Get back to her soon!",
+    "{user}-san, the training has been completed. Please get back to your uma soon.",
+    "The Chairwoman declares {user}'s run complete! Splendid work!",
+    "Tazuna-san reports that {user}'s trainee is waiting by the track!",
+    "Time's up, {user}! Don't keep a future champion waiting!",
+    "{user}, your trainee just crossed the line. Go see how she did!",
+    "Ding! Independent Training complete. On to the next, {user}!",
+    "There goes the bell! {user}, your trainee awaits!",
+    "Run finished, {user}. Your uma is cooling down; check in when you can.",
+    "That's another run logged, {user}. Whenever you're ready.",
+    "The stopwatch did its job, {user}. Now do yours.",
+    "{user}'s trainee is on the bench, swinging her legs and very obviously waiting.",
+    "Session over, {user}. Check her condition before the next one.",
+    "{user}, your uma came back and is pretending she wasn't waiting for you.",
+    "{user}, your uma is stretching very loudly in your general direction.",
 ];
 
 /**

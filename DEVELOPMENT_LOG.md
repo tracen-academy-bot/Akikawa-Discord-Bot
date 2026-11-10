@@ -16,6 +16,12 @@ Newest first. Each entry records what changed and, more importantly, why.
   `20261110090000_timer_recent_openers`.
 - Tests that named reminder lines by position now work from the list's
   length.
+- **The mention sits where a person would say the name** (owner): before
+  any "you/your" it introduces ("{user}, your trainee..."), as "{user}-san",
+  or as "{user}'s" in a third-person line; at the end only when nothing
+  earlier says "you" ("That's another run logged, {user}."). All 20 lines
+  follow this; the test that matched lines by their start now compares the
+  whole filled-in line.
 
 ---
 
