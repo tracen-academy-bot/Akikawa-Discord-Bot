@@ -177,8 +177,14 @@ async function main() {
     check('ids: a find survives rewording', [(await rares.rareTally(IG, 'u1'))[2]?.count, (await rares.readSpecial(IG, 'u1', RARE_OPENERS[2]!.id))?.name], [1, RARE_OPENERS[2]!.name]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: IG } });
     check('sets: every special belongs to a set', openers.RARE_OPENERS.every((o) => openers.SPECIAL_SETS.some((set) => set.id === o.set)), true);
-    check('sets: all on gives every special', openers.rarePoolFor([]).length, RARE_PING_OPENERS.length);
-    check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, RARE_PING_OPENERS.length - openers.SPECIAL_SETS[0]!.openers.length);
+    // Paused sets (The Mejiro Estate, owner 2026-11-10) give no new finds: never in the pool.
+    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set)).length;
+    check('sets: all on gives every special of the sets not paused', openers.rarePoolFor([]).length, liveSpecials);
+    check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, liveSpecials - openers.SPECIAL_SETS[0]!.openers.length);
+    check('paused: The Mejiro Estate is paused, nothing else', openers.PAUSED_SETS, ['mejiro-estate']);
+    check('paused: none of its lines roll, even with every set unlocked', openers.rarePoolFor([], []).some((t) => RARE_OPENERS.some((o) => o.set === 'mejiro-estate' && o.text === t)), false);
+    check('paused: finding the Mejiro Family line announces nothing', openers.setsUnlockedBy(openers.specialById('set1.mejiro')!.text, ['mejiro-estate']).length, 0);
+    check('paused: no boost draws on it', openers.boostPool('mejiro-estate', 'collab'), []);
     check('sets: with no special on, a rare roll gives a common line', PING_OPENERS.includes(openers.pickOpener(0.001, [])), true);
 
     // The lock: Matikanetannhauser is locked to its owner, guaranteed on their next ping, until they have it.
@@ -200,7 +206,7 @@ async function main() {
     check('lock: guaranteed, the owner gets it on every roll', [lock.ownerChance >= 1, owner.locked], [true, 2000]);
     const other = await sweep('someone-else');
     check('lock: nobody else gets it', other.locked, 0);
-    check('lock: everyone else keeps the base chance, spread evenly over the rest', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 2], [stepsOf(20000), RARE_PING_OPENERS.length - 1, true]);
+    check('lock: everyone else keeps the base chance, spread evenly over the rest', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 2], [stepsOf(20000), liveSpecials - 1, true]);
     await rares.recordRareOpener(LG, 'someone-else', lockedText);
     check('lock: still on while only someone else has it', (await sweep('someone-else', 2000)).locked, 0);
     await rares.recordRareOpener(LG, lock.owner, lockedText);
@@ -405,7 +411,8 @@ async function main() {
     check('stages: after Grandmother, only the photo waits', openers.closedSpecials(new Set([grandma.id])).filter((t) => [...sevenTexts, photo.text].includes(t)), [photo.text]);
     check('stages: the photo opens once all eight are found', openers.closedSpecials(new Set([grandma.id, ...seven])).includes(photo.text), false);
     const FG = `test-stages-${Date.now()}`;
-    const mejiroPool = openers.rarePoolFor([], []).filter((t) => mejiro.openers.some((o) => o.text === t));
+    // The set is paused, so its pool is built directly: the staging must still work when it resumes.
+    const mejiroPool = mejiro.openers.map((o) => o.text);
     const poolBefore = await rares.trainerPool(FG, 'f1', mejiroPool);
     check('redirect: before her welcome, every Mejiro roll is Grandmother (9 of 9)', [poolBefore.length, poolBefore.every((t) => t === grandma.text)], [9, true]);
     await rares.recordRareOpener(FG, 'f1', grandma.text);

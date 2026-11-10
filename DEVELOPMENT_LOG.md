@@ -4,6 +4,24 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-10 — The Mejiro Estate paused: no new finds
+
+- The set went live with #65; the owner had not meant its lines to be
+  final. One trainer had found Grandmother. Owner: "just disable all new
+  finds."
+- `SpecialSet.paused` and `PAUSED_SETS` (openers.ts). A paused set is out
+  of `rarePoolFor` (every roll and the pools built from it), `boostPool`
+  and the boosts in `extraChances`; `setsUnlockedBy` skips it, so finding
+  "Mejiro Family" does not say "Congrats! The Mejiro Estate unlocked!".
+- Kept: its Specials page, the finds already made, their leaderboard
+  points, and the staging logic (its tests now build the set's pool
+  directly, so they still run while it is paused).
+- Not done: trainers who find "Mejiro Family" while it is paused get no
+  Congrats line, now or when it resumes. Their set simply opens.
+- To resume: remove `paused: true` from the set.
+
+---
+
 ## 2026-11-10 — Every ping is a box
 
 - Owner: one layout, not two. Every expiry ping, its DM copy and the

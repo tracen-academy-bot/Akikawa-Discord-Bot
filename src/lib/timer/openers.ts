@@ -99,6 +99,12 @@ export interface SpecialSet {
     unlockBonus?: number;
     /** Shown in the Boosts view after the unlock bonus, e.g. "+1% <label>". */
     unlockBonusLabel?: string;
+    /**
+     * Paused: no new finds. Its lines never come up, in the base roll or any
+     * boost, and finding its prerequisite does not announce it. Its page and
+     * the finds already made stay as they are. Remove the flag to resume.
+     */
+    paused?: boolean;
     openers: readonly Special[];
 }
 
@@ -156,6 +162,8 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         id: 'mejiro-estate',
         name: 'The Mejiro Estate',
         requires: 'set1.mejiro',
+        // Paused (owner, 2026-11-10): no new finds until the lines are redesigned.
+        paused: true,
         openers: [
             { id: 'mejiro.grandmother', name: "Grandmother", text: "Ah. So you are {user}, the trainer the girls cannot stop writing home about. Welcome to the Mejiro Estate. Tea will be served in the east garden at three. Do mind the pond, and do keep McQueen away from the dessert cart until after dinner; I am told she has a plan." },
             { id: 'mejiro.mcqueen', name: "Mejiro McQueen", text: "Welcome to the Mejiro Estate, {user}-san. I shall be your guide this afternoon, desu wa. The garden, the pond, the tea room... and the patisserie cart, which simply happens to lie on our route. *Ahem.* One parfait a week is perfectly reasonable. ...Is that the baseball broadcast in the parlour? N-not that I would know. Shall we?", after: ['mejiro.grandmother'] },
@@ -272,9 +280,12 @@ export function commonsFor(recent: readonly string[]): string[] {
     return left.length > 0 ? left : [...PING_OPENERS];
 }
 
-/** The special texts in the sets that are neither turned off (`disabledSets`) nor locked (`lockedSets`). */
+/** The ids of the paused sets (`SpecialSet.paused`): no new finds from them. */
+export const PAUSED_SETS: readonly string[] = SPECIAL_SETS.filter((s) => s.paused).map((s) => s.id);
+
+/** The special texts in the sets that are neither turned off (`disabledSets`), locked (`lockedSets`) nor paused. */
 export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonly string[] = []): string[] {
-    return RARE_OPENERS.filter((o) => !disabledSets.includes(o.set) && !lockedSets.includes(o.set)).map((o) => o.text);
+    return RARE_OPENERS.filter((o) => !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
 }
 
 /** The special that grants `boost` (by text) and the set it draws from, or undefined. */
@@ -290,6 +301,7 @@ export function boostOf(text: string): { set: string; boost: SpecialBoost } | un
  * included; landing on one of those adds another 50 runs.
  */
 export function boostPool(setId: string, tag: string): string[] {
+    if (PAUSED_SETS.includes(setId)) return [];
     return RARE_OPENERS.filter((o) => o.set === setId && o.tags?.includes(tag)).map((o) => o.text);
 }
 
@@ -325,7 +337,7 @@ export function specialById(id: string): (Special & { set: string }) | undefined
  */
 export function setsUnlockedBy(opener: string, lockedSets: readonly string[]): SpecialSet[] {
     const id = specialIdOf(opener);
-    return id ? SPECIAL_SETS.filter((s) => s.requires === id && lockedSets.includes(s.id)) : [];
+    return id ? SPECIAL_SETS.filter((s) => s.requires === id && lockedSets.includes(s.id) && !s.paused) : [];
 }
 
 /** The id of the special whose current text is `text`, or undefined. */

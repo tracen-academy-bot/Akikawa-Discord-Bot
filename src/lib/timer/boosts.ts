@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { EARLY_START, PAUSED_SETS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
 import { activeBoosts, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
@@ -42,7 +42,8 @@ export async function extraChances(
     buffs: readonly SeasonalBuff[] = SEASONAL_BUFFS,
 ): Promise<ExtraChance[]> {
     if (!settings.boosts) return [];
-    const usable = (setId: string) => !settings.disabledSets.includes(setId) && !lockedSets.includes(setId);
+    // A paused set (SpecialSet.paused) gives no new finds, so no boost draws on it.
+    const usable = (setId: string) => !settings.disabledSets.includes(setId) && !lockedSets.includes(setId) && !PAUSED_SETS.includes(setId);
     const extras: ExtraChance[] = [];
     for (const held of await activeBoosts(guildId, discordUserId)) {
         if (!usable(held.setId)) continue;

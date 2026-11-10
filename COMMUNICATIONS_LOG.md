@@ -4,6 +4,15 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-10 — The Mejiro Estate paused
+
+- #65 put the whole Estate set live; I read "merge it and leave it alone"
+  as the set going live with only the photo rework held back, and did not
+  ask plainly first. The owner wants the lines redesigned first.
+- Decision: no new finds from the set until then. Existing finds stay.
+
+---
+
 ## 2026-11-10 — Every ping is a box
 
 - Owner: "it should always be a box if that is the approach." Every timer

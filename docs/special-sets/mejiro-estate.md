@@ -2,6 +2,8 @@
 
 Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file is the source text; keep the two in step.
 
+**Paused (owner, 2026-11-10): no new finds** until the lines are redesigned (`paused: true` on the set). Its lines never roll, no boost draws on it, and finding "Mejiro Family" no longer announces it. Its Specials page and the finds already made (Grandmother, once) stay. Remove the flag to resume.
+
 - **Premise:** the trainer is invited to a gathering at the Mejiro Estate; each line is one scene.
 - **Style:** fancy, no hashtags (a guest like Helios may keep hers).
 - **Unlock:** the Set 1 line "Mejiro Family" (`set1.mejiro`).
