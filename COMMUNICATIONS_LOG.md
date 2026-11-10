@@ -4,6 +4,12 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-10 — Base special chance back to 6%
+
+- The base stays 6%; the soft caps (20% / 25% / 30%) remain for later.
+
+---
+
 ## 2026-11-10 — 10% specials with soft caps
 
 - Base special chance is 10%. Totals past raw 20% count at half, past raw

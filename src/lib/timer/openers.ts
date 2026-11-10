@@ -134,7 +134,7 @@ export const RARE_OPENERS: readonly (Special & { set: string })[] = SPECIAL_SETS
 export const RARE_PING_OPENERS: readonly string[] = RARE_OPENERS.map((o) => o.text);
 
 /** Chance, across all of them, that a ping opens with a rare line. */
-export const RARE_OPENER_CHANCE = 0.1;
+export const RARE_OPENER_CHANCE = 0.06;
 
 /**
  * Soft caps on a ping's total special chance (base plus every boost), as in
@@ -242,11 +242,11 @@ export function boostPool(setId: string, tag: string): string[] {
 /**
  * Specials locked to one trainer until that trainer has found them:
  *
- *   - nobody else can get it: their special share (10%) is spread evenly
+ *   - nobody else can get it: their special share (6%) is spread evenly
  *     over the other specials;
  *   - the owner gets it at `ownerChance` per ping (2%), and the rest of
  *     their special share (the other 2%) is spread evenly over the other
- *     specials. Their total special chance stays 10%.
+ *     specials. Their total special chance stays 6%.
  *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping
  *     is that special, whatever the roll.
  *

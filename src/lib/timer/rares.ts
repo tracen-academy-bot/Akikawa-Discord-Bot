@@ -302,17 +302,17 @@ export interface ExtraChance {
  *
  *   - one slice per extra, of width `chance`, each picking evenly from its
  *     own pool (an extra whose pool is empty gets no slice);
- *   - then the usual special share, `RARE_OPENER_CHANCE` (10%);
+ *   - then the usual special share, `RARE_OPENER_CHANCE` (6%);
  *   - then the common lines.
  *
  * So the chances add: with extras $c_1, \dots, c_k$, a ping is special with
- * probability $c_1 + \dots + c_k + 0.1$, before the soft caps (`effectiveChance`),
- * which shrink the extras' slices, never the base. Within the usual 10%, the locks work
+ * probability $c_1 + \dots + c_k + 0.06$, before the soft caps (`effectiveChance`),
+ * which shrink the extras' slices, never the base. Within the usual 6%, the locks work
  * as before:
  *
  *   - a locked special is out of everyone's pool but its owner's, so the
- *     10% is spread evenly over the rest;
- *   - the owner gets it below `ownerChance`, and the rest of the 10% is
+ *     6% is spread evenly over the rest;
+ *   - the owner gets it below `ownerChance`, and the rest of the 6% is
  *     spread evenly over the other specials;
  *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping is
  *     that special, whatever the roll and before any extra.
