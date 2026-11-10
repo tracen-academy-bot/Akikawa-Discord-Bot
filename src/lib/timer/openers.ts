@@ -59,11 +59,18 @@ export interface Special {
     tags?: readonly string[];
     boost?: SpecialBoost;
     /**
-     * A set's finale: it can only come up for a trainer who has found every
-     * other special in the set (The Mejiro Estate's Family Photograph).
-     * Until then it is out of their pool and their boosts.
+     * Specials (by id) a trainer must have found before this one can come up,
+     * e.g. the seven Mejiro after Grandmother's welcome, the Family
+     * Photograph after all of them. Until then it is out of their pool and
+     * their boosts. Nothing on the Specials page says so: it just shows "???".
      */
-    finale?: boolean;
+    after?: readonly string[];
+    /**
+     * How many times this special counts in a trainer's pool (default 1).
+     * Grandmother's welcome counts 8 times, so the gate to the rest of The
+     * Mejiro Estate opens quickly. The lock itself is never shown.
+     */
+    weight?: number;
     /**
      * A file in `src/assets/specials/` (a video or GIF) posted with the line:
      * on the ping, its DM copy, and when the special is read in full.
@@ -149,15 +156,15 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         name: 'The Mejiro Estate',
         requires: 'set1.mejiro',
         openers: [
-            { id: 'mejiro.grandmother', name: "Grandmother", text: "Ah. So you are {user}, the trainer the girls cannot stop writing home about. Welcome to the Mejiro Estate. Tea will be served in the east garden at three. Do mind the pond, and do keep McQueen away from the dessert cart until after dinner; I am told she has a plan." },
-            { id: 'mejiro.mcqueen', name: "Mejiro McQueen", text: "Welcome to the Mejiro Estate, {user}-san. Shall I show you the garden? The pond is at its loveliest when the blossoms fall, and the patisserie cart simply happens to be stationed beside it. Ahem. A coincidence, I assure you. Entirely." },
-            { id: 'mejiro.ryan', name: "Mejiro Ryan", text: "{user}-san! It's the Mejiro present exchange! I wrapped a complete training set, so whoever receives it, we're muscling together. ...Huh? You drew my gift, and I drew yours? W-wait, this is exactly like chapter twelve of... forget I said anything! Let's muscle!" },
-            { id: 'mejiro.dober', name: "Mejiro Dober", text: "{user}, over here. ...There are far too many people, and all of them are looking. Not you; you're fine. Sit. Drink your tea. I-it's not as if I kept this seat for you. It was simply empty." },
-            { id: 'mejiro.palmer', name: "Mejiro Palmer", text: "{user}! So, I complimented Grandmother's gown at the last party and she asked me to dance. Tonight it's your turn, I already told her. Please don't step on her feet. I am genuinely begging you." },
-            { id: 'mejiro.ardan', name: "Mejiro Ardan", text: "Shall we, {user}-san? The garden looks like this for only one evening a year, and I would rather spend that fleeting moment beside you. ...Ah, and Sister has asked for photographs, so do try to smile." },
-            { id: 'mejiro.bright', name: "Mejiro Bright", text: "Ah~ {user}-sama, you've arrived~ The tea party began an hour ago... or was it two~? Maki-chan and I have only just finished dressing for it~ Ufufu, the scones will surely wait for us~" },
-            { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "The family insists on a matching photograph... such a commotion. Come, {user}. Stand where I am seen at my best. ...And you may look for as long as you like." },
-            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, no flexing. Dober, the camera, not the floor. Palmer, Bright has fallen asleep again. Ardan, Ramonu, perfect. And {user}, here, beside us. ...There. One for the family album.", finale: true },
+            { id: 'mejiro.grandmother', name: "Grandmother", text: "Ah. So you are {user}, the trainer the girls cannot stop writing home about. Welcome to the Mejiro Estate. Tea will be served in the east garden at three. Do mind the pond, and do keep McQueen away from the dessert cart until after dinner; I am told she has a plan.", weight: 8 },
+            { id: 'mejiro.mcqueen', name: "Mejiro McQueen", text: "Welcome to the Mejiro Estate, {user}-san. I shall be your guide this afternoon, desu wa. The garden, the pond, the tea room... and the patisserie cart, which simply happens to lie on our route. *Ahem.* One parfait a week is perfectly reasonable. ...Is that the baseball broadcast in the parlour? N-not that I would know. Shall we?", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.ryan', name: "Mejiro Ryan", text: "{user}-san! Grandmother made me wear a dress tonight... it's frilly. Very frilly. Everyone keeps saying it looks nice, but they're just being polite, right? ...Right? Ugh, this is exactly the chapter where the heroine flees to the balcony. I am not fleeing to the balcony. I'm just... getting some air.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.dober', name: "Mejiro Dober", text: "{user}, don't wander off. ...Too many people tonight, and half of them are men in suits. Not that I need you here. You're just the only one I can stand next to without my ears going flat. And if Dad calls me 'Bell-chan', you heard nothing.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.palmer', name: "Mejiro Palmer", text: "{user}! So I complimented Grandmother's gown last Christmas and she made me dance. Tonight it's your turn, I already told her. Two rules: don't step on her feet, and do NOT panic and bolt halfway through. Running away at full speed is my move.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.ardan', name: "Mejiro Ardan", text: "Shall we dance, {user}-san? Only a waltz; the doctor was very clear about my legs. ...Please don't look so worried. The garden is lit for this one evening, and I intend to shine for every second of it. Sister is watching, you know. Let us give her something worth looking at.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.bright', name: "Mejiro Bright", text: "Ah~ {user}-sama, good evening~ ...Or is it morning? I napped in the sunroom and lost track~ Ryan-oneesama's dress looks lovely, doesn't it~? I sewed one just like it for Maki-chan~ Please don't tell her, it's a surprise~", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "{user}. You'll do; escort me. ...Surely you didn't think I would walk into my own family's gathering alone, dressed like this? Look, then, for as long as you like. Only know that you are my second love. The first is waiting for me on the turf.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, it looks lovely, stop tugging the hem. Dober, the camera, not the floor; nobody else is looking. Palmer, wake Bright. Ardan, beside your sister. Ramonu... yes, we know, you are radiant. And {user}, here, with the family. ...There. One for the album.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'] },
         ],
     },
 ];
@@ -335,11 +342,9 @@ export function specialMediaPath(opener: string): string | null {
 }
 
 /**
- * The finale specials still closed to a trainer who has found `foundIds`:
- * each finale whose set still has another special they have not found.
+ * The specials still closed to a trainer who has found `foundIds`: those
+ * with an `after` they have not all found.
  */
-export function closedFinales(foundIds: ReadonlySet<string>): string[] {
-    return SPECIAL_SETS.flatMap((set) =>
-        set.openers.filter((o) => o.finale && set.openers.some((other) => !other.finale && !foundIds.has(other.id))).map((o) => o.text),
-    );
+export function closedSpecials(foundIds: ReadonlySet<string>): string[] {
+    return RARE_OPENERS.filter((o) => o.after?.some((id) => !foundIds.has(id))).map((o) => o.text);
 }

@@ -390,20 +390,28 @@ async function main() {
     const capSpecials = [...capCounts].filter(([o]) => rares.isRareOpener(o)).reduce((n, [, c]) => n + c, 0);
     check('caps: raw 36% plays as 26.5% (base whole, boosts shrunk)', Math.abs(capSpecials - stepsOf(20000, 0.265)) <= 2, true);
 
-    // The Mejiro Estate: opened by Set 1's Mejiro Family line; the Family Photograph waits for the other eight.
+    // The Mejiro Estate: Set 1's Mejiro Family line opens it; Grandmother first (8x), then the seven, then the photograph.
     const mejiro = openers.SPECIAL_SETS.find((x) => x.id === 'mejiro-estate')!;
-    const photo = mejiro.openers.find((o) => o.finale)!;
-    check('mejiro: 9 lines, opened by the Mejiro Family line, one finale', [mejiro.openers.length, mejiro.requires, mejiro.openers.filter((o) => o.finale).map((o) => o.id)], [9, 'set1.mejiro', ['mejiro.photo']]);
+    const grandma = mejiro.openers.find((o) => o.id === 'mejiro.grandmother')!;
+    const seven = mejiro.openers.filter((o) => o.after?.length === 1).map((o) => o.id);
+    const photo = mejiro.openers.find((o) => o.id === 'mejiro.photo')!;
+    check('mejiro: 9 lines, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.length, mejiro.requires, seven.length, photo.after?.length, grandma.weight], [9, 'set1.mejiro', 7, 8, 8]);
     check('mejiro: no hashtags, one {user} each', mejiro.openers.every((o) => !/#\w/.test(o.text) && o.text.split('{user}').length === 2), true);
-    const others = mejiro.openers.filter((o) => !o.finale).map((o) => o.id);
-    check('finale: closed until the other eight are found', [openers.closedFinales(new Set(others.slice(0, 7))).includes(photo.text), openers.closedFinales(new Set(others)).includes(photo.text)], [true, false]);
-    const FG = `test-finale-${Date.now()}`;
-    for (const id of others.slice(0, 7)) await rares.recordRareOpener(FG, 'f1', openers.specialById(id)!.text);
-    check('finale: still closed with one family member missing', (await rares.closedFinalesFor(FG, 'f1')).includes(photo.text), true);
-    await rares.recordRareOpener(FG, 'f1', openers.specialById(others[7]!)!.text);
-    check('finale: open once the whole family is found', (await rares.closedFinalesFor(FG, 'f1')).includes(photo.text), false);
+    const sevenTexts = seven.map((id) => openers.specialById(id)!.text);
+    check('stages: before Grandmother, the seven and the photo are closed', openers.closedSpecials(new Set()).filter((t) => [...sevenTexts, photo.text].includes(t)).length, 8);
+    check('stages: after Grandmother, only the photo waits', openers.closedSpecials(new Set([grandma.id])).filter((t) => [...sevenTexts, photo.text].includes(t)), [photo.text]);
+    check('stages: the photo opens once all eight are found', openers.closedSpecials(new Set([grandma.id, ...seven])).includes(photo.text), false);
+    const FG = `test-stages-${Date.now()}`;
+    const mejiroPool = openers.rarePoolFor([], []).filter((t) => mejiro.openers.some((o) => o.text === t));
+    const poolBefore = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('weight: before her welcome, Grandmother counts 8 times and is the only Mejiro line', [poolBefore.length, poolBefore.every((t) => t === grandma.text)], [8, true]);
+    await rares.recordRareOpener(FG, 'f1', grandma.text);
+    const poolAfter = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('weight: once found she counts once, and the seven open (not the photo)', [poolAfter.filter((t) => t === grandma.text).length, poolAfter.length, poolAfter.includes(photo.text)], [1, 8, false]);
+    for (const t of sevenTexts) await rares.recordRareOpener(FG, 'f1', t);
+    check('stages: with the whole family found, the photograph joins the pool', (await rares.trainerPool(FG, 'f1', mejiroPool)).includes(photo.text), true);
     const mPage = json(rares.specialsView(await rares.rareTally(FG), 3));
-    check('finale: an unfound finale hints at itself on the page', mPage.embeds[0]!.fields?.[0]?.value.split('\n').at(-1), '**9.** ??? (the finale)');
+    check('stages: the page never shows the lock, just ???', mPage.embeds[0]!.fields?.[0]?.value.split('\n').at(-1), '**9.** ???');
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: FG } });
 
     // Reminder lines: none repeats within 4 pings in a row.

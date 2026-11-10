@@ -12,7 +12,7 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { chooseOpener, closedFinalesFor, grantBoost, isRareOpener, lockedSetsFor, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
+import { chooseOpener, closedSpecialsFor, grantBoost, trainerPool, isRareOpener, lockedSetsFor, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances } from './boosts';
 import { commonsFor, fillOpener, pickOpener, rarePoolFor, setsUnlockedBy, specialMediaPath } from './openers';
 import { AttachmentBuilder } from 'discord.js';
@@ -149,9 +149,10 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // so the line posted is the one recorded.
                 const settings = await getUserSettings(timer.guildId, timer.discordUserId);
                 const lockedSets = await lockedSetsFor(timer.guildId, timer.discordUserId);
-                // A set's finale stays out of the pool, and the boosts, until the rest of its set is found.
-                const closed = await closedFinalesFor(timer.guildId, timer.discordUserId);
-                const pool = rarePoolFor(settings.disabledSets, lockedSets).filter((t) => !closed.includes(t));
+                // Specials that wait on others (Special.after) stay out of the pool and the boosts until then.
+                const closed = await closedSpecialsFor(timer.guildId, timer.discordUserId);
+                // Weighted specials (Grandmother's welcome, 8x) count extra until found.
+                const pool = await trainerPool(timer.guildId, timer.discordUserId, rarePoolFor(settings.disabledSets, lockedSets));
                 const extras = (await extraChances(timer.guildId, timer.discordUserId, settings, lockedSets, timer.earlyStart, pool)).map((e) => ({
                     ...e,
                     pool: e.pool.filter((t) => !closed.includes(t)),

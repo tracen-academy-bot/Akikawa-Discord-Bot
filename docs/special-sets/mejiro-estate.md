@@ -2,10 +2,14 @@
 
 Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file is the source text; keep the two in step.
 
-- **Premise:** the trainer is invited to a gathering at the Mejiro Estate; each line is one scene with one family member.
-- **Style:** fancy, no hashtags.
+- **Premise:** the trainer is invited to a gathering at the Mejiro Estate; each line is one scene.
+- **Style:** fancy, no hashtags (a guest like Helios may keep hers).
 - **Unlock:** the Set 1 line "Mejiro Family" (`set1.mejiro`).
-- **The Family Photograph** (`finale`): comes up only for a trainer who has found the other eight lines; until then it is out of their pool and boosts, and the Specials page shows it as "??? (the finale)". No boost, no bonus: it simply waits.
+- **Stages** (`Special.after`, never shown on the Specials page, which just says "???"):
+  1. Grandmother's welcome comes first; it counts 8x in the pool until found (`Special.weight`).
+  2. The seven Mejiro open after it, in any order.
+  3. The Family Photograph opens after all eight.
+  4. Guests (to come) open after the photograph.
 
 ## Lines
 
@@ -15,74 +19,73 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
    Ah. So you are {user}, the trainer the girls cannot stop writing home about. Welcome to the Mejiro Estate. Tea will be served in the east garden at three. Do mind the pond, and do keep McQueen away from the dessert cart until after dinner; I am told she has a plan.
    ```
 
-   Hook: Head of the family. McQueen's おばあ様 (McQueen 10026, 70004, 91221; Palmer 91020). McQueen's sweets weakness: profile, 90003.
+   Hook: Head of the family, McQueen's おばあ様 (McQueen 10026, 70004, 91221; Palmer 91020). Counts 8x until found; she opens the rest.
 
 2. Mejiro McQueen
 
    ```text
-   Welcome to the Mejiro Estate, {user}-san. Shall I show you the garden? The pond is at its loveliest when the blossoms fall, and the patisserie cart simply happens to be stationed beside it. Ahem. A coincidence, I assure you. Entirely.
+   Welcome to the Mejiro Estate, {user}-san. I shall be your guide this afternoon, desu wa. The garden, the pond, the tea room... and the patisserie cart, which simply happens to lie on our route. *Ahem.* One parfait a week is perfectly reasonable. ...Is that the baseball broadcast in the parlour? N-not that I would know. Shall we?
    ```
 
-   Hook: Garden pond under cherry blossoms (91024); afternoon tea (90012); sweets weakness; "ahem" (コホン).
+   Hook: ~desu wa ojousama; sweets weakness ("paku paku desu wa"); secretly loves watching sports (91004, 91025 nighter); *ahem* (コホン).
 
 3. Mejiro Ryan
 
    ```text
-   {user}-san! It's the Mejiro present exchange! I wrapped a complete training set, so whoever receives it, we're muscling together. ...Huh? You drew my gift, and I drew yours? W-wait, this is exactly like chapter twelve of... forget I said anything! Let's muscle!
+   {user}-san! Grandmother made me wear a dress tonight... it's frilly. Very frilly. Everyone keeps saying it looks nice, but they're just being polite, right? ...Right? Ugh, this is exactly the chapter where the heroine flees to the balcony. I am not fleeing to the balcony. I'm just... getting some air.
    ```
 
-   Hook: Family present exchange (10008); "Let's Muscle!"; secret shoujo-manga fan.
+   Hook: Feels plain beside her cousins; flustered by cute clothes (90006) and shoujo-manga scenes (91015, 10005).
 
 4. Mejiro Dober
 
    ```text
-   {user}, over here. ...There are far too many people, and all of them are looking. Not you; you're fine. Sit. Drink your tea. I-it's not as if I kept this seat for you. It was simply empty.
+   {user}, don't wander off. ...Too many people tonight, and half of them are men in suits. Not that I need you here. You're just the only one I can stand next to without my ears going flat. And if Dad calls me 'Bell-chan', you heard nothing.
    ```
 
-   Hook: Dislikes big family gatherings and being stared at (10010, profile); tea party under autumn leaves (91014); tsundere.
+   Hook: Afraid of men and stares; the trainer is her exception (10001); hates "Bell-chan" (91000); dislikes crowds (10010).
 
 5. Mejiro Palmer
 
    ```text
-   {user}! So, I complimented Grandmother's gown at the last party and she asked me to dance. Tonight it's your turn, I already told her. Please don't step on her feet. I am genuinely begging you.
+   {user}! So I complimented Grandmother's gown last Christmas and she made me dance. Tonight it's your turn, I already told her. Two rules: don't step on her feet, and do NOT panic and bolt halfway through. Running away at full speed is my move.
    ```
 
-   Hook: Complimented Grandmother's outfit at the Christmas party and was asked to dance (91020).
+   Hook: Danced with Grandmother after praising her outfit (91020); runaway (bakunige) style.
 
 6. Mejiro Ardan
 
    ```text
-   Shall we, {user}-san? The garden looks like this for only one evening a year, and I would rather spend that fleeting moment beside you. ...Ah, and Sister has asked for photographs, so do try to smile.
+   Shall we dance, {user}-san? Only a waltz; the doctor was very clear about my legs. ...Please don't look so worried. The garden is lit for this one evening, and I intend to shine for every second of it. Sister is watching, you know. Let us give her something worth looking at.
    ```
 
-   Hook: Fleeting moments; "shall we" (参りましょう); calls Ramonu 姉様; birthday party at the estate (10012).
+   Hook: Glass legs, infirmary regular; dance (waltz); fleeting moments; calls Ramonu 姉様.
 
 7. Mejiro Bright
 
    ```text
-   Ah~ {user}-sama, you've arrived~ The tea party began an hour ago... or was it two~? Maki-chan and I have only just finished dressing for it~ Ufufu, the scones will surely wait for us~
+   Ah~ {user}-sama, good evening~ ...Or is it morning? I napped in the sunroom and lost track~ Ryan-oneesama's dress looks lovely, doesn't it~? I sewed one just like it for Maki-chan~ Please don't tell her, it's a surprise~
    ```
 
-   Hook: Slow at everything, drawn-out endings; dolls (Maki-chan); frilly tea party wish (91004).
+   Hook: Slow and sleepy; dolls (Maki-chan), sews their clothes; "Ryan-oneesama".
 
 8. Mejiro Ramonu
 
    ```text
-   The family insists on a matching photograph... such a commotion. Come, {user}. Stand where I am seen at my best. ...And you may look for as long as you like.
+   {user}. You'll do; escort me. ...Surely you didn't think I would walk into my own family's gathering alone, dressed like this? Look, then, for as long as you like. Only know that you are my second love. The first is waiting for me on the turf.
    ```
 
-   Hook: Family matching photo (91006); loves being looked at (profile).
+   Hook: Cool toward the trainer, demands an escort (91028), invites being gazed at (91029); racing is her lover (40004).
 
 9. The Family Photograph
 
    ```text
-   Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, no flexing. Dober, the camera, not the floor. Palmer, Bright has fallen asleep again. Ardan, Ramonu, perfect. And {user}, here, beside us. ...There. One for the family album.
+   Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, it looks lovely, stop tugging the hem. Dober, the camera, not the floor; nobody else is looking. Palmer, wake Bright. Ardan, beside your sister. Ramonu... yes, we know, you are radiant. And {user}, here, with the family. ...There. One for the album.
    ```
 
-   Hook: Finale. Each member's quirk in one shot.
+   Hook: Opens after all eight. Each member in one shot.
 
-## Later
+## Guests (to come)
 
-- Helios x Palmer (home scenes x11): Helios may keep her hashtags.
-- Satono Estate PvP: Satono Diamond x Kitasan Black.
-- Ryan x Dober (home scenes x7).
+- Daitaku Helios with Palmer: a DJ party (home scenes x11).
+- Satono Diamond: a business visit, with Kitasan Black as her plus-one.

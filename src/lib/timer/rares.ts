@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedFinales, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -147,9 +147,7 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
         .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${rows.length} found${status}`);
     if (!locked) {
         const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
-        // An unfound finale hints that it is the last one, without its name.
-        const unfound = (t: RareTally) => (specialById(t.id)?.finale ? '??? (the finale)' : '???');
-        const names = rows.map(({ t }, n) => `**${n + 1}.** ${t.count > 0 ? t.name : unfound(t)}`);
+        const names = rows.map(({ t }, n) => `**${n + 1}.** ${t.count > 0 ? t.name : '???'}`);
         const counts = rows.map(({ t }) => (t.count > 0 ? `**×${t.count}**` : '—'));
         const firsts = rows.map(({ t }) => (t.count > 0 && t.firstUserId && t.firstAt ? (personal ? when(t) : `<@${t.firstUserId}> ${when(t)}`) : '—'));
         embed.addFields(
@@ -252,11 +250,32 @@ export async function lockedSetsFor(guildId: string, discordUserId: string): Pro
     return gated.filter((s) => !found.has(s.requires!)).map((s) => s.id);
 }
 
-/** The finale specials still closed to a trainer (see `Special.finale`): out of their pool and boosts. */
-export async function closedFinalesFor(guildId: string, discordUserId: string): Promise<string[]> {
-    if (!RARE_OPENERS.some((o) => o.finale)) return [];
+/** The ids of the specials a trainer has found. */
+export async function foundSpecialIds(guildId: string, discordUserId: string): Promise<Set<string>> {
     const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, discordUserId }, select: { specialId: true } });
-    return closedFinales(new Set(hits.flatMap((h) => (h.specialId ? [h.specialId] : []))));
+    return new Set(hits.flatMap((h) => (h.specialId ? [h.specialId] : [])));
+}
+
+/** The specials still closed to a trainer (see `Special.after`): out of their pool and boosts. */
+export async function closedSpecialsFor(guildId: string, discordUserId: string): Promise<string[]> {
+    if (!RARE_OPENERS.some((o) => o.after)) return [];
+    return closedSpecials(await foundSpecialIds(guildId, discordUserId));
+}
+
+/**
+ * A trainer's special pool with closed specials taken out and weighted ones
+ * (`Special.weight`) repeated, while the trainer has not found them yet.
+ */
+export async function trainerPool(guildId: string, discordUserId: string, pool: readonly string[]): Promise<string[]> {
+    const found = await foundSpecialIds(guildId, discordUserId);
+    const closed = closedSpecials(found);
+    return pool
+        .filter((t) => !closed.includes(t))
+        .flatMap((t) => {
+            const special = RARE_OPENERS.find((o) => o.text === t);
+            const times = special?.weight && !found.has(special.id) ? special.weight : 1;
+            return Array<string>(times).fill(t);
+        });
 }
 
 /** A set boost a trainer holds. */
