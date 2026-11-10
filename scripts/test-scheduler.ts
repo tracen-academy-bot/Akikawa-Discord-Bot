@@ -94,7 +94,7 @@ async function main() {
     check('openers: from the base chance up a common one, spread evenly', [pickOpener(P), pickOpener(P + (1 - P) * 0.5), pickOpener(0.9999)], [PING_OPENERS[0], PING_OPENERS[3], PING_OPENERS[6]]);
     let rare = 0;
     for (let i = 0; i < 100000; i += 1) if (RARE_PING_OPENERS.includes(pickOpener(i / 100000))) rare += 1;
-    check('openers: the base chance is 10%, and rare ones are 10% of the range', [P, rare], [0.1, stepsOf(100000)]);
+    check('openers: the base chance is 6%, and rare ones are 6% of the range', [P, rare], [0.06, stepsOf(100000)]);
     check('openers: the mention can sit mid-sentence', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => (RARE_PING_OPENERS.findIndex((o) => o.startsWith('Torena')) + 0.5) / RARE_PING_OPENERS.length * P), "Torena-san, there's a new burger place in town! I'll ask El and Grass to come too, so come with me, okay <@u1>? We can host a party afterwards too! I can't wait...");
 
     // Rare lines are recorded and tallied.
@@ -321,16 +321,16 @@ async function main() {
     await rares.grantBoost(SN, 's1', loves.text);
     await rares.recordRareOpener(SN, 's1', curren.text);
     const bv = (await boostsView(SN, 's1', inSeason)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: base, Loves, the unlock bonus, total 15%', [bv.includes('**Base:** 10%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 15% chance of a special.**')], [true, true, true, false, true]);
+    check('boosts view: base, Loves, the unlock bonus, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, false, true]);
     await us0.toggleSetting(SN, 's1', 'boosts');
     const off = await boostsView(SN, 's1', inSeason);
     const offText = off.embeds[0]!.toJSON().description ?? '';
-    check('boosts view: off pauses them, total is the base', [offText.includes('(paused)'), offText.includes('**Your next ping: 10% chance of a special.**'), (off.components[0]!.toJSON().components[0] as { custom_id: string; label: string }).custom_id, (off.components[0]!.toJSON().components[0] as { label: string }).label], [true, true, BOOSTS_TOGGLE_ID, 'Boosts: Off']);
+    check('boosts view: off pauses them, total is the base', [offText.includes('(paused)'), offText.includes('**Your next ping: 6% chance of a special.**'), (off.components[0]!.toJSON().components[0] as { custom_id: string; label: string }).custom_id, (off.components[0]!.toJSON().components[0] as { label: string }).label], [true, true, BOOSTS_TOGGLE_ID, 'Boosts: Off']);
     const quiet = (await boostsView(SN, 'nobody', OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: nothing running, with the early-start tip', [quiet.includes('No boosts right now.'), quiet.includes('-# Early Start: start your next run quickly for +1% overall!'), quiet.includes('**Your next ping: 10% chance')], [true, true, true]);
+    check('boosts view: nothing running, with the early-start tip', [quiet.includes('No boosts right now.'), quiet.includes('-# Early Start: start your next run quickly for +1% overall!'), quiet.includes('**Your next ping: 6% chance')], [true, true, true]);
     const inWeek = new Date(week.from.getTime() + 60_000);
     const before = (await boostsView(SN, 'not-unlocked', inWeek)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: Curren Chan week before unlocking, total 11%', [before.includes(`**+1%** Curren Chan: meet her in the lobby! Ends <t:${Math.floor(week.until.getTime() / 1000)}:R>.`), before.includes('**Your next ping: 11% chance')], [true, true]);
+    check('boosts view: Curren Chan week before unlocking, total 7%', [before.includes(`**+1%** Curren Chan: meet her in the lobby! Ends <t:${Math.floor(week.until.getTime() / 1000)}:R>.`), before.includes('**Your next ping: 7% chance')], [true, true]);
     check('names: #OnlineSensations specials are hashtags', openers.SPECIAL_SETS[1]!.openers.every((o) => /^#[A-Za-z]+$/.test(o.name)), true);
     const { BUTTON_BOOSTS } = await import('../src/lib/timer/panel');
     check('panel: has the Boosts button', JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_BOOSTS), true);
@@ -376,8 +376,8 @@ async function main() {
     // Soft caps: full to raw 20%, half to raw 30% (25%), a quarter beyond, 30% at most.
     const eff = (t: number) => Math.round(openers.effectiveChance(t) * 10000) / 10000;
     check('caps: full, then half, then a quarter, then the 30% hard cap', [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.7].map(eff), [0.1, 0.2, 0.225, 0.25, 0.275, 0.3, 0.3]);
-    // A big pile of boosts: base 10% + 30% raw extras = raw 40%, so 27.5% effective;
-    // the base slice stays 10% and the extras shrink to 17.5%.
+    // A big pile of boosts: base 6% + 30% raw extras = raw 36%, so 26.5% effective
+    // (25% + 6% / 4); the base slice stays 6% and the extras shrink to 20.5%.
     const CG = `test-caps-${Date.now()}`;
     const bigExtras = [{ chance: 0.3, pool: openers.boostPool('online-sensations', 'collab') }];
     const capCounts = new Map<string, number>();
@@ -386,7 +386,7 @@ async function main() {
         capCounts.set(o, (capCounts.get(o) ?? 0) + 1);
     }
     const capSpecials = [...capCounts].filter(([o]) => rares.isRareOpener(o)).reduce((n, [, c]) => n + c, 0);
-    check('caps: raw 40% plays as 27.5% (base whole, boosts shrunk)', Math.abs(capSpecials - stepsOf(20000, 0.275)) <= 2, true);
+    check('caps: raw 36% plays as 26.5% (base whole, boosts shrunk)', Math.abs(capSpecials - stepsOf(20000, 0.265)) <= 2, true);
 
     // Media: #ChuChuChallenge posts its video; the file is in the repo; plain lines post nothing.
     const fs = await import('fs');

@@ -12,7 +12,7 @@ import { getUserSettings, type UserSettings } from './userSettings';
 /** Custom ID of the Boosts view's On/Off button. Starts with `timer:` so the panel's handler gets it. */
 export const BOOSTS_TOGGLE_ID = 'timer:boosts:toggle';
 
-/** A chance as a percentage, e.g. 0.1 -> "10%", 0.105 -> "10.5%". */
+/** A chance as a percentage, e.g. 0.06 -> "6%", 0.105 -> "10.5%". */
 function percent(chance: number): string {
     return `${Math.round(chance * 1000) / 10}%`;
 }

@@ -4,6 +4,14 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-10 — Base back to 6%
+
+- `RARE_OPENER_CHANCE` back to 0.06 (the owner had misread; 10% was not
+  wanted). The soft caps, stacking runs and the odds table stay; the table
+  is regenerated. Today's most is a raw 12%, well under the first cap.
+
+---
+
 ## 2026-11-10 — Base 10%, soft caps, odds table; boost runs stack
 
 - **Base special chance 10%** (was 6%).
