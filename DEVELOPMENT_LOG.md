@@ -3148,3 +3148,12 @@ nothing calls this module yet — but the same class of latent bug.
   club role deleted during a deploy (Rigil may have been deleted before #53 deployed).
 - Risk: a club role missing from `CLUB_ROLE_IDS` makes its members lose Member at every start.
   Keep the variable in step with the real club roles.
+
+## 2026-11-10: Club directory image grouped by expected rank
+
+- `renderClubList` groups clubs under section headers in rank order S+, S, A+, A, B+, Casual,
+  then "Rank not set"; names are sorted within a group (`groupByRank`, tested in test-commands).
+- Casual now wears the C badge artwork (`C.png`); before, it was a drawn "C" circle.
+- `drawRankBadge` saves and restores canvas state; the drawn badges left `textBaseline = middle`,
+  which pushed the next club name a few pixels down.
+- The SS, B, C+, D+ and D badges are in-game ranks for the applicant card; expected ranks have no such values.

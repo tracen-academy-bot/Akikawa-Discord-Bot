@@ -1070,6 +1070,13 @@ async function main() {
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });
     await prisma.$disconnect();
 
+    // Club directory image: grouped by expected rank, highest first, names sorted within.
+    const { groupByRank } = await import('../src/lib/image/renderClubList');
+    const dc = (name: string, rank: string | null) => ({ id: name, name, rank: rank as never, headcount: 30, quotaText: '' });
+    const grouped = groupByRank([dc('Umbra', 'CASUAL'), dc('Tempest', null), dc('Rose', 'A'), dc('Spica', 'S'), dc('Canopus', 'A'), dc('Alkes', 'A_PLUS')]);
+    check('directory: groups run S+ to Casual, then unset; empty ranks left out', grouped.map((g) => g.rank), ['S', 'A_PLUS', 'A', 'CASUAL', null]);
+    check('directory: names sorted within a group', grouped[2]!.clubs.map((c) => c.name), ['Canopus', 'Rose']);
+
     console.log(`\n${pass} passed, ${fail} failed`);
     process.exit(fail === 0 ? 0 : 1);
 }
