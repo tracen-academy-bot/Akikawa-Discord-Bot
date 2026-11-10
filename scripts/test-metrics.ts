@@ -217,7 +217,7 @@ function biweeklyChecks() {
     check('day 30 is still the second half', w(30, 31), '15-31#2');
     check('30-day month: second half is 15-30', w(29, 30), '15-30#2');
     check('28-day February: second half is 15-28', w(28, 28), '15-28#2');
-    check('biweekly quota text', describeQuota(160_000_000, 'BIWEEKLY'), '160.0M per 2 weeks');
+    check('biweekly quota text', describeQuota(160_000_000, 'BIWEEKLY'), '160.0M / 2 weeks');
 
     // Biweekly 28M, 31-day month: 28M due by day 14, 62M (31/14) by day 31.
     const bOpts = { quota: 28_000_000, period: 'BIWEEKLY' as const, daysInMonth: 31 };

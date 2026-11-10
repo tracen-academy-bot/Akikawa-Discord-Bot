@@ -1070,6 +1070,24 @@ async function main() {
     await prisma.trainerLink.deleteMany({ where: { guildId: GUILD } });
     await prisma.$disconnect();
 
+    // A club typed by name instead of picked from the suggestions.
+    const { findClubByIdOrName } = await import('../src/commands/club');
+    const LG = `test-lookup-${Date.now()}`;
+    const ascella = await prisma.trackedCircle.create({ data: { guildId: LG, name: 'Ascella' } });
+    await prisma.trackedCircle.create({ data: { guildId: LG, name: 'Rose' } });
+    await prisma.trackedCircle.create({ data: { guildId: LG, name: 'Primrose' } });
+    check('club lookup: by ID, by exact name ignoring case, by a single partial match', [
+        (await findClubByIdOrName(LG, ascella.id))?.name,
+        (await findClubByIdOrName(LG, 'ascella'))?.name,
+        (await findClubByIdOrName(LG, 'Asc'))?.name,
+    ], ['Ascella', 'Ascella', 'Ascella']);
+    check('club lookup: exact name wins over a longer match; ambiguous or unknown is null', [
+        (await findClubByIdOrName(LG, 'Rose'))?.name,
+        await findClubByIdOrName(LG, 'ros'),
+        await findClubByIdOrName(LG, 'Rigil'),
+    ], ['Rose', null, null]);
+    await prisma.trackedCircle.deleteMany({ where: { guildId: LG } });
+
     // Club directory image: grouped by expected rank, highest first, names sorted within.
     const { groupByRank } = await import('../src/lib/image/renderClubList');
     const dc = (name: string, rank: string | null, daily: number | null = null) => ({ id: name, name, rank: rank as never, headcount: 30, quotaText: '', dailyRequirement: daily });

@@ -84,8 +84,25 @@ async function clubSummary(club: Club): Promise<ClubSummary> {
     return { id: club.id, name: club.name, rank: club.rank, headcount: await clubHeadcount(club), quotaText: clubQuotaText(club), dailyRequirement: clubDailyRequirement(club) };
 }
 
+/**
+ * The club an option names: its ID when picked from the suggestions, or its
+ * name when typed and sent as is (exact name first, ignoring case, then a
+ * single partial match). Null when nothing, or more than one club, matches.
+ */
+export async function findClubByIdOrName(guildId: string, value: string): Promise<Club | null> {
+    const byId = await prisma.trackedCircle.findFirst({ where: { id: value, guildId } });
+    if (byId) return byId;
+    const typed = value.trim();
+    if (!typed) return null;
+    const exact = await prisma.trackedCircle.findMany({ where: { guildId, name: { equals: typed, mode: 'insensitive' } }, take: 2 });
+    if (exact.length === 1) return exact[0]!;
+    if (exact.length > 1) return null;
+    const partial = await prisma.trackedCircle.findMany({ where: { guildId, name: { contains: typed, mode: 'insensitive' } }, take: 2 });
+    return partial.length === 1 ? partial[0]! : null;
+}
+
 async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId: string): Promise<Club | null> {
-    const club = await prisma.trackedCircle.findFirst({ where: { id: clubId, guildId: interaction.guildId! } });
+    const club = await findClubByIdOrName(interaction.guildId!, clubId);
     if (!club) {
         await interaction.reply({ embeds: [errorEmbed('That club could not be found.')]});
         return null;

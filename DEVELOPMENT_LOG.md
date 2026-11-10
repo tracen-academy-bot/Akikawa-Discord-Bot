@@ -3161,3 +3161,7 @@ nothing calls this module yet — but the same class of latent bug.
   EFF. DAILY column (`clubDailyRequirement`: monthly quota over the current game month's days,
   weekly over 7, 2-weekly over 14), and clubs sort by it within a rank, highest first.
   Short figures ("533K") keep the column from running into the quota.
+- Same day: `/club` commands accept a club name typed and sent without picking a suggestion
+  (`findClubByIdOrName`: ID, then exact name ignoring case, then a single partial match).
+  Staff hit "That club could not be found." twice (Rigil, Ascella) from pressing Enter on a typed name.
+  test-metrics expected the old "per 2 weeks" wording; updated.
