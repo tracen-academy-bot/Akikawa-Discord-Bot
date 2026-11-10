@@ -29,7 +29,7 @@ import { DEFAULT_PALETTE, PALETTES, paletteOf } from '../lib/image/theme';
 import { FAN_REPORT_LAYOUTS, layoutsOf, type FanReportLayout } from '../lib/image/renderFanReport';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { currentCircleProgress } from '../lib/fans/reports';
-import { PERIOD_CHOICES, RANK_CHOICES, clubQuotaText, formatRank } from '../lib/clubFormat';
+import { PERIOD_CHOICES, RANK_CHOICES, clubQuotaText, formatRank, clubDailyRequirement } from '../lib/clubFormat';
 import { cutoffDetail, cutoffForRank, cutoffLine } from '../lib/fans/cutoff';
 import { toSafeNumber } from '../lib/fans/metrics';
 import { publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
@@ -81,7 +81,7 @@ async function clubHeadcount(club: Club): Promise<number | null> {
 
 /** What the club directory and club card show for a club. */
 async function clubSummary(club: Club): Promise<ClubSummary> {
-    return { id: club.id, name: club.name, rank: club.rank, headcount: await clubHeadcount(club), quotaText: clubQuotaText(club) };
+    return { id: club.id, name: club.name, rank: club.rank, headcount: await clubHeadcount(club), quotaText: clubQuotaText(club), dailyRequirement: clubDailyRequirement(club) };
 }
 
 async function findClubOrReply(interaction: ChatInputCommandInteraction, clubId: string): Promise<Club | null> {

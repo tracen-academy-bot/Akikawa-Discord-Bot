@@ -3157,3 +3157,7 @@ nothing calls this module yet — but the same class of latent bug.
 - `drawRankBadge` saves and restores canvas state; the drawn badges left `textBaseline = middle`,
   which pushed the next club name a few pixels down.
 - The SS, B, C+, D+ and D badges are in-game ranks for the applicant card; expected ranks have no such values.
+- Same day: quotas read "102.3M / month" everywhere (`describeQuota`). The directory image has an
+  EFF. DAILY column (`clubDailyRequirement`: monthly quota over the current game month's days,
+  weekly over 7, 2-weekly over 14), and clubs sort by it within a rank, highest first.
+  Short figures ("533K") keep the column from running into the quota.
