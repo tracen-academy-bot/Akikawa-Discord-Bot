@@ -11,27 +11,28 @@ import {
 } from 'discord.js';
 
 /**
- * A special line with media, laid out as one Components V2 box:
+ * Every timer ping, its DM copy and the special read view post as one
+ * Components V2 box, so they all look the same:
  *
  *   heading     the special's name (read view only)
- *   main text   the line itself
+ *   main text   the line itself, mention included
  *   subtext     its "-#" lines (e.g. a boost footer)
- *   media       the video or image, from the attachment
+ *   media       the video or image, from the attachment (lines with media only)
  *   credit      small text right under the media (where it came from)
  *   extras      the ping's bold lines (Milestone, Congrats...), after a divider
  *
- * Plain lines (no media) are not sent this way; they stay plain text.
+ * Parts that are empty are left out; a plain reminder is just its line.
  */
 
 /** The box's accent, the timer's orange. */
 const ACCENT = 0xf2a87a;
 
-export interface MediaMessageParts {
+export interface PingBoxParts {
     /** The filled line, mention included; "-#" lines in it become the subtext. */
     text: string;
-    /** Full path of the media file to attach. */
-    mediaPath: string;
-    /** Shown under the media as small text, e.g. "Video: <https://...>". */
+    /** Full path of the media file to attach, when the line has one. */
+    mediaPath?: string | null | undefined;
+    /** Shown under the media as small text, e.g. "Video: <https://...>". Needs `mediaPath`. */
     credit?: string | null | undefined;
     /** The ping's extra lines (Milestone, streak, Congrats), shown last. */
     extraLines?: readonly string[];
@@ -48,20 +49,27 @@ export function splitSubtext(text: string): { main: string; sub: string } {
     };
 }
 
-/** The Components V2 message for a line with media: send it as is (add `allowedMentions`, and `Ephemeral` to the flags when needed). */
-export function mediaMessage(parts: MediaMessageParts) {
-    const file = new AttachmentBuilder(parts.mediaPath);
-    const name = path.basename(parts.mediaPath);
+/**
+ * The Components V2 message for a line: send it as is (add
+ * `allowedMentions`, and `Ephemeral` to the flags when needed). `files`
+ * holds the media attachment, or nothing for a line without media.
+ */
+export function pingBox(parts: PingBoxParts) {
     const { main, sub } = splitSubtext(parts.text);
     const box = new ContainerBuilder().setAccentColor(ACCENT);
     if (parts.heading) box.addTextDisplayComponents(new TextDisplayBuilder().setContent(`### ${parts.heading}`));
-    box.addTextDisplayComponents(new TextDisplayBuilder().setContent(main));
+    if (main) box.addTextDisplayComponents(new TextDisplayBuilder().setContent(main));
     if (sub) box.addTextDisplayComponents(new TextDisplayBuilder().setContent(sub));
-    box.addMediaGalleryComponents(new MediaGalleryBuilder().addItems(new MediaGalleryItemBuilder().setURL(`attachment://${name}`)));
-    if (parts.credit) box.addTextDisplayComponents(new TextDisplayBuilder().setContent(`-# ${parts.credit}`));
+    const files: AttachmentBuilder[] = [];
+    if (parts.mediaPath) {
+        files.push(new AttachmentBuilder(parts.mediaPath));
+        const name = path.basename(parts.mediaPath);
+        box.addMediaGalleryComponents(new MediaGalleryBuilder().addItems(new MediaGalleryItemBuilder().setURL(`attachment://${name}`)));
+        if (parts.credit) box.addTextDisplayComponents(new TextDisplayBuilder().setContent(`-# ${parts.credit}`));
+    }
     if (parts.extraLines && parts.extraLines.length > 0) {
         box.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small));
         box.addTextDisplayComponents(new TextDisplayBuilder().setContent(parts.extraLines.join('\n')));
     }
-    return { components: [box], files: [file], flags: MessageFlags.IsComponentsV2 as const };
+    return { components: [box], files, flags: MessageFlags.IsComponentsV2 as const };
 }

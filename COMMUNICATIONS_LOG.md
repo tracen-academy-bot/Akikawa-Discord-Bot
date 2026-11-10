@@ -4,6 +4,14 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-10 — Every ping is a box
+
+- Owner: "it should always be a box if that is the approach." Every timer
+  ping (and its DM copy, and the special read view) posts as the same
+  Components V2 box, not only lines with media.
+
+---
+
 ## 2026-11-10 — The Mejiro Estate
 
 - New set, unlocked by Set 1's Mejiro Family line: Grandmother and the

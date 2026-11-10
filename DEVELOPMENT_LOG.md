@@ -4,13 +4,33 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-10 — Every ping is a box
+
+- Owner: one layout, not two. Every expiry ping, its DM copy and the
+  special read view now post as the Components V2 box, with or without
+  media. A plain reminder is a box with its line, then a divider and the
+  extras when there are any.
+- `mediaMessage` became `pingBox` (src/lib/timer/pingBox.ts); `mediaPath`
+  is optional, and the media gallery and credit only appear with it.
+- `pingExtraLines` (scheduler.ts) builds the bold lines under the opener;
+  `buildPingContent` is that plus the opener, as text, for the tests. The
+  ping no longer slices the text to find its extras.
+- `specialEmbed` is gone; the read view uses the box for every special.
+- Tests: the fake channel reads a box's text blocks back as text, so the
+  existing ping checks still check the real message; new checks for a plain
+  box (line, divider, extras, no file).
+- Still to check once live: the mention inside the box pings.
+
+---
+
 ## 2026-11-10 — Specials with media post as a Components V2 box
 
 - `mediaMessage` (src/lib/timer/mediaMessage.ts): a line with media is one
   container: main text, its "-#" subtext, the media (gallery, video or
   image), the credit as small text under it, then a divider and the ping's
   extras (Milestone, Congrats...). The read view uses the same box with the
-  special's name on top. Plain lines stay plain text.
+  special's name on top. Plain lines stayed plain text (changed the same
+  day: see "Every ping is a box").
 - `Special.credit`: where the media comes from, kept out of the line's text
   so it can sit under the media. #ChuChuChallenge's video credit moved there.
 - To check once live: the mention inside the box still pings.
