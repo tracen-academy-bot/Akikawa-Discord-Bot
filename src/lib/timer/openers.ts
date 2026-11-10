@@ -20,8 +20,8 @@ export const PING_OPENERS: readonly string[] = [
 /**
  * A boost a special gives the trainer who gets it: for the next `runs`
  * pings, an extra `chance` (on top of the usual special chance) of a
- * special from the same set carrying `tag`. Getting it again restarts the
- * count; it does not stack.
+ * special from the same set carrying `tag`. Getting it again adds `runs`
+ * more to what is left (the runs stack; the chance does not).
  */
 export interface SpecialBoost {
     tag: string;
@@ -210,7 +210,7 @@ export function boostOf(text: string): { set: string; boost: SpecialBoost } | un
  * The lines a set's boost draws on: that set's specials with the boost's
  * tag. Every #OnlineSensations line is a collab (with the trainer, at
  * least), so its boost covers the whole set, the lines that grant it
- * included; landing on one of those restarts the boost, never stacks it.
+ * included; landing on one of those adds another 50 runs.
  */
 export function boostPool(setId: string, tag: string): string[] {
     return RARE_OPENERS.filter((o) => o.set === setId && o.tags?.includes(tag)).map((o) => o.text);

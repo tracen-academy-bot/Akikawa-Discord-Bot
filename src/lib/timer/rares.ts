@@ -268,7 +268,11 @@ export async function spendBoosts(guildId: string, discordUserId: string): Promi
     await prisma.timerSpecialBoost.deleteMany({ where: { guildId, discordUserId, runsLeft: { lte: 0 } } });
 }
 
-/** Gives a trainer the boost `opener` grants, if it grants one, with its full run count. */
+/**
+ * Gives a trainer the boost `opener` grants, if it grants one: its run count,
+ * added to whatever is left of the same set's boost (boosts stack runs, so
+ * 37 left plus another 50 is 87; the chance stays the same).
+ */
 export async function grantBoost(guildId: string, discordUserId: string, opener: string): Promise<boolean> {
     const granted = boostOf(opener);
     if (!granted) return false;
@@ -276,7 +280,7 @@ export async function grantBoost(guildId: string, discordUserId: string, opener:
     await prisma.timerSpecialBoost.upsert({
         where: { guildId_discordUserId_setId: { guildId, discordUserId, setId: granted.set } },
         create: { guildId, discordUserId, setId: granted.set, runsLeft },
-        update: { runsLeft },
+        update: { runsLeft: { increment: runsLeft } },
     });
     return true;
 }

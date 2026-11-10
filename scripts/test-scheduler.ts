@@ -222,9 +222,9 @@ async function main() {
     await rares.spendBoosts(XG, 'u1');
     check('boost: each ping spends one', (await rares.activeBoosts(XG, 'u1'))[0]?.runsLeft, 48);
     await rares.grantBoost(XG, 'u1', loves.text);
-    check('boost: getting Loves again restarts it, no stacking', await rares.activeBoosts(XG, 'u1'), [{ setId: 'online-sensations', runsLeft: 50 }]);
-    for (let k = 0; k < 50; k += 1) await rares.spendBoosts(XG, 'u1');
-    check('boost: gone after 50', await rares.activeBoosts(XG, 'u1'), []);
+    check('boost: getting Loves again stacks the runs (48 + 50), not the chance', await rares.activeBoosts(XG, 'u1'), [{ setId: 'online-sensations', runsLeft: 98 }]);
+    for (let k = 0; k < 98; k += 1) await rares.spendBoosts(XG, 'u1');
+    check('boost: gone once every run is spent', await rares.activeBoosts(XG, 'u1'), []);
     await rares.grantBoost(XG, 'u1', loves.text);
     const { extraChances } = await import('../src/lib/timer/scheduler');
     const us0 = await import('../src/lib/timer/userSettings');

@@ -19,8 +19,11 @@ Newest first. Each entry records what changed and, more importantly, why.
 - The collab boost now covers all of #OnlineSensations (owner: each line is
   a collab with the trainer). Every line is tagged `collab`, and
   `boostPool` no longer leaves out the lines that grant the boost; landing
-  on one restarts the 50 runs. The footers (Loves, #ChuChuChallenge) say
+  on one adds 50 runs. The footers (Loves, #ChuChuChallenge) say
   "a 4% chance of getting an entry in #OnlineSensations".
+- **Boost runs stack** (owner): getting a boost again adds its runs to what
+  is left (`grantBoost` increments), instead of restarting at 50. The
+  chance stays +4%.
 
 ---
 
