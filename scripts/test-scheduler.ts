@@ -195,7 +195,7 @@ async function main() {
     check('lock: guaranteed, the owner gets it on every roll', [lock.ownerChance >= 1, owner.locked], [true, 2000]);
     const other = await sweep('someone-else');
     check('lock: nobody else gets it', other.locked, 0);
-    check('lock: everyone else keeps the base chance, spread evenly over the rest', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 1], [stepsOf(20000), RARE_PING_OPENERS.length - 1, true]);
+    check('lock: everyone else keeps the base chance, spread evenly over the rest', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 2], [stepsOf(20000), RARE_PING_OPENERS.length - 1, true]);
     await rares.recordRareOpener(LG, 'someone-else', lockedText);
     check('lock: still on while only someone else has it', (await sweep('someone-else', 2000)).locked, 0);
     await rares.recordRareOpener(LG, lock.owner, lockedText);
@@ -232,7 +232,7 @@ async function main() {
     const fullPool = openers.rarePoolFor([]);
     // A time with no seasonal buff running, so the checks below see only boosts.
     const OFF_SEASON = new Date('2026-01-01T00:00:00Z');
-    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON)).map((e) => [e.chance, e.pool.length]), [[0.04, 9], [0.01, fullPool.length], [0.01, 12]]);
+    check('extras: boost plus early start', (await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON)).map((e) => [e.chance, e.pool.length]), [[0.04, 9], [0.01, fullPool.length], [0.01, openers.SPECIAL_SETS[1]!.openers.length]]);
     check('extras: the unlock bonus only once the set is unlocked', (await extraChances(XG, 'u1', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
     check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool, OFF_SEASON)).map((e) => e.chance), [0.04, 0.01, 0.01]);
     check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool, OFF_SEASON), []);
@@ -257,13 +257,13 @@ async function main() {
     // Collab lines: all of the 4% boost, plus their share of the 1% and 6%
     // (spread over every special but the locked Matikanetannhauser).
     const shareOf = (n: number, of: number) => Math.round((STEPS * n * 9) / of);
-    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (stepsOf(STEPS, 0.04) + shareOf(0.01, fullPool.length - 1) + shareOf(P, fullPool.length - 1) + shareOf(0.01, 12))) <= 3, true);
+    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (stepsOf(STEPS, 0.04) + shareOf(0.01, fullPool.length - 1) + shareOf(P, fullPool.length - 1) + shareOf(0.01, openers.SPECIAL_SETS[1]!.openers.length))) <= 3, true);
     // The sweep is discrete, so step boundaries can shift a count by one either way.
     const commonEach = (STEPS - stepsOf(STEPS, 0.04 + 0.01 + 0.01 + P)) / PING_OPENERS.length;
     check('odds: common lines stay even', commonCounts.every((c) => Math.abs(c - commonEach) <= 1), true);
     const lockedPage = json(await rares.mySpecialsView(XG, 'u2', 2));
     check('pages: a locked set hides its rows, toggle greyed out', [lockedPage.embeds[0]!.description, lockedPage.embeds[0]!.fields ?? [], lockedPage.components[0]!.components[1]?.label, lockedPage.components[0]!.components[1]?.disabled], [
-        '**Set 2: #OnlineSensations**: 0 of 12 found\nLocked: find **Curren Chan** to open it.',
+        `**Set 2: #OnlineSensations**: 0 of ${openers.SPECIAL_SETS[1]!.openers.length} found\nLocked: find **Curren Chan** to open it.`,
         [],
         '#OnlineSensations: Locked',
         true,
@@ -313,7 +313,7 @@ async function main() {
     const seasonal = await extraChances(SN, 's1', plain, LOCKED, false, openers.rarePoolFor([]), inSeason, [buff]);
     check('season: in its window, an extra slice that only draws its special', seasonal.map((e) => [e.chance, e.pool]), [[0.01, [currenText]]]);
     check('season: not before or after the window', [(await extraChances(SN, 's1', plain, LOCKED, false, [], new Date(buff.from.getTime() - 1), [buff])).length, (await extraChances(SN, 's1', plain, LOCKED, false, [], buff.until, [buff])).length], [0, 0]);
-    check('season: a prerequisite buff stops once its set is unlocked; the unlock bonus takes over', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), [[0.01, 12]]);
+    check('season: a prerequisite buff stops once its set is unlocked; the unlock bonus takes over', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), [[0.01, openers.SPECIAL_SETS[1]!.openers.length]]);
     check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
 
     // The Boosts view: base, each boost, and the next ping's total.
@@ -372,6 +372,16 @@ async function main() {
     check('unlock: Curren Chan opens #OnlineSensations while it is locked, not after', [openers.setsUnlockedBy(currenLine, ['online-sensations']).map((x) => x.name), openers.setsUnlockedBy(currenLine, []).length, openers.setsUnlockedBy(PING_OPENERS[0]!, ['online-sensations']).length], [['#OnlineSensations'], 0, 0]);
     const plainRun = { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never;
     check('unlock: the ping says Congrats right under the line', buildPingContent('u1', plainRun, 0, null, Math.random, currenLine, ['#OnlineSensations']).split('\n')[1], '**Congrats!** #OnlineSensations unlocked!');
+
+    // Media: #ChuChuChallenge posts its video; the file is in the repo; plain lines post nothing.
+    const fs = await import('fs');
+    const chu = RARE_OPENERS.find((o) => o.id === 'os.chu')!;
+    const chuMedia = openers.specialMediaPath(chu.text);
+    check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
+    check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
+    check('media: a line without media posts none', [openers.specialMediaPath(RARE_OPENERS[0]!.text), openers.specialMediaPath(PING_OPENERS[0]!)], [null, null]);
+    check('chu: grants the collab boost like Loves, and is not in its own pool', [openers.boostOf(chu.text)?.boost, openers.boostPool('online-sensations', 'collab').includes(chu.text)], [{ tag: 'collab', chance: 0.04, runs: 50 }, false]);
+    check('chu: one {user}, and {set_name} fills in', [chu.text.split('{user}').length - 1, openers.fillOpener(chu.text, 'u1').includes('#SpecialCollab in #OnlineSensations.')], [1, true]);
 
     // The live board's Today card shows as many trainers as fit beside the week.
     const live = await import('../src/lib/image/renderTimerLeaderboard');

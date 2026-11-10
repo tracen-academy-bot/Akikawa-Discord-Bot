@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 /** Timer-ping openers, common and rare. Kept apart so the scheduler and the rare tally share them. */
 
 /**
@@ -41,6 +43,11 @@ export interface Special {
     /** Labels a boost can draw on, e.g. `collab`. */
     tags?: readonly string[];
     boost?: SpecialBoost;
+    /**
+     * A file in `src/assets/specials/` (a video or GIF) posted with the line:
+     * on the ping, its DM copy, and when the special is read in full.
+     */
+    media?: string;
 }
 
 /** One special set: a group of special lines that can be turned on or off. */
@@ -113,6 +120,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'os.taiki', name: "#TaikiShuttle", text: "Ugh, Taiki just doesn't #NoticeMyRivalry at all! She's so #PartyFun and her Texan burgers are so #Deliciousss... That's right! {user}, time to make some noise in UmaTube! Surely we can get a collab out of her! #MakeCurrenNoticeableAgain", tags: ['collab'] },
             { id: 'os.biko', name: "#BikoPegasus", text: "Biko's got a new #UmaTokPost? Oh my GAWDDD I love Biko! Have you seen her animations? Her #PowerRanger series is also soooo cool... wait... You got me a #RangerCollab?! No weiii! (#PalmerHelios taught me that!) Thank you shooo much {user}! Time to get my #DressUp ready! #CurrenxBiko #PinkRanger", tags: ['collab'] },
             { id: 'os.helios', name: "#DaitakuHelios", text: "Wei weeeiiii! {user}, I've heard of how gyatdamnnn vibey you are! So here's the thing Torepiii *wink*: Gold City and I have been doing a pretty s'mexy looksmaxxing Zombie☆Makeover, and I think Curren be such a cutieee, frfr! I'll be looking for six or seven- HAHAH SIX SEVENNN- more ladies, so hook me up... and also ||teach me how to bag Daiichi-ojou too pweaseee!|| See ya, Helios☆Out! #LookAtHelios #ScaryCurren #DoveyVibey", tags: ['collab'] },
+            { id: 'os.chu', name: "#ChuChuChallenge", text: "{user}-chan! Everyone on UmaTok is doing the #ChuChuChallenge, so obviously Curren does it the #Kawaiiest~ Camera’s rolling, ready? Chu♡ Chu♡ Chu♡... wait, why are you smiling at me like that?! S-stop, Curren’s supposed to be #Unshakeable! Curren is NOT ドキドキ #Flustered right now! ...Ugh, my face is so warm.. Cut, CUT! Another take! バカ！ #CurrenxTrainer #ChuChuChallenge #DummyTrainerHateYou\n-# As #Revenge, Curren Chan vows to #TireYouOut with more #SpecialCollabs. For the next 50 runs, gain a 4% chance of getting a #SpecialCollab in {set_name}.", boost: { tag: 'collab', chance: 0.04, runs: 50 }, media: 'chu-chu-challenge.mp4' },
         ],
     },
 ];
@@ -244,4 +252,13 @@ export function setsUnlockedBy(opener: string, lockedSets: readonly string[]): S
 /** The id of the special whose current text is `text`, or undefined. */
 export function specialIdOf(text: string): string | undefined {
     return RARE_OPENERS.find((o) => o.text === text)?.id;
+}
+
+/** Where special media files live: `src/assets/specials` in development, `dist/assets/specials` when built. */
+export const SPECIAL_MEDIA_DIR = path.join(__dirname, '..', '..', 'assets', 'specials');
+
+/** The media file posted with `opener` (a special's text), as a full path, or null. */
+export function specialMediaPath(opener: string): string | null {
+    const media = RARE_OPENERS.find((o) => o.text === opener)?.media;
+    return media ? path.join(SPECIAL_MEDIA_DIR, media) : null;
 }

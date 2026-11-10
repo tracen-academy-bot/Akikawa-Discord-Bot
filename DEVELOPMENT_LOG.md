@@ -4,6 +4,21 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-10 — #ChuChuChallenge: a special with a video
+
+- `Special.media`: a file in `src/assets/specials/` posted with the line, on
+  the ping, its DM copy and the read view (`specialMediaPath`). The Docker
+  build already copies `src/assets` to `dist/assets`.
+- #OnlineSensations line 13, #ChuChuChallenge (owner's text). It grants the
+  collab boost like Loves and posts `chu-chu-challenge.mp4`: the owner's
+  17 s clip, re-encoded from 1080p60 (7.6 MB) to 720p30 (3.6 MB) so pings
+  load fast; well under Discord's 10 MB bot upload limit. A video shows as a
+  player (click to play, with sound); a GIF would autoplay but be silent.
+- Tests: the media path and file, size limit, the new line's boost and fill;
+  set-size counts now read the set instead of a hard-coded 12.
+
+---
+
 ## 2026-11-09 — Curren Chan week restored until unlock; Boosts wording; hashtag names
 
 - Correction to the entry below: the owner wanted Curren Chan week kept for

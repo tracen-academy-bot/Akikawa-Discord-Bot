@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf } from './openers';
+import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -213,12 +213,12 @@ export function pageOfSet(setId: string): number {
  * special). Checked against their own finds, so a forged choice cannot
  * reveal a line they have not had.
  */
-export async function readSpecial(guildId: string, discordUserId: string, choice: string): Promise<{ name: string; text: string } | null> {
+export async function readSpecial(guildId: string, discordUserId: string, choice: string): Promise<{ name: string; text: string; media: string | null } | null> {
     const special = specialById(choice);
     if (!special) return null;
     const found = await prisma.rareOpenerHit.findFirst({ where: { guildId, discordUserId, specialId: special.id } });
     if (!found) return null;
-    return { name: special.name, text: fillOpener(special.text, discordUserId) };
+    return { name: special.name, text: fillOpener(special.text, discordUserId), media: specialMediaPath(special.text) };
 }
 
 /** The embed showing one special in full. */

@@ -4,6 +4,14 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-10 — #ChuChuChallenge, with its video
+
+- #OnlineSensations gets a 13th line, #ChuChuChallenge, which posts the
+  owner's dance clip with the ping and grants the collab boost.
+- Song lyrics are not put in the bot's text; the clip carries the song.
+
+---
+
 ## 2026-11-09 — Curren Chan week back, until you unlock
 
 - Curren Chan week stays for trainers who have not had Curren Chan; once
