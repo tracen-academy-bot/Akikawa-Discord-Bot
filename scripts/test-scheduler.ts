@@ -433,6 +433,7 @@ async function main() {
     const chuMedia = openers.specialMediaPath(chu.text);
     check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
+    check('credit: only #ChuChuChallenge credits the video', RARE_OPENERS.filter((o) => o.text.includes('youtu.be/hJ78i-6uwGM')).map((o) => o.id), ['os.chu']);
     check('chu: credits the video without embedding it', chu.text.endsWith('\n-# Video: <https://youtu.be/hJ78i-6uwGM>'), true);
     check('media: a line without media posts none', [openers.specialMediaPath(RARE_OPENERS[0]!.text), openers.specialMediaPath(PING_OPENERS[0]!)], [null, null]);
     check('chu: grants the collab boost like Loves, and is in its pool like every line', [openers.boostOf(chu.text)?.boost, openers.boostPool('online-sensations', 'collab').includes(chu.text)], [{ tag: 'collab', chance: 0.04, runs: 50 }, true]);
