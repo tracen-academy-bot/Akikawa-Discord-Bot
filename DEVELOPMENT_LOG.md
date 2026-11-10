@@ -4,6 +4,27 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-10 — 20 reminder lines, no back-to-back repeats
+
+- `PING_OPENERS` grows from 7 to 20 (13 new, picked and edited with the
+  owner from two drafts: a few Chairwoman/Tazuna lines, a few dry ones).
+- **No repeats:** a trainer's last 3 reminder lines
+  (`TimerUserSettings.recentOpeners`, `COMMON_NO_REPEAT`) are left out of
+  their next pick (`commonsFor`), so none comes up twice within 4 pings in
+  a row. The scheduler remembers each reminder it posts (`rememberCommon`).
+  Special lines are unaffected. Migration
+  `20261110090000_timer_recent_openers`.
+- Tests that named reminder lines by position now work from the list's
+  length.
+- **The mention sits where a person would say the name** (owner): before
+  any "you/your" it introduces ("{user}, your trainee..."), as "{user}-san",
+  or as "{user}'s" in a third-person line; at the end only when nothing
+  earlier says "you" ("That's another run logged, {user}."). All 20 lines
+  follow this; the test that matched lines by their start now compares the
+  whole filled-in line.
+
+---
+
 ## 2026-11-10 — Base back to 6%
 
 - `RARE_OPENER_CHANCE` back to 0.06 (the owner had misread; 10% was not
