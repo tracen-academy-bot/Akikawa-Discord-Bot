@@ -59,6 +59,12 @@ export interface Special {
     tags?: readonly string[];
     boost?: SpecialBoost;
     /**
+     * A set's finale: it can only come up for a trainer who has found every
+     * other special in the set (The Mejiro Estate's Family Photograph).
+     * Until then it is out of their pool and their boosts.
+     */
+    finale?: boolean;
+    /**
      * A file in `src/assets/specials/` (a video or GIF) posted with the line:
      * on the ping, its DM copy, and when the special is read in full.
      */
@@ -136,6 +142,22 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'os.biko', name: "#BikoPegasus", text: "Biko's got a new #UmaTokPost? Oh my GAWDDD I love Biko! Have you seen her animations? Her #PowerRanger series is also soooo cool... wait... You got me a #RangerCollab?! No weiii! (#PalmerHelios taught me that!) Thank you shooo much {user}! Time to get my #DressUp ready! #CurrenxBiko #PinkRanger", tags: ['collab'] },
             { id: 'os.helios', name: "#DaitakuHelios", text: "Wei weeeiiii! {user}, I've heard of how gyatdamnnn vibey you are! So here's the thing Torepiii *wink*: Gold City and I have been doing a pretty s'mexy looksmaxxing Zombie☆Makeover, and I think Curren be such a cutieee, frfr! I'll be looking for six or seven- HAHAH SIX SEVENNN- more ladies, so hook me up... and also ||teach me how to bag Daiichi-ojou too pweaseee!|| See ya, Helios☆Out! #LookAtHelios #ScaryCurren #DoveyVibey", tags: ['collab'] },
             { id: 'os.chu', name: "#ChuChuChallenge", text: "{user}-chan! Everyone on UmaTok is doing the #ChuChuChallenge, so obviously Curren does it the #Kawaiiest~ Got the #FancyCam ready? Here we go! Chu♡ Chu♡ Chu♡... wait, why are you smiling at me like that?! S-stop, Curren’s supposed to be #Unshakeable! Curren is NOT ドキドキ #Flustered right now! ...Ugh, my face is so warm.. Cut, CUT! Another take! バカ！ #CurrenxTrainer #ChuChuChallenge #DummyTrainer #IHateTrainer\n-# As #Revenge, Curren Chan vows to #TireYouOut with more #SpecialCollabs. For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 }, media: 'chu-chu-challenge.mp4' },
+        ],
+    },
+    {
+        id: 'mejiro-estate',
+        name: 'The Mejiro Estate',
+        requires: 'set1.mejiro',
+        openers: [
+            { id: 'mejiro.grandmother', name: "Grandmother", text: "Ah. So you are {user}, the trainer the girls cannot stop writing home about. Welcome to the Mejiro Estate. Tea will be served in the east garden at three. Do mind the pond, and do keep McQueen away from the dessert cart until after dinner; I am told she has a plan." },
+            { id: 'mejiro.mcqueen', name: "Mejiro McQueen", text: "Welcome to the Mejiro Estate, {user}-san. Shall I show you the garden? The pond is at its loveliest when the blossoms fall, and the patisserie cart simply happens to be stationed beside it. Ahem. A coincidence, I assure you. Entirely." },
+            { id: 'mejiro.ryan', name: "Mejiro Ryan", text: "{user}-san! It's the Mejiro present exchange! I wrapped a complete training set, so whoever receives it, we're muscling together. ...Huh? You drew my gift, and I drew yours? W-wait, this is exactly like chapter twelve of... forget I said anything! Let's muscle!" },
+            { id: 'mejiro.dober', name: "Mejiro Dober", text: "{user}, over here. ...There are far too many people, and all of them are looking. Not you; you're fine. Sit. Drink your tea. I-it's not as if I kept this seat for you. It was simply empty." },
+            { id: 'mejiro.palmer', name: "Mejiro Palmer", text: "{user}! So, I complimented Grandmother's gown at the last party and she asked me to dance. Tonight it's your turn, I already told her. Please don't step on her feet. I am genuinely begging you." },
+            { id: 'mejiro.ardan', name: "Mejiro Ardan", text: "Shall we, {user}-san? The garden looks like this for only one evening a year, and I would rather spend that fleeting moment beside you. ...Ah, and Sister has asked for photographs, so do try to smile." },
+            { id: 'mejiro.bright', name: "Mejiro Bright", text: "Ah~ {user}-sama, you've arrived~ The tea party began an hour ago... or was it two~? Maki-chan and I have only just finished dressing for it~ Ufufu, the scones will surely wait for us~" },
+            { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "The family insists on a matching photograph... such a commotion. Come, {user}. Stand where I am seen at my best. ...And you may look for as long as you like." },
+            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, no flexing. Dober, the camera, not the floor. Palmer, Bright has fallen asleep again. Ardan, Ramonu, perfect. And {user}, here, beside us. ...There. One for the family album.", finale: true },
         ],
     },
 ];
@@ -310,4 +332,14 @@ export const SPECIAL_MEDIA_DIR = path.join(__dirname, '..', '..', 'assets', 'spe
 export function specialMediaPath(opener: string): string | null {
     const media = RARE_OPENERS.find((o) => o.text === opener)?.media;
     return media ? path.join(SPECIAL_MEDIA_DIR, media) : null;
+}
+
+/**
+ * The finale specials still closed to a trainer who has found `foundIds`:
+ * each finale whose set still has another special they have not found.
+ */
+export function closedFinales(foundIds: ReadonlySet<string>): string[] {
+    return SPECIAL_SETS.flatMap((set) =>
+        set.openers.filter((o) => o.finale && set.openers.some((other) => !other.finale && !foundIds.has(other.id))).map((o) => o.text),
+    );
 }

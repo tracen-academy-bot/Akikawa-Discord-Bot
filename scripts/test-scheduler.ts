@@ -165,7 +165,7 @@ async function main() {
     const openers = await import('../src/lib/timer/openers');
     const allIds = openers.RARE_OPENERS.map((o) => o.id);
     check('ids: every special has a unique id', new Set(allIds).size, allIds.length);
-    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id.startsWith(o.set === 'online-sensations' ? 'os.' : `${o.set}.`)), true);
+    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id.startsWith(({ 'online-sensations': 'os.', 'mejiro-estate': 'mejiro.' } as Record<string, string>)[o.set] ?? `${o.set}.`)), true);
     check('ids: prerequisites and locks name real specials', [...openers.SPECIAL_SETS.flatMap((x) => (x.requires ? [x.requires] : [])), ...openers.SPECIAL_LOCKS.map((l) => l.id)].every((id) => openers.specialById(id) !== undefined), true);
     // A reworded special keeps its finds: they follow the id, not the text.
     const IG = `test-ids-${Date.now()}`;
@@ -212,10 +212,10 @@ async function main() {
     const loves = RARE_OPENERS.find((o) => o.id === 'os.loves')!;
     check('sets: Curren Chan is the last of Set 1', [curren.set, openers.SPECIAL_SETS[0]!.openers.at(-1)?.name], ['set1', 'Curren Chan']);
     check('fill: every {user} and {set_name}', [openers.fillOpener(loves.text, 'u9').includes('{'), openers.fillOpener(loves.text, 'u9').split('<@u9>').length - 1, openers.fillOpener(loves.text, 'u9').includes('in #OnlineSensations.')], [false, 2, true]);
-    check('locks: the set is locked until Curren Chan', await rares.lockedSetsFor(XG, 'u1'), ['online-sensations']);
-    check('locks: a locked set is out of the pool', openers.rarePoolFor([], ['online-sensations']).length, openers.SPECIAL_SETS[0]!.openers.length);
+    check('locks: each gated set is locked until its special (Curren Chan, the Mejiro Family line)', await rares.lockedSetsFor(XG, 'u1'), ['online-sensations', 'mejiro-estate']);
+    check('locks: a locked set is out of the pool', openers.rarePoolFor([], ['online-sensations', 'mejiro-estate']).length, openers.SPECIAL_SETS[0]!.openers.length);
     await rares.recordRareOpener(XG, 'u1', curren.text);
-    check('locks: open once Curren Chan is found', [await rares.lockedSetsFor(XG, 'u1'), await rares.lockedSetsFor(XG, 'u2')], [[], ['online-sensations']]);
+    check('locks: open once Curren Chan is found (only that set)', [await rares.lockedSetsFor(XG, 'u1'), await rares.lockedSetsFor(XG, 'u2')], [['mejiro-estate'], ['online-sensations', 'mejiro-estate']]);
     const collabs = openers.boostPool('online-sensations', 'collab');
     check('boost: covers every #OnlineSensations line, Loves and #Celebrate included', [collabs.length, collabs.includes(loves.text), RARE_OPENERS.filter((o) => collabs.includes(o.text)).map((o) => o.name).includes('#Celebrate')], [openers.SPECIAL_SETS[1]!.openers.length, true, true]);
     check('boost: a plain special grants nothing', await rares.grantBoost(XG, 'u1', curren.text), false);
@@ -389,6 +389,22 @@ async function main() {
     }
     const capSpecials = [...capCounts].filter(([o]) => rares.isRareOpener(o)).reduce((n, [, c]) => n + c, 0);
     check('caps: raw 36% plays as 26.5% (base whole, boosts shrunk)', Math.abs(capSpecials - stepsOf(20000, 0.265)) <= 2, true);
+
+    // The Mejiro Estate: opened by Set 1's Mejiro Family line; the Family Photograph waits for the other eight.
+    const mejiro = openers.SPECIAL_SETS.find((x) => x.id === 'mejiro-estate')!;
+    const photo = mejiro.openers.find((o) => o.finale)!;
+    check('mejiro: 9 lines, opened by the Mejiro Family line, one finale', [mejiro.openers.length, mejiro.requires, mejiro.openers.filter((o) => o.finale).map((o) => o.id)], [9, 'set1.mejiro', ['mejiro.photo']]);
+    check('mejiro: no hashtags, one {user} each', mejiro.openers.every((o) => !/#\w/.test(o.text) && o.text.split('{user}').length === 2), true);
+    const others = mejiro.openers.filter((o) => !o.finale).map((o) => o.id);
+    check('finale: closed until the other eight are found', [openers.closedFinales(new Set(others.slice(0, 7))).includes(photo.text), openers.closedFinales(new Set(others)).includes(photo.text)], [true, false]);
+    const FG = `test-finale-${Date.now()}`;
+    for (const id of others.slice(0, 7)) await rares.recordRareOpener(FG, 'f1', openers.specialById(id)!.text);
+    check('finale: still closed with one family member missing', (await rares.closedFinalesFor(FG, 'f1')).includes(photo.text), true);
+    await rares.recordRareOpener(FG, 'f1', openers.specialById(others[7]!)!.text);
+    check('finale: open once the whole family is found', (await rares.closedFinalesFor(FG, 'f1')).includes(photo.text), false);
+    const mPage = json(rares.specialsView(await rares.rareTally(FG), 3));
+    check('finale: an unfound finale hints at itself on the page', mPage.embeds[0]!.fields?.[0]?.value.split('\n').at(-1), '**9.** ??? (the finale)');
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: FG } });
 
     // Reminder lines: none repeats within 4 pings in a row.
     check('reminders: 20 lines, each naming the trainer', [PING_OPENERS.length, PING_OPENERS.every((o) => o.includes('{user}'))], [20, true]);

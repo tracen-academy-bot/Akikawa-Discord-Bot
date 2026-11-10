@@ -4,6 +4,21 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-10 — The Mejiro Estate set; set finales
+
+- New special set `mejiro-estate`, "The Mejiro Estate", opened by Set 1's
+  "Mejiro Family" line: Grandmother's welcome and one line for each of the
+  seven Mejiro (McQueen, Ryan, Dober, Palmer, Ardan, Bright, Ramonu), each
+  built on their voice data (see `docs/special-sets/mejiro-estate.md`).
+  Fancy, no hashtags.
+- `Special.finale`: The Family Photograph comes up only once a trainer has
+  found every other line in the set (`closedFinales`, `closedFinalesFor`);
+  until then it is out of their pool and boosts, and their Specials page
+  shows "??? (the finale)".
+- Tests: lock lists now include the new set; ids prefixed `mejiro.`.
+
+---
+
 ## 2026-11-10 — 20 reminder lines, no back-to-back repeats
 
 - `PING_OPENERS` grows from 7 to 20 (13 new, picked and edited with the
