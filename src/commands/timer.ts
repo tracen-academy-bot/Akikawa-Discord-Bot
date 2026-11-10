@@ -2,6 +2,7 @@ import type { StringSelectMenuInteraction } from 'discord.js';
 import { SETTINGS_PREFIX, getUserSettings, runMinutes, settingsView, toggleSetting } from '../lib/timer/userSettings';
 import { READ_MENU_ID, SPECIALS_FIRST_PAGE, SPECIALS_PAGE_PREFIX, SPECIALS_SET_PREFIX, lockedSetsFor, mySpecialsView, pageOfSet, rareTally, readSpecial, specialEmbed, specialsView } from '../lib/timer/rares';
 import { EARLY_START } from '../lib/timer/openers';
+import { mediaMessage } from '../lib/timer/mediaMessage';
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
@@ -618,10 +619,14 @@ export function isSpecialReadMenu(customId: string): boolean {
 export async function handleSpecialRead(interaction: StringSelectMenuInteraction) {
     if (!interaction.inGuild()) return;
     const special = await readSpecial(interaction.guildId, interaction.user.id, interaction.values[0] ?? '');
+    if (special?.media) {
+        // The same box as the ping: name, line, subtext, media, credit.
+        const box = mediaMessage({ heading: special.name, text: special.text, mediaPath: special.media, credit: special.credit });
+        await interaction.reply({ ...box, allowedMentions: { parse: [] }, flags: box.flags | MessageFlags.Ephemeral });
+        return;
+    }
     await interaction.reply({
-        ...(special
-            ? { embeds: [specialEmbed(special)], files: special.media ? [new AttachmentBuilder(special.media)] : [] }
-            : { content: 'You have not unlocked that special yet.' }),
+        ...(special ? { embeds: [specialEmbed(special)] } : { content: 'You have not unlocked that special yet.' }),
         allowedMentions: { parse: [] },
         flags: MessageFlags.Ephemeral,
     });

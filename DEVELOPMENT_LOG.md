@@ -4,6 +4,19 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-10 — Specials with media post as a Components V2 box
+
+- `mediaMessage` (src/lib/timer/mediaMessage.ts): a line with media is one
+  container: main text, its "-#" subtext, the media (gallery, video or
+  image), the credit as small text under it, then a divider and the ping's
+  extras (Milestone, Congrats...). The read view uses the same box with the
+  special's name on top. Plain lines stay plain text.
+- `Special.credit`: where the media comes from, kept out of the line's text
+  so it can sit under the media. #ChuChuChallenge's video credit moved there.
+- To check once live: the mention inside the box still pings.
+
+---
+
 ## 2026-11-10 — The Mejiro Estate set; set finales
 
 - New special set `mejiro-estate`, "The Mejiro Estate", opened by Set 1's
