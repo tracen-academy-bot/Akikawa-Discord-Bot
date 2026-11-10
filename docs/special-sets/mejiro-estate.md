@@ -6,10 +6,10 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
 - **Style:** fancy, no hashtags (a guest like Helios may keep hers).
 - **Unlock:** the Set 1 line "Mejiro Family" (`set1.mejiro`).
 - **Stages** (`Special.after`, never shown on the Specials page, which just says "???"):
-  1. Grandmother's welcome comes first; it counts 8x in the pool until found (`Special.weight`).
+  1. Grandmother's welcome comes first: any roll on a Mejiro line she has not unlocked yet gives her line instead (`redirectOpener`), so she takes the whole set's share (9x) until found.
   2. The seven Mejiro open after it, in any order.
-  3. The Family Photograph opens after all eight.
-  4. Guests (to come) open after the photograph.
+  3. The Family Photograph opens after all eight; until then a roll on it gives an unmet family member.
+  4. Guests (to come) open after the photograph; until then a roll on one redirects the same way.
 
 ## Lines
 
@@ -19,7 +19,7 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
    Ah. So you are {user}, the trainer the girls cannot stop writing home about. Welcome to the Mejiro Estate. Tea will be served in the east garden at three. Do mind the pond, and do keep McQueen away from the dessert cart until after dinner; I am told she has a plan.
    ```
 
-   Hook: Head of the family, McQueen's おばあ様 (McQueen 10026, 70004, 91221; Palmer 91020). Counts 8x until found; she opens the rest.
+   Hook: Head of the family, McQueen's おばあ様 (McQueen 10026, 70004, 91221; Palmer 91020). Every Mejiro roll redirects to her until she is found; she opens the rest.
 
 2. Mejiro McQueen
 

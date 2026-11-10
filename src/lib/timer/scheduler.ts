@@ -12,7 +12,7 @@ import {
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { chooseOpener, closedSpecialsFor, grantBoost, trainerPool, isRareOpener, lockedSetsFor, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
+import { chooseOpener, grantBoost, trainerPool, isRareOpener, lockedSetsFor, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances } from './boosts';
 import { commonsFor, fillOpener, pickOpener, rarePoolFor, setsUnlockedBy, specialMediaPath } from './openers';
 import { AttachmentBuilder } from 'discord.js';
@@ -150,13 +150,13 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 const settings = await getUserSettings(timer.guildId, timer.discordUserId);
                 const lockedSets = await lockedSetsFor(timer.guildId, timer.discordUserId);
                 // Specials that wait on others (Special.after) stay out of the pool and the boosts until then.
-                const closed = await closedSpecialsFor(timer.guildId, timer.discordUserId);
-                // Weighted specials (Grandmother's welcome, 8x) count extra until found.
                 const pool = await trainerPool(timer.guildId, timer.discordUserId, rarePoolFor(settings.disabledSets, lockedSets));
-                const extras = (await extraChances(timer.guildId, timer.discordUserId, settings, lockedSets, timer.earlyStart, pool)).map((e) => ({
-                    ...e,
-                    pool: e.pool.filter((t) => !closed.includes(t)),
-                }));
+                const extras = await Promise.all(
+                    (await extraChances(timer.guildId, timer.discordUserId, settings, lockedSets, timer.earlyStart, pool)).map(async (e) => ({
+                        ...e,
+                        pool: await trainerPool(timer.guildId, timer.discordUserId, e.pool),
+                    })),
+                );
                 // Reminder lines don't repeat within 4 pings in a row (see COMMON_NO_REPEAT).
                 const commons = commonsFor(await recentCommons(timer.guildId, timer.discordUserId));
                 const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras, commons);

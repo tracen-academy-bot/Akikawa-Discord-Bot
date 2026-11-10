@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
 import { EARLY_START, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
-import { activeBoosts, closedSpecialsFor, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
+import { activeBoosts, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
 /**
@@ -83,12 +83,11 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
         lockedSetsFor(guildId, discordUserId),
         prisma.trainingTimer.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } } }),
     ]);
-    const closed = await closedSpecialsFor(guildId, discordUserId);
     const pool = await trainerPool(guildId, discordUserId, rarePoolFor(settings.disabledSets, lockedSets));
     // Listed as if Boosts were on, so paused ones still show.
-    const extras = (await extraChances(guildId, discordUserId, { ...settings, boosts: true }, lockedSets, timer?.earlyStart ?? false, pool, now))
-        .map((e) => ({ ...e, pool: e.pool.filter((t) => !closed.includes(t)) }))
-        .filter((e) => e.pool.length > 0);
+    const extras = (await extraChances(guildId, discordUserId, { ...settings, boosts: true }, lockedSets, timer?.earlyStart ?? false, pool, now)).filter(
+        (e) => e.pool.length > 0,
+    );
     const base = pool.length > 0 ? RARE_OPENER_CHANCE : 0;
     const rawTotal = base + (settings.boosts ? extras.reduce((sum, e) => sum + e.chance, 0) : 0);
     const total = base > 0 ? effectiveChance(rawTotal) : rawTotal;

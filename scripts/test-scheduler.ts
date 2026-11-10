@@ -395,7 +395,7 @@ async function main() {
     const grandma = mejiro.openers.find((o) => o.id === 'mejiro.grandmother')!;
     const seven = mejiro.openers.filter((o) => o.after?.length === 1).map((o) => o.id);
     const photo = mejiro.openers.find((o) => o.id === 'mejiro.photo')!;
-    check('mejiro: 9 lines, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.length, mejiro.requires, seven.length, photo.after?.length, grandma.weight], [9, 'set1.mejiro', 7, 8, 8]);
+    check('mejiro: 9 lines, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.length, mejiro.requires, seven.length, photo.after?.length], [9, 'set1.mejiro', 7, 8]);
     check('mejiro: no hashtags, one {user} each', mejiro.openers.every((o) => !/#\w/.test(o.text) && o.text.split('{user}').length === 2), true);
     const sevenTexts = seven.map((id) => openers.specialById(id)!.text);
     check('stages: before Grandmother, the seven and the photo are closed', openers.closedSpecials(new Set()).filter((t) => [...sevenTexts, photo.text].includes(t)).length, 8);
@@ -404,10 +404,10 @@ async function main() {
     const FG = `test-stages-${Date.now()}`;
     const mejiroPool = openers.rarePoolFor([], []).filter((t) => mejiro.openers.some((o) => o.text === t));
     const poolBefore = await rares.trainerPool(FG, 'f1', mejiroPool);
-    check('weight: before her welcome, Grandmother counts 8 times and is the only Mejiro line', [poolBefore.length, poolBefore.every((t) => t === grandma.text)], [8, true]);
+    check('redirect: before her welcome, every Mejiro roll is Grandmother (9 of 9)', [poolBefore.length, poolBefore.every((t) => t === grandma.text)], [9, true]);
     await rares.recordRareOpener(FG, 'f1', grandma.text);
     const poolAfter = await rares.trainerPool(FG, 'f1', mejiroPool);
-    check('weight: once found she counts once, and the seven open (not the photo)', [poolAfter.filter((t) => t === grandma.text).length, poolAfter.length, poolAfter.includes(photo.text)], [1, 8, false]);
+    check('redirect: once found she counts once, the seven open, and a photo roll gives an unmet member', [poolAfter.filter((t) => t === grandma.text).length, poolAfter.length, poolAfter.includes(photo.text), poolAfter.filter((t) => t === sevenTexts[0]).length], [1, 9, false, 2]);
     for (const t of sevenTexts) await rares.recordRareOpener(FG, 'f1', t);
     check('stages: with the whole family found, the photograph joins the pool', (await rares.trainerPool(FG, 'f1', mejiroPool)).includes(photo.text), true);
     const mPage = json(rares.specialsView(await rares.rareTally(FG), 3));
@@ -433,6 +433,7 @@ async function main() {
     const chuMedia = openers.specialMediaPath(chu.text);
     check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
+    check('chu: credits the video without embedding it', chu.text.endsWith('\n-# Video: <https://youtu.be/hJ78i-6uwGM>'), true);
     check('media: a line without media posts none', [openers.specialMediaPath(RARE_OPENERS[0]!.text), openers.specialMediaPath(PING_OPENERS[0]!)], [null, null]);
     check('chu: grants the collab boost like Loves, and is in its pool like every line', [openers.boostOf(chu.text)?.boost, openers.boostPool('online-sensations', 'collab').includes(chu.text)], [{ tag: 'collab', chance: 0.04, runs: 50 }, true]);
     check('chu: one {user}, and {set_name} fills in', [chu.text.split('{user}').length - 1, openers.fillOpener(chu.text, 'u1').includes('an entry in #OnlineSensations.')], [1, true]);

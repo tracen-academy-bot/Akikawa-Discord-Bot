@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -263,19 +263,13 @@ export async function closedSpecialsFor(guildId: string, discordUserId: string):
 }
 
 /**
- * A trainer's special pool with closed specials taken out and weighted ones
- * (`Special.weight`) repeated, while the trainer has not found them yet.
+ * A trainer's special pool with every closed special redirected to what it
+ * waits on (`redirectOpener`): before Grandmother's welcome, every Mejiro
+ * line in the pool is her line.
  */
 export async function trainerPool(guildId: string, discordUserId: string, pool: readonly string[]): Promise<string[]> {
     const found = await foundSpecialIds(guildId, discordUserId);
-    const closed = closedSpecials(found);
-    return pool
-        .filter((t) => !closed.includes(t))
-        .flatMap((t) => {
-            const special = RARE_OPENERS.find((o) => o.text === t);
-            const times = special?.weight && !found.has(special.id) ? special.weight : 1;
-            return Array<string>(times).fill(t);
-        });
+    return pool.map((t) => redirectOpener(t, found));
 }
 
 /** A set boost a trainer holds. */
