@@ -433,8 +433,17 @@ async function main() {
     const chuMedia = openers.specialMediaPath(chu.text);
     check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
-    check('credit: only #ChuChuChallenge credits the video', RARE_OPENERS.filter((o) => o.text.includes('youtu.be/hJ78i-6uwGM')).map((o) => o.id), ['os.chu']);
-    check('chu: credits the video without embedding it', chu.text.endsWith('\n-# Video: <https://youtu.be/hJ78i-6uwGM>'), true);
+    check('credit: only #ChuChuChallenge credits the video, as its own field', [RARE_OPENERS.filter((o) => o.credit).map((o) => [o.id, o.credit]), RARE_OPENERS.some((o) => o.text.includes('youtu.be'))], [[['os.chu', 'Video: <https://youtu.be/hJ78i-6uwGM>']], false]);
+    // The media box: main text, subtext, media, credit under it, then the extras.
+    const { mediaMessage, splitSubtext } = await import('../src/lib/timer/mediaMessage');
+    check('box: a line splits into main text and its -# subtext', [splitSubtext('Hi {user}!\n-# Footer one.').main, splitSubtext('Hi {user}!\n-# Footer one.').sub], ['Hi {user}!', '-# Footer one.']);
+    const box = mediaMessage({ text: openers.fillOpener(chu.text, 'u1'), mediaPath: chuMedia!, credit: chu.credit, extraLines: ['**Milestone!** That makes run #**25**!'] });
+    const boxJson = box.components[0]!.toJSON() as { components: { type: number; content?: string; items?: { media: { url: string } }[] }[] };
+    check('box: main, subtext, media, credit, divider, extras (in that order)', boxJson.components.map((c) => c.type), [10, 10, 12, 10, 14, 10]);
+    check('box: the mention is in the main text, the credit under the media', [boxJson.components[0]!.content?.startsWith('<@u1>-chan!'), boxJson.components[1]!.content?.startsWith('-# As #Revenge'), boxJson.components[2]!.items?.[0]?.media.url, boxJson.components[3]!.content], [true, true, 'attachment://chu-chu-challenge.mp4', '-# Video: <https://youtu.be/hJ78i-6uwGM>']);
+    check('box: sent as Components V2 with the file attached', [(box.flags & 32768) === 32768, box.files.length], [true, 1]);
+    const readBox = mediaMessage({ heading: chu.name, text: chu.text, mediaPath: chuMedia!, credit: chu.credit }).components[0]!.toJSON() as { components: { type: number; content?: string }[] };
+    check('box: the read view adds the name on top and no extras', [readBox.components[0]!.content, readBox.components.at(-1)!.content], ['### #ChuChuChallenge', '-# Video: <https://youtu.be/hJ78i-6uwGM>']);
     check('media: a line without media posts none', [openers.specialMediaPath(RARE_OPENERS[0]!.text), openers.specialMediaPath(PING_OPENERS[0]!)], [null, null]);
     check('chu: grants the collab boost like Loves, and is in its pool like every line', [openers.boostOf(chu.text)?.boost, openers.boostPool('online-sensations', 'collab').includes(chu.text)], [{ tag: 'collab', chance: 0.04, runs: 50 }, true]);
     check('chu: one {user}, and {set_name} fills in', [chu.text.split('{user}').length - 1, openers.fillOpener(chu.text, 'u1').includes('an entry in #OnlineSensations.')], [1, true]);

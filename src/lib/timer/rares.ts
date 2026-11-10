@@ -213,12 +213,12 @@ export function pageOfSet(setId: string): number {
  * special). Checked against their own finds, so a forged choice cannot
  * reveal a line they have not had.
  */
-export async function readSpecial(guildId: string, discordUserId: string, choice: string): Promise<{ name: string; text: string; media: string | null } | null> {
+export async function readSpecial(guildId: string, discordUserId: string, choice: string): Promise<{ name: string; text: string; media: string | null; credit: string | null } | null> {
     const special = specialById(choice);
     if (!special) return null;
     const found = await prisma.rareOpenerHit.findFirst({ where: { guildId, discordUserId, specialId: special.id } });
     if (!found) return null;
-    return { name: special.name, text: fillOpener(special.text, discordUserId), media: specialMediaPath(special.text) };
+    return { name: special.name, text: fillOpener(special.text, discordUserId), media: specialMediaPath(special.text), credit: special.credit ?? null };
 }
 
 /** The embed showing one special in full. */
