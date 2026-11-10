@@ -4,6 +4,33 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-10 — The Mejiro Estate set; set finales
+
+- New special set `mejiro-estate`, "The Mejiro Estate", opened by Set 1's
+  "Mejiro Family" line: Grandmother's welcome and one line for each of the
+  seven Mejiro (McQueen, Ryan, Dober, Palmer, Ardan, Bright, Ramonu), each
+  built on their voice data (see `docs/special-sets/mejiro-estate.md`).
+  Fancy, no hashtags.
+- **Stages** (`Special.after`, owner's design): Grandmother's welcome
+  first, then the seven Mejiro in any order, then the Family Photograph,
+  later guests. A special whose `after` list is not all found is out of the
+  trainer's pool and boosts (`closedSpecials`, `trainerPool`). The lock is
+  never shown; the page says "???" as for any unfound line.
+- Closed specials redirect instead of dropping out (owner): a roll on one
+  gives the first special it waits on that the trainer has not found
+  (`redirectOpener`, applied by `trainerPool` to the pool and boost pools).
+  So Grandmother takes all 9 Mejiro slots until found, and a photo roll
+  gives an unmet family member.
+- #ChuChuChallenge credits its video: "-# Video: <https://youtu.be/hJ78i-6uwGM>"
+  (angle brackets so Discord adds no second embed).
+- Lines rewritten after a deeper read of each girl (owner: "more than a
+  primary analysis"): McQueen's desu wa and secret sports, Ryan's dress
+  panic instead of muscle, Dober's fear of men, Ramonu's escort and
+  "second love".
+- Tests: lock lists now include the new set; ids prefixed `mejiro.`.
+
+---
+
 ## 2026-11-10 — 20 reminder lines, no back-to-back repeats
 
 - `PING_OPENERS` grows from 7 to 20 (13 new, picked and edited with the

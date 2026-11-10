@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -248,6 +248,28 @@ export async function lockedSetsFor(guildId: string, discordUserId: string): Pro
     const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, discordUserId }, select: { specialId: true } });
     const found = new Set(hits.map((h) => h.specialId));
     return gated.filter((s) => !found.has(s.requires!)).map((s) => s.id);
+}
+
+/** The ids of the specials a trainer has found. */
+export async function foundSpecialIds(guildId: string, discordUserId: string): Promise<Set<string>> {
+    const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, discordUserId }, select: { specialId: true } });
+    return new Set(hits.flatMap((h) => (h.specialId ? [h.specialId] : [])));
+}
+
+/** The specials still closed to a trainer (see `Special.after`): out of their pool and boosts. */
+export async function closedSpecialsFor(guildId: string, discordUserId: string): Promise<string[]> {
+    if (!RARE_OPENERS.some((o) => o.after)) return [];
+    return closedSpecials(await foundSpecialIds(guildId, discordUserId));
+}
+
+/**
+ * A trainer's special pool with every closed special redirected to what it
+ * waits on (`redirectOpener`): before Grandmother's welcome, every Mejiro
+ * line in the pool is her line.
+ */
+export async function trainerPool(guildId: string, discordUserId: string, pool: readonly string[]): Promise<string[]> {
+    const found = await foundSpecialIds(guildId, discordUserId);
+    return pool.map((t) => redirectOpener(t, found));
 }
 
 /** A set boost a trainer holds. */

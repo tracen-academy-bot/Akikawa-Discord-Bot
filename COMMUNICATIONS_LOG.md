@@ -4,6 +4,15 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-10 — The Mejiro Estate
+
+- New set, unlocked by Set 1's Mejiro Family line: Grandmother and the
+  seven Mejiro, fancy and without hashtags.
+- Its finale, The Family Photograph, appears only after the other eight are
+  found. A light mechanic by request, nothing forced.
+
+---
+
 ## 2026-11-10 — More reminder lines, no repeats
 
 - 20 everyday reminder lines (was 7), less uniformly upbeat.

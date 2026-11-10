@@ -59,6 +59,15 @@ export interface Special {
     tags?: readonly string[];
     boost?: SpecialBoost;
     /**
+     * Specials (by id) a trainer must have found before this one can come up,
+     * e.g. the seven Mejiro after Grandmother's welcome, the Family
+     * Photograph after all of them. Until then a roll on it redirects to the
+     * first of those still unfound (`redirectOpener`), so Grandmother takes
+     * the whole set's share until she is found. Nothing on the Specials page
+     * says so: it just shows "???".
+     */
+    after?: readonly string[];
+    /**
      * A file in `src/assets/specials/` (a video or GIF) posted with the line:
      * on the ping, its DM copy, and when the special is read in full.
      */
@@ -126,7 +135,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'os.celebrate', name: "#Celebrate", text: "{user}, it's time to #Celebrate! It took so much #Preparation but we finally got #ThreeMillionFollowers on release! Thank you for being my #FavoriteManager, and it's time to get a bazillion more! #WorkHard", tags: ['collab'] },
             { id: 'os.eyes-only', name: "#ForYourEyesOnly", text: "{user}, it's such a long dayyyy~ #SoTired It was fun but a #DozenDresses takes so long for the producers... So I just want to *closes door behind* show you something #ForYourEyesOnly~\n...ya like it, m'fated #BelovedManager? shh, it's only for you now... and maybe when we truly #BecomeAPair~", tags: ['collab'] },
             { id: 'os.rickey', name: "#CopanoRickey", text: "Hey {user}, have you seen that #Viral Umastagram photo? The #Rickey☆Buzz one? She wanted to raise 15 million #ChristmasOrnies... Either way, that's why we're streaming with her to garner more support! Here comes the #FengShui train! #CurrenxRickey #RickeyLuckyHappy", tags: ['collab'] },
-            { id: 'os.loves', name: "#LovesOnlyYou", text: "#Woah #Surprised Loves? What are you doing here?! I'm surprised you'd be #WalkingAround- oh my god you're #LiveStreaming! {user}, get in here! Introducing to everyone, #TheBestManager that Tracen can ask for! And also mine~ #CurrensManager #CurrenxLoves\n-# {user} became so famous that even Montjeu #L'ArcChampion requested a collaboration! For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 } },
+            { id: 'os.loves', name: "#LovesOnlyYou", text: "#Woah #Surprised Loves? What are you doing here?! I'm surprised you'd be #WalkingAround- oh my god you're #LiveStreaming! {user}, get in here! Introducing to everyone, #TheBestManager that Tracen can ask for! And also mine~ #CurrensManager #CurrenxLoves\n-# {user} became so famous that even Montjeu #L'ArcChampion requested a collaboration! For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.\n-# Video: <https://youtu.be/hJ78i-6uwGM>", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 } },
             { id: 'os.tosen', name: "#TosenJordan", text: "You know Tosen right? Yeah, her #FancyNails are amazing! Look how that fits her #CircusCostume though! We *have* to make one- yes {user}-chan... #ComeOn have you not seen Gojo-kun?! You can do the same! #CurrenxTosen #IWantGojoKun #MakeMeMarin", tags: ['collab'] },
             { id: 'os.gold-city', name: "#GoldCity", text: "Ugh, I want to actually do a #RealCollab with Gold City but she's always busy... Last time she even asked if you'd be her #UmastaCameraman; when are you doing *my* photos huh {user}-chan? Come onnn, at least act like a #RealMan~ #CityWaitingRoom #SpoilYourPrincess", tags: ['collab'] },
             { id: 'os.transcend', name: "#Transcend", text: "Transcend said thanks for the collab, {user}-chan! Her followers went #Explosive overnight, and she called Curren a total #Charisma~ Now she's offering a whole jar of #Hachimi for intel on #TheBestManager... sorry Trans-chan, that scoop is #NotForSale! #CurrenxTranscend", tags: ['collab'] },
@@ -135,7 +144,23 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'os.taiki', name: "#TaikiShuttle", text: "Ugh, Taiki just doesn't #NoticeMyRivalry at all! She's so #PartyFun and her Texan burgers are so #Deliciousss... That's right! {user}, time to make some noise in UmaTube! Surely we can get a collab out of her! #MakeCurrenNoticeableAgain", tags: ['collab'] },
             { id: 'os.biko', name: "#BikoPegasus", text: "Biko's got a new #UmaTokPost? Oh my GAWDDD I love Biko! Have you seen her animations? Her #PowerRanger series is also soooo cool... wait... You got me a #RangerCollab?! No weiii! (#PalmerHelios taught me that!) Thank you shooo much {user}! Time to get my #DressUp ready! #CurrenxBiko #PinkRanger", tags: ['collab'] },
             { id: 'os.helios', name: "#DaitakuHelios", text: "Wei weeeiiii! {user}, I've heard of how gyatdamnnn vibey you are! So here's the thing Torepiii *wink*: Gold City and I have been doing a pretty s'mexy looksmaxxing Zombie☆Makeover, and I think Curren be such a cutieee, frfr! I'll be looking for six or seven- HAHAH SIX SEVENNN- more ladies, so hook me up... and also ||teach me how to bag Daiichi-ojou too pweaseee!|| See ya, Helios☆Out! #LookAtHelios #ScaryCurren #DoveyVibey", tags: ['collab'] },
-            { id: 'os.chu', name: "#ChuChuChallenge", text: "{user}-chan! Everyone on UmaTok is doing the #ChuChuChallenge, so obviously Curren does it the #Kawaiiest~ Got the #FancyCam ready? Here we go! Chu♡ Chu♡ Chu♡... wait, why are you smiling at me like that?! S-stop, Curren’s supposed to be #Unshakeable! Curren is NOT ドキドキ #Flustered right now! ...Ugh, my face is so warm.. Cut, CUT! Another take! バカ！ #CurrenxTrainer #ChuChuChallenge #DummyTrainer #IHateTrainer\n-# As #Revenge, Curren Chan vows to #TireYouOut with more #SpecialCollabs. For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 }, media: 'chu-chu-challenge.mp4' },
+            { id: 'os.chu', name: "#ChuChuChallenge", text: "{user}-chan! Everyone on UmaTok is doing the #ChuChuChallenge, so obviously Curren does it the #Kawaiiest~ Got the #FancyCam ready? Here we go! Chu♡ Chu♡ Chu♡... wait, why are you smiling at me like that?! S-stop, Curren’s supposed to be #Unshakeable! Curren is NOT ドキドキ #Flustered right now! ...Ugh, my face is so warm.. Cut, CUT! Another take! バカ！ #CurrenxTrainer #ChuChuChallenge #DummyTrainer #IHateTrainer\n-# As #Revenge, Curren Chan vows to #TireYouOut with more #SpecialCollabs. For the next 50 runs, gain a 4% chance of getting an entry in {set_name}.\n-# Video: <https://youtu.be/hJ78i-6uwGM>", tags: ['collab'], boost: { tag: 'collab', chance: 0.04, runs: 50 }, media: 'chu-chu-challenge.mp4' },
+        ],
+    },
+    {
+        id: 'mejiro-estate',
+        name: 'The Mejiro Estate',
+        requires: 'set1.mejiro',
+        openers: [
+            { id: 'mejiro.grandmother', name: "Grandmother", text: "Ah. So you are {user}, the trainer the girls cannot stop writing home about. Welcome to the Mejiro Estate. Tea will be served in the east garden at three. Do mind the pond, and do keep McQueen away from the dessert cart until after dinner; I am told she has a plan." },
+            { id: 'mejiro.mcqueen', name: "Mejiro McQueen", text: "Welcome to the Mejiro Estate, {user}-san. I shall be your guide this afternoon, desu wa. The garden, the pond, the tea room... and the patisserie cart, which simply happens to lie on our route. *Ahem.* One parfait a week is perfectly reasonable. ...Is that the baseball broadcast in the parlour? N-not that I would know. Shall we?", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.ryan', name: "Mejiro Ryan", text: "{user}-san! Grandmother made me wear a dress tonight... it's frilly. Very frilly. Everyone keeps saying it looks nice, but they're just being polite, right? ...Right? Ugh, this is exactly the chapter where the heroine flees to the balcony. I am not fleeing to the balcony. I'm just... getting some air.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.dober', name: "Mejiro Dober", text: "{user}, don't wander off. ...Too many people tonight, and half of them are men in suits. Not that I need you here. You're just the only one I can stand next to without my ears going flat. And if Dad calls me 'Bell-chan', you heard nothing.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.palmer', name: "Mejiro Palmer", text: "{user}! So I complimented Grandmother's gown last Christmas and she made me dance. Tonight it's your turn, I already told her. Two rules: don't step on her feet, and do NOT panic and bolt halfway through. Running away at full speed is my move.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.ardan', name: "Mejiro Ardan", text: "Shall we dance, {user}-san? Only a waltz; the doctor was very clear about my legs. ...Please don't look so worried. The garden is lit for this one evening, and I intend to shine for every second of it. Sister is watching, you know. Let us give her something worth looking at.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.bright', name: "Mejiro Bright", text: "Ah~ {user}-sama, good evening~ ...Or is it morning? I napped in the sunroom and lost track~ Ryan-oneesama's dress looks lovely, doesn't it~? I sewed one just like it for Maki-chan~ Please don't tell her, it's a surprise~", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "{user}. You'll do; escort me. ...Surely you didn't think I would walk into my own family's gathering alone, dressed like this? Look, then, for as long as you like. Only know that you are my second love. The first is waiting for me on the turf.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, it looks lovely, stop tugging the hem. Dober, the camera, not the floor; nobody else is looking. Palmer, wake Bright. Ardan, beside your sister. Ramonu... yes, we know, you are radiant. And {user}, here, with the family. ...There. One for the album.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'] },
         ],
     },
 ];
@@ -310,4 +335,27 @@ export const SPECIAL_MEDIA_DIR = path.join(__dirname, '..', '..', 'assets', 'spe
 export function specialMediaPath(opener: string): string | null {
     const media = RARE_OPENERS.find((o) => o.text === opener)?.media;
     return media ? path.join(SPECIAL_MEDIA_DIR, media) : null;
+}
+
+/**
+ * The specials still closed to a trainer who has found `foundIds`: those
+ * with an `after` they have not all found.
+ */
+export function closedSpecials(foundIds: ReadonlySet<string>): string[] {
+    return RARE_OPENERS.filter((o) => o.after?.some((id) => !foundIds.has(id))).map((o) => o.text);
+}
+
+/**
+ * What a roll on `text` gives a trainer who has found `foundIds`: the line
+ * itself if it is open, else (following `after`) the first special it waits
+ * on that they have not found, itself redirected the same way.
+ */
+export function redirectOpener(text: string, foundIds: ReadonlySet<string>): string {
+    let special = RARE_OPENERS.find((o) => o.text === text);
+    for (let hops = 0; special?.after && hops < RARE_OPENERS.length; hops += 1) {
+        const missing = special.after.find((id) => !foundIds.has(id));
+        if (!missing) break;
+        special = specialById(missing);
+    }
+    return special?.text ?? text;
 }

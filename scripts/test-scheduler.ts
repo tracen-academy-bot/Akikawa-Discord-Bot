@@ -165,7 +165,7 @@ async function main() {
     const openers = await import('../src/lib/timer/openers');
     const allIds = openers.RARE_OPENERS.map((o) => o.id);
     check('ids: every special has a unique id', new Set(allIds).size, allIds.length);
-    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id.startsWith(o.set === 'online-sensations' ? 'os.' : `${o.set}.`)), true);
+    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id.startsWith(({ 'online-sensations': 'os.', 'mejiro-estate': 'mejiro.' } as Record<string, string>)[o.set] ?? `${o.set}.`)), true);
     check('ids: prerequisites and locks name real specials', [...openers.SPECIAL_SETS.flatMap((x) => (x.requires ? [x.requires] : [])), ...openers.SPECIAL_LOCKS.map((l) => l.id)].every((id) => openers.specialById(id) !== undefined), true);
     // A reworded special keeps its finds: they follow the id, not the text.
     const IG = `test-ids-${Date.now()}`;
@@ -212,10 +212,10 @@ async function main() {
     const loves = RARE_OPENERS.find((o) => o.id === 'os.loves')!;
     check('sets: Curren Chan is the last of Set 1', [curren.set, openers.SPECIAL_SETS[0]!.openers.at(-1)?.name], ['set1', 'Curren Chan']);
     check('fill: every {user} and {set_name}', [openers.fillOpener(loves.text, 'u9').includes('{'), openers.fillOpener(loves.text, 'u9').split('<@u9>').length - 1, openers.fillOpener(loves.text, 'u9').includes('in #OnlineSensations.')], [false, 2, true]);
-    check('locks: the set is locked until Curren Chan', await rares.lockedSetsFor(XG, 'u1'), ['online-sensations']);
-    check('locks: a locked set is out of the pool', openers.rarePoolFor([], ['online-sensations']).length, openers.SPECIAL_SETS[0]!.openers.length);
+    check('locks: each gated set is locked until its special (Curren Chan, the Mejiro Family line)', await rares.lockedSetsFor(XG, 'u1'), ['online-sensations', 'mejiro-estate']);
+    check('locks: a locked set is out of the pool', openers.rarePoolFor([], ['online-sensations', 'mejiro-estate']).length, openers.SPECIAL_SETS[0]!.openers.length);
     await rares.recordRareOpener(XG, 'u1', curren.text);
-    check('locks: open once Curren Chan is found', [await rares.lockedSetsFor(XG, 'u1'), await rares.lockedSetsFor(XG, 'u2')], [[], ['online-sensations']]);
+    check('locks: open once Curren Chan is found (only that set)', [await rares.lockedSetsFor(XG, 'u1'), await rares.lockedSetsFor(XG, 'u2')], [['mejiro-estate'], ['online-sensations', 'mejiro-estate']]);
     const collabs = openers.boostPool('online-sensations', 'collab');
     check('boost: covers every #OnlineSensations line, Loves and #Celebrate included', [collabs.length, collabs.includes(loves.text), RARE_OPENERS.filter((o) => collabs.includes(o.text)).map((o) => o.name).includes('#Celebrate')], [openers.SPECIAL_SETS[1]!.openers.length, true, true]);
     check('boost: a plain special grants nothing', await rares.grantBoost(XG, 'u1', curren.text), false);
@@ -390,6 +390,30 @@ async function main() {
     const capSpecials = [...capCounts].filter(([o]) => rares.isRareOpener(o)).reduce((n, [, c]) => n + c, 0);
     check('caps: raw 36% plays as 26.5% (base whole, boosts shrunk)', Math.abs(capSpecials - stepsOf(20000, 0.265)) <= 2, true);
 
+    // The Mejiro Estate: Set 1's Mejiro Family line opens it; Grandmother first (8x), then the seven, then the photograph.
+    const mejiro = openers.SPECIAL_SETS.find((x) => x.id === 'mejiro-estate')!;
+    const grandma = mejiro.openers.find((o) => o.id === 'mejiro.grandmother')!;
+    const seven = mejiro.openers.filter((o) => o.after?.length === 1).map((o) => o.id);
+    const photo = mejiro.openers.find((o) => o.id === 'mejiro.photo')!;
+    check('mejiro: 9 lines, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.length, mejiro.requires, seven.length, photo.after?.length], [9, 'set1.mejiro', 7, 8]);
+    check('mejiro: no hashtags, one {user} each', mejiro.openers.every((o) => !/#\w/.test(o.text) && o.text.split('{user}').length === 2), true);
+    const sevenTexts = seven.map((id) => openers.specialById(id)!.text);
+    check('stages: before Grandmother, the seven and the photo are closed', openers.closedSpecials(new Set()).filter((t) => [...sevenTexts, photo.text].includes(t)).length, 8);
+    check('stages: after Grandmother, only the photo waits', openers.closedSpecials(new Set([grandma.id])).filter((t) => [...sevenTexts, photo.text].includes(t)), [photo.text]);
+    check('stages: the photo opens once all eight are found', openers.closedSpecials(new Set([grandma.id, ...seven])).includes(photo.text), false);
+    const FG = `test-stages-${Date.now()}`;
+    const mejiroPool = openers.rarePoolFor([], []).filter((t) => mejiro.openers.some((o) => o.text === t));
+    const poolBefore = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('redirect: before her welcome, every Mejiro roll is Grandmother (9 of 9)', [poolBefore.length, poolBefore.every((t) => t === grandma.text)], [9, true]);
+    await rares.recordRareOpener(FG, 'f1', grandma.text);
+    const poolAfter = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('redirect: once found she counts once, the seven open, and a photo roll gives an unmet member', [poolAfter.filter((t) => t === grandma.text).length, poolAfter.length, poolAfter.includes(photo.text), poolAfter.filter((t) => t === sevenTexts[0]).length], [1, 9, false, 2]);
+    for (const t of sevenTexts) await rares.recordRareOpener(FG, 'f1', t);
+    check('stages: with the whole family found, the photograph joins the pool', (await rares.trainerPool(FG, 'f1', mejiroPool)).includes(photo.text), true);
+    const mPage = json(rares.specialsView(await rares.rareTally(FG), 3));
+    check('stages: the page never shows the lock, just ???', mPage.embeds[0]!.fields?.[0]?.value.split('\n').at(-1), '**9.** ???');
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: FG } });
+
     // Reminder lines: none repeats within 4 pings in a row.
     check('reminders: 20 lines, each naming the trainer', [PING_OPENERS.length, PING_OPENERS.every((o) => o.includes('{user}'))], [20, true]);
     const NR = `test-norepeat-${Date.now()}`;
@@ -409,6 +433,7 @@ async function main() {
     const chuMedia = openers.specialMediaPath(chu.text);
     check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
+    check('chu: credits the video without embedding it', chu.text.endsWith('\n-# Video: <https://youtu.be/hJ78i-6uwGM>'), true);
     check('media: a line without media posts none', [openers.specialMediaPath(RARE_OPENERS[0]!.text), openers.specialMediaPath(PING_OPENERS[0]!)], [null, null]);
     check('chu: grants the collab boost like Loves, and is in its pool like every line', [openers.boostOf(chu.text)?.boost, openers.boostPool('online-sensations', 'collab').includes(chu.text)], [{ tag: 'collab', chance: 0.04, runs: 50 }, true]);
     check('chu: one {user}, and {set_name} fills in', [chu.text.split('{user}').length - 1, openers.fillOpener(chu.text, 'u1').includes('an entry in #OnlineSensations.')], [1, true]);
