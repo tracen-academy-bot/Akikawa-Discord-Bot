@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, RARE_OPENER_CHANCE, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { EARLY_START, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
 import { activeBoosts, lockedSetsFor, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
@@ -12,7 +12,7 @@ import { getUserSettings, type UserSettings } from './userSettings';
 /** Custom ID of the Boosts view's On/Off button. Starts with `timer:` so the panel's handler gets it. */
 export const BOOSTS_TOGGLE_ID = 'timer:boosts:toggle';
 
-/** A chance as a percentage, e.g. 0.06 -> "6%", 0.105 -> "10.5%". */
+/** A chance as a percentage, e.g. 0.1 -> "10%", 0.105 -> "10.5%". */
 function percent(chance: number): string {
     return `${Math.round(chance * 1000) / 10}%`;
 }
@@ -89,7 +89,8 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
         (e) => e.pool.length > 0,
     );
     const base = pool.length > 0 ? RARE_OPENER_CHANCE : 0;
-    const total = base + (settings.boosts ? extras.reduce((sum, e) => sum + e.chance, 0) : 0);
+    const rawTotal = base + (settings.boosts ? extras.reduce((sum, e) => sum + e.chance, 0) : 0);
+    const total = base > 0 ? effectiveChance(rawTotal) : rawTotal;
 
     const lines = [`**Base:** ${percent(RARE_OPENER_CHANCE)} on every ping${pool.length === 0 ? ' (every special set is off for you)' : ''}.`];
     if (extras.length === 0) lines.push('No boosts right now.');
@@ -100,6 +101,7 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
         );
     }
     lines.push('', `**Your next ping: ${percent(total)} chance of a special.**`);
+    if (total < rawTotal - 1e-9) lines.push(`-# Raw ${percent(rawTotal)} before the soft caps: raw over 20% counts at half, raw over 30% at a quarter, 30% at most.`);
     if (!settings.boosts) lines.push('Boosts are off, so they are paused. Turn them on below.');
 
     const embed = new EmbedBuilder().setColor(0xf2a87a).setTitle('Your boosts').setDescription(lines.join('\n'));

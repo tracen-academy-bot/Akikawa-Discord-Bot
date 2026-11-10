@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
+import { PING_OPENERS, RARE_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -302,16 +302,17 @@ export interface ExtraChance {
  *
  *   - one slice per extra, of width `chance`, each picking evenly from its
  *     own pool (an extra whose pool is empty gets no slice);
- *   - then the usual special share, `RARE_OPENER_CHANCE` (6%);
+ *   - then the usual special share, `RARE_OPENER_CHANCE` (10%);
  *   - then the common lines.
  *
  * So the chances add: with extras $c_1, \dots, c_k$, a ping is special with
- * probability $c_1 + \dots + c_k + 0.06$. Within the usual 6%, the locks work
+ * probability $c_1 + \dots + c_k + 0.1$, before the soft caps (`effectiveChance`),
+ * which shrink the extras' slices, never the base. Within the usual 10%, the locks work
  * as before:
  *
  *   - a locked special is out of everyone's pool but its owner's, so the
- *     6% is spread evenly over the rest;
- *   - the owner gets it below `ownerChance`, and the rest of the 6% is
+ *     10% is spread evenly over the rest;
+ *   - the owner gets it below `ownerChance`, and the rest of the 10% is
  *     spread evenly over the other specials;
  *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping is
  *     that special, whatever the roll and before any extra.
@@ -331,7 +332,14 @@ export async function chooseOpener(
     // A guarantee: the owner's next ping is theirs, whatever the roll.
     if (mine && mine.ownerChance >= 1) return mine.text;
 
-    const slices = extras.map((e) => ({ chance: e.chance, pool: e.pool.filter((t) => !locked.includes(t)) })).filter((e) => e.chance > 0 && e.pool.length > 0);
+    const raw = extras.map((e) => ({ chance: e.chance, pool: e.pool.filter((t) => !locked.includes(t)) })).filter((e) => e.chance > 0 && e.pool.length > 0);
+    // The soft caps: when base plus boosts passes 20%, the boost slices
+    // shrink in proportion so the total is exactly `effectiveChance`; the
+    // base slice stays whole.
+    const rawExtra = raw.reduce((sum, e) => sum + e.chance, 0);
+    const keptExtra = Math.max(0, effectiveChance(RARE_OPENER_CHANCE + rawExtra) - RARE_OPENER_CHANCE);
+    const scale = rawExtra > 0 ? keptExtra / rawExtra : 1;
+    const slices = raw.map((e) => ({ ...e, chance: e.chance * scale }));
     let start = 0;
     for (const slice of slices) {
         if (r < start + slice.chance) {

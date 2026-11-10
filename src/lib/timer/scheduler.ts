@@ -48,7 +48,7 @@ export { PING_OPENERS, RARE_PING_OPENERS, RARE_OPENER_CHANCE, pickOpener } from 
 export { extraChances } from './boosts';
 
 /**
- * Builds the message body for an expiry ping: an opener (a rare one 6% of
+ * Builds the message body for an expiry ping: an opener (a rare one 10% of
  * the time), then a bold-led line for each thing worth celebrating
  * (a special set it unlocked, the run's number, a streak, a new milestone
  * role). `milestoneRoleId` is a role the run just earned; it is mentioned

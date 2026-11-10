@@ -125,13 +125,13 @@ Voice ids are from the JP master data (see `docs/uma-reference/`).
   the trainer at least (owner, 2026-11-10), so the boost covers the whole
   set, the lines that grant it included (landing on one adds 50 more runs).
 - **Unlock bonus:** once a trainer has unlocked the set, every ping has an
-  extra 1% chance of one of its lines (on top of the usual 6% for any
+  extra 1% chance of one of its lines (on top of the usual 10% for any
   special). Boosts off turns it off.
 - **#ChuChuChallenge** (line 13) grants the same collab boost as Loves (it
   adds 50 runs), and posts its video with the ping, its DM copy and
   the read view. The clip is the owner's (a fan dance video set to
   chu♡chu♡chu by Ganeme), re-encoded to 720p30, 3.6 MB.
 - **Loves Only You's boost:** for the trainer's next 50 pings, +4% chance of
-  an #OnlineSensations line, on top of the usual 6% for any special. Getting
+  an #OnlineSensations line, on top of the usual 10% for any special. Getting
   Loves (or #ChuChuChallenge) again adds 50 more runs to what is left; the
   +4% does not stack. Boosts off pauses it.

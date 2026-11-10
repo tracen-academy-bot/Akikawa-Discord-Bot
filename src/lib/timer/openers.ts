@@ -134,7 +134,30 @@ export const RARE_OPENERS: readonly (Special & { set: string })[] = SPECIAL_SETS
 export const RARE_PING_OPENERS: readonly string[] = RARE_OPENERS.map((o) => o.text);
 
 /** Chance, across all of them, that a ping opens with a rare line. */
-export const RARE_OPENER_CHANCE = 0.06;
+export const RARE_OPENER_CHANCE = 0.1;
+
+/**
+ * Soft caps on a ping's total special chance (base plus every boost), as in
+ * Uma's stat soft caps (owner, 2026-11-10). Up to 20% counts in full; the
+ * raw chance from 20% to 30% counts at half (reaching 25%); beyond that at a
+ * quarter; and the effective chance never passes the 30% hard cap (reached
+ * at a raw 50%).
+ */
+export const SPECIAL_SOFT_CAPS: readonly { from: number; rate: number }[] = [
+    { from: 0.2, rate: 1 / 2 },
+    { from: 0.3, rate: 1 / 4 },
+];
+export const SPECIAL_HARD_CAP = 0.3;
+
+/** The effective special chance for a raw total `raw`, after the soft caps and the hard cap. */
+export function effectiveChance(raw: number): number {
+    let effective = Math.min(raw, SPECIAL_SOFT_CAPS[0]!.from);
+    SPECIAL_SOFT_CAPS.forEach((cap, i) => {
+        const end = SPECIAL_SOFT_CAPS[i + 1]?.from ?? Infinity;
+        if (raw > cap.from) effective += (Math.min(raw, end) - cap.from) * cap.rate;
+    });
+    return Math.min(effective, SPECIAL_HARD_CAP);
+}
 
 /**
  * A seasonal buff: from `from` until `until`, every trainer's ping has an
@@ -219,11 +242,11 @@ export function boostPool(setId: string, tag: string): string[] {
 /**
  * Specials locked to one trainer until that trainer has found them:
  *
- *   - nobody else can get it: their special share (6%) is spread evenly
+ *   - nobody else can get it: their special share (10%) is spread evenly
  *     over the other specials;
  *   - the owner gets it at `ownerChance` per ping (2%), and the rest of
  *     their special share (the other 2%) is spread evenly over the other
- *     specials. Their total special chance stays 6%.
+ *     specials. Their total special chance stays 10%.
  *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping
  *     is that special, whatever the roll.
  *
