@@ -3,6 +3,7 @@ import { prisma } from '../../db/prisma';
 import { LIVE_DAY_ROWS, LIVE_WEEK_ROWS, renderLiveBoard } from '../image/renderTimerLeaderboard';
 import { displayName } from './boardImage';
 import { buildPanel } from './panel';
+import { noticeBox } from './pingBox';
 import { getBoard, getDayBoard, getTimerSettings } from './rewards';
 import { STREAK_TIMEZONE, getPanelContext, listActiveTimers } from './service';
 
@@ -85,7 +86,7 @@ export async function postPanelPair(client: Client, guild: Guild, channelId: str
     const panel = await channel.send(buildPanel(timers, context));
     // The notice goes last, right under the panel. It never pings: it is re-posted often.
     const notice = old?.notice
-        ? await channel.send({ content: old.notice, allowedMentions: { parse: [] } }).catch((e) => {
+        ? await channel.send(noticeBox(old.notice)).catch((e) => {
               console.error('Timer notice post failed:', e);
               return null;
           })
@@ -138,10 +139,11 @@ export async function setPanelNotice(
     if (panel.noticeMessageId) {
         try {
             const message = await channel.messages.fetch(panel.noticeMessageId);
-            await message.edit({ content: notice, allowedMentions: { parse: [] } });
+            await message.edit(noticeBox(notice));
             return 'saved';
         } catch {
-            // Deleted by hand: post the sticky again, notice included.
+            // Deleted by hand, or an older plain-text notice that cannot become
+            // a box by an edit: post the sticky again, notice included.
         }
     }
     return (await postPanelPair(client, guild, channelId)) ? 'saved' : 'failed';
