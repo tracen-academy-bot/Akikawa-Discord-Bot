@@ -75,13 +75,13 @@ export function pingBox(parts: PingBoxParts) {
 }
 
 /**
- * The timer notice under the panel (`/timer notice`), as a box: a bold
- * "Notice" line, then the text. It never pings anyone: the sticky re-posts it
+ * The timer notice under the panel (`/timer notice`), as a box: a "Notice"
+ * heading, then the text. It never pings anyone: the sticky re-posts it
  * often.
  */
 export function noticeBox(text: string) {
     const box = new ContainerBuilder()
         .setAccentColor(ACCENT)
-        .addTextDisplayComponents(new TextDisplayBuilder().setContent('**Notice**'), new TextDisplayBuilder().setContent(text));
+        .addTextDisplayComponents(new TextDisplayBuilder().setContent('### Notice'), new TextDisplayBuilder().setContent(text));
     return { components: [box], flags: MessageFlags.IsComponentsV2 as const, allowedMentions: { parse: [] as [] } };
 }
