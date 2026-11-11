@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, PAUSED_SETS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { EARLY_START, PAUSED_SETS, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
 import { activeBoosts, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
@@ -24,6 +24,8 @@ function percent(chance: number): string {
  *     chance, drawn from that set's lines with the boost's tag;
  *   - early start, when the run was one: its chance, drawn from their usual
  *     special pool;
+ *   - their personal boost (`PERSONAL_BOOSTS`), if they have one: its chance,
+ *     drawn from their usual special pool;
  *   - each seasonal buff running at `now`, when its special's set is on and
  *     unlocked for them: its chance, drawn from that one special. A buff on
  *     a set's prerequisite (Curren Chan) stops once that set is unlocked:
@@ -58,6 +60,9 @@ export async function extraChances(
         }
     }
     if (earlyStart) extras.push({ chance: EARLY_START.chance, pool, label: 'Early Start: you started this run quickly!' });
+    for (const personal of PERSONAL_BOOSTS) {
+        if (personal.owner === discordUserId) extras.push({ chance: personal.chance, pool, label: personal.label });
+    }
     for (const buff of activeSeasonals(now, buffs)) {
         const special = specialById(buff.specialId);
         if (!special || !usable(special.set)) continue;

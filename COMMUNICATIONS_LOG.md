@@ -4,6 +4,16 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-11 — Tylina's +3%, and the Fortune Tent draft
+
+- Tylina gets a permanent personal +3% special chance, "Ei, Ei, Mun!"
+  (Machitan answering her Leading Mambologist). Pauses with Boosts off.
+- Fuku-chan's Fortune Tent (a member's idea): drafted in
+  `docs/special-sets/fortune-tent.md` for review; bigger blessings, curses
+  that lower the base, and a 1% Shiraoki-sama's Oracle at +5%.
+
+---
+
 ## 2026-11-11 — Timer sticky with a notice
 
 - The board, panel and a notice (`/timer notice`) stay together at the

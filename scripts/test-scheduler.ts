@@ -247,6 +247,12 @@ async function main() {
     check('extras: the unlock bonus only once the set is unlocked', (await extraChances(XG, 'u1', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
     check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool, OFF_SEASON)).map((e) => e.chance), [0.04, 0.01, 0.01]);
     check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool, OFF_SEASON), []);
+    // Tylina's personal boost (owner, 2026-11-11): +3% from her usual pool, paused with Boosts off.
+    const tylina = openers.PERSONAL_BOOSTS[0]!;
+    const hers = await extraChances(XG, tylina.owner, base, ['online-sensations'], false, fullPool, OFF_SEASON);
+    check('personal: Tylina gets +3% from her usual pool, as "Ei, Ei, Mun!"', hers.map((e) => [e.chance, e.pool.length, e.label?.startsWith('Ei, Ei, Mun!')]), [[0.03, fullPool.length, true]]);
+    check('personal: nobody else gets it', (await extraChances(XG, 'someone-else', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
+    check('personal: paused with her Boosts off', await extraChances(XG, tylina.owner, { ...base, boosts: false }, [], false, fullPool, OFF_SEASON), []);
     check('extras: none for a set turned off', (await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool, OFF_SEASON)).length, 0);
     // The chances add: 4% boost + 1% early + 1% unlock bonus + the base 6% = 12%, the base intact.
     const extras = await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON);
