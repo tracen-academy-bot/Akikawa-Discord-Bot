@@ -139,6 +139,10 @@ model TimerPanel {
     panelMessageId String
     /// The live board image above the panel; null if it could not be posted.
     boardMessageId String?
+    /// The announcement under the panel (`/timer notice`); null when there is none.
+    notice          String?
+    /// Its message, posted right under the panel; null when there is no notice.
+    noticeMessageId String?
     updatedAt      DateTime @updatedAt
 
     @@index([guildId])

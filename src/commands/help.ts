@@ -98,6 +98,7 @@ export const AUDIENCE: Record<string, Audience> = {
     'fans circle debug': 'managers',
     'fans circle sync': 'managers',
     'timer panel': 'managers',
+    'timer notice': 'managers',
     'timer rewards': 'managers',
     'timer publish': 'managers',
     'timer milestone add': 'managers',

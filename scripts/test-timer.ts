@@ -278,18 +278,31 @@ async function rewardChecks() {
     const sent: string[] = [];
     const deleted: string[] = [];
     const edited: string[] = [];
+    /** What a notice was posted or edited with: its text and mentions. */
+    const noticeLog: { text: string; mentions: unknown }[] = [];
+    /** Ids the fake channel holds after the sticky's last message (for restoreSticky). */
+    let after: string[] = [];
     let next = 0;
     const channel = {
         id: 'c-timer',
         isTextBased: () => true,
-        send: async (payload: { files?: unknown[] }) => {
-            const id = `${payload.files ? 'board' : 'panel'}-${++next}`;
+        send: async (payload: { files?: unknown[]; content?: string; allowedMentions?: unknown }) => {
+            const id = `${payload.files ? 'board' : payload.content ? 'notice' : 'panel'}-${++next}`;
+            if (payload.content) noticeLog.push({ text: payload.content, mentions: payload.allowedMentions });
             sent.push(id);
             return { id };
         },
         messages: {
             delete: async (id: string) => void deleted.push(id),
-            fetch: async (id: string) => ({ edit: async () => void edited.push(id) }),
+            fetch: async (q: string | { after: string }) =>
+                typeof q === 'string'
+                    ? {
+                          edit: async (payload: { content?: string; allowedMentions?: unknown }) => {
+                              edited.push(q);
+                              if (payload.content) noticeLog.push({ text: payload.content, mentions: payload.allowedMentions });
+                          },
+                      }
+                    : new Map(after.map((id) => [id, {}])),
         },
     };
     const client = {
@@ -309,6 +322,39 @@ async function rewardChecks() {
     check('then the finished runs redraw it', edited, ['board-3']);
     await live.flushLiveBoards(client, Date.now() + 62_000);
     check('and nothing redraws until a run finishes again', edited, ['board-3']);
+
+    // ── The notice under the panel, and the sticky ────────────────────────────
+    check('notice: none without a panel in the channel', await live.setPanelNotice(client, guild, 'c-elsewhere', 'Hi'), 'no-panel');
+    sent.length = 0;
+    deleted.length = 0;
+    check('notice: the first one re-posts the sticky with it last', [await live.setPanelNotice(client, guild, 'c-timer', '  #OnlineSensations is up!  '), sent], ['saved', ['board-5', 'panel-6', 'notice-7']]);
+    check('notice: trimmed, and it never pings', noticeLog.at(-1), { text: '#OnlineSensations is up!', mentions: { parse: [] } });
+    check('notice: remembered with its message', await prisma.timerPanel.findUnique({ where: { channelId: 'c-timer' }, select: { notice: true, noticeMessageId: true } }), { notice: '#OnlineSensations is up!', noticeMessageId: 'notice-7' });
+    sent.length = 0;
+    check('notice: editing it edits the message in place, nothing re-posted', [await live.setPanelNotice(client, guild, 'c-timer', 'Edited.'), edited.at(-1), sent, noticeLog.at(-1)?.text], ['saved', 'notice-7', [], 'Edited.']);
+    await live.postPanelPair(client, guild, 'c-timer');
+    check('notice: a re-post deletes the old three and posts all three again', [deleted.slice(-3), sent], [['board-5', 'panel-6', 'notice-7'], ['board-8', 'panel-9', 'notice-10']]);
+    check('notice: kept text', noticeLog.at(-1)?.text, 'Edited.');
+    check('notice: left empty, it is removed', [await live.setPanelNotice(client, guild, 'c-timer', '   '), deleted.at(-1), (await prisma.timerPanel.findUnique({ where: { channelId: 'c-timer' } }))?.noticeMessageId], ['removed', 'notice-10', null]);
+    sent.length = 0;
+    await live.postPanelPair(client, guild, 'c-timer');
+    check('notice: without one, the sticky is just board and panel', sent, ['board-11', 'panel-12']);
+
+    // Sticky decisions: pings stay at the bottom, everything else goes above the sticky.
+    check('sticky: nothing under it, nothing to do', live.stickyAction([], new Set()), 'none');
+    check('sticky: people posted under it, it moves', live.stickyAction(['m1', 'm2'], new Set()), 'repost');
+    check('sticky: a ping is still up under it, it waits', live.stickyAction(['m1', 'ping'], new Set(['ping'])), 'wait');
+    check('sticky: waits 30 s after the latest post', live.stickyDelay(1000, 1000), live.STICKY_QUIET_MS);
+    check('sticky: but at most 3 minutes after the first', [live.stickyDelay(0, 170_000), live.stickyDelay(0, 400_000)], [10_000, 0]);
+    sent.length = 0;
+    after = [];
+    check('sticky: at the bottom already, no re-post', [await live.restoreSticky(client, 'c-timer'), sent], ['none', []]);
+    after = ['m-1', 'ping-1'];
+    await prisma.timerNotification.create({ data: { channelId: 'c-timer', messageId: 'ping-1', deleteAt: new Date(Date.now() + 300_000) } });
+    check('sticky: a live ping under it, it waits for the ping', [await live.restoreSticky(client, 'c-timer'), sent], ['wait', []]);
+    await prisma.timerNotification.deleteMany({ where: { channelId: 'c-timer' } });
+    check('sticky: once the ping is gone, it moves under the posts', [await live.restoreSticky(client, 'c-timer'), sent], ['repost', ['board-13', 'panel-14']]);
+    check('sticky: no sticky in a channel, nothing happens', await live.restoreSticky(client, 'c-elsewhere'), 'skip');
     await prisma.timerPanel.deleteMany({ where: { guildId: G2 } });
 
     // ── Milestones ────────────────────────────────────────────────────────────
