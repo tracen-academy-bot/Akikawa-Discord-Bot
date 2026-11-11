@@ -4,6 +4,17 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-11 — The notice is a box
+
+- Owner: the notice as a Components V2 box with a bold "Notice" on top.
+  `noticeBox` (pingBox.ts): accent box, "**Notice**", then the text; still
+  `allowedMentions: { parse: [] }`.
+- A notice posted as plain text before this cannot reliably be turned into a
+  V2 message by an edit; if the edit fails, `setPanelNotice` re-posts the
+  sticky, which posts the box. Any re-post does the same.
+
+---
+
 ## 2026-11-11 — The timer sticky: board, panel, notice
 
 - Owner: the board and panel should stay at the bottom with an

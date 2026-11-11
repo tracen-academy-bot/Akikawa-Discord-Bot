@@ -280,15 +280,24 @@ async function rewardChecks() {
     const edited: string[] = [];
     /** What a notice was posted or edited with: its text and mentions. */
     const noticeLog: { text: string; mentions: unknown }[] = [];
+    /** A message payload as the fake channel sees it; only the notice box has `flags` (Components V2). */
+    type NoticePayload = { flags?: number; components?: { toJSON(): unknown }[]; allowedMentions?: unknown };
+    /** A notice box read back: its text blocks joined, and its mentions. */
+    const noticeOf = (payload: NoticePayload) => ({
+        text: (payload.components ?? [])
+            .flatMap((c) => (c.toJSON() as { components: { content?: string }[] }).components.map((b) => b.content ?? ''))
+            .join('\n'),
+        mentions: payload.allowedMentions,
+    });
     /** Ids the fake channel holds after the sticky's last message (for restoreSticky). */
     let after: string[] = [];
     let next = 0;
     const channel = {
         id: 'c-timer',
         isTextBased: () => true,
-        send: async (payload: { files?: unknown[]; content?: string; allowedMentions?: unknown }) => {
-            const id = `${payload.files ? 'board' : payload.content ? 'notice' : 'panel'}-${++next}`;
-            if (payload.content) noticeLog.push({ text: payload.content, mentions: payload.allowedMentions });
+        send: async (payload: NoticePayload & { files?: unknown[] }) => {
+            const id = `${payload.files ? 'board' : payload.flags ? 'notice' : 'panel'}-${++next}`;
+            if (payload.flags) noticeLog.push(noticeOf(payload));
             sent.push(id);
             return { id };
         },
@@ -297,9 +306,9 @@ async function rewardChecks() {
             fetch: async (q: string | { after: string }) =>
                 typeof q === 'string'
                     ? {
-                          edit: async (payload: { content?: string; allowedMentions?: unknown }) => {
+                          edit: async (payload: NoticePayload) => {
                               edited.push(q);
-                              if (payload.content) noticeLog.push({ text: payload.content, mentions: payload.allowedMentions });
+                              if (payload.flags) noticeLog.push(noticeOf(payload));
                           },
                       }
                     : new Map(after.map((id) => [id, {}])),
@@ -328,13 +337,13 @@ async function rewardChecks() {
     sent.length = 0;
     deleted.length = 0;
     check('notice: the first one re-posts the sticky with it last', [await live.setPanelNotice(client, guild, 'c-timer', '  #OnlineSensations is up!  '), sent], ['saved', ['board-5', 'panel-6', 'notice-7']]);
-    check('notice: trimmed, and it never pings', noticeLog.at(-1), { text: '#OnlineSensations is up!', mentions: { parse: [] } });
+    check('notice: a box, bold Notice on top, trimmed, and it never pings', noticeLog.at(-1), { text: '**Notice**\n#OnlineSensations is up!', mentions: { parse: [] } });
     check('notice: remembered with its message', await prisma.timerPanel.findUnique({ where: { channelId: 'c-timer' }, select: { notice: true, noticeMessageId: true } }), { notice: '#OnlineSensations is up!', noticeMessageId: 'notice-7' });
     sent.length = 0;
-    check('notice: editing it edits the message in place, nothing re-posted', [await live.setPanelNotice(client, guild, 'c-timer', 'Edited.'), edited.at(-1), sent, noticeLog.at(-1)?.text], ['saved', 'notice-7', [], 'Edited.']);
+    check('notice: editing it edits the message in place, nothing re-posted', [await live.setPanelNotice(client, guild, 'c-timer', 'Edited.'), edited.at(-1), sent, noticeLog.at(-1)?.text], ['saved', 'notice-7', [], '**Notice**\nEdited.']);
     await live.postPanelPair(client, guild, 'c-timer');
     check('notice: a re-post deletes the old three and posts all three again', [deleted.slice(-3), sent], [['board-5', 'panel-6', 'notice-7'], ['board-8', 'panel-9', 'notice-10']]);
-    check('notice: kept text', noticeLog.at(-1)?.text, 'Edited.');
+    check('notice: kept text', noticeLog.at(-1)?.text, '**Notice**\nEdited.');
     check('notice: left empty, it is removed', [await live.setPanelNotice(client, guild, 'c-timer', '   '), deleted.at(-1), (await prisma.timerPanel.findUnique({ where: { channelId: 'c-timer' } }))?.noticeMessageId], ['removed', 'notice-10', null]);
     sent.length = 0;
     await live.postPanelPair(client, guild, 'c-timer');
