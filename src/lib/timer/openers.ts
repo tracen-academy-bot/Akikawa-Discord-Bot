@@ -332,7 +332,7 @@ export const SPECIAL_LOCKS: readonly { id: string; owner: string; ownerChance: n
  */
 export const PERSONAL_BOOSTS: readonly { owner: string; chance: number; label: string }[] = [
     // Owner, 2026-11-11: Machitan answers her biggest fan's cheers (Tannhauser, voice 91020).
-    { owner: '457773317739380738', chance: 0.03, label: 'Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist' },
+    { owner: '457773317739380738', chance: 0.03, label: 'Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!' },
 ];
 
 /** The special with id `id`, or undefined. */

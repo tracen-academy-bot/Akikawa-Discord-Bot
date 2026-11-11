@@ -55,7 +55,7 @@ export async function extraChances(
             extras.push({
                 chance: boost.chance,
                 pool: boostPool(held.setId, boost.tag),
-                label: `${set.name} ${boost.tag} lines, ${held.runsLeft} run${held.runsLeft === 1 ? '' : 's'} left`,
+                label: `${set.name} ${boost.tag} lines, ${held.runsLeft} run${held.runsLeft === 1 ? '' : 's'} left.`,
             });
         }
     }
