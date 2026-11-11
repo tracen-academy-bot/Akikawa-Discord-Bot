@@ -4,6 +4,19 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-11 — Personal boost: "Ei, Ei, Mun!" for Tylina
+
+- `PERSONAL_BOOSTS` (openers.ts): per-trainer extra special chance, drawn
+  from their usual pool, added in `extraChances` after early start. A boost
+  like the others: Boosts off pauses it; soft caps apply.
+- First entry (owner's request): Tylina (457773317739380738), +3%,
+  permanent, labelled "Ei, Ei, Mun!: Machitan cheers on her Leading
+  Mambologist" (Machitan wants to answer her fans' cheers, voice 91020).
+- Also on this branch: `docs/special-sets/fortune-tent.md`, the Fortune Tent
+  draft for review (not in code).
+
+---
+
 ## 2026-11-11 — The notice is a box
 
 - Owner: the notice as a Components V2 box with a bold "Notice" on top.

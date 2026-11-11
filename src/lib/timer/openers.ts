@@ -325,6 +325,16 @@ export const SPECIAL_LOCKS: readonly { id: string; owner: string; ownerChance: n
     { id: 'set1.matikane', owner: '457773317739380738', ownerChance: 1 },
 ];
 
+/**
+ * Personal boosts: extra special chance on every ping for one trainer, drawn
+ * from their usual special pool. A boost like the others: Boosts off pauses
+ * it, and it counts toward the soft caps.
+ */
+export const PERSONAL_BOOSTS: readonly { owner: string; chance: number; label: string }[] = [
+    // Owner, 2026-11-11: Machitan answers her biggest fan's cheers (Tannhauser, voice 91020).
+    { owner: '457773317739380738', chance: 0.03, label: 'Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist' },
+];
+
 /** The special with id `id`, or undefined. */
 export function specialById(id: string): (Special & { set: string }) | undefined {
     return RARE_OPENERS.find((o) => o.id === id);
