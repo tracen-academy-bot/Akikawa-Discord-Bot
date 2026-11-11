@@ -9,6 +9,7 @@ import {
     scheduleNotificationDeletion,
     type CompletionSummary,
 } from './service';
+import { prisma } from '../../db/prisma';
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
@@ -17,7 +18,7 @@ import { extraChances } from './boosts';
 import { commonsFor, fillOpener, pickOpener, rarePoolFor, setsUnlockedBy, specialCredit, specialMediaPath } from './openers';
 import { pingBox } from './pingBox';
 import { getUserSettings, pingMinutes } from './userSettings';
-import { currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty } from './livePanel';
+import { checkAllStickies, currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty, noteChannelActivity } from './livePanel';
 
 /**
  * Drives timer expiry and notification cleanup.
@@ -229,6 +230,8 @@ async function processExpiredTimers(client: Client): Promise<void> {
 /** Removes expiry pings that have outlived their display time. */
 async function processExpiredNotifications(client: Client): Promise<void> {
     const due = await claimExpiredNotifications(new Date());
+    if (due.length === 0) return;
+    const stickies = new Set((await prisma.timerPanel.findMany({ select: { channelId: true } })).map((p) => p.channelId));
 
     for (const notification of due) {
         try {
@@ -239,6 +242,8 @@ async function processExpiredNotifications(client: Client): Promise<void> {
             // Already deleted by a moderator, or the channel is gone. The row is
             // claimed either way, so this never retries forever.
         }
+        // A sticky that waited for this ping (stickyAction 'wait') may move now.
+        if (stickies.has(notification.channelId)) noteChannelActivity(client, notification.channelId);
     }
 }
 
@@ -284,6 +289,8 @@ export function startScheduler(client: Client): () => void {
     };
 
     void tick();
+    // Posts made while the bot was offline may sit under a sticky.
+    void checkAllStickies(client).catch((e) => console.error('Timer sticky check failed:', e));
     const handle = setInterval(() => void tick(), TICK_INTERVAL_MS);
     return () => clearInterval(handle);
 }

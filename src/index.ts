@@ -17,7 +17,8 @@ import { registerCommands } from './lib/registerCommands';
 import { handleClubRoleDeleted, syncMemberRole, syncMemberRoles } from './lib/roleAssignment';
 import { connect } from './lib/startup';
 import { runMigrations } from './lib/migrate';
-import { handleSpecialRead, handleTimerButton, isSpecialReadMenu, isTimerButton } from './commands/timer';
+import { handleSpecialRead, handleTimerButton, handleTimerNoticeModal, isSpecialReadMenu, isTimerButton, isTimerNoticeModal } from './commands/timer';
+import { onChannelMessage } from './lib/timer/livePanel';
 import { handlePostModal, isPostModal } from './commands/post';
 import { handleClubModal, isClubModal } from './commands/club';
 import { handleProfileModal, isProfileModal } from './commands/clubProfile';
@@ -127,6 +128,8 @@ client.on(Events.GuildRoleDelete, (role) => {
 
 client.on(Events.MessageCreate, (message) => {
     void handlePrefixMessage(message);
+    // Keeps the timer's sticky (board, panel, notice) under people's posts.
+    void onChannelMessage(message).catch((e) => console.error('Timer sticky check failed:', e));
     // An applicant replying with their trainer ID after being asked for it.
     void takeIdFromMessage(message);
 });
@@ -206,7 +209,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 ? handleClubModal
                 : isWelcomeModal(interaction.customId)
                   ? handleWelcomeModal
-                  : null;
+                  : isTimerNoticeModal(interaction.customId)
+                    ? handleTimerNoticeModal
+                    : null;
         if (!handler) return;
         try {
             await handler(interaction);

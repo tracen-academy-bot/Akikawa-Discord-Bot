@@ -4,6 +4,14 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-11 — Timer sticky with a notice
+
+- The board, panel and a notice (`/timer notice`) stay together at the
+  bottom of the timer channel. People's posts push them back down after a
+  quiet spell; timer pings always stay below them.
+
+---
+
 ## 2026-11-10 — The Mejiro Estate paused
 
 - #65 put the whole Estate set live; I read "merge it and leave it alone"

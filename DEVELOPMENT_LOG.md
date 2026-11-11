@@ -4,6 +4,37 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-11 — The timer sticky: board, panel, notice
+
+- Owner: the board and panel should stay at the bottom with an
+  announcement under them, editable without reposting by hand, and pings
+  always below.
+- `TimerPanel.notice` / `noticeMessageId` (migration
+  `20261110190000_timer_panel_notice`). `postPanelPair` posts board, panel,
+  then the notice, and deletes all three on a re-post. The notice is plain
+  text with `allowedMentions: { parse: [] }`: it is re-posted often, so it
+  must never ping.
+- `/timer notice` (Club Managers): a form prefilled with the current text.
+  `setPanelNotice` edits the message in place, posts the sticky again when
+  there is no notice message yet (so it lands under the panel), and removes
+  it when left empty.
+- Sticky (`livePanel.ts`): a post by anyone but the bot in a sticky channel
+  (`onChannelMessage`, from messageCreate) schedules `restoreSticky` after
+  30 s of quiet, at most 3 minutes after the first post
+  (`stickyDelay`). `restoreSticky` reads the messages after the sticky's
+  last one: none, nothing to do; a timer ping still up among them, wait
+  (pings stay at the bottom); otherwise re-post (`stickyAction`). Deleting a
+  ping and startup schedule the same check, so a sticky that waited moves
+  once the ping is gone, and posts made while offline are caught.
+- One move per channel at a time (`restoring`); a check that lands during a
+  move reschedules itself.
+- Needs the GuildMessages intent (the top rung of the intent ladder). Without
+  it the sticky only moves on the bot's own posts, as before.
+- Known gap: the bot's own public replies (e.g. `/timer stats` in that
+  channel) do not trigger a move by themselves; the next person's post does.
+
+---
+
 ## 2026-11-10 — The Mejiro Estate paused: no new finds
 
 - The set went live with #65; the owner had not meant its lines to be

@@ -77,8 +77,14 @@ Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
   on the right) with the timer panel under it, at the bottom of the channel.
   Running it again deletes the old pair and posts a fresh one there. The
   board redraws itself after runs finish (at most every 30 seconds) and at
-  midnight JST. When the weekly results or `/timer publish` post in the same
-  channel, the pair is reposted under them.
+  midnight JST. It is a sticky: when anyone posts in the channel, the board,
+  the panel and the notice move back under them once the channel has been
+  quiet for 30 seconds (3 minutes at most while people keep talking). Timer
+  pings stay below it: while one is up, the sticky waits until the ping is
+  deleted. The weekly results and `/timer publish` move it down straight away.
+- `/timer notice`: a form to write, edit or (left empty) remove the
+  announcement under the panel in this channel. Saving edits the message in
+  place; it moves with the sticky and never pings anyone.
 - `/timer publish [channel] [ping]`: posts last week's final leaderboard
   once, now: in the given channel, else the rewards channel, else where it
   is used. It pings the top 5 unless `ping:false`. It does not change roles.

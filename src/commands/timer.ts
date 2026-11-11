@@ -11,6 +11,11 @@ import {
     AttachmentBuilder,
     ChannelType,
     GuildMember,
+    ActionRowBuilder,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+    type ModalSubmitInteraction,
 } from 'discord.js';
 import { isOfficer } from '../lib/permissions';
 import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
@@ -53,7 +58,7 @@ import {
     type BoardPeriod,
 } from '../lib/timer/rewards';
 import { displayName, renderBoardFor, renderSpecialsBoardFor, weekResultsPost } from '../lib/timer/boardImage';
-import { keepPanelAtBottom, postPanelPair } from '../lib/timer/livePanel';
+import { NOTICE_MAX_LENGTH, keepPanelAtBottom, postPanelPair, setPanelNotice } from '../lib/timer/livePanel';
 import { prisma } from '../db/prisma';
 import { renderTimerStats } from '../lib/image/renderTimerStats';
 
@@ -87,6 +92,11 @@ export const data = new SlashCommandBuilder()
         sub
             .setName('panel')
             .setDescription('Post the Trainer Timer control panel in this channel. Club Managers only.'),
+    )
+    .addSubcommand((sub) =>
+        sub
+            .setName('notice')
+            .setDescription('Write or edit the announcement under the timer panel in this channel. Club Managers only.'),
     )
     .addSubcommand((sub) =>
         sub
@@ -183,6 +193,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         case 'panel':
             await handlePanel(interaction);
             break;
+        case 'notice':
+            await handleNotice(interaction);
+            break;
         case 'stats':
             await handleStats(interaction);
             break;
@@ -235,6 +248,61 @@ async function handlePanel(interaction: ChatInputCommandInteraction) {
                 : errorEmbed('The panel can only be posted in a text channel I can send messages in.'),
         ],
     });
+}
+
+// ─── Notice ───────────────────────────────────────────────────────────────────
+
+/** Custom ID of the `/timer notice` form. */
+const NOTICE_MODAL_ID = 'timer-notice';
+
+/** True for the `/timer notice` form's submit. */
+export function isTimerNoticeModal(customId: string): boolean {
+    return customId === NOTICE_MODAL_ID;
+}
+
+/**
+ * `/timer notice`: a form with the channel's current notice, to write, edit
+ * or (left empty) remove the announcement under the panel.
+ */
+async function handleNotice(interaction: ChatInputCommandInteraction) {
+    if (!isOfficer(interaction.member as GuildMember)) {
+        await interaction.reply({ embeds: [errorEmbed('Only Club Managers can change the timer notice.')], flags: MessageFlags.Ephemeral });
+        return;
+    }
+    const panel = await prisma.timerPanel.findUnique({ where: { channelId: interaction.channelId } });
+    if (!panel) {
+        await interaction.reply({ embeds: [errorEmbed('There is no timer panel in this channel. Post one with `/timer panel` first.')], flags: MessageFlags.Ephemeral });
+        return;
+    }
+    const input = new TextInputBuilder()
+        .setCustomId('text')
+        .setLabel('Notice (shown under the panel)')
+        .setStyle(TextInputStyle.Paragraph)
+        .setMaxLength(NOTICE_MAX_LENGTH)
+        .setRequired(false)
+        .setPlaceholder('Leave empty to remove the notice.');
+    if (panel.notice) input.setValue(panel.notice);
+    await interaction.showModal(
+        new ModalBuilder().setCustomId(NOTICE_MODAL_ID).setTitle('Timer notice').addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(input)),
+    );
+}
+
+/** Saves the `/timer notice` form: edits the notice in place, posts it, or removes it. */
+export async function handleTimerNoticeModal(interaction: ModalSubmitInteraction) {
+    if (!interaction.inCachedGuild() || !interaction.channelId) return;
+    if (!isOfficer(interaction.member as GuildMember)) {
+        await interaction.reply({ embeds: [errorEmbed('Only Club Managers can change the timer notice.')], flags: MessageFlags.Ephemeral });
+        return;
+    }
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    const result = await setPanelNotice(interaction.client, interaction.guild, interaction.channelId, interaction.fields.getTextInputValue('text'));
+    const reply = {
+        saved: successEmbed('Notice saved', 'It is under the panel and stays with it at the bottom. It never pings anyone.'),
+        removed: successEmbed('Notice removed', 'The panel has no notice now.'),
+        'no-panel': errorEmbed('There is no timer panel in this channel any more. Post one with `/timer panel`.'),
+        failed: errorEmbed('I could not post in this channel. Check that I can send messages here.'),
+    }[result];
+    await interaction.editReply({ embeds: [reply] });
 }
 
 /** Renders a trainer's statistics card. */
