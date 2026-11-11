@@ -338,7 +338,7 @@ async function main() {
     await rares.grantBoost(SN, 's1', loves.text);
     await rares.recordRareOpener(SN, 's1', curren.text);
     const bv = (await boostsView(SN, 's1', inSeason)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: base, Loves, the unlock bonus, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, false, true]);
+    check('boosts view: base, Loves, the unlock bonus, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left.'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, false, true]);
     await us0.toggleSetting(SN, 's1', 'boosts');
     const off = await boostsView(SN, 's1', inSeason);
     const offText = off.embeds[0]!.toJSON().description ?? '';
