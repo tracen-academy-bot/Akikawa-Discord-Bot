@@ -72,7 +72,7 @@ export async function extraChances(
     }
     for (const set of SPECIAL_SETS) {
         if (!set.unlockBonus || !set.requires || !usable(set.id)) continue;
-        extras.push({ chance: set.unlockBonus, pool: set.openers.map((o) => o.text), label: set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines` });
+        extras.push({ chance: set.unlockBonus, pool: set.openers.map((o) => o.text), label: set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.` });
     }
     return extras;
 }
