@@ -252,6 +252,9 @@ async function main() {
     const hers = await extraChances(XG, tylina.owner, base, ['online-sensations'], false, fullPool, OFF_SEASON);
     check('personal: Tylina gets +3% from her usual pool, as "Ei, Ei, Mun!"', hers.map((e) => [e.chance, e.pool.length, e.label?.startsWith('Ei, Ei, Mun!')]), [[0.03, fullPool.length, true]]);
     check('personal: nobody else gets it', (await extraChances(XG, 'someone-else', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
+    // A trainer can hold several (owner, 2026-11-12): two at +1.5% each, each its own line.
+    const leneya = await extraChances(XG, '340238209147600897', base, ['online-sensations'], false, fullPool, OFF_SEASON);
+    check('personal: two boosts are two lines, +1.5% each', leneya.map((e) => [e.chance, e.label?.split(':')[0]]), [[0.015, 'Faster Than Light'], [0.015, "Principal's Pirouette"]]);
     check('personal: paused with her Boosts off', await extraChances(XG, tylina.owner, { ...base, boosts: false }, [], false, fullPool, OFF_SEASON), []);
     check('extras: none for a set turned off', (await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool, OFF_SEASON)).length, 0);
     // The chances add: 4% boost + 1% early + 1% unlock bonus + the base 6% = 12%, the base intact.
