@@ -334,9 +334,9 @@ export const PERSONAL_BOOSTS: readonly { owner: string; chance: number; label: s
     // Owner, 2026-11-11: Machitan answers her biggest fan's cheers (Tannhauser, voice 91020).
     { owner: '457773317739380738', chance: 0.03, label: 'Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!' },
     // Owner, 2026-11-12: two at +1.5% each (3% in all). Tachyon hums "fuun", calls the
-    // trainer Guinea Pig-kun, and aims "sara ni sono saki" (even beyond faster-than-light,
+    // trainer Guinea Pig-kun, and aims 更にその先 ("even beyond that": past faster-than-light,
     // voice 91001); Win Variation dreams of the principal role (ballet).
-    { owner: '340238209147600897', chance: 0.015, label: "Faster Than Light: Fuun... for once, Tachyon's experiment takes Guinea Pig-kun *sara ni sono saki*!" },
+    { owner: '340238209147600897', chance: 0.015, label: "Faster Than Light: Fuun... for once, Tachyon's experiment takes Guinea Pig-kun 更にその先!" },
     { owner: '340238209147600897', chance: 0.015, label: "Principal's Pirouette: Win Variation cheers you up with a heartfelt valse!" },
 ];
 
