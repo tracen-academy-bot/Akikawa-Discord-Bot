@@ -80,26 +80,23 @@ Tea is at three in the east garden, and I should be glad of your company. Do min
 
 ```text
 {user}. ...You came. I'd rather you didn't wander off now. ...Look, I know the Mejiros have appearances to keep up, but having the Satonos over tonight is a bit much for me. Men in suits, and everyone looks so poised... I just feel small next to them.
-You always say I'm enough, just the way I am. ...F-forget I said that. And what do you mean my ears are twitching? 別に... Here, take this ginger tea. I made too much of it, that's all.
-*"Bell-chan~!" from across the hall.* ...You. Heard. *Nothing.* I'll go pummel my dad later, grr.
+You always say I'm enough, just the way I am. ...F-forget I said that. And what do you mean my ears are twitching? 別に... Just shut up and have this ginger tea that definitely wasn't premade.
+"Bell-chan~?" Oh, my dad? ...I'll go pummel him real quick. And *you* too, if you ever *titter*.
 ```
 
-- Was: all defence, no reveal ("felt like it's just missing").
+- Was: all defence, no reveal ("feels like it's just missing").
 - Now: she was hoping the trainer would come; the guard drops (she feels
   she falls short of the poised family, her canon arc); "enough" answers
   it; "forget I said that" (忘れて, what she says after an earnest slip)
   and 別に (betsu ni, her tsundere denial, 10 uses), with twitching ears
   giving her away; ginger tea with a tsundere excuse (canon); "Bell-chan"
-  from her father (voice 91000) as the closer.
+  from her father (voice 91000) as the closer, without a stage cue.
 - Foreshadows the Satono Diamond guest visit ("men in suits": the Satono
   Group).
 - Edits to the owner's text: "{u-user}-san" (the bot fills only `{user}`;
-  Dober never says "-san") became "{user}. ...You came."; the brackets
-  filled as "have appearances to keep up" and "enough"; the "mattaku"
-  bracket became the owner's "forget I said that... 別に..." ("aa, mou" is
-  only 2 uses in her lines); "meek" became "small"; a stage cue added for
-  "Bell-chan". Open: "pummel" or the softer "I'll be having words with Dad
-  later."
+  Dober never says "-san") became "{user}. ...You came."; brackets filled
+  as "have appearances to keep up" and "enough"; "meek" became "small";
+  "teeter" read as "titter" (to giggle); open if "tattle" was meant.
 
 ### 5. Mejiro Palmer (Tune)
 
