@@ -80,22 +80,24 @@ Tea is at three in the east garden, and I should be glad of your company. Do min
 
 ```text
 {user}. ...You came. I'd rather you didn't wander off now. ...Look, I know the Mejiros have appearances to keep up, but having the Satonos over tonight is a bit much for me. Men in suits, and everyone looks so poised... I just feel small next to them.
-You always say I'm enough, just the way I am. A-aa, mou, don't look at me like that. Here, take this ginger tea. I made too much of it, that's all.
+You always say I'm enough, just the way I am. ...F-forget I said that. And what do you mean my ears are twitching? 別に... Here, take this ginger tea. I made too much of it, that's all.
 *"Bell-chan~!" from across the hall.* ...You. Heard. *Nothing.* I'll go pummel my dad later, grr.
 ```
 
 - Was: all defence, no reveal ("felt like it's just missing").
 - Now: she was hoping the trainer would come; the guard drops (she feels
   she falls short of the poised family, her canon arc); "enough" answers
-  it; "aa, mou" (her frustrated exclamation) and "don't look at me" (her
-  "don't stare"); ginger tea with a tsundere excuse (canon); "Bell-chan"
+  it; "forget I said that" (忘れて, what she says after an earnest slip)
+  and 別に (betsu ni, her tsundere denial, 10 uses), with twitching ears
+  giving her away; ginger tea with a tsundere excuse (canon); "Bell-chan"
   from her father (voice 91000) as the closer.
 - Foreshadows the Satono Diamond guest visit ("men in suits": the Satono
   Group).
 - Edits to the owner's text: "{u-user}-san" (the bot fills only `{user}`;
   Dober never says "-san") became "{user}. ...You came."; the brackets
-  filled as "have appearances to keep up", "enough", "A-aa, mou, don't
-  look at me like that"; "meek" became "small"; a stage cue added for
+  filled as "have appearances to keep up" and "enough"; the "mattaku"
+  bracket became the owner's "forget I said that... 別に..." ("aa, mou" is
+  only 2 uses in her lines); "meek" became "small"; a stage cue added for
   "Bell-chan". Open: "pummel" or the softer "I'll be having words with Dad
   later."
 
