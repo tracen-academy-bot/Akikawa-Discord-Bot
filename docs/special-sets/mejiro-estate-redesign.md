@@ -60,7 +60,7 @@ Tea is at three in the east garden, and I should be glad of your company. Do min
 ```text
 {user}-san, glad to see you here! *waves* Grandmother made me wear a dress tonight, for you, and... it's frilly. Very frilly... I told myself it's fine: shoulders back, chin up, it's basically posture training. Let's Muscle!
 ...It's not working. *sigh* Everyone keeps saying it looks nice, but they're just being polite, right? Kuu~... this is exactly the chapter where the heroine flees to the balcony...
-...Oh, did I say that out loud? W-well, we do have a batting cage out back. Want to come with me?
+...Oh, did I say that out loud? W-well, we do have a batting cage out back. Want to come with me? ...McQueen insists it's for guests.
 ```
 
 - Was: no muscle at all (the fix for "too much muscle" overshot).
@@ -68,10 +68,10 @@ Tea is at three in the east garden, and I should be glad of your company. Do min
   insecurity, which stays the heart of the line; "Kuu~" is her flustered
   squeal at shoujo-manga moments (voice 10005). She catches herself saying
   the balcony line aloud and escapes to the batting cage.
-- The batting cage is not in her data: an invention, in character (she
-  turns everything into training). Optional add-on: "...McQueen insists
-  it's for guests." (McQueen secretly loves watching baseball, voice 91004
-  and 91025.)
+- The batting cage: the owner recalls Ryan with baseball in a support
+  card's art (not in the voice data, so not checked here). The closing
+  "...McQueen insists it's for guests." is a nod to McQueen, who secretly
+  loves watching baseball (voice 91004 and 91025), cut from her own line.
 - Edits to the owner's text: "for you, and. It's frilly" became "for you,
   and... it's frilly"; "baseball machine" became "batting cage"; "Oh"
   capitalised, "W-well" added.
