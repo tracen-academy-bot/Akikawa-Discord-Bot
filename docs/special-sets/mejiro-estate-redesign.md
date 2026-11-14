@@ -15,16 +15,25 @@ in `docs/uma-reference/briefs/`.
 Each entry: the new text, then what changed and why. "Was" refers to the
 text in code now (`docs/special-sets/mejiro-estate.md`).
 
-### 1. Grandmother (Tune)
+### 1. Grandmother (Tune; the owner's text)
 
 ```text
-Ah. So you are {user}, the trainer the girls cannot stop writing home about. Welcome to the Mejiro Estate. This family has chased one dream for longer than I care to admit, and I am told you have been helping to carry it. Tea is served in the east garden at three. Do mind the pond.
+Ah, so you are {user}, the trainer the girls cannot stop writing home about. Do come in; you are very welcome here.
+You see, this family has chased one dream for a very long time, and I am told you have been helping the girls carry it. They are all rather fond of you.
+Tea is at three in the east garden, and I should be glad of your company. Do mind the pond, dear, and do keep McQueen away from the dessert cart until after dinner; I am told she has a plan. Not that she is being terribly discreet about it, hoho.
 ```
 
-- Was: the McQueen dessert-cart joke, the first of three sweets jokes.
-- Now: the family's long-cherished dream (McQueen's 悲願, the Tenno Sho)
-  and the trainer's part in it. Warmer, and it sets up why the trainer is
-  welcome.
+- Someone has already found her (finds are kept by id, so a reword keeps
+  it), so every beat of the original stays: the girls writing home, tea in
+  the east garden at three, the pond, McQueen's dessert plan.
+- Was curt: "Ah. So you are...", then only instructions. Now she welcomes
+  the trainer personally, adds the family's long dream and "they are all
+  rather fond of you", and turns the tea into an invitation.
+- The owner's last sentence read "Not that she is any discreet about it";
+  changed to "being terribly discreet" for grammar.
+- The dessert joke stays as a running gag: Grandmother sets it up, and
+  McQueen's own line ("the patisserie cart, which simply happens to lie on
+  our route") pays it off. The photo's sweets line is gone.
 
 ### 2. Mejiro McQueen (Tune)
 
@@ -32,8 +41,8 @@ Ah. So you are {user}, the trainer the girls cannot stop writing home about. Wel
 Gokigenyou, {user}-san. Welcome to the Mejiro Estate. I shall be your guide this afternoon, desu wa. The garden, the pond, the trophy room where the Tenno Sho shield shall one day hang... and the patisserie cart, which simply happens to lie on our route. *Ahem.* One parfait is perfectly reasonable. ...Why is Gold Ship in the hedge? No. I refuse to ask. Shall we?
 ```
 
-- Kept: "desu wa", *ahem* (コホン), the sweets weakness. **This is now the
-  only sweets joke in the set.**
+- Kept: "desu wa", *ahem* (コホン), the sweets weakness, which pays off
+  Grandmother's dessert-cart warning.
 - Added: "gokigenyou" (her greeting), the Tenno Sho shield ("toward the
   honour of the shield", her own line), and Gold Ship, whom the fandom
   knows as her chaos (her line about Gold Ship's Cossack dance, voice
