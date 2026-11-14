@@ -55,16 +55,26 @@ Tea is at three in the east garden, and I should be glad of your company. Do min
   bother" became "I refuse to dignify it" (open: "I shan't even ask" or
   "I refuse to bother with her").
 
-### 3. Mejiro Ryan (Rework)
+### 3. Mejiro Ryan (Rework; the owner's text)
 
 ```text
-{user}-san! Grandmother made me wear a dress tonight. It's frilly. Very frilly. I told myself it's fine: shoulders back, chin up, it's basically posture training. Let's Muscle! ...It's not working. Everyone keeps saying it looks nice, but they're just being polite, right? Kuu~... this is exactly the chapter where the heroine flees to the balcony. I'm not fleeing. I'm just... getting some air.
+{user}-san, glad to see you here! *waves* Grandmother made me wear a dress tonight, for you, and... it's frilly. Very frilly... I told myself it's fine: shoulders back, chin up, it's basically posture training. Let's Muscle!
+...It's not working. *sigh* Everyone keeps saying it looks nice, but they're just being polite, right? Kuu~... this is exactly the chapter where the heroine flees to the balcony...
+...Oh, did I say that out loud? W-well, we do have a batting cage out back. Want to come with me?
 ```
 
 - Was: no muscle at all (the fix for "too much muscle" overshot).
-- Now: one "Let's Muscle!" (her catchphrase), used as a cover for the
-  dress insecurity, which stays the heart of the line. "Kuu~" is her
-  flustered squeal at shoujo-manga moments (voice 10005).
+- Now: one "Let's Muscle!" (her catchphrase) as a cover for the dress
+  insecurity, which stays the heart of the line; "Kuu~" is her flustered
+  squeal at shoujo-manga moments (voice 10005). She catches herself saying
+  the balcony line aloud and escapes to the batting cage.
+- The batting cage is not in her data: an invention, in character (she
+  turns everything into training). Optional add-on: "...McQueen insists
+  it's for guests." (McQueen secretly loves watching baseball, voice 91004
+  and 91025.)
+- Edits to the owner's text: "for you, and. It's frilly" became "for you,
+  and... it's frilly"; "baseball machine" became "batting cage"; "Oh"
+  capitalised, "W-well" added.
 
 ### 4. Mejiro Dober (Keep, one touch)
 
