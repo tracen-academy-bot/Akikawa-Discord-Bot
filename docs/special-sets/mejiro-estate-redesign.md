@@ -76,14 +76,28 @@ Tea is at three in the east garden, and I should be glad of your company. Do min
   and... it's frilly"; "baseball machine" became "batting cage"; "Oh"
   capitalised, "W-well" added.
 
-### 4. Mejiro Dober (Keep, one touch)
+### 4. Mejiro Dober (Rework; the owner's text)
 
 ```text
-{user}, don't wander off. ...Too many people tonight, and half of them are men in suits. I-it's not like I need you here. You're just the only one I can stand next to without my ears going flat. And if Dad calls me 'Bell-chan', you heard nothing.
+{user}. ...You came. I'd rather you didn't wander off now. ...Look, I know the Mejiros have appearances to keep up, but having the Satonos over tonight is a bit much for me. Men in suits, and everyone looks so poised... I just feel small next to them.
+You always say I'm enough, just the way I am. A-aa, mou, don't look at me like that. Here, take this ginger tea. I made too much of it, that's all.
+*"Bell-chan~!" from across the hall.* ...You. Heard. *Nothing.* I'll go pummel my dad later, grr.
 ```
 
-- Only change: the tsundere "it's not like..." (her "betsu ni", in
-  English) in place of "Not that I need you here".
+- Was: all defence, no reveal ("felt like it's just missing").
+- Now: she was hoping the trainer would come; the guard drops (she feels
+  she falls short of the poised family, her canon arc); "enough" answers
+  it; "aa, mou" (her frustrated exclamation) and "don't look at me" (her
+  "don't stare"); ginger tea with a tsundere excuse (canon); "Bell-chan"
+  from her father (voice 91000) as the closer.
+- Foreshadows the Satono Diamond guest visit ("men in suits": the Satono
+  Group).
+- Edits to the owner's text: "{u-user}-san" (the bot fills only `{user}`;
+  Dober never says "-san") became "{user}. ...You came."; the brackets
+  filled as "have appearances to keep up", "enough", "A-aa, mou, don't
+  look at me like that"; "meek" became "small"; a stage cue added for
+  "Bell-chan". Open: "pummel" or the softer "I'll be having words with Dad
+  later."
 
 ### 5. Mejiro Palmer (Tune)
 
