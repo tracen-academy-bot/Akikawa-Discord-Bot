@@ -98,14 +98,22 @@ You always say I'm enough, just the way I am. ...F-forget I said that. And what 
   as "have appearances to keep up" and "enough"; "meek" became "small";
   "teeter" became "tattle" (the owner meant telling anyone about it).
 
-### 5. Mejiro Palmer (Tune)
+### 5. Mejiro Palmer (Tune; the owner's text)
 
 ```text
-{user}! Okay, so Palmer-san complimented Grandmother's gown last Christmas, and she made me dance. Tonight it's your turn, I already told her. Sorry not sorry~ Two rules: don't step on her feet, and do NOT bolt halfway through. Running away at full speed is Palmer-san's move, ssho~?
+{user}! Okay, so I, Palmer-san, complimented Grandmother's gown last Christmas, and she made me dance. Tonight it's your turn, I already told her. Sorry not sorry~
+Two rules: don't step on her feet, and do NOT bolt halfway through. Running away at full speed is Palmer-san's move, ssho~?
+Oh, Helios? It's for a surprise, okay? Besties gotta protect 'em #SweetieSecrecies! Sounds just like her, eh?
 ```
 
-- Same scene (canon: voice 91020), now in her voice: she calls herself
-  "Palmer-san", and "~ssho" is her casual "right?".
+- Same scene (canon: voice 91020), in her voice: "Palmer-san", "~ssho"
+  (her casual "right?").
+- Foreshadows the Helios guest visit (the after-party). The hashtag is
+  Palmer imitating Helios and catching it, a joke about the set's
+  no-hashtags rule rather than a break of it.
+- Edits to the owner's text: "so she made me dance" became "and she made
+  me dance"; "'eh?" became ", eh?". Open: #SweetieSecrecies as written, or
+  #BestieSecrets.
 
 ### 6. Mejiro Ardan (Keep, one touch)
 
