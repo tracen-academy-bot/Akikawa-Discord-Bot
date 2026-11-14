@@ -35,20 +35,25 @@ Tea is at three in the east garden, and I should be glad of your company. Do min
   McQueen's own line ("the patisserie cart, which simply happens to lie on
   our route") pays it off. The photo's sweets line is gone.
 
-### 2. Mejiro McQueen (Tune)
+### 2. Mejiro McQueen (Tune; the owner's text)
 
 ```text
-Gokigenyou, {user}-san. Welcome to the Mejiro Estate. I shall be your guide this afternoon, desu wa. The garden, the pond, the trophy room where the Tenno Sho shield shall one day hang... and the patisserie cart, which simply happens to lie on our route. *Ahem.* One parfait is perfectly reasonable. ...Why is Gold Ship in the hedge? No. I refuse to ask. Shall we?
+ごきげんよう, {user}-san. Welcome to the Mejiro Estate. I shall be your guide this afternoon, desu wa. The garden, the pond, the trophy room where the Tenno Sho shield shall one day hang... and the patisserie cart, which simply happens to lie on our route. *Ahem.* You know me, Trainer-san, one parfait is perfectly reasonable.
+...Gold Ship? ...Why the h- why would she be in the hedge? I refuse to dignify it. Shall we?
 ```
 
 - Kept: "desu wa", *ahem* (コホン), the sweets weakness, which pays off
-  Grandmother's dessert-cart warning.
-- Added: "gokigenyou" (her greeting), the Tenno Sho shield ("toward the
-  honour of the shield", her own line), and Gold Ship, whom the fandom
-  knows as her chaos (her line about Gold Ship's Cossack dance, voice
-  91000).
+  Grandmother's dessert-cart warning. "You know me" makes her self-aware
+  about it.
+- Added: ごきげんよう (gokigenyou, her greeting) in Japanese, the Tenno Sho
+  shield ("toward the honour of the shield", her own line), and Gold Ship
+  (her line about Gold Ship's Cossack dance, voice 91000). "Why the h-" is
+  her composure slipping and catching itself, as her brief describes.
 - Dropped: the secret baseball broadcast (three tics stacked read like a
   checklist).
+- Edits to the owner's text: a comma after "You know me"; "I refuse to
+  bother" became "I refuse to dignify it" (open: "I shan't even ask" or
+  "I refuse to bother with her").
 
 ### 3. Mejiro Ryan (Rework)
 
