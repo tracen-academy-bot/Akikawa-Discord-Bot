@@ -144,15 +144,30 @@ Oh dear, your shoulders are up by your ears again. Nervous, are we? I've watched
   was cut as too much like Super Creek (UKronis) in favour of the owner's
   "Hush, and drink. The moon is lovely tonight, isn't it?"
 
-### 7. Mejiro Bright (Tune)
+### 7. Mejiro Bright (Rework; the owner's text)
 
 ```text
-Ah~ {user}-sama, good evening~ ...Or is it morning? I napped in the sunroom and lost track, desu wa~ Ryan-oneesama's dress looks lovely, doesn't it~? I sewed one just like it for Maki-chan~ ...Ufufu. Everyone thinks I am only sleepy. But at the next race, I intend to win~ Please don't tell either of them; both are surprises~
+...zzz... oh? Ah~ {user}-sama, good evening~ I dozed off while sewing, desu wa~ Look: a tiny suit for Maki-chan, just like yours~ Now she can come to the party with you too. Ufufu~
+You came to fetch me for... the party? Oh, right. I'll be down in a moment~ But hold still first... *holds a half-knitted scarf to your neck* ...Yes, the length is perfect~ It gets rather cold here in winter, so I'm knitting you a scarf. Well, the beginnings of one. It will be ready by winter... next winter, perhaps. Good things take their time, after all~
 ```
 
-- Added: her elongated "desu wa~", "ufufu", and the hidden fire ("a voice
-  in my heart says win", her own line) that makes her more than sleepy.
-- Kept: Maki-chan (her doll, canon), sewing, "Ryan-oneesama".
+- Was: a checklist (sleepy, Ryan's dress, Maki-chan, sewing, a stated
+  hidden fire, surprises). A draft where she waited at the door "since
+  lunch" read as sad (pining); a draft where she was still choosing
+  ribbons put her at the centre with the trainer as a helper.
+- Now: a light scene about the trainer. She wakes mid-line (her own "I
+  seem to have fallen asleep~"), has sewn her doll a suit matching the
+  trainer's (sewing doll clothes, Maki-chan: canon), and is knitting the
+  trainer a scarf, very slowly (knitting "very slowly" is in her likes).
+  "Good things take their time" is her canon patience, turned warm.
+- No romance beat on purpose: the set already has Ryan, Dober, Ardan and
+  Ramonu for that.
+- Edits to the owner's text: "you woke me up since... the party?" became
+  "You came to fetch me for... the party?"; the second "just a moment"
+  became "But hold still first..."; a stage cue for the scarf; one
+  "desu wa~" and one "Ufufu~" removed; "[prototype of one]" became "Well,
+  the beginnings of one"; "it gets pretty cold around here" became "it
+  gets rather cold here in winter".
 
 ### 8. Mejiro Ramonu (Tune)
 
