@@ -119,7 +119,7 @@ Oh, Helios? It's for a surprise, okay? Besties gotta protect 'em #SweetieSecreci
 
 ```text
 Good evening, {user}-san. ...My my, you look tired. Business talk with the Satonos, I take it? No overdoing it, Trainer-san... めっ！ Fufu, Creek-san taught me that one.
-I had the kitchen brew a pot of herbal tea. Oh yes, Baaya's recipe; she swears by it. I added a few notes of my own. And yes, before any dancing. ...You're fine, you say? Fufu. No, you are not. *Sit.* ...that's my good Trainer~ *pats*
+I had the kitchen brew a pot of herbal tea. Oh yes, Baaya's recipe; she swears by it. I added a few notes of my own. And yes, before any dancing. ...You're fine, you say? Fufu. Hush, and drink. The moon is lovely tonight, isn't it?
 Oh dear, your shoulders are up by your ears again. Nervous, are we? I've watched you practise; you are far better than you think, and "I can't dance" is not an answer I accept tonight. 参りましょう。
 ```
 
@@ -128,7 +128,11 @@ Oh dear, your shoulders are up by your ears again. Nervous, are we? I've watched
 - Now (from a discussion with UKronis): what sets her apart from McQueen
   is care. McQueen tends to you when you are sick; Ardan stops you getting
   sick. Gentle and polite, playful like a kind elder sister, and she puts
-  her foot down ("No, you are not. *Sit.*"; "not an answer I accept").
+  her foot down ("Hush, and drink"; "not an answer I accept"). A partner,
+  not a parent: she calls the trainer "my partner" once in canon, and her
+  praise is "you and I", never "good child".
+- "The moon is lovely tonight, isn't it?": the 月が綺麗ですね trope (an
+  indirect "I love you"), kept in English so it stays a quiet reference.
   The scene is about the trainer (tired, nervous about dancing), not her
   legs; "before any dancing" carries the dance.
 - Canon: Creek's めっ！ trick (voice 90004); herbal tea and medicinal
@@ -136,9 +140,9 @@ Oh dear, your shoulders are up by your ears again. Nervous, are we? I've watched
   broth from an earlier draft was dropped (UKronis: too Sakura Chitose O).
 - Ties: "the Satonos" (Dober and the guests).
 - Edits to the owner's text: "I added some notes" became "I added a few
-  notes of my own"; italics on *Sit.* and *pats* kept. Note: "my good
-  Trainer~ *pats*" leans on Super Creek's いい子いい子; read as Ardan
-  copying her senpai's routine.
+  notes of my own". The earlier "*Sit.* ...that's my good Trainer~ *pats*"
+  was cut as too much like Super Creek (UKronis) in favour of the owner's
+  "Hush, and drink. The moon is lovely tonight, isn't it?"
 
 ### 7. Mejiro Bright (Tune)
 
