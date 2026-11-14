@@ -115,13 +115,30 @@ Oh, Helios? It's for a surprise, okay? Besties gotta protect 'em #SweetieSecreci
   me dance"; "'eh?" became ", eh?". Open: #SweetieSecrecies as written, or
   #BestieSecrets.
 
-### 6. Mejiro Ardan (Keep, one touch)
+### 6. Mejiro Ardan (Rework; the owner's text, with UKronis)
 
 ```text
-Shall we dance, {user}-san? Only a waltz; the doctor was very clear about my legs. ...Please don't look so worried. The garden is lit for this one evening, and I intend to shine for every second of it. Sister is watching, you know. Let us give her something worth looking at. Mairimashou.
+Good evening, {user}-san. ...My my, you look tired. Business talk with the Satonos, I take it? No overdoing it, Trainer-san... めっ！ Fufu, Creek-san taught me that one.
+I had the kitchen brew a pot of herbal tea. Oh yes, Baaya's recipe; she swears by it. I added a few notes of my own. And yes, before any dancing. ...You're fine, you say? Fufu. No, you are not. *Sit.* ...that's my good Trainer~ *pats*
+Oh dear, your shoulders are up by your ears again. Nervous, are we? I've watched you practise; you are far better than you think, and "I can't dance" is not an answer I accept tonight. 参りましょう。
 ```
 
-- Only change: ends on "mairimashou" (shall we go), her usual line.
+- Was: all about Ardan (her legs, her shine, her sister); "something
+  quintessential Ardan missing".
+- Now (from a discussion with UKronis): what sets her apart from McQueen
+  is care. McQueen tends to you when you are sick; Ardan stops you getting
+  sick. Gentle and polite, playful like a kind elder sister, and she puts
+  her foot down ("No, you are not. *Sit.*"; "not an answer I accept").
+  The scene is about the trainer (tired, nervous about dancing), not her
+  legs; "before any dancing" carries the dance.
+- Canon: Creek's めっ！ trick (voice 90004); herbal tea and medicinal
+  cooking (her likes); her nanny ばあや (Baaya); dance; 参りましょう. The
+  broth from an earlier draft was dropped (UKronis: too Sakura Chitose O).
+- Ties: "the Satonos" (Dober and the guests).
+- Edits to the owner's text: "I added some notes" became "I added a few
+  notes of my own"; italics on *Sit.* and *pats* kept. Note: "my good
+  Trainer~ *pats*" leans on Super Creek's いい子いい子; read as Ardan
+  copying her senpai's routine.
 
 ### 7. Mejiro Bright (Tune)
 
