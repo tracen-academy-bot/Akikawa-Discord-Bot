@@ -81,7 +81,7 @@ Tea is at three in the east garden, and I should be glad of your company. Do min
 ```text
 {user}. ...You came. I'd rather you didn't wander off now. ...Look, I know the Mejiros have appearances to keep up, but having the Satonos over tonight is a bit much for me. Men in suits, and everyone looks so poised... I just feel small next to them.
 You always say I'm enough, just the way I am. ...F-forget I said that. And what do you mean my ears are twitching? 別に... Just shut up and have this ginger tea that definitely wasn't premade.
-"Bell-chan~?" Oh, my dad? ...I'll go pummel him real quick. And *you* too, if you ever *titter*.
+"Bell-chan~?" Oh, my dad? ...I'll go pummel him real quick. And *you* too, if you ever *tattle*.
 ```
 
 - Was: all defence, no reveal ("feels like it's just missing").
@@ -96,7 +96,7 @@ You always say I'm enough, just the way I am. ...F-forget I said that. And what 
 - Edits to the owner's text: "{u-user}-san" (the bot fills only `{user}`;
   Dober never says "-san") became "{user}. ...You came."; brackets filled
   as "have appearances to keep up" and "enough"; "meek" became "small";
-  "teeter" read as "titter" (to giggle); open if "tattle" was meant.
+  "teeter" became "tattle" (the owner meant telling anyone about it).
 
 ### 5. Mejiro Palmer (Tune)
 
