@@ -148,7 +148,7 @@ Oh dear, your shoulders are up by your ears again. Nervous, are we? I've watched
 
 ```text
 ...zzz... oh? Ah~ {user}-sama, good evening~ I dozed off while sewing, desu wa~ Look: a tiny suit for Maki-chan, just like yours~ Now she can come to the party with you too. Ufufu~
-You came to fetch me for... the party? Oh, right. I'll be down in a moment~ But hold still first... *holds a half-knitted scarf to your neck* ...Yes, the length is perfect~ It gets rather cold here in winter, so I'm knitting you a scarf. Well, the beginnings of one. It will be ready by winter... next winter, perhaps. Good things take their time, after all~
+You came to fetch me for... the party? Oh, right. I'll be down in a moment~ But hold still first... Yes, the length is perfect~ Oh, what was I measuring? It gets rather cold here in winter, so I'm knitting you a scarf. Well, the beginnings of one anyway. It will be ready by winter... next winter, perhaps. Good things take their time, after all~
 ```
 
 - Was: a checklist (sleepy, Ryan's dress, Maki-chan, sewing, a stated
@@ -164,10 +164,11 @@ You came to fetch me for... the party? Oh, right. I'll be down in a moment~ But 
   Ramonu for that.
 - Edits to the owner's text: "you woke me up since... the party?" became
   "You came to fetch me for... the party?"; the second "just a moment"
-  became "But hold still first..."; a stage cue for the scarf; one
-  "desu wa~" and one "Ufufu~" removed; "[prototype of one]" became "Well,
-  the beginnings of one"; "it gets pretty cold around here" became "it
-  gets rather cold here in winter".
+  became "But hold still first..."; one "desu wa~" and one "Ufufu~"
+  removed; "[prototype of one]" became "the beginnings of one"; "it gets
+  pretty cold around here" became "it gets rather cold here in winter".
+  The owner then cut the scarf stage cue (too long) for "Oh, what was I
+  measuring?", which reads as Bright, half asleep, forgetting mid-task.
 
 ### 8. Mejiro Ramonu (Tune)
 
