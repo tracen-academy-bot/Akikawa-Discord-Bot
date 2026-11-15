@@ -76,12 +76,29 @@ export const READ_MENU_ID = 'timer:specials:read';
 /** The page the Specials list opens on: Set 1, the first special set. Page 0 is Set 0, the reminders. */
 export const SPECIALS_FIRST_PAGE = 1;
 
-/** How many pages the Specials list has: Set 0 (the reminders) and one per special set. */
-const PAGE_COUNT = SPECIAL_SETS.length + 1;
+/**
+ * The Specials list's pages, in order: Set 0 (the reminders), then each
+ * special set, and right after a set with extras (`Special.extra`: the
+ * Remedial Rehearsal, guests) a page of its own for them, "Set <n>.5"
+ * (owner, 2026-11-15).
+ */
+type SpecialsPage = { kind: 'reminders' } | { kind: 'set'; set: number } | { kind: 'extras'; set: number };
+const PAGES: readonly SpecialsPage[] = [
+    { kind: 'reminders' },
+    ...SPECIAL_SETS.flatMap((s, i): SpecialsPage[] =>
+        RARE_OPENERS.some((o) => o.set === s.id && o.extra) ? [{ kind: 'set', set: i }, { kind: 'extras', set: i }] : [{ kind: 'set', set: i }],
+    ),
+];
 
-/** A page's heading: "Set <n>: <name>". */
+/** How many pages the Specials list has. */
+const PAGE_COUNT = PAGES.length;
+
+/** A page's heading: "Set <n>: <name>", or "Set <n>.5: <name> Extras". */
 function pageTitle(page: number): string {
-    return page === 0 ? 'Set 0: Reminders' : `Set ${page}: ${SPECIAL_SETS[page - 1]!.name}`;
+    const pg = PAGES[page]!;
+    if (pg.kind === 'reminders') return 'Set 0: Reminders';
+    const name = SPECIAL_SETS[pg.set]!.name;
+    return pg.kind === 'set' ? `Set ${pg.set + 1}: ${name}` : `Set ${pg.set + 1}.5: ${name} Extras`;
 }
 
 /** The Back/Next row of a Specials page, with `middle` (the set's toggle) between them. */
@@ -135,18 +152,19 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     const total = tally.reduce((sum, t) => sum + t.count, 0);
     const pings = `${total} special ping${total === 1 ? '' : 's'}`;
     const tallyLine = `${personal ? `${pings} for you so far` : `${pings} on the server so far`}.`;
-    if (pg === 0) return remindersPage(mode, tallyLine);
-    const p = pg - 1;
-    const set = SPECIAL_SETS[p]!;
-    // The set's lines, then its extras, then its guests (shown after them, never counted in its totals).
+    const page_ = PAGES[pg]!;
+    if (page_.kind === 'reminders') return remindersPage(mode, tallyLine);
+    const set = SPECIAL_SETS[page_.set]!;
+    // A set page lists its lines; its extras page lists its extras (the
+    // Rehearsal, then the guests), counted on their own, never in the set's
+    // or the overall totals.
     const inSet = tally.map((t, i) => ({ t, i })).filter(({ t }) => t.set === set.id);
-    const main = inSet.filter(({ t }) => !t.extra);
-    const rows = [...main, ...inSet.filter(({ t }) => t.extra && !t.guest), ...inSet.filter(({ t }) => t.guest)];
+    const rows = page_.kind === 'set' ? inSet.filter(({ t }) => !t.extra) : [...inSet.filter(({ t }) => t.extra && !t.guest), ...inSet.filter(({ t }) => t.guest)];
     const counted = tally.filter((t) => !t.extra);
     const found = counted.filter((t) => t.count > 0).length;
-    const foundHere = main.filter(({ t }) => t.count > 0).length;
-    /** A row's number within its set ("**3.**"), "Extra." for an extra, or "Guest." for a guest. */
-    const num = (t: RareTally, n: number) => (t.guest ? 'Guest.' : t.extra ? 'Extra.' : `${n + 1}.`);
+    const foundHere = rows.filter(({ t }) => t.count > 0).length;
+    /** A row's number on its page ("**3.**"). */
+    const num = (_t: RareTally, n: number) => `${n + 1}.`;
     const locked = extras?.lockedSets.includes(set.id) ?? false;
     const off = extras?.disabledSets.includes(set.id) ?? false;
 
@@ -154,7 +172,7 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     const embed = new EmbedBuilder()
         .setColor(0xf2a87a)
         .setTitle(personal ? `Your specials: ${found} of ${counted.length}` : `Specials found: ${found} of ${counted.length}`)
-        .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${main.length} found${status}`);
+        .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${rows.length} found${status}`);
     if (!locked) {
         const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
         const names = rows.map(({ t }, n) => `**${num(t, n)}** ${t.count > 0 ? t.name : '???'}`);
@@ -195,7 +213,7 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     if (options.length > 0) {
         components.push(
             new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                new StringSelectMenuBuilder().setCustomId(READ_MENU_ID).setPlaceholder(`Read a special from ${set.name}`).addOptions(options),
+                new StringSelectMenuBuilder().setCustomId(READ_MENU_ID).setPlaceholder(`Read a special from ${page_.kind === 'extras' ? `${set.name} Extras` : set.name}`).addOptions(options),
             ),
         );
     }
@@ -216,7 +234,8 @@ export async function mySpecialsView(guildId: string, discordUserId: string, pag
 /** The page of `setId` in the Specials list (Set 1 is page 1), or the first page. */
 export function pageOfSet(setId: string): number {
     const i = SPECIAL_SETS.findIndex((s) => s.id === setId);
-    return i === -1 ? SPECIALS_FIRST_PAGE : i + 1;
+    const page = PAGES.findIndex((p) => p.kind === 'set' && p.set === i);
+    return page === -1 ? SPECIALS_FIRST_PAGE : page;
 }
 
 /**

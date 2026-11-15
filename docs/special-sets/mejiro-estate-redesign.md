@@ -307,9 +307,10 @@ for guests only.
    McQueen (canon); Kitasan is her plus-one.
 
    ```text
-   Diamond: "Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu."
-   Kitasan: "Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!"
-   Diamond: "Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?"
+   Diamond: "Good evening, {user}-san. McQueen-san invited the Satono house to dinner, along with some... discussions. Ah, you have informed McQueen-san... how thoughtful of you. Speaking of which, I may have brought a plus-one... fufu."
+   Kitasan: "Wasshoi, Trainer-san! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? ドドン!"
+   Diamond: "Kita-chan, it's a dinner party. ...ふむふむ. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you mind letting McQueen-san know of our little plan?~"
+   McQueen: "Ah, right on time! Welcome to the Mejiro Estate. A festival? ...We shall see, desu wa. Thank you for greeting them for me, Trainer-san. Please, come in!"
    ```
 
 3. **`guest.goldship`, "Gold Ship"**: pays off McQueen's hedge. The

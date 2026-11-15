@@ -151,8 +151,12 @@ async function main() {
     const set0 = json(rares.specialsView(tally, 0));
     check('set 0: the reminders, in full, Back off', [set0.embeds[0]!.title, PING_OPENERS.every((o) => set0.embeds[0]!.description?.includes(o.replaceAll('{user}', '@trainer'))), set0.components[0]!.components[0]!.disabled, set0.components.length], ['Set 0: Reminders', true, true, 1]);
     check('set 0: the same for a trainer, no toggle', json(rares.specialsView(tally, 0, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).components[0]!.components.map((b) => b.label), ['Back', 'Next']);
-    const last = json(rares.specialsView(tally, SETS.length));
-    check('pages: the last page, numbered within its set, Next off', [last.embeds[0]!.description?.startsWith(`**Set ${SETS.length}: ${SETS.at(-1)!.name}**`), last.embeds[0]!.fields?.[0]?.value.split('\n')[0], last.components[0]!.components.at(-1)?.disabled, last.embeds[0]!.footer?.text.endsWith(`Page ${SETS.length + 1} of ${SETS.length + 1}`)], [true, '**1.** ???', true, true]);
+    // Pages: Set 0, each set, and a "Set <n>.5" extras page right after a set with extras (owner, 2026-11-15).
+    const extrasPages = SETS.filter((x) => RARE_OPENERS.some((o) => o.set === x.id && o.extra)).length;
+    const lastPage = SETS.length + extrasPages;
+    const last = json(rares.specialsView(tally, lastPage));
+    check('pages: the last page is the last set\'s extras, numbered on its own, Next off', [last.embeds[0]!.description?.startsWith(`**Set ${SETS.length}.5: ${SETS.at(-1)!.name} Extras**`), last.embeds[0]!.fields?.[0]?.value.split('\n')[0], last.components[0]!.components.at(-1)?.disabled, last.embeds[0]!.footer?.text.endsWith(`Page ${lastPage + 1} of ${lastPage + 1}`)], [true, '**1.** ???', true, true]);
+    check('pages: a set\'s page lists only its lines', json(rares.specialsView(tally, rares.pageOfSet('mejiro-estate'))).embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 0 of 9 found'), true);
     check('pages: a page out of range is clamped', [json(rares.specialsView(tally, 99)).embeds[0]!.description, json(rares.specialsView(tally, -5)).embeds[0]!.title], [last.embeds[0]!.description, 'Set 0: Reminders']);
     const { buildPanel, BUTTON_SPECIALS } = await import('../src/lib/timer/panel');
     const panelJson = JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never));
@@ -587,10 +591,11 @@ async function main() {
     check('completion: the 9 lines complete the set; the Rehearsal does not stand in for one, but scores 15', cb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['c-nine', 1, 9, 9 * 15 + 100], ['c-eight', 0, 8, 9 * 15]]);
     const mejiroPage = json(rares.specialsView(await rares.rareTally(CB, 'c-eight'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
     const mNames = mejiroPage.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
-    check('page: the Rehearsal after the 9, not in the set\'s count', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mNames[9]], [true, 15, "**Extra.** Ramonu's Remedial Rehearsal"]);
-    check('page: ??? until found', json(rares.specialsView(await rares.rareTally(CB, 'c-nine'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).embeds[0]!.fields?.[0]?.value.split('\n')[9], '**Extra.** ???');
-    const readOpts = mejiroPage.components[1]?.components[0]?.options?.map((o) => o.label) ?? [];
-    check('read menu: the Rehearsal can be read once found', readOpts.at(-1), "Extra. Ramonu's Remedial Rehearsal");
+    const mejiroExtras = json(rares.specialsView(await rares.rareTally(CB, 'c-eight'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    check('page: the Mejiro page has just its 9; the Rehearsal is on Set 3.5, counted there only', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mejiroExtras.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 1 of 6 found'), mejiroExtras.embeds[0]!.fields?.[0]?.value.split('\n')[0]], [true, 9, true, "**1.** Ramonu's Remedial Rehearsal"]);
+    check('page: ??? until found', json(rares.specialsView(await rares.rareTally(CB, 'c-nine'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).embeds[0]!.fields?.[0]?.value.split('\n')[0], '**1.** ???');
+    const readOpts = mejiroExtras.components[1]?.components[0]?.options?.map((o) => o.label) ?? [];
+    check('read menu: the Rehearsal can be read once found, from Set 3.5', readOpts, ["1. Ramonu's Remedial Rehearsal"]);
     const readRamonu = await rares.readSpecial(OG, T, 'mejiro.ramonu');
     check('read: Ramonu in full, without any outcome footer', [readRamonu?.text, readRamonu?.text.includes('-#')], [openers.fillOpener(ramonu.text, T), false]);
     check('read: the Rehearsal without footers', (await rares.readSpecial(OG, T, 'mejiro.rehearsal'))?.text, openers.fillOpener(rehearsal.text, T));
@@ -603,7 +608,7 @@ async function main() {
         true,
     ]);
     check('guests: exactly one {user} each', guests.map((g) => g.text.split('{user}').length - 1), [1, 1, 1, 1, 1]);
-    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#DJHelios', '#MusicalEternity', '#MejiroAfterParty', '#ZuttomoDJ', '#BakunigeBPM'], true, ['Diamond', 'Kitasan', 'Diamond'], ['Rudolf', 'Sirius', 'Ramonu']]);
+    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#DJHelios', '#MusicalEternity', '#MejiroAfterParty', '#ZuttomoDJ', '#BakunigeBPM'], true, ['Diamond', 'Kitasan', 'Diamond', 'McQueen'], ['Rudolf', 'Sirius', 'Ramonu']]);
     const guestTexts = guests.map((g) => g.text);
     const hasGuest = (pool: readonly string[]) => pool.some((t) => guestTexts.includes(t));
     const mejiroLinesLive = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
@@ -671,17 +676,17 @@ async function main() {
     const gb = await rares.specialsBoard(GB);
     check('guests: not in the set\'s completion or found count, but 15 new and 3 repeat', gb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['g-all', 1, 9, 14 * 15 + 3 + 100], ['g-eight', 0, 8, 13 * 15]]);
     check('guests: not in the board\'s special count', gb.specialCount, RARE_OPENERS.filter((o) => !o.extra && !o.guest).length);
-    const gEight = json(rares.specialsView(await rares.rareTally(GB, 'g-eight'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    const gEight = json(rares.specialsView(await rares.rareTally(GB, 'g-eight'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
     const gNames = gEight.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
-    check('page: guests after the 9 and the Rehearsal, not in either count', [gEight.embeds[0]!.title, gEight.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), gNames.slice(9)], [
+    check('page: Set 3.5 lists the Rehearsal then the guests, counted on their own, never in the overall total', [gEight.embeds[0]!.title, gEight.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 5 of 6 found'), gNames], [
         `Your specials: 8 of ${RARE_OPENERS.filter((o) => !o.extra).length}`,
         true,
-        ['**Extra.** ???', ...guests.map((g) => `**Guest.** ${g.name}`)],
+        ['**1.** ???', ...guests.map((g, i) => `**${i + 2}.** ${g.name}`)],
     ]);
-    const gNone = json(rares.specialsView(await rares.rareTally(GB, 'nobody'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
-    check('page: "**Guest.** ???" until found', (gNone.embeds[0]!.fields?.[0]?.value.split('\n') ?? []).slice(10), ['**Guest.** ???', '**Guest.** ???', '**Guest.** ???', '**Guest.** ???', '**Guest.** ???']);
+    const gNone = json(rares.specialsView(await rares.rareTally(GB, 'nobody'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    check('page: ??? until found, on Set 3.5', gNone.embeds[0]!.fields?.[0]?.value.split('\n') ?? [], ['**1.** ???', '**2.** ???', '**3.** ???', '**4.** ???', '**5.** ???', '**6.** ???']);
     const gOpts = gEight.components[1]?.components[0]?.options?.map((o) => [o.label, o.value]) ?? [];
-    check('read menu: found guests can be read', [gOpts.slice(-5), (await rares.readSpecial(GB, 'g-eight', 'guest.teio'))?.text, await rares.readSpecial(GB, 'nobody', 'guest.teio')], [guests.map((g) => [`Guest. ${g.name}`, g.id]), openers.fillOpener(openers.specialById('guest.teio')!.text, 'g-eight'), null]);
+    check('read menu: found guests can be read, from Set 3.5', [gOpts, (await rares.readSpecial(GB, 'g-eight', 'guest.teio'))?.text, await rares.readSpecial(GB, 'nobody', 'guest.teio')], [guests.map((g, i) => [`${i + 2}. ${g.name}`, g.id]), openers.fillOpener(openers.specialById('guest.teio')!.text, 'g-eight'), null]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [GG, GB] } } });
     await prisma.timerUserSettings.deleteMany({ where: { guildId: GG } });
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [OG, CB] } } });
