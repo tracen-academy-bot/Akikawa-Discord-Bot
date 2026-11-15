@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, PAUSED_SETS, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, guestSlice, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { EARLY_START, PAUSED_SETS, setLinesPool, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, guestSlice, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
 import { activeBoosts, foundSpecialIds, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
@@ -79,15 +79,29 @@ export async function extraChances(
         if (personal.owner === discordUserId) extras.push({ chance: personal.chance, pool, label: personal.label });
     }
     for (const buff of activeSeasonals(now, buffs)) {
-        const special = specialById(buff.specialId);
+        // A set-wide buff (Mejiro week): that set's lines, while it is usable.
+        if (buff.setId) {
+            if (!usable(buff.setId)) continue;
+            extras.push({ chance: buff.chance, pool: setLinesPool(buff.setId), label: `${buff.label} Ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>.` });
+            continue;
+        }
+        const special = buff.specialId ? specialById(buff.specialId) : undefined;
         if (!special || !usable(special.set)) continue;
+        // Ends with the server's first Ramonu's Second Love; its end is never shown.
+        if (buff.endsOnSecondLove) {
+            if (await prisma.timerSecondLove.findUnique({ where: { guildId } })) continue;
+            extras.push({ chance: buff.chance, pool: [special.text], label: buff.label });
+            continue;
+        }
         const unlocksDone = SPECIAL_SETS.some((s) => s.requires === buff.specialId && !lockedSets.includes(s.id));
         if (unlocksDone) continue;
         extras.push({ chance: buff.chance, pool: [special.text], label: `${buff.label} Ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>.` });
     }
     for (const set of SPECIAL_SETS) {
         if (!set.unlockBonus || !set.requires || !usable(set.id)) continue;
-        extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra).map((o) => o.text), label: set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.` });
+        if (set.unlockBonusUntil && now.getTime() >= set.unlockBonusUntil.getTime()) continue;
+        const ends = set.unlockBonusUntil ? ` Ends <t:${Math.floor(set.unlockBonusUntil.getTime() / 1000)}:R>.` : '';
+        extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra).map((o) => o.text), label: `${set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.`}${ends}` });
     }
     if (guests) extras.push(guests);
     return extras;

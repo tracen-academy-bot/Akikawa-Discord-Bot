@@ -90,6 +90,13 @@ export interface SpecialOutcome {
      * guaranteed by a loss): it does not stack.
      */
     schedule?: { special: string; within: number };
+    /**
+     * Guarantees the trainer's next run is a guest (`Special.guest`) they have
+     * not met, at random; once they have met them all, any guest. Never the
+     * special that rolled it (no chaining into itself). Only when no other
+     * guarantee is pending; a lesson (`schedule`) always wins over it.
+     */
+    guaranteeGuest?: boolean;
     /** A win: the losing streak goes back to 0. */
     win?: boolean;
     /** A loss: adds its mishap to the streak and guarantees the trainer's next ping is this special again. */
@@ -190,6 +197,8 @@ export interface SpecialSet {
     unlockBonus?: number;
     /** Shown in the Boosts view after the unlock bonus, e.g. "+1% <label>". */
     unlockBonusLabel?: string;
+    /** When the unlock bonus ends (owner, 2026-11-15: no bonus is permanent). None: it never ends. */
+    unlockBonusUntil?: Date;
     /**
      * Paused: no new finds. Its lines never come up, in the base roll or any
      * boost, and finding its prerequisite does not announce it. Its page and
@@ -248,6 +257,38 @@ const REHEARSAL_OUTCOMES: readonly SpecialOutcome[] = [
     },
 ];
 
+/**
+ * Daitaku Helios's after-party (owner, 2026-11-15): every time, Palmer is
+ * talked into introducing the trainer to another guest, so their next run
+ * is a guest they have not met (any guest, once they have met them all).
+ */
+const HELIOS_OUTCOMES: readonly SpecialOutcome[] = [
+    {
+        id: 'introductions',
+        weight: 1,
+        footer: "-# Despite being initially confused by both Helios's more... special taste in music and her slang, the Mejiros warmed up and had a good time. Helios even convinced Palmer to introduce you to the other guests in the house!",
+        guaranteeGuest: true,
+    },
+];
+
+/** The Symboli visit (owner, 2026-11-15): a punchline footer, no effect. */
+const SYMBOLI_OUTCOMES: readonly SpecialOutcome[] = [
+    {
+        id: 'daggers',
+        weight: 1,
+        footer: "-# Ramonu kept staring daggers at you for a week afterwards. It didn't help that Helios told her it was a Massive☆Skill♪Issue... jokingly, of course. Helios is still scared of Ramonu to this day. Welp... that makes two.",
+    },
+];
+
+/** Tokai Teio's visit (owner, 2026-11-15): a punchline footer, no effect. */
+const TEIO_OUTCOMES: readonly SpecialOutcome[] = [
+    {
+        id: 'pose',
+        weight: 1,
+        footer: "-# To make matters worse, Teio did the #HalloweenStupid pose, and McQueen, shockingly, recognized it immediately. Well, at least neither of them broke their legs. What a chaotic kid. Still, it's nice to see McQueen... happy? I guess?",
+    },
+];
+
 const REHEARSAL_FORCED: ForcedSuccess = {
     after: 3,
     text: "Finally, {user} succeeded in not failing. Ramonu couldn't help but crack a tiny smile, amused by how pleased you were with yourself... and, secretly, already missing your clumsiness.",
@@ -289,6 +330,8 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         // Owner, 2026-11-09: +1% #OnlineSensations once unlocked.
         unlockBonus: 0.01,
         unlockBonusLabel: '#OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!',
+        // Not permanent (owner, 2026-11-15): ends with Curren and Mejiro week, at the reset of Nov 22.
+        unlockBonusUntil: new Date('2026-11-22T15:00:00Z'),
         openers: [
             { id: 'os.celebrate', name: "#Celebrate", text: "{user}, it's time to #Celebrate! It took so much #Preparation but we finally got #ThreeMillionFollowers on release! Thank you for being my #FavoriteManager, and it's time to get a bazillion more! #WorkHard", tags: ['collab'] },
             { id: 'os.eyes-only', name: "#ForYourEyesOnly", text: "{user}, it's such a long dayyyy~ #SoTired It was fun but a #DozenDresses takes so long for the producers... So I just want to *closes door behind* show you something #ForYourEyesOnly~\n...ya like it, m'fated #BelovedManager? shh, it's only for you now... and maybe when we truly #BecomeAPair~", tags: ['collab'] },
@@ -320,15 +363,15 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'mejiro.ardan', name: "Mejiro Ardan", text: "Good evening, {user}-san. ...My my, you look tired. Business talk with the Satonos, I take it? No overdoing it, Trainer-san... めっ！ Fufu, Creek-san taught me that one.\nI had the kitchen brew a pot of herbal tea. Oh yes, Baaya's recipe; she swears by it. I added a few notes of my own. And yes, before any dancing. ...You're fine, you say? Fufu. Hush, and drink. The moon is lovely tonight, isn't it?\nOh dear, your shoulders are up by your ears again. Nervous, are we? I've watched you practise; you are far better than you think, and \"I can't dance\" is not an answer I accept tonight. 参りましょう。", after: ['mejiro.grandmother'] },
             { id: 'mejiro.bright', name: "Mejiro Bright", text: "...zzz... oh? Ah~ {user}-sama, good evening~ I dozed off while sewing, desu wa~ Look: a tiny suit for Maki-chan, just like yours~ Now she can come to the party with you too. Ufufu~\nYou came to fetch me for... the party? Oh, right. I'll be down in a moment~ But hold still first... Yes, the length is perfect~ Oh, what was I measuring? It gets rather cold here in winter, so I'm knitting you a scarf. Well, the beginnings of one anyway. It will be ready by winter... next winter, perhaps. Good things take their time, after all~", after: ['mejiro.grandmother'] },
             { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "Ah, {user}. Your arrival is appreciated. Offer me your arm. Mmm... you're warm.\n...Still thinking about our training analysis? How... boorish of you. First the Symbolis, and now this. Eyes here, if you please. ...There we go. Good. Look all you want; I did *not* dress like this for no one, after all.\nArdan is dancing tonight, you see. Isn't her stubbornness lovely? You had better keep up too. The track can wait until tomorrow... tonight, it's just you and me.", after: ['mejiro.grandmother'], outcomes: RAMONU_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
-            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, it looks lovely, stop tugging the hem. Dober, the camera, not the floor; nobody else is looking. Palmer, wake Bright. Ardan, beside your sister. Ramonu... yes, we know, you are radiant. And {user}, here, with the family. ...There. One for the album.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'] },
+            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. No, {user}, I shall take this one myself. I have taken plenty of these with them, after all.\nRamonu, in the centre; yes, just like that. You look radiant, dear. McQueen, the cake can wait. ...Hoho, am I wrong? Ryan, it looks lovely, stop tugging the hem. Dober, eyes up; nobody is looking at anyone but you, and that is the point. Palmer, wake Bright. Brighttt, eyes here... yes, good. Ardan, beside your sister, please.\nVery well... there. One for the album. Now then, {user}: how does it feel, knowing that every road these girls ever ran somehow led them to you?\nThey are all smiling at you, you know. I would say that settles it. Welcome to the Mejiro Family, {user}.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'], media: 'mejiro-family-photograph.jpg', credit: 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>' },
             // An extra (owner, 2026-11-15): only through Ramonu's lesson boost or a lost lesson's guarantee.
             { id: 'mejiro.rehearsal', name: "Ramonu's Remedial Rehearsal", text: "Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?", after: ['mejiro.ramonu'], extra: true, outcomes: REHEARSAL_OUTCOMES, forcedSuccess: REHEARSAL_FORCED },
             // Guests (owner, 2026-11-15): extras of their own, only through the guest slice (`guestSlice`), once the Family Photograph is found.
-            { id: "guest.helios", name: "Daitaku Helios", text: "Weeei, Tore-pi! Surprise~! ...What do you mean you didn't expect me?! #DJHelios is obviously always everywhere! Anyways, Pama-chin wanted a dance party, and for her テンアゲ playlist to be heard by the other Meji-uwus too! That's why I got her to sneak my decks into the ballroom, and Grandmother said \"one hour\". よいちょまる, that's basically forever! Can't wait to see everyone surprised! {user}, get on the floor, Pama-chin's already age-age! #MejiroAfterParty #ZuttomoDJ", after: ['mejiro.photo'], extra: true, guest: true },
-            { id: "guest.satono", name: "Satono Diamond & Kitasan Black", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!\"\nDiamond: \"Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?\"", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.helios", name: "Daitaku Helios", text: "Weeei, Tore-pippi! SURPRIIISE~☆ ...Huh? You didn't expect me?! ぴえん... #DJHelios is literally everywhere, no cap! Okok, so why am I here? Pama-chin was like \"I wanna party\", and also like \"my テンアゲ playlist deserves to be heard by ALL the Meji-uwus!\", and I was like, say less! So I made her smuggle my decks into the ballroom, and Grandmother said \"one hour\". ONE HOUR?! よいちょまる, that's basically a #MusicalEternity, frfr! The whole Estate's gonna be shook, ya know! Oh, it's timeeeee! {user}, get on the floor, Pama-chin's already mega age-age! #MejiroAfterParty #ZuttomoDJ #BakunigeBPM", after: ['mejiro.photo'], extra: true, guest: true, outcomes: HELIOS_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
+            { id: "guest.satono", name: "Satono Diamond & Kitasan Black", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, along with some... discussions. Ah, you have informed McQueen-san... how thoughtful of you. Speaking of which, I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi, Trainer-san! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? ドドン!\"\nDiamond: \"Kita-chan, it's a dinner party. ...ふむふむ. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you mind letting McQueen-san know of our little plan?~\"\nMcQueen: \"Ah, right on time! Welcome to the Mejiro Estate. A festival? ...We shall see, desu wa. Thank you for greeting them for me, Trainer-san. Please, come in!\"", after: ['mejiro.photo'], extra: true, guest: true },
             { id: "guest.goldship", name: "Gold Ship", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.photo'], extra: true, guest: true },
-            { id: "guest.symboli", name: "Symboli Rudolf & Sirius Symboli", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm, so that will be all.\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had better not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true },
-            { id: "guest.teio", name: "Tokai Teio", text: "Hey hey, {user}! Kaichou brought me along as her plus-one, so Teio-sama is officially Symboli-house company tonight. I promised to behave! ...Mostly. Did you see McQueen's face when I walked in? Priceless. Muteki! ...Wait. Is this floor good for a Teio Step?", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.symboli", name: "Symboli Rudolf & Sirius Symboli", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true, outcomes: SYMBOLI_OUTCOMES },
+            { id: "guest.teio", name: "Tokai Teio", text: "Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~\nWell yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~\n...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~\nNow come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!", after: ['mejiro.photo'], extra: true, guest: true, media: 'halloween-pose.mp4', credit: 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>', outcomes: TEIO_OUTCOMES },
         ],
     },
 ];
@@ -377,8 +420,16 @@ export function effectiveChance(raw: number): number {
 export interface SeasonalBuff {
     /** Shown in the Boosts view after its chance, e.g. "+1% <label>". */
     label: string;
-    specialId: string;
+    /** One special (`specialId`) or a whole set's lines (`setId`, its extras left out). */
+    specialId?: string;
+    setId?: string;
     chance: number;
+    /**
+     * Ends the moment the server's first trainer earns Ramonu's Second Love
+     * (`TimerSecondLove`) instead of at a shown time: its Boosts label shows
+     * no end (owner, 2026-11-15). `until` is then only a far-off backstop.
+     */
+    endsOnSecondLove?: boolean;
     from: Date;
     until: Date;
 }
@@ -387,7 +438,16 @@ export const SEASONAL_BUFFS: readonly SeasonalBuff[] = [
     // Curren Chan week (owner, 2026-11-08): +1% Curren Chan for 7 days. Her
     // line unlocks #OnlineSensations, so it stops for a trainer who has it
     // (see `extraChances`); the set's unlock bonus takes over.
-    { label: 'Curren Chan: meet her in the lobby!', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-11-08T11:00:00Z'), until: new Date('2026-11-15T11:00:00Z') },
+    // Extended (owner, 2026-11-15) through Mejiro week, to the weekly reset (Monday 00:00 JST).
+    { label: 'Curren Chan: meet her in the lobby!', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-11-08T11:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
+    // Mejiro week (owner, 2026-11-15), one weekly event from reset to reset:
+    // +2% on the invitation (the Mejiro Family line) until the Estate is
+    // unlocked, then +2% on the Estate's lines.
+    { label: "Mejiro week: the Estate's invitation is waiting in the lobby!", specialId: 'set1.mejiro', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
+    { label: 'Mejiro week: Come meet the Mejiros at the Estate!', setId: 'mejiro-estate', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
+    // And Ramonu's own +2% for the week (owner, 2026-11-15); none while a Remedial Rehearsal is owed (she is held then).
+    // Until the server's first Ramonu's Second Love, not shown (owner, 2026-11-15); the role stays earnable after, just harder.
+    { label: 'Mejiro Ramonu: You stayed when it mattered. So come closer, my second love... let me show you what I race for.', specialId: 'mejiro.ramonu', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2099-01-01T00:00:00Z'), endsOnSecondLove: true },
 ];
 
 /** The seasonal buffs (of `buffs`, by default all) running at `now`. */
@@ -523,6 +583,7 @@ export interface RolledOutcome {
     footer: string;
     boost?: OutcomeBoost;
     schedule?: { special: string; within: number };
+    guaranteeGuest?: boolean;
     win: boolean;
     lose: boolean;
 }
@@ -569,6 +630,7 @@ export function rollOutcome(special: Special, r: number, streak: readonly string
         footer: mishap?.footer ?? picked.footer ?? '',
         ...(picked.boost ? { boost: picked.boost } : {}),
         ...(picked.schedule ? { schedule: picked.schedule } : {}),
+        ...(picked.guaranteeGuest ? { guaranteeGuest: true } : {}),
         win: picked.win ?? false,
         lose: picked.lose ?? false,
     };

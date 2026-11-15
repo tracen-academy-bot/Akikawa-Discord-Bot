@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -59,6 +59,8 @@ export async function rareTally(guildId: string, discordUserId?: string): Promis
 export interface PersonalExtras {
     lockedSets: readonly string[];
     disabledSets: readonly string[];
+    /** Sets whose completion was handled (auto-off); see `restingLines`. */
+    autoOffSets?: readonly string[];
     boosts: readonly ActiveBoost[];
     /** False when the trainer turned Boosts off. */
     boostsOn: boolean;
@@ -76,12 +78,29 @@ export const READ_MENU_ID = 'timer:specials:read';
 /** The page the Specials list opens on: Set 1, the first special set. Page 0 is Set 0, the reminders. */
 export const SPECIALS_FIRST_PAGE = 1;
 
-/** How many pages the Specials list has: Set 0 (the reminders) and one per special set. */
-const PAGE_COUNT = SPECIAL_SETS.length + 1;
+/**
+ * The Specials list's pages, in order: Set 0 (the reminders), then each
+ * special set, and right after a set with extras (`Special.extra`: the
+ * Remedial Rehearsal, guests) a page of its own for them, "Set <n>.5"
+ * (owner, 2026-11-15).
+ */
+type SpecialsPage = { kind: 'reminders' } | { kind: 'set'; set: number } | { kind: 'extras'; set: number };
+const PAGES: readonly SpecialsPage[] = [
+    { kind: 'reminders' },
+    ...SPECIAL_SETS.flatMap((s, i): SpecialsPage[] =>
+        RARE_OPENERS.some((o) => o.set === s.id && o.extra) ? [{ kind: 'set', set: i }, { kind: 'extras', set: i }] : [{ kind: 'set', set: i }],
+    ),
+];
 
-/** A page's heading: "Set <n>: <name>". */
+/** How many pages the Specials list has. */
+const PAGE_COUNT = PAGES.length;
+
+/** A page's heading: "Set <n>: <name>", or "Set <n>.5: <name> Extras". */
 function pageTitle(page: number): string {
-    return page === 0 ? 'Set 0: Reminders' : `Set ${page}: ${SPECIAL_SETS[page - 1]!.name}`;
+    const pg = PAGES[page]!;
+    if (pg.kind === 'reminders') return 'Set 0: Reminders';
+    const name = SPECIAL_SETS[pg.set]!.name;
+    return pg.kind === 'set' ? `Set ${pg.set + 1}: ${name}` : `Set ${pg.set + 1}.5: ${name} Extras`;
 }
 
 /** The Back/Next row of a Specials page, with `middle` (the set's toggle) between them. */
@@ -135,29 +154,39 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     const total = tally.reduce((sum, t) => sum + t.count, 0);
     const pings = `${total} special ping${total === 1 ? '' : 's'}`;
     const tallyLine = `${personal ? `${pings} for you so far` : `${pings} on the server so far`}.`;
-    if (pg === 0) return remindersPage(mode, tallyLine);
-    const p = pg - 1;
-    const set = SPECIAL_SETS[p]!;
-    // The set's lines, then its extras, then its guests (shown after them, never counted in its totals).
+    const page_ = PAGES[pg]!;
+    if (page_.kind === 'reminders') return remindersPage(mode, tallyLine);
+    const set = SPECIAL_SETS[page_.set]!;
+    // A set page lists its lines; its extras page lists its extras (the
+    // Rehearsal, then the guests), counted on their own, never in the set's
+    // or the overall totals.
     const inSet = tally.map((t, i) => ({ t, i })).filter(({ t }) => t.set === set.id);
-    const main = inSet.filter(({ t }) => !t.extra);
-    const rows = [...main, ...inSet.filter(({ t }) => t.extra && !t.guest), ...inSet.filter(({ t }) => t.guest)];
+    const rows = page_.kind === 'set' ? inSet.filter(({ t }) => !t.extra) : [...inSet.filter(({ t }) => t.extra && !t.guest), ...inSet.filter(({ t }) => t.guest)];
     const counted = tally.filter((t) => !t.extra);
     const found = counted.filter((t) => t.count > 0).length;
-    const foundHere = main.filter(({ t }) => t.count > 0).length;
-    /** A row's number within its set ("**3.**"), "Extra." for an extra, or "Guest." for a guest. */
-    const num = (t: RareTally, n: number) => (t.guest ? 'Guest.' : t.extra ? 'Extra.' : `${n + 1}.`);
+    const foundHere = rows.filter(({ t }) => t.count > 0).length;
+    /** A row's number on a set page ("3."); an extras page lists names only (owner, 2026-11-15). */
+    const extrasPage = page_.kind === 'extras';
+    const num = (_t: RareTally, n: number) => (extrasPage ? '' : `${n + 1}.`);
+    const lead = (t: RareTally, n: number) => (extrasPage ? '' : `**${num(t, n)}** `);
     const locked = extras?.lockedSets.includes(set.id) ?? false;
     const off = extras?.disabledSets.includes(set.id) ?? false;
+    const resting = !off && isResting(set.id, extras?.autoOffSets ?? []);
 
-    const status = locked ? `\nLocked: find **${(set.requires && specialById(set.requires)?.name) ?? 'its special'}** to open it.` : off ? '\nOff: these never come up for you.' : '';
+    const status = locked
+        ? `\nLocked: find **${(set.requires && specialById(set.requires)?.name) ?? 'its special'}** to open it.`
+        : off
+          ? '\nOff: these never come up for you.'
+          : resting
+            ? '\nResting: every line found, so they rest; only what its extras still need comes up.'
+            : '';
     const embed = new EmbedBuilder()
         .setColor(0xf2a87a)
         .setTitle(personal ? `Your specials: ${found} of ${counted.length}` : `Specials found: ${found} of ${counted.length}`)
-        .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${main.length} found${status}`);
+        .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${rows.length} found${status}`);
     if (!locked) {
         const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
-        const names = rows.map(({ t }, n) => `**${num(t, n)}** ${t.count > 0 ? t.name : '???'}`);
+        const names = rows.map(({ t }, n) => `${lead(t, n)}${t.count > 0 ? t.name : '???'}`);
         const counts = rows.map(({ t }) => (t.count > 0 ? `**×${t.count}**` : '—'));
         const firsts = rows.map(({ t }) => (t.count > 0 && t.firstUserId && t.firstAt ? (personal ? when(t) : `<@${t.firstUserId}> ${when(t)}`) : '—'));
         embed.addFields(
@@ -182,20 +211,20 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     const toggle = personal
         ? new ButtonBuilder()
               .setCustomId(`${SPECIALS_SET_PREFIX}${set.id}`)
-              .setLabel(`${set.name}: ${locked ? 'Locked' : off ? 'Off' : 'On'}`)
-              .setStyle(!locked && !off ? ButtonStyle.Success : ButtonStyle.Secondary)
+              .setLabel(`${set.name}: ${locked ? 'Locked' : off ? 'Off' : resting ? 'Resting' : 'On'}`)
+              .setStyle(!locked && !off && !resting ? ButtonStyle.Success : ButtonStyle.Secondary)
               .setDisabled(locked)
         : undefined;
     const nav = navRow(mode, pg, toggle);
     const components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = [nav];
     // Reading in full is for a trainer's own finds, a set's worth at a time.
     const options = personal
-        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, n }) => ({ label: `${num(t, n)} ${t.name}`.slice(0, 100), value: t.id }))
+        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, n }) => ({ label: `${extrasPage ? '' : `${num(t, n)} `}${t.name}`.slice(0, 100), value: t.id }))
         : [];
     if (options.length > 0) {
         components.push(
             new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                new StringSelectMenuBuilder().setCustomId(READ_MENU_ID).setPlaceholder(`Read a special from ${set.name}`).addOptions(options),
+                new StringSelectMenuBuilder().setCustomId(READ_MENU_ID).setPlaceholder(`Read a special from ${page_.kind === 'extras' ? `${set.name} Extras` : set.name}`).addOptions(options),
             ),
         );
     }
@@ -210,13 +239,14 @@ export async function mySpecialsView(guildId: string, discordUserId: string, pag
         activeBoosts(guildId, discordUserId),
         getUserSettings(guildId, discordUserId),
     ]);
-    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, boosts, boostsOn: settings.boosts });
+    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts });
 }
 
 /** The page of `setId` in the Specials list (Set 1 is page 1), or the first page. */
 export function pageOfSet(setId: string): number {
     const i = SPECIAL_SETS.findIndex((s) => s.id === setId);
-    return i === -1 ? SPECIALS_FIRST_PAGE : i + 1;
+    const page = PAGES.findIndex((p) => p.kind === 'set' && p.set === i);
+    return page === -1 ? SPECIALS_FIRST_PAGE : page;
 }
 
 /**
@@ -278,6 +308,8 @@ export async function closedSpecialsFor(guildId: string, discordUserId: string):
 export async function trainerPool(guildId: string, discordUserId: string, pool: readonly string[]): Promise<string[]> {
     const found = await foundSpecialIds(guildId, discordUserId);
     const state = await outcomeState(guildId, discordUserId);
+    const autoOffSets = (await getUserSettings(guildId, discordUserId)).autoOffSets ?? [];
+    const resting = new Set(SPECIAL_SETS.flatMap((s) => restingLines(s.id, found, autoOffSets)));
     // The special owed: scheduled or guaranteed, or mid losing streak (a streak belongs to the special with a forced success).
     const streakOn = RARE_OPENERS.find((o) => o.forcedSuccess)?.id ?? null;
     const owed = state.guaranteedSpecialId ?? (state.losingStreak.length > 0 ? streakOn : null);
@@ -285,7 +317,74 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
         const holder = RARE_OPENERS.find((o) => o.text === t)?.heldUntilPassed;
         return holder !== undefined && holder === owed;
     };
-    return pool.map((t) => redirectOpener(t, found)).filter((t) => !held(t));
+    return pool.map((t) => redirectOpener(t, found)).filter((t) => !held(t) && !resting.has(t));
+}
+
+/** True when a set is resting for a trainer: auto-off with extras left, not turned back on. */
+export function isResting(setId: string, autoOffSets: readonly string[]): boolean {
+    return autoOffSets.includes(setId) && !autoOffSets.includes(`${setId}:all`) && !autoOffSets.includes(`${setId}:kept`);
+}
+
+/**
+ * The texts of a resting set's lines that stay out of a trainer's pools
+ * (owner, 2026-11-15): every found line of the set, except those an extra
+ * not yet found still needs (its `after`, e.g. Ramonu for the Rehearsal,
+ * the photo for the guests). Empty when the set is not resting.
+ */
+export function restingLines(setId: string, found: ReadonlySet<string>, autoOffSets: readonly string[]): string[] {
+    if (!isResting(setId, autoOffSets)) return [];
+    const inSet = RARE_OPENERS.filter((o) => o.set === setId);
+    const needed = new Set(inSet.filter((o) => o.extra && !found.has(o.id)).flatMap((o) => o.after ?? []));
+    return inSet.filter((o) => !o.extra && found.has(o.id) && !needed.has(o.id)).map((o) => o.text);
+}
+
+/**
+ * What finding `opener` completes for a trainer, if anything new (owner,
+ * 2026-11-15): every line of its set (its found lines rest, except what its
+ * extras still need), or every line and extra (the set turns off). Returns
+ * the ping's line and `record`, to call once the find is saved; null when
+ * nothing new is completed or the set was handled before.
+ */
+export async function completionNotice(guildId: string, discordUserId: string, opener: string): Promise<{ line: string; record: () => Promise<void> } | null> {
+    const special = specialByText(opener);
+    if (!special) return null;
+    const set = SPECIAL_SETS.find((s) => s.id === special.set);
+    if (!set) return null;
+    const found = await foundSpecialIds(guildId, discordUserId);
+    found.add(special.id);
+    const inSet = RARE_OPENERS.filter((o) => o.set === set.id);
+    const mainDone = inSet.filter((o) => !o.extra).every((o) => found.has(o.id));
+    const allDone = mainDone && inSet.every((o) => found.has(o.id));
+    const settings = await getUserSettings(guildId, discordUserId);
+    const handled = settings.autoOffSets ?? [];
+    if (handled.includes(`${set.id}:kept`)) return null;
+    const save = (autoOffSets: string[], disabledSets: string[]) =>
+        prisma.timerUserSettings.upsert({
+            where: { guildId_discordUserId: { guildId, discordUserId } },
+            create: { guildId, discordUserId, autoOffSets, disabledSets },
+            update: { autoOffSets, disabledSets },
+        });
+    if (allDone && !handled.includes(`${set.id}:all`)) {
+        return {
+            line: `**Complete!** ${set.name}: every line found, so it's off for you now and others come up more. Turn it back on in Specials anytime.`,
+            record: async () => {
+                const now = await getUserSettings(guildId, discordUserId);
+                const auto = [...new Set([...(now.autoOffSets ?? []), set.id, `${set.id}:all`])];
+                const disabled = now.disabledSets.includes(set.id) ? now.disabledSets : [...now.disabledSets, set.id];
+                await save(auto, disabled);
+            },
+        };
+    }
+    if (mainDone && !allDone && !handled.includes(set.id)) {
+        return {
+            line: `**Complete!** ${set.name}: every line found! Your lines rest now, all but what its extras still need, so others come up more. Wake them in Specials anytime.`,
+            record: async () => {
+                const now = await getUserSettings(guildId, discordUserId);
+                await save([...new Set([...(now.autoOffSets ?? []), set.id])], now.disabledSets);
+            },
+        };
+    }
+    return null;
 }
 
 /**
@@ -402,10 +501,25 @@ export async function applyOutcome(
         guaranteedSpecialId = specialId;
         guaranteedInRuns = 1;
     }
-    // A schedule never stacks: not while one is pending or a losing streak runs.
-    if (rolled?.schedule && !guaranteedSpecialId && losingStreak.length === 0) {
+    // A schedule never stacks (not while that special is owed: scheduled,
+    // guaranteed, or a losing streak runs), but it overrides any other
+    // pending guarantee: Ramonu's lesson always wins (owner, 2026-11-15).
+    if (rolled?.schedule && guaranteedSpecialId !== rolled.schedule.special && losingStreak.length === 0) {
         guaranteedSpecialId = rolled.schedule.special;
         guaranteedInRuns = 1 + Math.min(rolled.schedule.within - 1, Math.floor(random() * rolled.schedule.within));
+    }
+    // Helios's introductions: the next run is a guest not yet met (any guest
+    // once all are met), never the one that rolled it; only if nothing else
+    // is pending.
+    if (rolled?.guaranteeGuest && !guaranteedSpecialId && losingStreak.length === 0) {
+        const found = await foundSpecialIds(guildId, discordUserId);
+        const guests = RARE_OPENERS.filter((o) => o.guest && o.id !== specialId);
+        const unmet = guests.filter((o) => !found.has(o.id));
+        const from = unmet.length > 0 ? unmet : guests;
+        if (from.length > 0) {
+            guaranteedSpecialId = from[Math.min(from.length - 1, Math.floor(random() * from.length))]!.id;
+            guaranteedInRuns = 1;
+        }
     }
     const sameRuns = (guaranteedInRuns ?? 1) === state.guaranteedInRuns;
     if (guaranteedSpecialId === state.guaranteedSpecialId && sameRuns && JSON.stringify(losingStreak) === JSON.stringify(state.losingStreak)) return;

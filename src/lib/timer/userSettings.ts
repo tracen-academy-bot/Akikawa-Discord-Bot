@@ -32,12 +32,14 @@ export interface UserSettings {
     earlyRiser: boolean;
     boosts: boolean;
     disabledSets: string[];
+    /** Sets whose completion was handled (`TimerUserSettings.autoOffSets`). */
+    autoOffSets?: string[];
 }
 
 /** The settings of a trainer; the defaults when they never changed any. */
 export async function getUserSettings(guildId: string, discordUserId: string): Promise<UserSettings> {
     const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } } });
-    return { dmPing: row?.dmPing ?? false, earlyRiser: row?.earlyRiser ?? false, boosts: row?.boosts ?? true, disabledSets: row?.disabledSets ?? [] };
+    return { dmPing: row?.dmPing ?? false, earlyRiser: row?.earlyRiser ?? false, boosts: row?.boosts ?? true, disabledSets: row?.disabledSets ?? [], autoOffSets: row?.autoOffSets ?? [] };
 }
 
 /** Run length for a trainer, in minutes. */
@@ -63,7 +65,16 @@ export async function toggleSetting(guildId: string, discordUserId: string, key:
     else if (key.startsWith('set:')) {
         const id = key.slice(4);
         if (SPECIAL_SETS.some((s) => s.id === id)) {
-            next.disabledSets = current.disabledSets.includes(id) ? current.disabledSets.filter((s) => s !== id) : [...current.disabledSets, id];
+            const auto = current.autoOffSets ?? [];
+            const handled = auto.includes(id) || auto.includes(`${id}:all`);
+            const kept = auto.includes(`${id}:kept`);
+            if (handled && !kept && !current.disabledSets.includes(id)) {
+                // Resting (auto-off with extras left): the press wakes its lines, without turning the set off.
+            } else {
+                next.disabledSets = current.disabledSets.includes(id) ? current.disabledSets.filter((s) => s !== id) : [...current.disabledSets, id];
+            }
+            // Once the trainer has a say, auto-off leaves the set alone.
+            if (handled && !kept) next.autoOffSets = [...auto, `${id}:kept`];
         }
     }
     await prisma.timerUserSettings.upsert({

@@ -96,7 +96,10 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
 9. The Family Photograph
 
    ```text
-   Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, it looks lovely, stop tugging the hem. Dober, the camera, not the floor; nobody else is looking. Palmer, wake Bright. Ardan, beside your sister. Ramonu... yes, we know, you are radiant. And {user}, here, with the family. ...There. One for the album.
+   Everyone, gather round. No, {user}, I shall take this one myself. I have taken plenty of these with them, after all.
+   Ramonu, in the centre; yes, just like that. You look radiant, dear. McQueen, the cake can wait. ...Hoho, am I wrong? Ryan, it looks lovely, stop tugging the hem. Dober, eyes up; nobody is looking at anyone but you, and that is the point. Palmer, wake Bright. Brighttt, eyes here... yes, good. Ardan, beside your sister, please.
+   Very well... there. One for the album. Now then, {user}: how does it feel, knowing that every road these girls ever ran somehow led them to you?
+   They are all smiling at you, you know. I would say that settles it. Welcome to the Mejiro Family, {user}.
    ```
 
    Hook: Opens after all eight. Each member in one shot.
@@ -171,9 +174,10 @@ Weeei, Tore-pi! Surprise~! ...What do you mean you didn't expect me?! #DJHelios 
 ### `guest.satono`: Satono Diamond & Kitasan Black
 
 ```text
-Diamond: "Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu."
-Kitasan: "Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!"
-Diamond: "Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?"
+Diamond: "Good evening, {user}-san. McQueen-san invited the Satono house to dinner, along with some... discussions. Ah, you have informed McQueen-san... how thoughtful of you. Speaking of which, I may have brought a plus-one... fufu."
+Kitasan: "Wasshoi, Trainer-san! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? ドドン!"
+Diamond: "Kita-chan, it's a dinner party. ...ふむふむ. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you mind letting McQueen-san know of our little plan?~"
+McQueen: "Ah, right on time! Welcome to the Mejiro Estate. A festival? ...We shall see, desu wa. Thank you for greeting them for me, Trainer-san. Please, come in!"
 ```
 
 ### `guest.goldship`: Gold Ship
@@ -188,12 +192,16 @@ Now listen up: I may have failed this time, but next time, I'll come in through 
 
 ```text
 Rudolf: "Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
-Sirius: "...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm, so that will be all."
-Ramonu: "*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had better not have enjoyed that."
+Sirius: "...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~"
+Ramonu: "*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that."
 ```
 
 ### `guest.teio`: Tokai Teio
 
 ```text
-Hey hey, {user}! Kaichou brought me along as her plus-one, so Teio-sama is officially Symboli-house company tonight. I promised to behave! ...Mostly. Did you see McQueen's face when I walked in? Priceless. Muteki! ...Wait. Is this floor good for a Teio Step?
+Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~
+Well yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~
+...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~
+Now come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!
+-# To make matters worse, Teio did the #HalloweenStupid pose, and McQueen, shockingly, recognized it immediately. Well, at least neither of them broke their legs. What a chaotic kid. Still, it's nice to see McQueen... happy? I guess?
 ```

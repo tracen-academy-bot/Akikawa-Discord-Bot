@@ -151,8 +151,12 @@ async function main() {
     const set0 = json(rares.specialsView(tally, 0));
     check('set 0: the reminders, in full, Back off', [set0.embeds[0]!.title, PING_OPENERS.every((o) => set0.embeds[0]!.description?.includes(o.replaceAll('{user}', '@trainer'))), set0.components[0]!.components[0]!.disabled, set0.components.length], ['Set 0: Reminders', true, true, 1]);
     check('set 0: the same for a trainer, no toggle', json(rares.specialsView(tally, 0, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).components[0]!.components.map((b) => b.label), ['Back', 'Next']);
-    const last = json(rares.specialsView(tally, SETS.length));
-    check('pages: the last page, numbered within its set, Next off', [last.embeds[0]!.description?.startsWith(`**Set ${SETS.length}: ${SETS.at(-1)!.name}**`), last.embeds[0]!.fields?.[0]?.value.split('\n')[0], last.components[0]!.components.at(-1)?.disabled, last.embeds[0]!.footer?.text.endsWith(`Page ${SETS.length + 1} of ${SETS.length + 1}`)], [true, '**1.** ???', true, true]);
+    // Pages: Set 0, each set, and a "Set <n>.5" extras page right after a set with extras (owner, 2026-11-15).
+    const extrasPages = SETS.filter((x) => RARE_OPENERS.some((o) => o.set === x.id && o.extra)).length;
+    const lastPage = SETS.length + extrasPages;
+    const last = json(rares.specialsView(tally, lastPage));
+    check('pages: the last page is the last set\'s extras, numbered on its own, Next off', [last.embeds[0]!.description?.startsWith(`**Set ${SETS.length}.5: ${SETS.at(-1)!.name} Extras**`), last.embeds[0]!.fields?.[0]?.value.split('\n')[0], last.components[0]!.components.at(-1)?.disabled, last.embeds[0]!.footer?.text.endsWith(`Page ${lastPage + 1} of ${lastPage + 1}`)], [true, '???', true, true]);
+    check('pages: a set\'s page lists only its lines', json(rares.specialsView(tally, rares.pageOfSet('mejiro-estate'))).embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 0 of 9 found'), true);
     check('pages: a page out of range is clamped', [json(rares.specialsView(tally, 99)).embeds[0]!.description, json(rares.specialsView(tally, -5)).embeds[0]!.title], [last.embeds[0]!.description, 'Set 0: Reminders']);
     const { buildPanel, BUTTON_SPECIALS } = await import('../src/lib/timer/panel');
     const panelJson = JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never));
@@ -338,7 +342,32 @@ async function main() {
     // Seasonal buffs: a flat slice on one special, for a time window. None run now;
     // a sample one checks the mechanism.
     const week = openers.SEASONAL_BUFFS[0]!;
-    check('season: Curren Chan week, +1% Curren Chan for 7 days', [week.specialId, week.chance, (week.until.getTime() - week.from.getTime()) / 86_400_000, week.label], ['set1.curren', 0.01, 7, 'Curren Chan: meet her in the lobby!']);
+    check('season: Curren Chan week, +1% Curren Chan, extended to the reset of Nov 22 (owner)', [week.specialId, week.chance, week.until.toISOString(), week.label], ['set1.curren', 0.01, '2026-11-22T15:00:00.000Z', 'Curren Chan: meet her in the lobby!']);
+    // No bonus is permanent (owner, 2026-11-15): the #OnlineSensations unlock bonus ends at the reset of Nov 22.
+    const osBefore = await extraChances(XG, 'os-end', { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] }, [], false, fullPool, new Date('2026-11-20T00:00:00Z'));
+    const osAfter = await extraChances(XG, 'os-end', { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] }, [], false, fullPool, new Date('2026-11-22T15:00:00Z'));
+    const osLabel = (xs: { label?: string }[]) => xs.find((e) => e.label?.startsWith('#OnlineSensations: Curren'))?.label;
+    check('unlock bonus: +1% #OnlineSensations until the reset of Nov 22, then gone', [osLabel(osBefore)?.endsWith(`Ends <t:${Date.UTC(2026, 10, 22, 15) / 1000}:R>.`), osLabel(osAfter)], [true, undefined]);
+    // Mejiro week (owner, 2026-11-15): reset to reset; +2% the invitation until the Estate opens, then +2% its lines.
+    const [, invite, estateWeek] = openers.SEASONAL_BUFFS;
+    check('season: Mejiro week, reset to reset, +2% each', [invite?.specialId, estateWeek?.setId, invite?.chance, estateWeek?.chance, invite?.from.toISOString(), estateWeek?.until.toISOString()], ['set1.mejiro', 'mejiro-estate', 0.02, 0.02, '2026-11-15T15:00:00.000Z', '2026-11-22T15:00:00.000Z']);
+    const MW = new Date('2026-11-17T00:00:00Z');
+    const mwBase = { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] as string[] };
+    const mwLocked = await extraChances(XG, 'mw-new', mwBase, ['online-sensations', 'mejiro-estate'], false, fullPool, MW);
+    const mwOpen = await extraChances(XG, 'mw-open', mwBase, ['online-sensations'], false, fullPool, MW);
+    check('season: before the Estate opens, +2% on the invitation; after, +2% on its 9 lines', [mwLocked.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length]), mwOpen.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length])], [[[0.02, 1]], [[0.02, 9]]]);
+    check('season: Mejiro week also gives Ramonu her own +2% once the Estate is open', [mwLocked.some((e) => e.label?.startsWith('Mejiro Ramonu')), mwOpen.filter((e) => e.label?.startsWith('Mejiro Ramonu: You stayed when it mattered')).map((e) => [e.chance, e.pool.length, e.pool[0] === openers.specialById('mejiro.ramonu')!.text])], [false, [[0.02, 1, true]]]);
+    check('season: the Estate label', openers.SEASONAL_BUFFS[2]?.label, 'Mejiro week: Come meet the Mejiros at the Estate!');
+    // Ramonu's +2% runs until the server's first Ramonu's Second Love, its end never shown (owner, 2026-11-15).
+    const ramonuBuff = mwOpen.find((e) => e.label?.startsWith('Mejiro Ramonu'));
+    check('season: Ramonu\'s buff shows no end', ramonuBuff?.label?.includes('Ends'), false);
+    const rewardsSL = await import('../src/lib/timer/rewards');
+    await rewardsSL.grantSecondLove(null, XG, 'first-lover');
+    const mwAfterLove = await extraChances(XG, 'mw-open', mwBase, ['online-sensations'], false, fullPool, MW);
+    check('season: the server\'s first Second Love ends Ramonu\'s buff; Mejiro week goes on', [mwAfterLove.some((e) => e.label?.startsWith('Mejiro Ramonu')), mwAfterLove.some((e) => e.label?.startsWith('Mejiro week: Come meet'))], [false, true]);
+    check('season: the first is recorded once', (await prisma.timerSecondLove.findUnique({ where: { guildId: XG } }))?.firstUserId, 'first-lover');
+    await rewardsSL.grantSecondLove(null, XG, 'second-lover');
+    check('season: later winners do not replace the first', (await prisma.timerSecondLove.findUnique({ where: { guildId: XG } }))?.firstUserId, 'first-lover');
     const buff = { label: 'Sample week', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-12-01T00:00:00Z'), until: new Date('2026-12-08T00:00:00Z') };
     const inSeason = new Date(buff.from.getTime() + 60_000);
     const currenText = RARE_OPENERS.find((o) => o.id === buff.specialId)!.text;
@@ -348,7 +377,8 @@ async function main() {
     const seasonal = await extraChances(SN, 's1', plain, LOCKED, false, openers.rarePoolFor([]), inSeason, [buff]);
     check('season: in its window, an extra slice that only draws its special', seasonal.map((e) => [e.chance, e.pool]), [[0.01, [currenText]]]);
     check('season: not before or after the window', [(await extraChances(SN, 's1', plain, LOCKED, false, [], new Date(buff.from.getTime() - 1), [buff])).length, (await extraChances(SN, 's1', plain, LOCKED, false, [], buff.until, [buff])).length], [0, 0]);
-    check('season: a prerequisite buff stops once its set is unlocked; the unlock bonus takes over', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), [[0.01, openers.SPECIAL_SETS[1]!.openers.length]]);
+    // (This sample week is in December, after the #OnlineSensations unlock bonus ended on Nov 22.)
+    check('season: a prerequisite buff stops once its set is unlocked (and by December the unlock bonus is over)', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), []);
     check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
 
     // The Boosts view: base, each boost, and the next ping's total.
@@ -356,7 +386,7 @@ async function main() {
     await rares.grantBoost(SN, 's1', loves.text);
     await rares.recordRareOpener(SN, 's1', curren.text);
     const bv = (await boostsView(SN, 's1', inSeason)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: base, Loves, the unlock bonus, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left.'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, false, true]);
+    check('boosts view: base and Loves; the unlock bonus is over by December, total 10%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left.'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 10% chance of a special.**')], [true, true, false, false, true]);
     await us0.toggleSetting(SN, 's1', 'boosts');
     const off = await boostsView(SN, 's1', inSeason);
     const offText = off.embeds[0]!.toJSON().description ?? '';
@@ -429,7 +459,9 @@ async function main() {
     const seven = mejiro.openers.filter((o) => !o.extra && o.after?.length === 1).map((o) => o.id);
     const photo = mejiro.openers.find((o) => o.id === 'mejiro.photo')!;
     check('mejiro: 9 lines and 1 extra, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.filter((o) => !o.extra).length, mejiro.openers.filter((o) => o.extra && !o.guest).map((o) => o.id), mejiro.requires, seven.length, photo.after?.length], [9, ['mejiro.rehearsal'], 'set1.mejiro', 7, 8]);
-    check('mejiro: one {user} each, guests included', mejiro.openers.every((o) => o.text.split('{user}').length === 2), true);
+    // The Family Photograph names the trainer three times, by the owner's design (the finale); every other line once.
+    check('mejiro: one {user} each, guests included; the photograph three', [mejiro.openers.filter((o) => o.id !== 'mejiro.photo').every((o) => o.text.split('{user}').length === 2), photo.text.split('{user}').length - 1], [true, 3]);
+    check('photo: the art, credited, under the finale', [photo.media, photo.credit, openers.specialMediaPath(photo.text) ? (await import('fs')).existsSync(openers.specialMediaPath(photo.text)!) : false, photo.text.endsWith('Welcome to the Mejiro Family, {user}.')], ['mejiro-family-photograph.jpg', 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>', true, true]);
     // No hashtags, except Palmer's one: #SweetieSecrecies is Palmer imitating Helios, on purpose.
     check('mejiro: no hashtags, but Palmer\'s one Helios imitation', [mejiro.openers.filter((o) => o.id !== 'mejiro.palmer' && !o.guest).every((o) => !/#\w/.test(o.text)), mejiro.openers.find((o) => o.id === 'mejiro.palmer')!.text.match(/#\w+/g)], [true, ['#SweetieSecrecies']]);
     const sevenTexts = seven.map((id) => openers.specialById(id)!.text);
@@ -587,10 +619,11 @@ async function main() {
     check('completion: the 9 lines complete the set; the Rehearsal does not stand in for one, but scores 15', cb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['c-nine', 1, 9, 9 * 15 + 100], ['c-eight', 0, 8, 9 * 15]]);
     const mejiroPage = json(rares.specialsView(await rares.rareTally(CB, 'c-eight'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
     const mNames = mejiroPage.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
-    check('page: the Rehearsal after the 9, not in the set\'s count', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mNames[9]], [true, 15, "**Extra.** Ramonu's Remedial Rehearsal"]);
-    check('page: ??? until found', json(rares.specialsView(await rares.rareTally(CB, 'c-nine'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).embeds[0]!.fields?.[0]?.value.split('\n')[9], '**Extra.** ???');
-    const readOpts = mejiroPage.components[1]?.components[0]?.options?.map((o) => o.label) ?? [];
-    check('read menu: the Rehearsal can be read once found', readOpts.at(-1), "Extra. Ramonu's Remedial Rehearsal");
+    const mejiroExtras = json(rares.specialsView(await rares.rareTally(CB, 'c-eight'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    check('page: the Mejiro page has just its 9; the Rehearsal is on Set 3.5, counted there only', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mejiroExtras.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 1 of 6 found'), mejiroExtras.embeds[0]!.fields?.[0]?.value.split('\n')[0]], [true, 9, true, "Ramonu's Remedial Rehearsal"]);
+    check('page: ??? until found', json(rares.specialsView(await rares.rareTally(CB, 'c-nine'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).embeds[0]!.fields?.[0]?.value.split('\n')[0], '???');
+    const readOpts = mejiroExtras.components[1]?.components[0]?.options?.map((o) => o.label) ?? [];
+    check('read menu: the Rehearsal can be read once found, from Set 3.5', readOpts, ["Ramonu's Remedial Rehearsal"]);
     const readRamonu = await rares.readSpecial(OG, T, 'mejiro.ramonu');
     check('read: Ramonu in full, without any outcome footer', [readRamonu?.text, readRamonu?.text.includes('-#')], [openers.fillOpener(ramonu.text, T), false]);
     check('read: the Rehearsal without footers', (await rares.readSpecial(OG, T, 'mejiro.rehearsal'))?.text, openers.fillOpener(rehearsal.text, T));
@@ -603,7 +636,7 @@ async function main() {
         true,
     ]);
     check('guests: exactly one {user} each', guests.map((g) => g.text.split('{user}').length - 1), [1, 1, 1, 1, 1]);
-    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#DJHelios', '#MejiroAfterParty', '#ZuttomoDJ'], true, ['Diamond', 'Kitasan', 'Diamond'], ['Rudolf', 'Sirius', 'Ramonu']]);
+    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#DJHelios', '#MusicalEternity', '#MejiroAfterParty', '#ZuttomoDJ', '#BakunigeBPM'], true, ['Diamond', 'Kitasan', 'Diamond', 'McQueen'], ['Rudolf', 'Sirius', 'Ramonu']]);
     const guestTexts = guests.map((g) => g.text);
     const hasGuest = (pool: readonly string[]) => pool.some((t) => guestTexts.includes(t));
     const mejiroLinesLive = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
@@ -639,6 +672,77 @@ async function main() {
         await rares.recordRareOpener(GG, GT, openers.specialById('guest.satono')!.text);
         check('guest slice: shrinks as guests are found (3.2% after one)', (await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).map((e) => near(e.chance, 0.032)), [true]);
     }
+    // Helios's introductions (owner, 2026-11-15): the next run is a guest not yet met; never while a Rehearsal is owed.
+    const helios = openers.specialById('guest.helios')!;
+    const intro = openers.rollOutcome(helios, 0.5)!;
+    check('helios: every time, introductions: a guaranteed guest, with the footer', [intro.outcome, intro.guaranteeGuest, intro.footer.startsWith('-# Despite being initially confused by both Helios'), intro.footer.endsWith('introduce you to the other guests in the house!'), helios.heldUntilPassed], ['introductions', true, true, true, 'mejiro.rehearsal']);
+    const HG = `test-helios-${Date.now()}`;
+    for (const id of ['set1.mejiro', grandma.id, ...seven, photo.id, 'guest.helios']) await rares.recordRareOpener(HG, 'h1', openers.specialById(id)!.text);
+    await rares.applyOutcome(HG, 'h1', helios.text, intro, () => 0);
+    const unmetFirst = guestIds.filter((id) => id !== 'guest.helios')[0];
+    check('helios: the next run is a guest not yet met (never Helios)', await rares.outcomeState(HG, 'h1'), { guaranteedSpecialId: unmetFirst, guaranteedInRuns: 1, losingStreak: [] });
+    await rares.applyOutcome(HG, 'h1', openers.specialById(unmetFirst!)!.text, null);
+    for (const id of guestIds) await rares.recordRareOpener(HG, 'h1', openers.specialById(id)!.text);
+    await rares.applyOutcome(HG, 'h1', helios.text, intro, () => 0.999);
+    const allMet = (await rares.outcomeState(HG, 'h1')).guaranteedSpecialId;
+    check('helios: once every guest is met, any guest but Helios', [guestIds.includes(allMet!), allMet === 'guest.helios'], [true, false]);
+    // Ramonu's lesson overrides a pending guest guarantee.
+    await rares.applyOutcome(HG, 'h1', ramonu.text, openers.rollOutcome(ramonu, 0.1), () => 0);
+    check('helios: Ramonu\'s lesson overrides a pending guest guarantee', await rares.outcomeState(HG, 'h1'), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: [] });
+    check('helios: no Helios while a Rehearsal is owed', (await rares.trainerPool(HG, 'h1', guestTexts)).includes(helios.text), false);
+    await rares.applyOutcome(HG, 'h1', helios.text, intro, () => 0);
+    check('helios: introductions do nothing while a Rehearsal is owed', (await rares.outcomeState(HG, 'h1')).guaranteedSpecialId, 'mejiro.rehearsal');
+
+    const symboliRoll = openers.rollOutcome(openers.specialById('guest.symboli')!, 0.5)!;
+    check('symboli: the daggers footer, and no effect', [symboliRoll.footer.startsWith('-# Ramonu kept staring daggers at you'), symboliRoll.boost, symboliRoll.schedule, symboliRoll.guaranteeGuest], [true, undefined, undefined, undefined]);
+
+    // Auto-off (owner, 2026-11-15): a finished set rests (all but what its extras need), then turns off once its extras are found too.
+    const usA = await import('../src/lib/timer/userSettings');
+    const AG = `test-autooff-${Date.now()}`;
+    const AU = 'a1';
+    const mejiroMain = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra);
+    await rares.recordRareOpener(AG, AU, openers.specialById('set1.mejiro')!.text);
+    for (const o of mejiroMain.slice(0, 8)) await rares.recordRareOpener(AG, AU, o.text);
+    const lastMain = mejiroMain[8]!;
+    const done1 = await rares.completionNotice(AG, AU, lastMain.text);
+    check('auto-off: the 9th line completes the set: the ping says it rests', done1?.line.startsWith('**Complete!** The Mejiro Estate: every line found! Your lines rest now'), true);
+    await rares.recordRareOpener(AG, AU, lastMain.text);
+    await done1!.record();
+    const restingNow = rares.restingLines('mejiro-estate', await rares.foundSpecialIds(AG, AU), (await usA.getUserSettings(AG, AU)).autoOffSets ?? []);
+    check('auto-off: found lines rest, but Ramonu (the Rehearsal needs her) and the photo (the guests) stay', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(photo.text)], [7, false, false]);
+    const mejiroAll = mejiroMain.map((o) => o.text);
+    check('auto-off: the pool leaves resting lines out', (await rares.trainerPool(AG, AU, mejiroAll)).sort(), [ramonu.text, photo.text].sort());
+    check('auto-off: a repeat find says nothing more', await rares.completionNotice(AG, AU, lastMain.text), null);
+    const restPage = json(await rares.mySpecialsView(AG, AU, rares.pageOfSet('mejiro-estate')));
+    check('auto-off: the page says Resting, and so does its button', [restPage.embeds[0]!.description?.includes('Resting: every line found'), restPage.components[0]!.components[1]?.label], [true, 'The Mejiro Estate: Resting']);
+    // Every extra found too: the set turns off.
+    const extrasList = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && o.extra);
+    for (const o of extrasList.slice(0, -1)) await rares.recordRareOpener(AG, AU, o.text);
+    const done2 = await rares.completionNotice(AG, AU, extrasList.at(-1)!.text);
+    check('auto-off: the last extra completes everything: the ping says it is off', done2?.line.startsWith("**Complete!** The Mejiro Estate: every line found, so it's off for you now"), true);
+    await rares.recordRareOpener(AG, AU, extrasList.at(-1)!.text);
+    await done2!.record();
+    check('auto-off: the set is off for them', (await usA.getUserSettings(AG, AU)).disabledSets, ['mejiro-estate']);
+    await usA.toggleSetting(AG, AU, 'set:mejiro-estate');
+    const after = await usA.getUserSettings(AG, AU);
+    check('auto-off: they can turn it back on, and it stays on (kept)', [after.disabledSets, after.autoOffSets?.includes('mejiro-estate:kept'), await rares.completionNotice(AG, AU, lastMain.text)], [[], true, null]);
+    check('auto-off: once kept, nothing rests', rares.restingLines('mejiro-estate', await rares.foundSpecialIds(AG, AU), after.autoOffSets ?? []), []);
+    // Resting, then woken by the button without turning the set off.
+    const WG = `${AG}-wake`;
+    for (const o of mejiroMain) await rares.recordRareOpener(WG, AU, o.text);
+    await (await rares.completionNotice(WG, AU, lastMain.text))!.record();
+    await usA.toggleSetting(WG, AU, 'set:mejiro-estate');
+    const woke = await usA.getUserSettings(WG, AU);
+    check('auto-off: pressing Resting wakes the lines and leaves the set on', [woke.disabledSets, rares.isResting('mejiro-estate', woke.autoOffSets ?? [])], [[], false]);
+    // A set without extras turns off at once.
+    const OGx = `${AG}-set1`;
+    const set1Lines = RARE_OPENERS.filter((o) => o.set === 'set1');
+    for (const o of set1Lines.slice(0, -1)) await rares.recordRareOpener(OGx, AU, o.text);
+    const set1Done = await rares.completionNotice(OGx, AU, set1Lines.at(-1)!.text);
+    await rares.recordRareOpener(OGx, AU, set1Lines.at(-1)!.text);
+    await set1Done!.record();
+    check('auto-off: a set without extras turns off when complete', [set1Done?.line.includes("Lobby Loungers: every line found, so it's off"), (await usA.getUserSettings(OGx, AU)).disabledSets], [true, ['set1']]);
+
     // Counts and completion: guests never count, but score.
     const GB = `${GG}-board`;
     for (const t of nine) await rares.recordRareOpener(GB, 'g-all', t);
@@ -647,17 +751,17 @@ async function main() {
     const gb = await rares.specialsBoard(GB);
     check('guests: not in the set\'s completion or found count, but 15 new and 3 repeat', gb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['g-all', 1, 9, 14 * 15 + 3 + 100], ['g-eight', 0, 8, 13 * 15]]);
     check('guests: not in the board\'s special count', gb.specialCount, RARE_OPENERS.filter((o) => !o.extra && !o.guest).length);
-    const gEight = json(rares.specialsView(await rares.rareTally(GB, 'g-eight'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    const gEight = json(rares.specialsView(await rares.rareTally(GB, 'g-eight'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
     const gNames = gEight.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
-    check('page: guests after the 9 and the Rehearsal, not in either count', [gEight.embeds[0]!.title, gEight.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), gNames.slice(9)], [
+    check('page: Set 3.5 lists the Rehearsal then the guests, counted on their own, never in the overall total', [gEight.embeds[0]!.title, gEight.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 5 of 6 found'), gNames], [
         `Your specials: 8 of ${RARE_OPENERS.filter((o) => !o.extra).length}`,
         true,
-        ['**Extra.** ???', ...guests.map((g) => `**Guest.** ${g.name}`)],
+        ['???', ...guests.map((g) => g.name)],
     ]);
-    const gNone = json(rares.specialsView(await rares.rareTally(GB, 'nobody'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
-    check('page: "**Guest.** ???" until found', (gNone.embeds[0]!.fields?.[0]?.value.split('\n') ?? []).slice(10), ['**Guest.** ???', '**Guest.** ???', '**Guest.** ???', '**Guest.** ???', '**Guest.** ???']);
+    const gNone = json(rares.specialsView(await rares.rareTally(GB, 'nobody'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    check('page: ??? until found, on Set 3.5', gNone.embeds[0]!.fields?.[0]?.value.split('\n') ?? [], ['???', '???', '???', '???', '???', '???']);
     const gOpts = gEight.components[1]?.components[0]?.options?.map((o) => [o.label, o.value]) ?? [];
-    check('read menu: found guests can be read', [gOpts.slice(-5), (await rares.readSpecial(GB, 'g-eight', 'guest.teio'))?.text, await rares.readSpecial(GB, 'nobody', 'guest.teio')], [guests.map((g) => [`Guest. ${g.name}`, g.id]), openers.fillOpener(openers.specialById('guest.teio')!.text, 'g-eight'), null]);
+    check('read menu: found guests can be read, from Set 3.5', [gOpts, (await rares.readSpecial(GB, 'g-eight', 'guest.teio'))?.text, await rares.readSpecial(GB, 'nobody', 'guest.teio')], [guests.map((g) => [g.name, g.id]), openers.fillOpener(openers.specialById('guest.teio')!.text, 'g-eight'), null]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [GG, GB] } } });
     await prisma.timerUserSettings.deleteMany({ where: { guildId: GG } });
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [OG, CB] } } });
@@ -684,7 +788,9 @@ async function main() {
     const chuMedia = openers.specialMediaPath(chu.text);
     check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
-    check('credit: only #ChuChuChallenge credits the video, as its own field', [RARE_OPENERS.filter((o) => o.credit).map((o) => [o.id, o.credit]), RARE_OPENERS.some((o) => o.text.includes('youtu.be'))], [[['os.chu', 'Video: <https://youtu.be/hJ78i-6uwGM>']], false]);
+    check('credit: each video or picture is credited in its own field (#ChuChuChallenge, the photograph, Teio\'s pose), never in the text', [RARE_OPENERS.filter((o) => o.credit).map((o) => [o.id, o.credit]), RARE_OPENERS.some((o) => /youtu\.?be/.test(o.text))], [[['os.chu', 'Video: <https://youtu.be/hJ78i-6uwGM>'], ['mejiro.photo', 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>'], ['guest.teio', 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>']], false]);
+    const teioMedia = openers.specialMediaPath(openers.specialById('guest.teio')!.text);
+    check('media: Teio\'s pose clip exists, under 10 MB', [teioMedia?.endsWith('halloween-pose.mp4'), teioMedia ? fs.existsSync(teioMedia) : false, teioMedia ? fs.statSync(teioMedia).size < 10 * 1024 * 1024 : false], [true, true, true]);
     // The media box: main text, subtext, media, credit under it, then the extras.
     const { pingBox, splitSubtext } = await import('../src/lib/timer/pingBox');
     check('box: a line splits into main text and its -# subtext', [splitSubtext('Hi {user}!\n-# Footer one.').main, splitSubtext('Hi {user}!\n-# Footer one.').sub], ['Hi {user}!', '-# Footer one.']);
@@ -720,12 +826,12 @@ async function main() {
     // Settings: DM me too, early riser, boosts, special sets.
     const us = await import('../src/lib/timer/userSettings');
     const SG = `test-usettings-${Date.now()}`;
-    check('settings: defaults', await us.getUserSettings(SG, 'u1'), { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] });
+    check('settings: defaults', await us.getUserSettings(SG, 'u1'), { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [], autoOffSets: [] });
     check('settings: default run and ping times', [us.runMinutes(await us.getUserSettings(SG, 'u1')), us.pingMinutes(await us.getUserSettings(SG, 'u1'))], [50, 5]);
     await us.toggleSetting(SG, 'u1', 'dm');
     await us.toggleSetting(SG, 'u1', 'early');
     const on = await us.toggleSetting(SG, 'u1', 'set:set1');
-    check('settings: each toggle flips', on, { dmPing: true, earlyRiser: true, boosts: true, disabledSets: ['set1'] });
+    check('settings: each toggle flips', on, { dmPing: true, earlyRiser: true, boosts: true, disabledSets: ['set1'], autoOffSets: [] });
     check('settings: boosts flip off and back', [(await us.toggleSetting(SG, 'u1', 'boosts')).boosts, (await us.toggleSetting(SG, 'u1', 'boosts')).boosts], [false, true]);
     check('settings: early riser runs 49 and clears in 4', [us.runMinutes(on), us.pingMinutes(on)], [49, 4]);
     check('settings: an unknown set is ignored', (await us.toggleSetting(SG, 'u1', 'set:nope')).disabledSets, ['set1']);

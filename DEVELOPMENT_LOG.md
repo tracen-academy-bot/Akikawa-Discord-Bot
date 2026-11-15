@@ -4,6 +4,27 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — Weekly events, auto-off, the extras page, and the last guests
+
+- Weekly events (owner): Curren Chan week extended to the reset of Nov 22
+  (15:00 UTC); Mejiro week, reset to reset: +2% on the invitation (Mejiro
+  Family) until the Estate opens, then +2% on its lines (`SeasonalBuff`
+  gains `setId`).
+- Auto-off (`TimerUserSettings.autoOffSets`, migration
+  `20261115200000_auto_off_sets`): finding every line of a set rests its
+  found lines, all but what its extras still need (`restingLines`); finding
+  its extras too turns the set off. The ping says so ("Complete!"); the
+  Specials button shows "Resting" and wakes the lines; a trainer who turns a
+  set back on keeps it ("<set>:kept").
+- Specials: a "Set <n>.5: <name> Extras" page right after a set with extras,
+  names only; the set page lists only its lines.
+- Guests: Helios's louder line and introductions (the next run is an unmet
+  guest; no Helios while a Rehearsal is owed; Ramonu's lesson overrides);
+  the Symboli visit's daggers footer; Teio's line, pose footer and credited
+  clip; Satono's dinner with McQueen.
+
+---
+
 ## 2026-11-15 — The Mejiro Estate is live again
 
 - `paused: true` removed from `mejiro-estate`: the redesigned lines,
