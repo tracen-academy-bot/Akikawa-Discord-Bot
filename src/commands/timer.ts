@@ -1,6 +1,6 @@
 import type { StringSelectMenuInteraction } from 'discord.js';
 import { SETTINGS_PREFIX, getUserSettings, runMinutes, settingsView, toggleSetting } from '../lib/timer/userSettings';
-import { READ_MENU_ID, SPECIALS_FIRST_PAGE, SPECIALS_PAGE_PREFIX, SPECIALS_SET_PREFIX, lockedSetsFor, mySpecialsView, pageOfSet, rareTally, readSpecial, specialsView } from '../lib/timer/rares';
+import { READ_MENU_ID, SPECIALS_FIRST_PAGE, SPECIALS_PAGE_PREFIX, SPECIALS_SET_PREFIX, lockedSetsFor, mySpecialsView, pageOfSet, readSpecial, serverSpecialsView } from '../lib/timer/rares';
 import { EARLY_START } from '../lib/timer/openers';
 import { pingBox } from '../lib/timer/pingBox';
 import {
@@ -225,8 +225,7 @@ async function handleSpecials(interaction: ChatInputCommandInteraction) {
         });
         return;
     }
-    const tally = await rareTally(interaction.guildId!);
-    await interaction.reply({ ...specialsView(tally, SPECIALS_FIRST_PAGE), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+    await interaction.reply({ ...(await serverSpecialsView(interaction.guildId!, SPECIALS_FIRST_PAGE)), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 /** Posts a fresh control panel. */
@@ -579,7 +578,7 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
                 await interaction.reply({ content: 'Only Club Managers can see the whole server\'s specials.', flags: MessageFlags.Ephemeral });
                 return;
             }
-            await interaction.update({ ...specialsView(await rareTally(guildId), Number(page)), allowedMentions: { parse: [] } });
+            await interaction.update({ ...(await serverSpecialsView(guildId, Number(page))), allowedMentions: { parse: [] } });
         } else {
             await interaction.update({ ...(await mySpecialsView(guildId, interaction.user.id, Number(page))), allowedMentions: { parse: [] } });
         }

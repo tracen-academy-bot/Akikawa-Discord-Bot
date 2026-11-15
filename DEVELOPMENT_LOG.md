@@ -4,6 +4,22 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — Set 4: Fuku-chan's Fortune Tent on the Specials pages
+
+- From `TENT_OPENS`, a last Specials page (`specialsView`, kind `fortune`)
+  lists the 13 fortunes (names in `fortuneLines.ts`), "???" until drawn,
+  with Times and First drawn (by) from `TimerFortuneDraw` (`fortuneTally`).
+  A read menu shows a drawn fortune's result box (`fortune:<id>` in
+  `readSpecial`). No On/Off, no auto-off.
+- Scoring like a set (owner): 15 a new fortune, 3 a repeat, +100 for all 13;
+  they count in "N of M" (personal and server) and on the specials board
+  (`specialsBoard` folds the draws in; its counts gain 13 and 1 set).
+- The fortunes' texts moved to `fortuneLines.ts` (no database), so the
+  Specials code can list them; `fortune.ts` re-exports them. The server
+  list is built by `serverSpecialsView`.
+
+---
+
 ## 2026-11-15 — Specials not open yet are hidden
 
 - Owner: Matikanefukukitaru must not show before the tent opens. A special

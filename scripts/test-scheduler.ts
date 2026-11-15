@@ -431,7 +431,7 @@ async function main() {
         ['lb-wide-late', 300, 0, 20, 20],
     ]);
     check('specials board: limit caps the rows, not the totals', [(await rares.specialsBoard(LB, 3, POST)).rows.length, (await rares.specialsBoard(LB, 3, POST)).trainers], [3, 4]);
-    check('specials board: totals', [sb.totalPings, sb.trainers, sb.specialCount, sb.setCount], [14 + 20 + 21 + 20, 4, RARE_OPENERS.filter((o) => !o.extra).length, openers.SPECIAL_SETS.length]);
+    check('specials board: totals', [sb.totalPings, sb.trainers, sb.specialCount, sb.setCount], [14 + 20 + 21 + 20, 4, RARE_OPENERS.filter((o) => !o.extra).length + 13, openers.SPECIAL_SETS.length + 1]); // + Set 4's 13 fortunes
     const { renderSpecialsLeaderboard } = await import('../src/lib/image/renderSpecialsLeaderboard');
     const png = await renderSpecialsLeaderboard(sb, new Map([['lb-set', 'Tylina']]));
     check('specials board: renders a PNG', [png.subarray(1, 4).toString(), png.length > 1000], ['PNG', true]);
@@ -756,7 +756,7 @@ async function main() {
     for (const t of [...nine.slice(0, 8), ...guestTexts]) await rares.recordRareOpener(GB, 'g-eight', t);
     const gb = await rares.specialsBoard(GB, 15, POST);
     check('guests: not in the set\'s completion or found count, but 15 new and 3 repeat', gb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['g-all', 1, 9, 14 * 15 + 3 + 100], ['g-eight', 0, 8, 13 * 15]]);
-    check('guests: not in the board\'s special count', gb.specialCount, RARE_OPENERS.filter((o) => !o.extra && !o.guest).length);
+    check('guests: not in the board\'s special count', gb.specialCount, RARE_OPENERS.filter((o) => !o.extra && !o.guest).length + 13);
     const gEight = json(rares.specialsView(await rares.rareTally(GB, 'g-eight'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }, PRE));
     const gNames = gEight.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
     check('page: Set 3.5 lists the Rehearsal then the guests, counted on their own, never in the overall total', [gEight.embeds[0]!.title, gEight.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 5 of 6 found'), gNames], [
@@ -893,11 +893,11 @@ async function main() {
         const nAll = RARE_OPENERS.filter((o) => !o.extra).length;
         check('hidden: her row and counts, before and after the opening (personal)', [await hv(BEFORE, true), await hv(OPEN, true)], [
             [`Your specials: 0 of ${nAll - 1}`, '**Set 1: Lobby Loungers**: 0 of 13', false, 13],
-            [`Your specials: 1 of ${nAll}`, '**Set 1: Lobby Loungers**: 1 of 14', true, 14],
+            [`Your specials: 1 of ${nAll + 13}`, '**Set 1: Lobby Loungers**: 1 of 14', true, 14],
         ]);
-        check('hidden: the same on the server list', [(await hv(BEFORE, false))[0], (await hv(BEFORE, false))[2], (await hv(OPEN, false))[0], (await hv(OPEN, false))[2]], [`Specials found: 0 of ${nAll - 1}`, false, `Specials found: 1 of ${nAll}`, true]);
+        check('hidden: the same on the server list', [(await hv(BEFORE, false))[0], (await hv(BEFORE, false))[2], (await hv(OPEN, false))[0], (await hv(OPEN, false))[2]], [`Specials found: 0 of ${nAll - 1}`, false, `Specials found: 1 of ${nAll + 13}`, true]);
         const hb = async (now: Date) => { const b = await rares.specialsBoard(FG, 15, now); return [b.specialCount, b.rows.find((r) => r.discordUserId === 'h1')?.found ?? 0]; };
-        check('hidden: the board\'s special count and finds', [await hb(BEFORE), await hb(OPEN)], [[nAll - 1, 0], [nAll, 1]]);
+        check('hidden: the board\'s special count and finds', [await hb(BEFORE), await hb(OPEN)], [[nAll - 1, 0], [nAll + 13, 1]]);
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: FG, discordUserId: 'h1' } });
         // Set 1 complete without her until she opens (no lost set points), with her from then on.
         const LBF = `${FG}-board`;
@@ -979,6 +979,35 @@ async function main() {
         check('draw: a new one after midnight JST, never the previous line', [d2?.fresh, d2?.draw.tier.id, d2?.draw.line.id], [true, 'great', 'great.taiki']);
         const box = JSON.stringify(fortune.fortuneBox(d1!.draw, 't1'));
         check('draw: a box only to the trainer: heading, the scene with the mention, the effect line', [box.includes('### 大吉 Great blessing'), box.includes('<@t1>-san, three tea stalks'), box.includes("-# Today's fortune: +2% chance of a special line until the daily reset."), (fortune.fortuneBox(d1!.draw, 't1').flags & 64) === 64, box.includes('{user}')], [true, true, true, true, false]);
+
+        // Set 4: Fuku-chan's Fortune Tent, a Specials page from the opening (owner, 2026-11-15).
+        type VJ = { embeds: { title?: string; description?: string; fields?: { name: string; value: string }[]; footer?: { text: string } }[]; components: { components: { custom_id: string; label?: string; options?: { label: string; value: string }[] }[] }[] };
+        const vj = (v: { embeds: { toJSON(): unknown }[]; components: { toJSON(): unknown }[] }) => ({ embeds: v.embeds.map((e) => e.toJSON()), components: v.components.map((c) => c.toJSON()) }) as VJ;
+        const lastBefore = vj(await rares.mySpecialsView(FG, 't1', 99, BEFORE));
+        check('set 4: no page before the opening (the last page is still Set 3.5)', [lastBefore.embeds[0]!.description?.startsWith('**Set 3.5'), lastBefore.embeds[0]!.footer?.text.endsWith('Page 5 of 5')], [true, true]);
+        const s4 = vj(await rares.mySpecialsView(FG, 't1', 5, OPEN));
+        const s4e = s4.embeds[0]!;
+        const s4col = (n: number) => s4e.fields?.[n]?.value.split('\n') ?? [];
+        check('set 4: the last page, after Set 3.5, titled and counted', [s4e.description, s4e.footer?.text.endsWith('Page 6 of 6'), s4e.fields?.map((f) => f.name), s4col(0).length], ["**Set 4: Fuku-chan's Fortune Tent**: 2 of 13 drawn", true, ['Fortune', 'Times', 'First drawn'], 13]);
+        check('set 4: ??? until drawn; the drawn one by name, count and when', [s4col(0)[0], s4col(0)[2], s4col(1)[2], s4col(2)[2]?.startsWith('<t:'), s4col(0)[3], s4col(0)[4]], ['**1.** ???', '**3.** 大吉: Tea Stalks', '**×1**', true, '**4.** 大吉: Taiki Shuttle', '**5.** ???']);
+        check('set 4: the row names, in order', fortune.FORTUNE_LINES.map((l) => l.name), ["Shiraoki-sama's Oracle", '超吉: Copano Rickey', '大吉: Tea Stalks', '大吉: Taiki Shuttle', '吉: Rice Shower', '吉: Blue Machitan', '吉: Silence Suzuka', '小吉: Matikanetannhauser', '小吉: Nice Nature', '凶: The Cloudy Crystal Ball', '凶: Meisho Doto', '大凶: The Black Cat', '大凶: Air Groove']);
+        check('set 4: no On/Off, a read menu of drawn fortunes', [s4.components[0]!.components.map((b) => b.label), s4.components[1]?.components[0]?.options?.map((o) => [o.label, o.value])], [['Back', 'Next'], [['3. 大吉: Tea Stalks', 'fortune:great.tea'], ['4. 大吉: Taiki Shuttle', 'fortune:great.taiki']]]);
+        const readF = await rares.readSpecial(FG, 't1', 'fortune:great.tea');
+        check('set 4: reading a fortune shows its result box text; not one not drawn', [readF?.name, readF?.text.includes('<@t1>-san, three tea stalks'), readF?.text.endsWith("-# Today's fortune: +2% chance of a special line until the daily reset."), await rares.readSpecial(FG, 't1', 'fortune:oracle.sky'), await rares.readSpecial(FG, 't1', 'fortune:nope')], ['大吉 Great blessing', true, true, null, null]);
+        check('set 4: fortunes count in the "N of M" totals (personal: 2 Matikanes + 2 fortunes)', s4e.title, `Your specials: 4 of ${nAll + 13}`);
+        const s4srv = vj(await rares.serverSpecialsView(FG, 5, OPEN)).embeds[0]!;
+        check('set 4: the server list, first drawn by', [s4srv.fields?.[2]?.name, s4srv.fields?.[2]?.value.split('\n')[2]?.startsWith('<@t1> <t:')], ['First drawn by', true]);
+        // Scoring: 15 a new fortune, 3 a repeat, 100 for all 13.
+        const SB = `${FG}-score`;
+        let k = 0;
+        for (const l of fortune.FORTUNE_LINES) await prisma.timerFortuneDraw.create({ data: { guildId: SB, discordUserId: 'all13', day: `d${k++}`, tier: fortune.fortuneLineById(l.id)!.tier.id, lineId: l.id, drawnAt: new Date(OPEN.getTime() + k * 60_000) } });
+        await prisma.timerFortuneDraw.create({ data: { guildId: SB, discordUserId: 'all13', day: 'again', tier: 'great', lineId: 'great.tea', drawnAt: new Date(OPEN.getTime() + 99 * 60_000) } });
+        await prisma.timerFortuneDraw.create({ data: { guildId: SB, discordUserId: 'two', day: 'x', tier: 'great', lineId: 'great.tea', drawnAt: OPEN } });
+        await prisma.timerFortuneDraw.create({ data: { guildId: SB, discordUserId: 'two', day: 'y', tier: 'curse', lineId: 'curse.doto', drawnAt: OPEN } });
+        const fb = await rares.specialsBoard(SB, 15, OPEN);
+        check('set 4: scored like a set (15 new, 3 repeat, +100 for all 13), finds and sets counted', fb.rows.map((r) => [r.discordUserId, r.points, r.setsComplete, r.found]), [['all13', 13 * 15 + 3 + 100, 1, 13], ['two', 30, 0, 2]]);
+        check('set 4: not on the board before the opening', (await rares.specialsBoard(SB, 15, BEFORE)).rows.length, 0);
+        await prisma.timerFortuneDraw.deleteMany({ where: { guildId: SB } });
 
         // Effects: a blessing is an extra slice (paused with Boosts off); a curse lowers the base (never paused).
         const plainF = { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] as string[] };

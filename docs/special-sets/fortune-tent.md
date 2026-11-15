@@ -40,6 +40,20 @@ These override the draft below where they differ.
    reflecting it.
 
 Open questions answered: Air Groove's 大凶 is in; the Oracle stays private.
+
+### Set 4 on the Specials pages (owner, 2026-11-15, follow-up)
+
+From `TENT_OPENS` (not before), a last Specials page after Set 3.5:
+**Set 4: Fuku-chan's Fortune Tent**, the 13 fortunes numbered in this
+order, "???" until drawn: 1 Shiraoki-sama's Oracle, 2 超吉: Copano Rickey,
+3 大吉: Tea Stalks, 4 大吉: Taiki Shuttle, 5 吉: Rice Shower, 6 吉: Blue
+Machitan, 7 吉: Silence Suzuka, 8 小吉: Matikanetannhauser, 9 小吉: Nice
+Nature, 10 凶: The Cloudy Crystal Ball, 11 凶: Meisho Doto, 12 大凶: The
+Black Cat, 13 大凶: Air Groove. Times and "First drawn" / "First drawn by"
+columns come from `TimerFortuneDraw`; the read menu shows a drawn
+fortune's result box. No On/Off (it is not a pool) and no auto-off.
+Scoring like a set: 15 per new fortune, 3 per repeat draw, +100 for all
+13; they count in the "N of M" totals and on the specials board.
 `{user}` is the trainer's mention, once per line, placed before any "you" it
 introduces.
 
