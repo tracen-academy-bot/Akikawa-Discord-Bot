@@ -189,6 +189,9 @@ model TimerUserSettings {
     /// A special their next ping is guaranteed to be (a lost Remedial
     /// Rehearsal); cleared when it comes up. Null: none.
     guaranteedSpecialId String?
+    /// Runs until that special comes up: 1 is the next ping (a lost
+    /// Rehearsal); a scheduled one counts down from 1 to 25. Null: 1.
+    guaranteedInRuns    Int?
     /// Their current Remedial Rehearsal losing streak: the mishaps so far, in
     /// order (its length is the streak). Empty after a win.
     losingStreak  String[] @default([])

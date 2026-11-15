@@ -13,7 +13,7 @@ import { prisma } from '../../db/prisma';
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, grantSecondLove, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { applyOutcome, chooseOpener, endBoostsHitBy, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
+import { applyOutcome, chooseOpener, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances } from './boosts';
 import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
 import { pingBox } from './pingBox';
@@ -208,6 +208,8 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // Boosts tick down only while on (off pauses them). A boost
                 // this ping grants starts after it, with its full count.
                 if (settings.boosts) await spendBoosts(timer.guildId, timer.discordUserId);
+                // A scheduled guarantee (Ramonu's lesson) counts down one run on every other ping.
+                await tickGuarantee(timer.guildId, timer.discordUserId, opener);
                 if (!isRareOpener(opener)) await rememberCommon(timer.guildId, timer.discordUserId, opener);
                 if (isRareOpener(opener)) {
                     await recordRareOpener(timer.guildId, timer.discordUserId, opener);

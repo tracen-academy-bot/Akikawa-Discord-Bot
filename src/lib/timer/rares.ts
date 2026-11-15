@@ -302,14 +302,17 @@ export async function activeBoosts(guildId: string, discordUserId: string): Prom
 }
 
 /**
- * Gives a trainer an outcome boost: its run count, added to whatever is left
- * of the same boost (by key), as set boosts stack.
+ * Gives a trainer an outcome boost. Outcome boosts do not stack (owner,
+ * 2026-11-15): getting the same one again (by key) only tops it back up to
+ * its full run count, never past it.
  */
 export async function grantOutcomeBoost(guildId: string, discordUserId: string, boost: OutcomeBoost): Promise<void> {
+    const where = { guildId_discordUserId_setId_key: { guildId, discordUserId, setId: boost.set, key: boost.key } };
+    const held = await prisma.timerSpecialBoost.findUnique({ where });
     await prisma.timerSpecialBoost.upsert({
-        where: { guildId_discordUserId_setId_key: { guildId, discordUserId, setId: boost.set, key: boost.key } },
+        where,
         create: { guildId, discordUserId, setId: boost.set, key: boost.key, specialId: boost.special ?? null, chance: boost.chance, endsOnHit: boost.endsOnHit ?? false, runsLeft: boost.runs },
-        update: { runsLeft: { increment: boost.runs }, chance: boost.chance, endsOnHit: boost.endsOnHit ?? false, specialId: boost.special ?? null },
+        update: { runsLeft: Math.max(held?.runsLeft ?? 0, boost.runs), chance: boost.chance, endsOnHit: boost.endsOnHit ?? false, specialId: boost.special ?? null },
     });
 }
 
@@ -320,15 +323,33 @@ export async function endBoostsHitBy(guildId: string, discordUserId: string, ope
     await prisma.timerSpecialBoost.deleteMany({ where: { guildId, discordUserId, specialId, endsOnHit: true } });
 }
 
-/** A trainer's outcome state: the special their next ping is guaranteed to be, and their losing streak. */
+/**
+ * A trainer's outcome state: the special a coming ping is guaranteed to be,
+ * how many runs until it (1: the next ping), and their losing streak.
+ */
 export interface OutcomeState {
     guaranteedSpecialId: string | null;
+    guaranteedInRuns: number;
     losingStreak: string[];
 }
 
 export async function outcomeState(guildId: string, discordUserId: string): Promise<OutcomeState> {
-    const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } }, select: { guaranteedSpecialId: true, losingStreak: true } });
-    return { guaranteedSpecialId: row?.guaranteedSpecialId ?? null, losingStreak: row?.losingStreak ?? [] };
+    const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } }, select: { guaranteedSpecialId: true, guaranteedInRuns: true, losingStreak: true } });
+    return { guaranteedSpecialId: row?.guaranteedSpecialId ?? null, guaranteedInRuns: row?.guaranteedInRuns ?? 1, losingStreak: row?.losingStreak ?? [] };
+}
+
+/**
+ * Counts one run down on a trainer's pending guarantee, after a ping that
+ * was not it (`opener`): it never drops below 1, so a guarantee that could
+ * not fire (its set off, locked or paused) stays due on the next ping.
+ */
+export async function tickGuarantee(guildId: string, discordUserId: string, opener: string): Promise<void> {
+    const state = await outcomeState(guildId, discordUserId);
+    if (!state.guaranteedSpecialId || specialIdOf(opener) === state.guaranteedSpecialId || state.guaranteedInRuns <= 1) return;
+    await prisma.timerUserSettings.update({
+        where: { guildId_discordUserId: { guildId, discordUserId } },
+        data: { guaranteedInRuns: state.guaranteedInRuns - 1 },
+    });
 }
 
 /**
@@ -337,6 +358,7 @@ export async function outcomeState(guildId: string, discordUserId: string): Prom
  * (it then waits until the set is usable again).
  */
 export function guaranteedOpener(state: OutcomeState, disabledSets: readonly string[], lockedSets: readonly string[]): string | undefined {
+    if (state.guaranteedInRuns > 1) return undefined;
     const special = state.guaranteedSpecialId ? specialById(state.guaranteedSpecialId) : undefined;
     if (!special || disabledSets.includes(special.set) || lockedSets.includes(special.set) || PAUSED_SETS.includes(special.set)) return undefined;
     return special.text;
@@ -348,23 +370,38 @@ export function guaranteedOpener(state: OutcomeState, disabledSets: readonly str
  * a win or forced success resets the losing streak; a loss adds its mishap
  * to the streak and guarantees the trainer's next ping is this special again.
  */
-export async function applyOutcome(guildId: string, discordUserId: string, opener: string, rolled: RolledOutcome | null): Promise<void> {
+export async function applyOutcome(
+    guildId: string,
+    discordUserId: string,
+    opener: string,
+    rolled: RolledOutcome | null,
+    random: () => number = Math.random,
+): Promise<void> {
     const specialId = specialIdOf(opener);
     if (!specialId) return;
     const state = await outcomeState(guildId, discordUserId);
-    let guaranteedSpecialId = state.guaranteedSpecialId === specialId ? null : state.guaranteedSpecialId;
+    const fulfilled = state.guaranteedSpecialId === specialId;
+    let guaranteedSpecialId = fulfilled ? null : state.guaranteedSpecialId;
+    let guaranteedInRuns: number | null = fulfilled ? null : state.guaranteedInRuns;
     let losingStreak = state.losingStreak;
     if (rolled?.boost) await grantOutcomeBoost(guildId, discordUserId, rolled.boost);
     if (rolled?.win || rolled?.forced) losingStreak = [];
     if (rolled?.lose) {
         losingStreak = [...losingStreak, rolled.mishap ?? rolled.outcome];
         guaranteedSpecialId = specialId;
+        guaranteedInRuns = 1;
     }
-    if (guaranteedSpecialId === state.guaranteedSpecialId && JSON.stringify(losingStreak) === JSON.stringify(state.losingStreak)) return;
+    // A schedule never stacks: not while one is pending or a losing streak runs.
+    if (rolled?.schedule && !guaranteedSpecialId && losingStreak.length === 0) {
+        guaranteedSpecialId = rolled.schedule.special;
+        guaranteedInRuns = 1 + Math.min(rolled.schedule.within - 1, Math.floor(random() * rolled.schedule.within));
+    }
+    const sameRuns = (guaranteedInRuns ?? 1) === state.guaranteedInRuns;
+    if (guaranteedSpecialId === state.guaranteedSpecialId && sameRuns && JSON.stringify(losingStreak) === JSON.stringify(state.losingStreak)) return;
     await prisma.timerUserSettings.upsert({
         where: { guildId_discordUserId: { guildId, discordUserId } },
-        create: { guildId, discordUserId, guaranteedSpecialId, losingStreak },
-        update: { guaranteedSpecialId, losingStreak },
+        create: { guildId, discordUserId, guaranteedSpecialId, guaranteedInRuns, losingStreak },
+        update: { guaranteedSpecialId, guaranteedInRuns, losingStreak },
     });
 }
 

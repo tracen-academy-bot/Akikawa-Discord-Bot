@@ -4,6 +4,22 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — Ramonu's lesson is scheduled, not rolled; no stacking
+
+- Owner: the lesson should not stack, and should land on one run, not be a
+  chance. Ramonu's 75% outcome now schedules the Remedial Rehearsal on a
+  run picked at random from the next 25 (`SpecialOutcome.schedule`). It is
+  the only way to get it, and a second lesson while one is pending (or
+  during a losing streak) does nothing.
+- `TimerUserSettings.guaranteedInRuns` (migration
+  `20261115180000_guarantee_countdown`): runs until the guaranteed special;
+  `tickGuarantee` counts it down on every other ping, never below 1 (so a
+  guarantee whose set is off or paused waits). A loss sets it to 1.
+- Outcome boosts no longer stack: `grantOutcomeBoost` tops a repeat up to
+  its full runs instead of adding them.
+
+---
+
 ## 2026-11-15 — The owner's posts stay under the sticky
 
 - `STICKY_EXEMPT` (livePanel.ts): the owner's posts never move the sticky

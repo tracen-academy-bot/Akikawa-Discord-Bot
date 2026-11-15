@@ -182,7 +182,7 @@ Then **one outcome**, rolled each time this line comes up:
 
 | Chance | Footer | Effect |
 | --- | --- | --- |
-| 75% | `-# Ramonu is still not quite satisfied with how distracted you were, and has insisted you join her next dance practice. For the next 25 runs, gain a 10% chance of Ramonu's Remedial Rehearsal, until she has had her lesson.` | +10% Remedial Rehearsal for 25 runs; ends as soon as the Rehearsal comes up (one-time). |
+| 75% | `-# Ramonu is still not quite satisfied with how distracted you were, and has insisted you join her next dance practice. She will summon you for a lesson sometime in the next 25 runs.` | The Rehearsal is scheduled on a run picked at random from the next 25 (owner, 2026-11-15: replaced the +10% boost); it comes up no other way, and a second lesson does not stack. |
 | 25% | `-# Ramonu remains unimpressed... but your footwork convinced her your attention was where it belonged. For the next 50 runs, gain a 5% chance of meeting another Mejiro.` | +5% Mejiro lines for 50 runs. |
 
 - Canon: boorishness (無粋) is her weak spot, with the trainer still working
