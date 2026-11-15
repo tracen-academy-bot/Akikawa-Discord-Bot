@@ -4,6 +4,22 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — Tylina meets Grandmother again
+
+- Owner: Tylina's Grandmother finds are reset. Migration
+  `20261116000000_first_finder_grandmother_reset` adds `TimerFirstFinder`
+  (guild, special: who found it first), copies her earliest Grandmother find
+  into it in every guild, then deletes all her Grandmother finds. Her own
+  tally and points have no Grandmother, so her Mejiro lines redirect to
+  Grandmother again (staging as usual).
+- The server's Specials list (`rareTally` without a trainer) takes "First
+  found by" from `TimerFirstFinder` when it is earlier than any remaining
+  find, or there is none (the row then shows by name, "—" for times).
+- `resetFinds` in `rares.ts` runs the same SQL (optionally for one guild);
+  tests run both it and the migration's own statements on scratch guilds.
+
+---
+
 ## 2026-11-15 — First Victor on Set 3.5
 
 - Once a guild has a `TimerSecondLove` row, the Set 3.5 (Mejiro Estate

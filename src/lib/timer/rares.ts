@@ -47,13 +47,47 @@ export interface RareTally {
     guest: boolean;
 }
 
-/** Every rare line, in list order, with its tally in a guild, or for one trainer when `discordUserId` is given. */
+/**
+ * Every rare line, in list order, with its tally in a guild, or for one trainer when `discordUserId` is given.
+ * The guild's tally takes its first finder from `TimerFirstFinder` when that is earlier than any remaining find (or there is none).
+ */
 export async function rareTally(guildId: string, discordUserId?: string): Promise<RareTally[]> {
     const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, ...(discordUserId ? { discordUserId } : {}) }, orderBy: { at: 'asc' } });
+    const overrides = discordUserId ? [] : await prisma.timerFirstFinder.findMany({ where: { guildId } });
     return RARE_OPENERS.map(({ id, name, text: opener, set, extra, guest }) => {
         const mine = hits.filter((h) => h.specialId === id);
-        return { id, name, opener, set, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null, extra: (extra ?? false) || (guest ?? false), guest: guest ?? false };
+        let firstUserId = mine[0]?.discordUserId ?? null;
+        let firstAt = mine[0]?.at ?? null;
+        const kept = overrides.find((o) => o.specialId === id);
+        if (kept && (!firstAt || kept.at.getTime() < firstAt.getTime())) {
+            firstUserId = kept.discordUserId;
+            firstAt = kept.at;
+        }
+        return { id, name, opener, set, count: mine.length, firstUserId, firstAt, extra: (extra ?? false) || (guest ?? false), guest: guest ?? false };
     });
+}
+
+/**
+ * Removes all of a trainer's finds of one special (in every guild, or only
+ * `guildId`), first keeping their earliest as the guild's first-finder
+ * override (`TimerFirstFinder`) unless one is kept already. The same SQL as
+ * migration `20261116000000_first_finder_grandmother_reset` (Tylina's
+ * Grandmother reset), so the tests can run it. Returns the finds removed.
+ */
+export async function resetFinds(discordUserId: string, specialId: string, guildId?: string): Promise<number> {
+    const [, removed] = await prisma.$transaction([
+        prisma.$executeRaw`
+            INSERT INTO "TimerFirstFinder" ("guildId", "specialId", "discordUserId", "at")
+            SELECT DISTINCT ON ("guildId") "guildId", "specialId", "discordUserId", "at"
+            FROM "RareOpenerHit"
+            WHERE "discordUserId" = ${discordUserId} AND "specialId" = ${specialId} AND (${guildId ?? null}::text IS NULL OR "guildId" = ${guildId ?? null})
+            ORDER BY "guildId", "at" ASC
+            ON CONFLICT ("guildId", "specialId") DO NOTHING`,
+        prisma.$executeRaw`
+            DELETE FROM "RareOpenerHit"
+            WHERE "discordUserId" = ${discordUserId} AND "specialId" = ${specialId} AND (${guildId ?? null}::text IS NULL OR "guildId" = ${guildId ?? null})`,
+    ]);
+    return removed;
 }
 
 /** What a trainer's own Specials pages add: their locks, sets turned off, and boosts. */
@@ -273,9 +307,11 @@ export function specialsView(allTally: RareTally[], page: number, extras?: Perso
         .setTitle(title)
         .setDescription(`**${pageTitle(pages, pg)}**: ${foundHere} of ${rows.length} found${status}`);
     if (!locked) {
-        const names = rows.map(({ t }, n) => `${lead(t, n)}${t.count > 0 ? t.name : '???'}`);
+        // Found, or (server list) a kept first finder with no find left (TimerFirstFinder).
+        const seen = (t: RareTally) => t.count > 0 || (t.firstUserId !== null && t.firstAt !== null);
+        const names = rows.map(({ t }, n) => `${lead(t, n)}${seen(t) ? t.name : '???'}`);
         const counts = rows.map(({ t }) => (t.count > 0 ? `**×${t.count}**` : '—'));
-        const firsts = rows.map(({ t }) => (t.count > 0 && t.firstUserId && t.firstAt ? (personal ? when(t.firstAt) : `<@${t.firstUserId}> ${when(t.firstAt)}`) : '—'));
+        const firsts = rows.map(({ t }) => (seen(t) && t.firstUserId && t.firstAt ? (personal ? when(t.firstAt) : `<@${t.firstUserId}> ${when(t.firstAt)}`) : '—'));
         embed.addFields(
             { name: 'Special', value: names.join('\n').slice(0, 1024), inline: true },
             { name: 'Times', value: counts.join('\n').slice(0, 1024), inline: true },

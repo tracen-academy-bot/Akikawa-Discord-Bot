@@ -1056,6 +1056,54 @@ async function main() {
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: VG } });
     }
 
+    // Tylina's Grandmother reset (owner, 2026-11-15): the migration's SQL, run on scratch guilds through `resetFinds`.
+    {
+        const TY = '457773317739380738';
+        const GM = 'mejiro.grandmother';
+        const R1 = `test-reset1-${Date.now()}`;
+        const R2 = `test-reset2-${Date.now()}`;
+        const o = await import('../src/lib/timer/openers');
+        const gmText = o.specialById(GM)!.text;
+        const hit = (guildId: string, discordUserId: string, specialId: string, at: string) =>
+            prisma.rareOpenerHit.create({ data: { guildId, discordUserId, specialId, opener: o.specialById(specialId)!.text, at: new Date(at) } });
+        await hit(R1, TY, GM, '2026-11-15T16:00:00Z');
+        await hit(R1, TY, GM, '2026-11-15T18:00:00Z');
+        await hit(R1, TY, 'mejiro.mcqueen', '2026-11-15T17:00:00Z');
+        await hit(R1, 'other', GM, '2026-11-15T17:30:00Z');
+        await hit(R2, TY, GM, '2026-11-15T20:00:00Z');
+        const removed = (await rares.resetFinds(TY, GM, R1)) + (await rares.resetFinds(TY, GM, R2));
+        const kept = await prisma.timerFirstFinder.findMany({ where: { guildId: { in: [R1, R2] } }, orderBy: { guildId: 'asc' } });
+        check('reset: her earliest Grandmother kept as the first finder, per guild', kept.map((k) => [k.guildId, k.specialId, k.discordUserId, k.at.toISOString()]), [[R1, GM, TY, '2026-11-15T16:00:00.000Z'], [R2, GM, TY, '2026-11-15T20:00:00.000Z']]);
+        check('reset: all her Grandmother finds gone, nothing else', [removed, await prisma.rareOpenerHit.count({ where: { guildId: { in: [R1, R2] }, discordUserId: TY, specialId: GM } }), await prisma.rareOpenerHit.count({ where: { guildId: R1, discordUserId: TY } }), await prisma.rareOpenerHit.count({ where: { guildId: R1, discordUserId: 'other' } })], [3, 0, 1, 1]);
+        const mineT = (await rares.rareTally(R1, TY)).find((t) => t.id === GM)!;
+        check('reset: her own tally has no Grandmother; her Mejiro lines wait on her again', [mineT.count, mineT.firstUserId, o.redirectOpener(o.specialById('mejiro.ryan')!.text, await rares.foundSpecialIds(R1, TY)) === gmText], [0, null, true]);
+        const srv1 = (await rares.rareTally(R1)).find((t) => t.id === GM)!;
+        const srv2 = (await rares.rareTally(R2)).find((t) => t.id === GM)!;
+        check('reset: the server keeps her as first finder (earlier than the remaining find, or none left)', [[srv1.count, srv1.firstUserId, srv1.firstAt?.toISOString()], [srv2.count, srv2.firstUserId]], [[1, TY, '2026-11-15T16:00:00.000Z'], [0, TY]]);
+        const estate = rares.pageOfSet('mejiro-estate');
+        const col0 = (await rares.serverSpecialsView(R2, estate, PRE)).embeds[0]!.toJSON().fields?.[0]?.value.split('\n')[0];
+        const col2 = (await rares.serverSpecialsView(R2, estate, PRE)).embeds[0]!.toJSON().fields?.[2]?.value.split('\n')[0];
+        check('reset: the server list shows her as First found by, even with no find left', [col0, col2?.startsWith(`<@${TY}> <t:`)], ['**1.** Grandmother', true]);
+        await hit(R1, TY, GM, '2026-11-16T10:00:00Z');
+        await rares.resetFinds(TY, GM, R1);
+        check('reset: running again keeps the first override', (await prisma.timerFirstFinder.findUnique({ where: { guildId_specialId: { guildId: R1, specialId: GM } } }))?.at.toISOString(), '2026-11-15T16:00:00.000Z');
+        // An override later than a remaining find is ignored.
+        await prisma.timerFirstFinder.update({ where: { guildId_specialId: { guildId: R1, specialId: GM } }, data: { at: new Date('2026-11-15T19:00:00Z') } });
+        check('reset: an override later than a remaining find does not win', (await rares.rareTally(R1)).find((t) => t.id === GM)?.firstUserId, 'other');
+        const fsMig = await import('fs');
+        const sql = fsMig.readFileSync('prisma/migrations/20261116000000_first_finder_grandmother_reset/migration.sql', 'utf8');
+        check('reset: the migration targets her and Grandmother, keep then delete', [sql.includes(`"discordUserId" = '${TY}' AND "specialId" = '${GM}'`), sql.indexOf('INSERT INTO "TimerFirstFinder"') < sql.indexOf('DELETE FROM "RareOpenerHit"'), sql.includes('ON CONFLICT ("guildId", "specialId") DO NOTHING')], [true, true, true]);
+        // And the migration's own statements (its INSERT and DELETE), run as written on a fresh scratch guild.
+        const R3 = `test-reset3-${Date.now()}`;
+        await hit(R3, TY, GM, '2026-11-15T21:00:00Z');
+        await hit(R3, TY, GM, '2026-11-15T22:00:00Z');
+        const statements = sql.split(';').map((x) => x.replace(/^\s*--.*$/gm, '').trim()).filter((x) => x.startsWith('INSERT') || x.startsWith('DELETE'));
+        for (const st of statements) await prisma.$executeRawUnsafe(st);
+        check('reset: the migration SQL itself keeps her earliest and removes her finds', [statements.length, (await prisma.timerFirstFinder.findUnique({ where: { guildId_specialId: { guildId: R3, specialId: GM } } }))?.at.toISOString(), await prisma.rareOpenerHit.count({ where: { guildId: R3, discordUserId: TY, specialId: GM } })], [2, '2026-11-15T21:00:00.000Z', 0]);
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [R1, R2, R3] } } });
+        await prisma.timerFirstFinder.deleteMany({ where: { guildId: { in: [R1, R2, R3] } } });
+    }
+
     check('expired timer removed', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-a' } }), 0);
     check('in-progress timer untouched', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-b' } }), 1);
 
