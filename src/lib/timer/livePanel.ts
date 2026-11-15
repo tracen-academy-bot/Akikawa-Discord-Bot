@@ -110,6 +110,50 @@ export async function keepPanelAtBottom(client: Client, guild: Guild, channelId:
     if (await prisma.timerPanel.findUnique({ where: { channelId } })) await postPanelPair(client, guild, channelId);
 }
 
+/**
+ * Notices the bot sets under every panel by itself at a given time (owner,
+ * 2026-11-15): each once per panel (`TimerPanel.noticeKey`), at `at` or,
+ * if the bot was down then, as soon as it is back within a day. A new week's
+ * notice is a new entry.
+ */
+export const SCHEDULED_NOTICES: readonly { key: string; at: Date; text: string }[] = [
+    {
+        // Monday 2026-11-16 00:01 JST, a minute after the week's results.
+        key: '2026-11-16-mejiro-estate',
+        at: new Date('2026-11-15T15:01:00Z'),
+        text: [
+            '#OnlineSensations is now up! Join Curren Chan as she ~~kidnaps~~ recruits you as her #FavoriteManager and gets on #SpecialCollabs with other umas!',
+            'The Mejiros have formally extended an invitation to their esteemed Estate. Please arrive with haste.',
+            '',
+            '*"To offer a perfect and complete victory \u2013 that is the proof of my love."* Show up and perform with Ramonu, or be made to try again. After all, it\'s a special day at the Estate, and Ramonu accepts nothing less than perfection.',
+        ].join('\n'),
+    },
+];
+
+/** How long after its time a scheduled notice may still be set (the bot was down). */
+const SCHEDULED_NOTICE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** Sets every scheduled notice that is due on each panel that does not have it yet. */
+export async function postScheduledNotices(client: Client, now = new Date(), notices = SCHEDULED_NOTICES): Promise<number> {
+    let set = 0;
+    for (const n of notices) {
+        if (now.getTime() < n.at.getTime() || now.getTime() > n.at.getTime() + SCHEDULED_NOTICE_WINDOW_MS) continue;
+        const panels = await prisma.timerPanel.findMany({ where: { OR: [{ noticeKey: null }, { noticeKey: { not: n.key } }] } });
+        for (const panel of panels) {
+            const guild = client.guilds.cache.get(panel.guildId) ?? (await client.guilds.fetch(panel.guildId).catch(() => null));
+            if (!guild) continue;
+            const result = await setPanelNotice(client, guild, panel.channelId, n.text).catch((e) => {
+                console.error(`Timer scheduled notice ${n.key} failed in ${panel.channelId}:`, e instanceof Error ? e.message : e);
+                return 'failed' as const;
+            });
+            if (result !== 'saved') continue;
+            await prisma.timerPanel.update({ where: { channelId: panel.channelId }, data: { noticeKey: n.key } });
+            set += 1;
+        }
+    }
+    return set;
+}
+
 /** Longest notice: one Discord message. */
 export const NOTICE_MAX_LENGTH = 2000;
 

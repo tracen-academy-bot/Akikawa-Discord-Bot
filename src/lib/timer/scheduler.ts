@@ -18,7 +18,7 @@ import { extraChances } from './boosts';
 import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
 import { pingBox } from './pingBox';
 import { getUserSettings, pingMinutes } from './userSettings';
-import { checkAllStickies, currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty, noteChannelActivity } from './livePanel';
+import { checkAllStickies, currentPanelMessageId, postScheduledNotices, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty, noteChannelActivity } from './livePanel';
 
 /**
  * Drives timer expiry and notification cleanup.
@@ -302,6 +302,8 @@ export function startScheduler(client: Client): () => void {
             if (Date.now() - lastAwardCheck >= AWARD_CHECK_MS) {
                 lastAwardCheck = Date.now();
                 await processWeeklyAwards(client);
+                // Notices scheduled for after the week's results (e.g. Monday 00:01 JST).
+                await postScheduledNotices(client).catch((e) => console.error('Timer scheduled notices failed:', e));
             }
             // A new day: every live board's "today" starts over.
             const today = dayKey(new Date());
