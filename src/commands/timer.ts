@@ -59,7 +59,7 @@ import {
     type BoardPeriod,
 } from '../lib/timer/rewards';
 import { displayName, renderBoardFor, renderSpecialsBoardFor, weekResultsPost } from '../lib/timer/boardImage';
-import { NOTICE_MAX_LENGTH, keepPanelAtBottom, postPanelPair, setPanelNotice } from '../lib/timer/livePanel';
+import { NOTICE_MAX_LENGTH, keepPanelAtBottom, postPanelPair, removePanel, setPanelNotice } from '../lib/timer/livePanel';
 import { prisma } from '../db/prisma';
 import { renderTimerStats } from '../lib/image/renderTimerStats';
 
@@ -92,7 +92,10 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('panel')
-            .setDescription('Post the Trainer Timer control panel in this channel. Club Managers only.'),
+            .setDescription('Post the Trainer Timer control panel in this channel. Club Managers only.')
+            .addBooleanOption((opt) =>
+                opt.setName('remove').setDescription('Remove the board, panel and notice here, and stop keeping them in this channel').setRequired(false),
+            ),
     )
     .addSubcommand((sub) =>
         sub
@@ -239,10 +242,23 @@ async function handlePanel(interaction: ChatInputCommandInteraction) {
         return;
     }
 
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    // remove:true: take the sticky out of this channel for good (no more reposts or notices here).
+    if (interaction.options.getBoolean('remove')) {
+        const removed = await removePanel(interaction.client, interaction.channelId);
+        await interaction.editReply({
+            embeds: [
+                removed
+                    ? successEmbed('Panel removed', 'The live board, the panel and the notice are gone from this channel, and I no longer keep them here.')
+                    : errorEmbed('There is no timer panel in this channel.'),
+            ],
+        });
+        return;
+    }
+
     // The live board and the panel are posted as normal channel messages,
     // not the interaction reply, so they are permanent and can be pinned. An
     // old pair in this channel is deleted, so this also moves it to the bottom.
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const posted = await postPanelPair(interaction.client, interaction.guild!, interaction.channelId);
     await interaction.editReply({
         embeds: [
