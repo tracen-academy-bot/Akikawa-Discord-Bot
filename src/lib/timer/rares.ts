@@ -146,8 +146,11 @@ function remindersPage(mode: 'mine' | 'all', footerHead: string) {
  *     and the page number.
  *
  * `page` is clamped to the pages there are. Never shows a special's text.
+ * A special not open yet at `now` (`Special.opensAt`) is left out of every
+ * row and count, as if it did not exist.
  */
-export function specialsView(tally: RareTally[], page: number, extras?: PersonalExtras) {
+export function specialsView(allTally: RareTally[], page: number, extras?: PersonalExtras, now: Date = new Date()) {
+    const tally = allTally.filter((t) => isOpenAt(specialById(t.id) ?? {}, now));
     const personal = extras !== undefined;
     const mode = personal ? 'mine' : 'all';
     const pg = Math.max(0, Math.min(PAGE_COUNT - 1, Number.isInteger(page) ? page : SPECIALS_FIRST_PAGE));
@@ -232,14 +235,14 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
 }
 
 /** A trainer's own Specials page `page`, from the database. */
-export async function mySpecialsView(guildId: string, discordUserId: string, page: number) {
+export async function mySpecialsView(guildId: string, discordUserId: string, page: number, now: Date = new Date()) {
     const [tally, lockedSets, boosts, settings] = await Promise.all([
         rareTally(guildId, discordUserId),
         lockedSetsFor(guildId, discordUserId),
         activeBoosts(guildId, discordUserId),
         getUserSettings(guildId, discordUserId),
     ]);
-    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts });
+    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts }, now);
 }
 
 /** The page of `setId` in the Specials list (Set 1 is page 1), or the first page. */
@@ -706,7 +709,8 @@ export interface SpecialsBoard {
  * caps the rows; the totals cover everyone.
  */
 export async function specialsBoard(guildId: string, limit = 15, now: Date = new Date()): Promise<SpecialsBoard> {
-    const ids = new Set(RARE_OPENERS.map((o) => o.id));
+    // Only specials that exist and are open at `now` (Special.opensAt) count.
+    const ids = new Set(RARE_OPENERS.filter((o) => isOpenAt(o, now)).map((o) => o.id));
     const hits = (await prisma.rareOpenerHit.findMany({ where: { guildId, specialId: { not: null } }, orderBy: { at: 'asc' }, select: { discordUserId: true, specialId: true, at: true } })).filter(
         (h) => ids.has(h.specialId!),
     );
@@ -730,5 +734,5 @@ export async function specialsBoard(guildId: string, limit = 15, now: Date = new
         return { discordUserId, points, setsComplete, found, pings: u.pings, reachedAt: u.reachedAt };
     });
     rows.sort((a, b) => b.points - a.points || a.reachedAt.getTime() - b.reachedAt.getTime());
-    return { rows: rows.slice(0, limit), specialCount: RARE_OPENERS.filter((o) => !o.extra).length, setCount: SPECIAL_SETS.length, totalPings: hits.length, trainers: rows.length };
+    return { rows: rows.slice(0, limit), specialCount: RARE_OPENERS.filter((o) => !o.extra && isOpenAt(o, now)).length, setCount: SPECIAL_SETS.length, totalPings: hits.length, trainers: rows.length };
 }

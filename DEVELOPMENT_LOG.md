@@ -4,6 +4,17 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — Specials not open yet are hidden
+
+- Owner: Matikanefukukitaru must not show before the tent opens. A special
+  with `opensAt` in the future is now left out of every Specials page
+  (personal and server), every "N of M" count, set completion and the
+  specials board (`specialsView`, `mySpecialsView` and `specialsBoard` take
+  `now`). From `opensAt` on she shows and counts like any line.
+- Tests pin the older Specials checks to a fixed time before the opening.
+
+---
+
 ## 2026-11-15 — Guest names
 
 - The Mejiro Estate's guests are listed under new names (owner; `name`
