@@ -414,7 +414,9 @@ async function main() {
     const seven = mejiro.openers.filter((o) => o.after?.length === 1).map((o) => o.id);
     const photo = mejiro.openers.find((o) => o.id === 'mejiro.photo')!;
     check('mejiro: 9 lines, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.length, mejiro.requires, seven.length, photo.after?.length], [9, 'set1.mejiro', 7, 8]);
-    check('mejiro: no hashtags, one {user} each', mejiro.openers.every((o) => !/#\w/.test(o.text) && o.text.split('{user}').length === 2), true);
+    check('mejiro: one {user} each', mejiro.openers.every((o) => o.text.split('{user}').length === 2), true);
+    // No hashtags, except Palmer's one: #SweetieSecrecies is Palmer imitating Helios, on purpose.
+    check('mejiro: no hashtags, but Palmer\'s one Helios imitation', [mejiro.openers.filter((o) => o.id !== 'mejiro.palmer').every((o) => !/#\w/.test(o.text)), mejiro.openers.find((o) => o.id === 'mejiro.palmer')!.text.match(/#\w+/g)], [true, ['#SweetieSecrecies']]);
     const sevenTexts = seven.map((id) => openers.specialById(id)!.text);
     check('stages: before Grandmother, the seven and the photo are closed', openers.closedSpecials(new Set()).filter((t) => [...sevenTexts, photo.text].includes(t)).length, 8);
     check('stages: after Grandmother, only the photo waits', openers.closedSpecials(new Set([grandma.id])).filter((t) => [...sevenTexts, photo.text].includes(t)), [photo.text]);
