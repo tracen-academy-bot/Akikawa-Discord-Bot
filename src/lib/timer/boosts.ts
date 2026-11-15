@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, PAUSED_SETS, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { EARLY_START, PAUSED_SETS, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
 import { activeBoosts, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
@@ -22,6 +22,9 @@ function percent(chance: number): string {
  *
  *   - each set boost they hold, for a set they have on and unlocked: its
  *     chance, drawn from that set's lines with the boost's tag;
+ *   - each outcome boost they hold (`OutcomeBoost`, e.g. Ramonu's lesson),
+ *     for a set they have on and unlocked: its own chance, drawn from its one
+ *     special or the set's lines (its extras left out);
  *   - early start, when the run was one: its chance, drawn from their usual
  *     special pool;
  *   - their personal boost (`PERSONAL_BOOSTS`), if they have one: its chance,
@@ -49,6 +52,14 @@ export async function extraChances(
     const extras: ExtraChance[] = [];
     for (const held of await activeBoosts(guildId, discordUserId)) {
         if (!usable(held.setId)) continue;
+        if (held.key) {
+            const set = SPECIAL_SETS.find((s) => s.id === held.setId);
+            const known = outcomeBoostByKey(held.key);
+            const target = held.specialId ? specialById(held.specialId)?.name : `${set?.name ?? held.setId}: any of its lines`;
+            const label = known ? outcomeBoostLabel(known, held.runsLeft) : `${target}, ${held.runsLeft} run${held.runsLeft === 1 ? '' : 's'} left.`;
+            extras.push({ chance: held.chance ?? 0, pool: outcomeBoostPool({ set: held.setId, ...(held.specialId ? { special: held.specialId } : {}) }), label });
+            continue;
+        }
         const set = SPECIAL_SETS.find((s) => s.id === held.setId);
         const boost = set?.openers.find((o) => o.boost)?.boost;
         if (set && boost) {
@@ -72,7 +83,7 @@ export async function extraChances(
     }
     for (const set of SPECIAL_SETS) {
         if (!set.unlockBonus || !set.requires || !usable(set.id)) continue;
-        extras.push({ chance: set.unlockBonus, pool: set.openers.map((o) => o.text), label: set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.` });
+        extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra).map((o) => o.text), label: set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.` });
     }
     return extras;
 }

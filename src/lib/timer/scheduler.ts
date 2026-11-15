@@ -11,11 +11,11 @@ import {
 } from './service';
 import { prisma } from '../../db/prisma';
 import { refreshPanel } from './panel';
-import { awardMilestone, getTimerSettings, runWeeklyAwards, type WeeklyAward } from './rewards';
+import { awardMilestone, getTimerSettings, grantSecondLove, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { chooseOpener, grantBoost, trainerPool, isRareOpener, lockedSetsFor, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
+import { applyOutcome, chooseOpener, endBoostsHitBy, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances } from './boosts';
-import { commonsFor, fillOpener, pickOpener, rarePoolFor, setsUnlockedBy, specialCredit, specialMediaPath } from './openers';
+import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
 import { pingBox } from './pingBox';
 import { getUserSettings, pingMinutes } from './userSettings';
 import { checkAllStickies, currentPanelMessageId, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty, noteChannelActivity } from './livePanel';
@@ -104,6 +104,16 @@ export function buildPingContent(
     return [filled, ...pingExtraLines(summary, lagSeconds, milestoneRoleId, unlockedSets)].join('\n');
 }
 
+/**
+ * A ping's main text: the filled opener, then what its outcome adds (its
+ * footer, or a forced success's paragraph and role footer). The channel ping
+ * and its DM copy both use this one text, so they show the same outcome.
+ */
+export function pingText(opener: string, discordUserId: string, rolled: RolledOutcome | null = null, role: { roleId: string; had: boolean } | null = null): string {
+    const added = rolled ? outcomeLines(rolled, discordUserId, role) : '';
+    return [fillOpener(opener, discordUserId), ...(added ? [added] : [])].join('\n');
+}
+
 /** A guild the bot is in, from the cache or Discord; null when it is not. */
 async function guildOf(client: Client, guildId: string): Promise<Guild | null> {
     return client.guilds.cache.get(guildId) ?? (await client.guilds.fetch(guildId).catch(() => null));
@@ -173,14 +183,22 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 );
                 // Reminder lines don't repeat within 4 pings in a row (see COMMON_NO_REPEAT).
                 const commons = commonsFor(await recentCommons(timer.guildId, timer.discordUserId));
-                const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras, commons);
+                // A lost Remedial Rehearsal guarantees the next ping (while its set is usable).
+                const state = await outcomeState(timer.guildId, timer.discordUserId);
+                const guaranteed = guaranteedOpener(state, settings.disabledSets, lockedSets);
+                const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras, commons, guaranteed);
+                // A special with outcomes rolls one, once; a forced success gives its role first, so the footer can say so.
+                const special = specialByText(opener);
+                const rolled = special ? rollOutcome(special, Math.random(), state.losingStreak) : null;
+                const role = rolled?.forced ? await grantSecondLove(await guildOf(client, timer.guildId), timer.guildId, timer.discordUserId) : null;
+                const text = pingText(opener, timer.discordUserId, rolled, role);
                 // The first time a trainer gets a set's prerequisite, the ping says the set opened.
                 const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
                 // Every ping posts as one Components V2 box: line, subtext, the
                 // media and its credit when the line has them, then the extras.
                 const payload = () =>
                     pingBox({
-                        text: fillOpener(opener, timer.discordUserId),
+                        text,
                         mediaPath: specialMediaPath(opener),
                         credit: specialCredit(opener),
                         extraLines: pingExtraLines(summary, lagSeconds, milestoneRoleId, unlocked),
@@ -194,6 +212,9 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 if (isRareOpener(opener)) {
                     await recordRareOpener(timer.guildId, timer.discordUserId, opener);
                     await grantBoost(timer.guildId, timer.discordUserId, opener);
+                    // One-time boosts on this special end; then its outcome applies (boost, streak, guarantee).
+                    await endBoostsHitBy(timer.guildId, timer.discordUserId, opener);
+                    await applyOutcome(timer.guildId, timer.discordUserId, opener, rolled);
                 }
                 if (settings.dmPing) {
                     // A copy in their DMs; it pings nobody else and is not deleted.

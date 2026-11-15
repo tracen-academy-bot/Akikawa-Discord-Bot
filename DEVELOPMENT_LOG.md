@@ -4,6 +4,51 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — The Mejiro Estate's new lines; Ramonu's outcomes and Remedial Rehearsal
+
+- The eight Mejiro lines (Grandmother to Ramonu) are the owner's final copy
+  from `docs/special-sets/mejiro-estate-redesign.md` (ids, names and staging
+  unchanged, so finds are kept). Palmer's #SweetieSecrecies is her imitating
+  Helios; the no-hashtags test allows that one. The photo is unchanged (its
+  rework is not final). **The set stays paused**; nothing below can trigger
+  until the owner removes `paused`.
+- Outcomes (`Special.outcomes`, openers.ts): when a special with outcomes is
+  a ping's opener, `rollOutcome` picks one by weight from its own random
+  number; `pingText` puts its footer (a "-#" line) under the line, and the
+  channel ping and DM copy share that one text. The read view shows the line
+  alone. The roll odds are never shown to trainers.
+- Ramonu: 75% a lesson (one-time +10% Remedial Rehearsal for 25 runs, ended
+  by the Rehearsal coming up, by any route), 25% footwork (+5% any Mejiro
+  line for 50 runs).
+- Ramonu's Remedial Rehearsal (`mejiro.rehearsal`, `extra: true`, after
+  Ramonu): never in the base pool, set-wide boosts or the unlock bonus; only
+  through its boost or a guarantee. On the Specials page it is listed after
+  the 9 as "Extra." ("???" until found), outside the set's and the title's
+  counts; it scores find points (15/3) but not toward set completion (+100).
+  50% win (+3% any Mejiro line for 25 runs, streak reset), 50% lose: a
+  mishap (tail, dress, feet) not yet used in the losing streak, the streak
+  grows, and the trainer's next ping is the Rehearsal (a per-trainer
+  guarantee, after `SPECIAL_LOCKS`'s, only while the set is usable). At a
+  streak of 3 the next one is a forced success (`ForcedSuccess`): the line,
+  the paragraph, then `-# You obtained <@&role>.` (or "Ramonu's Second Love,
+  still."); no role set, or a refused grant, leaves the footer out and logs a
+  warning. Pings still allow only the trainer's mention.
+- Storage (migration `20261115120000_special_outcomes`): `TimerSpecialBoost`
+  gains `key` (in the primary key; '' is the old set boost), `specialId`,
+  `chance`, `endsOnHit`; `TimerUserSettings` gains `guaranteedSpecialId` and
+  `losingStreak` (the mishaps so far); `TimerSettings` gains
+  `secondLoveRoleId`, set by `/timer rewards second_love_role` (Club
+  Managers) and shown in its summary. `off` leaves it alone (it only stops
+  the weekly rewards).
+- Outcome boosts tick down with the others (only while Boosts are on) and
+  stack runs when granted again. Boosts view labels: "Ramonu's Remedial
+  Rehearsal, 25 runs left, until she has had her lesson." and "The Mejiro
+  Estate: any Mejiro line, 50 runs left."
+- Tests build the Mejiro pools directly (the set is paused); a hand-stored
+  boost on Set 1 covers the live path.
+
+---
+
 ## 2026-11-11 — Personal boost: "Ei, Ei, Mun!" for Tylina
 
 - `PERSONAL_BOOSTS` (openers.ts): per-trainer extra special chance, drawn
