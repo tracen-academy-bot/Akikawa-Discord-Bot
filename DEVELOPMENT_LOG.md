@@ -4,6 +4,15 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — First Victor on Set 3.5
+
+- Once a guild has a `TimerSecondLove` row, the Set 3.5 (Mejiro Estate
+  Extras) page, personal and server, adds under its table: "First Victor
+  (Ramonu's Second Love): @user, when". Nothing before anyone has won; not in
+  the Boosts view.
+
+---
+
 ## 2026-11-15 — Set 4: Fuku-chan's Fortune Tent on the Specials pages
 
 - From `TENT_OPENS`, a last Specials page (`specialsView`, kind `fortune`)

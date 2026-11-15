@@ -140,6 +140,10 @@ read view. The odds are never shown.
   if they had it. No role set, or no permission: the footer is left out.
 - The footer texts are in `docs/special-sets/mejiro-estate-redesign.md`
   (sections 8 and 8b) and in code.
+- **First Victor** (owner, 2026-11-15): once the server has its first
+  Ramonu's Second Love (`TimerSecondLove`), the Set 3.5 page (personal and
+  server) shows under its table "First Victor (Ramonu's Second Love):
+  @user, when". Nothing before then; not in the Boosts view.
 
 ## Guests (code: `Special.guest`, `GUEST_SLICE`, `guestSlice`)
 

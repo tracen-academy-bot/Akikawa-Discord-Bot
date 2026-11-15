@@ -1039,6 +1039,23 @@ async function main() {
         await cleanF();
     }
 
+    // First Victor on Set 3.5 (owner, 2026-11-15): once the guild has a Ramonu's Second Love.
+    {
+        const VG = `test-victor-${Date.now()}`;
+        const openersV = await import('../src/lib/timer/openers');
+        await rares.recordRareOpener(VG, 'v1', openersV.specialById('set1.mejiro')!.text);
+        const fieldsOf = async (mine: boolean, page: number) => (mine ? await rares.mySpecialsView(VG, 'v1', page, PRE) : await rares.serverSpecialsView(VG, page, PRE)).embeds[0]!.toJSON().fields ?? [];
+        const victorLine = (f: { value: string }[]) => f.find((x) => x.value.startsWith('First Victor'))?.value ?? null;
+        check('victor: nothing before anyone has won', [victorLine(await fieldsOf(true, 4)), victorLine(await fieldsOf(false, 4))], [null, null]);
+        const at = new Date('2026-11-16T12:00:00Z');
+        await prisma.timerSecondLove.create({ data: { guildId: VG, firstUserId: 'winner-1', firstAt: at } });
+        const line = `First Victor (Ramonu's Second Love): <@winner-1> <t:${Math.floor(at.getTime() / 1000)}:R>`;
+        check('victor: under the Set 3.5 table, personal and server', [victorLine(await fieldsOf(true, 4)), victorLine(await fieldsOf(false, 4)), (await fieldsOf(false, 4)).at(-1)?.value], [line, line, line]);
+        check('victor: only on Set 3.5, not on Set 3 or the Boosts view', [victorLine(await fieldsOf(false, 3)), victorLine(await fieldsOf(false, 1)), JSON.stringify(await (await import('../src/lib/timer/boosts')).boostsView(VG, 'v1', PRE)).includes('First Victor')], [null, null, false]);
+        await prisma.timerSecondLove.deleteMany({ where: { guildId: VG } });
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: VG } });
+    }
+
     check('expired timer removed', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-a' } }), 0);
     check('in-progress timer untouched', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-b' } }), 1);
 

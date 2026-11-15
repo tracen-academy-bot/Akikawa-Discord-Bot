@@ -165,7 +165,12 @@ export const FORTUNE_READ_PREFIX = 'fortune:';
 export interface SpecialsViewMore {
     /** Set 4's tally (`fortuneTally`); none: every fortune "???". */
     fortunes?: readonly FortuneTally[];
+    /** The server's first Ramonu's Second Love (`TimerSecondLove`), shown on Set 3.5; null or none: nobody yet. */
+    firstVictor?: { userId: string; at: Date } | null;
 }
+
+/** The set whose extras page shows the First Victor: The Mejiro Estate (Ramonu's Remedial Rehearsal). */
+const FIRST_VICTOR_SET = 'mejiro-estate';
 
 /**
  * One page of the Specials list: Set 0 (the reminders), then one special
@@ -276,6 +281,10 @@ export function specialsView(allTally: RareTally[], page: number, extras?: Perso
             { name: 'Times', value: counts.join('\n').slice(0, 1024), inline: true },
             { name: personal ? 'First got' : 'First found by', value: firsts.join('\n').slice(0, 1024), inline: true },
         );
+        // Under the Set 3.5 table, once someone has won (owner, 2026-11-15).
+        if (extrasPage && set.id === FIRST_VICTOR_SET && more.firstVictor) {
+            embed.addFields({ name: '\u200b', value: `First Victor (Ramonu's Second Love): <@${more.firstVictor.userId}> ${when(more.firstVictor.at)}` });
+        }
     }
     embed.setFooter({ text: footer.join('\n') });
 
@@ -302,6 +311,12 @@ export function specialsView(allTally: RareTally[], page: number, extras?: Perso
     return { embeds: [embed], components };
 }
 
+/** The server's first Ramonu's Second Love, or null while nobody has won. */
+async function firstVictor(guildId: string): Promise<{ userId: string; at: Date } | null> {
+    const row = await prisma.timerSecondLove.findUnique({ where: { guildId } });
+    return row ? { userId: row.firstUserId, at: row.firstAt } : null;
+}
+
 /** A trainer's own Specials page `page`, from the database. */
 export async function mySpecialsView(guildId: string, discordUserId: string, page: number, now: Date = new Date()) {
     const [tally, lockedSets, boosts, settings, fortunes] = await Promise.all([
@@ -311,13 +326,13 @@ export async function mySpecialsView(guildId: string, discordUserId: string, pag
         getUserSettings(guildId, discordUserId),
         fortuneTally(guildId, discordUserId),
     ]);
-    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts }, now, { fortunes });
+    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts }, now, { fortunes, firstVictor: await firstVictor(guildId) });
 }
 
 /** The server's Specials page `page` (Club Managers), from the database. */
 export async function serverSpecialsView(guildId: string, page: number, now: Date = new Date()) {
-    const [tally, fortunes] = await Promise.all([rareTally(guildId), fortuneTally(guildId)]);
-    return specialsView(tally, page, undefined, now, { fortunes });
+    const [tally, fortunes, victor] = await Promise.all([rareTally(guildId), fortuneTally(guildId), firstVictor(guildId)]);
+    return specialsView(tally, page, undefined, now, { fortunes, firstVictor: victor });
 }
 
 /** The page of `setId` in the Specials list (Set 1 is page 1), or the first page. */
