@@ -496,6 +496,10 @@ async function main() {
     check('ramonu: the lesson schedules the Rehearsal 11 runs out (pick 0.4), with no boost', [await stateOf(), await rares.activeBoosts(OG, T)], [{ guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 11, losingStreak: [] }, []]);
     check('ramonu: the pick covers runs 1 to 25', [0, 0.04, 0.5, 0.9999].map((x) => 1 + Math.min(24, Math.floor(x * 25))), [1, 2, 13, 25]);
     check('schedule: not due yet, so no guarantee', rares.guaranteedOpener(await stateOf(), [], []), undefined);
+    // No Ramonu until her Rehearsal is passed (owner, 2026-11-15): out of every pool while it is owed.
+    const mejiroLines = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
+    const hasRamonu = async () => (await rares.trainerPool(OG, T, mejiroLines)).includes(ramonu.text);
+    check('held: no Ramonu while her lesson is scheduled', await hasRamonu(), false);
     const currenSpecial = openers.specialById('set1.curren')!;
     check('schedule: a guarantee fires only on its run (shown on a live set)', [rares.guaranteedOpener({ guaranteedSpecialId: 'set1.curren', guaranteedInRuns: 2, losingStreak: [] }, [], []), rares.guaranteedOpener({ guaranteedSpecialId: 'set1.curren', guaranteedInRuns: 1, losingStreak: [] }, [], [])], [undefined, currenSpecial.text]);
     await ping(PING_OPENERS[0]!, 0.5);
@@ -528,6 +532,7 @@ async function main() {
 
     // The Rehearsal comes up: the schedule is fulfilled; a loss guarantees the next ping.
     const lost1 = await ping(rehearsal.text, 0.5);
+    check('held: still no Ramonu after a lost lesson', await hasRamonu(), false);
     check('rehearsal: a loss starts the streak and guarantees the next ping', [lost1?.mishap, await stateOf()], ['tail', { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] }]);
     await ping(ramonu.text, 0.1, 0.9);
     check('ramonu: a lesson during a losing streak schedules nothing new', await stateOf(), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] });
@@ -538,10 +543,14 @@ async function main() {
     const lost3 = await ping(rehearsal.text, 0.5);
     check('rehearsal: three losses are the tail, the dress and the feet, once each', [lost1?.mishap, lost2?.mishap, lost3?.mishap], ['tail', 'dress', 'feet']);
     check('rehearsal: still guaranteed after the third loss', (await rares.outcomeState(OG, T)).guaranteedSpecialId, 'mejiro.rehearsal');
+    check('held: still no Ramonu mid losing streak', await hasRamonu(), false);
     const forced = await ping(rehearsal.text, 0.1);
+    check('held: Ramonu is back once the lesson is passed (here, forced)', await hasRamonu(), true);
     check('rehearsal: the 4th lesson is a forced success; streak and guarantee reset; no boost', [forced?.forced, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).map((b) => b.key)], [true, { guaranteedSpecialId: null, guaranteedInRuns: 1, losingStreak: [] }, ['mejiro.ramonu:footwork']]);
     await ping(rehearsal.text, 0.6);
+    check('held: a lost lesson takes Ramonu away again', await hasRamonu(), false);
     const won = await ping(rehearsal.text, 0.2);
+    check('held: a won lesson brings Ramonu back', await hasRamonu(), true);
     check('rehearsal: a win resets the streak, clears the guarantee, and adds +3% any Mejiro line', [won?.outcome, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).find((b) => b.key === 'mejiro.rehearsal:win')?.runsLeft], ['win', { guaranteedSpecialId: null, guaranteedInRuns: 1, losingStreak: [] }, 25]);
     check('rehearsal: the next loss can be the tail again (a new streak)', (await ping(rehearsal.text, 0.5))?.mishap, 'tail');
 

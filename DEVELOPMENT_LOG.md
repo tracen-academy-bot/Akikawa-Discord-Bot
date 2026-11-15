@@ -17,6 +17,10 @@ Newest first. Each entry records what changed and, more importantly, why.
   guarantee whose set is off or paused waits). A loss sets it to 1.
 - Outcome boosts no longer stack: `grantOutcomeBoost` tops a repeat up to
   its full runs instead of adding them.
+- No Ramonu until her lesson is passed: `Special.heldUntilPassed`;
+  `trainerPool` leaves a held line out of every pool (base and boosts)
+  while the trainer owes that special (scheduled, guaranteed, or mid
+  losing streak). A win or the forced success brings her back.
 
 ---
 
