@@ -90,6 +90,13 @@ export interface SpecialOutcome {
      * guaranteed by a loss): it does not stack.
      */
     schedule?: { special: string; within: number };
+    /**
+     * Guarantees the trainer's next run is a guest (`Special.guest`) they have
+     * not met, at random; once they have met them all, any guest. Never the
+     * special that rolled it (no chaining into itself). Only when no other
+     * guarantee is pending; a lesson (`schedule`) always wins over it.
+     */
+    guaranteeGuest?: boolean;
     /** A win: the losing streak goes back to 0. */
     win?: boolean;
     /** A loss: adds its mishap to the streak and guarantees the trainer's next ping is this special again. */
@@ -248,6 +255,20 @@ const REHEARSAL_OUTCOMES: readonly SpecialOutcome[] = [
     },
 ];
 
+/**
+ * Daitaku Helios's after-party (owner, 2026-11-15): every time, Palmer is
+ * talked into introducing the trainer to another guest, so their next run
+ * is a guest they have not met (any guest, once they have met them all).
+ */
+const HELIOS_OUTCOMES: readonly SpecialOutcome[] = [
+    {
+        id: 'introductions',
+        weight: 1,
+        footer: "-# Despite being initially confused by both Helios's more... special taste in music and her slang, the Mejiros warmed up and had a good time. Helios even convinced Palmer to introduce you to the other guests in the house!",
+        guaranteeGuest: true,
+    },
+];
+
 const REHEARSAL_FORCED: ForcedSuccess = {
     after: 3,
     text: "Finally, {user} succeeded in not failing. Ramonu couldn't help but crack a tiny smile, amused by how pleased you were with yourself... and, secretly, already missing your clumsiness.",
@@ -324,7 +345,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             // An extra (owner, 2026-11-15): only through Ramonu's lesson boost or a lost lesson's guarantee.
             { id: 'mejiro.rehearsal', name: "Ramonu's Remedial Rehearsal", text: "Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?", after: ['mejiro.ramonu'], extra: true, outcomes: REHEARSAL_OUTCOMES, forcedSuccess: REHEARSAL_FORCED },
             // Guests (owner, 2026-11-15): extras of their own, only through the guest slice (`guestSlice`), once the Family Photograph is found.
-            { id: "guest.helios", name: "Daitaku Helios", text: "Weeei, Tore-pi! Surprise~! ...What do you mean you didn't expect me?! #DJHelios is obviously always everywhere! Anyways, Pama-chin wanted a dance party, and for her テンアゲ playlist to be heard by the other Meji-uwus too! That's why I got her to sneak my decks into the ballroom, and Grandmother said \"one hour\". よいちょまる, that's basically forever! Can't wait to see everyone surprised! {user}, get on the floor, Pama-chin's already age-age! #MejiroAfterParty #ZuttomoDJ", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.helios", name: "Daitaku Helios", text: "Weeei, Tore-pippi! SURPRIIISE~☆ ...Huh? You didn't expect me?! ぴえん... #DJHelios is literally everywhere, no cap! Okok, so why am I here? Pama-chin was like \"I wanna party\", and also like \"my テンアゲ playlist deserves to be heard by ALL the Meji-uwus!\", and I was like, say less! So I made her smuggle my decks into the ballroom, and Grandmother said \"one hour\". ONE HOUR?! よいちょまる, that's basically a #MusicalEternity, frfr! The whole Estate's gonna be shook, ya know! Oh, it's timeeeee! {user}, get on the floor, Pama-chin's already mega age-age! #MejiroAfterParty #ZuttomoDJ #BakunigeBPM", after: ['mejiro.photo'], extra: true, guest: true, outcomes: HELIOS_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
             { id: "guest.satono", name: "Satono Diamond & Kitasan Black", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!\"\nDiamond: \"Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?\"", after: ['mejiro.photo'], extra: true, guest: true },
             { id: "guest.goldship", name: "Gold Ship", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.photo'], extra: true, guest: true },
             { id: "guest.symboli", name: "Symboli Rudolf & Sirius Symboli", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm, so that will be all.\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had better not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true },
@@ -523,6 +544,7 @@ export interface RolledOutcome {
     footer: string;
     boost?: OutcomeBoost;
     schedule?: { special: string; within: number };
+    guaranteeGuest?: boolean;
     win: boolean;
     lose: boolean;
 }
@@ -569,6 +591,7 @@ export function rollOutcome(special: Special, r: number, streak: readonly string
         footer: mishap?.footer ?? picked.footer ?? '',
         ...(picked.boost ? { boost: picked.boost } : {}),
         ...(picked.schedule ? { schedule: picked.schedule } : {}),
+        ...(picked.guaranteeGuest ? { guaranteeGuest: true } : {}),
         win: picked.win ?? false,
         lose: picked.lose ?? false,
     };

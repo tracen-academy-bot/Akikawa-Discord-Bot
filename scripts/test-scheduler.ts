@@ -603,7 +603,7 @@ async function main() {
         true,
     ]);
     check('guests: exactly one {user} each', guests.map((g) => g.text.split('{user}').length - 1), [1, 1, 1, 1, 1]);
-    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#DJHelios', '#MejiroAfterParty', '#ZuttomoDJ'], true, ['Diamond', 'Kitasan', 'Diamond'], ['Rudolf', 'Sirius', 'Ramonu']]);
+    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#DJHelios', '#MusicalEternity', '#MejiroAfterParty', '#ZuttomoDJ', '#BakunigeBPM'], true, ['Diamond', 'Kitasan', 'Diamond'], ['Rudolf', 'Sirius', 'Ramonu']]);
     const guestTexts = guests.map((g) => g.text);
     const hasGuest = (pool: readonly string[]) => pool.some((t) => guestTexts.includes(t));
     const mejiroLinesLive = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
@@ -639,6 +639,27 @@ async function main() {
         await rares.recordRareOpener(GG, GT, openers.specialById('guest.satono')!.text);
         check('guest slice: shrinks as guests are found (3.2% after one)', (await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).map((e) => near(e.chance, 0.032)), [true]);
     }
+    // Helios's introductions (owner, 2026-11-15): the next run is a guest not yet met; never while a Rehearsal is owed.
+    const helios = openers.specialById('guest.helios')!;
+    const intro = openers.rollOutcome(helios, 0.5)!;
+    check('helios: every time, introductions: a guaranteed guest, with the footer', [intro.outcome, intro.guaranteeGuest, intro.footer.startsWith('-# Despite being initially confused by both Helios'), intro.footer.endsWith('introduce you to the other guests in the house!'), helios.heldUntilPassed], ['introductions', true, true, true, 'mejiro.rehearsal']);
+    const HG = `test-helios-${Date.now()}`;
+    for (const id of ['set1.mejiro', grandma.id, ...seven, photo.id, 'guest.helios']) await rares.recordRareOpener(HG, 'h1', openers.specialById(id)!.text);
+    await rares.applyOutcome(HG, 'h1', helios.text, intro, () => 0);
+    const unmetFirst = guestIds.filter((id) => id !== 'guest.helios')[0];
+    check('helios: the next run is a guest not yet met (never Helios)', await rares.outcomeState(HG, 'h1'), { guaranteedSpecialId: unmetFirst, guaranteedInRuns: 1, losingStreak: [] });
+    await rares.applyOutcome(HG, 'h1', openers.specialById(unmetFirst!)!.text, null);
+    for (const id of guestIds) await rares.recordRareOpener(HG, 'h1', openers.specialById(id)!.text);
+    await rares.applyOutcome(HG, 'h1', helios.text, intro, () => 0.999);
+    const allMet = (await rares.outcomeState(HG, 'h1')).guaranteedSpecialId;
+    check('helios: once every guest is met, any guest but Helios', [guestIds.includes(allMet!), allMet === 'guest.helios'], [true, false]);
+    // Ramonu's lesson overrides a pending guest guarantee.
+    await rares.applyOutcome(HG, 'h1', ramonu.text, openers.rollOutcome(ramonu, 0.1), () => 0);
+    check('helios: Ramonu\'s lesson overrides a pending guest guarantee', await rares.outcomeState(HG, 'h1'), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: [] });
+    check('helios: no Helios while a Rehearsal is owed', (await rares.trainerPool(HG, 'h1', guestTexts)).includes(helios.text), false);
+    await rares.applyOutcome(HG, 'h1', helios.text, intro, () => 0);
+    check('helios: introductions do nothing while a Rehearsal is owed', (await rares.outcomeState(HG, 'h1')).guaranteedSpecialId, 'mejiro.rehearsal');
+
     // Counts and completion: guests never count, but score.
     const GB = `${GG}-board`;
     for (const t of nine) await rares.recordRareOpener(GB, 'g-all', t);

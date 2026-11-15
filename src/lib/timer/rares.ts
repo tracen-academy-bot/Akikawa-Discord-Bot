@@ -402,10 +402,25 @@ export async function applyOutcome(
         guaranteedSpecialId = specialId;
         guaranteedInRuns = 1;
     }
-    // A schedule never stacks: not while one is pending or a losing streak runs.
-    if (rolled?.schedule && !guaranteedSpecialId && losingStreak.length === 0) {
+    // A schedule never stacks (not while that special is owed: scheduled,
+    // guaranteed, or a losing streak runs), but it overrides any other
+    // pending guarantee: Ramonu's lesson always wins (owner, 2026-11-15).
+    if (rolled?.schedule && guaranteedSpecialId !== rolled.schedule.special && losingStreak.length === 0) {
         guaranteedSpecialId = rolled.schedule.special;
         guaranteedInRuns = 1 + Math.min(rolled.schedule.within - 1, Math.floor(random() * rolled.schedule.within));
+    }
+    // Helios's introductions: the next run is a guest not yet met (any guest
+    // once all are met), never the one that rolled it; only if nothing else
+    // is pending.
+    if (rolled?.guaranteeGuest && !guaranteedSpecialId && losingStreak.length === 0) {
+        const found = await foundSpecialIds(guildId, discordUserId);
+        const guests = RARE_OPENERS.filter((o) => o.guest && o.id !== specialId);
+        const unmet = guests.filter((o) => !found.has(o.id));
+        const from = unmet.length > 0 ? unmet : guests;
+        if (from.length > 0) {
+            guaranteedSpecialId = from[Math.min(from.length - 1, Math.floor(random() * from.length))]!.id;
+            guaranteedInRuns = 1;
+        }
     }
     const sameRuns = (guaranteedInRuns ?? 1) === state.guaranteedInRuns;
     if (guaranteedSpecialId === state.guaranteedSpecialId && sameRuns && JSON.stringify(losingStreak) === JSON.stringify(state.losingStreak)) return;
