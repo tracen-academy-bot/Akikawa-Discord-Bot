@@ -87,6 +87,12 @@ export async function extraChances(
         }
         const special = buff.specialId ? specialById(buff.specialId) : undefined;
         if (!special || !usable(special.set)) continue;
+        // Ends with the server's first Ramonu's Second Love; its end is never shown.
+        if (buff.endsOnSecondLove) {
+            if (await prisma.timerSecondLove.findUnique({ where: { guildId } })) continue;
+            extras.push({ chance: buff.chance, pool: [special.text], label: buff.label });
+            continue;
+        }
         const unlocksDone = SPECIAL_SETS.some((s) => s.requires === buff.specialId && !lockedSets.includes(s.id));
         if (unlocksDone) continue;
         extras.push({ chance: buff.chance, pool: [special.text], label: `${buff.label} Ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>.` });

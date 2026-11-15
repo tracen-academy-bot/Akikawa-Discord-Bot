@@ -259,6 +259,10 @@ async function setRole(guild: Guild, userId: string, roleId: string, give: boole
  * text without the role footer.
  */
 export async function grantSecondLove(guild: Guild | null, guildId: string, userId: string): Promise<{ roleId: string; had: boolean } | null> {
+    // The server's first forced success ends Ramonu's own buff (`SeasonalBuff.endsOnSecondLove`).
+    await prisma.timerSecondLove
+        .upsert({ where: { guildId }, create: { guildId, firstUserId: userId }, update: {} })
+        .catch((e) => console.warn(`Ramonu's Second Love: could not record the first for ${guildId}:`, e instanceof Error ? e.message : e));
     const roleId = (await getTimerSettings(guildId).catch(() => null))?.secondLoveRoleId ?? null;
     if (!roleId) {
         console.warn(`Ramonu's Second Love: no role set for guild ${guildId} (/timer rewards second_love_role); ${userId} earned it.`);

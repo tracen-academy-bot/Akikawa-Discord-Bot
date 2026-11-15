@@ -576,3 +576,12 @@ model WelcomeSettings {
     boosts    Boolean  @default(true)
     updatedAt DateTime @updatedAt
 }
+
+/// The first trainer on a server to earn Ramonu's Second Love (a forced
+/// success at her Remedial Rehearsal). Ends Ramonu's own buff (owner,
+/// 2026-11-15); the role stays earnable.
+model TimerSecondLove {
+    guildId     String   @id
+    firstUserId String
+    firstAt     DateTime @default(now())
+}

@@ -424,6 +424,12 @@ export interface SeasonalBuff {
     specialId?: string;
     setId?: string;
     chance: number;
+    /**
+     * Ends the moment the server's first trainer earns Ramonu's Second Love
+     * (`TimerSecondLove`) instead of at a shown time: its Boosts label shows
+     * no end (owner, 2026-11-15). `until` is then only a far-off backstop.
+     */
+    endsOnSecondLove?: boolean;
     from: Date;
     until: Date;
 }
@@ -440,7 +446,8 @@ export const SEASONAL_BUFFS: readonly SeasonalBuff[] = [
     { label: "Mejiro week: the Estate's invitation is waiting in the lobby!", specialId: 'set1.mejiro', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
     { label: 'Mejiro week: Come meet the Mejiros at the Estate!', setId: 'mejiro-estate', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
     // And Ramonu's own +2% for the week (owner, 2026-11-15); none while a Remedial Rehearsal is owed (she is held then).
-    { label: 'Mejiro Ramonu: You stayed when it mattered. So come closer, my second love... let me show you what I race for.', specialId: 'mejiro.ramonu', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
+    // Until the server's first Ramonu's Second Love, not shown (owner, 2026-11-15); the role stays earnable after, just harder.
+    { label: 'Mejiro Ramonu: You stayed when it mattered. So come closer, my second love... let me show you what I race for.', specialId: 'mejiro.ramonu', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2099-01-01T00:00:00Z'), endsOnSecondLove: true },
 ];
 
 /** The seasonal buffs (of `buffs`, by default all) running at `now`. */
