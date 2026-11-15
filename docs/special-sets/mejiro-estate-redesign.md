@@ -170,16 +170,82 @@ You came to fetch me for... the party? Oh, right. I'll be down in a moment~ But 
   The owner then cut the scarf stage cue (too long) for "Oh, what was I
   measuring?", which reads as Bright, half asleep, forgetting mid-task.
 
-### 8. Mejiro Ramonu (Tune)
+### 8. Mejiro Ramonu (Rework; the owner's text)
 
 ```text
-{user}. Good; you'll do. Offer me your arm. ...A Mejiro does not walk into her own family's gathering alone, least of all dressed like this. Look, if you like. Ardan is dancing tonight; isn't she lovely? Do try to keep up with her. And do remember: you are my second love. The first is waiting for me on the turf.
+Ah, {user}. Your arrival is appreciated. Offer me your arm. Mmm... you're warm.
+...Still thinking about our training analysis? How... boorish of you. First the Symbolis, and now this. Eyes here, if you please. ...There we go. Good. Look all you want; I did *not* dress like this for no one, after all.
+Ardan is dancing tonight, you see. Isn't her stubbornness lovely? You had better keep up too. The track can wait until tomorrow... tonight, it's just you and me.
 ```
 
-- Was: her escort voice line almost word for word.
-- Now: the escort demand paraphrased; added her amused, possessive pride
-  in Ardan ("Ardan is lovely, isn't she?", her own line), which ties into
-  Ardan's dance.
+Then **one outcome**, rolled each time this line comes up:
+
+| Chance | Footer | Effect |
+| --- | --- | --- |
+| 75% | `-# Ramonu is still not quite satisfied with how distracted you were, and has insisted you join her next dance practice. For the next 25 runs, gain a 10% chance of Ramonu's Remedial Rehearsal, until she has had her lesson.` | +10% Remedial Rehearsal for 25 runs; ends as soon as the Rehearsal comes up (one-time). |
+| 25% | `-# Ramonu remains unimpressed... but your footwork convinced her your attention was where it belonged. For the next 50 runs, gain a 5% chance of meeting another Mejiro.` | +5% Mejiro lines for 50 runs. |
+
+- Canon: boorishness (無粋) is her weak spot, with the trainer still working
+  on a beautiful night as the example (voice 91023); she invites being
+  looked at (91029); she demands an escort (91028). The trainer-bound beat
+  is her catching them distracted.
+- "The track can wait until tomorrow... tonight, it's just you and me":
+  her first love is racing (40004), so this is the line's reveal.
+- Ties: "First the Symbolis" sets up the Symboli guest visit; "Isn't her
+  stubbornness lovely?" pays off Ardan (UKronis's read).
+- Edits to the owner's text: the second `{user}` became "You had better
+  keep up too"; "Hey. Eyes here please" became "Eyes here, if you
+  please"; "dress to impress nobody" became "dress like this for no one";
+  "The track can wait tomorrow" became "until tomorrow".
+
+### 8b. Ramonu's Remedial Rehearsal (an extra; the owner's design)
+
+Unlocked by meeting Ramonu (not by the photo, unlike the guests). Does not
+count toward set completion; its own points like the guests (15 new, 3
+repeat).
+
+```text
+Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?
+```
+
+Then **50/50**:
+
+| Outcome | Footer | Effect |
+| --- | --- | --- |
+| Win | `-# Your practice paid off. As a pair, your steps flow a little smoother now. For the next 25 runs, gain a 3% chance of meeting another Mejiro.` | +3% Mejiro lines for 25 runs. |
+| Lose: tail | `-# You tried. Admittedly. You still stepped on her tail, and she was *displeased*. She has cleared your schedule: your next run ends in another lesson.` | The next ping is the Rehearsal again (guaranteed). |
+| Lose: dress | `-# You tried. Admittedly. You still caught the hem of her dress, and she was *displeased*. She has cleared your schedule: your next run ends in another lesson.` | Same. |
+| Lose: feet | `-# You tried. Admittedly. You still trod on her toes, and she was *displeased*. She has cleared your schedule: your next run ends in another lesson.` | Same. |
+
+- A loss picks one of the three mishaps (about 16.7% each), never one
+  already used in the current losing streak. So three losses in a row are
+  always the tail, the dress and the feet, once each.
+- **After three losses in a row, the 4th lesson is a forced success:**
+
+  ```text
+  Finally, {user} succeeded in not failing. Ramonu couldn't help but crack a tiny smile, amused by how pleased you were with yourself... and, secretly, already missing your clumsiness.
+  -# You obtained @Ramonu's Second Love.
+  ```
+
+  - The prize is the role **Ramonu's Second Love** (no Mejiro boost). If
+    the trainer already has it: `-# Ramonu's Second Love, still.`
+  - Optional, the owner's aside: a Ramonu-only reinvite on top (e.g. +3%
+    chance of Ramonu's line for 25 runs). Not decided.
+  - The name: racing is her first love (40004), so second is the highest a
+    person can rank; earned by being clumsy three times in a row.
+- The numbers: a trip reaches the role with $0.5^3 = 12.5\%$ (about one
+  trip in eight); lessons per trip average $1 + 0.5 + 0.25 + 0.125 =
+  1.875$, at most 4. A loss only costs the next ping (usually a reminder
+  line).
+- Build needs: the role created in Discord and given to the bot (a
+  setting or its ID); the bot needs Manage Roles, with its own role above
+  this one. New mechanics: a line that rolls one of several outcomes, a
+  boost on one special, a guaranteed next ping, and a losing streak count.
+- Edits to the owner's text: "[worriedness]" read as distraction; "[another
+  meeting in the Estate]" as any Mejiro line; "sleep over" became "cleared
+  your schedule: your next run ends in another lesson"; "your celebratory
+  state" became "how pleased you were with yourself"; "obtain {role}"
+  became "You obtained @Ramonu's Second Love".
 
 ### 9. The Family Photograph (from the planned rework)
 
