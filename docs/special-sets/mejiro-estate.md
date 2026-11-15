@@ -165,13 +165,13 @@ dialogue is for guests only. Gold Ship and Teio use the owner's final copy
 - Specials page: after the 9 lines and the Rehearsal, as "**Guest.** ???"
   until found, then by name, readable from the read menu.
 
-### `guest.helios`: Daitaku Helios
+### `guest.helios`: #MejiroAfterParty
 
 ```text
 Weeei, Tore-pi! Surprise~! ...What do you mean you didn't expect me?! #DJHelios is obviously always everywhere! Anyways, Pama-chin wanted a dance party, and for her テンアゲ playlist to be heard by the other Meji-uwus too! That's why I got her to sneak my decks into the ballroom, and Grandmother said "one hour". よいちょまる, that's basically forever! Can't wait to see everyone surprised! {user}, get on the floor, Pama-chin's already age-age! #MejiroAfterParty #ZuttomoDJ
 ```
 
-### `guest.satono`: Satono Diamond & Kitasan Black
+### `guest.satono`: Satono & Kita
 
 ```text
 Diamond: "Good evening, {user}-san. McQueen-san invited the Satono house to dinner, along with some... discussions. Ah, you have informed McQueen-san... how thoughtful of you. Speaking of which, I may have brought a plus-one... fufu."
@@ -180,7 +180,7 @@ Diamond: "Kita-chan, it's a dinner party. ...ふむふむ. Then again, nobody ha
 McQueen: "Ah, right on time! Welcome to the Mejiro Estate. A festival? ...We shall see, desu wa. Thank you for greeting them for me, Trainer-san. Please, come in!"
 ```
 
-### `guest.goldship`: Gold Ship
+### `guest.goldship`: Golshi's Crashdown
 
 ```text
 Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.
@@ -188,7 +188,7 @@ Anyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQu
 Now listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!
 ```
 
-### `guest.symboli`: Symboli Rudolf & Sirius Symboli
+### `guest.symboli`: The Symboli-cs
 
 ```text
 Rudolf: "Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
@@ -196,7 +196,7 @@ Sirius: "...And that's why she calls them boring. Unbelievable. Evening, Trainer
 Ramonu: "*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that."
 ```
 
-### `guest.teio`: Tokai Teio
+### `guest.teio`: Teio's Tag-along
 
 ```text
 Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~

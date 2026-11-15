@@ -4,6 +4,14 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — Guest names
+
+- The Mejiro Estate's guests are listed under new names (owner; `name`
+  only, ids unchanged): #MejiroAfterParty (`guest.helios`), Satono & Kita,
+  Golshi's Crashdown, The Symboli-cs, Teio's Tag-along. Finds follow the id.
+
+---
+
 ## 2026-11-15 — Fuku-chan's Fortune Tent (opens 2026-11-22T15:00Z)
 
 - Design: `docs/special-sets/fortune-tent.md`, with the owner's decisions of

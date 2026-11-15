@@ -634,7 +634,7 @@ async function main() {
     const guestIds = guests.map((g) => g.id);
     check('guests: the five, in the Mejiro Estate, each an extra and a guest, after the photo', [guestIds, guests.map((g) => g.name), guests.every((g) => g.set === 'mejiro-estate' && g.extra === true && g.guest === true && JSON.stringify(g.after) === JSON.stringify(['mejiro.photo']))], [
         ['guest.helios', 'guest.satono', 'guest.goldship', 'guest.symboli', 'guest.teio'],
-        ['Daitaku Helios', 'Satono Diamond & Kitasan Black', 'Gold Ship', 'Symboli Rudolf & Sirius Symboli', 'Tokai Teio'],
+        ['#MejiroAfterParty', 'Satono & Kita', "Golshi's Crashdown", 'The Symboli-cs', "Teio's Tag-along"],
         true,
     ]);
     check('guests: exactly one {user} each', guests.map((g) => g.text.split('{user}').length - 1), [1, 1, 1, 1, 1]);
