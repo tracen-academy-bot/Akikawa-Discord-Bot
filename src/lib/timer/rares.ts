@@ -270,11 +270,20 @@ export async function closedSpecialsFor(guildId: string, discordUserId: string):
 /**
  * A trainer's special pool with every closed special redirected to what it
  * waits on (`redirectOpener`): before Grandmother's welcome, every Mejiro
- * line in the pool is her line.
+ * line in the pool is her line. Lines held until a special is passed
+ * (`Special.heldUntilPassed`) are left out while the trainer owes it.
  */
 export async function trainerPool(guildId: string, discordUserId: string, pool: readonly string[]): Promise<string[]> {
     const found = await foundSpecialIds(guildId, discordUserId);
-    return pool.map((t) => redirectOpener(t, found));
+    const state = await outcomeState(guildId, discordUserId);
+    // The special owed: scheduled or guaranteed, or mid losing streak (a streak belongs to the special with a forced success).
+    const streakOn = RARE_OPENERS.find((o) => o.forcedSuccess)?.id ?? null;
+    const owed = state.guaranteedSpecialId ?? (state.losingStreak.length > 0 ? streakOn : null);
+    const held = (t: string) => {
+        const holder = RARE_OPENERS.find((o) => o.text === t)?.heldUntilPassed;
+        return holder !== undefined && holder === owed;
+    };
+    return pool.map((t) => redirectOpener(t, found)).filter((t) => !held(t));
 }
 
 /**

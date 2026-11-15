@@ -121,6 +121,10 @@ read view. The odds are never shown.
   picked at random from the next 25, and comes up no other way; not while
   one is already pending or a losing streak runs); 25% footwork (+5% any
   Mejiro line for 50 runs).
+- **No Ramonu until the lesson is passed** (owner, 2026-11-15): while the
+  Rehearsal is scheduled, guaranteed, or a losing streak runs, Ramonu's own
+  line is out of every pool (`Special.heldUntilPassed`); a win or the
+  forced success brings her back.
 - **Outcome boosts do not stack** (owner, 2026-11-15): the same one again
   tops it back up to its full runs, never past them.
 - **Rehearsal**, 50/50: a win (+3% any Mejiro line for 25 runs, the losing
