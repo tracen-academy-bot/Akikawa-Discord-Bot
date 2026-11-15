@@ -438,7 +438,9 @@ export const SEASONAL_BUFFS: readonly SeasonalBuff[] = [
     // +2% on the invitation (the Mejiro Family line) until the Estate is
     // unlocked, then +2% on the Estate's lines.
     { label: "Mejiro week: the Estate's invitation is waiting in the lobby!", specialId: 'set1.mejiro', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
-    { label: 'Mejiro week: The Mejiro Estate, any of its lines!', setId: 'mejiro-estate', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
+    { label: 'Mejiro week: Come meet the Mejiros at the Estate!', setId: 'mejiro-estate', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
+    // And Ramonu's own +2% for the week (owner, 2026-11-15); none while a Remedial Rehearsal is owed (she is held then).
+    { label: 'Mejiro Ramonu: You stayed when it mattered. So come closer, my second love... let me show you what I race for.', specialId: 'mejiro.ramonu', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
 ];
 
 /** The seasonal buffs (of `buffs`, by default all) running at `now`. */

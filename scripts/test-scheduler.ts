@@ -356,6 +356,8 @@ async function main() {
     const mwLocked = await extraChances(XG, 'mw-new', mwBase, ['online-sensations', 'mejiro-estate'], false, fullPool, MW);
     const mwOpen = await extraChances(XG, 'mw-open', mwBase, ['online-sensations'], false, fullPool, MW);
     check('season: before the Estate opens, +2% on the invitation; after, +2% on its 9 lines', [mwLocked.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length]), mwOpen.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length])], [[[0.02, 1]], [[0.02, 9]]]);
+    check('season: Mejiro week also gives Ramonu her own +2% once the Estate is open', [mwLocked.some((e) => e.label?.startsWith('Mejiro Ramonu')), mwOpen.filter((e) => e.label?.startsWith('Mejiro Ramonu: You stayed when it mattered')).map((e) => [e.chance, e.pool.length, e.pool[0] === openers.specialById('mejiro.ramonu')!.text])], [false, [[0.02, 1, true]]]);
+    check('season: the Estate label', openers.SEASONAL_BUFFS[2]?.label, 'Mejiro week: Come meet the Mejiros at the Estate!');
     const buff = { label: 'Sample week', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-12-01T00:00:00Z'), until: new Date('2026-12-08T00:00:00Z') };
     const inSeason = new Date(buff.from.getTime() + 60_000);
     const currenText = RARE_OPENERS.find((o) => o.id === buff.specialId)!.text;
