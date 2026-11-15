@@ -83,6 +83,13 @@ export interface SpecialOutcome {
      */
     mishaps?: readonly { id: string; footer: string }[];
     boost?: OutcomeBoost;
+    /**
+     * Schedules `special` on a run picked at random from the next `within`
+     * runs (1 = the very next one): that ping is forced to be it, and it
+     * comes up no other way. Not while one is already pending (scheduled, or
+     * guaranteed by a loss): it does not stack.
+     */
+    schedule?: { special: string; within: number };
     /** A win: the losing streak goes back to 0. */
     win?: boolean;
     /** A loss: adds its mishap to the streak and guarantees the trainer's next ping is this special again. */
@@ -179,16 +186,17 @@ export interface SpecialSet {
 
 /**
  * Mejiro Ramonu's outcomes (owner, 2026-11-15): 75% she wants another
- * lesson (a one-time +10% Remedial Rehearsal for 25 runs, ended by the
- * Rehearsal), 25% your footwork passed (+5% any Mejiro line for 50 runs).
+ * lesson (the Remedial Rehearsal is scheduled on a run picked at random
+ * from the next 25; the only way to get it), 25% your footwork passed (+5%
+ * any Mejiro line for 50 runs).
  * The odds are never shown to trainers.
  */
 const RAMONU_OUTCOMES: readonly SpecialOutcome[] = [
     {
         id: 'lesson',
         weight: 3,
-        footer: "-# Ramonu is still not quite satisfied with how distracted you were, and has insisted you join her next dance practice. For the next 25 runs, gain a 10% chance of Ramonu's Remedial Rehearsal, until she has had her lesson.",
-        boost: { key: 'mejiro.ramonu:lesson', set: 'mejiro-estate', special: 'mejiro.rehearsal', chance: 0.1, runs: 25, endsOnHit: true, label: "Ramonu's Remedial Rehearsal, {runs}, until she has had her lesson." },
+        footer: "-# Ramonu is still not quite satisfied with how distracted you were, and has insisted you join her next dance practice. She will summon you for a lesson sometime in the next 25 runs.",
+        schedule: { special: 'mejiro.rehearsal', within: 25 },
     },
     {
         id: 'footwork',
@@ -457,6 +465,7 @@ export interface RolledOutcome {
     /** The footer to show, a "-#" template (empty for a forced success: see `outcomeLines`). */
     footer: string;
     boost?: OutcomeBoost;
+    schedule?: { special: string; within: number };
     win: boolean;
     lose: boolean;
 }
@@ -502,6 +511,7 @@ export function rollOutcome(special: Special, r: number, streak: readonly string
         forced: false,
         footer: mishap?.footer ?? picked.footer ?? '',
         ...(picked.boost ? { boost: picked.boost } : {}),
+        ...(picked.schedule ? { schedule: picked.schedule } : {}),
         win: picked.win ?? false,
         lose: picked.lose ?? false,
     };

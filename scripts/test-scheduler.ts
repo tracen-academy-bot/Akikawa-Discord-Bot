@@ -457,7 +457,7 @@ async function main() {
     check('outcomes: a special without outcomes rolls nothing', openers.rollOutcome(grandma, 0.3), null);
     const lesson = openers.rollOutcome(ramonu, 0.1)!;
     const footwork = openers.rollOutcome(ramonu, 0.9)!;
-    check('outcomes: Ramonu\'s lesson is +10% Rehearsal for 25 runs, one-time', [lesson.boost?.special, lesson.boost?.chance, lesson.boost?.runs, lesson.boost?.endsOnHit, lesson.footer.startsWith('-# Ramonu is still not quite satisfied'), lesson.footer.includes('gain a 10% chance of Ramonu\'s Remedial Rehearsal, until she has had her lesson.')], ['mejiro.rehearsal', 0.1, 25, true, true, true]);
+    check('outcomes: Ramonu\'s lesson schedules the Rehearsal within 25 runs, with no boost', [lesson.schedule, lesson.boost, lesson.footer.startsWith('-# Ramonu is still not quite satisfied'), lesson.footer.endsWith('She will summon you for a lesson sometime in the next 25 runs.')], [{ special: 'mejiro.rehearsal', within: 25 }, undefined, true, true]);
     check('outcomes: Ramonu\'s footwork is +5% any Mejiro line for 50 runs', [footwork.boost?.special, footwork.boost?.set, footwork.boost?.chance, footwork.boost?.runs, footwork.boost?.endsOnHit ?? false, footwork.footer.endsWith('gain a 5% chance of meeting another Mejiro.')], [undefined, 'mejiro-estate', 0.05, 50, false, true]);
     check('outcomes: the odds are never in a footer', [...(ramonu.outcomes ?? []), ...(rehearsal.outcomes ?? [])].some((o) => /75%|25%|50%/.test(o.footer ?? '')), false);
     check('rehearsal: an extra, out of the base pool and every set-wide pool', [rehearsal.extra, openers.rarePoolFor([], []).includes(rehearsal.text), openers.setLinesPool('mejiro-estate'), RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).length], [true, false, [], 9]);
@@ -475,33 +475,42 @@ async function main() {
     // The Boosts storage and mechanics, through the database.
     const OG = `test-outcomes-${Date.now()}`;
     const T = 'o1';
-    const rehearsalOnly = [{ set: 'mejiro-estate', special: 'mejiro.rehearsal' }];
-    const ping = async (opener: string, r: number) => {
-        // As the scheduler does after a ping: spend, record, end one-time boosts, apply the outcome.
+    const ping = async (opener: string, r: number, pick = 0.4) => {
+        // As the scheduler does after a ping: spend, count the guarantee down, record, end one-time boosts, apply the outcome.
         const state = await rares.outcomeState(OG, T);
         const special = openers.specialByText(opener);
         const rolled = special ? openers.rollOutcome(special, r, state.losingStreak) : null;
         await rares.spendBoosts(OG, T);
-        await rares.recordRareOpener(OG, T, opener);
-        await rares.endBoostsHitBy(OG, T, opener);
-        await rares.applyOutcome(OG, T, opener, rolled);
+        await rares.tickGuarantee(OG, T, opener);
+        if (openers.specialIdOf(opener)) {
+            await rares.recordRareOpener(OG, T, opener);
+            await rares.endBoostsHitBy(OG, T, opener);
+            await rares.applyOutcome(OG, T, opener, rolled, () => pick);
+        }
         return rolled;
     };
+    const stateOf = () => rares.outcomeState(OG, T);
     for (const id of ['mejiro.grandmother', 'mejiro.mcqueen']) await rares.recordRareOpener(OG, T, openers.specialById(id)!.text);
-    await ping(ramonu.text, 0.1);
-    const afterLesson = await rares.activeBoosts(OG, T);
-    check('ramonu: the lesson outcome stores a one-time Rehearsal boost', afterLesson, [{ setId: 'mejiro-estate', runsLeft: 25, key: 'mejiro.ramonu:lesson', specialId: 'mejiro.rehearsal', chance: 0.1, endsOnHit: true }]);
+    // Ramonu's lesson (owner, 2026-11-15): the Rehearsal on a run picked at random from the next 25; no boost, no stacking.
+    await ping(ramonu.text, 0.1, 0.4);
+    check('ramonu: the lesson schedules the Rehearsal 11 runs out (pick 0.4), with no boost', [await stateOf(), await rares.activeBoosts(OG, T)], [{ guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 11, losingStreak: [] }, []]);
+    check('ramonu: the pick covers runs 1 to 25', [0, 0.04, 0.5, 0.9999].map((x) => 1 + Math.min(24, Math.floor(x * 25))), [1, 2, 13, 25]);
+    check('schedule: not due yet, so no guarantee', rares.guaranteedOpener(await stateOf(), [], []), undefined);
+    const currenSpecial = openers.specialById('set1.curren')!;
+    check('schedule: a guarantee fires only on its run (shown on a live set)', [rares.guaranteedOpener({ guaranteedSpecialId: 'set1.curren', guaranteedInRuns: 2, losingStreak: [] }, [], []), rares.guaranteedOpener({ guaranteedSpecialId: 'set1.curren', guaranteedInRuns: 1, losingStreak: [] }, [], [])], [undefined, currenSpecial.text]);
+    await ping(PING_OPENERS[0]!, 0.5);
+    check('schedule: every other ping counts it down', (await stateOf()).guaranteedInRuns, 10);
     const usable = { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] as string[] };
     const NOT_OS = ['online-sensations'];
-    check('ramonu: while the set is paused, the boost gives nothing', await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON), []);
-    check('boosts view label: the lesson, with runs left', openers.outcomeBoostLabel(openers.outcomeBoostByKey(afterLesson[0]!.key!)!, 25), "Ramonu's Remedial Rehearsal, 25 runs left, until she has had her lesson.");
-    check('ramonu: its boost pool, built directly, is the Rehearsal, open once Ramonu is found', await rares.trainerPool(OG, T, rehearsalOnly.map((b) => openers.specialById(b.special)!.text)), [rehearsal.text]);
-    await ping(PING_OPENERS[0]!, 0.5);
-    check('ramonu: the boost ticks down like the others', (await rares.activeBoosts(OG, T))[0]?.runsLeft, 24);
     await ping(ramonu.text, 0.9);
-    const both = await rares.activeBoosts(OG, T);
-    check('ramonu: footwork adds +5% any Mejiro line for 50 runs beside it', both.map((b) => [b.key, b.runsLeft, b.chance, b.specialId ?? null]), [['mejiro.ramonu:footwork', 50, 0.05, null], ['mejiro.ramonu:lesson', 23, 0.1, 'mejiro.rehearsal']]);
-    check('boosts view labels: any Mejiro line, one run, the win', [openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.ramonu:footwork')!, 50), openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.ramonu:lesson')!, 1), openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.rehearsal:win')!, 25)], ['The Mejiro Estate: any Mejiro line, 50 runs left.', "Ramonu's Remedial Rehearsal, 1 run left, until she has had her lesson.", 'The Mejiro Estate: any Mejiro line, 25 runs left, after a lesson well learned.']);
+    check('ramonu: footwork adds +5% any Mejiro line for 50 runs; the schedule keeps counting', [(await rares.activeBoosts(OG, T)).map((b) => [b.key, b.runsLeft, b.chance, b.specialId ?? null]), (await stateOf()).guaranteedInRuns], [[['mejiro.ramonu:footwork', 50, 0.05, null]], 9]);
+    await ping(ramonu.text, 0.1, 0.99);
+    check('ramonu: a second lesson does not stack or move the pending one', await stateOf(), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 8, losingStreak: [] });
+    await ping(ramonu.text, 0.9);
+    check('boosts: outcome boosts do not stack; a repeat tops up to full', (await rares.activeBoosts(OG, T)).find((b) => b.key === 'mejiro.ramonu:footwork')?.runsLeft, 50);
+    check('boosts view labels: any Mejiro line, the win', [openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.ramonu:footwork')!, 50), openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.rehearsal:win')!, 25)], ['The Mejiro Estate: any Mejiro line, 50 runs left.', 'The Mejiro Estate: any Mejiro line, 25 runs left, after a lesson well learned.']);
+    for (let k = 0; k < 10; k += 1) await ping(PING_OPENERS[0]!, 0.5);
+    check('schedule: counts down to 1 and stays due (the set is paused, so it waits)', (await stateOf()).guaranteedInRuns, 1);
     check('boosts: outcome boosts give nothing while paused, with Boosts off, or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length], [0, 0, 0]);
     // The same storage on a set that is not paused (stored by hand: no Set 1 line has outcomes).
     const UG = `${OG}-live`;
@@ -515,12 +524,13 @@ async function main() {
     check('boosts: a one-time boost on a live set ends on its hit, the other stays', (await rares.activeBoosts(UG, T)).map((b) => b.key), ['test:set']);
     await prisma.timerSpecialBoost.deleteMany({ where: { guildId: UG } });
     const footer = json(await rares.mySpecialsView(OG, T, 3)).embeds[0]!.footer?.text.split('\n') ?? [];
-    check('specials: outcome boosts in the footer', [footer.includes('Boost: +5% The Mejiro Estate for 50 more runs.'), footer.includes("Boost: +10% Ramonu's Remedial Rehearsal for 23 more runs.")], [true, true]);
+    check('specials: outcome boosts in the footer', footer.some((l) => l.startsWith('Boost: +5% The Mejiro Estate for ')), true);
 
-    // The Rehearsal comes up: the one-time boost ends; a loss guarantees the next ping.
+    // The Rehearsal comes up: the schedule is fulfilled; a loss guarantees the next ping.
     const lost1 = await ping(rehearsal.text, 0.5);
-    check('rehearsal: the one-time boost ends as soon as it comes up', (await rares.activeBoosts(OG, T)).map((b) => b.key), ['mejiro.ramonu:footwork']);
-    check('rehearsal: a loss starts the streak and guarantees the next ping', [lost1?.mishap, await rares.outcomeState(OG, T)], ['tail', { guaranteedSpecialId: 'mejiro.rehearsal', losingStreak: ['tail'] }]);
+    check('rehearsal: a loss starts the streak and guarantees the next ping', [lost1?.mishap, await stateOf()], ['tail', { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] }]);
+    await ping(ramonu.text, 0.1, 0.9);
+    check('ramonu: a lesson during a losing streak schedules nothing new', await stateOf(), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] });
     const st = await rares.outcomeState(OG, T);
     check('guarantee: not while the set is paused (or off, or locked)', [rares.guaranteedOpener(st, [], []), rares.guaranteedOpener(st, ['mejiro-estate'], []), rares.guaranteedOpener(st, [], ['mejiro-estate'])], [undefined, undefined, undefined]);
     check('guarantee: chooseOpener honours it, whatever the roll and before any boost', [await rares.chooseOpener(OG, T, 0.99, fullPool, [], PING_OPENERS, rehearsal.text), await rares.chooseOpener(OG, T, 0.001, fullPool, extras, PING_OPENERS, rehearsal.text)], [rehearsal.text, rehearsal.text]);
@@ -529,10 +539,10 @@ async function main() {
     check('rehearsal: three losses are the tail, the dress and the feet, once each', [lost1?.mishap, lost2?.mishap, lost3?.mishap], ['tail', 'dress', 'feet']);
     check('rehearsal: still guaranteed after the third loss', (await rares.outcomeState(OG, T)).guaranteedSpecialId, 'mejiro.rehearsal');
     const forced = await ping(rehearsal.text, 0.1);
-    check('rehearsal: the 4th lesson is a forced success; streak and guarantee reset; no boost', [forced?.forced, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).map((b) => b.key)], [true, { guaranteedSpecialId: null, losingStreak: [] }, ['mejiro.ramonu:footwork']]);
+    check('rehearsal: the 4th lesson is a forced success; streak and guarantee reset; no boost', [forced?.forced, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).map((b) => b.key)], [true, { guaranteedSpecialId: null, guaranteedInRuns: 1, losingStreak: [] }, ['mejiro.ramonu:footwork']]);
     await ping(rehearsal.text, 0.6);
     const won = await ping(rehearsal.text, 0.2);
-    check('rehearsal: a win resets the streak, clears the guarantee, and adds +3% any Mejiro line', [won?.outcome, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).find((b) => b.key === 'mejiro.rehearsal:win')?.runsLeft], ['win', { guaranteedSpecialId: null, losingStreak: [] }, 25]);
+    check('rehearsal: a win resets the streak, clears the guarantee, and adds +3% any Mejiro line', [won?.outcome, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).find((b) => b.key === 'mejiro.rehearsal:win')?.runsLeft], ['win', { guaranteedSpecialId: null, guaranteedInRuns: 1, losingStreak: [] }, 25]);
     check('rehearsal: the next loss can be the tail again (a new streak)', (await ping(rehearsal.text, 0.5))?.mishap, 'tail');
 
     // The ping text: the line, then the footer; a forced success has the paragraph and the role footer.

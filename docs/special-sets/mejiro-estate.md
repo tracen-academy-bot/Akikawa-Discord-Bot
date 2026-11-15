@@ -117,9 +117,12 @@ Extra: Ramonu's Remedial Rehearsal (`mejiro.rehearsal`, `extra: true`)
 The footer goes under the line in the ping and its DM copy, never in the
 read view. The odds are never shown.
 
-- **Ramonu**, each time: 75% a lesson (+10% Rehearsal for 25 runs, ended as
-  soon as the Rehearsal comes up); 25% footwork (+5% any Mejiro line for 50
-  runs).
+- **Ramonu**, each time: 75% a lesson (the Rehearsal is scheduled on a run
+  picked at random from the next 25, and comes up no other way; not while
+  one is already pending or a losing streak runs); 25% footwork (+5% any
+  Mejiro line for 50 runs).
+- **Outcome boosts do not stack** (owner, 2026-11-15): the same one again
+  tops it back up to its full runs, never past them.
 - **Rehearsal**, 50/50: a win (+3% any Mejiro line for 25 runs, the losing
   streak back to 0) or a loss (one of the tail, the dress, the feet, never
   one already used in the streak; the trainer's next ping is the Rehearsal
