@@ -2,7 +2,7 @@
 
 Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file is the source text; keep the two in step.
 
-**Paused (owner, 2026-11-10): no new finds** until the lines are redesigned (`paused: true` on the set). Its lines never roll, no boost draws on it, and finding "Mejiro Family" no longer announces it. Its Specials page and the finds already made (Grandmother, once) stay. Remove the flag to resume.
+**Live again (owner, 2026-11-15).** It was paused on 2026-11-10 (no new finds) while the lines were redesigned; it resumed with the new lines, Ramonu's Remedial Rehearsal and the first wave of guests. Finds made before the pause (Grandmother, once) were kept.
 
 - **Premise:** the trainer is invited to a gathering at the Mejiro Estate; each line is one scene.
 - **Style:** fancy, no hashtags (a guest like Helios may keep hers; Palmer's one #SweetieSecrecies is her imitating Helios).
@@ -187,8 +187,9 @@ Now listen up: I may have failed this time, but next time, I'll come in through 
 ### `guest.symboli`: Symboli Rudolf & Sirius Symboli
 
 ```text
-Rudolf: "Good evening, {user}-kun. Ramonu once called our lunches boring, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
-Sirius: "...And that's why she calls them boring. Stay close, puppy. I came to watch the Emperor squirm."
+Rudolf: "Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
+Sirius: "...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm, so that will be all."
+Ramonu: "*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had better not have enjoyed that."
 ```
 
 ### `guest.teio`: Tokai Teio

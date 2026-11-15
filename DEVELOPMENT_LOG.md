@@ -4,6 +4,20 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — The Mejiro Estate is live again
+
+- `paused: true` removed from `mejiro-estate`: the redesigned lines,
+  Ramonu's outcomes and Remedial Rehearsal, and the guests are all live.
+  `PAUSED_SETS` is empty; the pause mechanism stays for later use.
+- Tests that assumed the pause now check the live behaviour (the Estate
+  rolls once unlocked, finding Mejiro Family announces it, a due guarantee
+  fires, the guest slice is there); the guest tests no longer lift the
+  pause by hand.
+- The Symboli guest line is the owner's longer version: Ramonu walks in on
+  Sirius flirting with the trainer.
+
+---
+
 ## 2026-11-15 — The Mejiro Estate's guests
 
 - Five guests (`guest.helios`, `guest.satono`, `guest.goldship`,
