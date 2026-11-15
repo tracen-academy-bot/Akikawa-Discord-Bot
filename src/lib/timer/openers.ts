@@ -278,6 +278,15 @@ const SYMBOLI_OUTCOMES: readonly SpecialOutcome[] = [
     },
 ];
 
+/** Tokai Teio's visit (owner, 2026-11-15): a punchline footer, no effect. */
+const TEIO_OUTCOMES: readonly SpecialOutcome[] = [
+    {
+        id: 'pose',
+        weight: 1,
+        footer: "-# To make matters worse, Teio did the #HalloweenStupid pose, and McQueen, shockingly, recognized it immediately. Well, at least neither of them broke their legs. What a chaotic kid. Still, it's nice to see McQueen... happy? I guess?",
+    },
+];
+
 const REHEARSAL_FORCED: ForcedSuccess = {
     after: 3,
     text: "Finally, {user} succeeded in not failing. Ramonu couldn't help but crack a tiny smile, amused by how pleased you were with yourself... and, secretly, already missing your clumsiness.",
@@ -358,7 +367,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: "guest.satono", name: "Satono Diamond & Kitasan Black", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!\"\nDiamond: \"Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?\"", after: ['mejiro.photo'], extra: true, guest: true },
             { id: "guest.goldship", name: "Gold Ship", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.photo'], extra: true, guest: true },
             { id: "guest.symboli", name: "Symboli Rudolf & Sirius Symboli", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true, outcomes: SYMBOLI_OUTCOMES },
-            { id: "guest.teio", name: "Tokai Teio", text: "Hey hey, {user}! Kaichou brought me along as her plus-one, so Teio-sama is officially Symboli-house company tonight. I promised to behave! ...Mostly. Did you see McQueen's face when I walked in? Priceless. Muteki! ...Wait. Is this floor good for a Teio Step?", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.teio", name: "Tokai Teio", text: "Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~\nWell yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~\n...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~\nNow come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!", after: ['mejiro.photo'], extra: true, guest: true, media: 'halloween-pose.mp4', credit: 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>', outcomes: TEIO_OUTCOMES },
         ],
     },
 ];

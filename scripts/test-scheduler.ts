@@ -708,7 +708,9 @@ async function main() {
     const chuMedia = openers.specialMediaPath(chu.text);
     check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
-    check('credit: only #ChuChuChallenge credits the video, as its own field', [RARE_OPENERS.filter((o) => o.credit).map((o) => [o.id, o.credit]), RARE_OPENERS.some((o) => o.text.includes('youtu.be'))], [[['os.chu', 'Video: <https://youtu.be/hJ78i-6uwGM>']], false]);
+    check('credit: each video is credited in its own field (#ChuChuChallenge, Teio\'s pose), never in the text', [RARE_OPENERS.filter((o) => o.credit).map((o) => [o.id, o.credit]), RARE_OPENERS.some((o) => /youtu\.?be/.test(o.text))], [[['os.chu', 'Video: <https://youtu.be/hJ78i-6uwGM>'], ['guest.teio', 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>']], false]);
+    const teioMedia = openers.specialMediaPath(openers.specialById('guest.teio')!.text);
+    check('media: Teio\'s pose clip exists, under 10 MB', [teioMedia?.endsWith('halloween-pose.mp4'), teioMedia ? fs.existsSync(teioMedia) : false, teioMedia ? fs.statSync(teioMedia).size < 10 * 1024 * 1024 : false], [true, true, true]);
     // The media box: main text, subtext, media, credit under it, then the extras.
     const { pingBox, splitSubtext } = await import('../src/lib/timer/pingBox');
     check('box: a line splits into main text and its -# subtext', [splitSubtext('Hi {user}!\n-# Footer one.').main, splitSubtext('Hi {user}!\n-# Footer one.').sub], ['Hi {user}!', '-# Footer one.']);

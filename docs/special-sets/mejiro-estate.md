@@ -195,5 +195,9 @@ Ramonu: "*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we hav
 ### `guest.teio`: Tokai Teio
 
 ```text
-Hey hey, {user}! Kaichou brought me along as her plus-one, so Teio-sama is officially Symboli-house company tonight. I promised to behave! ...Mostly. Did you see McQueen's face when I walked in? Priceless. Muteki! ...Wait. Is this floor good for a Teio Step?
+Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~
+Well yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~
+...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~
+Now come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!
+-# To make matters worse, Teio did the #HalloweenStupid pose, and McQueen, shockingly, recognized it immediately. Well, at least neither of them broke their legs. What a chaotic kid. Still, it's nice to see McQueen... happy? I guess?
 ```
