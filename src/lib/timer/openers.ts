@@ -197,6 +197,8 @@ export interface SpecialSet {
     unlockBonus?: number;
     /** Shown in the Boosts view after the unlock bonus, e.g. "+1% <label>". */
     unlockBonusLabel?: string;
+    /** When the unlock bonus ends (owner, 2026-11-15: no bonus is permanent). None: it never ends. */
+    unlockBonusUntil?: Date;
     /**
      * Paused: no new finds. Its lines never come up, in the base roll or any
      * boost, and finding its prerequisite does not announce it. Its page and
@@ -328,6 +330,8 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         // Owner, 2026-11-09: +1% #OnlineSensations once unlocked.
         unlockBonus: 0.01,
         unlockBonusLabel: '#OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!',
+        // Not permanent (owner, 2026-11-15): ends with Curren and Mejiro week, at the reset of Nov 22.
+        unlockBonusUntil: new Date('2026-11-22T15:00:00Z'),
         openers: [
             { id: 'os.celebrate', name: "#Celebrate", text: "{user}, it's time to #Celebrate! It took so much #Preparation but we finally got #ThreeMillionFollowers on release! Thank you for being my #FavoriteManager, and it's time to get a bazillion more! #WorkHard", tags: ['collab'] },
             { id: 'os.eyes-only', name: "#ForYourEyesOnly", text: "{user}, it's such a long dayyyy~ #SoTired It was fun but a #DozenDresses takes so long for the producers... So I just want to *closes door behind* show you something #ForYourEyesOnly~\n...ya like it, m'fated #BelovedManager? shh, it's only for you now... and maybe when we truly #BecomeAPair~", tags: ['collab'] },

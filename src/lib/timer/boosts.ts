@@ -93,7 +93,9 @@ export async function extraChances(
     }
     for (const set of SPECIAL_SETS) {
         if (!set.unlockBonus || !set.requires || !usable(set.id)) continue;
-        extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra).map((o) => o.text), label: set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.` });
+        if (set.unlockBonusUntil && now.getTime() >= set.unlockBonusUntil.getTime()) continue;
+        const ends = set.unlockBonusUntil ? ` Ends <t:${Math.floor(set.unlockBonusUntil.getTime() / 1000)}:R>.` : '';
+        extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra).map((o) => o.text), label: `${set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.`}${ends}` });
     }
     if (guests) extras.push(guests);
     return extras;

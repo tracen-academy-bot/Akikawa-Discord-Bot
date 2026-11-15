@@ -343,6 +343,11 @@ async function main() {
     // a sample one checks the mechanism.
     const week = openers.SEASONAL_BUFFS[0]!;
     check('season: Curren Chan week, +1% Curren Chan, extended to the reset of Nov 22 (owner)', [week.specialId, week.chance, week.until.toISOString(), week.label], ['set1.curren', 0.01, '2026-11-22T15:00:00.000Z', 'Curren Chan: meet her in the lobby!']);
+    // No bonus is permanent (owner, 2026-11-15): the #OnlineSensations unlock bonus ends at the reset of Nov 22.
+    const osBefore = await extraChances(XG, 'os-end', { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] }, [], false, fullPool, new Date('2026-11-20T00:00:00Z'));
+    const osAfter = await extraChances(XG, 'os-end', { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] }, [], false, fullPool, new Date('2026-11-22T15:00:00Z'));
+    const osLabel = (xs: { label?: string }[]) => xs.find((e) => e.label?.startsWith('#OnlineSensations: Curren'))?.label;
+    check('unlock bonus: +1% #OnlineSensations until the reset of Nov 22, then gone', [osLabel(osBefore)?.endsWith(`Ends <t:${Date.UTC(2026, 10, 22, 15) / 1000}:R>.`), osLabel(osAfter)], [true, undefined]);
     // Mejiro week (owner, 2026-11-15): reset to reset; +2% the invitation until the Estate opens, then +2% its lines.
     const [, invite, estateWeek] = openers.SEASONAL_BUFFS;
     check('season: Mejiro week, reset to reset, +2% each', [invite?.specialId, estateWeek?.setId, invite?.chance, estateWeek?.chance, invite?.from.toISOString(), estateWeek?.until.toISOString()], ['set1.mejiro', 'mejiro-estate', 0.02, 0.02, '2026-11-15T15:00:00.000Z', '2026-11-22T15:00:00.000Z']);
@@ -360,7 +365,8 @@ async function main() {
     const seasonal = await extraChances(SN, 's1', plain, LOCKED, false, openers.rarePoolFor([]), inSeason, [buff]);
     check('season: in its window, an extra slice that only draws its special', seasonal.map((e) => [e.chance, e.pool]), [[0.01, [currenText]]]);
     check('season: not before or after the window', [(await extraChances(SN, 's1', plain, LOCKED, false, [], new Date(buff.from.getTime() - 1), [buff])).length, (await extraChances(SN, 's1', plain, LOCKED, false, [], buff.until, [buff])).length], [0, 0]);
-    check('season: a prerequisite buff stops once its set is unlocked; the unlock bonus takes over', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), [[0.01, openers.SPECIAL_SETS[1]!.openers.length]]);
+    // (This sample week is in December, after the #OnlineSensations unlock bonus ended on Nov 22.)
+    check('season: a prerequisite buff stops once its set is unlocked (and by December the unlock bonus is over)', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), []);
     check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
 
     // The Boosts view: base, each boost, and the next ping's total.
@@ -368,7 +374,7 @@ async function main() {
     await rares.grantBoost(SN, 's1', loves.text);
     await rares.recordRareOpener(SN, 's1', curren.text);
     const bv = (await boostsView(SN, 's1', inSeason)).embeds[0]!.toJSON().description ?? '';
-    check('boosts view: base, Loves, the unlock bonus, total 11%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left.'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 11% chance of a special.**')], [true, true, true, false, true]);
+    check('boosts view: base and Loves; the unlock bonus is over by December, total 10%', [bv.includes('**Base:** 6%'), bv.includes('**+4%** #OnlineSensations collab lines, 50 runs left.'), bv.includes('**+1%** #OnlineSensations: Curren ~~drags~~ invites you for her #SpecialCollabs!'), bv.includes('Curren Chan week'), bv.includes('**Your next ping: 10% chance of a special.**')], [true, true, false, false, true]);
     await us0.toggleSetting(SN, 's1', 'boosts');
     const off = await boostsView(SN, 's1', inSeason);
     const offText = off.embeds[0]!.toJSON().description ?? '';
