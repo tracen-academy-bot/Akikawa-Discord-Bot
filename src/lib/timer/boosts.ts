@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, PAUSED_SETS, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, guestSlice, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { EARLY_START, PAUSED_SETS, setLinesPool, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, guestSlice, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
 import { activeBoosts, foundSpecialIds, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
@@ -79,7 +79,13 @@ export async function extraChances(
         if (personal.owner === discordUserId) extras.push({ chance: personal.chance, pool, label: personal.label });
     }
     for (const buff of activeSeasonals(now, buffs)) {
-        const special = specialById(buff.specialId);
+        // A set-wide buff (Mejiro week): that set's lines, while it is usable.
+        if (buff.setId) {
+            if (!usable(buff.setId)) continue;
+            extras.push({ chance: buff.chance, pool: setLinesPool(buff.setId), label: `${buff.label} Ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>.` });
+            continue;
+        }
+        const special = buff.specialId ? specialById(buff.specialId) : undefined;
         if (!special || !usable(special.set)) continue;
         const unlocksDone = SPECIAL_SETS.some((s) => s.requires === buff.specialId && !lockedSets.includes(s.id));
         if (unlocksDone) continue;

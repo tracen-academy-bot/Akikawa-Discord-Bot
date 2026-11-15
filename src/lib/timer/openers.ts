@@ -416,7 +416,9 @@ export function effectiveChance(raw: number): number {
 export interface SeasonalBuff {
     /** Shown in the Boosts view after its chance, e.g. "+1% <label>". */
     label: string;
-    specialId: string;
+    /** One special (`specialId`) or a whole set's lines (`setId`, its extras left out). */
+    specialId?: string;
+    setId?: string;
     chance: number;
     from: Date;
     until: Date;
@@ -426,7 +428,13 @@ export const SEASONAL_BUFFS: readonly SeasonalBuff[] = [
     // Curren Chan week (owner, 2026-11-08): +1% Curren Chan for 7 days. Her
     // line unlocks #OnlineSensations, so it stops for a trainer who has it
     // (see `extraChances`); the set's unlock bonus takes over.
-    { label: 'Curren Chan: meet her in the lobby!', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-11-08T11:00:00Z'), until: new Date('2026-11-15T11:00:00Z') },
+    // Extended (owner, 2026-11-15) through Mejiro week, to the weekly reset (Monday 00:00 JST).
+    { label: 'Curren Chan: meet her in the lobby!', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-11-08T11:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
+    // Mejiro week (owner, 2026-11-15), one weekly event from reset to reset:
+    // +2% on the invitation (the Mejiro Family line) until the Estate is
+    // unlocked, then +2% on the Estate's lines.
+    { label: "Mejiro week: the Estate's invitation is waiting in the lobby!", specialId: 'set1.mejiro', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
+    { label: 'Mejiro week: The Mejiro Estate, any of its lines!', setId: 'mejiro-estate', chance: 0.02, from: new Date('2026-11-15T15:00:00Z'), until: new Date('2026-11-22T15:00:00Z') },
 ];
 
 /** The seasonal buffs (of `buffs`, by default all) running at `now`. */

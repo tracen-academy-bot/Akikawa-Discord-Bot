@@ -155,7 +155,7 @@ async function main() {
     const extrasPages = SETS.filter((x) => RARE_OPENERS.some((o) => o.set === x.id && o.extra)).length;
     const lastPage = SETS.length + extrasPages;
     const last = json(rares.specialsView(tally, lastPage));
-    check('pages: the last page is the last set\'s extras, numbered on its own, Next off', [last.embeds[0]!.description?.startsWith(`**Set ${SETS.length}.5: ${SETS.at(-1)!.name} Extras**`), last.embeds[0]!.fields?.[0]?.value.split('\n')[0], last.components[0]!.components.at(-1)?.disabled, last.embeds[0]!.footer?.text.endsWith(`Page ${lastPage + 1} of ${lastPage + 1}`)], [true, '**1.** ???', true, true]);
+    check('pages: the last page is the last set\'s extras, numbered on its own, Next off', [last.embeds[0]!.description?.startsWith(`**Set ${SETS.length}.5: ${SETS.at(-1)!.name} Extras**`), last.embeds[0]!.fields?.[0]?.value.split('\n')[0], last.components[0]!.components.at(-1)?.disabled, last.embeds[0]!.footer?.text.endsWith(`Page ${lastPage + 1} of ${lastPage + 1}`)], [true, '???', true, true]);
     check('pages: a set\'s page lists only its lines', json(rares.specialsView(tally, rares.pageOfSet('mejiro-estate'))).embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 0 of 9 found'), true);
     check('pages: a page out of range is clamped', [json(rares.specialsView(tally, 99)).embeds[0]!.description, json(rares.specialsView(tally, -5)).embeds[0]!.title], [last.embeds[0]!.description, 'Set 0: Reminders']);
     const { buildPanel, BUTTON_SPECIALS } = await import('../src/lib/timer/panel');
@@ -342,7 +342,15 @@ async function main() {
     // Seasonal buffs: a flat slice on one special, for a time window. None run now;
     // a sample one checks the mechanism.
     const week = openers.SEASONAL_BUFFS[0]!;
-    check('season: Curren Chan week, +1% Curren Chan for 7 days', [week.specialId, week.chance, (week.until.getTime() - week.from.getTime()) / 86_400_000, week.label], ['set1.curren', 0.01, 7, 'Curren Chan: meet her in the lobby!']);
+    check('season: Curren Chan week, +1% Curren Chan, extended to the reset of Nov 22 (owner)', [week.specialId, week.chance, week.until.toISOString(), week.label], ['set1.curren', 0.01, '2026-11-22T15:00:00.000Z', 'Curren Chan: meet her in the lobby!']);
+    // Mejiro week (owner, 2026-11-15): reset to reset; +2% the invitation until the Estate opens, then +2% its lines.
+    const [, invite, estateWeek] = openers.SEASONAL_BUFFS;
+    check('season: Mejiro week, reset to reset, +2% each', [invite?.specialId, estateWeek?.setId, invite?.chance, estateWeek?.chance, invite?.from.toISOString(), estateWeek?.until.toISOString()], ['set1.mejiro', 'mejiro-estate', 0.02, 0.02, '2026-11-15T15:00:00.000Z', '2026-11-22T15:00:00.000Z']);
+    const MW = new Date('2026-11-17T00:00:00Z');
+    const mwBase = { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] as string[] };
+    const mwLocked = await extraChances(XG, 'mw-new', mwBase, ['online-sensations', 'mejiro-estate'], false, fullPool, MW);
+    const mwOpen = await extraChances(XG, 'mw-open', mwBase, ['online-sensations'], false, fullPool, MW);
+    check('season: before the Estate opens, +2% on the invitation; after, +2% on its 9 lines', [mwLocked.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length]), mwOpen.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length])], [[[0.02, 1]], [[0.02, 9]]]);
     const buff = { label: 'Sample week', specialId: 'set1.curren', chance: 0.01, from: new Date('2026-12-01T00:00:00Z'), until: new Date('2026-12-08T00:00:00Z') };
     const inSeason = new Date(buff.from.getTime() + 60_000);
     const currenText = RARE_OPENERS.find((o) => o.id === buff.specialId)!.text;
@@ -592,10 +600,10 @@ async function main() {
     const mejiroPage = json(rares.specialsView(await rares.rareTally(CB, 'c-eight'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
     const mNames = mejiroPage.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
     const mejiroExtras = json(rares.specialsView(await rares.rareTally(CB, 'c-eight'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
-    check('page: the Mejiro page has just its 9; the Rehearsal is on Set 3.5, counted there only', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mejiroExtras.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 1 of 6 found'), mejiroExtras.embeds[0]!.fields?.[0]?.value.split('\n')[0]], [true, 9, true, "**1.** Ramonu's Remedial Rehearsal"]);
-    check('page: ??? until found', json(rares.specialsView(await rares.rareTally(CB, 'c-nine'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).embeds[0]!.fields?.[0]?.value.split('\n')[0], '**1.** ???');
+    check('page: the Mejiro page has just its 9; the Rehearsal is on Set 3.5, counted there only', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mejiroExtras.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 1 of 6 found'), mejiroExtras.embeds[0]!.fields?.[0]?.value.split('\n')[0]], [true, 9, true, "Ramonu's Remedial Rehearsal"]);
+    check('page: ??? until found', json(rares.specialsView(await rares.rareTally(CB, 'c-nine'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).embeds[0]!.fields?.[0]?.value.split('\n')[0], '???');
     const readOpts = mejiroExtras.components[1]?.components[0]?.options?.map((o) => o.label) ?? [];
-    check('read menu: the Rehearsal can be read once found, from Set 3.5', readOpts, ["1. Ramonu's Remedial Rehearsal"]);
+    check('read menu: the Rehearsal can be read once found, from Set 3.5', readOpts, ["Ramonu's Remedial Rehearsal"]);
     const readRamonu = await rares.readSpecial(OG, T, 'mejiro.ramonu');
     check('read: Ramonu in full, without any outcome footer', [readRamonu?.text, readRamonu?.text.includes('-#')], [openers.fillOpener(ramonu.text, T), false]);
     check('read: the Rehearsal without footers', (await rares.readSpecial(OG, T, 'mejiro.rehearsal'))?.text, openers.fillOpener(rehearsal.text, T));
@@ -681,12 +689,12 @@ async function main() {
     check('page: Set 3.5 lists the Rehearsal then the guests, counted on their own, never in the overall total', [gEight.embeds[0]!.title, gEight.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 5 of 6 found'), gNames], [
         `Your specials: 8 of ${RARE_OPENERS.filter((o) => !o.extra).length}`,
         true,
-        ['**1.** ???', ...guests.map((g, i) => `**${i + 2}.** ${g.name}`)],
+        ['???', ...guests.map((g) => g.name)],
     ]);
     const gNone = json(rares.specialsView(await rares.rareTally(GB, 'nobody'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
-    check('page: ??? until found, on Set 3.5', gNone.embeds[0]!.fields?.[0]?.value.split('\n') ?? [], ['**1.** ???', '**2.** ???', '**3.** ???', '**4.** ???', '**5.** ???', '**6.** ???']);
+    check('page: ??? until found, on Set 3.5', gNone.embeds[0]!.fields?.[0]?.value.split('\n') ?? [], ['???', '???', '???', '???', '???', '???']);
     const gOpts = gEight.components[1]?.components[0]?.options?.map((o) => [o.label, o.value]) ?? [];
-    check('read menu: found guests can be read, from Set 3.5', [gOpts, (await rares.readSpecial(GB, 'g-eight', 'guest.teio'))?.text, await rares.readSpecial(GB, 'nobody', 'guest.teio')], [guests.map((g, i) => [`${i + 2}. ${g.name}`, g.id]), openers.fillOpener(openers.specialById('guest.teio')!.text, 'g-eight'), null]);
+    check('read menu: found guests can be read, from Set 3.5', [gOpts, (await rares.readSpecial(GB, 'g-eight', 'guest.teio'))?.text, await rares.readSpecial(GB, 'nobody', 'guest.teio')], [guests.map((g) => [g.name, g.id]), openers.fillOpener(openers.specialById('guest.teio')!.text, 'g-eight'), null]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [GG, GB] } } });
     await prisma.timerUserSettings.deleteMany({ where: { guildId: GG } });
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [OG, CB] } } });

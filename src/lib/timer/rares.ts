@@ -163,8 +163,10 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     const counted = tally.filter((t) => !t.extra);
     const found = counted.filter((t) => t.count > 0).length;
     const foundHere = rows.filter(({ t }) => t.count > 0).length;
-    /** A row's number on its page ("**3.**"). */
-    const num = (_t: RareTally, n: number) => `${n + 1}.`;
+    /** A row's number on a set page ("3."); an extras page lists names only (owner, 2026-11-15). */
+    const extrasPage = page_.kind === 'extras';
+    const num = (_t: RareTally, n: number) => (extrasPage ? '' : `${n + 1}.`);
+    const lead = (t: RareTally, n: number) => (extrasPage ? '' : `**${num(t, n)}** `);
     const locked = extras?.lockedSets.includes(set.id) ?? false;
     const off = extras?.disabledSets.includes(set.id) ?? false;
 
@@ -175,7 +177,7 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
         .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${rows.length} found${status}`);
     if (!locked) {
         const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
-        const names = rows.map(({ t }, n) => `**${num(t, n)}** ${t.count > 0 ? t.name : '???'}`);
+        const names = rows.map(({ t }, n) => `${lead(t, n)}${t.count > 0 ? t.name : '???'}`);
         const counts = rows.map(({ t }) => (t.count > 0 ? `**×${t.count}**` : '—'));
         const firsts = rows.map(({ t }) => (t.count > 0 && t.firstUserId && t.firstAt ? (personal ? when(t) : `<@${t.firstUserId}> ${when(t)}`) : '—'));
         embed.addFields(
@@ -208,7 +210,7 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     const components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = [nav];
     // Reading in full is for a trainer's own finds, a set's worth at a time.
     const options = personal
-        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, n }) => ({ label: `${num(t, n)} ${t.name}`.slice(0, 100), value: t.id }))
+        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, n }) => ({ label: `${extrasPage ? '' : `${num(t, n)} `}${t.name}`.slice(0, 100), value: t.id }))
         : [];
     if (options.length > 0) {
         components.push(
