@@ -1,7 +1,59 @@
 # Draft: Fuku-chan's Fortune Tent
 
-Status: **draft for the owner's review, not in code.** Idea from a member
-(Machitan Mun); tiers, curses and the Oracle tier from the owner.
+Status: **in code (opens 2026-11-22T15:00Z)**, `src/lib/timer/fortune.ts`.
+Idea from a member (Machitan Mun); tiers, curses and the Oracle tier from
+the owner.
+
+## Owner's decisions (2026-11-15)
+
+These override the draft below where they differ.
+
+1. **Fukukitaru** is a Lobby Loungers special, `set1.fukukitaru`
+   ("Matikanefukukitaru"), a normal find, listed right after
+   `set1.matikane` (ids unchanged).
+2. **Release gate:** nothing before `TENT_OPENS` = 2026-11-22T15:00Z
+   (Monday 00:00 JST): no unlock, no button, no intro, and Fukukitaru's
+   line is in no pool (`Special.opensAt`). Until then she does not hold up
+   Set 1's completion either.
+3. **Unlock:** both `set1.matikane` and `set1.fukukitaru` found, from
+   `TENT_OPENS`. The ping that completes the pair adds
+   `**Congrats!** Fuku-chan's Fortune Tent unlocked!`; trainers who already
+   had both get it on their first ping after the opening.
+4. **The introduction is the next run's ping** after the unlock (a box like
+   the pings; not a special find, not in Specials; once ever). A guarantee
+   due on that run (Ramonu's Remedial Rehearsal, a Helios guest) wins; the
+   intro waits for the first run without one (`TimerUserSettings.tentIntroOwed`).
+5. **The draw:** a **Fortune** button in the Boosts view, only with the
+   tent; once per day (midnight in `STREAK_TIMEZONE`, JST); then "Drawn
+   today", greyed out. The result is an ephemeral box: the tier heading,
+   the line, the effect line. Stored in `TimerFortuneDraw` (guild, user,
+   day, tier, line).
+6. **Tiers** as in the table below; 大凶 has a second line (Air Groove, the
+   owner's final copy below). Within a tier each line is equally likely,
+   but never the trainer's previous draw (a one-line tier may repeat). The
+   odds are never shown.
+7. **Effects until the daily reset:** a blessing is an extra slice from the
+   usual special pool (soft caps apply; paused with Boosts off), e.g.
+   "**+2%** Fortune: Great blessing, until the daily reset." A curse lowers
+   the base (6% to 5% or 4%) in `chooseOpener`, Boosts on or off, shown as
+   "**-1%** Fortune: Curse, until the daily reset." with the total
+   reflecting it.
+
+Open questions answered: Air Groove's 大凶 is in; the Oracle stays private.
+
+### Set 4 on the Specials pages (owner, 2026-11-15, follow-up)
+
+From `TENT_OPENS` (not before), a last Specials page after Set 3.5:
+**Set 4: Fuku-chan's Fortune Tent**, the 13 fortunes numbered in this
+order, "???" until drawn: 1 Shiraoki-sama's Oracle, 2 超吉: Copano Rickey,
+3 大吉: Tea Stalks, 4 大吉: Taiki Shuttle, 5 吉: Rice Shower, 6 吉: Blue
+Machitan, 7 吉: Silence Suzuka, 8 小吉: Matikanetannhauser, 9 小吉: Nice
+Nature, 10 凶: The Cloudy Crystal Ball, 11 凶: Meisho Doto, 12 大凶: The
+Black Cat, 13 大凶: Air Groove. Times and "First drawn" / "First drawn by"
+columns come from `TimerFortuneDraw`; the read menu shows a drawn
+fortune's result box. No On/Off (it is not a pool) and no auto-off.
+Scoring like a set: 15 per new fortune, 3 per repeat draw, +100 for all
+13; they count in the "N of M" totals and on the specials board.
 `{user}` is the trainer's mention, once per line, placed before any "you" it
 introduces.
 
@@ -91,7 +143,7 @@ From `docs/uma-reference/briefs/1056.json` (Fukukitaru) and `1062.json`
 | 吉 Blessing | +1% | 25% | 3 |
 | 小吉 Small blessing | +0.5% | 25% | 2 |
 | 凶 Curse | -1% | 20% | 2 |
-| 大凶 Great curse | -2% | 10% | 1 |
+| 大凶 Great curse | -2% | 10% | 2 |
 
 - Within a tier, each line is equally likely.
 - Average draw:
@@ -220,9 +272,16 @@ Each result's box: a heading, the scene, then its effect line.
     Machitan: "Hiii! Fuku-chan senpai, quick, call the Charm Army!"
     ```
 
-Spare, not counted above: a second 大凶 with Air Groove, who got a
-Shigaraki tanuki from Fuku (Fuku, voice 91004) and could hand it back "just
-in case", with a "mattaku" about the cat.
+13. Air Groove (owner's final copy, 2026-11-15; she got a Shigaraki tanuki
+    from Fuku, voice 91004)
+
+    ```text
+    Fuku: "D-daikyou... {user}-san, it's a GREAT curse, and the black cat is back, and—"
+    Groove: "Mattaku. What is this racket outside the student council room? ...Fukukitaru. It is a cat. Not the end of the world."
+    Groove: "...Still. Kisama, take this. A Shigaraki tanuki. Fukukitaru insisted it would bring luck, and I am in no mood to argue with a crystal ball. Just in case."
+    Fuku: "Air Groove-san... you kept it all this time?!"
+    Machitan: "Ei, ei, mun! ...It's still a great curse though, isn't it." / Groove: "Yes. But perhaps a smaller one."
+    ```
 
 ## Notes for the build
 

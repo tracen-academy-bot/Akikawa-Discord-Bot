@@ -4,6 +4,92 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — Tylina meets Grandmother again
+
+- Owner: Tylina's Grandmother finds are reset. Migration
+  `20261116000000_first_finder_grandmother_reset` adds `TimerFirstFinder`
+  (guild, special: who found it first), copies her earliest Grandmother find
+  into it in every guild, then deletes all her Grandmother finds. Her own
+  tally and points have no Grandmother, so her Mejiro lines redirect to
+  Grandmother again (staging as usual).
+- The server's Specials list (`rareTally` without a trainer) takes "First
+  found by" from `TimerFirstFinder` when it is earlier than any remaining
+  find, or there is none (the row then shows by name, "—" for times).
+- `resetFinds` in `rares.ts` runs the same SQL (optionally for one guild);
+  tests run both it and the migration's own statements on scratch guilds.
+
+---
+
+## 2026-11-15 — First Victor on Set 3.5
+
+- Once a guild has a `TimerSecondLove` row, the Set 3.5 (Mejiro Estate
+  Extras) page, personal and server, adds under its table: "First Victor
+  (Ramonu's Second Love): @user, when". Nothing before anyone has won; not in
+  the Boosts view.
+
+---
+
+## 2026-11-15 — Set 4: Fuku-chan's Fortune Tent on the Specials pages
+
+- From `TENT_OPENS`, a last Specials page (`specialsView`, kind `fortune`)
+  lists the 13 fortunes (names in `fortuneLines.ts`), "???" until drawn,
+  with Times and First drawn (by) from `TimerFortuneDraw` (`fortuneTally`).
+  A read menu shows a drawn fortune's result box (`fortune:<id>` in
+  `readSpecial`). No On/Off, no auto-off.
+- Scoring like a set (owner): 15 a new fortune, 3 a repeat, +100 for all 13;
+  they count in "N of M" (personal and server) and on the specials board
+  (`specialsBoard` folds the draws in; its counts gain 13 and 1 set).
+- The fortunes' texts moved to `fortuneLines.ts` (no database), so the
+  Specials code can list them; `fortune.ts` re-exports them. The server
+  list is built by `serverSpecialsView`.
+
+---
+
+## 2026-11-15 — Specials not open yet are hidden
+
+- Owner: Matikanefukukitaru must not show before the tent opens. A special
+  with `opensAt` in the future is now left out of every Specials page
+  (personal and server), every "N of M" count, set completion and the
+  specials board (`specialsView`, `mySpecialsView` and `specialsBoard` take
+  `now`). From `opensAt` on she shows and counts like any line.
+- Tests pin the older Specials checks to a fixed time before the opening.
+
+---
+
+## 2026-11-15 — Guest names
+
+- The Mejiro Estate's guests are listed under new names (owner; `name`
+  only, ids unchanged): #MejiroAfterParty (`guest.helios`), Satono & Kita,
+  Golshi's Crashdown, The Symboli-cs, Teio's Tag-along. Finds follow the id.
+
+---
+
+## 2026-11-15 — Fuku-chan's Fortune Tent (opens 2026-11-22T15:00Z)
+
+- Design: `docs/special-sets/fortune-tent.md`, with the owner's decisions of
+  2026-11-15 at its top. Code: `src/lib/timer/fortune.ts`.
+- Matikanefukukitaru (`set1.fukukitaru`), a Lobby Loungers special right
+  after Machitan. `Special.opensAt` keeps her out of every pool before
+  `TENT_OPENS` (Monday 00:00 JST, Nov 23); until then she does not hold up
+  Set 1's completion or its board points either.
+- Unlock: both Matikanes found, from the opening. The ping that completes
+  the pair (or a trainer's first ping after the opening, if they had both)
+  adds "**Congrats!** Fuku-chan's Fortune Tent unlocked!". The next run's
+  ping is the introduction instead of an opener, once ever; a due guarantee
+  (Rehearsal, Helios guest) goes first and the intro waits.
+- Fortune button in the Boosts view: one omikuji per JST day, ephemeral
+  box, then "Drawn today". Seven tiers (1/4/15/25/25/20/10%), 13 lines
+  (Air Groove's 大凶 added, owner's final copy); never the previous line.
+- A blessing is an extra slice from the usual pool until the reset (soft
+  caps, paused with Boosts off); a curse lowers the base in `chooseOpener`
+  (`baseAdjust`), never paused; the Boosts view shows both and the total.
+- Migration `20261115230000_fortune_tent`: `TimerUserSettings.tentUnlocked`,
+  `tentIntroOwed`, and the `TimerFortuneDraw` table (guild, user, day).
+- Tests in `scripts/test-scheduler.ts`; existing counts updated for Set 1's
+  14th line.
+
+---
+
 ## 2026-11-15 — Weekly events, auto-off, the extras page, and the last guests
 
 - Weekly events (owner): Curren Chan week extended to the reset of Nov 22

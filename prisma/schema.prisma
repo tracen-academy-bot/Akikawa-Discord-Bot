@@ -202,9 +202,45 @@ model TimerUserSettings {
     /// extras are too (the set turns off), "<set>:kept" once the trainer
     /// turned it back on themselves (no more auto-off for it).
     autoOffSets   String[] @default([])
+    /// Fuku-chan's Fortune Tent: its unlock was announced ("Congrats!") on a ping.
+    tentUnlocked  Boolean  @default(false)
+    /// The tent's introduction is owed: it is the trainer's next run's ping
+    /// (after any guarantee due on it). Set once, with `tentUnlocked`.
+    tentIntroOwed Boolean  @default(false)
     updatedAt     DateTime @updatedAt
 
     @@id([guildId, discordUserId])
+}
+
+/// Who found a special first in a guild, kept when their finds were removed
+/// (owner, 2026-11-15: Tylina meets Grandmother again). The server's
+/// Specials list shows it as "First found by" when it is earlier than any
+/// remaining find, or there is none.
+model TimerFirstFinder {
+    guildId       String
+    specialId     String
+    discordUserId String
+    at            DateTime
+
+    @@id([guildId, specialId])
+}
+
+/// One omikuji from Fuku-chan's Fortune Tent: one per trainer per day (the
+/// streak timezone's day), so a redeploy cannot give a second draw. Its
+/// effect lasts until the daily reset.
+model TimerFortuneDraw {
+    guildId       String
+    discordUserId String
+    /// `YYYY-MM-DD` in the streak timezone (`dayKey`).
+    day           String
+    /// The tier's id (`FORTUNE_TIERS`), e.g. "great".
+    tier          String
+    /// The result line's id, e.g. "great.tea".
+    lineId        String
+    drawnAt       DateTime @default(now())
+
+    @@id([guildId, discordUserId, day])
+    @@index([guildId, discordUserId, drawnAt])
 }
 
 /// A rare timer-ping opener that came up: who got it, which line, when.

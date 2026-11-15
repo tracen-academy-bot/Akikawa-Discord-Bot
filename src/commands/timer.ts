@@ -1,6 +1,6 @@
 import type { StringSelectMenuInteraction } from 'discord.js';
 import { SETTINGS_PREFIX, getUserSettings, runMinutes, settingsView, toggleSetting } from '../lib/timer/userSettings';
-import { READ_MENU_ID, SPECIALS_FIRST_PAGE, SPECIALS_PAGE_PREFIX, SPECIALS_SET_PREFIX, lockedSetsFor, mySpecialsView, pageOfSet, rareTally, readSpecial, specialsView } from '../lib/timer/rares';
+import { READ_MENU_ID, SPECIALS_FIRST_PAGE, SPECIALS_PAGE_PREFIX, SPECIALS_SET_PREFIX, lockedSetsFor, mySpecialsView, pageOfSet, readSpecial, serverSpecialsView } from '../lib/timer/rares';
 import { EARLY_START } from '../lib/timer/openers';
 import { pingBox } from '../lib/timer/pingBox';
 import {
@@ -20,6 +20,7 @@ import {
 import { isOfficer } from '../lib/permissions';
 import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
 import { BOOSTS_TOGGLE_ID, boostsView } from '../lib/timer/boosts';
+import { FORTUNE_BUTTON_ID, drawFortune, fortuneBox } from '../lib/timer/fortune';
 import {
     BUTTON_BOOSTS,
     BUTTON_LEADERBOARD,
@@ -224,8 +225,7 @@ async function handleSpecials(interaction: ChatInputCommandInteraction) {
         });
         return;
     }
-    const tally = await rareTally(interaction.guildId!);
-    await interaction.reply({ ...specialsView(tally, SPECIALS_FIRST_PAGE), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+    await interaction.reply({ ...(await serverSpecialsView(interaction.guildId!, SPECIALS_FIRST_PAGE)), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 /** Posts a fresh control panel. */
@@ -559,6 +559,16 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
         return;
     }
 
+    // Fortune (Fuku-chan's Fortune Tent): today's omikuji, only to the trainer.
+    // The Boosts view redraws with "Drawn today"; a forged press without the
+    // tent changes nothing, and a second press shows today's draw again.
+    if (interaction.customId === FORTUNE_BUTTON_ID) {
+        const result = await drawFortune(guildId, interaction.user.id);
+        await interaction.update(await boostsView(guildId, interaction.user.id));
+        if (result) await interaction.followUp(fortuneBox(result.draw, interaction.user.id));
+        return;
+    }
+
     // Back/Next in a Specials list: the trainer's own (`mine`), or the
     // server's (`all`, Club Managers only, as for /timer specials).
     if (interaction.customId.startsWith(SPECIALS_PAGE_PREFIX)) {
@@ -568,7 +578,7 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
                 await interaction.reply({ content: 'Only Club Managers can see the whole server\'s specials.', flags: MessageFlags.Ephemeral });
                 return;
             }
-            await interaction.update({ ...specialsView(await rareTally(guildId), Number(page)), allowedMentions: { parse: [] } });
+            await interaction.update({ ...(await serverSpecialsView(guildId, Number(page))), allowedMentions: { parse: [] } });
         } else {
             await interaction.update({ ...(await mySpecialsView(guildId, interaction.user.id, Number(page))), allowedMentions: { parse: [] } });
         }

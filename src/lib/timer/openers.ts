@@ -175,7 +175,18 @@ export interface Special {
      * the set's lines and other extras as "Guest.".
      */
     guest?: boolean;
+    /**
+     * Not before this time: out of every pool (base and boosts) until then
+     * (owner, 2026-11-15: Matikanefukukitaru opens with the Fortune Tent).
+     */
+    opensAt?: Date;
 }
+
+/**
+ * When Fuku-chan's Fortune Tent opens (owner, 2026-11-15): the weekly reset,
+ * Monday 00:00 JST. Before it, no Matikanefukukitaru, no unlock, no Fortune.
+ */
+export const TENT_OPENS = new Date('2026-11-22T15:00:00Z');
 
 /** One special set: a group of special lines that can be turned on or off. */
 export interface SpecialSet {
@@ -309,6 +320,8 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         name: 'Lobby Loungers',
         openers: [
         { id: 'set1.matikane', name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
+        // Owner, 2026-11-15: with Machitan, she opens Fuku-chan's Fortune Tent (see fortune.ts). From TENT_OPENS only.
+        { id: 'set1.fukukitaru', name: 'Matikanefukukitaru', text: "Mumu...! {user}-san, Shiraoki-sama's oracle was right, you came! The run is done, and my crystal ball says the results are lucky. ...It also says something about a tent, and Machitan. I'm sure it's nothing! Namu, namu!", opensAt: TENT_OPENS },
         { id: 'set1.overslept', name: 'Overslept?!', text: '{user} zzzzzzzzz- OOOH AEUHHHH! Oh, right. Trainer, trainer, the timer!' },
         { id: 'set1.tachyon', name: 'Agnes Tachyon', text: '{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food! And then some guinea pigging activities too...' },
         { id: 'set1.bourbon', name: 'Mihono Bourbon', text: "{user} Master-san, I have been provided intel of your underling's completion. Please proceed at haste. I will provide chocolate afterwards." },
@@ -367,11 +380,11 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             // An extra (owner, 2026-11-15): only through Ramonu's lesson boost or a lost lesson's guarantee.
             { id: 'mejiro.rehearsal', name: "Ramonu's Remedial Rehearsal", text: "Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?", after: ['mejiro.ramonu'], extra: true, outcomes: REHEARSAL_OUTCOMES, forcedSuccess: REHEARSAL_FORCED },
             // Guests (owner, 2026-11-15): extras of their own, only through the guest slice (`guestSlice`), once the Family Photograph is found.
-            { id: "guest.helios", name: "Daitaku Helios", text: "Weeei, Tore-pippi! SURPRIIISE~☆ ...Huh? You didn't expect me?! ぴえん... #DJHelios is literally everywhere, no cap! Okok, so why am I here? Pama-chin was like \"I wanna party\", and also like \"my テンアゲ playlist deserves to be heard by ALL the Meji-uwus!\", and I was like, say less! So I made her smuggle my decks into the ballroom, and Grandmother said \"one hour\". ONE HOUR?! よいちょまる, that's basically a #MusicalEternity, frfr! The whole Estate's gonna be shook, ya know! Oh, it's timeeeee! {user}, get on the floor, Pama-chin's already mega age-age! #MejiroAfterParty #ZuttomoDJ #BakunigeBPM", after: ['mejiro.photo'], extra: true, guest: true, outcomes: HELIOS_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
-            { id: "guest.satono", name: "Satono Diamond & Kitasan Black", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, along with some... discussions. Ah, you have informed McQueen-san... how thoughtful of you. Speaking of which, I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi, Trainer-san! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? ドドン!\"\nDiamond: \"Kita-chan, it's a dinner party. ...ふむふむ. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you mind letting McQueen-san know of our little plan?~\"\nMcQueen: \"Ah, right on time! Welcome to the Mejiro Estate. A festival? ...We shall see, desu wa. Thank you for greeting them for me, Trainer-san. Please, come in!\"", after: ['mejiro.photo'], extra: true, guest: true },
-            { id: "guest.goldship", name: "Gold Ship", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.photo'], extra: true, guest: true },
-            { id: "guest.symboli", name: "Symboli Rudolf & Sirius Symboli", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true, outcomes: SYMBOLI_OUTCOMES },
-            { id: "guest.teio", name: "Tokai Teio", text: "Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~\nWell yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~\n...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~\nNow come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!", after: ['mejiro.photo'], extra: true, guest: true, media: 'halloween-pose.mp4', credit: 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>', outcomes: TEIO_OUTCOMES },
+            { id: "guest.helios", name: "#MejiroAfterParty", text: "Weeei, Tore-pippi! SURPRIIISE~☆ ...Huh? You didn't expect me?! ぴえん... #DJHelios is literally everywhere, no cap! Okok, so why am I here? Pama-chin was like \"I wanna party\", and also like \"my テンアゲ playlist deserves to be heard by ALL the Meji-uwus!\", and I was like, say less! So I made her smuggle my decks into the ballroom, and Grandmother said \"one hour\". ONE HOUR?! よいちょまる, that's basically a #MusicalEternity, frfr! The whole Estate's gonna be shook, ya know! Oh, it's timeeeee! {user}, get on the floor, Pama-chin's already mega age-age! #MejiroAfterParty #ZuttomoDJ #BakunigeBPM", after: ['mejiro.photo'], extra: true, guest: true, outcomes: HELIOS_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
+            { id: "guest.satono", name: "Satono & Kita", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, along with some... discussions. Ah, you have informed McQueen-san... how thoughtful of you. Speaking of which, I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi, Trainer-san! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? ドドン!\"\nDiamond: \"Kita-chan, it's a dinner party. ...ふむふむ. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you mind letting McQueen-san know of our little plan?~\"\nMcQueen: \"Ah, right on time! Welcome to the Mejiro Estate. A festival? ...We shall see, desu wa. Thank you for greeting them for me, Trainer-san. Please, come in!\"", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.goldship", name: "Golshi's Crashdown", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.symboli", name: "The Symboli-cs", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true, outcomes: SYMBOLI_OUTCOMES },
+            { id: "guest.teio", name: "Teio's Tag-along", text: "Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~\nWell yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~\n...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~\nNow come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!", after: ['mejiro.photo'], extra: true, guest: true, media: 'halloween-pose.mp4', credit: 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>', outcomes: TEIO_OUTCOMES },
         ],
     },
 ];
@@ -477,12 +490,12 @@ export function fillOpener(text: string, discordUserId: string): string {
  * Picks an opener from one random number: below `RARE_OPENER_CHANCE` a rare
  * one, else a common one, each evenly within its group.
  */
-export function pickOpener(r: number, rarePool: readonly string[] = RARE_PING_OPENERS, commons: readonly string[] = PING_OPENERS): string {
-    if (r < RARE_OPENER_CHANCE && rarePool.length > 0) {
-        return rarePool[Math.min(rarePool.length - 1, Math.floor((r / RARE_OPENER_CHANCE) * rarePool.length))]!;
+export function pickOpener(r: number, rarePool: readonly string[] = RARE_PING_OPENERS, commons: readonly string[] = PING_OPENERS, chance: number = RARE_OPENER_CHANCE): string {
+    if (r < chance && rarePool.length > 0) {
+        return rarePool[Math.min(rarePool.length - 1, Math.floor((r / chance) * rarePool.length))]!;
     }
     // A rare roll with every special set off falls back to a common line.
-    const share = r < RARE_OPENER_CHANCE ? r / RARE_OPENER_CHANCE : (r - RARE_OPENER_CHANCE) / (1 - RARE_OPENER_CHANCE);
+    const share = r < chance ? r / chance : (r - chance) / (1 - chance);
     return commons[Math.min(commons.length - 1, Math.floor(share * commons.length))]!;
 }
 
@@ -498,9 +511,17 @@ export function commonsFor(recent: readonly string[]): string[] {
 /** The ids of the paused sets (`SpecialSet.paused`): no new finds from them. */
 export const PAUSED_SETS: readonly string[] = SPECIAL_SETS.filter((s) => s.paused).map((s) => s.id);
 
-/** The special texts in the sets that are neither turned off (`disabledSets`), locked (`lockedSets`) nor paused. Extras (`Special.extra`) are never in it. */
-export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonly string[] = []): string[] {
-    return RARE_OPENERS.filter((o) => !o.extra && !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
+/** True when `special` is open at `now` (`Special.opensAt`). */
+export function isOpenAt(special: Pick<Special, 'opensAt'>, now: Date = new Date()): boolean {
+    return !special.opensAt || now.getTime() >= special.opensAt.getTime();
+}
+
+/**
+ * The special texts in the sets that are neither turned off (`disabledSets`), locked (`lockedSets`) nor paused.
+ * Extras (`Special.extra`) are never in it, nor a special not open yet at `now` (`Special.opensAt`).
+ */
+export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonly string[] = [], now: Date = new Date()): string[] {
+    return RARE_OPENERS.filter((o) => !o.extra && isOpenAt(o, now) && !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
 }
 
 /**
@@ -540,9 +561,9 @@ export function guestSlice(
 }
 
 /** A set's lines for a set-wide outcome boost ("any Mejiro line"): all but its extras; none while it is paused. */
-export function setLinesPool(setId: string): string[] {
+export function setLinesPool(setId: string, now: Date = new Date()): string[] {
     if (PAUSED_SETS.includes(setId)) return [];
-    return RARE_OPENERS.filter((o) => o.set === setId && !o.extra).map((o) => o.text);
+    return RARE_OPENERS.filter((o) => o.set === setId && !o.extra && isOpenAt(o, now)).map((o) => o.text);
 }
 
 /** The pool an outcome boost draws on: its one special, or its set's lines; none while its set is paused. */
@@ -671,7 +692,7 @@ export function boostOf(text: string): { set: string; boost: SpecialBoost } | un
  */
 export function boostPool(setId: string, tag: string): string[] {
     if (PAUSED_SETS.includes(setId)) return [];
-    return RARE_OPENERS.filter((o) => o.set === setId && o.tags?.includes(tag)).map((o) => o.text);
+    return RARE_OPENERS.filter((o) => o.set === setId && o.tags?.includes(tag) && isOpenAt(o)).map((o) => o.text);
 }
 
 /**
