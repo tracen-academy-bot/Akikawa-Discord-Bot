@@ -175,7 +175,18 @@ export interface Special {
      * the set's lines and other extras as "Guest.".
      */
     guest?: boolean;
+    /**
+     * Not before this time: out of every pool (base and boosts) until then
+     * (owner, 2026-11-15: Matikanefukukitaru opens with the Fortune Tent).
+     */
+    opensAt?: Date;
 }
+
+/**
+ * When Fuku-chan's Fortune Tent opens (owner, 2026-11-15): the weekly reset,
+ * Monday 00:00 JST. Before it, no Matikanefukukitaru, no unlock, no Fortune.
+ */
+export const TENT_OPENS = new Date('2026-11-22T15:00:00Z');
 
 /** One special set: a group of special lines that can be turned on or off. */
 export interface SpecialSet {
@@ -309,6 +320,8 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
         name: 'Lobby Loungers',
         openers: [
         { id: 'set1.matikane', name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
+        // Owner, 2026-11-15: with Machitan, she opens Fuku-chan's Fortune Tent (see fortune.ts). From TENT_OPENS only.
+        { id: 'set1.fukukitaru', name: 'Matikanefukukitaru', text: "Mumu...! {user}-san, Shiraoki-sama's oracle was right, you came! The run is done, and my crystal ball says the results are lucky. ...It also says something about a tent, and Machitan. I'm sure it's nothing! Namu, namu!", opensAt: TENT_OPENS },
         { id: 'set1.overslept', name: 'Overslept?!', text: '{user} zzzzzzzzz- OOOH AEUHHHH! Oh, right. Trainer, trainer, the timer!' },
         { id: 'set1.tachyon', name: 'Agnes Tachyon', text: '{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food! And then some guinea pigging activities too...' },
         { id: 'set1.bourbon', name: 'Mihono Bourbon', text: "{user} Master-san, I have been provided intel of your underling's completion. Please proceed at haste. I will provide chocolate afterwards." },
@@ -477,12 +490,12 @@ export function fillOpener(text: string, discordUserId: string): string {
  * Picks an opener from one random number: below `RARE_OPENER_CHANCE` a rare
  * one, else a common one, each evenly within its group.
  */
-export function pickOpener(r: number, rarePool: readonly string[] = RARE_PING_OPENERS, commons: readonly string[] = PING_OPENERS): string {
-    if (r < RARE_OPENER_CHANCE && rarePool.length > 0) {
-        return rarePool[Math.min(rarePool.length - 1, Math.floor((r / RARE_OPENER_CHANCE) * rarePool.length))]!;
+export function pickOpener(r: number, rarePool: readonly string[] = RARE_PING_OPENERS, commons: readonly string[] = PING_OPENERS, chance: number = RARE_OPENER_CHANCE): string {
+    if (r < chance && rarePool.length > 0) {
+        return rarePool[Math.min(rarePool.length - 1, Math.floor((r / chance) * rarePool.length))]!;
     }
     // A rare roll with every special set off falls back to a common line.
-    const share = r < RARE_OPENER_CHANCE ? r / RARE_OPENER_CHANCE : (r - RARE_OPENER_CHANCE) / (1 - RARE_OPENER_CHANCE);
+    const share = r < chance ? r / chance : (r - chance) / (1 - chance);
     return commons[Math.min(commons.length - 1, Math.floor(share * commons.length))]!;
 }
 
@@ -498,9 +511,17 @@ export function commonsFor(recent: readonly string[]): string[] {
 /** The ids of the paused sets (`SpecialSet.paused`): no new finds from them. */
 export const PAUSED_SETS: readonly string[] = SPECIAL_SETS.filter((s) => s.paused).map((s) => s.id);
 
-/** The special texts in the sets that are neither turned off (`disabledSets`), locked (`lockedSets`) nor paused. Extras (`Special.extra`) are never in it. */
-export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonly string[] = []): string[] {
-    return RARE_OPENERS.filter((o) => !o.extra && !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
+/** True when `special` is open at `now` (`Special.opensAt`). */
+export function isOpenAt(special: Pick<Special, 'opensAt'>, now: Date = new Date()): boolean {
+    return !special.opensAt || now.getTime() >= special.opensAt.getTime();
+}
+
+/**
+ * The special texts in the sets that are neither turned off (`disabledSets`), locked (`lockedSets`) nor paused.
+ * Extras (`Special.extra`) are never in it, nor a special not open yet at `now` (`Special.opensAt`).
+ */
+export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonly string[] = [], now: Date = new Date()): string[] {
+    return RARE_OPENERS.filter((o) => !o.extra && isOpenAt(o, now) && !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
 }
 
 /**
@@ -540,9 +561,9 @@ export function guestSlice(
 }
 
 /** A set's lines for a set-wide outcome boost ("any Mejiro line"): all but its extras; none while it is paused. */
-export function setLinesPool(setId: string): string[] {
+export function setLinesPool(setId: string, now: Date = new Date()): string[] {
     if (PAUSED_SETS.includes(setId)) return [];
-    return RARE_OPENERS.filter((o) => o.set === setId && !o.extra).map((o) => o.text);
+    return RARE_OPENERS.filter((o) => o.set === setId && !o.extra && isOpenAt(o, now)).map((o) => o.text);
 }
 
 /** The pool an outcome boost draws on: its one special, or its set's lines; none while its set is paused. */
@@ -671,7 +692,7 @@ export function boostOf(text: string): { set: string; boost: SpecialBoost } | un
  */
 export function boostPool(setId: string, tag: string): string[] {
     if (PAUSED_SETS.includes(setId)) return [];
-    return RARE_OPENERS.filter((o) => o.set === setId && o.tags?.includes(tag)).map((o) => o.text);
+    return RARE_OPENERS.filter((o) => o.set === setId && o.tags?.includes(tag) && isOpenAt(o)).map((o) => o.text);
 }
 
 /**

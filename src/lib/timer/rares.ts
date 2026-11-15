@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -352,7 +352,8 @@ export async function completionNotice(guildId: string, discordUserId: string, o
     if (!set) return null;
     const found = await foundSpecialIds(guildId, discordUserId);
     found.add(special.id);
-    const inSet = RARE_OPENERS.filter((o) => o.set === set.id);
+    // A special not open yet (Special.opensAt) does not hold up a completion.
+    const inSet = RARE_OPENERS.filter((o) => o.set === set.id && isOpenAt(o));
     const mainDone = inSet.filter((o) => !o.extra).every((o) => found.has(o.id));
     const allDone = mainDone && inSet.every((o) => found.has(o.id));
     const settings = await getUserSettings(guildId, discordUserId);
@@ -590,6 +591,8 @@ export interface ExtraChance {
  * A locked special never comes up from an extra. `guaranteed` (a special's
  * text, from `guaranteedOpener`: a lost Remedial Rehearsal) is the trainer's
  * own guarantee: it comes up whatever the roll, after a lock's guarantee.
+ * `baseAdjust` (a Fortune Tent curse, e.g. -0.01) changes the usual special
+ * share for this ping: 6% becomes 5%; it is never below 0.
  */
 export async function chooseOpener(
     guildId: string,
@@ -599,7 +602,9 @@ export async function chooseOpener(
     extras: readonly ExtraChance[] = [],
     commons: readonly string[] = PING_OPENERS,
     guaranteed?: string,
+    baseAdjust = 0,
 ): Promise<string> {
+    const p = Math.max(0, RARE_OPENER_CHANCE + baseAdjust);
     const locks = await activeLocks(guildId);
     const locked = locks.map((l) => l.text);
     const mine = locks.find((l) => l.owner === discordUserId);
@@ -612,7 +617,7 @@ export async function chooseOpener(
     // shrink in proportion so the total is exactly `effectiveChance`; the
     // base slice stays whole.
     const rawExtra = raw.reduce((sum, e) => sum + e.chance, 0);
-    const keptExtra = Math.max(0, effectiveChance(RARE_OPENER_CHANCE + rawExtra) - RARE_OPENER_CHANCE);
+    const keptExtra = Math.max(0, effectiveChance(p + rawExtra) - p);
     const scale = rawExtra > 0 ? keptExtra / rawExtra : 1;
     const slices = raw.map((e) => ({ ...e, chance: e.chance * scale }));
     let start = 0;
@@ -625,7 +630,6 @@ export async function chooseOpener(
     }
     // Past the extras: map what is left back onto [0, 1), keeping the usual
     // special share exactly its width and stretching only the common part.
-    const p = RARE_OPENER_CHANCE;
     const u = r - start;
     const rest = u < p ? u : p + ((u - p) * (1 - p)) / (1 - start - p);
 
@@ -636,7 +640,7 @@ export async function chooseOpener(
         const share = (rest - mine.ownerChance) / (p - mine.ownerChance);
         return others[Math.min(others.length - 1, Math.floor(share * others.length))]!;
     }
-    return pickOpener(rest, others, commons);
+    return pickOpener(rest, others, commons, p);
 }
 
 /** A common opener at random, for when a locked special has no other special to become. */
@@ -701,7 +705,7 @@ export interface SpecialsBoard {
  * new special first. Only finds of specials that still exist count. `limit`
  * caps the rows; the totals cover everyone.
  */
-export async function specialsBoard(guildId: string, limit = 15): Promise<SpecialsBoard> {
+export async function specialsBoard(guildId: string, limit = 15, now: Date = new Date()): Promise<SpecialsBoard> {
     const ids = new Set(RARE_OPENERS.map((o) => o.id));
     const hits = (await prisma.rareOpenerHit.findMany({ where: { guildId, specialId: { not: null } }, orderBy: { at: 'asc' }, select: { discordUserId: true, specialId: true, at: true } })).filter(
         (h) => ids.has(h.specialId!),
@@ -718,7 +722,8 @@ export async function specialsBoard(guildId: string, limit = 15): Promise<Specia
     }
     const rows: SpecialsBoardRow[] = [...byUser].map(([discordUserId, u]) => {
         // Extras score as finds but never count toward a set, or the found count.
-        const setsComplete = SPECIAL_SETS.filter((s) => s.openers.some((o) => !o.extra) && s.openers.every((o) => o.extra || u.found.has(o.id))).length;
+        // A special not open yet (Special.opensAt) does not count toward its set until it opens.
+        const setsComplete = SPECIAL_SETS.filter((s) => s.openers.some((o) => !o.extra) && s.openers.every((o) => o.extra || !isOpenAt(o, now) || u.found.has(o.id))).length;
         const distinct = u.found.size;
         const points = distinct * SPECIAL_POINTS.found + (u.pings - distinct) * SPECIAL_POINTS.repeat + setsComplete * SPECIAL_POINTS.set;
         const found = [...u.found].filter((id) => !specialById(id)?.extra).length;

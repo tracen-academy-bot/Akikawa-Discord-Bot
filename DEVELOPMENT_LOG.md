@@ -4,6 +4,32 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — Fuku-chan's Fortune Tent (opens 2026-11-22T15:00Z)
+
+- Design: `docs/special-sets/fortune-tent.md`, with the owner's decisions of
+  2026-11-15 at its top. Code: `src/lib/timer/fortune.ts`.
+- Matikanefukukitaru (`set1.fukukitaru`), a Lobby Loungers special right
+  after Machitan. `Special.opensAt` keeps her out of every pool before
+  `TENT_OPENS` (Monday 00:00 JST, Nov 23); until then she does not hold up
+  Set 1's completion or its board points either.
+- Unlock: both Matikanes found, from the opening. The ping that completes
+  the pair (or a trainer's first ping after the opening, if they had both)
+  adds "**Congrats!** Fuku-chan's Fortune Tent unlocked!". The next run's
+  ping is the introduction instead of an opener, once ever; a due guarantee
+  (Rehearsal, Helios guest) goes first and the intro waits.
+- Fortune button in the Boosts view: one omikuji per JST day, ephemeral
+  box, then "Drawn today". Seven tiers (1/4/15/25/25/20/10%), 13 lines
+  (Air Groove's 大凶 added, owner's final copy); never the previous line.
+- A blessing is an extra slice from the usual pool until the reset (soft
+  caps, paused with Boosts off); a curse lowers the base in `chooseOpener`
+  (`baseAdjust`), never paused; the Boosts view shows both and the total.
+- Migration `20261115230000_fortune_tent`: `TimerUserSettings.tentUnlocked`,
+  `tentIntroOwed`, and the `TimerFortuneDraw` table (guild, user, day).
+- Tests in `scripts/test-scheduler.ts`; existing counts updated for Set 1's
+  14th line.
+
+---
+
 ## 2026-11-15 — Weekly events, auto-off, the extras page, and the last guests
 
 - Weekly events (owner): Curren Chan week extended to the reset of Nov 22

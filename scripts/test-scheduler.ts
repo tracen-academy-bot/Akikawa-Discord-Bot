@@ -196,9 +196,11 @@ async function main() {
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: IG } });
     check('sets: every special belongs to a set', openers.RARE_OPENERS.every((o) => openers.SPECIAL_SETS.some((set) => set.id === o.set)), true);
     // Paused sets (The Mejiro Estate, owner 2026-11-10) give no new finds: never in the pool.
-    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set) && !o.extra).length;
+    // A special not open yet (Matikanefukukitaru, until the Fortune Tent opens) is in no pool either.
+    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set) && !o.extra && openers.isOpenAt(o)).length;
+    const set1Open = openers.SPECIAL_SETS[0]!.openers.filter((o) => openers.isOpenAt(o)).length;
     check('sets: all on gives every special of the sets not paused (extras never)', openers.rarePoolFor([]).length, liveSpecials);
-    check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, liveSpecials - openers.SPECIAL_SETS[0]!.openers.length);
+    check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, liveSpecials - set1Open);
     // The Mejiro Estate was paused 2026-11-10 and resumed 2026-11-15 (owner).
     check('paused: no set is paused', openers.PAUSED_SETS, []);
     check('resumed: the Estate\'s lines roll once it is unlocked', openers.rarePoolFor([], []).some((t) => RARE_OPENERS.some((o) => o.set === 'mejiro-estate' && o.text === t)), true);
@@ -241,7 +243,7 @@ async function main() {
     check('sets: Curren Chan is the last of Set 1', [curren.set, openers.SPECIAL_SETS[0]!.openers.at(-1)?.name], ['set1', 'Curren Chan']);
     check('fill: every {user} and {set_name}', [openers.fillOpener(loves.text, 'u9').includes('{'), openers.fillOpener(loves.text, 'u9').split('<@u9>').length - 1, openers.fillOpener(loves.text, 'u9').includes('in #OnlineSensations.')], [false, 2, true]);
     check('locks: each gated set is locked until its special (Curren Chan, the Mejiro Family line)', await rares.lockedSetsFor(XG, 'u1'), ['online-sensations', 'mejiro-estate']);
-    check('locks: a locked set is out of the pool', openers.rarePoolFor([], ['online-sensations', 'mejiro-estate']).length, openers.SPECIAL_SETS[0]!.openers.length);
+    check('locks: a locked set is out of the pool', openers.rarePoolFor([], ['online-sensations', 'mejiro-estate']).length, set1Open);
     await rares.recordRareOpener(XG, 'u1', curren.text);
     check('locks: open once Curren Chan is found (only that set)', [await rares.lockedSetsFor(XG, 'u1'), await rares.lockedSetsFor(XG, 'u2')], [['mejiro-estate'], ['online-sensations', 'mejiro-estate']]);
     const collabs = openers.boostPool('online-sensations', 'collab');
@@ -411,7 +413,7 @@ async function main() {
     const seedHits = async (user: string, texts: string[], from: number) => {
         for (const [k, t] of texts.entries()) await prisma.rareOpenerHit.create({ data: { guildId: LB, discordUserId: user, opener: t, specialId: openers.specialIdOf(t)!, at: at(from + k) } });
     };
-    await seedHits('lb-set', set1, 0); // 13 found, Set 1 complete
+    await seedHits('lb-set', set1, 0); // 14 found, Set 1 complete
     await seedHits('lb-wide', all.slice(1, 21), 100); // 20 found, no set complete
     await seedHits('lb-wide-more', [...all.slice(1, 21), all[1]!], 200); // 20 found, one repeat
     await seedHits('lb-wide-late', all.slice(1, 21), 300); // ties lb-wide, but later
@@ -419,13 +421,13 @@ async function main() {
     // Points: 15 a new special, 3 a repeat, 100 a full set.
     check('specials board: points (15 new, 3 repeat, 100 a set)', rares.SPECIAL_POINTS, { found: 15, repeat: 3, set: 100 });
     check('specials board: ranked by points, a tie to who got there first', sb.rows.map((r) => [r.discordUserId, r.points, r.setsComplete, r.found, r.pings]), [
+        ['lb-set', 310, 1, 14, 14],
         ['lb-wide-more', 303, 0, 20, 21],
         ['lb-wide', 300, 0, 20, 20],
         ['lb-wide-late', 300, 0, 20, 20],
-        ['lb-set', 295, 1, 13, 13],
     ]);
     check('specials board: limit caps the rows, not the totals', [(await rares.specialsBoard(LB, 3)).rows.length, (await rares.specialsBoard(LB, 3)).trainers], [3, 4]);
-    check('specials board: totals', [sb.totalPings, sb.trainers, sb.specialCount, sb.setCount], [13 + 20 + 21 + 20, 4, RARE_OPENERS.filter((o) => !o.extra).length, openers.SPECIAL_SETS.length]);
+    check('specials board: totals', [sb.totalPings, sb.trainers, sb.specialCount, sb.setCount], [14 + 20 + 21 + 20, 4, RARE_OPENERS.filter((o) => !o.extra).length, openers.SPECIAL_SETS.length]);
     const { renderSpecialsLeaderboard } = await import('../src/lib/image/renderSpecialsLeaderboard');
     const png = await renderSpecialsLeaderboard(sb, new Map([['lb-set', 'Tylina']]));
     check('specials board: renders a PNG', [png.subarray(1, 4).toString(), png.length > 1000], ['PNG', true]);
@@ -556,7 +558,7 @@ async function main() {
         { guildId: UG, discordUserId: T, setId: 'set1', key: 'test:set', chance: 0.03, runsLeft: 1 },
     ] });
     const live1 = await extraChances(UG, T, usable, NOT_OS, false, [], OFF_SEASON);
-    check('boosts: on a live set, one special or the set\'s lines, at their own chance, labelled', live1.map((e) => [e.chance, e.pool.length, e.label]), [[0.02, 1, 'Curren Chan, 5 runs left.'], [0.03, openers.SPECIAL_SETS[0]!.openers.length, 'Lobby Loungers: any of its lines, 1 run left.']]);
+    check('boosts: on a live set, one special or the set\'s lines, at their own chance, labelled', live1.map((e) => [e.chance, e.pool.length, e.label]), [[0.02, 1, 'Curren Chan, 5 runs left.'], [0.03, set1Open, 'Lobby Loungers: any of its lines, 1 run left.']]);
     await rares.endBoostsHitBy(UG, T, openers.specialById('set1.curren')!.text);
     check('boosts: a one-time boost on a live set ends on its hit, the other stays', (await rares.activeBoosts(UG, T)).map((b) => b.key), ['test:set']);
     await prisma.timerSpecialBoost.deleteMany({ where: { guildId: UG } });
@@ -853,6 +855,140 @@ async function main() {
     ]);
     check('ping: a plain run is just the opener', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, () => 0.5), PING_OPENERS[Math.floor(((0.5 - P) / (1 - P)) * PING_OPENERS.length)]!.replace('{user}', '<@u1>'));
     check('ping: an ongoing streak, first run of the day', buildPingContent('u1', { milestone: null, newLongestStreak: false, currentStreakDays: 4, firstOfDay: true, totalRuns: 9 } as never, 0, null, () => 0.5).split('\n')[1], '**Persistence!** **4 days** straight! Keep it going!');
+
+    // ─── Fuku-chan's Fortune Tent (owner, 2026-11-15) ───────────────────────
+    {
+        const fortune = await import('../src/lib/timer/fortune');
+        const boostsMod = await import('../src/lib/timer/boosts');
+        const usF = await import('../src/lib/timer/userSettings');
+        const fs = await import('fs');
+        const FG = `test-fortune-${Date.now()}`;
+        const BEFORE = new Date('2026-11-22T14:59:00Z');
+        const OPEN = new Date('2026-11-23T03:00:00Z'); // Monday noon JST, after the opening
+        const fuku = openers.specialById('set1.fukukitaru')!;
+        const machi = openers.specialById('set1.matikane')!;
+        const cleanF = async () => {
+            await prisma.rareOpenerHit.deleteMany({ where: { guildId: FG } });
+            await prisma.timerUserSettings.deleteMany({ where: { guildId: FG } });
+            await prisma.timerFortuneDraw.deleteMany({ where: { guildId: FG } });
+        };
+        await cleanF();
+
+        // The gate.
+        check('tent: opens Monday 00:00 JST, Nov 23 (2026-11-22T15:00Z)', [fortune.TENT_OPENS.toISOString(), fortune.tentIsOpen(BEFORE), fortune.tentIsOpen(fortune.TENT_OPENS)], ['2026-11-22T15:00:00.000Z', false, true]);
+        check('fukukitaru: a Lobby Loungers special right after Machitan, named Matikanefukukitaru', [fuku.set, fuku.name, openers.SPECIAL_SETS[0]!.openers[1]!.id, fuku.extra ?? false], ['set1', 'Matikanefukukitaru', 'set1.fukukitaru', false]);
+        check('fukukitaru: her line is the doc\'s, one {user}', [fuku.text.startsWith('Mumu...! {user}-san'), fuku.text.split('{user}').length - 1], [true, 1]);
+        check('fukukitaru: in no pool before the opening, in the pool from it', [openers.rarePoolFor([], [], BEFORE).includes(fuku.text), openers.rarePoolFor([], [], fortune.TENT_OPENS).includes(fuku.text), openers.setLinesPool('set1', BEFORE).includes(fuku.text), openers.setLinesPool('set1', OPEN).includes(fuku.text)], [false, true, false, true]);
+        // Set 1 complete without her until she opens (no lost set points), with her from then on.
+        const LBF = `${FG}-board`;
+        for (const o of openers.SPECIAL_SETS[0]!.openers.filter((x) => x.id !== fuku.id)) await rares.recordRareOpener(LBF, 'c1', o.text);
+        check('fukukitaru: Set 1 counts as complete without her before the opening, not after', [(await rares.specialsBoard(LBF, 15, BEFORE)).rows[0]?.setsComplete, (await rares.specialsBoard(LBF, 15, OPEN)).rows[0]?.setsComplete], [1, 0]);
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: LBF } });
+
+        // The unlock: both Matikanes, and the tent open.
+        await rares.recordRareOpener(FG, 't1', machi.text);
+        check('unlock: Machitan alone is not enough', [await fortune.hasTent(FG, 't1', OPEN), await fortune.tentUnlockNotice(FG, 't1', PING_OPENERS[0]!, OPEN)], [false, null]);
+        check('unlock: no unlock before the opening, even on Fuku\'s ping', [await fortune.tentUnlockNotice(FG, 't1', fuku.text, BEFORE)], [null]);
+        const completing = await fortune.tentUnlockNotice(FG, 't1', fuku.text, OPEN);
+        check('unlock: the ping that completes the pair says so', completing?.line, "**Congrats!** Fuku-chan's Fortune Tent unlocked!");
+        const { pingExtraLines: pel } = await import('../src/lib/timer/scheduler');
+        check('unlock: a Congrats line like a set unlock', pel({ milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, [], [completing!.line]), ["**Congrats!** Fuku-chan's Fortune Tent unlocked!"]);
+        await rares.recordRareOpener(FG, 't1', fuku.text);
+        await completing!.record();
+        check('unlock: once only', [await fortune.tentUnlockNotice(FG, 't1', PING_OPENERS[0]!, OPEN), await fortune.hasTent(FG, 't1', OPEN), await fortune.hasTent(FG, 't1', BEFORE)], [null, true, false]);
+        // A trainer with both before the opening: the line on their first ping after it.
+        await rares.recordRareOpener(FG, 't2', machi.text);
+        await rares.recordRareOpener(FG, 't2', fuku.text);
+        check('unlock: had both already: the line on the first ping after the opening, on any line', [await fortune.tentUnlockNotice(FG, 't2', PING_OPENERS[3]!, BEFORE), (await fortune.tentUnlockNotice(FG, 't2', PING_OPENERS[3]!, OPEN))?.line], [null, fortune.TENT_UNLOCK_LINE]);
+
+        // The introduction: the next run's ping, behind a due guarantee, once ever.
+        check('intro: owed after the unlock ping, not before', [await fortune.tentIntroDue(FG, 't2', false, OPEN), await fortune.tentIntroDue(FG, 't1', false, OPEN), await fortune.tentIntroDue(FG, 't1', false, BEFORE)], [false, true, false]);
+        check('intro: a due guarantee (Rehearsal, a Helios guest) wins; the intro waits', await fortune.tentIntroDue(FG, 't1', true, OPEN), false);
+        await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 't1' } }, data: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1 } });
+        const st = await rares.outcomeState(FG, 't1');
+        check('intro: the guarantee check is guaranteedOpener (due at 1 run)', [rares.guaranteedOpener(st, [], []) !== undefined, rares.guaranteedOpener({ ...st, guaranteedInRuns: 3 }, [], [])], [true, undefined]);
+        check('intro: still owed while it waits', await fortune.tentIntroDue(FG, 't1', false, OPEN), true);
+        const intro = fortune.tentIntroText('t1').split('\n');
+        check('intro: four speakers, then the -# line, the mention once', [intro.length, intro.map((l) => l.split(':')[0]), intro[4]!.startsWith("-# Fuku-chan's Fortune Tent is open"), fortune.TENT_INTRO.split('{user}').length - 1, intro.join('\n').includes('<@t1>')], [5, ['Machitan', 'Fuku', 'Machitan', 'Fuku', "-# Fuku-chan's Fortune Tent is open"], true, 1, true]);
+        check('intro: not a special (no find, not in Specials)', rares.isRareOpener(fortune.TENT_INTRO), false);
+        await fortune.tentIntroShown(FG, 't1');
+        check('intro: once only', [await fortune.tentIntroDue(FG, 't1', false, OPEN), (await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 't1' } } }))?.tentUnlocked], [false, true]);
+        await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 't1' } }, data: { guaranteedSpecialId: null, guaranteedInRuns: null } });
+
+        // The tiers: weights 1, 4, 15, 25, 25, 20, 10 (never shown).
+        const T = fortune.FORTUNE_TIERS;
+        check('tiers: chances and weights', T.map((t) => [t.id, t.delta, t.weight]), [['oracle', 0.05, 1], ['super', 0.03, 4], ['great', 0.02, 15], ['blessing', 0.01, 25], ['small', 0.005, 25], ['curse', -0.01, 20], ['great-curse', -0.02, 10]]);
+        check('tiers: the rolls map in order', [0, 0.0099, 0.01, 0.0499, 0.05, 0.1999, 0.2, 0.4499, 0.45, 0.6999, 0.7, 0.8999, 0.9, 0.9999].map((r) => fortune.tierForRoll(r).id), ['oracle', 'oracle', 'super', 'super', 'great', 'great', 'blessing', 'blessing', 'small', 'small', 'curse', 'curse', 'great-curse', 'great-curse']);
+        const tierCounts = new Map<string, number>();
+        for (let k = 0; k < 10000; k += 1) tierCounts.set(fortune.tierForRoll(k / 10000).id, (tierCounts.get(fortune.tierForRoll(k / 10000).id) ?? 0) + 1);
+        check('tiers: a sweep matches the weights exactly', T.map((t) => tierCounts.get(t.id)), [100, 400, 1500, 2500, 2500, 2000, 1000]);
+        check('tiers: lines per tier (大凶 has Air Groove too)', T.map((t) => t.lines.length), [1, 1, 2, 3, 2, 2, 2]);
+        check('tiers: headings and effects, Japanese intact', T.map((t) => t.heading), ["Shiraoki-sama's Oracle", '超吉 Super blessing', '大吉 Great blessing', '吉 Blessing', '小吉 Small blessing', '凶 Curse', '大凶 Great curse']);
+        const all13 = T.flatMap((t) => t.lines);
+        check('lines: 13, unique ids, each exactly one {user}', [all13.length, new Set(all13.map((l) => l.id)).size, all13.every((l) => l.text.split('{user}').length === 2)], [13, 13, true]);
+        // Verbatim: every line (and heading, effect, intro) is in the design doc, except Air Groove's (the owner's final copy).
+        const doc = fs.readFileSync('docs/special-sets/fortune-tent.md', 'utf8');
+        const inDoc = (t: string) => t.split('\n').every((l) => doc.includes(l));
+        check('lines: verbatim from the doc', [all13.filter((l) => l.id !== 'great-curse.groove').every((l) => inDoc(l.text)), T.every((t) => doc.includes(`### ${t.heading}`) && doc.includes(t.effect)), inDoc(fortune.TENT_INTRO), doc.includes(fortune.TENT_UNLOCK_LINE), doc.includes(fuku.text)], [true, true, true, true, true]);
+        check('lines: Air Groove\'s, the owner\'s final copy', fortune.fortuneTier('great-curse')!.lines[1]!.text, [
+            'Fuku: "D-daikyou... {user}-san, it\'s a GREAT curse, and the black cat is back, and—"',
+            'Groove: "Mattaku. What is this racket outside the student council room? ...Fukukitaru. It is a cat. Not the end of the world."',
+            'Groove: "...Still. Kisama, take this. A Shigaraki tanuki. Fukukitaru insisted it would bring luck, and I am in no mood to argue with a crystal ball. Just in case."',
+            'Fuku: "Air Groove-san... you kept it all this time?!"',
+            'Machitan: "Ei, ei, mun! ...It\'s still a great curse though, isn\'t it." / Groove: "Yes. But perhaps a smaller one."',
+        ].join('\n'));
+        const great = fortune.fortuneTier('great')!;
+        const oracle = fortune.fortuneTier('oracle')!;
+        check('lines: never the previous line; a one-line tier may repeat', [fortune.lineForRoll(great, 0, 'great.tea').id, fortune.lineForRoll(great, 0.99, 'great.tea').id, fortune.lineForRoll(great, 0, null).id, fortune.lineForRoll(great, 0.99, null).id, fortune.lineForRoll(oracle, 0.5, 'oracle.sky').id], ['great.taiki', 'great.taiki', 'great.tea', 'great.taiki', 'oracle.sky']);
+
+        // The draw: once per JST day.
+        const seq = (...xs: number[]) => { let i = 0; return () => xs[i++ % xs.length]!; };
+        check('draw: none without the tent, or before it opens', [await fortune.drawFortune(FG, 'nobody', OPEN), await fortune.drawFortune(FG, 't1', BEFORE)], [null, null]);
+        const d1 = await fortune.drawFortune(FG, 't1', OPEN, seq(0.1, 0)); // 大吉, first line
+        check('draw: the first of the day', [d1?.fresh, d1?.draw.tier.id, d1?.draw.line.id], [true, 'great', 'great.tea']);
+        const d1b = await fortune.drawFortune(FG, 't1', new Date('2026-11-23T14:59:00Z'), seq(0.95, 0));
+        check('draw: once a day: the same draw back until the reset', [d1b?.fresh, d1b?.draw.line.id, await prisma.timerFortuneDraw.count({ where: { guildId: FG, discordUserId: 't1' } })], [false, 'great.tea', 1]);
+        const view = (await boostsMod.boostsView(FG, 't1', OPEN)).components[0]!.toJSON() as { components: { custom_id: string; label: string; disabled?: boolean }[] };
+        check('draw: the button reads "Drawn today", greyed out', view.components.map((c) => [c.custom_id, c.label, c.disabled ?? false]), [['timer:boosts:toggle', 'Boosts: On', false], [fortune.FORTUNE_BUTTON_ID, 'Drawn today', true]]);
+        const fresh = (await boostsMod.boostsView(FG, 't2', OPEN)).components[0]!.toJSON() as { components: { label: string; disabled?: boolean }[] };
+        const none = (await boostsMod.boostsView(FG, 'nobody', OPEN)).components[0]!.toJSON() as { components: unknown[] };
+        const early = (await boostsMod.boostsView(FG, 't1', BEFORE)).components[0]!.toJSON() as { components: unknown[] };
+        check('draw: "Fortune" before drawing; no button without the tent, or before it opens', [fresh.components[1]?.label, fresh.components[1]?.disabled ?? false, none.components.length, early.components.length], ['Fortune', false, 1, 1]);
+        const NEXT_DAY = new Date('2026-11-23T15:00:00Z'); // Tuesday 00:00 JST
+        const d2 = await fortune.drawFortune(FG, 't1', NEXT_DAY, seq(0.1, 0));
+        check('draw: a new one after midnight JST, never the previous line', [d2?.fresh, d2?.draw.tier.id, d2?.draw.line.id], [true, 'great', 'great.taiki']);
+        const box = JSON.stringify(fortune.fortuneBox(d1!.draw, 't1'));
+        check('draw: a box only to the trainer: heading, the scene with the mention, the effect line', [box.includes('### 大吉 Great blessing'), box.includes('<@t1>-san, three tea stalks'), box.includes("-# Today's fortune: +2% chance of a special line until the daily reset."), (fortune.fortuneBox(d1!.draw, 't1').flags & 64) === 64, box.includes('{user}')], [true, true, true, true, false]);
+
+        // Effects: a blessing is an extra slice (paused with Boosts off); a curse lowers the base (never paused).
+        const plainF = { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] as string[] };
+        const poolF = openers.rarePoolFor([], [], OPEN);
+        // The Estate locked, as for these trainers (no Mejiro finds), so only the fortune shows.
+        const LK = ['online-sensations', 'mejiro-estate'];
+        const ex = await boostsMod.extraChances(FG, 't1', plainF, LK, false, poolF, OPEN);
+        check('blessing: an extra slice from the usual pool, labelled', ex.map((e) => [e.chance, e.pool.length, e.label]), [[0.02, poolF.length, 'Fortune: Great blessing, until the daily reset.']]);
+        check('blessing: paused with Boosts off; gone after the reset', [(await boostsMod.extraChances(FG, 't1', { ...plainF, boosts: false }, LK, false, poolF, OPEN)).length, (await boostsMod.extraChances(FG, 't1', plainF, LK, false, poolF, new Date('2026-11-25T03:00:00Z'))).length], [0, 0]);
+        const bvBless = (await boostsMod.boostsView(FG, 't1', OPEN)).embeds[0]!.toJSON().description ?? '';
+        check('blessing: the Boosts view line and total', [bvBless.includes('**+2%** Fortune: Great blessing, until the daily reset.'), bvBless.includes('**Your next ping: 8% chance of a special.**')], [true, true]);
+        const CURSE_DAY = new Date('2026-11-25T03:00:00Z');
+        await fortune.drawFortune(FG, 't2', CURSE_DAY, seq(0.75, 0)); // 凶
+        check('curse: lowers the base for the day, Boosts on or off (not a boost)', [await boostsMod.fortuneBaseAdjust(FG, 't2', CURSE_DAY), (await boostsMod.extraChances(FG, 't2', plainF, LK, false, poolF, CURSE_DAY)).length, await boostsMod.fortuneBaseAdjust(FG, 't2', new Date('2026-11-26T03:00:00Z'))], [-0.01, 0, 0]);
+        await usF.toggleSetting(FG, 't2', 'boosts');
+        const bvCurse = (await boostsMod.boostsView(FG, 't2', CURSE_DAY)).embeds[0]!.toJSON().description ?? '';
+        check('curse: the Boosts view line and total, with Boosts off too', [bvCurse.includes('**-1%** Fortune: Curse, until the daily reset.'), bvCurse.includes('**Your next ping: 5% chance of a special.**'), bvCurse.includes('**Base:** 6%')], [true, true, true]);
+        await prisma.timerFortuneDraw.create({ data: { guildId: FG, discordUserId: 't2', day: '2026-11-27', tier: 'great-curse', lineId: 'great-curse.cat' } });
+        const GC = new Date('2026-11-27T03:00:00Z');
+        check('curse: a great curse, -2%, total 4%', [await boostsMod.fortuneBaseAdjust(FG, 't2', GC), ((await boostsMod.boostsView(FG, 't2', GC)).embeds[0]!.toJSON().description ?? '').includes('**Your next ping: 4% chance of a special.**')], [-0.02, true]);
+        // chooseOpener with the base adjust: 5% and 4% of the range are specials.
+        const sweepBase = async (adjust: number, extras: { chance: number; pool: string[] }[] = []) => {
+            let n = 0;
+            for (let k = 0; k < 10000; k += 1) if (rares.isRareOpener(await rares.chooseOpener(FG, 'sweeper', k / 10000, poolF, extras, PING_OPENERS, undefined, adjust))) n += 1;
+            return n;
+        };
+        check('curse: chooseOpener\'s base share is 6% less the curse', [await sweepBase(0), await sweepBase(-0.01), await sweepBase(-0.02)], [600, 500, 400]);
+        check('curse: other boosts still add on top', await sweepBase(-0.01, [{ chance: 0.02, pool: poolF }]), 700);
+        await cleanF();
+    }
 
     check('expired timer removed', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-a' } }), 0);
     check('in-progress timer untouched', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-b' } }), 1);

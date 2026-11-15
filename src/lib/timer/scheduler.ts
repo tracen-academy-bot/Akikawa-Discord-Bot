@@ -14,7 +14,8 @@ import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, grantSecondLove, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
 import { applyOutcome, chooseOpener, completionNotice, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
-import { extraChances } from './boosts';
+import { extraChances, fortuneBaseAdjust } from './boosts';
+import { tentIntroDue, tentIntroShown, tentIntroText, tentUnlockNotice } from './fortune';
 import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
 import { pingBox } from './pingBox';
 import { getUserSettings, pingMinutes } from './userSettings';
@@ -189,16 +190,22 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // A lost Remedial Rehearsal guarantees the next ping (while its set is usable).
                 const state = await outcomeState(timer.guildId, timer.discordUserId);
                 const guaranteed = guaranteedOpener(state, settings.disabledSets, lockedSets);
-                const opener = await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras, commons, guaranteed);
+                // Fuku-chan's Fortune Tent: owed its introduction, this run's ping is it (a due guarantee wins; the intro waits).
+                const intro = await tentIntroDue(timer.guildId, timer.discordUserId, guaranteed !== undefined, now);
+                // A Fortune Tent curse lowers the base for the day, Boosts on or off.
+                const baseAdjust = await fortuneBaseAdjust(timer.guildId, timer.discordUserId, now);
+                const opener = intro ? '' : await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras, commons, guaranteed, baseAdjust);
                 // A special with outcomes rolls one, once; a forced success gives its role first, so the footer can say so.
-                const special = specialByText(opener);
+                const special = intro ? undefined : specialByText(opener);
                 const rolled = special ? rollOutcome(special, Math.random(), state.losingStreak) : null;
                 const role = rolled?.forced ? await grantSecondLove(await guildOf(client, timer.guildId), timer.guildId, timer.discordUserId) : null;
-                const text = pingText(opener, timer.discordUserId, rolled, role);
+                const text = intro ? tentIntroText(timer.discordUserId) : pingText(opener, timer.discordUserId, rolled, role);
                 // The first time a trainer gets a set's prerequisite, the ping says the set opened.
                 const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
                 // Completing a set rests it (or turns it off), said on this ping; saved after the find.
                 const completion = isRareOpener(opener) ? await completionNotice(timer.guildId, timer.discordUserId, opener) : null;
+                // Both Matikanes found (from the tent's opening): the ping says the tent opened.
+                const tent = await tentUnlockNotice(timer.guildId, timer.discordUserId, opener, now);
                 // Every ping posts as one Components V2 box: line, subtext, the
                 // media and its credit when the line has them, then the extras.
                 const payload = () =>
@@ -206,7 +213,7 @@ async function processExpiredTimers(client: Client): Promise<void> {
                         text,
                         mediaPath: specialMediaPath(opener),
                         credit: specialCredit(opener),
-                        extraLines: pingExtraLines(summary, lagSeconds, milestoneRoleId, unlocked, completion ? [completion.line] : []),
+                        extraLines: pingExtraLines(summary, lagSeconds, milestoneRoleId, unlocked, [...(tent ? [tent.line] : []), ...(completion ? [completion.line] : [])]),
                     });
                 const message = await channel.send({ ...payload(), allowedMentions: { users: [timer.discordUserId] } });
                 await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));
@@ -215,7 +222,9 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 if (settings.boosts) await spendBoosts(timer.guildId, timer.discordUserId);
                 // A scheduled guarantee (Ramonu's lesson) counts down one run on every other ping.
                 await tickGuarantee(timer.guildId, timer.discordUserId, opener);
-                if (!isRareOpener(opener)) await rememberCommon(timer.guildId, timer.discordUserId, opener);
+                await tent?.record();
+                if (intro) await tentIntroShown(timer.guildId, timer.discordUserId);
+                else if (!isRareOpener(opener)) await rememberCommon(timer.guildId, timer.discordUserId, opener);
                 if (isRareOpener(opener)) {
                     await recordRareOpener(timer.guildId, timer.discordUserId, opener);
                     await completion?.record();

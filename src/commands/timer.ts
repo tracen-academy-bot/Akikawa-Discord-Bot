@@ -20,6 +20,7 @@ import {
 import { isOfficer } from '../lib/permissions';
 import { errorEmbed, infoEmbed, successEmbed } from '../lib/embeds';
 import { BOOSTS_TOGGLE_ID, boostsView } from '../lib/timer/boosts';
+import { FORTUNE_BUTTON_ID, drawFortune, fortuneBox } from '../lib/timer/fortune';
 import {
     BUTTON_BOOSTS,
     BUTTON_LEADERBOARD,
@@ -556,6 +557,16 @@ export async function handleTimerButton(interaction: ButtonInteraction) {
     if (interaction.customId === BOOSTS_TOGGLE_ID) {
         await toggleSetting(guildId, interaction.user.id, 'boosts');
         await interaction.update(await boostsView(guildId, interaction.user.id));
+        return;
+    }
+
+    // Fortune (Fuku-chan's Fortune Tent): today's omikuji, only to the trainer.
+    // The Boosts view redraws with "Drawn today"; a forged press without the
+    // tent changes nothing, and a second press shows today's draw again.
+    if (interaction.customId === FORTUNE_BUTTON_ID) {
+        const result = await drawFortune(guildId, interaction.user.id);
+        await interaction.update(await boostsView(guildId, interaction.user.id));
+        if (result) await interaction.followUp(fortuneBox(result.draw, interaction.user.id));
         return;
     }
 

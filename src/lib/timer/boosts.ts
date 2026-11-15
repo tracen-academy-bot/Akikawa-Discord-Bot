@@ -1,6 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, PAUSED_SETS, setLinesPool, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, guestSlice, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { EARLY_START, PAUSED_SETS, setLinesPool, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, isOpenAt, guestSlice, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { fortuneButton, fortuneToday, hasTent } from './fortune';
 import { activeBoosts, foundSpecialIds, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
@@ -34,7 +35,10 @@ function percent(chance: number): string {
  *     a set's prerequisite (Curren Chan) stops once that set is unlocked:
  *     it has done its job, and the set's unlock bonus takes over;
  *   - each set with an `unlockBonus` they have unlocked and on: its bonus,
- *     drawn from that set's lines.
+ *     drawn from that set's lines;
+ *   - today's Fortune Tent blessing (`fortuneToday`), until the daily reset:
+ *     its chance, drawn from their usual special pool. A curse is not an
+ *     extra: it lowers the base (`fortuneBaseAdjust`), Boosts on or off.
  *
  * And, Boosts on or off, the guest slice (`guestSlice`): content, not a
  * boost (`content: true`), so it is the only extra left with Boosts off.
@@ -101,10 +105,21 @@ export async function extraChances(
         if (!set.unlockBonus || !set.requires || !usable(set.id)) continue;
         if (set.unlockBonusUntil && now.getTime() >= set.unlockBonusUntil.getTime()) continue;
         const ends = set.unlockBonusUntil ? ` Ends <t:${Math.floor(set.unlockBonusUntil.getTime() / 1000)}:R>.` : '';
-        extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra).map((o) => o.text), label: `${set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.`}${ends}` });
+        extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra && isOpenAt(o, now)).map((o) => o.text), label: `${set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.`}${ends}` });
     }
+    const fortune = await fortuneToday(guildId, discordUserId, now);
+    if (fortune && fortune.tier.delta > 0) extras.push({ chance: fortune.tier.delta, pool, label: fortune.tier.label });
     if (guests) extras.push(guests);
     return extras;
+}
+
+/**
+ * How much today's Fortune Tent curse lowers a trainer's base special
+ * chance (e.g. -0.01), or 0. Not a boost: Boosts off does not pause it.
+ */
+export async function fortuneBaseAdjust(guildId: string, discordUserId: string, now: Date = new Date()): Promise<number> {
+    const fortune = await fortuneToday(guildId, discordUserId, now);
+    return fortune && fortune.tier.delta < 0 ? fortune.tier.delta : 0;
 }
 
 /**
@@ -119,17 +134,22 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
         lockedSetsFor(guildId, discordUserId),
         prisma.trainingTimer.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } } }),
     ]);
-    const pool = await trainerPool(guildId, discordUserId, rarePoolFor(settings.disabledSets, lockedSets));
+    const pool = await trainerPool(guildId, discordUserId, rarePoolFor(settings.disabledSets, lockedSets, now));
     // Listed as if Boosts were on, so paused ones still show.
     const extras = (await extraChances(guildId, discordUserId, { ...settings, boosts: true }, lockedSets, timer?.earlyStart ?? false, pool, now)).filter(
         (e) => e.pool.length > 0,
     );
-    const base = pool.length > 0 ? RARE_OPENER_CHANCE : 0;
+    // Fortune Tent: a curse lowers the base, Boosts on or off; the button once they have the tent.
+    const fortune = await fortuneToday(guildId, discordUserId, now);
+    const curse = fortune && fortune.tier.delta < 0 ? fortune : null;
+    const tent = await hasTent(guildId, discordUserId, now);
+    const base = pool.length > 0 ? Math.max(0, RARE_OPENER_CHANCE + (curse?.tier.delta ?? 0)) : 0;
     // The guest slice is content, not a boost: it counts with Boosts off too.
     const rawTotal = base + extras.filter((e) => settings.boosts || e.content).reduce((sum, e) => sum + e.chance, 0);
     const total = base > 0 ? effectiveChance(rawTotal) : rawTotal;
 
     const lines = [`**Base:** ${percent(RARE_OPENER_CHANCE)} on every ping${pool.length === 0 ? ' (every special set is off for you)' : ''}.`];
+    if (curse) lines.push(`**-${percent(-curse.tier.delta)}** ${curse.tier.label}`);
     if (extras.length === 0) lines.push('No boosts right now.');
     for (const e of extras) lines.push(`**+${percent(e.chance)}** ${e.label ?? ''}${settings.boosts || e.content ? '' : ' (paused)'}`);
     if (!timer?.earlyStart) {
@@ -148,5 +168,6 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
             .setLabel(`Boosts: ${settings.boosts ? 'On' : 'Off'}`)
             .setStyle(settings.boosts ? ButtonStyle.Success : ButtonStyle.Secondary),
     );
+    if (tent) row.addComponents(fortuneButton(fortune !== null));
     return { embeds: [embed], components: [row] };
 }
