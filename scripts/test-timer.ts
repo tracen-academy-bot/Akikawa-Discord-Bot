@@ -370,6 +370,12 @@ async function rewardChecks() {
     check('sticky: only the owner posted under it, it stays put', [await live.restoreSticky(client, 'c-timer'), sent], ['none', []]);
     after = ['owner-1', 'm-9'];
     check('sticky: someone else posts after the owner, it moves below both', await live.restoreSticky(client, 'c-timer'), 'repost');
+    // Removing a panel (owner, 2026-11-15): its messages go and the channel is forgotten.
+    await live.postPanelPair(client, guild, 'c-gone');
+    const gone = await prisma.timerPanel.findUnique({ where: { channelId: 'c-gone' } });
+    deleted.length = 0;
+    check('remove: deletes the board and panel, forgets the channel', [await live.removePanel(client, 'c-gone'), deleted.sort(), await prisma.timerPanel.findUnique({ where: { channelId: 'c-gone' } })], [true, [gone!.boardMessageId!, gone!.panelMessageId].sort(), null]);
+    check('remove: nothing to remove the second time; no sticky check there', [await live.removePanel(client, 'c-gone'), await live.restoreSticky(client, 'c-gone')], [false, 'skip']);
     // Scheduled notices (owner, 2026-11-15): set by the bot at their time, once per panel.
     const sched = [{ key: 'test-notice', at: new Date('2030-01-06T15:01:00Z'), text: 'Scheduled hello.' }];
     check('scheduled notice: not before its time', await live.postScheduledNotices(client, new Date('2030-01-06T15:00:00Z'), sched), 0);

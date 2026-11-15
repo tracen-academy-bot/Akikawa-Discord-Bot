@@ -82,6 +82,9 @@ Weeks run Monday 00:00 to Sunday 24:00 JST. Club Managers set them up:
   quiet for 30 seconds (3 minutes at most while people keep talking). Timer
   pings stay below it: while one is up, the sticky waits until the ping is
   deleted. The weekly results and `/timer publish` move it down straight away.
+- `/timer panel remove:true`: deletes the board, panel and notice in this
+  channel and stops keeping them there (no more sticky moves or scheduled
+  notices in it).
 - `/timer notice`: a form to write, edit or (left empty) remove the
   announcement under the panel in this channel, shown as a box with a
   "Notice" heading on top. Saving edits the message in

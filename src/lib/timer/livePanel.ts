@@ -100,6 +100,25 @@ export async function postPanelPair(client: Client, guild: Guild, channelId: str
     return true;
 }
 
+/**
+ * Takes the sticky out of `channelId` (`/timer panel remove:true`): deletes
+ * its board, panel and notice messages and forgets the channel, so nothing
+ * is reposted or set there again. False when there was no panel.
+ */
+export async function removePanel(client: Client, channelId: string): Promise<boolean> {
+    const panel = await prisma.timerPanel.findUnique({ where: { channelId } });
+    if (!panel) return false;
+    const channel = await sendable(client, channelId);
+    if (channel) {
+        for (const id of [panel.boardMessageId, panel.panelMessageId, panel.noticeMessageId]) {
+            if (id) await channel.messages.delete(id).catch(() => undefined);
+        }
+    }
+    await prisma.timerPanel.delete({ where: { channelId } });
+    lastDrawn.delete(channelId);
+    return true;
+}
+
 /** The panel message currently in a channel, if the bot is keeping one there. */
 export async function currentPanelMessageId(channelId: string): Promise<string | null> {
     return (await prisma.timerPanel.findUnique({ where: { channelId } }))?.panelMessageId ?? null;
