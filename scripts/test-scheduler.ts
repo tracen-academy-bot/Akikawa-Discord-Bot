@@ -676,6 +676,53 @@ async function main() {
     const symboliRoll = openers.rollOutcome(openers.specialById('guest.symboli')!, 0.5)!;
     check('symboli: the daggers footer, and no effect', [symboliRoll.footer.startsWith('-# Ramonu kept staring daggers at you'), symboliRoll.boost, symboliRoll.schedule, symboliRoll.guaranteeGuest], [true, undefined, undefined, undefined]);
 
+    // Auto-off (owner, 2026-11-15): a finished set rests (all but what its extras need), then turns off once its extras are found too.
+    const usA = await import('../src/lib/timer/userSettings');
+    const AG = `test-autooff-${Date.now()}`;
+    const AU = 'a1';
+    const mejiroMain = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra);
+    await rares.recordRareOpener(AG, AU, openers.specialById('set1.mejiro')!.text);
+    for (const o of mejiroMain.slice(0, 8)) await rares.recordRareOpener(AG, AU, o.text);
+    const lastMain = mejiroMain[8]!;
+    const done1 = await rares.completionNotice(AG, AU, lastMain.text);
+    check('auto-off: the 9th line completes the set: the ping says it rests', done1?.line.startsWith('**Complete!** The Mejiro Estate: every line found! Your lines rest now'), true);
+    await rares.recordRareOpener(AG, AU, lastMain.text);
+    await done1!.record();
+    const restingNow = rares.restingLines('mejiro-estate', await rares.foundSpecialIds(AG, AU), (await usA.getUserSettings(AG, AU)).autoOffSets ?? []);
+    check('auto-off: found lines rest, but Ramonu (the Rehearsal needs her) and the photo (the guests) stay', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(photo.text)], [7, false, false]);
+    const mejiroAll = mejiroMain.map((o) => o.text);
+    check('auto-off: the pool leaves resting lines out', (await rares.trainerPool(AG, AU, mejiroAll)).sort(), [ramonu.text, photo.text].sort());
+    check('auto-off: a repeat find says nothing more', await rares.completionNotice(AG, AU, lastMain.text), null);
+    const restPage = json(await rares.mySpecialsView(AG, AU, rares.pageOfSet('mejiro-estate')));
+    check('auto-off: the page says Resting, and so does its button', [restPage.embeds[0]!.description?.includes('Resting: every line found'), restPage.components[0]!.components[1]?.label], [true, 'The Mejiro Estate: Resting']);
+    // Every extra found too: the set turns off.
+    const extrasList = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && o.extra);
+    for (const o of extrasList.slice(0, -1)) await rares.recordRareOpener(AG, AU, o.text);
+    const done2 = await rares.completionNotice(AG, AU, extrasList.at(-1)!.text);
+    check('auto-off: the last extra completes everything: the ping says it is off', done2?.line.startsWith("**Complete!** The Mejiro Estate: every line found, so it's off for you now"), true);
+    await rares.recordRareOpener(AG, AU, extrasList.at(-1)!.text);
+    await done2!.record();
+    check('auto-off: the set is off for them', (await usA.getUserSettings(AG, AU)).disabledSets, ['mejiro-estate']);
+    await usA.toggleSetting(AG, AU, 'set:mejiro-estate');
+    const after = await usA.getUserSettings(AG, AU);
+    check('auto-off: they can turn it back on, and it stays on (kept)', [after.disabledSets, after.autoOffSets?.includes('mejiro-estate:kept'), await rares.completionNotice(AG, AU, lastMain.text)], [[], true, null]);
+    check('auto-off: once kept, nothing rests', rares.restingLines('mejiro-estate', await rares.foundSpecialIds(AG, AU), after.autoOffSets ?? []), []);
+    // Resting, then woken by the button without turning the set off.
+    const WG = `${AG}-wake`;
+    for (const o of mejiroMain) await rares.recordRareOpener(WG, AU, o.text);
+    await (await rares.completionNotice(WG, AU, lastMain.text))!.record();
+    await usA.toggleSetting(WG, AU, 'set:mejiro-estate');
+    const woke = await usA.getUserSettings(WG, AU);
+    check('auto-off: pressing Resting wakes the lines and leaves the set on', [woke.disabledSets, rares.isResting('mejiro-estate', woke.autoOffSets ?? [])], [[], false]);
+    // A set without extras turns off at once.
+    const OGx = `${AG}-set1`;
+    const set1Lines = RARE_OPENERS.filter((o) => o.set === 'set1');
+    for (const o of set1Lines.slice(0, -1)) await rares.recordRareOpener(OGx, AU, o.text);
+    const set1Done = await rares.completionNotice(OGx, AU, set1Lines.at(-1)!.text);
+    await rares.recordRareOpener(OGx, AU, set1Lines.at(-1)!.text);
+    await set1Done!.record();
+    check('auto-off: a set without extras turns off when complete', [set1Done?.line.includes("Lobby Loungers: every line found, so it's off"), (await usA.getUserSettings(OGx, AU)).disabledSets], [true, ['set1']]);
+
     // Counts and completion: guests never count, but score.
     const GB = `${GG}-board`;
     for (const t of nine) await rares.recordRareOpener(GB, 'g-all', t);
@@ -759,12 +806,12 @@ async function main() {
     // Settings: DM me too, early riser, boosts, special sets.
     const us = await import('../src/lib/timer/userSettings');
     const SG = `test-usettings-${Date.now()}`;
-    check('settings: defaults', await us.getUserSettings(SG, 'u1'), { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] });
+    check('settings: defaults', await us.getUserSettings(SG, 'u1'), { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [], autoOffSets: [] });
     check('settings: default run and ping times', [us.runMinutes(await us.getUserSettings(SG, 'u1')), us.pingMinutes(await us.getUserSettings(SG, 'u1'))], [50, 5]);
     await us.toggleSetting(SG, 'u1', 'dm');
     await us.toggleSetting(SG, 'u1', 'early');
     const on = await us.toggleSetting(SG, 'u1', 'set:set1');
-    check('settings: each toggle flips', on, { dmPing: true, earlyRiser: true, boosts: true, disabledSets: ['set1'] });
+    check('settings: each toggle flips', on, { dmPing: true, earlyRiser: true, boosts: true, disabledSets: ['set1'], autoOffSets: [] });
     check('settings: boosts flip off and back', [(await us.toggleSetting(SG, 'u1', 'boosts')).boosts, (await us.toggleSetting(SG, 'u1', 'boosts')).boosts], [false, true]);
     check('settings: early riser runs 49 and clears in 4', [us.runMinutes(on), us.pingMinutes(on)], [49, 4]);
     check('settings: an unknown set is ignored', (await us.toggleSetting(SG, 'u1', 'set:nope')).disabledSets, ['set1']);

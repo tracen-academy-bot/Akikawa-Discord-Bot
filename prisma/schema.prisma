@@ -195,6 +195,11 @@ model TimerUserSettings {
     /// Their current Remedial Rehearsal losing streak: the mishaps so far, in
     /// order (its length is the streak). Empty after a win.
     losingStreak  String[] @default([])
+    /// Sets whose completion was handled (auto-off, owner 2026-11-15): "<set>"
+    /// once every line is found (found lines rest), "<set>:all" once its
+    /// extras are too (the set turns off), "<set>:kept" once the trainer
+    /// turned it back on themselves (no more auto-off for it).
+    autoOffSets   String[] @default([])
     updatedAt     DateTime @updatedAt
 
     @@id([guildId, discordUserId])

@@ -13,7 +13,7 @@ import { prisma } from '../../db/prisma';
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, grantSecondLove, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { applyOutcome, chooseOpener, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
+import { applyOutcome, chooseOpener, completionNotice, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances } from './boosts';
 import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
 import { pingBox } from './pingBox';
@@ -61,9 +61,12 @@ export function pingExtraLines(
     lagSeconds: number,
     milestoneRoleId: string | null = null,
     unlockedSets: readonly string[] = [],
+    notices: readonly string[] = [],
 ): string[] {
     const lines: string[] = [];
     for (const name of unlockedSets) lines.push(`**Congrats!** ${name} unlocked!`);
+    // A set completed by this ping (auto-off; see `completionNotice`).
+    lines.push(...notices);
 
     if (lagSeconds > LATE_DELIVERY_THRESHOLD_S) {
         const minutes = Math.round(lagSeconds / 60);
@@ -194,6 +197,8 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 const text = pingText(opener, timer.discordUserId, rolled, role);
                 // The first time a trainer gets a set's prerequisite, the ping says the set opened.
                 const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
+                // Completing a set rests it (or turns it off), said on this ping; saved after the find.
+                const completion = isRareOpener(opener) ? await completionNotice(timer.guildId, timer.discordUserId, opener) : null;
                 // Every ping posts as one Components V2 box: line, subtext, the
                 // media and its credit when the line has them, then the extras.
                 const payload = () =>
@@ -201,7 +206,7 @@ async function processExpiredTimers(client: Client): Promise<void> {
                         text,
                         mediaPath: specialMediaPath(opener),
                         credit: specialCredit(opener),
-                        extraLines: pingExtraLines(summary, lagSeconds, milestoneRoleId, unlocked),
+                        extraLines: pingExtraLines(summary, lagSeconds, milestoneRoleId, unlocked, completion ? [completion.line] : []),
                     });
                 const message = await channel.send({ ...payload(), allowedMentions: { users: [timer.discordUserId] } });
                 await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));
@@ -213,6 +218,7 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 if (!isRareOpener(opener)) await rememberCommon(timer.guildId, timer.discordUserId, opener);
                 if (isRareOpener(opener)) {
                     await recordRareOpener(timer.guildId, timer.discordUserId, opener);
+                    await completion?.record();
                     await grantBoost(timer.guildId, timer.discordUserId, opener);
                     // One-time boosts on this special end; then its outcome applies (boost, streak, guarantee).
                     await endBoostsHitBy(timer.guildId, timer.discordUserId, opener);
