@@ -4,6 +4,15 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — The owner's posts stay under the sticky
+
+- `STICKY_EXEMPT` (livePanel.ts): the owner's posts never move the sticky
+  (messageCreate ignores them, and `restoreSticky` does not count them),
+  so a sneak peek stays at the very bottom. The next post by anyone else
+  moves the sticky below both.
+
+---
+
 ## 2026-11-15 — The Mejiro Estate's new lines; Ramonu's outcomes and Remedial Rehearsal
 
 - The eight Mejiro lines (Grandmother to Ramonu) are the owner's final copy
