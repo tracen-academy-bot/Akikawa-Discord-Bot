@@ -165,7 +165,7 @@ dialogue is for guests only. Gold Ship and Teio use the owner's final copy
 ### `guest.helios`: Daitaku Helios
 
 ```text
-Weeei, Tore-pi! Surprise~! Pama-chin snuck my decks into the ballroom, and Grandmother said "one hour". Yoichomaru, that's basically forever! {user}, get on the floor, Palmer-san's already age-age! #MejiroAfterParty #ZuttomoDJ
+Weeei, Tore-pi! Surprise~! ...What do you mean you didn't expect me?! #DJHelios is obviously always everywhere! Anyways, Pama-chin wanted a dance party, and for her テンアゲ playlist to be heard by the other Meji-uwus too! That's why I got her to sneak my decks into the ballroom, and Grandmother said "one hour". よいちょまる, that's basically forever! Can't wait to see everyone surprised! {user}, get on the floor, Pama-chin's already age-age! #MejiroAfterParty #ZuttomoDJ
 ```
 
 ### `guest.satono`: Satono Diamond & Kitasan Black

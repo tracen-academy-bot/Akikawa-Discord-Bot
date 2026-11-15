@@ -603,7 +603,7 @@ async function main() {
         true,
     ]);
     check('guests: exactly one {user} each', guests.map((g) => g.text.split('{user}').length - 1), [1, 1, 1, 1, 1]);
-    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#MejiroAfterParty', '#ZuttomoDJ'], true, ['Diamond', 'Kitasan', 'Diamond'], ['Rudolf', 'Sirius', 'Ramonu']]);
+    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#DJHelios', '#MejiroAfterParty', '#ZuttomoDJ'], true, ['Diamond', 'Kitasan', 'Diamond'], ['Rudolf', 'Sirius', 'Ramonu']]);
     const guestTexts = guests.map((g) => g.text);
     const hasGuest = (pool: readonly string[]) => pool.some((t) => guestTexts.includes(t));
     const mejiroLinesLive = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
