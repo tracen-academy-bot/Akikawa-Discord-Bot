@@ -192,12 +192,13 @@ async function main() {
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: IG } });
     check('sets: every special belongs to a set', openers.RARE_OPENERS.every((o) => openers.SPECIAL_SETS.some((set) => set.id === o.set)), true);
     // Paused sets (The Mejiro Estate, owner 2026-11-10) give no new finds: never in the pool.
-    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set)).length;
-    check('sets: all on gives every special of the sets not paused', openers.rarePoolFor([]).length, liveSpecials);
+    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set) && !o.extra).length;
+    check('sets: all on gives every special of the sets not paused (extras never)', openers.rarePoolFor([]).length, liveSpecials);
     check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, liveSpecials - openers.SPECIAL_SETS[0]!.openers.length);
-    check('paused: The Mejiro Estate is paused, nothing else', openers.PAUSED_SETS, ['mejiro-estate']);
-    check('paused: none of its lines roll, even with every set unlocked', openers.rarePoolFor([], []).some((t) => RARE_OPENERS.some((o) => o.set === 'mejiro-estate' && o.text === t)), false);
-    check('paused: finding the Mejiro Family line announces nothing', openers.setsUnlockedBy(openers.specialById('set1.mejiro')!.text, ['mejiro-estate']).length, 0);
+    // The Mejiro Estate was paused 2026-11-10 and resumed 2026-11-15 (owner).
+    check('paused: no set is paused', openers.PAUSED_SETS, []);
+    check('resumed: the Estate\'s lines roll once it is unlocked', openers.rarePoolFor([], []).some((t) => RARE_OPENERS.some((o) => o.set === 'mejiro-estate' && o.text === t)), true);
+    check('resumed: finding the Mejiro Family line announces the Estate', openers.setsUnlockedBy(openers.specialById('set1.mejiro')!.text, ['mejiro-estate']).map((x) => x.name), ['The Mejiro Estate']);
     check('paused: no boost draws on it', openers.boostPool('mejiro-estate', 'collab'), []);
     check('sets: with no special on, a rare roll gives a common line', PING_OPENERS.includes(openers.pickOpener(0.001, [])), true);
 
@@ -460,9 +461,9 @@ async function main() {
     check('outcomes: Ramonu\'s lesson schedules the Rehearsal within 25 runs, with no boost', [lesson.schedule, lesson.boost, lesson.footer.startsWith('-# Ramonu is still not quite satisfied'), lesson.footer.endsWith('She will summon you for a lesson sometime in the next 25 runs.')], [{ special: 'mejiro.rehearsal', within: 25 }, undefined, true, true]);
     check('outcomes: Ramonu\'s footwork is +5% any Mejiro line for 50 runs', [footwork.boost?.special, footwork.boost?.set, footwork.boost?.chance, footwork.boost?.runs, footwork.boost?.endsOnHit ?? false, footwork.footer.endsWith('gain a 5% chance of meeting another Mejiro.')], [undefined, 'mejiro-estate', 0.05, 50, false, true]);
     check('outcomes: the odds are never in a footer', [...(ramonu.outcomes ?? []), ...(rehearsal.outcomes ?? [])].some((o) => /75%|25%|50%/.test(o.footer ?? '')), false);
-    check('rehearsal: an extra, out of the base pool and every set-wide pool', [rehearsal.extra, openers.rarePoolFor([], []).includes(rehearsal.text), openers.setLinesPool('mejiro-estate'), RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).length], [true, false, [], 9]);
+    check('rehearsal: an extra, out of the base pool and every set-wide pool', [rehearsal.extra, openers.rarePoolFor([], []).includes(rehearsal.text), openers.setLinesPool('mejiro-estate').length, openers.setLinesPool('mejiro-estate').includes(rehearsal.text), RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).length], [true, false, 9, false, 9]);
     check('rehearsal: unlocked by Ramonu, one {user}, its own text', [rehearsal.after, rehearsal.text.split('{user}').length - 1, rehearsal.name], [['mejiro.ramonu'], 1, "Ramonu's Remedial Rehearsal"]);
-    check('rehearsal: its boost pool is just its line, but none while the set is paused', [openers.outcomeBoostPool({ set: 'mejiro-estate', special: 'mejiro.rehearsal' }), openers.PAUSED_SETS.includes('mejiro-estate')], [[], true]);
+    check('rehearsal: a boost on it would draw just its line', openers.outcomeBoostPool({ set: 'mejiro-estate', special: 'mejiro.rehearsal' }), [rehearsal.text]);
     check('rehearsal: 50% win, 50% lose', [0, 0.4999, 0.5, 0.9999].map((r) => openers.rollOutcome(rehearsal, r)?.outcome), ['win', 'win', 'lose', 'lose']);
     const win = openers.rollOutcome(rehearsal, 0.2)!;
     check('rehearsal: a win is +3% any Mejiro line for 25 runs and resets the streak', [win.win, win.lose, win.boost?.chance, win.boost?.runs, win.boost?.special, win.footer.startsWith('-# Your practice paid off.'), win.footer.endsWith('gain a 3% chance of meeting another Mejiro.')], [true, false, 0.03, 25, undefined, true, true]);
@@ -515,7 +516,7 @@ async function main() {
     check('boosts view labels: any Mejiro line, the win', [openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.ramonu:footwork')!, 50), openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.rehearsal:win')!, 25)], ['The Mejiro Estate: any Mejiro line, 50 runs left.', 'The Mejiro Estate: any Mejiro line, 25 runs left, after a lesson well learned.']);
     for (let k = 0; k < 10; k += 1) await ping(PING_OPENERS[0]!, 0.5);
     check('schedule: counts down to 1 and stays due (the set is paused, so it waits)', (await stateOf()).guaranteedInRuns, 1);
-    check('boosts: outcome boosts give nothing while paused, with Boosts off, or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length], [0, 0, 0]);
+    check('boosts: outcome boosts apply, but give nothing with Boosts off or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length], [1, 0, 0]);
     // The same storage on a set that is not paused (stored by hand: no Set 1 line has outcomes).
     const UG = `${OG}-live`;
     await prisma.timerSpecialBoost.createMany({ data: [
@@ -537,7 +538,7 @@ async function main() {
     await ping(ramonu.text, 0.1, 0.9);
     check('ramonu: a lesson during a losing streak schedules nothing new', await stateOf(), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] });
     const st = await rares.outcomeState(OG, T);
-    check('guarantee: not while the set is paused (or off, or locked)', [rares.guaranteedOpener(st, [], []), rares.guaranteedOpener(st, ['mejiro-estate'], []), rares.guaranteedOpener(st, [], ['mejiro-estate'])], [undefined, undefined, undefined]);
+    check('guarantee: due now, it fires; not while the set is off or locked', [rares.guaranteedOpener(st, [], []), rares.guaranteedOpener(st, ['mejiro-estate'], []), rares.guaranteedOpener(st, [], ['mejiro-estate'])], [rehearsal.text, undefined, undefined]);
     check('guarantee: chooseOpener honours it, whatever the roll and before any boost', [await rares.chooseOpener(OG, T, 0.99, fullPool, [], PING_OPENERS, rehearsal.text), await rares.chooseOpener(OG, T, 0.001, fullPool, extras, PING_OPENERS, rehearsal.text)], [rehearsal.text, rehearsal.text]);
     const lost2 = await ping(rehearsal.text, 0.5);
     const lost3 = await ping(rehearsal.text, 0.5);
@@ -618,7 +619,7 @@ async function main() {
         near(openers.guestSliceChance(withPhoto(...guestIds.slice(0, 4))), 0.008),
         openers.guestSliceChance(withPhoto(...guestIds)),
     ], [true, true, true, 0]);
-    check('guest slice: none while the set is paused (it is)', [openers.PAUSED_SETS.includes('mejiro-estate'), openers.guestSlice(withPhoto(), [], [])], [true, null]);
+    check('guest slice: none while the set is paused (passed in), some once it is not', [openers.guestSlice(withPhoto(), [], [], ['mejiro-estate']), openers.guestSlice(withPhoto(), [], []) !== null], [null, true]);
     const liveSlice = openers.guestSlice(withPhoto('guest.helios'), [], [], []);
     check('guest slice: once resumed, all five guests (repeats possible), labelled, content not a boost', [near(liveSlice?.chance ?? 0, 0.032), liveSlice?.pool, liveSlice?.label, liveSlice?.content], [true, guestTexts, 'The Mejiro Estate: guests are dropping by.', true]);
     check('guest slice: none with the set off or locked, before the photo, or with every guest found', [openers.guestSlice(withPhoto(), ['mejiro-estate'], [], []), openers.guestSlice(withPhoto(), [], ['mejiro-estate'], []), openers.guestSlice(new Set([grandma.id]), [], [], []), openers.guestSlice(withPhoto(...guestIds), [], [], [])], [null, null, null, null]);
@@ -626,12 +627,7 @@ async function main() {
     const GG = `test-guests-${Date.now()}`;
     const GT = 'g1';
     for (const id of ['set1.mejiro', grandma.id, ...seven, photo.id]) await rares.recordRareOpener(GG, GT, openers.specialById(id)!.text);
-    check('guest slice: nothing from extraChances while paused, Boosts on or off', [await extraChances(GG, GT, usable, NOT_OS, false, [], OFF_SEASON), await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)], [[], []]);
-    // As if the set were resumed: lift the pause for these checks only.
-    const pausedList = openers.PAUSED_SETS as string[];
-    const pausedAt = pausedList.indexOf('mejiro-estate');
-    pausedList.splice(pausedAt, 1);
-    try {
+    {
         const on = (await extraChances(GG, GT, usable, NOT_OS, false, [], OFF_SEASON)).filter((e) => e.content);
         const offExtras = await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON);
         check('guest slice: in extraChances with Boosts on, and still there with Boosts off', [on.map((e) => [e.chance, e.pool.length, e.label]), offExtras.map((e) => [e.chance, e.pool.length, e.label])], [[[0.04, 5, 'The Mejiro Estate: guests are dropping by.']], [[0.04, 5, 'The Mejiro Estate: guests are dropping by.']]]);
@@ -642,10 +638,7 @@ async function main() {
         check('boosts view: the guest slice with Boosts off, not paused, in the total (6% + 4%)', [gv.includes('**+4%** The Mejiro Estate: guests are dropping by.\n'), gv.includes('guests are dropping by. (paused)'), gv.includes('**Your next ping: 10% chance of a special.**')], [true, false, true]);
         await rares.recordRareOpener(GG, GT, openers.specialById('guest.satono')!.text);
         check('guest slice: shrinks as guests are found (3.2% after one)', (await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).map((e) => near(e.chance, 0.032)), [true]);
-    } finally {
-        pausedList.splice(pausedAt, 0, 'mejiro-estate');
     }
-    check('paused: restored after the guest checks', openers.PAUSED_SETS, ['mejiro-estate']);
     // Counts and completion: guests never count, but score.
     const GB = `${GG}-board`;
     for (const t of nine) await rares.recordRareOpener(GB, 'g-all', t);

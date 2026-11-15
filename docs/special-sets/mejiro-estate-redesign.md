@@ -329,8 +329,9 @@ for guests only.
    boring (voice 91002); Rudolf's puns; Sirius calls the trainer "puppy".
 
    ```text
-   Rudolf: "Good evening, {user}-kun. Ramonu once called our lunches boring, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
-   Sirius: "...And that's why she calls them boring. Stay close, puppy. I came to watch the Emperor squirm."
+   Rudolf: "Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
+   Sirius: "...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm, so that will be all."
+   Ramonu: "*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had better not have enjoyed that."
    ```
 
 5. **`guest.teio`, "Tokai Teio"**: comes as Rudolf's plus-one (she
