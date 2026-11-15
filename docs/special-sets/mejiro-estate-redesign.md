@@ -313,12 +313,15 @@ for guests only.
    ```
 
 3. **`guest.goldship`, "Gold Ship"**: pays off McQueen's hedge. The
-   owner's beats: a failed dropkick on McQueen, missing her, a KFC bucket,
-   the next escapade at once. (Dropkick: anime and fandom, not voice data.)
+   owner's text: a failed dropkick on McQueen, "I always miss her", a KFC
+   bucket and a parfait for McQueen, then the next escapade (the
+   chandelier, the trainer on rope duty). The dropkick is anime and fandom,
+   not voice data.
 
    ```text
-   Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Don't look at me like that.
-   Here, hold this: a KFC bucket, family size. Don't ask where I got it. Now listen up: next time, I come in through the chandelier, and you're on rope duty. Gorushi-sama has spoken☆
+   Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.
+   Anyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆
+   Now listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!
    ```
 
 4. **`guest.symboli`, "Symboli Rudolf & Sirius Symboli"**: pays off
@@ -330,11 +333,12 @@ for guests only.
    Sirius: "...And that's why she calls them boring. Stay close, puppy. I came to watch the Emperor squirm."
    ```
 
-5. **`guest.teio`, "Tokai Teio"**: McQueen's rival; her Kaichou is visiting.
-   (Open: no tease in the Mejiro lines yet.)
+5. **`guest.teio`, "Tokai Teio"**: comes as Rudolf's plus-one (she
+   worships "Kaichou"), through Ramonu's Symboli dinner; there to see
+   McQueen's face (her rival, six mentions in McQueen's lines).
 
    ```text
-   Hey hey, {user}! McQueen said I could come if I behaved, so Teio-sama is officially the most behaved guest ever. Muteki! ...Wait. Is that Kaichou? Kaichou's HERE?! Quick, does this floor work for a Teio Step?
+   Hey hey, {user}! Kaichou brought me along as her plus-one, so Teio-sama is officially Symboli-house company tonight. I promised to behave! ...Mostly. Did you see McQueen's face when I walked in? Priceless. Muteki! ...Wait. Is this floor good for a Teio Step?
    ```
 
 ### Second-wave candidates (data ties only, no lines yet)
