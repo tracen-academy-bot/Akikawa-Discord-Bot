@@ -370,6 +370,13 @@ async function rewardChecks() {
     check('sticky: only the owner posted under it, it stays put', [await live.restoreSticky(client, 'c-timer'), sent], ['none', []]);
     after = ['owner-1', 'm-9'];
     check('sticky: someone else posts after the owner, it moves below both', await live.restoreSticky(client, 'c-timer'), 'repost');
+    // Scheduled notices (owner, 2026-11-15): set by the bot at their time, once per panel.
+    const sched = [{ key: 'test-notice', at: new Date('2030-01-06T15:01:00Z'), text: 'Scheduled hello.' }];
+    check('scheduled notice: not before its time', await live.postScheduledNotices(client, new Date('2030-01-06T15:00:00Z'), sched), 0);
+    check('scheduled notice: set at its time', [await live.postScheduledNotices(client, new Date('2030-01-06T15:01:30Z'), sched), (await prisma.timerPanel.findUnique({ where: { channelId: 'c-timer' } }))?.notice, noticeLog.at(-1)?.text], [1, 'Scheduled hello.', '### Notice\nScheduled hello.']);
+    check('scheduled notice: only once', await live.postScheduledNotices(client, new Date('2030-01-06T16:00:00Z'), sched), 0);
+    check('scheduled notice: a new key is set again; none after a day', [await live.postScheduledNotices(client, new Date('2030-01-08T00:00:00Z'), [{ ...sched[0]!, key: 'late' }]), await live.postScheduledNotices(client, new Date('2030-01-06T16:00:00Z'), [{ ...sched[0]!, key: 'next' }])], [0, 1]);
+    check('scheduled notice: this week\'s, Monday 00:01 JST, with an en dash', [live.SCHEDULED_NOTICES[0]?.at.toISOString(), live.SCHEDULED_NOTICES[0]?.text.includes('victory \u2013 that')], ['2026-11-15T15:01:00.000Z', true]);
     await prisma.timerPanel.deleteMany({ where: { guildId: G2 } });
 
     // ── Milestones ────────────────────────────────────────────────────────────
