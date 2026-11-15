@@ -441,7 +441,9 @@ async function main() {
     const seven = mejiro.openers.filter((o) => !o.extra && o.after?.length === 1).map((o) => o.id);
     const photo = mejiro.openers.find((o) => o.id === 'mejiro.photo')!;
     check('mejiro: 9 lines and 1 extra, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.filter((o) => !o.extra).length, mejiro.openers.filter((o) => o.extra && !o.guest).map((o) => o.id), mejiro.requires, seven.length, photo.after?.length], [9, ['mejiro.rehearsal'], 'set1.mejiro', 7, 8]);
-    check('mejiro: one {user} each, guests included', mejiro.openers.every((o) => o.text.split('{user}').length === 2), true);
+    // The Family Photograph names the trainer three times, by the owner's design (the finale); every other line once.
+    check('mejiro: one {user} each, guests included; the photograph three', [mejiro.openers.filter((o) => o.id !== 'mejiro.photo').every((o) => o.text.split('{user}').length === 2), photo.text.split('{user}').length - 1], [true, 3]);
+    check('photo: the art, credited, under the finale', [photo.media, photo.credit, openers.specialMediaPath(photo.text) ? (await import('fs')).existsSync(openers.specialMediaPath(photo.text)!) : false, photo.text.endsWith('Welcome to the Mejiro Family, {user}.')], ['mejiro-family-photograph.jpg', 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>', true, true]);
     // No hashtags, except Palmer's one: #SweetieSecrecies is Palmer imitating Helios, on purpose.
     check('mejiro: no hashtags, but Palmer\'s one Helios imitation', [mejiro.openers.filter((o) => o.id !== 'mejiro.palmer' && !o.guest).every((o) => !/#\w/.test(o.text)), mejiro.openers.find((o) => o.id === 'mejiro.palmer')!.text.match(/#\w+/g)], [true, ['#SweetieSecrecies']]);
     const sevenTexts = seven.map((id) => openers.specialById(id)!.text);
@@ -768,7 +770,7 @@ async function main() {
     const chuMedia = openers.specialMediaPath(chu.text);
     check('media: #ChuChuChallenge has its video, and the file exists', [chuMedia?.endsWith('chu-chu-challenge.mp4'), chuMedia ? fs.existsSync(chuMedia) : false], [true, true]);
     check('media: under Discord\'s 10 MB upload limit', chuMedia ? fs.statSync(chuMedia).size < 10 * 1024 * 1024 : false, true);
-    check('credit: each video is credited in its own field (#ChuChuChallenge, Teio\'s pose), never in the text', [RARE_OPENERS.filter((o) => o.credit).map((o) => [o.id, o.credit]), RARE_OPENERS.some((o) => /youtu\.?be/.test(o.text))], [[['os.chu', 'Video: <https://youtu.be/hJ78i-6uwGM>'], ['guest.teio', 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>']], false]);
+    check('credit: each video or picture is credited in its own field (#ChuChuChallenge, the photograph, Teio\'s pose), never in the text', [RARE_OPENERS.filter((o) => o.credit).map((o) => [o.id, o.credit]), RARE_OPENERS.some((o) => /youtu\.?be/.test(o.text))], [[['os.chu', 'Video: <https://youtu.be/hJ78i-6uwGM>'], ['mejiro.photo', 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>'], ['guest.teio', 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>']], false]);
     const teioMedia = openers.specialMediaPath(openers.specialById('guest.teio')!.text);
     check('media: Teio\'s pose clip exists, under 10 MB', [teioMedia?.endsWith('halloween-pose.mp4'), teioMedia ? fs.existsSync(teioMedia) : false, teioMedia ? fs.statSync(teioMedia).size < 10 * 1024 * 1024 : false], [true, true, true]);
     // The media box: main text, subtext, media, credit under it, then the extras.

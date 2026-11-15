@@ -96,7 +96,10 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
 9. The Family Photograph
 
    ```text
-   Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, it looks lovely, stop tugging the hem. Dober, the camera, not the floor; nobody else is looking. Palmer, wake Bright. Ardan, beside your sister. Ramonu... yes, we know, you are radiant. And {user}, here, with the family. ...There. One for the album.
+   Everyone, gather round. No, {user}, I shall take this one myself. I have taken plenty of these with them, after all.
+   Ramonu, in the centre; yes, just like that. You look radiant, dear. McQueen, the cake can wait. ...Hoho, am I wrong? Ryan, it looks lovely, stop tugging the hem. Dober, eyes up; nobody is looking at anyone but you, and that is the point. Palmer, wake Bright. Brighttt, eyes here... yes, good. Ardan, beside your sister, please.
+   Very well... there. One for the album. Now then, {user}: how does it feel, knowing that every road these girls ever ran somehow led them to you?
+   They are all smiling at you, you know. I would say that settles it. Welcome to the Mejiro Family, {user}.
    ```
 
    Hook: Opens after all eight. Each member in one shot.
