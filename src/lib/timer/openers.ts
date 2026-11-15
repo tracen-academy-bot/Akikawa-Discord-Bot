@@ -269,6 +269,15 @@ const HELIOS_OUTCOMES: readonly SpecialOutcome[] = [
     },
 ];
 
+/** The Symboli visit (owner, 2026-11-15): a punchline footer, no effect. */
+const SYMBOLI_OUTCOMES: readonly SpecialOutcome[] = [
+    {
+        id: 'daggers',
+        weight: 1,
+        footer: "-# Ramonu kept staring daggers at you for a week afterwards. It didn't help that Helios told her it was a Massive☆Skill♪Issue... jokingly, of course. Helios is still scared of Ramonu to this day. Welp... that makes two.",
+    },
+];
+
 const REHEARSAL_FORCED: ForcedSuccess = {
     after: 3,
     text: "Finally, {user} succeeded in not failing. Ramonu couldn't help but crack a tiny smile, amused by how pleased you were with yourself... and, secretly, already missing your clumsiness.",
@@ -348,7 +357,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: "guest.helios", name: "Daitaku Helios", text: "Weeei, Tore-pippi! SURPRIIISE~☆ ...Huh? You didn't expect me?! ぴえん... #DJHelios is literally everywhere, no cap! Okok, so why am I here? Pama-chin was like \"I wanna party\", and also like \"my テンアゲ playlist deserves to be heard by ALL the Meji-uwus!\", and I was like, say less! So I made her smuggle my decks into the ballroom, and Grandmother said \"one hour\". ONE HOUR?! よいちょまる, that's basically a #MusicalEternity, frfr! The whole Estate's gonna be shook, ya know! Oh, it's timeeeee! {user}, get on the floor, Pama-chin's already mega age-age! #MejiroAfterParty #ZuttomoDJ #BakunigeBPM", after: ['mejiro.photo'], extra: true, guest: true, outcomes: HELIOS_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
             { id: "guest.satono", name: "Satono Diamond & Kitasan Black", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!\"\nDiamond: \"Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?\"", after: ['mejiro.photo'], extra: true, guest: true },
             { id: "guest.goldship", name: "Gold Ship", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.photo'], extra: true, guest: true },
-            { id: "guest.symboli", name: "Symboli Rudolf & Sirius Symboli", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm, so that will be all.\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had better not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.symboli", name: "Symboli Rudolf & Sirius Symboli", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true, outcomes: SYMBOLI_OUTCOMES },
             { id: "guest.teio", name: "Tokai Teio", text: "Hey hey, {user}! Kaichou brought me along as her plus-one, so Teio-sama is officially Symboli-house company tonight. I promised to behave! ...Mostly. Did you see McQueen's face when I walked in? Priceless. Muteki! ...Wait. Is this floor good for a Teio Step?", after: ['mejiro.photo'], extra: true, guest: true },
         ],
     },

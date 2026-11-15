@@ -660,6 +660,9 @@ async function main() {
     await rares.applyOutcome(HG, 'h1', helios.text, intro, () => 0);
     check('helios: introductions do nothing while a Rehearsal is owed', (await rares.outcomeState(HG, 'h1')).guaranteedSpecialId, 'mejiro.rehearsal');
 
+    const symboliRoll = openers.rollOutcome(openers.specialById('guest.symboli')!, 0.5)!;
+    check('symboli: the daggers footer, and no effect', [symboliRoll.footer.startsWith('-# Ramonu kept staring daggers at you'), symboliRoll.boost, symboliRoll.schedule, symboliRoll.guaranteeGuest], [true, undefined, undefined, undefined]);
+
     // Counts and completion: guests never count, but score.
     const GB = `${GG}-board`;
     for (const t of nine) await rares.recordRareOpener(GB, 'g-all', t);

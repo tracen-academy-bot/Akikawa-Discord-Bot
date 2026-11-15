@@ -188,8 +188,8 @@ Now listen up: I may have failed this time, but next time, I'll come in through 
 
 ```text
 Rudolf: "Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
-Sirius: "...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm, so that will be all."
-Ramonu: "*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had better not have enjoyed that."
+Sirius: "...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~"
+Ramonu: "*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that."
 ```
 
 ### `guest.teio`: Tokai Teio
