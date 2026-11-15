@@ -155,11 +155,19 @@ export interface Special {
     heldUntilPassed?: string;
     /**
      * An extra: never in the base pool (`rarePoolFor`) or a set-wide boost,
-     * only reachable through its own boost or a guarantee. It does not count
+     * only reachable through its own boost or a guarantee (a guest: the guest
+     * slice, `guestSlice`). It does not count
      * toward its set's completion (the "N of 9" counts, the set's points),
      * but scores normal find points. Its Specials page lists it after the set's lines.
      */
     extra?: boolean;
+    /**
+     * A guest (The Mejiro Estate's visitors): always an extra too (`extra:
+     * true`), so out of every pool, boost, count and completion an extra is
+     * out of. Its only route is the guest slice (`guestSlice`). Listed after
+     * the set's lines and other extras as "Guest.".
+     */
+    guest?: boolean;
 }
 
 /** One special set: a group of special lines that can be turned on or off. */
@@ -315,6 +323,12 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, it looks lovely, stop tugging the hem. Dober, the camera, not the floor; nobody else is looking. Palmer, wake Bright. Ardan, beside your sister. Ramonu... yes, we know, you are radiant. And {user}, here, with the family. ...There. One for the album.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'] },
             // An extra (owner, 2026-11-15): only through Ramonu's lesson boost or a lost lesson's guarantee.
             { id: 'mejiro.rehearsal', name: "Ramonu's Remedial Rehearsal", text: "Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?", after: ['mejiro.ramonu'], extra: true, outcomes: REHEARSAL_OUTCOMES, forcedSuccess: REHEARSAL_FORCED },
+            // Guests (owner, 2026-11-15): extras of their own, only through the guest slice (`guestSlice`), once the Family Photograph is found.
+            { id: "guest.helios", name: "Daitaku Helios", text: "Weeei, Tore-pi! Surprise~! Pama-chin snuck my decks into the ballroom, and Grandmother said \"one hour\". Yoichomaru, that's basically forever! {user}, get on the floor, Palmer-san's already age-age! #MejiroAfterParty #ZuttomoDJ", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.satono", name: "Satono Diamond & Kitasan Black", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!\"\nDiamond: \"Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?\"", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.goldship", name: "Gold Ship", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.symboli", name: "Symboli Rudolf & Sirius Symboli", text: "Rudolf: \"Good evening, {user}-kun. Ramonu once called our lunches boring, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Stay close, puppy. I came to watch the Emperor squirm.\"", after: ['mejiro.photo'], extra: true, guest: true },
+            { id: "guest.teio", name: "Tokai Teio", text: "Hey hey, {user}! Kaichou brought me along as her plus-one, so Teio-sama is officially Symboli-house company tonight. I promised to behave! ...Mostly. Did you see McQueen's face when I walked in? Priceless. Muteki! ...Wait. Is this floor good for a Teio Step?", after: ['mejiro.photo'], extra: true, guest: true },
         ],
     },
 ];
@@ -427,6 +441,42 @@ export const PAUSED_SETS: readonly string[] = SPECIAL_SETS.filter((s) => s.pause
 /** The special texts in the sets that are neither turned off (`disabledSets`), locked (`lockedSets`) nor paused. Extras (`Special.extra`) are never in it. */
 export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonly string[] = []): string[] {
     return RARE_OPENERS.filter((o) => !o.extra && !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
+}
+
+/**
+ * The guest slice (owner, 2026-11-15): once a trainer has found the Family
+ * Photograph, an extra chance of a guest, `chance` x (guests they have not
+ * found / all guests), drawn from every guest (repeats can come up while it
+ * is open). It is content, not a boost: Boosts off does not pause it, but
+ * it gives nothing while the set is paused, off or locked for them.
+ */
+export const GUEST_SLICE = { set: 'mejiro-estate', requires: 'mejiro.photo', chance: 0.04, label: 'The Mejiro Estate: guests are dropping by.' } as const;
+
+/** Every guest (`Special.guest`), in list order. */
+export const GUESTS: readonly (Special & { set: string })[] = RARE_OPENERS.filter((o) => o.guest);
+
+/** The guest slice's chance for a trainer who has found `foundIds`: 0 before the photo, and once every guest is found. */
+export function guestSliceChance(foundIds: ReadonlySet<string>): number {
+    if (GUESTS.length === 0 || !foundIds.has(GUEST_SLICE.requires)) return 0;
+    const unfound = GUESTS.filter((g) => !foundIds.has(g.id)).length;
+    return (GUEST_SLICE.chance * unfound) / GUESTS.length;
+}
+
+/**
+ * A trainer's guest slice, or null when it has no chance or its set is
+ * paused (`paused`), turned off or locked for them. `content`: not a boost.
+ */
+export function guestSlice(
+    foundIds: ReadonlySet<string>,
+    disabledSets: readonly string[],
+    lockedSets: readonly string[],
+    paused: readonly string[] = PAUSED_SETS,
+): { chance: number; pool: string[]; label: string; content: true } | null {
+    const set = GUEST_SLICE.set;
+    if (paused.includes(set) || disabledSets.includes(set) || lockedSets.includes(set)) return null;
+    const chance = guestSliceChance(foundIds);
+    if (chance <= 0) return null;
+    return { chance, pool: GUESTS.map((g) => g.text), label: GUEST_SLICE.label, content: true };
 }
 
 /** A set's lines for a set-wide outcome boost ("any Mejiro line"): all but its extras; none while it is paused. */

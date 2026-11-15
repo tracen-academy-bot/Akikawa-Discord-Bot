@@ -4,6 +4,23 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-15 — The Mejiro Estate's guests
+
+- Five guests (`guest.helios`, `guest.satono`, `guest.goldship`,
+  `guest.symboli`, `guest.teio`) in the `mejiro-estate` set, marked
+  `Special.guest` and `extra`, so they inherit every exclusion an extra
+  has: base pool, set-wide and unlock pools, "N of M" counts, set
+  completion. They still score 15 / 3 as finds.
+- Their only route is the guest slice (`guestSlice` / `guestSliceChance`
+  in openers.ts): after the Family Photograph, 4% x unfound / all guests,
+  drawn from all five, added in `extraChances` and counted toward the soft
+  caps. It is content, not a boost (`ExtraChance.content`): Boosts off
+  leaves it on, and the Boosts view counts it and never marks it paused.
+  Nothing while the set is paused (it still is), off or locked.
+- Specials page: guests listed last as "**Guest.**", "???" until found.
+
+---
+
 ## 2026-11-15 — Ramonu's lesson is scheduled, not rolled; no stacking
 
 - Owner: the lesson should not stack, and should land on one run, not be a

@@ -138,7 +138,61 @@ read view. The odds are never shown.
 - The footer texts are in `docs/special-sets/mejiro-estate-redesign.md`
   (sections 8 and 8b) and in code.
 
-## Guests (to come)
+## Guests (code: `Special.guest`, `GUEST_SLICE`, `guestSlice`)
 
-- Daitaku Helios with Palmer: a DJ party (home scenes x11).
-- Satono Diamond: a business visit, with Kitasan Black as her plus-one.
+Owner's design, 2026-11-15. Five visitors in the first wave; multi-voice
+dialogue is for guests only. Gold Ship and Teio use the owner's final copy
+(2026-11-15), which replaces the redesign doc's drafts.
+
+- Guests belong to this set and are marked `guest: true` (and `extra:
+  true`, so every exclusion an extra has applies): never in the base pool
+  (`rarePoolFor`), a set-wide boost, the unlock bonus, or the "any Mejiro
+  line" outcome boosts.
+- They exist for a trainer only once they have found **The Family
+  Photograph** (`mejiro.photo`; each guest has `after: ['mejiro.photo']`).
+- Their own slice, an extra chance in `extraChances`, counted toward the
+  soft caps like the others: 4% x (guests the trainer has not found / 5).
+  So 4%, 3.2% after one, 0 (no slice) once all five are found. It draws from
+  all five, so repeats can come up while it is open.
+- Content, not a boost: Boosts off does not pause it. It gives nothing
+  while the set is paused, off, or locked for the trainer. Boosts view:
+  "The Mejiro Estate: guests are dropping by."
+- Never in set completion or any "N of M" count; they score find points
+  like any special (15 new, 3 repeat).
+- Specials page: after the 9 lines and the Rehearsal, as "**Guest.** ???"
+  until found, then by name, readable from the read menu.
+
+### `guest.helios`: Daitaku Helios
+
+```text
+Weeei, Tore-pi! Surprise~! Pama-chin snuck my decks into the ballroom, and Grandmother said "one hour". Yoichomaru, that's basically forever! {user}, get on the floor, Palmer-san's already age-age! #MejiroAfterParty #ZuttomoDJ
+```
+
+### `guest.satono`: Satono Diamond & Kitasan Black
+
+```text
+Diamond: "Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu."
+Kitasan: "Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!"
+Diamond: "Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?"
+```
+
+### `guest.goldship`: Gold Ship
+
+```text
+Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.
+Anyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆
+Now listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!
+```
+
+### `guest.symboli`: Symboli Rudolf & Sirius Symboli
+
+```text
+Rudolf: "Good evening, {user}-kun. Ramonu once called our lunches boring, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
+Sirius: "...And that's why she calls them boring. Stay close, puppy. I came to watch the Emperor squirm."
+```
+
+### `guest.teio`: Tokai Teio
+
+```text
+Hey hey, {user}! Kaichou brought me along as her plus-one, so Teio-sama is officially Symboli-house company tonight. I promised to behave! ...Mostly. Did you see McQueen's face when I walked in? Priceless. Muteki! ...Wait. Is this floor good for a Teio Step?
+```
