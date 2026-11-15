@@ -127,6 +127,9 @@ model TimerSettings {
     /// The last week awarded, as its Monday's `YYYY-MM-DD` (JST). A new row
     /// starts at the week before last, so the first setup awards last week.
     lastAwardedWeek   String?
+    /// "Ramonu's Second Love": given for a forced success at Ramonu's
+    /// Remedial Rehearsal (`ForcedSuccess` in openers.ts). Null: not given.
+    secondLoveRoleId  String?
     updatedAt         DateTime @updatedAt
 }
 
@@ -183,6 +186,12 @@ model TimerUserSettings {
     /// Their latest reminder (common) lines, newest last; these can't come
     /// up again yet (`COMMON_NO_REPEAT`).
     recentOpeners String[] @default([])
+    /// A special their next ping is guaranteed to be (a lost Remedial
+    /// Rehearsal); cleared when it comes up. Null: none.
+    guaranteedSpecialId String?
+    /// Their current Remedial Rehearsal losing streak: the mishaps so far, in
+    /// order (its length is the streak). Empty after a win.
+    losingStreak  String[] @default([])
     updatedAt     DateTime @updatedAt
 
     @@id([guildId, discordUserId])
@@ -206,17 +215,24 @@ model RareOpenerHit {
     @@index([guildId, specialId])
 }
 
-/// A set boost a trainer holds: for `runsLeft` more pings, extra special
-/// chance on that set's tagged lines (see `SpecialBoost` in openers.ts).
-/// Getting the granting special again resets `runsLeft`.
+/// A boost a trainer holds, for `runsLeft` more pings. With `key` empty, a
+/// set boost: extra chance on that set's tagged lines (see `SpecialBoost` in
+/// openers.ts). Otherwise an outcome boost (`OutcomeBoost`, stored by its
+/// key): `chance` on one special (`specialId`) or, without one, on the set's
+/// lines; `endsOnHit` ends it once its special comes up. Getting the same
+/// boost again adds to `runsLeft`.
 model TimerSpecialBoost {
     guildId       String
     discordUserId String
     setId         String
+    key           String   @default("")
+    specialId     String?
+    chance        Float?
+    endsOnHit     Boolean  @default(false)
     runsLeft      Int
     updatedAt     DateTime @updatedAt
 
-    @@id([guildId, discordUserId, setId])
+    @@id([guildId, discordUserId, setId, key])
 }
 
 /// Who placed 1st to 3rd in a week, so the role comes off exactly the people

@@ -127,6 +127,9 @@ export const data = new SlashCommandBuilder()
             .setDescription("Set the weekly roles and where the week's final board posts. Club Managers only.")
             .addRoleOption((opt) => opt.setName('top_role').setDescription(`Role for the week's ${placesLabel('top')} by runs`).setRequired(false))
             .addRoleOption((opt) => opt.setName('second_role').setDescription(`Role for the week's ${placesLabel('second')} by runs`).setRequired(false))
+            .addRoleOption((opt) =>
+                opt.setName('second_love_role').setDescription("Role \"Ramonu's Second Love\", earned at her Remedial Rehearsal (a Mejiro Estate special)").setRequired(false),
+            )
             .addChannelOption((opt) =>
                 opt
                     .setName('channel')
@@ -359,10 +362,11 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
     const guild = interaction.guild!;
     const role = interaction.options.getRole('top_role');
     const second = interaction.options.getRole('second_role');
+    const secondLove = interaction.options.getRole('second_love_role');
     const channel = interaction.options.getChannel('channel');
     const off = interaction.options.getBoolean('off') ?? false;
 
-    for (const r of [role, second]) {
+    for (const r of [role, second, secondLove]) {
         if (!r) continue;
         const problem = await roleProblem(guild, r.id);
         if (problem) {
@@ -370,7 +374,7 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
             return;
         }
     }
-    const changed = off || role !== null || second !== null || channel !== null;
+    const changed = off || role !== null || second !== null || secondLove !== null || channel !== null;
     // The first setup awards last week at the next minute's check.
     const firstSetup = changed && !off && (await getTimerSettings(guild.id)) === null;
     const settings = off
@@ -379,6 +383,7 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
           ? await saveTimerSettings(guild.id, {
                 ...(role ? { topRoleId: role.id } : {}),
                 ...(second ? { secondRoleId: second.id } : {}),
+                ...(secondLove ? { secondLoveRoleId: secondLove.id } : {}),
                 ...(channel ? { announceChannelId: channel.id } : {}),
             })
           : await getTimerSettings(guild.id);
@@ -390,6 +395,7 @@ async function handleRewards(interaction: ChatInputCommandInteraction) {
         `Weekly role, ${placesLabel('top')}: ${settings?.topRoleId ? `<@&${settings.topRoleId}>` : 'not set'}`,
         `Weekly role, ${placesLabel('second')}: ${settings?.secondRoleId ? `<@&${settings.secondRoleId}>` : 'not set (`second_role`)'}`,
         `End-of-week board: ${settings?.announceChannelId ? `<#${settings.announceChannelId}>` : 'not posted'}`,
+        `Ramonu's Second Love: ${settings?.secondLoveRoleId ? `<@&${settings.secondLoveRoleId}>` : 'not set (`second_love_role`)'}`,
         `This week ends <t:${ends}:F> (<t:${ends}:R>); it is awarded about 15 minutes later.`,
         ...(firstSetup
             ? [

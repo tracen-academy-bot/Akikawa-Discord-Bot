@@ -197,9 +197,17 @@ export function noteChannelActivity(client: Client, channelId: string, now = Dat
     stickyTimers.set(channelId, { timer, since });
 }
 
-/** messageCreate: a post by anyone but the bot, in a channel with a sticky, schedules a check. */
+/**
+ * People whose posts may sit under the sticky: their posts never move it,
+ * so a sneak peek stays at the very bottom. The next post by anyone else
+ * moves the sticky below both. Owner, 2026-11-15: just the owner.
+ */
+export const STICKY_EXEMPT: readonly string[] = ['688006136690900996'];
+
+/** messageCreate: a post by anyone but the bot (or `STICKY_EXEMPT`), in a channel with a sticky, schedules a check. */
 export async function onChannelMessage(message: Message): Promise<void> {
     if (!message.inGuild() || message.author.id === message.client.user.id) return;
+    if (STICKY_EXEMPT.includes(message.author.id)) return;
     if (!(await prisma.timerPanel.findUnique({ where: { channelId: message.channelId }, select: { channelId: true } }))) return;
     noteChannelActivity(message.client, message.channelId);
 }
@@ -221,7 +229,10 @@ export async function restoreSticky(client: Client, channelId: string): Promise<
         const channel = await sendable(client, channelId);
         if (!channel) return 'skip';
         const last = panel.noticeMessageId ?? panel.panelMessageId;
-        const newer = [...(await channel.messages.fetch({ after: last, limit: 50 })).keys()];
+        // Posts by STICKY_EXEMPT do not count: the sticky may sit above them.
+        const newer = [...(await channel.messages.fetch({ after: last, limit: 50 })).entries()]
+            .filter(([, m]) => !STICKY_EXEMPT.includes((m as { author?: { id?: string } }).author?.id ?? ''))
+            .map(([id]) => id);
         const pings = await prisma.timerNotification.findMany({ where: { channelId, messageId: { in: newer } }, select: { messageId: true } });
         const action = stickyAction(newer, new Set(pings.map((p) => p.messageId)));
         if (action === 'repost') {

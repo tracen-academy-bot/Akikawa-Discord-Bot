@@ -311,7 +311,7 @@ async function rewardChecks() {
                               if (payload.flags) noticeLog.push(noticeOf(payload));
                           },
                       }
-                    : new Map(after.map((id) => [id, {}])),
+                    : new Map(after.map((id) => [id, { author: { id: id.startsWith('owner-') ? live.STICKY_EXEMPT[0] : 'someone' } }])),
         },
     };
     const client = {
@@ -364,6 +364,12 @@ async function rewardChecks() {
     await prisma.timerNotification.deleteMany({ where: { channelId: 'c-timer' } });
     check('sticky: once the ping is gone, it moves under the posts', [await live.restoreSticky(client, 'c-timer'), sent], ['repost', ['board-13', 'panel-14']]);
     check('sticky: no sticky in a channel, nothing happens', await live.restoreSticky(client, 'c-elsewhere'), 'skip');
+    // The owner's posts (STICKY_EXEMPT) may sit under the sticky (owner, 2026-11-15).
+    after = ['owner-1'];
+    sent.length = 0;
+    check('sticky: only the owner posted under it, it stays put', [await live.restoreSticky(client, 'c-timer'), sent], ['none', []]);
+    after = ['owner-1', 'm-9'];
+    check('sticky: someone else posts after the owner, it moves below both', await live.restoreSticky(client, 'c-timer'), 'repost');
     await prisma.timerPanel.deleteMany({ where: { guildId: G2 } });
 
     // ── Milestones ────────────────────────────────────────────────────────────

@@ -101,6 +101,36 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
 
    Hook: Opens after all eight. Each member in one shot.
 
+Extra: Ramonu's Remedial Rehearsal (`mejiro.rehearsal`, `extra: true`)
+
+   ```text
+   Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?
+   ```
+
+   Opens after Ramonu. Never in the base roll: it comes up only through
+   Ramonu's lesson boost or a lost lesson's guarantee. Listed after the nine
+   as "Extra." ("???" until found); not counted toward the set (its "N of 9"
+   or the +100), but scores 15 new / 3 repeat.
+
+## Outcomes (code: `RAMONU_OUTCOMES`, `REHEARSAL_OUTCOMES`, `REHEARSAL_FORCED`)
+
+The footer goes under the line in the ping and its DM copy, never in the
+read view. The odds are never shown.
+
+- **Ramonu**, each time: 75% a lesson (+10% Rehearsal for 25 runs, ended as
+  soon as the Rehearsal comes up); 25% footwork (+5% any Mejiro line for 50
+  runs).
+- **Rehearsal**, 50/50: a win (+3% any Mejiro line for 25 runs, the losing
+  streak back to 0) or a loss (one of the tail, the dress, the feet, never
+  one already used in the streak; the trainer's next ping is the Rehearsal
+  again).
+- **Forced success** after three losses in a row: the line, then the
+  paragraph, then `-# You obtained @Ramonu's Second Love.` (the role from
+  `/timer rewards second_love_role`), or `-# Ramonu's Second Love, still.`
+  if they had it. No role set, or no permission: the footer is left out.
+- The footer texts are in `docs/special-sets/mejiro-estate-redesign.md`
+  (sections 8 and 8b) and in code.
+
 ## Guests (to come)
 
 - Daitaku Helios with Palmer: a DJ party (home scenes x11).

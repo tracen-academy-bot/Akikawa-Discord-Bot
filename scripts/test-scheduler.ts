@@ -47,8 +47,18 @@ const channelStub = {
     },
 };
 
+/** The DM copies, read back the same way as channel pings. */
+const dms: { content: string }[] = [];
+const userStub = {
+    send: async (options: { components?: { toJSON(): unknown }[] }) => {
+        const blocks = (options.components ?? []).flatMap((c) => ((c.toJSON() as { components?: { content?: string }[] }).components ?? []));
+        dms.push({ content: blocks.flatMap((b) => (b.content === undefined ? [] : [b.content])).join('\n') });
+        return {};
+    },
+};
+
 // No guilds cached or fetchable: milestone roles are skipped, as for a guild the bot left.
-const clientStub = { channels: { fetch: async () => channelStub }, guilds: { cache: new Map(), fetch: async () => null } } as never;
+const clientStub = { channels: { fetch: async () => channelStub }, guilds: { cache: new Map(), fetch: async () => null }, users: { fetch: async () => userStub } } as never;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -56,6 +66,9 @@ async function main() {
     await prisma.trainingRun.deleteMany({ where: { guildId: G } });
     await prisma.trainingTimer.deleteMany({ where: { guildId: G } });
     await prisma.timerNotification.deleteMany({ where: { channelId: CHANNEL } });
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: G } });
+    // DM Me Too on, so the DM copy can be compared with the channel ping.
+    await prisma.timerUserSettings.create({ data: { guildId: G, discordUserId: 'trainer-a', dmPing: true } });
 
     // A run that ended 40 minutes ago, i.e. while the bot was down.
     const endedAt = new Date(Date.now() - 40 * 60_000);
@@ -86,6 +99,7 @@ async function main() {
 
     check('offline expiry delivered one ping', sent.length, 1);
     check('ping mentions the right trainer', sent[0]?.mentions, ['trainer-a']);
+    check('DM copy: one, the same box as the channel ping', [dms.length, dms[0]?.content === sent[0]?.content], [1, true]);
     check('ping pings the trainer', sent[0]?.content.includes('<@trainer-a>'), true);
     check('ping explains the delay', sent[0]?.content.includes('while I was offline'), true);
     check('ping confirms it still counted', sent[0]?.content.includes('It still counts!'), true);
@@ -120,7 +134,7 @@ async function main() {
     const embed = page0.embeds[0]!;
     const col = (n: number) => embed.fields?.[n]?.value.split('\n') ?? [];
     check('specials: one set per page, three columns', [embed.title, embed.description, embed.fields?.map((f) => f.name), col(0).length, col(2).length], [
-        `Specials found: 2 of ${RARE_PING_OPENERS.length}`,
+        `Specials found: 2 of ${RARE_OPENERS.filter((o) => !o.extra).length}`,
         `**Set 1: ${SETS[0]!.name}**: 2 of ${SETS[0]!.openers.length} found`,
         ['Special', 'Times', 'First found by'],
         SETS[0]!.openers.length,
@@ -147,7 +161,7 @@ async function main() {
     const mineView = json(rares.specialsView(await rares.rareTally(RG, 'u2'), 1, noExtras));
     const mine = mineView.embeds[0]!;
     const mcol = (n: number) => mine.fields?.[n]?.value.split('\n') ?? [];
-    check('specials: your own list counts only your finds', [mine.title, mcol(0)[1], mcol(1)[1], mcol(0)[4]], [`Your specials: 1 of ${RARE_PING_OPENERS.length}`, `**2.** ${RARE_OPENERS[1]!.name}`, '**×1**', '**5.** ???']);
+    check('specials: your own list counts only your finds (extras left out)', [mine.title, mcol(0)[1], mcol(1)[1], mcol(0)[4]], [`Your specials: 1 of ${RARE_OPENERS.filter((o) => !o.extra).length}`, `**2.** ${RARE_OPENERS[1]!.name}`, '**×1**', '**5.** ???']);
     check('specials: your own list shows when, not who', [mine.fields?.[2]?.name, mcol(2)[1]?.startsWith('<t:'), mine.footer?.text.startsWith('1 special ping for you')], ['First got', true, true]);
     check('pages: your page has Back, the set\'s toggle, Next', mineView.components[0]!.components.map((b) => [b.label, b.custom_id]), [
         ['Back', `${rares.SPECIALS_PAGE_PREFIX}mine:0`],
@@ -380,7 +394,7 @@ async function main() {
         ['lb-set', 295, 1, 13, 13],
     ]);
     check('specials board: limit caps the rows, not the totals', [(await rares.specialsBoard(LB, 3)).rows.length, (await rares.specialsBoard(LB, 3)).trainers], [3, 4]);
-    check('specials board: totals', [sb.totalPings, sb.trainers, sb.specialCount, sb.setCount], [13 + 20 + 21 + 20, 4, RARE_OPENERS.length, openers.SPECIAL_SETS.length]);
+    check('specials board: totals', [sb.totalPings, sb.trainers, sb.specialCount, sb.setCount], [13 + 20 + 21 + 20, 4, RARE_OPENERS.filter((o) => !o.extra).length, openers.SPECIAL_SETS.length]);
     const { renderSpecialsLeaderboard } = await import('../src/lib/image/renderSpecialsLeaderboard');
     const png = await renderSpecialsLeaderboard(sb, new Map([['lb-set', 'Tylina']]));
     check('specials board: renders a PNG', [png.subarray(1, 4).toString(), png.length > 1000], ['PNG', true]);
@@ -411,9 +425,9 @@ async function main() {
     // The Mejiro Estate: Set 1's Mejiro Family line opens it; Grandmother first (8x), then the seven, then the photograph.
     const mejiro = openers.SPECIAL_SETS.find((x) => x.id === 'mejiro-estate')!;
     const grandma = mejiro.openers.find((o) => o.id === 'mejiro.grandmother')!;
-    const seven = mejiro.openers.filter((o) => o.after?.length === 1).map((o) => o.id);
+    const seven = mejiro.openers.filter((o) => !o.extra && o.after?.length === 1).map((o) => o.id);
     const photo = mejiro.openers.find((o) => o.id === 'mejiro.photo')!;
-    check('mejiro: 9 lines, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.length, mejiro.requires, seven.length, photo.after?.length], [9, 'set1.mejiro', 7, 8]);
+    check('mejiro: 9 lines and 1 extra, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.filter((o) => !o.extra).length, mejiro.openers.filter((o) => o.extra).map((o) => o.id), mejiro.requires, seven.length, photo.after?.length], [9, ['mejiro.rehearsal'], 'set1.mejiro', 7, 8]);
     check('mejiro: one {user} each', mejiro.openers.every((o) => o.text.split('{user}').length === 2), true);
     // No hashtags, except Palmer's one: #SweetieSecrecies is Palmer imitating Helios, on purpose.
     check('mejiro: no hashtags, but Palmer\'s one Helios imitation', [mejiro.openers.filter((o) => o.id !== 'mejiro.palmer').every((o) => !/#\w/.test(o.text)), mejiro.openers.find((o) => o.id === 'mejiro.palmer')!.text.match(/#\w+/g)], [true, ['#SweetieSecrecies']]);
@@ -423,7 +437,7 @@ async function main() {
     check('stages: the photo opens once all eight are found', openers.closedSpecials(new Set([grandma.id, ...seven])).includes(photo.text), false);
     const FG = `test-stages-${Date.now()}`;
     // The set is paused, so its pool is built directly: the staging must still work when it resumes.
-    const mejiroPool = mejiro.openers.map((o) => o.text);
+    const mejiroPool = mejiro.openers.filter((o) => !o.extra).map((o) => o.text);
     const poolBefore = await rares.trainerPool(FG, 'f1', mejiroPool);
     check('redirect: before her welcome, every Mejiro roll is Grandmother (9 of 9)', [poolBefore.length, poolBefore.every((t) => t === grandma.text)], [9, true]);
     await rares.recordRareOpener(FG, 'f1', grandma.text);
@@ -432,8 +446,138 @@ async function main() {
     for (const t of sevenTexts) await rares.recordRareOpener(FG, 'f1', t);
     check('stages: with the whole family found, the photograph joins the pool', (await rares.trainerPool(FG, 'f1', mejiroPool)).includes(photo.text), true);
     const mPage = json(rares.specialsView(await rares.rareTally(FG), 3));
-    check('stages: the page never shows the lock, just ???', mPage.embeds[0]!.fields?.[0]?.value.split('\n').at(-1), '**9.** ???');
+    check('stages: the page never shows the lock, just ???', mPage.embeds[0]!.fields?.[0]?.value.split('\n')[8], '**9.** ???');
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: FG } });
+
+    // Outcomes: Ramonu rolls one each time; her Remedial Rehearsal is an extra with a losing streak.
+    // The set is paused, so pools are built directly, as the staging checks above do.
+    const ramonu = openers.specialById('mejiro.ramonu')!;
+    const rehearsal = openers.specialById('mejiro.rehearsal')!;
+    check('outcomes: Ramonu rolls 75% lesson, 25% footwork', [0, 0.5, 0.7499, 0.75, 0.9999].map((r) => openers.rollOutcome(ramonu, r)?.outcome), ['lesson', 'lesson', 'lesson', 'footwork', 'footwork']);
+    check('outcomes: a special without outcomes rolls nothing', openers.rollOutcome(grandma, 0.3), null);
+    const lesson = openers.rollOutcome(ramonu, 0.1)!;
+    const footwork = openers.rollOutcome(ramonu, 0.9)!;
+    check('outcomes: Ramonu\'s lesson is +10% Rehearsal for 25 runs, one-time', [lesson.boost?.special, lesson.boost?.chance, lesson.boost?.runs, lesson.boost?.endsOnHit, lesson.footer.startsWith('-# Ramonu is still not quite satisfied'), lesson.footer.includes('gain a 10% chance of Ramonu\'s Remedial Rehearsal, until she has had her lesson.')], ['mejiro.rehearsal', 0.1, 25, true, true, true]);
+    check('outcomes: Ramonu\'s footwork is +5% any Mejiro line for 50 runs', [footwork.boost?.special, footwork.boost?.set, footwork.boost?.chance, footwork.boost?.runs, footwork.boost?.endsOnHit ?? false, footwork.footer.endsWith('gain a 5% chance of meeting another Mejiro.')], [undefined, 'mejiro-estate', 0.05, 50, false, true]);
+    check('outcomes: the odds are never in a footer', [...(ramonu.outcomes ?? []), ...(rehearsal.outcomes ?? [])].some((o) => /75%|25%|50%/.test(o.footer ?? '')), false);
+    check('rehearsal: an extra, out of the base pool and every set-wide pool', [rehearsal.extra, openers.rarePoolFor([], []).includes(rehearsal.text), openers.setLinesPool('mejiro-estate'), RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).length], [true, false, [], 9]);
+    check('rehearsal: unlocked by Ramonu, one {user}, its own text', [rehearsal.after, rehearsal.text.split('{user}').length - 1, rehearsal.name], [['mejiro.ramonu'], 1, "Ramonu's Remedial Rehearsal"]);
+    check('rehearsal: its boost pool is just its line, but none while the set is paused', [openers.outcomeBoostPool({ set: 'mejiro-estate', special: 'mejiro.rehearsal' }), openers.PAUSED_SETS.includes('mejiro-estate')], [[], true]);
+    check('rehearsal: 50% win, 50% lose', [0, 0.4999, 0.5, 0.9999].map((r) => openers.rollOutcome(rehearsal, r)?.outcome), ['win', 'win', 'lose', 'lose']);
+    const win = openers.rollOutcome(rehearsal, 0.2)!;
+    check('rehearsal: a win is +3% any Mejiro line for 25 runs and resets the streak', [win.win, win.lose, win.boost?.chance, win.boost?.runs, win.boost?.special, win.footer.startsWith('-# Your practice paid off.'), win.footer.endsWith('gain a 3% chance of meeting another Mejiro.')], [true, false, 0.03, 25, undefined, true, true]);
+    check('rehearsal: a loss spreads evenly over the three mishaps', [0.5, 0.7, 0.9].map((r) => openers.rollOutcome(rehearsal, r)?.mishap), ['tail', 'dress', 'feet']);
+    check('rehearsal: a loss never repeats a mishap of the streak', [openers.rollOutcome(rehearsal, 0.5, ['tail'])?.mishap, openers.rollOutcome(rehearsal, 0.9, ['tail'])?.mishap, openers.rollOutcome(rehearsal, 0.5, ['dress', 'tail'])?.mishap, openers.rollOutcome(rehearsal, 0.99, ['feet', 'dress'])?.mishap], ['dress', 'feet', 'feet', 'tail']);
+    const mishapFooter = openers.rollOutcome(rehearsal, 0.5)!.footer;
+    check('rehearsal: the tail footer, word for word', mishapFooter, '-# You tried. Admittedly. You still stepped on her tail, and she was *displeased*. She has cleared your schedule: your next run ends in another lesson.');
+    check('rehearsal: three losses in a row are a forced success, whatever the roll', [openers.rollOutcome(rehearsal, 0.1, ['tail', 'dress', 'feet'])?.forced, openers.rollOutcome(rehearsal, 0.9, ['feet', 'tail', 'dress'])?.outcome, openers.rollOutcome(rehearsal, 0.9, ['feet', 'tail'])?.forced], [true, 'forced', false]);
+
+    // The Boosts storage and mechanics, through the database.
+    const OG = `test-outcomes-${Date.now()}`;
+    const T = 'o1';
+    const rehearsalOnly = [{ set: 'mejiro-estate', special: 'mejiro.rehearsal' }];
+    const ping = async (opener: string, r: number) => {
+        // As the scheduler does after a ping: spend, record, end one-time boosts, apply the outcome.
+        const state = await rares.outcomeState(OG, T);
+        const special = openers.specialByText(opener);
+        const rolled = special ? openers.rollOutcome(special, r, state.losingStreak) : null;
+        await rares.spendBoosts(OG, T);
+        await rares.recordRareOpener(OG, T, opener);
+        await rares.endBoostsHitBy(OG, T, opener);
+        await rares.applyOutcome(OG, T, opener, rolled);
+        return rolled;
+    };
+    for (const id of ['mejiro.grandmother', 'mejiro.mcqueen']) await rares.recordRareOpener(OG, T, openers.specialById(id)!.text);
+    await ping(ramonu.text, 0.1);
+    const afterLesson = await rares.activeBoosts(OG, T);
+    check('ramonu: the lesson outcome stores a one-time Rehearsal boost', afterLesson, [{ setId: 'mejiro-estate', runsLeft: 25, key: 'mejiro.ramonu:lesson', specialId: 'mejiro.rehearsal', chance: 0.1, endsOnHit: true }]);
+    const usable = { dmPing: false, earlyRiser: false, boosts: true, disabledSets: [] as string[] };
+    const NOT_OS = ['online-sensations'];
+    check('ramonu: while the set is paused, the boost gives nothing', await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON), []);
+    check('boosts view label: the lesson, with runs left', openers.outcomeBoostLabel(openers.outcomeBoostByKey(afterLesson[0]!.key!)!, 25), "Ramonu's Remedial Rehearsal, 25 runs left, until she has had her lesson.");
+    check('ramonu: its boost pool, built directly, is the Rehearsal, open once Ramonu is found', await rares.trainerPool(OG, T, rehearsalOnly.map((b) => openers.specialById(b.special)!.text)), [rehearsal.text]);
+    await ping(PING_OPENERS[0]!, 0.5);
+    check('ramonu: the boost ticks down like the others', (await rares.activeBoosts(OG, T))[0]?.runsLeft, 24);
+    await ping(ramonu.text, 0.9);
+    const both = await rares.activeBoosts(OG, T);
+    check('ramonu: footwork adds +5% any Mejiro line for 50 runs beside it', both.map((b) => [b.key, b.runsLeft, b.chance, b.specialId ?? null]), [['mejiro.ramonu:footwork', 50, 0.05, null], ['mejiro.ramonu:lesson', 23, 0.1, 'mejiro.rehearsal']]);
+    check('boosts view labels: any Mejiro line, one run, the win', [openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.ramonu:footwork')!, 50), openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.ramonu:lesson')!, 1), openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.rehearsal:win')!, 25)], ['The Mejiro Estate: any Mejiro line, 50 runs left.', "Ramonu's Remedial Rehearsal, 1 run left, until she has had her lesson.", 'The Mejiro Estate: any Mejiro line, 25 runs left, after a lesson well learned.']);
+    check('boosts: outcome boosts give nothing while paused, with Boosts off, or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length], [0, 0, 0]);
+    // The same storage on a set that is not paused (stored by hand: no Set 1 line has outcomes).
+    const UG = `${OG}-live`;
+    await prisma.timerSpecialBoost.createMany({ data: [
+        { guildId: UG, discordUserId: T, setId: 'set1', key: 'test:one', specialId: 'set1.curren', chance: 0.02, endsOnHit: true, runsLeft: 5 },
+        { guildId: UG, discordUserId: T, setId: 'set1', key: 'test:set', chance: 0.03, runsLeft: 1 },
+    ] });
+    const live1 = await extraChances(UG, T, usable, NOT_OS, false, [], OFF_SEASON);
+    check('boosts: on a live set, one special or the set\'s lines, at their own chance, labelled', live1.map((e) => [e.chance, e.pool.length, e.label]), [[0.02, 1, 'Curren Chan, 5 runs left.'], [0.03, openers.SPECIAL_SETS[0]!.openers.length, 'Lobby Loungers: any of its lines, 1 run left.']]);
+    await rares.endBoostsHitBy(UG, T, openers.specialById('set1.curren')!.text);
+    check('boosts: a one-time boost on a live set ends on its hit, the other stays', (await rares.activeBoosts(UG, T)).map((b) => b.key), ['test:set']);
+    await prisma.timerSpecialBoost.deleteMany({ where: { guildId: UG } });
+    const footer = json(await rares.mySpecialsView(OG, T, 3)).embeds[0]!.footer?.text.split('\n') ?? [];
+    check('specials: outcome boosts in the footer', [footer.includes('Boost: +5% The Mejiro Estate for 50 more runs.'), footer.includes("Boost: +10% Ramonu's Remedial Rehearsal for 23 more runs.")], [true, true]);
+
+    // The Rehearsal comes up: the one-time boost ends; a loss guarantees the next ping.
+    const lost1 = await ping(rehearsal.text, 0.5);
+    check('rehearsal: the one-time boost ends as soon as it comes up', (await rares.activeBoosts(OG, T)).map((b) => b.key), ['mejiro.ramonu:footwork']);
+    check('rehearsal: a loss starts the streak and guarantees the next ping', [lost1?.mishap, await rares.outcomeState(OG, T)], ['tail', { guaranteedSpecialId: 'mejiro.rehearsal', losingStreak: ['tail'] }]);
+    const st = await rares.outcomeState(OG, T);
+    check('guarantee: not while the set is paused (or off, or locked)', [rares.guaranteedOpener(st, [], []), rares.guaranteedOpener(st, ['mejiro-estate'], []), rares.guaranteedOpener(st, [], ['mejiro-estate'])], [undefined, undefined, undefined]);
+    check('guarantee: chooseOpener honours it, whatever the roll and before any boost', [await rares.chooseOpener(OG, T, 0.99, fullPool, [], PING_OPENERS, rehearsal.text), await rares.chooseOpener(OG, T, 0.001, fullPool, extras, PING_OPENERS, rehearsal.text)], [rehearsal.text, rehearsal.text]);
+    const lost2 = await ping(rehearsal.text, 0.5);
+    const lost3 = await ping(rehearsal.text, 0.5);
+    check('rehearsal: three losses are the tail, the dress and the feet, once each', [lost1?.mishap, lost2?.mishap, lost3?.mishap], ['tail', 'dress', 'feet']);
+    check('rehearsal: still guaranteed after the third loss', (await rares.outcomeState(OG, T)).guaranteedSpecialId, 'mejiro.rehearsal');
+    const forced = await ping(rehearsal.text, 0.1);
+    check('rehearsal: the 4th lesson is a forced success; streak and guarantee reset; no boost', [forced?.forced, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).map((b) => b.key)], [true, { guaranteedSpecialId: null, losingStreak: [] }, ['mejiro.ramonu:footwork']]);
+    await ping(rehearsal.text, 0.6);
+    const won = await ping(rehearsal.text, 0.2);
+    check('rehearsal: a win resets the streak, clears the guarantee, and adds +3% any Mejiro line', [won?.outcome, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).find((b) => b.key === 'mejiro.rehearsal:win')?.runsLeft], ['win', { guaranteedSpecialId: null, losingStreak: [] }, 25]);
+    check('rehearsal: the next loss can be the tail again (a new streak)', (await ping(rehearsal.text, 0.5))?.mishap, 'tail');
+
+    // The ping text: the line, then the footer; a forced success has the paragraph and the role footer.
+    const sched = await import('../src/lib/timer/scheduler');
+    const pb = await import('../src/lib/timer/pingBox');
+    const lessonPing = sched.pingText(ramonu.text, 'u1', lesson);
+    check('ping: the outcome footer goes under the line, as subtext', [lessonPing.startsWith(openers.fillOpener(ramonu.text, 'u1') + '\n-# Ramonu is still'), pb.splitSubtext(lessonPing).sub === lesson.footer], [true, true]);
+    const forcedRoll = openers.rollOutcome(rehearsal, 0.3, ['tail', 'dress', 'feet'])!;
+    const forcedPing = sched.pingText(rehearsal.text, 'u1', forcedRoll, { roleId: 'role-love', had: false });
+    check('forced: line, the paragraph (main text), then the role footer', forcedPing.split('\n'), [
+        openers.fillOpener(rehearsal.text, 'u1'),
+        "Finally, <@u1> succeeded in not failing. Ramonu couldn't help but crack a tiny smile, amused by how pleased you were with yourself... and, secretly, already missing your clumsiness.",
+        '-# You obtained <@&role-love>.',
+    ]);
+    check('forced: the paragraph is main text, the role footer subtext', pb.splitSubtext(forcedPing).sub, '-# You obtained <@&role-love>.');
+    check('forced: "still" when they had it; no footer without a role', [sched.pingText(rehearsal.text, 'u1', forcedRoll, { roleId: 'role-love', had: true }).split('\n').at(-1), sched.pingText(rehearsal.text, 'u1', forcedRoll, null).split('\n').length], ["-# Ramonu's Second Love, still.", 2]);
+    // Giving the role: set in /timer rewards; a stub guild stands in for Discord.
+    const rewardsMod = await import('../src/lib/timer/rewards');
+    const added: string[] = [];
+    const guildWith = (has: boolean, fails = false) => ({ members: { fetch: async () => ({ roles: { cache: new Map(has ? [['role-love', {}]] : []), add: async (id: string) => { if (fails) throw new Error('Missing Permissions'); added.push(id); } } }) } }) as never;
+    check('second love: no role set gives nothing', await rewardsMod.grantSecondLove(guildWith(false), OG, T), null);
+    await rewardsMod.saveTimerSettings(OG, { secondLoveRoleId: 'role-love' });
+    check('second love: given, or already had', [await rewardsMod.grantSecondLove(guildWith(false), OG, T), await rewardsMod.grantSecondLove(guildWith(true), OG, T), added], [{ roleId: 'role-love', had: false }, { roleId: 'role-love', had: true }, ['role-love']]);
+    check('second love: a refused grant (permissions) gives nothing, without throwing', await rewardsMod.grantSecondLove(guildWith(false, true), OG, T), null);
+
+    // Set completion and the page: the Rehearsal is listed after the 9, never counted.
+    const nine = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
+    const CB = `test-complete-${Date.now()}`;
+    for (const t of nine) await rares.recordRareOpener(CB, 'c-nine', t);
+    for (const t of [...nine.slice(0, 8), rehearsal.text]) await rares.recordRareOpener(CB, 'c-eight', t);
+    const cb = await rares.specialsBoard(CB);
+    check('completion: the 9 lines complete the set; the Rehearsal does not stand in for one, but scores 15', cb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['c-nine', 1, 9, 9 * 15 + 100], ['c-eight', 0, 8, 9 * 15]]);
+    const mejiroPage = json(rares.specialsView(await rares.rareTally(CB, 'c-eight'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    const mNames = mejiroPage.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
+    check('page: the Rehearsal after the 9, not in the set\'s count', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mNames[9]], [true, 10, "**Extra.** Ramonu's Remedial Rehearsal"]);
+    check('page: ??? until found', json(rares.specialsView(await rares.rareTally(CB, 'c-nine'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).embeds[0]!.fields?.[0]?.value.split('\n')[9], '**Extra.** ???');
+    const readOpts = mejiroPage.components[1]?.components[0]?.options?.map((o) => o.label) ?? [];
+    check('read menu: the Rehearsal can be read once found', readOpts.at(-1), "Extra. Ramonu's Remedial Rehearsal");
+    const readRamonu = await rares.readSpecial(OG, T, 'mejiro.ramonu');
+    check('read: Ramonu in full, without any outcome footer', [readRamonu?.text, readRamonu?.text.includes('-#')], [openers.fillOpener(ramonu.text, T), false]);
+    check('read: the Rehearsal without footers', (await rares.readSpecial(OG, T, 'mejiro.rehearsal'))?.text, openers.fillOpener(rehearsal.text, T));
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [OG, CB] } } });
+    await prisma.timerSpecialBoost.deleteMany({ where: { guildId: OG } });
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: OG } });
+    await prisma.timerSettings.deleteMany({ where: { guildId: OG } });
 
     // Reminder lines: none repeats within 4 pings in a row.
     check('reminders: 20 lines, each naming the trainer', [PING_OPENERS.length, PING_OPENERS.every((o) => o.includes('{user}'))], [20, true]);
@@ -542,6 +686,7 @@ async function main() {
     check('no duplicate pings across ticks', sent.length, 1);
 
     stop();
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: G } });
     await prisma.trainingRun.deleteMany({ where: { guildId: G } });
     await prisma.trainingTimer.deleteMany({ where: { guildId: G } });
     await prisma.$disconnect();

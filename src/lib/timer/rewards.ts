@@ -202,7 +202,7 @@ export function getTimerSettings(guildId: string): Promise<TimerSettings | null>
  */
 export function saveTimerSettings(
     guildId: string,
-    change: { topRoleId?: string | null; secondRoleId?: string | null; announceChannelId?: string | null },
+    change: { topRoleId?: string | null; secondRoleId?: string | null; announceChannelId?: string | null; secondLoveRoleId?: string | null },
     now = new Date(),
 ): Promise<TimerSettings> {
     return prisma.timerSettings.upsert({
@@ -247,6 +247,35 @@ async function setRole(guild: Guild, userId: string, roleId: string, give: boole
     } catch (e) {
         console.error(`Timer reward: could not ${give ? 'give' : 'remove'} role ${roleId} for ${userId}:`, e instanceof Error ? e.message : e);
         return false;
+    }
+}
+
+/**
+ * Gives a trainer the guild's "Ramonu's Second Love" role
+ * (`TimerSettings.secondLoveRoleId`) for a forced success at Ramonu's
+ * Remedial Rehearsal. Returns the role and whether they already had it, or
+ * null (with a warning logged) when no role is set, the guild is unknown, or
+ * Discord refuses (permissions, the member left): the ping then shows its
+ * text without the role footer.
+ */
+export async function grantSecondLove(guild: Guild | null, guildId: string, userId: string): Promise<{ roleId: string; had: boolean } | null> {
+    const roleId = (await getTimerSettings(guildId).catch(() => null))?.secondLoveRoleId ?? null;
+    if (!roleId) {
+        console.warn(`Ramonu's Second Love: no role set for guild ${guildId} (/timer rewards second_love_role); ${userId} earned it.`);
+        return null;
+    }
+    if (!guild) {
+        console.warn(`Ramonu's Second Love: guild ${guildId} unavailable; could not give ${roleId} to ${userId}.`);
+        return null;
+    }
+    try {
+        const member = await guild.members.fetch(userId);
+        if (member.roles.cache.has(roleId)) return { roleId, had: true };
+        await member.roles.add(roleId, "Ramonu's Second Love: a forced success at her Remedial Rehearsal");
+        return { roleId, had: false };
+    } catch (e) {
+        console.warn(`Ramonu's Second Love: could not give ${roleId} to ${userId}:`, e instanceof Error ? e.message : e);
+        return null;
     }
 }
 

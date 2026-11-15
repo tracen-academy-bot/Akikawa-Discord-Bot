@@ -44,6 +44,65 @@ export interface SpecialBoost {
     runs: number;
 }
 
+/**
+ * A boost an outcome grants (`SpecialOutcome.boost`): for the next `runs`
+ * pings, an extra `chance` of either one special (`special`) or any line of
+ * the set `set` (its extras left out). Stored per trainer by `key`; getting
+ * the same outcome again adds `runs` more to what is left, as set boosts do.
+ */
+export interface OutcomeBoost {
+    /** Stable storage key; never change one in use. */
+    key: string;
+    /** The set it draws from (a paused, locked or turned-off set gives nothing). */
+    set: string;
+    /** One special, by id, instead of the whole set. */
+    special?: string;
+    chance: number;
+    runs: number;
+    /** One-time: ends as soon as its target comes up, by any route. */
+    endsOnHit?: boolean;
+    /** The Boosts view label; `{runs}` becomes "25 runs left". Ends with punctuation. */
+    label: string;
+}
+
+/**
+ * One outcome a special can roll each time it is a ping's opener
+ * (`Special.outcomes`): its footer goes under the line in the ping and its
+ * DM copy (never in the read view), and its effect applies once.
+ */
+export interface SpecialOutcome {
+    /** Stable id within the special. */
+    id: string;
+    /** Relative weight: 3 and 1 are 75% and 25%. */
+    weight: number;
+    /** "-# " line(s) under the line; `{user}` is the trainer's mention. */
+    footer?: string;
+    /**
+     * A loss's mishaps: one is chosen evenly among those not yet used in the
+     * trainer's current losing streak, and its footer is shown.
+     */
+    mishaps?: readonly { id: string; footer: string }[];
+    boost?: OutcomeBoost;
+    /** A win: the losing streak goes back to 0. */
+    win?: boolean;
+    /** A loss: adds its mishap to the streak and guarantees the trainer's next ping is this special again. */
+    lose?: boolean;
+}
+
+/**
+ * After `after` losses in a row, the special's next showing is a forced
+ * success instead of a roll: the line, then `text` (a paragraph, not a "-#"
+ * line), then a footer for the role it gives (`TimerSettings.secondLoveRoleId`).
+ */
+export interface ForcedSuccess {
+    after: number;
+    text: string;
+    /** `{role}` becomes the role's mention. */
+    roleFooter: string;
+    /** When the trainer already had the role. */
+    stillFooter: string;
+}
+
 /** One special line. `{user}` is the trainer's mention; `{set_name}` is its set's name. */
 export interface Special {
     /**
@@ -77,6 +136,16 @@ export interface Special {
      * "Video: <https://...>" (angle brackets: no second link preview).
      */
     credit?: string;
+    /** Rolled each time this line is a ping's opener; see `SpecialOutcome`. */
+    outcomes?: readonly SpecialOutcome[];
+    forcedSuccess?: ForcedSuccess;
+    /**
+     * An extra: never in the base pool (`rarePoolFor`) or a set-wide boost,
+     * only reachable through its own boost or a guarantee. It does not count
+     * toward its set's completion (the "N of 9" counts, the set's points),
+     * but scores normal find points. Its Specials page lists it after the set's lines.
+     */
+    extra?: boolean;
 }
 
 /** One special set: a group of special lines that can be turned on or off. */
@@ -107,6 +176,61 @@ export interface SpecialSet {
     paused?: boolean;
     openers: readonly Special[];
 }
+
+/**
+ * Mejiro Ramonu's outcomes (owner, 2026-11-15): 75% she wants another
+ * lesson (a one-time +10% Remedial Rehearsal for 25 runs, ended by the
+ * Rehearsal), 25% your footwork passed (+5% any Mejiro line for 50 runs).
+ * The odds are never shown to trainers.
+ */
+const RAMONU_OUTCOMES: readonly SpecialOutcome[] = [
+    {
+        id: 'lesson',
+        weight: 3,
+        footer: "-# Ramonu is still not quite satisfied with how distracted you were, and has insisted you join her next dance practice. For the next 25 runs, gain a 10% chance of Ramonu's Remedial Rehearsal, until she has had her lesson.",
+        boost: { key: 'mejiro.ramonu:lesson', set: 'mejiro-estate', special: 'mejiro.rehearsal', chance: 0.1, runs: 25, endsOnHit: true, label: "Ramonu's Remedial Rehearsal, {runs}, until she has had her lesson." },
+    },
+    {
+        id: 'footwork',
+        weight: 1,
+        footer: "-# Ramonu remains unimpressed... but your footwork convinced her your attention was where it belonged. For the next 50 runs, gain a 5% chance of meeting another Mejiro.",
+        boost: { key: 'mejiro.ramonu:footwork', set: 'mejiro-estate', chance: 0.05, runs: 50, label: 'The Mejiro Estate: any Mejiro line, {runs}.' },
+    },
+];
+
+/**
+ * Ramonu's Remedial Rehearsal, 50/50: a win (+3% any Mejiro line for 25
+ * runs, the losing streak back to 0) or a loss (one of three mishaps not yet
+ * used in the streak; the trainer's next ping is the Rehearsal again). After
+ * three losses in a row the next one is a forced success, with the role
+ * Ramonu's Second Love.
+ */
+const REHEARSAL_OUTCOMES: readonly SpecialOutcome[] = [
+    {
+        id: 'win',
+        weight: 1,
+        footer: "-# Your practice paid off. As a pair, your steps flow a little smoother now. For the next 25 runs, gain a 3% chance of meeting another Mejiro.",
+        win: true,
+        boost: { key: 'mejiro.rehearsal:win', set: 'mejiro-estate', chance: 0.03, runs: 25, label: 'The Mejiro Estate: any Mejiro line, {runs}, after a lesson well learned.' },
+    },
+    {
+        id: 'lose',
+        weight: 1,
+        lose: true,
+        mishaps: [
+            { id: 'tail', footer: "-# You tried. Admittedly. You still stepped on her tail, and she was *displeased*. She has cleared your schedule: your next run ends in another lesson." },
+            { id: 'dress', footer: "-# You tried. Admittedly. You still caught the hem of her dress, and she was *displeased*. She has cleared your schedule: your next run ends in another lesson." },
+            { id: 'feet', footer: "-# You tried. Admittedly. You still trod on her toes, and she was *displeased*. She has cleared your schedule: your next run ends in another lesson." },
+        ],
+    },
+];
+
+const REHEARSAL_FORCED: ForcedSuccess = {
+    after: 3,
+    text: "Finally, {user} succeeded in not failing. Ramonu couldn't help but crack a tiny smile, amused by how pleased you were with yourself... and, secretly, already missing your clumsiness.",
+    roleFooter: '-# You obtained {role}.',
+    stillFooter: "-# Ramonu's Second Love, still.",
+};
 
 /**
  * The special sets, in order: rare openers that together come up
@@ -172,8 +296,10 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'mejiro.palmer', name: "Mejiro Palmer", text: "{user}! Okay, so I, Palmer-san, complimented Grandmother's gown last Christmas, and she made me dance. Tonight it's your turn, I already told her. Sorry not sorry~\nTwo rules: don't step on her feet, and do NOT bolt halfway through. Running away at full speed is Palmer-san's move, ssho~?\nOh, Helios? It's for a surprise, okay? Besties gotta protect 'em #SweetieSecrecies! Sounds just like her, eh?", after: ['mejiro.grandmother'] },
             { id: 'mejiro.ardan', name: "Mejiro Ardan", text: "Good evening, {user}-san. ...My my, you look tired. Business talk with the Satonos, I take it? No overdoing it, Trainer-san... めっ！ Fufu, Creek-san taught me that one.\nI had the kitchen brew a pot of herbal tea. Oh yes, Baaya's recipe; she swears by it. I added a few notes of my own. And yes, before any dancing. ...You're fine, you say? Fufu. Hush, and drink. The moon is lovely tonight, isn't it?\nOh dear, your shoulders are up by your ears again. Nervous, are we? I've watched you practise; you are far better than you think, and \"I can't dance\" is not an answer I accept tonight. 参りましょう。", after: ['mejiro.grandmother'] },
             { id: 'mejiro.bright', name: "Mejiro Bright", text: "...zzz... oh? Ah~ {user}-sama, good evening~ I dozed off while sewing, desu wa~ Look: a tiny suit for Maki-chan, just like yours~ Now she can come to the party with you too. Ufufu~\nYou came to fetch me for... the party? Oh, right. I'll be down in a moment~ But hold still first... Yes, the length is perfect~ Oh, what was I measuring? It gets rather cold here in winter, so I'm knitting you a scarf. Well, the beginnings of one anyway. It will be ready by winter... next winter, perhaps. Good things take their time, after all~", after: ['mejiro.grandmother'] },
-            { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "Ah, {user}. Your arrival is appreciated. Offer me your arm. Mmm... you're warm.\n...Still thinking about our training analysis? How... boorish of you. First the Symbolis, and now this. Eyes here, if you please. ...There we go. Good. Look all you want; I did *not* dress like this for no one, after all.\nArdan is dancing tonight, you see. Isn't her stubbornness lovely? You had better keep up too. The track can wait until tomorrow... tonight, it's just you and me.", after: ['mejiro.grandmother'] },
+            { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "Ah, {user}. Your arrival is appreciated. Offer me your arm. Mmm... you're warm.\n...Still thinking about our training analysis? How... boorish of you. First the Symbolis, and now this. Eyes here, if you please. ...There we go. Good. Look all you want; I did *not* dress like this for no one, after all.\nArdan is dancing tonight, you see. Isn't her stubbornness lovely? You had better keep up too. The track can wait until tomorrow... tonight, it's just you and me.", after: ['mejiro.grandmother'], outcomes: RAMONU_OUTCOMES },
             { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. Grandmother in the centre, if you would. McQueen, the cake can wait. Ryan, it looks lovely, stop tugging the hem. Dober, the camera, not the floor; nobody else is looking. Palmer, wake Bright. Ardan, beside your sister. Ramonu... yes, we know, you are radiant. And {user}, here, with the family. ...There. One for the album.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'] },
+            // An extra (owner, 2026-11-15): only through Ramonu's lesson boost or a lost lesson's guarantee.
+            { id: 'mejiro.rehearsal', name: "Ramonu's Remedial Rehearsal", text: "Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?", after: ['mejiro.ramonu'], extra: true, outcomes: REHEARSAL_OUTCOMES, forcedSuccess: REHEARSAL_FORCED },
         ],
     },
 ];
@@ -283,9 +409,123 @@ export function commonsFor(recent: readonly string[]): string[] {
 /** The ids of the paused sets (`SpecialSet.paused`): no new finds from them. */
 export const PAUSED_SETS: readonly string[] = SPECIAL_SETS.filter((s) => s.paused).map((s) => s.id);
 
-/** The special texts in the sets that are neither turned off (`disabledSets`), locked (`lockedSets`) nor paused. */
+/** The special texts in the sets that are neither turned off (`disabledSets`), locked (`lockedSets`) nor paused. Extras (`Special.extra`) are never in it. */
 export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonly string[] = []): string[] {
-    return RARE_OPENERS.filter((o) => !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
+    return RARE_OPENERS.filter((o) => !o.extra && !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
+}
+
+/** A set's lines for a set-wide outcome boost ("any Mejiro line"): all but its extras; none while it is paused. */
+export function setLinesPool(setId: string): string[] {
+    if (PAUSED_SETS.includes(setId)) return [];
+    return RARE_OPENERS.filter((o) => o.set === setId && !o.extra).map((o) => o.text);
+}
+
+/** The pool an outcome boost draws on: its one special, or its set's lines; none while its set is paused. */
+export function outcomeBoostPool(boost: Pick<OutcomeBoost, 'set' | 'special'>): string[] {
+    if (PAUSED_SETS.includes(boost.set)) return [];
+    if (boost.special) {
+        const special = specialById(boost.special);
+        return special ? [special.text] : [];
+    }
+    return setLinesPool(boost.set);
+}
+
+/** The outcome boost stored under `key`, from any special's outcomes, or undefined. */
+export function outcomeBoostByKey(key: string): OutcomeBoost | undefined {
+    for (const o of RARE_OPENERS) {
+        const found = o.outcomes?.find((x) => x.boost?.key === key)?.boost;
+        if (found) return found;
+    }
+    return undefined;
+}
+
+/** The special whose current text is `text`, or undefined. */
+export function specialByText(text: string): (Special & { set: string }) | undefined {
+    return RARE_OPENERS.find((o) => o.text === text);
+}
+
+/** What a special rolled when it came up: see `rollOutcome`. */
+export interface RolledOutcome {
+    /** The special's id. */
+    special: string;
+    /** The outcome's id; 'forced' for a forced success. */
+    outcome: string;
+    /** The mishap chosen, for a loss. */
+    mishap?: string;
+    /** A forced success (`Special.forcedSuccess`). */
+    forced: boolean;
+    /** The footer to show, a "-#" template (empty for a forced success: see `outcomeLines`). */
+    footer: string;
+    boost?: OutcomeBoost;
+    win: boolean;
+    lose: boolean;
+}
+
+/**
+ * Rolls `special`'s outcome from one random number `r` in [0, 1), for a
+ * trainer whose current losing streak is `streak` (the mishaps used so far,
+ * in order). Null for a special without outcomes.
+ *
+ *   - With `forcedSuccess`, a streak of `after` or more is a forced success,
+ *     whatever `r`.
+ *   - Otherwise the outcomes cut [0, 1) in order by weight; the share of `r`
+ *     within its outcome picks a mishap evenly among those not in `streak`
+ *     (all of them, if every one was used).
+ */
+export function rollOutcome(special: Special, r: number, streak: readonly string[] = []): RolledOutcome | null {
+    if (!special.outcomes || special.outcomes.length === 0) return null;
+    if (special.forcedSuccess && streak.length >= special.forcedSuccess.after) {
+        return { special: special.id, outcome: 'forced', forced: true, footer: '', win: true, lose: false };
+    }
+    const total = special.outcomes.reduce((sum, o) => sum + o.weight, 0);
+    const x = Math.min(Math.max(r, 0), 1 - 1e-12) * total;
+    let start = 0;
+    let picked = special.outcomes[special.outcomes.length - 1]!;
+    for (const o of special.outcomes) {
+        if (x < start + o.weight) {
+            picked = o;
+            break;
+        }
+        start += o.weight;
+    }
+    const share = Math.min(Math.max((x - start) / picked.weight, 0), 1 - 1e-12);
+    let mishap: { id: string; footer: string } | undefined;
+    if (picked.mishaps && picked.mishaps.length > 0) {
+        const left = picked.mishaps.filter((m) => !streak.includes(m.id));
+        const from = left.length > 0 ? left : picked.mishaps;
+        mishap = from[Math.min(from.length - 1, Math.floor(share * from.length))]!;
+    }
+    return {
+        special: special.id,
+        outcome: picked.id,
+        ...(mishap ? { mishap: mishap.id } : {}),
+        forced: false,
+        footer: mishap?.footer ?? picked.footer ?? '',
+        ...(picked.boost ? { boost: picked.boost } : {}),
+        win: picked.win ?? false,
+        lose: picked.lose ?? false,
+    };
+}
+
+/**
+ * What a rolled outcome adds under the line in the ping (and its DM copy),
+ * with `{user}` filled: its footer; for a forced success, the paragraph,
+ * then the role footer (`role`: the role given, or `had` when the trainer
+ * already had it). With no role (none set, or it could not be given), the
+ * role footer is left out.
+ */
+export function outcomeLines(rolled: RolledOutcome, discordUserId: string, role: { roleId: string; had: boolean } | null = null): string {
+    const fill = (t: string) => t.replaceAll('{user}', `<@${discordUserId}>`);
+    if (!rolled.forced) return fill(rolled.footer);
+    const forced = specialById(rolled.special)?.forcedSuccess;
+    if (!forced) return '';
+    const footer = role ? (role.had ? forced.stillFooter : forced.roleFooter.replaceAll('{role}', `<@&${role.roleId}>`)) : null;
+    return [fill(forced.text), ...(footer ? [footer] : [])].join('\n');
+}
+
+/** A boost label for the Boosts view: `{runs}` filled as "25 runs left". */
+export function outcomeBoostLabel(boost: Pick<OutcomeBoost, 'label'>, runsLeft: number): string {
+    return boost.label.replaceAll('{runs}', `${runsLeft} run${runsLeft === 1 ? '' : 's'} left`);
 }
 
 /** The special that grants `boost` (by text) and the set it draws from, or undefined. */

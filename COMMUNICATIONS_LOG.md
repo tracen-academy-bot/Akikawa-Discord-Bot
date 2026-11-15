@@ -4,6 +4,16 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-15 — Mejiro lines final; Ramonu's Rehearsal built (still paused)
+
+- The owner's eight Mejiro lines are in. Ramonu now rolls an outcome, and her
+  Remedial Rehearsal (an extra; its role, "Ramonu's Second Love", comes
+  after three lessons failed in a row) is built. Footers may show boost sizes, but
+  never the roll odds. The Estate stays paused until the owner releases it.
+- Club Managers set the role with `/timer rewards second_love_role`.
+
+---
+
 ## 2026-11-11 — Tylina's +3%, and the Fortune Tent draft
 
 - Tylina gets a permanent personal +3% special chance, "Ei, Ei, Mun!"

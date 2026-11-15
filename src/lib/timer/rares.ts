@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -40,14 +40,16 @@ export interface RareTally {
     count: number;
     firstUserId: string | null;
     firstAt: Date | null;
+    /** An extra (`Special.extra`): listed after its set's lines, not counted in its totals. */
+    extra: boolean;
 }
 
 /** Every rare line, in list order, with its tally in a guild, or for one trainer when `discordUserId` is given. */
 export async function rareTally(guildId: string, discordUserId?: string): Promise<RareTally[]> {
     const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, ...(discordUserId ? { discordUserId } : {}) }, orderBy: { at: 'asc' } });
-    return RARE_OPENERS.map(({ id, name, text: opener, set }) => {
+    return RARE_OPENERS.map(({ id, name, text: opener, set, extra }) => {
         const mine = hits.filter((h) => h.specialId === id);
-        return { id, name, opener, set, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null };
+        return { id, name, opener, set, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null, extra: extra ?? false };
     });
 }
 
@@ -134,20 +136,26 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     if (pg === 0) return remindersPage(mode, tallyLine);
     const p = pg - 1;
     const set = SPECIAL_SETS[p]!;
-    const rows = tally.map((t, i) => ({ t, i })).filter(({ t }) => t.set === set.id);
-    const found = tally.filter((t) => t.count > 0).length;
-    const foundHere = rows.filter(({ t }) => t.count > 0).length;
+    // The set's lines, then its extras (shown after them, never counted in its totals).
+    const inSet = tally.map((t, i) => ({ t, i })).filter(({ t }) => t.set === set.id);
+    const main = inSet.filter(({ t }) => !t.extra);
+    const rows = [...main, ...inSet.filter(({ t }) => t.extra)];
+    const counted = tally.filter((t) => !t.extra);
+    const found = counted.filter((t) => t.count > 0).length;
+    const foundHere = main.filter(({ t }) => t.count > 0).length;
+    /** A row's number within its set ("**3.**"), or "Extra" for an extra. */
+    const num = (t: RareTally, n: number) => (t.extra ? 'Extra.' : `${n + 1}.`);
     const locked = extras?.lockedSets.includes(set.id) ?? false;
     const off = extras?.disabledSets.includes(set.id) ?? false;
 
     const status = locked ? `\nLocked: find **${(set.requires && specialById(set.requires)?.name) ?? 'its special'}** to open it.` : off ? '\nOff: these never come up for you.' : '';
     const embed = new EmbedBuilder()
         .setColor(0xf2a87a)
-        .setTitle(personal ? `Your specials: ${found} of ${tally.length}` : `Specials found: ${found} of ${tally.length}`)
-        .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${rows.length} found${status}`);
+        .setTitle(personal ? `Your specials: ${found} of ${counted.length}` : `Specials found: ${found} of ${counted.length}`)
+        .setDescription(`**${pageTitle(pg)}**: ${foundHere} of ${main.length} found${status}`);
     if (!locked) {
         const when = (t: RareTally) => `<t:${Math.floor(t.firstAt!.getTime() / 1000)}:R>`;
-        const names = rows.map(({ t }, n) => `**${n + 1}.** ${t.count > 0 ? t.name : '???'}`);
+        const names = rows.map(({ t }, n) => `**${num(t, n)}** ${t.count > 0 ? t.name : '???'}`);
         const counts = rows.map(({ t }) => (t.count > 0 ? `**×${t.count}**` : '—'));
         const firsts = rows.map(({ t }) => (t.count > 0 && t.firstUserId && t.firstAt ? (personal ? when(t) : `<@${t.firstUserId}> ${when(t)}`) : '—'));
         embed.addFields(
@@ -160,9 +168,11 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     const footer = [`${tallyLine} Each ping has a ${Math.round(RARE_OPENER_CHANCE * 100)}% chance of a special line.`];
     for (const b of extras?.boosts ?? []) {
         const boostSet = SPECIAL_SETS.find((s) => s.id === b.setId);
-        const boost = boostSet?.openers.find((o) => o.boost)?.boost;
-        if (!boostSet || !boost) continue;
-        footer.push(`Boost: +${Math.round(boost.chance * 100)}% ${boostSet.name} for ${b.runsLeft} more run${b.runsLeft === 1 ? '' : 's'}${extras!.boostsOn ? '' : ' (paused: Boosts are off)'}.`);
+        // An outcome boost has its own chance and target; a set boost takes its set's.
+        const chance = b.key ? b.chance : boostSet?.openers.find((o) => o.boost)?.boost?.chance;
+        if (!boostSet || chance === undefined) continue;
+        const target = b.specialId ? (specialById(b.specialId)?.name ?? boostSet.name) : boostSet.name;
+        footer.push(`Boost: +${Math.round(chance * 100)}% ${target} for ${b.runsLeft} more run${b.runsLeft === 1 ? '' : 's'}${extras!.boostsOn ? '' : ' (paused: Boosts are off)'}.`);
     }
     footer.push(`Page ${pg + 1} of ${PAGE_COUNT}`);
     embed.setFooter({ text: footer.join('\n') });
@@ -178,7 +188,7 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     const components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = [nav];
     // Reading in full is for a trainer's own finds, a set's worth at a time.
     const options = personal
-        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, n }) => ({ label: `${n + 1}. ${t.name}`.slice(0, 100), value: t.id }))
+        ? rows.map(({ t, i }, n) => ({ t, i, n })).filter(({ t }) => t.count > 0).slice(0, 25).map(({ t, n }) => ({ label: `${num(t, n)} ${t.name}`.slice(0, 100), value: t.id }))
         : [];
     if (options.length > 0) {
         components.push(
@@ -267,16 +277,95 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
     return pool.map((t) => redirectOpener(t, found));
 }
 
-/** A set boost a trainer holds. */
+/**
+ * A boost a trainer holds: a set boost (just `setId` and `runsLeft`), or an
+ * outcome boost (`OutcomeBoost`), which also has its `key`, `chance`, its
+ * one special if it has one, and whether it ends when that comes up.
+ */
 export interface ActiveBoost {
     setId: string;
     runsLeft: number;
+    key?: string;
+    specialId?: string;
+    chance?: number;
+    endsOnHit?: boolean;
 }
 
-/** A trainer's set boosts with runs left. */
+/** A trainer's boosts with runs left, set boosts first, in the order they were stored. */
 export async function activeBoosts(guildId: string, discordUserId: string): Promise<ActiveBoost[]> {
-    const rows = await prisma.timerSpecialBoost.findMany({ where: { guildId, discordUserId, runsLeft: { gt: 0 } } });
-    return rows.map((r) => ({ setId: r.setId, runsLeft: r.runsLeft }));
+    const rows = await prisma.timerSpecialBoost.findMany({ where: { guildId, discordUserId, runsLeft: { gt: 0 } }, orderBy: [{ key: 'asc' }, { setId: 'asc' }] });
+    return rows.map((r) =>
+        r.key
+            ? { setId: r.setId, runsLeft: r.runsLeft, key: r.key, ...(r.specialId ? { specialId: r.specialId } : {}), chance: r.chance ?? 0, endsOnHit: r.endsOnHit }
+            : { setId: r.setId, runsLeft: r.runsLeft },
+    );
+}
+
+/**
+ * Gives a trainer an outcome boost: its run count, added to whatever is left
+ * of the same boost (by key), as set boosts stack.
+ */
+export async function grantOutcomeBoost(guildId: string, discordUserId: string, boost: OutcomeBoost): Promise<void> {
+    await prisma.timerSpecialBoost.upsert({
+        where: { guildId_discordUserId_setId_key: { guildId, discordUserId, setId: boost.set, key: boost.key } },
+        create: { guildId, discordUserId, setId: boost.set, key: boost.key, specialId: boost.special ?? null, chance: boost.chance, endsOnHit: boost.endsOnHit ?? false, runsLeft: boost.runs },
+        update: { runsLeft: { increment: boost.runs }, chance: boost.chance, endsOnHit: boost.endsOnHit ?? false, specialId: boost.special ?? null },
+    });
+}
+
+/** Ends a trainer's one-time boosts on `opener`'s special (`OutcomeBoost.endsOnHit`): it has come up. */
+export async function endBoostsHitBy(guildId: string, discordUserId: string, opener: string): Promise<void> {
+    const specialId = specialIdOf(opener);
+    if (!specialId) return;
+    await prisma.timerSpecialBoost.deleteMany({ where: { guildId, discordUserId, specialId, endsOnHit: true } });
+}
+
+/** A trainer's outcome state: the special their next ping is guaranteed to be, and their losing streak. */
+export interface OutcomeState {
+    guaranteedSpecialId: string | null;
+    losingStreak: string[];
+}
+
+export async function outcomeState(guildId: string, discordUserId: string): Promise<OutcomeState> {
+    const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } }, select: { guaranteedSpecialId: true, losingStreak: true } });
+    return { guaranteedSpecialId: row?.guaranteedSpecialId ?? null, losingStreak: row?.losingStreak ?? [] };
+}
+
+/**
+ * The text of the special a trainer's next ping is guaranteed to be, or
+ * undefined: none is pending, or its set is off, locked or paused for them
+ * (it then waits until the set is usable again).
+ */
+export function guaranteedOpener(state: OutcomeState, disabledSets: readonly string[], lockedSets: readonly string[]): string | undefined {
+    const special = state.guaranteedSpecialId ? specialById(state.guaranteedSpecialId) : undefined;
+    if (!special || disabledSets.includes(special.set) || lockedSets.includes(special.set) || PAUSED_SETS.includes(special.set)) return undefined;
+    return special.text;
+}
+
+/**
+ * After a ping with the special `opener` was posted: clears a guarantee it
+ * fulfilled, then applies what it rolled (`rolled`, if anything): its boost;
+ * a win or forced success resets the losing streak; a loss adds its mishap
+ * to the streak and guarantees the trainer's next ping is this special again.
+ */
+export async function applyOutcome(guildId: string, discordUserId: string, opener: string, rolled: RolledOutcome | null): Promise<void> {
+    const specialId = specialIdOf(opener);
+    if (!specialId) return;
+    const state = await outcomeState(guildId, discordUserId);
+    let guaranteedSpecialId = state.guaranteedSpecialId === specialId ? null : state.guaranteedSpecialId;
+    let losingStreak = state.losingStreak;
+    if (rolled?.boost) await grantOutcomeBoost(guildId, discordUserId, rolled.boost);
+    if (rolled?.win || rolled?.forced) losingStreak = [];
+    if (rolled?.lose) {
+        losingStreak = [...losingStreak, rolled.mishap ?? rolled.outcome];
+        guaranteedSpecialId = specialId;
+    }
+    if (guaranteedSpecialId === state.guaranteedSpecialId && JSON.stringify(losingStreak) === JSON.stringify(state.losingStreak)) return;
+    await prisma.timerUserSettings.upsert({
+        where: { guildId_discordUserId: { guildId, discordUserId } },
+        create: { guildId, discordUserId, guaranteedSpecialId, losingStreak },
+        update: { guaranteedSpecialId, losingStreak },
+    });
 }
 
 /** Uses up one run of each of a trainer's set boosts; a boost at zero is removed. */
@@ -295,7 +384,7 @@ export async function grantBoost(guildId: string, discordUserId: string, opener:
     if (!granted) return false;
     const runsLeft = granted.boost.runs;
     await prisma.timerSpecialBoost.upsert({
-        where: { guildId_discordUserId_setId: { guildId, discordUserId, setId: granted.set } },
+        where: { guildId_discordUserId_setId_key: { guildId, discordUserId, setId: granted.set, key: '' } },
         create: { guildId, discordUserId, setId: granted.set, runsLeft },
         update: { runsLeft: { increment: runsLeft } },
     });
@@ -334,7 +423,9 @@ export interface ExtraChance {
  *   - an `ownerChance` of 1 or more is a guarantee: the owner's next ping is
  *     that special, whatever the roll and before any extra.
  *
- * A locked special never comes up from an extra.
+ * A locked special never comes up from an extra. `guaranteed` (a special's
+ * text, from `guaranteedOpener`: a lost Remedial Rehearsal) is the trainer's
+ * own guarantee: it comes up whatever the roll, after a lock's guarantee.
  */
 export async function chooseOpener(
     guildId: string,
@@ -343,12 +434,14 @@ export async function chooseOpener(
     pool: readonly string[],
     extras: readonly ExtraChance[] = [],
     commons: readonly string[] = PING_OPENERS,
+    guaranteed?: string,
 ): Promise<string> {
     const locks = await activeLocks(guildId);
     const locked = locks.map((l) => l.text);
     const mine = locks.find((l) => l.owner === discordUserId);
     // A guarantee: the owner's next ping is theirs, whatever the roll.
     if (mine && mine.ownerChance >= 1) return mine.text;
+    if (guaranteed) return guaranteed;
 
     const raw = extras.map((e) => ({ chance: e.chance, pool: e.pool.filter((t) => !locked.includes(t)) })).filter((e) => e.chance > 0 && e.pool.length > 0);
     // The soft caps: when base plus boosts passes 20%, the boost slices
@@ -419,7 +512,7 @@ export interface SpecialsBoardRow {
     points: number;
     /** Sets whose every special they have found. */
     setsComplete: number;
-    /** Distinct specials they have found. */
+    /** Distinct specials they have found, extras left out (they still score). */
     found: number;
     /** Special pings they have had, repeats included. */
     pings: number;
@@ -460,11 +553,13 @@ export async function specialsBoard(guildId: string, limit = 15): Promise<Specia
         byUser.set(h.discordUserId, u);
     }
     const rows: SpecialsBoardRow[] = [...byUser].map(([discordUserId, u]) => {
-        const setsComplete = SPECIAL_SETS.filter((s) => s.openers.length > 0 && s.openers.every((o) => u.found.has(o.id))).length;
-        const found = u.found.size;
-        const points = found * SPECIAL_POINTS.found + (u.pings - found) * SPECIAL_POINTS.repeat + setsComplete * SPECIAL_POINTS.set;
+        // Extras score as finds but never count toward a set, or the found count.
+        const setsComplete = SPECIAL_SETS.filter((s) => s.openers.some((o) => !o.extra) && s.openers.every((o) => o.extra || u.found.has(o.id))).length;
+        const distinct = u.found.size;
+        const points = distinct * SPECIAL_POINTS.found + (u.pings - distinct) * SPECIAL_POINTS.repeat + setsComplete * SPECIAL_POINTS.set;
+        const found = [...u.found].filter((id) => !specialById(id)?.extra).length;
         return { discordUserId, points, setsComplete, found, pings: u.pings, reachedAt: u.reachedAt };
     });
     rows.sort((a, b) => b.points - a.points || a.reachedAt.getTime() - b.reachedAt.getTime());
-    return { rows: rows.slice(0, limit), specialCount: RARE_OPENERS.length, setCount: SPECIAL_SETS.length, totalPings: hits.length, trainers: rows.length };
+    return { rows: rows.slice(0, limit), specialCount: RARE_OPENERS.filter((o) => !o.extra).length, setCount: SPECIAL_SETS.length, totalPings: hits.length, trainers: rows.length };
 }
