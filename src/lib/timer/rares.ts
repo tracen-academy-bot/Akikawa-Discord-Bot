@@ -42,14 +42,16 @@ export interface RareTally {
     firstAt: Date | null;
     /** An extra (`Special.extra`): listed after its set's lines, not counted in its totals. */
     extra: boolean;
+    /** A guest (`Special.guest`, always an extra): listed last, as "Guest.". */
+    guest: boolean;
 }
 
 /** Every rare line, in list order, with its tally in a guild, or for one trainer when `discordUserId` is given. */
 export async function rareTally(guildId: string, discordUserId?: string): Promise<RareTally[]> {
     const hits = await prisma.rareOpenerHit.findMany({ where: { guildId, ...(discordUserId ? { discordUserId } : {}) }, orderBy: { at: 'asc' } });
-    return RARE_OPENERS.map(({ id, name, text: opener, set, extra }) => {
+    return RARE_OPENERS.map(({ id, name, text: opener, set, extra, guest }) => {
         const mine = hits.filter((h) => h.specialId === id);
-        return { id, name, opener, set, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null, extra: extra ?? false };
+        return { id, name, opener, set, count: mine.length, firstUserId: mine[0]?.discordUserId ?? null, firstAt: mine[0]?.at ?? null, extra: (extra ?? false) || (guest ?? false), guest: guest ?? false };
     });
 }
 
@@ -136,15 +138,15 @@ export function specialsView(tally: RareTally[], page: number, extras?: Personal
     if (pg === 0) return remindersPage(mode, tallyLine);
     const p = pg - 1;
     const set = SPECIAL_SETS[p]!;
-    // The set's lines, then its extras (shown after them, never counted in its totals).
+    // The set's lines, then its extras, then its guests (shown after them, never counted in its totals).
     const inSet = tally.map((t, i) => ({ t, i })).filter(({ t }) => t.set === set.id);
     const main = inSet.filter(({ t }) => !t.extra);
-    const rows = [...main, ...inSet.filter(({ t }) => t.extra)];
+    const rows = [...main, ...inSet.filter(({ t }) => t.extra && !t.guest), ...inSet.filter(({ t }) => t.guest)];
     const counted = tally.filter((t) => !t.extra);
     const found = counted.filter((t) => t.count > 0).length;
     const foundHere = main.filter(({ t }) => t.count > 0).length;
-    /** A row's number within its set ("**3.**"), or "Extra" for an extra. */
-    const num = (t: RareTally, n: number) => (t.extra ? 'Extra.' : `${n + 1}.`);
+    /** A row's number within its set ("**3.**"), "Extra." for an extra, or "Guest." for a guest. */
+    const num = (t: RareTally, n: number) => (t.guest ? 'Guest.' : t.extra ? 'Extra.' : `${n + 1}.`);
     const locked = extras?.lockedSets.includes(set.id) ?? false;
     const off = extras?.disabledSets.includes(set.id) ?? false;
 
@@ -443,6 +445,8 @@ export interface ExtraChance {
     pool: readonly string[];
     /** What it is, for the Boosts view. */
     label?: string;
+    /** Content, not a boost (the guest slice): Boosts off does not pause it. */
+    content?: boolean;
 }
 
 /**

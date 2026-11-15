@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { prisma } from '../../db/prisma';
-import { EARLY_START, PAUSED_SETS, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
-import { activeBoosts, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
+import { EARLY_START, PAUSED_SETS, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, guestSlice, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
+import { activeBoosts, foundSpecialIds, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 
 /**
@@ -35,6 +35,9 @@ function percent(chance: number): string {
  *     it has done its job, and the set's unlock bonus takes over;
  *   - each set with an `unlockBonus` they have unlocked and on: its bonus,
  *     drawn from that set's lines.
+ *
+ * And, Boosts on or off, the guest slice (`guestSlice`): content, not a
+ * boost (`content: true`), so it is the only extra left with Boosts off.
  */
 export async function extraChances(
     guildId: string,
@@ -46,7 +49,8 @@ export async function extraChances(
     now: Date = new Date(),
     buffs: readonly SeasonalBuff[] = SEASONAL_BUFFS,
 ): Promise<ExtraChance[]> {
-    if (!settings.boosts) return [];
+    const guests = guestSlice(await foundSpecialIds(guildId, discordUserId), settings.disabledSets, lockedSets);
+    if (!settings.boosts) return guests ? [guests] : [];
     // A paused set (SpecialSet.paused) gives no new finds, so no boost draws on it.
     const usable = (setId: string) => !settings.disabledSets.includes(setId) && !lockedSets.includes(setId) && !PAUSED_SETS.includes(setId);
     const extras: ExtraChance[] = [];
@@ -85,6 +89,7 @@ export async function extraChances(
         if (!set.unlockBonus || !set.requires || !usable(set.id)) continue;
         extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra).map((o) => o.text), label: set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.` });
     }
+    if (guests) extras.push(guests);
     return extras;
 }
 
@@ -106,12 +111,13 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
         (e) => e.pool.length > 0,
     );
     const base = pool.length > 0 ? RARE_OPENER_CHANCE : 0;
-    const rawTotal = base + (settings.boosts ? extras.reduce((sum, e) => sum + e.chance, 0) : 0);
+    // The guest slice is content, not a boost: it counts with Boosts off too.
+    const rawTotal = base + extras.filter((e) => settings.boosts || e.content).reduce((sum, e) => sum + e.chance, 0);
     const total = base > 0 ? effectiveChance(rawTotal) : rawTotal;
 
     const lines = [`**Base:** ${percent(RARE_OPENER_CHANCE)} on every ping${pool.length === 0 ? ' (every special set is off for you)' : ''}.`];
     if (extras.length === 0) lines.push('No boosts right now.');
-    for (const e of extras) lines.push(`**+${percent(e.chance)}** ${e.label ?? ''}${settings.boosts ? '' : ' (paused)'}`);
+    for (const e of extras) lines.push(`**+${percent(e.chance)}** ${e.label ?? ''}${settings.boosts || e.content ? '' : ' (paused)'}`);
     if (!timer?.earlyStart) {
         lines.push(
             `-# Early Start: start your next run quickly for +${percent(EARLY_START.chance)} overall!`,

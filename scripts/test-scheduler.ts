@@ -182,7 +182,7 @@ async function main() {
     const openers = await import('../src/lib/timer/openers');
     const allIds = openers.RARE_OPENERS.map((o) => o.id);
     check('ids: every special has a unique id', new Set(allIds).size, allIds.length);
-    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id.startsWith(({ 'online-sensations': 'os.', 'mejiro-estate': 'mejiro.' } as Record<string, string>)[o.set] ?? `${o.set}.`)), true);
+    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id.startsWith(o.guest ? 'guest.' : ({ 'online-sensations': 'os.', 'mejiro-estate': 'mejiro.' } as Record<string, string>)[o.set] ?? `${o.set}.`)), true);
     check('ids: prerequisites and locks name real specials', [...openers.SPECIAL_SETS.flatMap((x) => (x.requires ? [x.requires] : [])), ...openers.SPECIAL_LOCKS.map((l) => l.id)].every((id) => openers.specialById(id) !== undefined), true);
     // A reworded special keeps its finds: they follow the id, not the text.
     const IG = `test-ids-${Date.now()}`;
@@ -427,10 +427,10 @@ async function main() {
     const grandma = mejiro.openers.find((o) => o.id === 'mejiro.grandmother')!;
     const seven = mejiro.openers.filter((o) => !o.extra && o.after?.length === 1).map((o) => o.id);
     const photo = mejiro.openers.find((o) => o.id === 'mejiro.photo')!;
-    check('mejiro: 9 lines and 1 extra, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.filter((o) => !o.extra).length, mejiro.openers.filter((o) => o.extra).map((o) => o.id), mejiro.requires, seven.length, photo.after?.length], [9, ['mejiro.rehearsal'], 'set1.mejiro', 7, 8]);
-    check('mejiro: one {user} each', mejiro.openers.every((o) => o.text.split('{user}').length === 2), true);
+    check('mejiro: 9 lines and 1 extra, opened by the Mejiro Family line; 7 wait on Grandmother; the photo on all 8', [mejiro.openers.filter((o) => !o.extra).length, mejiro.openers.filter((o) => o.extra && !o.guest).map((o) => o.id), mejiro.requires, seven.length, photo.after?.length], [9, ['mejiro.rehearsal'], 'set1.mejiro', 7, 8]);
+    check('mejiro: one {user} each, guests included', mejiro.openers.every((o) => o.text.split('{user}').length === 2), true);
     // No hashtags, except Palmer's one: #SweetieSecrecies is Palmer imitating Helios, on purpose.
-    check('mejiro: no hashtags, but Palmer\'s one Helios imitation', [mejiro.openers.filter((o) => o.id !== 'mejiro.palmer').every((o) => !/#\w/.test(o.text)), mejiro.openers.find((o) => o.id === 'mejiro.palmer')!.text.match(/#\w+/g)], [true, ['#SweetieSecrecies']]);
+    check('mejiro: no hashtags, but Palmer\'s one Helios imitation', [mejiro.openers.filter((o) => o.id !== 'mejiro.palmer' && !o.guest).every((o) => !/#\w/.test(o.text)), mejiro.openers.find((o) => o.id === 'mejiro.palmer')!.text.match(/#\w+/g)], [true, ['#SweetieSecrecies']]);
     const sevenTexts = seven.map((id) => openers.specialById(id)!.text);
     check('stages: before Grandmother, the seven and the photo are closed', openers.closedSpecials(new Set()).filter((t) => [...sevenTexts, photo.text].includes(t)).length, 8);
     check('stages: after Grandmother, only the photo waits', openers.closedSpecials(new Set([grandma.id])).filter((t) => [...sevenTexts, photo.text].includes(t)), [photo.text]);
@@ -586,13 +586,87 @@ async function main() {
     check('completion: the 9 lines complete the set; the Rehearsal does not stand in for one, but scores 15', cb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['c-nine', 1, 9, 9 * 15 + 100], ['c-eight', 0, 8, 9 * 15]]);
     const mejiroPage = json(rares.specialsView(await rares.rareTally(CB, 'c-eight'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
     const mNames = mejiroPage.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
-    check('page: the Rehearsal after the 9, not in the set\'s count', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mNames[9]], [true, 10, "**Extra.** Ramonu's Remedial Rehearsal"]);
+    check('page: the Rehearsal after the 9, not in the set\'s count', [mejiroPage.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), mNames.length, mNames[9]], [true, 15, "**Extra.** Ramonu's Remedial Rehearsal"]);
     check('page: ??? until found', json(rares.specialsView(await rares.rareTally(CB, 'c-nine'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true })).embeds[0]!.fields?.[0]?.value.split('\n')[9], '**Extra.** ???');
     const readOpts = mejiroPage.components[1]?.components[0]?.options?.map((o) => o.label) ?? [];
     check('read menu: the Rehearsal can be read once found', readOpts.at(-1), "Extra. Ramonu's Remedial Rehearsal");
     const readRamonu = await rares.readSpecial(OG, T, 'mejiro.ramonu');
     check('read: Ramonu in full, without any outcome footer', [readRamonu?.text, readRamonu?.text.includes('-#')], [openers.fillOpener(ramonu.text, T), false]);
     check('read: the Rehearsal without footers', (await rares.readSpecial(OG, T, 'mejiro.rehearsal'))?.text, openers.fillOpener(rehearsal.text, T));
+    // Guests (owner, 2026-11-15): the Mejiro Estate's visitors, after the Family Photograph, through their own slice.
+    const guests = openers.GUESTS;
+    const guestIds = guests.map((g) => g.id);
+    check('guests: the five, in the Mejiro Estate, each an extra and a guest, after the photo', [guestIds, guests.map((g) => g.name), guests.every((g) => g.set === 'mejiro-estate' && g.extra === true && g.guest === true && JSON.stringify(g.after) === JSON.stringify(['mejiro.photo']))], [
+        ['guest.helios', 'guest.satono', 'guest.goldship', 'guest.symboli', 'guest.teio'],
+        ['Daitaku Helios', 'Satono Diamond & Kitasan Black', 'Gold Ship', 'Symboli Rudolf & Sirius Symboli', 'Tokai Teio'],
+        true,
+    ]);
+    check('guests: exactly one {user} each', guests.map((g) => g.text.split('{user}').length - 1), [1, 1, 1, 1, 1]);
+    check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#MejiroAfterParty', '#ZuttomoDJ'], true, ['Diamond', 'Kitasan', 'Diamond'], ['Rudolf', 'Sirius']]);
+    const guestTexts = guests.map((g) => g.text);
+    const hasGuest = (pool: readonly string[]) => pool.some((t) => guestTexts.includes(t));
+    const mejiroLinesLive = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
+    check('guests: out of every normal pool (base, set-wide, boosts, the photo\'s wait)', [hasGuest(openers.rarePoolFor([], [])), hasGuest(openers.setLinesPool('mejiro-estate')), hasGuest(mejiroLinesLive), hasGuest(openers.boostPool('mejiro-estate', 'collab')), hasGuest(openers.outcomeBoostPool({ set: 'mejiro-estate' })), photo.after?.some((id) => guestIds.includes(id))], [false, false, false, false, false, false]);
+    check('guests: closed until the photo', [openers.closedSpecials(new Set([grandma.id, ...seven])).filter((t) => guestTexts.includes(t)).length, openers.closedSpecials(new Set([grandma.id, ...seven, photo.id])).filter((t) => guestTexts.includes(t)).length], [5, 0]);
+    // The slice: 4% x unfound / all, only after the photo.
+    const near = (a: number, b: number) => Math.abs(a - b) < 1e-12;
+    const withPhoto = (...ids: string[]) => new Set([grandma.id, ...seven, photo.id, ...ids]);
+    check('guest slice: 0 before the photo', openers.guestSliceChance(new Set([grandma.id, ...seven])), 0);
+    check('guest slice: 4%, then 3.2% after one, 0.8% with one left, 0 after all five', [
+        near(openers.guestSliceChance(withPhoto()), 0.04),
+        near(openers.guestSliceChance(withPhoto('guest.teio')), 0.032),
+        near(openers.guestSliceChance(withPhoto(...guestIds.slice(0, 4))), 0.008),
+        openers.guestSliceChance(withPhoto(...guestIds)),
+    ], [true, true, true, 0]);
+    check('guest slice: none while the set is paused (it is)', [openers.PAUSED_SETS.includes('mejiro-estate'), openers.guestSlice(withPhoto(), [], [])], [true, null]);
+    const liveSlice = openers.guestSlice(withPhoto('guest.helios'), [], [], []);
+    check('guest slice: once resumed, all five guests (repeats possible), labelled, content not a boost', [near(liveSlice?.chance ?? 0, 0.032), liveSlice?.pool, liveSlice?.label, liveSlice?.content], [true, guestTexts, 'The Mejiro Estate: guests are dropping by.', true]);
+    check('guest slice: none with the set off or locked, before the photo, or with every guest found', [openers.guestSlice(withPhoto(), ['mejiro-estate'], [], []), openers.guestSlice(withPhoto(), [], ['mejiro-estate'], []), openers.guestSlice(new Set([grandma.id]), [], [], []), openers.guestSlice(withPhoto(...guestIds), [], [], [])], [null, null, null, null]);
+    // Through extraChances and the Boosts view, from the database.
+    const GG = `test-guests-${Date.now()}`;
+    const GT = 'g1';
+    for (const id of ['set1.mejiro', grandma.id, ...seven, photo.id]) await rares.recordRareOpener(GG, GT, openers.specialById(id)!.text);
+    check('guest slice: nothing from extraChances while paused, Boosts on or off', [await extraChances(GG, GT, usable, NOT_OS, false, [], OFF_SEASON), await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)], [[], []]);
+    // As if the set were resumed: lift the pause for these checks only.
+    const pausedList = openers.PAUSED_SETS as string[];
+    const pausedAt = pausedList.indexOf('mejiro-estate');
+    pausedList.splice(pausedAt, 1);
+    try {
+        const on = (await extraChances(GG, GT, usable, NOT_OS, false, [], OFF_SEASON)).filter((e) => e.content);
+        const offExtras = await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON);
+        check('guest slice: in extraChances with Boosts on, and still there with Boosts off', [on.map((e) => [e.chance, e.pool.length, e.label]), offExtras.map((e) => [e.chance, e.pool.length, e.label])], [[[0.04, 5, 'The Mejiro Estate: guests are dropping by.']], [[0.04, 5, 'The Mejiro Estate: guests are dropping by.']]]);
+        check('guest slice: none with the Mejiro Estate off', (await extraChances(GG, GT, { ...usable, boosts: false, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length, 0);
+        check('guest slice: its slice comes first in the roll, drawn from the guests', [await rares.chooseOpener(GG, GT, 0.001, fullPool, offExtras), await rares.chooseOpener(GG, GT, 0.039, fullPool, offExtras)], [guestTexts[0], guestTexts[4]]);
+        await us0.toggleSetting(GG, GT, 'boosts');
+        const gv = (await boostsView(GG, GT, OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
+        check('boosts view: the guest slice with Boosts off, not paused, in the total (6% + 4%)', [gv.includes('**+4%** The Mejiro Estate: guests are dropping by.\n'), gv.includes('guests are dropping by. (paused)'), gv.includes('**Your next ping: 10% chance of a special.**')], [true, false, true]);
+        await rares.recordRareOpener(GG, GT, openers.specialById('guest.satono')!.text);
+        check('guest slice: shrinks as guests are found (3.2% after one)', (await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).map((e) => near(e.chance, 0.032)), [true]);
+    } finally {
+        pausedList.splice(pausedAt, 0, 'mejiro-estate');
+    }
+    check('paused: restored after the guest checks', openers.PAUSED_SETS, ['mejiro-estate']);
+    // Counts and completion: guests never count, but score.
+    const GB = `${GG}-board`;
+    for (const t of nine) await rares.recordRareOpener(GB, 'g-all', t);
+    for (const t of [...guestTexts, guestTexts[0]!]) await rares.recordRareOpener(GB, 'g-all', t);
+    for (const t of [...nine.slice(0, 8), ...guestTexts]) await rares.recordRareOpener(GB, 'g-eight', t);
+    const gb = await rares.specialsBoard(GB);
+    check('guests: not in the set\'s completion or found count, but 15 new and 3 repeat', gb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['g-all', 1, 9, 14 * 15 + 3 + 100], ['g-eight', 0, 8, 13 * 15]]);
+    check('guests: not in the board\'s special count', gb.specialCount, RARE_OPENERS.filter((o) => !o.extra && !o.guest).length);
+    const gEight = json(rares.specialsView(await rares.rareTally(GB, 'g-eight'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    const gNames = gEight.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
+    check('page: guests after the 9 and the Rehearsal, not in either count', [gEight.embeds[0]!.title, gEight.embeds[0]!.description?.startsWith('**Set 3: The Mejiro Estate**: 8 of 9 found'), gNames.slice(9)], [
+        `Your specials: 8 of ${RARE_OPENERS.filter((o) => !o.extra).length}`,
+        true,
+        ['**Extra.** ???', ...guests.map((g) => `**Guest.** ${g.name}`)],
+    ]);
+    const gNone = json(rares.specialsView(await rares.rareTally(GB, 'nobody'), 3, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }));
+    check('page: "**Guest.** ???" until found', (gNone.embeds[0]!.fields?.[0]?.value.split('\n') ?? []).slice(10), ['**Guest.** ???', '**Guest.** ???', '**Guest.** ???', '**Guest.** ???', '**Guest.** ???']);
+    const gOpts = gEight.components[1]?.components[0]?.options?.map((o) => [o.label, o.value]) ?? [];
+    check('read menu: found guests can be read', [gOpts.slice(-5), (await rares.readSpecial(GB, 'g-eight', 'guest.teio'))?.text, await rares.readSpecial(GB, 'nobody', 'guest.teio')], [guests.map((g) => [`Guest. ${g.name}`, g.id]), openers.fillOpener(openers.specialById('guest.teio')!.text, 'g-eight'), null]);
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [GG, GB] } } });
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: GG } });
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [OG, CB] } } });
     await prisma.timerSpecialBoost.deleteMany({ where: { guildId: OG } });
     await prisma.timerUserSettings.deleteMany({ where: { guildId: OG } });
