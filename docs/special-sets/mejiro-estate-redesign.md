@@ -290,63 +290,52 @@ until the photo) stays in `drafts.md` for a later release.
 - They are never in the normal pool before the photo; a roll on one
   redirects like the other closed lines.
 
-### First wave: five visits
+### First wave: five visits (latest; ids for the build)
 
-Each visit is rooted in a tie from the voice data.
+Each pays off a tease in the Mejiro lines. Multi-voice dialogue is allowed
+for guests only.
 
-1. **Daitaku Helios (with Palmer): the after-party**
-   Tie: Palmer's best friend ("zuttomo"), 11 home scenes together; the
-   owner's idea. Helios calls the trainer "Tore-pi", lives for "fests", and
-   keeps her hashtags.
+1. **`guest.helios`, "Daitaku Helios"**: pays off Palmer's "It's for a
+   surprise". Helios keeps her hashtags.
 
    ```text
-   Weeei! Tore-pi, the Mejiro Estate is officially a FEST now! Pama-chin let me plug my decks into the ballroom and Grandmother said "one hour". Yoichomaru, that's basically forever! {user}, get on the floor, Palmer-san's already age-age! #MejiroAfterParty #ZuttomoDJ
+   Weeei, Tore-pi! Surprise~! Pama-chin snuck my decks into the ballroom, and Grandmother said "one hour". Yoichomaru, that's basically forever! {user}, get on the floor, Palmer-san's already age-age! #MejiroAfterParty #ZuttomoDJ
    ```
 
-2. **Satono Diamond (with Kitasan Black): tea with McQueen**
-   Tie: Diamond holds regular tea parties with McQueen, her senior and
-   inspiration (her brief); Kitasan is her childhood best friend and
-   roommate. Diamond's "jinx" and "fumu fumu"; Kita's "wasshoi", "dodon".
+2. **`guest.satono`, "Satono Diamond & Kitasan Black"**: pays off "the
+   Satonos" in Dober's and Ardan's lines. Diamond has regular tea with
+   McQueen (canon); Kitasan is her plus-one.
 
    ```text
-   Diamond: "Good afternoon, {user}-san. McQueen-san invited me for our usual tea, and I may have brought a plus-one... fufu."
+   Diamond: "Good evening, {user}-san. McQueen-san invited the Satono house to dinner, and I may have brought a plus-one... fufu."
    Kitasan: "Wasshoi! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? Dodon!"
-   Diamond: "Kita-chan, it's a tea party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps?"
+   Diamond: "Kita-chan, it's a dinner party. ...Fumu fumu. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you hold the lanterns?"
    ```
 
-3. **Gold Ship: the uninvited guest**
-   Tie: McQueen's favourite prank target (voice 91000 and more); she once
-   gave Bright a pile of sweet potatoes (Bright, voice 91014). Calls
-   herself "Gorushi-chan".
+3. **`guest.goldship`, "Gold Ship"**: pays off McQueen's hedge. The
+   owner's beats: a failed dropkick on McQueen, missing her, a KFC bucket,
+   the next escapade at once. (Dropkick: anime and fandom, not voice data.)
 
    ```text
-   Gorushi-chan has entered the estate! Don't ask how; the hedge maze has a back door if you're brave enough. {user}, hold this: a sweet potato for Bright and a cardboard trophy for McQueen. When she screams, that means she likes it.
+   Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Don't look at me like that.
+   Here, hold this: a KFC bucket, family size. Don't ask where I got it. Now listen up: next time, I come in through the chandelier, and you're on rope duty. Gorushi-sama has spoken☆
    ```
 
-4. **Symboli Rudolf and Sirius Symboli: the rival house**
-   Tie: Ramonu's childhood friends and rivals; her story has events titled
-   "The Mejiro family and the Symboli family" and "the Emperor's
-   decision", and she once called lunch with Rudolf boring (voice 91002).
-   Rudolf calls the trainer "Trainer-kun" and loves puns; Sirius calls the
-   trainer "puppy".
+4. **`guest.symboli`, "Symboli Rudolf & Sirius Symboli"**: pays off
+   Ramonu's "First the Symbolis". Ramonu once called lunch with Rudolf
+   boring (voice 91002); Rudolf's puns; Sirius calls the trainer "puppy".
 
    ```text
-   Rudolf: "Good evening, {user}-kun. Ramonu has invited the Symboli house to dinner. She once called our lunches boring, so tonight I intend to prove otherwise... with a pun or two, if the moment allows."
-   Sirius: "The moment won't allow. Ramonu invited us to watch the Emperor squirm, and I wouldn't miss it. Stay close, puppy. This will be fun."
+   Rudolf: "Good evening, {user}-kun. Ramonu once called our lunches boring, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?"
+   Sirius: "...And that's why she calls them boring. Stay close, puppy. I came to watch the Emperor squirm."
    ```
 
-5. **Tokai Teio: McQueen's rival**
-   Tie: McQueen's same-year rival and friend (six mentions in McQueen's
-   lines); Teio worships Rudolf ("Kaichou"), so the Symboli visit pulls
-   her in. "Teio-sama", "muteki", the Teio Step.
+5. **`guest.teio`, "Tokai Teio"**: McQueen's rival; her Kaichou is visiting.
+   (Open: no tease in the Mejiro lines yet.)
 
    ```text
-   Hey hey, {user}! McQueen said I could come if I behaved, so Teio-sama is officially the most behaved guest ever. Muteki! ...Wait. Ramonu invited the Symboli house too? Is Kaichou here?! Quick, does this floor work for a Teio Step?
+   Hey hey, {user}! McQueen said I could come if I behaved, so Teio-sama is officially the most behaved guest ever. Muteki! ...Wait. Is that Kaichou? Kaichou's HERE?! Quick, does this floor work for a Teio Step?
    ```
-
-Cross-links on purpose: Gold Ship is the one in McQueen's hedge; Teio
-hears about the Symboli dinner; Helios is Palmer's plus-one at the party
-Palmer mentions in her own line.
 
 ### Second-wave candidates (data ties only, no lines yet)
 
