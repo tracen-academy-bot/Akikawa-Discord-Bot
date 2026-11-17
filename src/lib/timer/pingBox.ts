@@ -58,7 +58,13 @@ export function pingBox(parts: PingBoxParts) {
     const { main, sub } = splitSubtext(parts.text);
     const box = new ContainerBuilder().setAccentColor(ACCENT);
     if (parts.heading) box.addTextDisplayComponents(new TextDisplayBuilder().setContent(`### ${parts.heading}`));
-    if (main) box.addTextDisplayComponents(new TextDisplayBuilder().setContent(main));
+    // A line of just "---" in the main text is a divider between its parts
+    // (e.g. a Rehearsal's forced success, after the Rehearsal line).
+    const sections = main.split(/\n?^---$\n?/m).map((t) => t.trim()).filter((t) => t.length > 0);
+    sections.forEach((section, i) => {
+        if (i > 0) box.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small));
+        box.addTextDisplayComponents(new TextDisplayBuilder().setContent(section));
+    });
     if (sub) box.addTextDisplayComponents(new TextDisplayBuilder().setContent(sub));
     const files: AttachmentBuilder[] = [];
     if (parts.mediaPath) {

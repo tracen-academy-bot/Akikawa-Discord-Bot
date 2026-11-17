@@ -593,6 +593,15 @@ async function main() {
     check('rehearsal: a win resets the streak, clears the guarantee, and adds +3% any Mejiro line', [won?.outcome, await rares.outcomeState(OG, T), (await rares.activeBoosts(OG, T)).find((b) => b.key === 'mejiro.rehearsal:win')?.runsLeft], ['win', { guaranteedSpecialId: null, guaranteedInRuns: 1, losingStreak: [] }, 25]);
     check('rehearsal: the next loss can be the tail again (a new streak)', (await ping(rehearsal.text, 0.5))?.mishap, 'tail');
 
+    // A forced success sits below a divider in the box (owner, 2026-11-17).
+    {
+        const pbx = await import('../src/lib/timer/pingBox');
+        const forcedRoll = openers.rollOutcome(rehearsal, 0.1, ['tail', 'dress', 'feet'])!;
+        const forcedText = `${openers.fillOpener(rehearsal.text, 'u1')}\n${openers.outcomeLines(forcedRoll, 'u1', { roleId: 'r9', had: false })}`;
+        const bx = pbx.pingBox({ text: forcedText }).components[0]!.toJSON() as { components: { type: number; content?: string }[] };
+        check('box: the forced success is below a divider, the role footer last', [bx.components.map((c) => c.type), bx.components[0]!.content?.startsWith('Ah, <@u1>. Welcome back.'), bx.components[2]!.content?.startsWith('Finally, <@u1> succeeded'), bx.components[3]!.content], [[10, 14, 10, 10], true, true, '-# You obtained <@&r9>.']);
+        check('box: text without "---" is one block, as before', (pbx.pingBox({ text: 'Hi <@u1>!\nSecond line.' }).components[0]!.toJSON() as { components: unknown[] }).components.length, 1);
+    }
     // The ping text: the line, then the footer; a forced success has the paragraph and the role footer.
     const sched = await import('../src/lib/timer/scheduler');
     const pb = await import('../src/lib/timer/pingBox');
@@ -600,13 +609,14 @@ async function main() {
     check('ping: the outcome footer goes under the line, as subtext', [lessonPing.startsWith(openers.fillOpener(ramonu.text, 'u1') + '\n-# Ramonu is still'), pb.splitSubtext(lessonPing).sub === lesson.footer], [true, true]);
     const forcedRoll = openers.rollOutcome(rehearsal, 0.3, ['tail', 'dress', 'feet'])!;
     const forcedPing = sched.pingText(rehearsal.text, 'u1', forcedRoll, { roleId: 'role-love', had: false });
-    check('forced: line, the paragraph (main text), then the role footer', forcedPing.split('\n'), [
+    check('forced: line, a divider, the paragraph (main text), then the role footer', forcedPing.split('\n'), [
         openers.fillOpener(rehearsal.text, 'u1'),
+        '---',
         "Finally, <@u1> succeeded in not failing. Ramonu couldn't help but crack a tiny smile, amused by how pleased you were with yourself... and, secretly, already missing your clumsiness.",
         '-# You obtained <@&role-love>.',
     ]);
     check('forced: the paragraph is main text, the role footer subtext', pb.splitSubtext(forcedPing).sub, '-# You obtained <@&role-love>.');
-    check('forced: "still" when they had it; no footer without a role', [sched.pingText(rehearsal.text, 'u1', forcedRoll, { roleId: 'role-love', had: true }).split('\n').at(-1), sched.pingText(rehearsal.text, 'u1', forcedRoll, null).split('\n').length], ["-# Ramonu's Second Love, still.", 2]);
+    check('forced: "still" when they had it; no footer without a role', [sched.pingText(rehearsal.text, 'u1', forcedRoll, { roleId: 'role-love', had: true }).split('\n').at(-1), sched.pingText(rehearsal.text, 'u1', forcedRoll, null).split('\n').length], ["-# Ramonu's Second Love, still.", 3]);
     // Giving the role: set in /timer rewards; a stub guild stands in for Discord.
     const rewardsMod = await import('../src/lib/timer/rewards');
     const added: string[] = [];
