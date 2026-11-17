@@ -192,7 +192,7 @@ export async function setPanelNotice(
     if (!panel) return 'no-panel';
     const channel = await sendable(client, channelId);
     if (!channel) return 'failed';
-    const notice = text?.trim() ? text.trim().slice(0, NOTICE_MAX_LENGTH) : null;
+    const notice = text?.trim() ? resolveNoticeMentions(guild, text.trim()).slice(0, NOTICE_MAX_LENGTH) : null;
     if (!notice) {
         if (panel.noticeMessageId) await channel.messages.delete(panel.noticeMessageId).catch(() => undefined);
         await prisma.timerPanel.update({ where: { channelId }, data: { notice: null, noticeMessageId: null } });
@@ -210,6 +210,46 @@ export async function setPanelNotice(
         }
     }
     return (await postPanelPair(client, guild, channelId)) ? 'saved' : 'failed';
+}
+
+/**
+ * Turns a bare "@<id>" in a notice into a mention Discord shows as a pill
+ * (owner, 2026-11-17): a role mention if the server has a role with that id,
+ * else a member mention. Notices never ping, so this is only for display.
+ */
+export function resolveNoticeMentions(guild: { roles?: { cache?: { has(id: string): boolean } } }, text: string): string {
+    const isRole = (id: string) => guild.roles?.cache?.has(id) ?? false;
+    return text.replace(/(^|[^<@&\w])@(\d{17,20})\b/g, (_m, lead: string, id: string) => `${lead}${isRole(id) ? `<@&${id}>` : `<@${id}>`}`);
+}
+
+/**
+ * Notices set under every panel of a server the first time one of its
+ * special roles is won there (owner, 2026-11-17). `{role}` becomes the role
+ * mention, `{winner}` the winner's. One entry per special role.
+ */
+export const ROLE_WIN_NOTICES: Record<string, string> = {
+    'second-love': [
+        '#OnlineSensations is now up! Join Curren Chan as she ~~kidnaps~~ recruits you as her #FavoriteManager and gets on #SpecialCollabs with other umas!',
+        'The Mejiros have formally extended an invitation to their esteemed Estate. Please arrive with haste.',
+        '',
+        "To Ramonu, she's always cared about the track. That's how she ended up recruiting you too. And yet, as her eyes waver for just a moment, trying to meet yours... you feel your heart swaying on the same beat. {role}",
+    ].join('\n'),
+};
+
+/** Sets a role's win notice (`ROLE_WIN_NOTICES[key]`) under every panel of `guild`. Returns how many were set. */
+export async function postRoleWinNotice(client: Client, guild: Guild, key: string, fill: { roleId: string | null; winnerId: string }): Promise<number> {
+    const template = ROLE_WIN_NOTICES[key];
+    if (!template) return 0;
+    const text = template.replaceAll('{role}', fill.roleId ? `<@&${fill.roleId}>` : '').replaceAll('{winner}', `<@${fill.winnerId}>`).trim();
+    let set = 0;
+    for (const panel of await prisma.timerPanel.findMany({ where: { guildId: guild.id } })) {
+        const result = await setPanelNotice(client, guild, panel.channelId, text).catch((e) => {
+            console.error(`Timer role-win notice ${key} failed in ${panel.channelId}:`, e instanceof Error ? e.message : e);
+            return 'failed' as const;
+        });
+        if (result === 'saved') set += 1;
+    }
+    return set;
 }
 
 // ─── Sticky ───────────────────────────────────────────────────────────────────
