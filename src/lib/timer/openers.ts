@@ -141,6 +141,14 @@ export interface Special {
      */
     after?: readonly string[];
     /**
+     * Once open (every `after` found) and not yet found, it takes every roll
+     * on its set's lines (not the extras): base pool, set-wide boosts and
+     * buffs, a single line's buff (`claimOpener`, through `trainerPool`). The
+     * Family Photograph (owner, 2026-11-18): with all eight found, the next
+     * Estate roll is the photo. Once found, nothing changes.
+     */
+    claimsSet?: boolean;
+    /**
      * A file in `src/assets/specials/` (a video or GIF) posted with the line:
      * on the ping, its DM copy, and when the special is read in full.
      */
@@ -376,7 +384,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'mejiro.ardan', name: "Mejiro Ardan", text: "Good evening, {user}-san. ...My my, you look tired. Business talk with the Satonos, I take it? No overdoing it, Trainer-san... めっ！ Fufu, Creek-san taught me that one.\nI had the kitchen brew a pot of herbal tea. Oh yes, Baaya's recipe; she swears by it. I added a few notes of my own. And yes, before any dancing. ...You're fine, you say? Fufu. Hush, and drink. The moon is lovely tonight, isn't it?\nOh dear, your shoulders are up by your ears again. Nervous, are we? I've watched you practise; you are far better than you think, and \"I can't dance\" is not an answer I accept tonight. 参りましょう。", after: ['mejiro.grandmother'] },
             { id: 'mejiro.bright', name: "Mejiro Bright", text: "...zzz... oh? Ah~ {user}-sama, good evening~ I dozed off while sewing, desu wa~ Look: a tiny suit for Maki-chan, just like yours~ Now she can come to the party with you too. Ufufu~\nYou came to fetch me for... the party? Oh, right. I'll be down in a moment~ But hold still first... Yes, the length is perfect~ Oh, what was I measuring? It gets rather cold here in winter, so I'm knitting you a scarf. Well, the beginnings of one anyway. It will be ready by winter... next winter, perhaps. Good things take their time, after all~", after: ['mejiro.grandmother'] },
             { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "Ah, {user}. Your arrival is appreciated. Offer me your arm. Mmm... you're warm.\n...Still thinking about our training analysis? How... boorish of you. First the Symbolis, and now this. Eyes here, if you please. ...There we go. Good. Look all you want; I did *not* dress like this for no one, after all.\nArdan is dancing tonight, you see. Isn't her stubbornness lovely? You had better keep up too. The track can wait until tomorrow... tonight, it's just you and me.", after: ['mejiro.grandmother'], outcomes: RAMONU_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
-            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. No, {user}, I shall take this one myself. I have taken plenty of these with them, after all.\nRamonu, in the centre; yes, just like that. You look radiant, dear. McQueen, the cake can wait. ...Hoho, am I wrong? Ryan, it looks lovely, stop tugging the hem. Dober, eyes up; nobody is looking at anyone but you, and that is the point. Palmer, wake Bright. Brighttt, eyes here... yes, good. Ardan, beside your sister, please.\nVery well... there. One for the album. Now then, {user}: how does it feel, knowing that every road these girls ever ran somehow led them to you?\nThey are all smiling at you, you know. I would say that settles it. Welcome to the Mejiro Family, {user}.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'], media: 'mejiro-family-photograph.jpg', credit: 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>' },
+            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. No, {user}, I shall take this one myself. I have taken plenty of these with them, after all.\nRamonu, in the centre; yes, just like that. You look radiant, dear. McQueen, the cake can wait. ...Hoho, am I wrong? Ryan, it looks lovely, stop tugging the hem. Dober, eyes up; nobody is looking at anyone but you, and that is the point. Palmer, wake Bright. Brighttt, eyes here... yes, good. Ardan, beside your sister, please.\nVery well... there. One for the album. Now then, {user}: how does it feel, knowing that every road these girls ever ran somehow led them to you?\nThey are all smiling at you, you know. I would say that settles it. Welcome to the Mejiro Family, {user}.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'], claimsSet: true, media: 'mejiro-family-photograph.jpg', credit: 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>' },
             // An extra (owner, 2026-11-15): only through Ramonu's lesson boost or a lost lesson's guarantee.
             { id: 'mejiro.rehearsal', name: "Ramonu's Remedial Rehearsal", text: "Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?", after: ['mejiro.ramonu'], extra: true, outcomes: REHEARSAL_OUTCOMES, forcedSuccess: REHEARSAL_FORCED },
             // Guests (owner, 2026-11-15): extras of their own, only through the guest slice (`guestSlice`), once the Family Photograph is found.
@@ -781,6 +789,19 @@ export function redirectOpener(text: string, foundIds: ReadonlySet<string>): str
         special = specialById(missing);
     }
     return special?.text ?? text;
+}
+
+/**
+ * What a roll on `text` gives once staging is done (`redirectOpener`): a
+ * set's line (not an extra) becomes the set's claiming special
+ * (`Special.claimsSet`) while that is open and unfound for the trainer;
+ * anything else stays as it is.
+ */
+export function claimOpener(text: string, foundIds: ReadonlySet<string>): string {
+    const special = RARE_OPENERS.find((o) => o.text === text);
+    if (!special || special.extra) return text;
+    const claimer = RARE_OPENERS.find((o) => o.claimsSet && o.set === special.set && !foundIds.has(o.id) && !o.after?.some((id) => !foundIds.has(id)));
+    return claimer?.text ?? text;
 }
 
 /** The credit shown under `opener`'s media, or null. */

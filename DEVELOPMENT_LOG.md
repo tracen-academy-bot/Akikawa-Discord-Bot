@@ -4,6 +4,20 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-18 — The Family Photograph comes free
+
+- Owner: once a trainer has found Grandmother and the seven Mejiro (the
+  photo's `after`) and not the photo, every roll on a Mejiro Estate line
+  (not an extra) gives the photo: base pool, "any Mejiro line" outcome
+  boosts, Mejiro week, Ramonu's buff, anything through `trainerPool`. So
+  their next Estate roll is the photo, 100%.
+- `Special.claimsSet` (set on `mejiro.photo`) and `claimOpener` in
+  `openers.ts`; `trainerPool` applies it after `redirectOpener` and after
+  the `heldUntilPassed` filter, so a held Ramonu stays out instead of
+  becoming the photo. Once the photo is found, pools are as before.
+
+---
+
 ## 2026-11-15 — Tylina meets Grandmother again
 
 - Owner: Tylina's Grandmother finds are reset. Migration

@@ -482,10 +482,24 @@ async function main() {
     await rares.recordRareOpener(FG, 'f1', grandma.text);
     const poolAfter = await rares.trainerPool(FG, 'f1', mejiroPool);
     check('redirect: once found she counts once, the seven open, and a photo roll gives an unmet member', [poolAfter.filter((t) => t === grandma.text).length, poolAfter.length, poolAfter.includes(photo.text), poolAfter.filter((t) => t === sevenTexts[0]).length], [1, 9, false, 2]);
-    for (const t of sevenTexts) await rares.recordRareOpener(FG, 'f1', t);
-    check('stages: with the whole family found, the photograph joins the pool', (await rares.trainerPool(FG, 'f1', mejiroPool)).includes(photo.text), true);
+    for (const t of sevenTexts.slice(0, 6)) await rares.recordRareOpener(FG, 'f1', t);
+    const poolSeven = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('photo claim: with one of the eight missing, no claim (photo rolls give the missing one)', [poolSeven.includes(photo.text), poolSeven.filter((t) => t === sevenTexts[6]).length, poolSeven.filter((t) => t === grandma.text).length], [false, 2, 1]);
+    await rares.recordRareOpener(FG, 'f1', sevenTexts[6]!);
+    const poolEight = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('photo claim: with all eight found, every Estate line is the photo (9 of 9)', [poolEight.length, poolEight.every((t) => t === photo.text)], [9, true]);
+    const ramonuOnly = await rares.trainerPool(FG, 'f1', [openers.specialById('mejiro.ramonu')!.text]);
+    const extrasStay = await rares.trainerPool(FG, 'f1', [openers.specialById('mejiro.rehearsal')!.text, PING_OPENERS[0]!, openers.specialById('set1.mejiro')!.text]);
+    check('photo claim: a single-line buff (Ramonu) gives the photo; extras, commons and other sets do not', [JSON.stringify(ramonuOnly) === JSON.stringify([photo.text]), JSON.stringify(extrasStay) === JSON.stringify([openers.specialById('mejiro.rehearsal')!.text, PING_OPENERS[0]!, openers.specialById('set1.mejiro')!.text])], [true, true]);
+    await prisma.timerUserSettings.upsert({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 'f1' } }, create: { guildId: FG, discordUserId: 'f1', guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 3 }, update: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 3 } });
+    const poolHeld = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('photo claim: a held Ramonu stays out (8 photos, not 9)', [poolHeld.length, poolHeld.every((t) => t === photo.text), (await rares.trainerPool(FG, 'f1', [openers.specialById('mejiro.ramonu')!.text])).length], [8, true, 0]);
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: FG } });
     const mPage = json(rares.specialsView(await rares.rareTally(FG), 3, undefined, PRE));
     check('stages: the page never shows the lock, just ???', mPage.embeds[0]!.fields?.[0]?.value.split('\n')[8], '**9.** ???');
+    await rares.recordRareOpener(FG, 'f1', photo.text);
+    const poolDone = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('photo claim: once the photo is found, the pool is back to normal', [poolDone.length, new Set(poolDone).size, poolDone.filter((t) => t === photo.text).length], [9, 9, 1]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: FG } });
 
     // Outcomes: Ramonu rolls one each time; her Remedial Rehearsal is an extra with a losing streak.

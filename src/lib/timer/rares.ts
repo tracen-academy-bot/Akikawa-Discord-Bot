@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelec
 import { getUserSettings } from './userSettings';
 import { FORTUNE_LINES, fortuneLineById, tentIsOpen } from './fortuneLines';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, claimOpener, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -440,7 +440,9 @@ export async function closedSpecialsFor(guildId: string, discordUserId: string):
  * A trainer's special pool with every closed special redirected to what it
  * waits on (`redirectOpener`): before Grandmother's welcome, every Mejiro
  * line in the pool is her line. Lines held until a special is passed
- * (`Special.heldUntilPassed`) are left out while the trainer owes it.
+ * (`Special.heldUntilPassed`) are left out while the trainer owes it. Then
+ * a set's claiming special takes its lines (`claimOpener`): with all eight
+ * found and no photo, every Mejiro Estate line left is the Family Photograph.
  */
 export async function trainerPool(guildId: string, discordUserId: string, pool: readonly string[]): Promise<string[]> {
     const found = await foundSpecialIds(guildId, discordUserId);
@@ -454,7 +456,11 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
         const holder = RARE_OPENERS.find((o) => o.text === t)?.heldUntilPassed;
         return holder !== undefined && holder === owed;
     };
-    return pool.map((t) => redirectOpener(t, found)).filter((t) => !held(t) && !resting.has(t));
+    return pool
+        .map((t) => redirectOpener(t, found))
+        .filter((t) => !held(t))
+        .map((t) => claimOpener(t, found))
+        .filter((t) => !resting.has(t));
 }
 
 /** True when a set is resting for a trainer: auto-off with extras left, not turned back on. */

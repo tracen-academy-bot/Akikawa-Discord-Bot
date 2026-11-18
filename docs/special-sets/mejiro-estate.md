@@ -11,6 +11,10 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
   1. Grandmother's welcome comes first: any roll on a Mejiro line she has not unlocked yet gives her line instead (`redirectOpener`), so she takes the whole set's share (9x) until found.
   2. The seven Mejiro open after it, in any order.
   3. The Family Photograph opens after all eight; until then a roll on it gives an unmet family member.
+     Once all eight are found and the photo is not (owner, 2026-11-18), it comes free: every roll on any
+     Estate line (not the extras) gives the photo instead (`Special.claimsSet`, `claimOpener` in
+     `trainerPool`): the base pool, the "any Mejiro line" boosts, Mejiro week, Ramonu's own buff. So the
+     next Estate roll is the photo. A held Ramonu (`heldUntilPassed`) stays out. Once found, nothing changes.
   4. Guests (to come) open after the photograph; until then a roll on one redirects the same way.
 
 ## Lines
@@ -102,7 +106,7 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
    They are all smiling at you, you know. I would say that settles it. Welcome to the Mejiro Family, {user}.
    ```
 
-   Hook: Opens after all eight. Each member in one shot.
+   Hook: Opens after all eight, and then takes every Estate roll until found. Each member in one shot.
 
 Extra: Ramonu's Remedial Rehearsal (`mejiro.rehearsal`, `extra: true`)
 
