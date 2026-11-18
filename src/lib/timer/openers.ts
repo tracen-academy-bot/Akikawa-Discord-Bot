@@ -670,7 +670,8 @@ export function outcomeLines(rolled: RolledOutcome, discordUserId: string, role:
     const forced = specialById(rolled.special)?.forcedSuccess;
     if (!forced) return '';
     const footer = role ? (role.had ? forced.stillFooter : forced.roleFooter.replaceAll('{role}', `<@&${role.roleId}>`)) : null;
-    return [fill(forced.text), ...(footer ? [footer] : [])].join('\n');
+    // "---" puts a divider between the Rehearsal line and the result in the box (owner, 2026-11-17).
+    return ['---', fill(forced.text), ...(footer ? [footer] : [])].join('\n');
 }
 
 /** A boost label for the Boosts view: `{runs}` filled as "25 runs left". */

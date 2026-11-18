@@ -19,7 +19,7 @@ import { tentIntroDue, tentIntroShown, tentIntroText, tentUnlockNotice } from '.
 import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
 import { pingBox } from './pingBox';
 import { getUserSettings, pingMinutes } from './userSettings';
-import { checkAllStickies, currentPanelMessageId, postScheduledNotices, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty, noteChannelActivity } from './livePanel';
+import { checkAllStickies, currentPanelMessageId, postRoleWinNotice, postScheduledNotices, flushLiveBoards, keepPanelAtBottom, markAllLiveBoardsDirty, markLiveBoardsDirty, noteChannelActivity } from './livePanel';
 
 /**
  * Drives timer expiry and notification cleanup.
@@ -198,7 +198,16 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // A special with outcomes rolls one, once; a forced success gives its role first, so the footer can say so.
                 const special = intro ? undefined : specialByText(opener);
                 const rolled = special ? rollOutcome(special, Math.random(), state.losingStreak) : null;
-                const role = rolled?.forced ? await grantSecondLove(await guildOf(client, timer.guildId), timer.guildId, timer.discordUserId) : null;
+                // The server's first Second Love also sets its win notice under every panel (ROLE_WIN_NOTICES).
+                const firstLove = rolled?.forced ? !(await prisma.timerSecondLove.findUnique({ where: { guildId: timer.guildId } })) : false;
+                const loveGuild = rolled?.forced ? await guildOf(client, timer.guildId) : null;
+                const role = rolled?.forced ? await grantSecondLove(loveGuild, timer.guildId, timer.discordUserId) : null;
+                if (firstLove && loveGuild) {
+                    const loveRoleId = (await getTimerSettings(timer.guildId).catch(() => null))?.secondLoveRoleId ?? null;
+                    await postRoleWinNotice(client, loveGuild, 'second-love', { roleId: loveRoleId, winnerId: timer.discordUserId }).catch((e) =>
+                        console.warn(`Ramonu's Second Love: the win notice failed for ${timer.guildId}:`, e instanceof Error ? e.message : e),
+                    );
+                }
                 const text = intro ? tentIntroText(timer.discordUserId) : pingText(opener, timer.discordUserId, rolled, role);
                 // The first time a trainer gets a set's prerequisite, the ping says the set opened.
                 const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
