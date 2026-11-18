@@ -58,6 +58,7 @@ export async function renderTimerLeaderboard(
     names: Map<string, string>,
     topRoleName: string | null = null,
     secondRoleName: string | null = null,
+    thirdRoleName: string | null = null,
     palette: Palette = PALETTES[DEFAULT_PALETTE]!,
 ): Promise<Buffer> {
     const p = palette;
@@ -68,7 +69,7 @@ export async function renderTimerLeaderboard(
     const podium = rows.slice(0, TOP_PLACES);
     const rest = rows.slice(TOP_PLACES);
     const weekly = info.week !== null;
-    const rolesText = weekly ? weeklyRolesLine(topRoleName, secondRoleName, info.period === 'thisweek') : null;
+    const rolesText = weekly ? weeklyRolesLine(topRoleName, secondRoleName, thirdRoleName) : null;
     const roleLine = rolesText !== null && podium.length > 0;
 
     const headerH = 96;
@@ -179,6 +180,8 @@ export interface LiveBoardInfo {
     topRoleName: string | null;
     /** The second weekly role's name (places 3–5), or null. */
     secondRoleName?: string | null;
+    /** The third weekly role's name (places 6–10), or null. */
+    thirdRoleName?: string | null;
     /** "Mon Oct 26": today in the timer's time zone. */
     dayLabel: string;
     /** "12:34 JST": when the image was drawn. */
@@ -208,7 +211,7 @@ export async function renderLiveBoard(
     const weekW = cardW - dayW - GAP;
     const rowH = LIVE_ROW_H;
     const weekRows = week.rows.slice(0, LIVE_WEEK_ROWS);
-    const rolesText = weeklyRolesLine(info.topRoleName, info.secondRoleName ?? null, true);
+    const rolesText = weeklyRolesLine(info.topRoleName, info.secondRoleName ?? null, info.thirdRoleName ?? null);
     const roleLine = rolesText !== null && weekRows.length > 0;
     const weekH = liveWeekHeight(weekRows.length, roleLine);
     // Today fills the height the week's card already takes, at least its minimum.

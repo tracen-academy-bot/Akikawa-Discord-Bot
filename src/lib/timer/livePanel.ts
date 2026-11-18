@@ -51,7 +51,8 @@ export async function liveBoardFile(guild: Guild, now = new Date()): Promise<Att
     }
     const top = settings?.topRoleId ? guild.roles.cache.get(settings.topRoleId) : undefined;
     const second = settings?.secondRoleId ? guild.roles.cache.get(settings.secondRoleId) : undefined;
-    const image = await renderLiveBoard(week, today, names, { topRoleName: top?.name ?? null, secondRoleName: second?.name ?? null, ...labels(now) });
+    const third = settings?.thirdRoleId ? guild.roles.cache.get(settings.thirdRoleId) : undefined;
+    const image = await renderLiveBoard(week, today, names, { topRoleName: top?.name ?? null, secondRoleName: second?.name ?? null, thirdRoleName: third?.name ?? null, ...labels(now) });
     return new AttachmentBuilder(image, { name: 'training-live.png' });
 }
 

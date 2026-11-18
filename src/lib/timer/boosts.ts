@@ -4,6 +4,7 @@ import { EARLY_START, PAUSED_SETS, setLinesPool, PERSONAL_BOOSTS, RARE_OPENER_CH
 import { fortuneButton, fortuneToday, hasTent } from './fortune';
 import { activeBoosts, foundSpecialIds, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
+import { weeklyTierOf } from './rewards';
 
 /**
  * Boosts: everything that adds special chance to a trainer's ping on top of
@@ -30,6 +31,9 @@ function percent(chance: number): string {
  *     special pool;
  *   - their personal boost (`PERSONAL_BOOSTS`), if they have one: its chance,
  *     drawn from their usual special pool;
+ *   - their weekly tier (`WEEKLY_TIERS`: Abusers, Enjoyers, Regulars), from
+ *     their place in the latest awarded week: its chance, drawn from their
+ *     usual special pool, until the next week's results;
  *   - each seasonal buff running at `now`, when its special's set is on and
  *     unlocked for them: its chance, drawn from that one special. A buff on
  *     a set's prerequisite (Curren Chan) stops once that set is unlocked:
@@ -82,6 +86,8 @@ export async function extraChances(
     for (const personal of PERSONAL_BOOSTS) {
         if (personal.owner === discordUserId) extras.push({ chance: personal.chance, pool, label: personal.label });
     }
+    const tier = await weeklyTierOf(guildId, discordUserId);
+    if (tier) extras.push({ chance: tier.chance, pool, label: `${tier.label} Until next week's results.` });
     for (const buff of activeSeasonals(now, buffs)) {
         // A set-wide buff (Mejiro week): that set's lines, while it is usable.
         if (buff.setId) {

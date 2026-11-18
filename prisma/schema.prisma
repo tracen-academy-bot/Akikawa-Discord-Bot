@@ -122,6 +122,8 @@ model TimerSettings {
     topRoleId         String?
     /// Role held by the week's places 3-5 until the next week is awarded.
     secondRoleId      String?
+    /// Role held by the week's places 6-10 until the next week is awarded.
+    thirdRoleId       String?
     /// Channel or thread for the end-of-week leaderboard. Null: not posted.
     announceChannelId String?
     /// The last week awarded, as its Monday's `YYYY-MM-DD` (JST). A new row

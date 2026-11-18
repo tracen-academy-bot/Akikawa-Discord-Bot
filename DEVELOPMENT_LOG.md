@@ -4,6 +4,39 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-18 — Weekly tiers with boosts; Tylina's Forecast
+
+- Owner: weekly tiers by place, each with a special-chance boost held until
+  the next week's results: places 1–2 Abusers +5%, 3–5 Enjoyers +3%,
+  6–10 Regulars +1% (`WEEKLY_TIERS` in `rewards.ts`). The boost reads the
+  trainer's place in `TimerSettings.lastAwardedWeek` from
+  `TimerWeeklyAward` (`weeklyTierOf`), not the Discord role, so a role
+  given by hand gives no boost. It draws from the usual special pool and
+  pauses with Boosts off, like personal boosts.
+- The award now records the top 10 (`AWARD_PLACES` 5 → 10;
+  `SECOND_ROLE_PLACES` = 5). Places 6–10 get an optional third role
+  (`TimerSettings.thirdRoleId`, migration
+  `20261118100000_weekly_third_tier`, `/timer rewards third_role`). The
+  results post names and pings the top 10.
+- The boards' roles line is now always shown, without "take/hold":
+  "1–2 Abusers · 3–5 Enjoyers · 6–10 Regulars", with a role's name where
+  one is set.
+- Tylina: "Ei, Ei, Mun!" 3% → 4%, plus "Fuku-chan's Forecast" +4% (the
+  other Matikane). 8% personal; as an Abuser 6 + 8 + 5 = 19% raw, under
+  the 20% soft cap.
+- Not covered by a test: the third role's hand-off in `runWeeklyAwards`
+  (same slice code as the second role; the existing test has 4 runners).
+
+---
+
+## 2026-11-18 — Resting Estate: guest counterparts rest too
+
+- Review fix to the guest-unlock change: `restingLines` kept every found
+  line an unfound extra lists in `after`, so Palmer and McQueen stayed in a
+  resting Estate's pool for their guests. A guest comes from the guest
+  slice once its counterpart is found, not from rolling it, so guests no
+  longer keep lines. Only the Rehearsal keeps Ramonu.
+
 ## 2026-11-18 — One-time McQueen; guarantees respect staging
 
 - Owner: trainer `801847462209126411` gets Mejiro McQueen on their next

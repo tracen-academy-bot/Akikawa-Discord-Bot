@@ -272,10 +272,34 @@ async function main() {
     check('extras: the unlock bonus only once the set is unlocked', (await extraChances(XG, 'u1', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
     check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool, OFF_SEASON)).map((e) => e.chance), [0.04, 0.01, 0.01]);
     check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool, OFF_SEASON), []);
-    // Tylina's personal boost (owner, 2026-11-11): +3% from her usual pool, paused with Boosts off.
+    // Tylina's personal boosts (owner, 2026-11-11, raised 2026-11-18): +4% "Ei, Ei, Mun!" and +4% "Fuku-chan's Forecast", from her usual pool, paused with Boosts off.
     const tylina = openers.PERSONAL_BOOSTS[0]!;
     const hers = await extraChances(XG, tylina.owner, base, ['online-sensations'], false, fullPool, OFF_SEASON);
-    check('personal: Tylina gets +3% from her usual pool, as "Ei, Ei, Mun!"', hers.map((e) => [e.chance, e.pool.length, e.label?.startsWith('Ei, Ei, Mun!')]), [[0.03, fullPool.length, true]]);
+    check('personal: Tylina gets +4% twice from her usual pool, "Ei, Ei, Mun!" and "Fuku-chan\'s Forecast"', hers.map((e) => [e.chance, e.pool.length, e.label?.split(':')[0]]), [[0.04, fullPool.length, 'Ei, Ei, Mun!'], [0.04, fullPool.length, "Fuku-chan's Forecast"]]);
+    // Weekly tiers (owner, 2026-11-18): +5% places 1-2, +3% places 3-5, +1% places 6-10, from the latest awarded week, until the next.
+    {
+        const TG = `test-tiers-${Date.now()}`;
+        await prisma.timerSettings.create({ data: { guildId: TG, lastAwardedWeek: '2026-11-09' } });
+        await prisma.timerWeeklyAward.createMany({
+            data: [
+                { guildId: TG, week: '2026-11-02', place: 1, discordUserId: 'old-top', runs: 50 },
+                { guildId: TG, week: '2026-11-09', place: 2, discordUserId: 'p2', runs: 40 },
+                { guildId: TG, week: '2026-11-09', place: 3, discordUserId: 'p3', runs: 30 },
+                { guildId: TG, week: '2026-11-09', place: 10, discordUserId: 'p10', runs: 5 },
+            ],
+        });
+        const tierOf = async (id: string) => (await extraChances(TG, id, base, ['online-sensations'], false, fullPool, OFF_SEASON)).map((e) => [e.chance, e.label?.split(':')[0], e.pool.length]);
+        check('tiers: place 2 Abusers +5%, place 3 Enjoyers +3%, place 10 Regulars +1%, from the usual pool', [await tierOf('p2'), await tierOf('p3'), await tierOf('p10')], [[[0.05, 'Abusers', fullPool.length]], [[0.03, 'Enjoyers', fullPool.length]], [[0.01, 'Regulars', fullPool.length]]]);
+        check('tiers: only the latest awarded week counts; unplaced get none', [await tierOf('old-top'), await tierOf('nobody')], [[], []]);
+        check('tiers: paused with Boosts off', await extraChances(TG, 'p2', { ...base, boosts: false }, [], false, fullPool, OFF_SEASON), []);
+        const ty = await extraChances(TG, tylina.owner, base, ['online-sensations'], false, fullPool, OFF_SEASON);
+        check('tiers: none in a guild with no awards (XG) for Tylina; 8% personal', [ty.reduce((s, e) => s + e.chance, 0)], [0.08]);
+        await prisma.timerWeeklyAward.create({ data: { guildId: TG, week: '2026-11-09', place: 1, discordUserId: tylina.owner, runs: 60 } });
+        const tyTop = await extraChances(TG, tylina.owner, base, ['online-sensations'], false, fullPool, OFF_SEASON);
+        check('tiers: Tylina as an Abuser: 6% + 8% + 5% = 19% raw, under the soft caps', [Math.round((openers.RARE_OPENER_CHANCE + tyTop.reduce((s, e) => s + e.chance, 0)) * 1000) / 1000, openers.effectiveChance(openers.RARE_OPENER_CHANCE + tyTop.reduce((s, e) => s + e.chance, 0)) === openers.RARE_OPENER_CHANCE + tyTop.reduce((s, e) => s + e.chance, 0)], [0.19, true]);
+        await prisma.timerWeeklyAward.deleteMany({ where: { guildId: TG } });
+        await prisma.timerSettings.delete({ where: { guildId: TG } });
+    }
     check('personal: nobody else gets it', (await extraChances(XG, 'someone-else', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
     // A trainer can hold several (owner, 2026-11-12): two at +1.5% each, each its own line.
     const leneya = await extraChances(XG, '340238209147600897', base, ['online-sensations'], false, fullPool, OFF_SEASON);
@@ -803,9 +827,9 @@ async function main() {
     const restingNow = rares.restingLines('mejiro-estate', await rares.foundSpecialIds(AG, AU), (await usA.getUserSettings(AG, AU)).autoOffSets ?? []);
     const palmerText = openers.specialById('mejiro.palmer')!.text;
     const mcqueenText = openers.specialById('mejiro.mcqueen')!.text;
-    check('auto-off: found lines rest, but Ramonu (the Rehearsal and the Symbolis), Palmer (Helios) and McQueen (her three guests) stay; the photo rests', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(palmerText), restingNow.includes(mcqueenText), restingNow.includes(photo.text)], [6, false, false, false, true]);
+    check('auto-off: found lines rest, but Ramonu stays (the Rehearsal); guest counterparts and the photo rest', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(palmerText), restingNow.includes(mcqueenText), restingNow.includes(photo.text)], [8, false, true, true, true]);
     const mejiroAll = mejiroMain.map((o) => o.text);
-    check('auto-off: the pool leaves resting lines out', (await rares.trainerPool(AG, AU, mejiroAll)).sort(), [ramonu.text, palmerText, mcqueenText].sort());
+    check('auto-off: the pool leaves resting lines out', await rares.trainerPool(AG, AU, mejiroAll), [ramonu.text]);
     check('auto-off: a repeat find says nothing more', await rares.completionNotice(AG, AU, lastMain.text), null);
     const restPage = json(await rares.mySpecialsView(AG, AU, rares.pageOfSet('mejiro-estate'), PRE));
     check('auto-off: the page says Resting, and so does its button', [restPage.embeds[0]!.description?.includes('Resting: every line found'), restPage.components[0]!.components[1]?.label], [true, 'The Mejiro Estate: Resting']);

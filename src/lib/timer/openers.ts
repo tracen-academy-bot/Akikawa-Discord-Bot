@@ -742,7 +742,10 @@ export const SPECIAL_LOCKS: readonly { id: string; owner: string; ownerChance: n
  */
 export const PERSONAL_BOOSTS: readonly { owner: string; chance: number; label: string }[] = [
     // Owner, 2026-11-11: Machitan answers her biggest fan's cheers (Tannhauser, voice 91020).
-    { owner: '457773317739380738', chance: 0.03, label: 'Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!' },
+    // Owner, 2026-11-18: raised to 4%, and a second 4% from the other Matikane
+    // (Fukukitaru, the fortune-teller): 8% in all, 19% with the Abusers tier.
+    { owner: '457773317739380738', chance: 0.04, label: 'Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!' },
+    { owner: '457773317739380738', chance: 0.04, label: "Fuku-chan's Forecast: Fukukitaru peers into her crystal ball and sees a great Mambologist in your future!" },
     // Owner, 2026-11-12: two at +1.5% each (3% in all). Tachyon hums "fuun", calls the
     // trainer Guinea Pig-kun, and aims 更にその先 ("even beyond that": past faster-than-light,
     // voice 91001); Win Variation dreams of the principal role (ballet).

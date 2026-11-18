@@ -2,7 +2,7 @@ import { AttachmentBuilder, type Guild } from 'discord.js';
 import { renderTimerLeaderboard } from '../image/renderTimerLeaderboard';
 import { SPECIALS_BOARD_ROWS, renderSpecialsLeaderboard } from '../image/renderSpecialsLeaderboard';
 import { specialsBoard } from './rares';
-import { AWARD_PLACES, TOP_ROLE_PLACES, boardForWeek, getBoard, getTimerSettings, placesLabel, weekLabel, type Board, type BoardPeriod } from './rewards';
+import { AWARD_PLACES, SECOND_ROLE_PLACES, TOP_ROLE_PLACES, boardForWeek, getBoard, getTimerSettings, placesLabel, weekLabel, type Board, type BoardPeriod } from './rewards';
 
 /** A trainer's display name in the guild, or a fallback when they have left. */
 export async function displayName(guild: Guild, userId: string, fallback = 'Unknown Trainer'): Promise<string> {
@@ -24,7 +24,8 @@ export async function renderBoardFor(guild: Guild, period: BoardPeriod, board?: 
     const settings = await getTimerSettings(guild.id);
     const top = settings?.topRoleId ? guild.roles.cache.get(settings.topRoleId) : undefined;
     const second = settings?.secondRoleId ? guild.roles.cache.get(settings.secondRoleId) : undefined;
-    return renderTimerLeaderboard(shown, names, top?.name ?? null, second?.name ?? null);
+    const third = settings?.thirdRoleId ? guild.roles.cache.get(settings.thirdRoleId) : undefined;
+    return renderTimerLeaderboard(shown, names, top?.name ?? null, second?.name ?? null, third?.name ?? null);
 }
 
 /** Renders the specials leaderboard for `guild` (all time), with display names. */
@@ -36,7 +37,7 @@ export async function renderSpecialsBoardFor(guild: Guild): Promise<Buffer> {
 }
 
 /**
- * The post for a finished week: its final board, the top 5 named and
+ * The post for a finished week: its final board, the top 10 named and
  * pinged (when `ping`), and which role they hold. Used by the weekly award
  * and by `/timer publish`.
  */
@@ -52,6 +53,7 @@ export async function weekResultsPost(guild: Guild, week: string, ping: boolean)
     const holds = [
         ...(settings?.topRoleId && winners.length > 0 ? [`${placesLabel('top')} hold <@&${settings.topRoleId}>`] : []),
         ...(settings?.secondRoleId && winners.length > TOP_ROLE_PLACES ? [`${placesLabel('second')} hold <@&${settings.secondRoleId}>`] : []),
+        ...(settings?.thirdRoleId && winners.length > SECOND_ROLE_PLACES ? [`${placesLabel('third')} hold <@&${settings.thirdRoleId}>`] : []),
     ];
     if (holds.length > 0) lines.push(`${holds.join(', ')} until next week's results.`.replace(/^p/, 'P'));
     return {

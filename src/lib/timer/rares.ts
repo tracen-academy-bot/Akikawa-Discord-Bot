@@ -471,13 +471,17 @@ export function isResting(setId: string, autoOffSets: readonly string[]): boolea
 /**
  * The texts of a resting set's lines that stay out of a trainer's pools
  * (owner, 2026-11-15): every found line of the set, except those an extra
- * not yet found still needs (its `after`, e.g. Ramonu for the Rehearsal,
- * a counterpart Mejiro for its guests). Empty when the set is not resting.
+ * not yet found still needs (its `after`, e.g. Ramonu for the Rehearsal;
+ * not a guest's counterpart, since guests come from the guest slice).
+ * Empty when the set is not resting.
  */
 export function restingLines(setId: string, found: ReadonlySet<string>, autoOffSets: readonly string[]): string[] {
     if (!isResting(setId, autoOffSets)) return [];
     const inSet = RARE_OPENERS.filter((o) => o.set === setId);
-    const needed = new Set(inSet.filter((o) => o.extra && !found.has(o.id)).flatMap((o) => o.after ?? []));
+    // Only an extra that comes from rolling a line keeps it (the Rehearsal
+    // from Ramonu). A guest comes from the guest slice once its counterpart
+    // is found, so its counterpart can rest.
+    const needed = new Set(inSet.filter((o) => o.extra && !o.guest && !found.has(o.id)).flatMap((o) => o.after ?? []));
     return inSet.filter((o) => !o.extra && found.has(o.id) && !needed.has(o.id)).map((o) => o.text);
 }
 

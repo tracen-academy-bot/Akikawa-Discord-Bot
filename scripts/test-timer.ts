@@ -254,11 +254,11 @@ async function rewardChecks() {
     check('the places are kept for next week',
         (await prisma.timerWeeklyAward.findMany({ where: { guildId: G2, week: '2026-10-19' }, orderBy: { place: 'asc' } })).map((a) => a.discordUserId),
         ['alice', 'bob', 'carol', 'dave']);
-    check('the roles line for the boards', [rewards.weeklyRolesLine('Abusers', 'Enjoyers', true), rewards.weeklyRolesLine('Abusers', null, false), rewards.weeklyRolesLine(null, null, true)], [
-        '1–2 take Abusers · 3–5 take Enjoyers',
-        '1–2 hold Abusers',
-        null,
+    check('the tiers line for the boards: role names where set, tier names otherwise', [rewards.weeklyRolesLine('Top Dogs', 'Enjoyers', 'Fans'), rewards.weeklyRolesLine(null, null)], [
+        '1–2 Top Dogs · 3–5 Enjoyers · 6–10 Fans',
+        '1–2 Abusers · 3–5 Enjoyers · 6–10 Regulars',
     ]);
+    check('tier places', [rewards.placesLabel('top'), rewards.placesLabel('second'), rewards.placesLabel('third'), rewards.tierForPlace(5)?.name, rewards.tierForPlace(6)?.name, rewards.tierForPlace(11)], ['places 1–2', 'places 3–5', 'places 6–10', 'Enjoyers', 'Regulars', undefined]);
     check('a week is awarded once', (await rewards.runWeeklyAwards(guildOf, new Date('2026-10-25T16:00:00Z'))).length, 0);
     check('the week is marked done', (await rewards.getTimerSettings(G2))?.lastAwardedWeek, '2026-10-19');
 
