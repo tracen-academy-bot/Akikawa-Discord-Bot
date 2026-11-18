@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelec
 import { getUserSettings } from './userSettings';
 import { FORTUNE_LINES, fortuneLineById, tentIsOpen } from './fortuneLines';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, claimOpener, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, claimOpener, closedSpecials, redirectOpener, unlockedGuests, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -472,7 +472,7 @@ export function isResting(setId: string, autoOffSets: readonly string[]): boolea
  * The texts of a resting set's lines that stay out of a trainer's pools
  * (owner, 2026-11-15): every found line of the set, except those an extra
  * not yet found still needs (its `after`, e.g. Ramonu for the Rehearsal,
- * the photo for the guests). Empty when the set is not resting.
+ * a counterpart Mejiro for its guests). Empty when the set is not resting.
  */
 export function restingLines(setId: string, found: ReadonlySet<string>, autoOffSets: readonly string[]): string[] {
     if (!isResting(setId, autoOffSets)) return [];
@@ -652,12 +652,12 @@ export async function applyOutcome(
         guaranteedSpecialId = rolled.schedule.special;
         guaranteedInRuns = 1 + Math.min(rolled.schedule.within - 1, Math.floor(random() * rolled.schedule.within));
     }
-    // Helios's introductions: the next run is a guest not yet met (any guest
-    // once all are met), never the one that rolled it; only if nothing else
-    // is pending.
+    // Helios's introductions: the next run is an unlocked guest not yet met
+    // (any unlocked guest once those are met), never the one that rolled it;
+    // nothing when no other guest is unlocked, or something else is pending.
     if (rolled?.guaranteeGuest && !guaranteedSpecialId && losingStreak.length === 0) {
         const found = await foundSpecialIds(guildId, discordUserId);
-        const guests = RARE_OPENERS.filter((o) => o.guest && o.id !== specialId);
+        const guests = unlockedGuests(found).filter((o) => o.id !== specialId);
         const unmet = guests.filter((o) => !found.has(o.id));
         const from = unmet.length > 0 ? unmet : guests;
         if (from.length > 0) {

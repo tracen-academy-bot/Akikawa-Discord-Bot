@@ -4,6 +4,25 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-18 — Guests unlock with their counterpart Mejiro
+
+- Owner: each guest's `after` is its counterpart, not the photo: Helios
+  after Palmer, the Symbolis after Ramonu, Satono & Kita, Gold Ship and
+  Teio after McQueen. The Rehearsal still waits on Ramonu.
+- Guest slice: open once at least one guest is unlocked (`unlockedGuests`
+  in `openers.ts`); its chance is still 4% x (guests not found, out of all
+  five) / 5; its pool is only the unlocked guests (found or not). No slice
+  with none unlocked or all five found. `GUEST_SLICE.requires` is gone;
+  `guestSliceChance`/`guestSlice` keep their signatures (they already take
+  the trainer's finds).
+- Helios's introductions (`applyOutcome`) pick among unlocked guests only
+  (unmet first, never Helios); nothing if no other guest is unlocked.
+- Side effect on auto-off: a resting Estate now keeps Palmer, McQueen and
+  Ramonu in the pool while their guests are unfound (`restingLines` follows
+  the extras' `after`); the photo rests.
+
+---
+
 ## 2026-11-18 — The Family Photograph comes free
 
 - Owner: once a trainer has found Grandmother and the seven Mejiro (the

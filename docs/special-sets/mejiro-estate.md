@@ -15,7 +15,7 @@ Status: in code (`src/lib/timer/openers.ts`, set id `mejiro-estate`). This file 
      Estate line (not the extras) gives the photo instead (`Special.claimsSet`, `claimOpener` in
      `trainerPool`): the base pool, the "any Mejiro line" boosts, Mejiro week, Ramonu's own buff. So the
      next Estate roll is the photo. A held Ramonu (`heldUntilPassed`) stays out. Once found, nothing changes.
-  4. Guests (to come) open after the photograph; until then a roll on one redirects the same way.
+  4. Guests open with their counterpart Mejiro (owner, 2026-11-18; see Guests below), not the photograph.
 
 ## Lines
 
@@ -159,12 +159,22 @@ dialogue is for guests only. Gold Ship and Teio use the owner's final copy
   true`, so every exclusion an extra has applies): never in the base pool
   (`rarePoolFor`), a set-wide boost, the unlock bonus, or the "any Mejiro
   line" outcome boosts.
-- They exist for a trainer only once they have found **The Family
-  Photograph** (`mejiro.photo`; each guest has `after: ['mejiro.photo']`).
+- Each unlocks with its counterpart Mejiro (owner, 2026-11-18; its
+  `after`), no longer the Family Photograph:
+  - `guest.helios` after Mejiro Palmer (`mejiro.palmer`);
+  - `guest.symboli` after Mejiro Ramonu (`mejiro.ramonu`);
+  - `guest.satono`, `guest.goldship` and `guest.teio` after Mejiro McQueen
+    (`mejiro.mcqueen`).
 - Their own slice, an extra chance in `extraChances`, counted toward the
-  soft caps like the others: 4% x (guests the trainer has not found / 5).
-  So 4%, 3.2% after one, 0 (no slice) once all five are found. It draws from
-  all five, so repeats can come up while it is open.
+  soft caps like the others, open once at least one guest is unlocked:
+  4% x (guests the trainer has not found, out of all five / 5). So 4%, 3.2%
+  after one, 0 (no slice) once all five are found, or while none is
+  unlocked. It draws only from the guests unlocked for the trainer (found
+  or not, `unlockedGuests`), so repeats can come up while it is open.
+- Helios's introductions (`guaranteeGuest`, every time she comes up): the
+  next run is an unlocked guest the trainer has not met (any unlocked guest
+  once those are met), never Helios herself; nothing when no other guest is
+  unlocked, or another guarantee is pending.
 - Content, not a boost: Boosts off does not pause it. It gives nothing
   while the set is paused, off, or locked for the trainer. Boosts view:
   "The Mejiro Estate: guests are dropping by."
