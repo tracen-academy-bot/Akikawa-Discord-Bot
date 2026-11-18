@@ -28,31 +28,67 @@ import { TRAINING_MINUTES, dayKey, getLeaderboard, type LeaderboardRow } from '.
 export const TOP_PLACES = 3;
 
 /**
- * The weekly roles, by place: places 1 to `TOP_ROLE_PLACES` take the top role
- * (`topRoleId`), and the places after it up to `AWARD_PLACES` take the second
- * role (`secondRoleId`). Two tiers spread the reward over more trainers.
+ * The weekly tiers, by place: places 1 to `TOP_ROLE_PLACES` (Abusers), then
+ * up to `SECOND_ROLE_PLACES` (Enjoyers), then up to `AWARD_PLACES`
+ * (Regulars). Each tier has an optional role (`topRoleId`, `secondRoleId`,
+ * `thirdRoleId`) and a special-chance boost held until the next week's
+ * results (owner, 2026-11-18: 5/3/1).
  */
 export const TOP_ROLE_PLACES = 2;
-export const AWARD_PLACES = 5;
+export const SECOND_ROLE_PLACES = 5;
+export const AWARD_PLACES = 10;
 
-/** "places 1–2", "places 3–5": a weekly role's places, for the text. */
-export function placesLabel(tier: 'top' | 'second'): string {
-    return tier === 'top' ? `places 1–${TOP_ROLE_PLACES}` : `places ${TOP_ROLE_PLACES + 1}–${AWARD_PLACES}`;
+export type WeeklyTierId = 'top' | 'second' | 'third';
+
+/** One weekly tier: its places, default name, and boost. */
+export interface WeeklyTier {
+    id: WeeklyTierId;
+    from: number;
+    to: number;
+    /** Shown on the boards when the tier has no role set. */
+    name: string;
+    chance: number;
+    /** The boost's line in `/timer boosts`. */
+    label: string;
+}
+
+export const WEEKLY_TIERS: readonly WeeklyTier[] = [
+    { id: 'top', from: 1, to: TOP_ROLE_PLACES, name: 'Abusers', chance: 0.05, label: 'Abusers: The practice track has your name carved into it.' },
+    { id: 'second', from: TOP_ROLE_PLACES + 1, to: SECOND_ROLE_PLACES, name: 'Enjoyers', chance: 0.03, label: "Enjoyers: You've worn a groove into the practice track." },
+    { id: 'third', from: SECOND_ROLE_PLACES + 1, to: AWARD_PLACES, name: 'Regulars', chance: 0.01, label: 'Regulars: Akikawa nods as you head out for another run.' },
+];
+
+/** The tier that place `place` (1-based) falls in, or undefined past the last. */
+export function tierForPlace(place: number): WeeklyTier | undefined {
+    return WEEKLY_TIERS.find((t) => place >= t.from && place <= t.to);
+}
+
+/** "places 1–2", "places 3–5", "places 6–10": a weekly tier's places, for the text. */
+export function placesLabel(tier: WeeklyTierId): string {
+    const t = WEEKLY_TIERS.find((x) => x.id === tier)!;
+    return `places ${t.from}–${t.to}`;
 }
 
 /**
- * One line naming the weekly roles and their places, for the boards, or
- * null when neither role is set. `upcoming`: the week is still running
- * ("1–2 take Abusers · 3–5 take Enjoyers"); otherwise it is awarded
- * ("1–2 hold Abusers · 3–5 hold Enjoyers").
+ * One line naming the weekly tiers and their places, for the boards
+ * (owner, 2026-11-18): "1–2 Abusers · 3–5 Enjoyers · 6–10 Regulars". A
+ * tier with a role shows the role's name; one without, the tier's name.
  */
-export function weeklyRolesLine(topRoleName: string | null, secondRoleName: string | null, upcoming: boolean): string | null {
-    const verb = upcoming ? 'take' : 'hold';
-    const parts = [
-        ...(topRoleName ? [`1–${TOP_ROLE_PLACES} ${verb} ${topRoleName}`] : []),
-        ...(secondRoleName ? [`${TOP_ROLE_PLACES + 1}–${AWARD_PLACES} ${verb} ${secondRoleName}`] : []),
-    ];
-    return parts.length > 0 ? parts.join(' · ') : null;
+export function weeklyRolesLine(topRoleName: string | null, secondRoleName: string | null, thirdRoleName: string | null = null): string {
+    const names = [topRoleName, secondRoleName, thirdRoleName];
+    return WEEKLY_TIERS.map((t, i) => `${t.from}–${t.to} ${names[i] ?? t.name}`).join(' · ');
+}
+
+/**
+ * The weekly tier a trainer holds: their place in the latest awarded week,
+ * held until the next week's results. Undefined when they placed below the
+ * tiers or the guild has no awards.
+ */
+export async function weeklyTierOf(guildId: string, discordUserId: string): Promise<WeeklyTier | undefined> {
+    const settings = await prisma.timerSettings.findUnique({ where: { guildId } });
+    if (!settings?.lastAwardedWeek) return undefined;
+    const award = await prisma.timerWeeklyAward.findFirst({ where: { guildId, week: settings.lastAwardedWeek, discordUserId } });
+    return award ? tierForPlace(award.place) : undefined;
 }
 
 /** How long into a new week the old one is awarded. */
@@ -202,7 +238,7 @@ export function getTimerSettings(guildId: string): Promise<TimerSettings | null>
  */
 export function saveTimerSettings(
     guildId: string,
-    change: { topRoleId?: string | null; secondRoleId?: string | null; announceChannelId?: string | null; secondLoveRoleId?: string | null },
+    change: { topRoleId?: string | null; secondRoleId?: string | null; thirdRoleId?: string | null; announceChannelId?: string | null; secondLoveRoleId?: string | null },
     now = new Date(),
 ): Promise<TimerSettings> {
     return prisma.timerSettings.upsert({
@@ -432,7 +468,8 @@ export async function runWeeklyAwards(guildOf: (guildId: string) => Promise<Guil
         // holder from before the tiers, or one who moved tier, is covered).
         const tiers = [
             { roleId: settings.topRoleId, holders: winners.slice(0, TOP_ROLE_PLACES) },
-            { roleId: settings.secondRoleId, holders: winners.slice(TOP_ROLE_PLACES, AWARD_PLACES) },
+            { roleId: settings.secondRoleId, holders: winners.slice(TOP_ROLE_PLACES, SECOND_ROLE_PLACES) },
+            { roleId: settings.thirdRoleId, holders: winners.slice(SECOND_ROLE_PLACES, AWARD_PLACES) },
         ].filter((t): t is { roleId: string; holders: WeekRow[] } => t.roleId !== null);
         const guild = tiers.length > 0 ? await guildOf(settings.guildId) : null;
         if (guild) {

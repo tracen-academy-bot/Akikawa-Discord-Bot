@@ -272,10 +272,34 @@ async function main() {
     check('extras: the unlock bonus only once the set is unlocked', (await extraChances(XG, 'u1', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
     check('extras: early start without Early Riser too', (await extraChances(XG, 'u1', { ...base, earlyRiser: false }, [], true, fullPool, OFF_SEASON)).map((e) => e.chance), [0.04, 0.01, 0.01]);
     check('extras: none with Boosts off', await extraChances(XG, 'u1', { ...base, boosts: false }, [], true, fullPool, OFF_SEASON), []);
-    // Tylina's personal boost (owner, 2026-11-11): +3% from her usual pool, paused with Boosts off.
+    // Tylina's personal boosts (owner, 2026-11-11, raised 2026-11-18): +4% "Ei, Ei, Mun!" and +4% "Fuku-chan's Forecast", from her usual pool, paused with Boosts off.
     const tylina = openers.PERSONAL_BOOSTS[0]!;
     const hers = await extraChances(XG, tylina.owner, base, ['online-sensations'], false, fullPool, OFF_SEASON);
-    check('personal: Tylina gets +3% from her usual pool, as "Ei, Ei, Mun!"', hers.map((e) => [e.chance, e.pool.length, e.label?.startsWith('Ei, Ei, Mun!')]), [[0.03, fullPool.length, true]]);
+    check('personal: Tylina gets +4% twice from her usual pool, "Ei, Ei, Mun!" and "Fuku-chan\'s Forecast"', hers.map((e) => [e.chance, e.pool.length, e.label?.split(':')[0]]), [[0.04, fullPool.length, 'Ei, Ei, Mun!'], [0.04, fullPool.length, "Fuku-chan's Forecast"]]);
+    // Weekly tiers (owner, 2026-11-18): +5% places 1-2, +3% places 3-5, +1% places 6-10, from the latest awarded week, until the next.
+    {
+        const TG = `test-tiers-${Date.now()}`;
+        await prisma.timerSettings.create({ data: { guildId: TG, lastAwardedWeek: '2026-11-09' } });
+        await prisma.timerWeeklyAward.createMany({
+            data: [
+                { guildId: TG, week: '2026-11-02', place: 1, discordUserId: 'old-top', runs: 50 },
+                { guildId: TG, week: '2026-11-09', place: 2, discordUserId: 'p2', runs: 40 },
+                { guildId: TG, week: '2026-11-09', place: 3, discordUserId: 'p3', runs: 30 },
+                { guildId: TG, week: '2026-11-09', place: 10, discordUserId: 'p10', runs: 5 },
+            ],
+        });
+        const tierOf = async (id: string) => (await extraChances(TG, id, base, ['online-sensations'], false, fullPool, OFF_SEASON)).map((e) => [e.chance, e.label?.split(':')[0], e.pool.length]);
+        check('tiers: place 2 Abusers +5%, place 3 Enjoyers +3%, place 10 Regulars +1%, from the usual pool', [await tierOf('p2'), await tierOf('p3'), await tierOf('p10')], [[[0.05, 'Abusers', fullPool.length]], [[0.03, 'Enjoyers', fullPool.length]], [[0.01, 'Regulars', fullPool.length]]]);
+        check('tiers: only the latest awarded week counts; unplaced get none', [await tierOf('old-top'), await tierOf('nobody')], [[], []]);
+        check('tiers: paused with Boosts off', await extraChances(TG, 'p2', { ...base, boosts: false }, [], false, fullPool, OFF_SEASON), []);
+        const ty = await extraChances(TG, tylina.owner, base, ['online-sensations'], false, fullPool, OFF_SEASON);
+        check('tiers: none in a guild with no awards (XG) for Tylina; 8% personal', [ty.reduce((s, e) => s + e.chance, 0)], [0.08]);
+        await prisma.timerWeeklyAward.create({ data: { guildId: TG, week: '2026-11-09', place: 1, discordUserId: tylina.owner, runs: 60 } });
+        const tyTop = await extraChances(TG, tylina.owner, base, ['online-sensations'], false, fullPool, OFF_SEASON);
+        check('tiers: Tylina as an Abuser: 6% + 8% + 5% = 19% raw, under the soft caps', [Math.round((openers.RARE_OPENER_CHANCE + tyTop.reduce((s, e) => s + e.chance, 0)) * 1000) / 1000, openers.effectiveChance(openers.RARE_OPENER_CHANCE + tyTop.reduce((s, e) => s + e.chance, 0)) === openers.RARE_OPENER_CHANCE + tyTop.reduce((s, e) => s + e.chance, 0)], [0.19, true]);
+        await prisma.timerWeeklyAward.deleteMany({ where: { guildId: TG } });
+        await prisma.timerSettings.delete({ where: { guildId: TG } });
+    }
     check('personal: nobody else gets it', (await extraChances(XG, 'someone-else', base, ['online-sensations'], false, fullPool, OFF_SEASON)).length, 0);
     // A trainer can hold several (owner, 2026-11-12): two at +1.5% each, each its own line.
     const leneya = await extraChances(XG, '340238209147600897', base, ['online-sensations'], false, fullPool, OFF_SEASON);
@@ -482,10 +506,24 @@ async function main() {
     await rares.recordRareOpener(FG, 'f1', grandma.text);
     const poolAfter = await rares.trainerPool(FG, 'f1', mejiroPool);
     check('redirect: once found she counts once, the seven open, and a photo roll gives an unmet member', [poolAfter.filter((t) => t === grandma.text).length, poolAfter.length, poolAfter.includes(photo.text), poolAfter.filter((t) => t === sevenTexts[0]).length], [1, 9, false, 2]);
-    for (const t of sevenTexts) await rares.recordRareOpener(FG, 'f1', t);
-    check('stages: with the whole family found, the photograph joins the pool', (await rares.trainerPool(FG, 'f1', mejiroPool)).includes(photo.text), true);
+    for (const t of sevenTexts.slice(0, 6)) await rares.recordRareOpener(FG, 'f1', t);
+    const poolSeven = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('photo claim: with one of the eight missing, no claim (photo rolls give the missing one)', [poolSeven.includes(photo.text), poolSeven.filter((t) => t === sevenTexts[6]).length, poolSeven.filter((t) => t === grandma.text).length], [false, 2, 1]);
+    await rares.recordRareOpener(FG, 'f1', sevenTexts[6]!);
+    const poolEight = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('photo claim: with all eight found, every Estate line is the photo (9 of 9)', [poolEight.length, poolEight.every((t) => t === photo.text)], [9, true]);
+    const ramonuOnly = await rares.trainerPool(FG, 'f1', [openers.specialById('mejiro.ramonu')!.text]);
+    const extrasStay = await rares.trainerPool(FG, 'f1', [openers.specialById('mejiro.rehearsal')!.text, PING_OPENERS[0]!, openers.specialById('set1.mejiro')!.text]);
+    check('photo claim: a single-line buff (Ramonu) gives the photo; extras, commons and other sets do not', [JSON.stringify(ramonuOnly) === JSON.stringify([photo.text]), JSON.stringify(extrasStay) === JSON.stringify([openers.specialById('mejiro.rehearsal')!.text, PING_OPENERS[0]!, openers.specialById('set1.mejiro')!.text])], [true, true]);
+    await prisma.timerUserSettings.upsert({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 'f1' } }, create: { guildId: FG, discordUserId: 'f1', guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 3 }, update: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 3 } });
+    const poolHeld = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('photo claim: a held Ramonu stays out (8 photos, not 9)', [poolHeld.length, poolHeld.every((t) => t === photo.text), (await rares.trainerPool(FG, 'f1', [openers.specialById('mejiro.ramonu')!.text])).length], [8, true, 0]);
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: FG } });
     const mPage = json(rares.specialsView(await rares.rareTally(FG), 3, undefined, PRE));
     check('stages: the page never shows the lock, just ???', mPage.embeds[0]!.fields?.[0]?.value.split('\n')[8], '**9.** ???');
+    await rares.recordRareOpener(FG, 'f1', photo.text);
+    const poolDone = await rares.trainerPool(FG, 'f1', mejiroPool);
+    check('photo claim: once the photo is found, the pool is back to normal', [poolDone.length, new Set(poolDone).size, poolDone.filter((t) => t === photo.text).length], [9, 9, 1]);
     await prisma.rareOpenerHit.deleteMany({ where: { guildId: FG } });
 
     // Outcomes: Ramonu rolls one each time; her Remedial Rehearsal is an extra with a losing streak.
@@ -554,7 +592,8 @@ async function main() {
     check('boosts view labels: any Mejiro line, the win', [openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.ramonu:footwork')!, 50), openers.outcomeBoostLabel(openers.outcomeBoostByKey('mejiro.rehearsal:win')!, 25)], ['The Mejiro Estate: any Mejiro line, 50 runs left.', 'The Mejiro Estate: any Mejiro line, 25 runs left, after a lesson well learned.']);
     for (let k = 0; k < 10; k += 1) await ping(PING_OPENERS[0]!, 0.5);
     check('schedule: counts down to 1 and stays due (the set is paused, so it waits)', (await stateOf()).guaranteedInRuns, 1);
-    check('boosts: outcome boosts apply, but give nothing with Boosts off or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length], [1, 0, 0]);
+    // McQueen is found, so her three guests are unlocked: the guest slice (content) stays with Boosts off (owner, 2026-11-18).
+    check('boosts: outcome boosts apply, but give nothing with Boosts off (the guest slice stays) or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length], [2, 1, 0]);
     // The same storage on a set that is not paused (stored by hand: no Set 1 line has outcomes).
     const UG = `${OG}-live`;
     await prisma.timerSpecialBoost.createMany({ data: [
@@ -577,6 +616,21 @@ async function main() {
     check('ramonu: a lesson during a losing streak schedules nothing new', await stateOf(), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] });
     const st = await rares.outcomeState(OG, T);
     check('guarantee: due now, it fires; not while the set is off or locked', [rares.guaranteedOpener(st, [], []), rares.guaranteedOpener(st, ['mejiro-estate'], []), rares.guaranteedOpener(st, [], ['mejiro-estate'])], [rehearsal.text, undefined, undefined]);
+    // A guarantee waits while its special is still closed for the trainer (owner, 2026-11-18): McQueen before Grandmother.
+    const mcqueenSp = openers.specialById('mejiro.mcqueen')!;
+    const mcqDue = { guaranteedSpecialId: 'mejiro.mcqueen', guaranteedInRuns: 1, losingStreak: [] as string[] };
+    check('guarantee: a closed special waits (McQueen before Grandmother), fires once open', [rares.guaranteedOpener(mcqDue, [], [], openers.closedSpecials(new Set())), rares.guaranteedOpener(mcqDue, [], [], openers.closedSpecials(new Set([grandma.id]))) === mcqueenSp.text, rares.guaranteedOpener(mcqDue, [], ['mejiro-estate'], openers.closedSpecials(new Set([grandma.id])))], [undefined, true, undefined]);
+    {
+        const CGd = `test-closed-guarantee-${Date.now()}`;
+        await prisma.timerUserSettings.create({ data: { guildId: CGd, discordUserId: 'c1', guaranteedSpecialId: 'mejiro.mcqueen', guaranteedInRuns: 1 } });
+        const before = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], [], await rares.closedSpecialsFor(CGd, 'c1'));
+        await rares.tickGuarantee(CGd, 'c1', PING_OPENERS[0]!);
+        await rares.recordRareOpener(CGd, 'c1', grandma.text);
+        const after = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], [], await rares.closedSpecialsFor(CGd, 'c1'));
+        check('guarantee: from the database, closed McQueen waits (still due after a ping), then fires once Grandmother is found', [before, (await rares.outcomeState(CGd, 'c1')).guaranteedInRuns, after === mcqueenSp.text], [undefined, 1, true]);
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: CGd } });
+        await prisma.timerUserSettings.deleteMany({ where: { guildId: CGd } });
+    }
     check('guarantee: chooseOpener honours it, whatever the roll and before any boost', [await rares.chooseOpener(OG, T, 0.99, fullPool, [], PING_OPENERS, rehearsal.text), await rares.chooseOpener(OG, T, 0.001, fullPool, extras, PING_OPENERS, rehearsal.text)], [rehearsal.text, rehearsal.text]);
     const lost2 = await ping(rehearsal.text, 0.5);
     const lost3 = await ping(rehearsal.text, 0.5);
@@ -643,25 +697,44 @@ async function main() {
     const readRamonu = await rares.readSpecial(OG, T, 'mejiro.ramonu');
     check('read: Ramonu in full, without any outcome footer', [readRamonu?.text, readRamonu?.text.includes('-#')], [openers.fillOpener(ramonu.text, T), false]);
     check('read: the Rehearsal without footers', (await rares.readSpecial(OG, T, 'mejiro.rehearsal'))?.text, openers.fillOpener(rehearsal.text, T));
-    // Guests (owner, 2026-11-15): the Mejiro Estate's visitors, after the Family Photograph, through their own slice.
+    // Guests (owner, 2026-11-15): the Mejiro Estate's visitors, each after its counterpart Mejiro (2026-11-18), through their own slice.
     const guests = openers.GUESTS;
     const guestIds = guests.map((g) => g.id);
-    check('guests: the five, in the Mejiro Estate, each an extra and a guest, after the photo', [guestIds, guests.map((g) => g.name), guests.every((g) => g.set === 'mejiro-estate' && g.extra === true && g.guest === true && JSON.stringify(g.after) === JSON.stringify(['mejiro.photo']))], [
+    const helios0 = openers.specialById('guest.helios')!;
+    check('guests: the five, in the Mejiro Estate, each an extra and a guest, after its counterpart', [guestIds, guests.map((g) => g.name), guests.every((g) => g.set === 'mejiro-estate' && g.extra === true && g.guest === true), guests.map((g) => g.after)], [
         ['guest.helios', 'guest.satono', 'guest.goldship', 'guest.symboli', 'guest.teio'],
         ['#MejiroAfterParty', 'Satono & Kita', "Golshi's Crashdown", 'The Symboli-cs', "Teio's Tag-along"],
         true,
+        [['mejiro.palmer'], ['mejiro.mcqueen'], ['mejiro.mcqueen'], ['mejiro.ramonu'], ['mejiro.mcqueen']],
     ]);
+    check('guests: the Rehearsal still waits on Ramonu', rehearsal.after, ['mejiro.ramonu']);
     check('guests: exactly one {user} each', guests.map((g) => g.text.split('{user}').length - 1), [1, 1, 1, 1, 1]);
     check('guests: Helios keeps her hashtags; Gold Ship her ☆ and じゃあね; multi-voice lines kept', [openers.specialById('guest.helios')!.text.match(/#\w+/g), ['☆', '*said*', 'じゃあね', 'Gorushi-sama has spoken~'].every((x) => openers.specialById('guest.goldship')!.text.includes(x)), openers.specialById('guest.satono')!.text.split('\n').map((l) => l.split(':')[0]), openers.specialById('guest.symboli')!.text.split('\n').map((l) => l.split(':')[0])], [['#DJHelios', '#MusicalEternity', '#MejiroAfterParty', '#ZuttomoDJ', '#BakunigeBPM'], true, ['Diamond', 'Kitasan', 'Diamond', 'McQueen'], ['Rudolf', 'Sirius', 'Ramonu']]);
     const guestTexts = guests.map((g) => g.text);
     const hasGuest = (pool: readonly string[]) => pool.some((t) => guestTexts.includes(t));
     const mejiroLinesLive = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
     check('guests: out of every normal pool (base, set-wide, boosts, the photo\'s wait)', [hasGuest(openers.rarePoolFor([], [])), hasGuest(openers.setLinesPool('mejiro-estate')), hasGuest(mejiroLinesLive), hasGuest(openers.boostPool('mejiro-estate', 'collab')), hasGuest(openers.outcomeBoostPool({ set: 'mejiro-estate' })), photo.after?.some((id) => guestIds.includes(id))], [false, false, false, false, false, false]);
-    check('guests: closed until the photo', [openers.closedSpecials(new Set([grandma.id, ...seven])).filter((t) => guestTexts.includes(t)).length, openers.closedSpecials(new Set([grandma.id, ...seven, photo.id])).filter((t) => guestTexts.includes(t)).length], [5, 0]);
-    // The slice: 4% x unfound / all, only after the photo.
+    const openGuests = (...ids: string[]) => guestIds.filter((id) => !openers.closedSpecials(new Set([grandma.id, ...ids])).includes(openers.specialById(id)!.text));
+    check('guests: each opens with its counterpart (none with Grandmother alone; Palmer: Helios; Ramonu: the Symbolis; McQueen: the other three; all seven: all five)', [
+        openGuests(),
+        openGuests('mejiro.palmer'),
+        openGuests('mejiro.ramonu'),
+        openGuests('mejiro.mcqueen'),
+        openGuests('mejiro.ryan', 'mejiro.dober', 'mejiro.ardan', 'mejiro.bright'),
+        openGuests(...seven),
+    ], [[], ['guest.helios'], ['guest.symboli'], ['guest.satono', 'guest.goldship', 'guest.teio'], [], guestIds]);
+    check('guests: the photo is no longer needed', openGuests(...seven).length === 5 && !openers.closedSpecials(new Set([grandma.id, ...seven])).some((t) => guestTexts.includes(t)), true);
+    // The slice: 4% x unfound (of all five) / 5, once any guest is unlocked; drawn from the unlocked guests only.
     const near = (a: number, b: number) => Math.abs(a - b) < 1e-12;
     const withPhoto = (...ids: string[]) => new Set([grandma.id, ...seven, photo.id, ...ids]);
-    check('guest slice: 0 before the photo', openers.guestSliceChance(new Set([grandma.id, ...seven])), 0);
+    const textsOf = (...ids: string[]) => ids.map((id) => openers.specialById(id)!.text);
+    check('guest slice: 0 with no guest unlocked (Grandmother, Ryan, Dober, Ardan, Bright)', openers.guestSliceChance(new Set([grandma.id, 'mejiro.ryan', 'mejiro.dober', 'mejiro.ardan', 'mejiro.bright'])), 0);
+    const palmerOnly = openers.guestSlice(new Set([grandma.id, 'mejiro.palmer']), [], [], []);
+    check('guest slice: Palmer alone opens it at the full 4%, drawing only Helios', [near(palmerOnly?.chance ?? 0, 0.04), palmerOnly?.pool.length, palmerOnly?.pool[0] === helios0.text], [true, 1, true]);
+    const mcqueenRamonu = openers.guestSlice(new Set([grandma.id, 'mejiro.mcqueen', 'mejiro.ramonu', 'guest.teio']), [], [], []);
+    check('guest slice: McQueen and Ramonu: 4 guests in the pool (found Teio included), 3.2% (one of five found)', [near(mcqueenRamonu?.chance ?? 0, 0.032), JSON.stringify(mcqueenRamonu?.pool) === JSON.stringify(textsOf('guest.satono', 'guest.goldship', 'guest.symboli', 'guest.teio'))], [true, true]);
+    const allUnlockedFound = openers.guestSlice(new Set([grandma.id, 'mejiro.palmer', 'guest.helios']), [], [], []);
+    check('guest slice: unlocked guests all found but others not: still open (repeats), chance from all five', [near(allUnlockedFound?.chance ?? 0, 0.032), allUnlockedFound?.pool.length], [true, 1]);
     check('guest slice: 4%, then 3.2% after one, 0.8% with one left, 0 after all five', [
         near(openers.guestSliceChance(withPhoto()), 0.04),
         near(openers.guestSliceChance(withPhoto('guest.teio')), 0.032),
@@ -671,7 +744,7 @@ async function main() {
     check('guest slice: none while the set is paused (passed in), some once it is not', [openers.guestSlice(withPhoto(), [], [], ['mejiro-estate']), openers.guestSlice(withPhoto(), [], []) !== null], [null, true]);
     const liveSlice = openers.guestSlice(withPhoto('guest.helios'), [], [], []);
     check('guest slice: once resumed, all five guests (repeats possible), labelled, content not a boost', [near(liveSlice?.chance ?? 0, 0.032), liveSlice?.pool, liveSlice?.label, liveSlice?.content], [true, guestTexts, 'The Mejiro Estate: guests are dropping by.', true]);
-    check('guest slice: none with the set off or locked, before the photo, or with every guest found', [openers.guestSlice(withPhoto(), ['mejiro-estate'], [], []), openers.guestSlice(withPhoto(), [], ['mejiro-estate'], []), openers.guestSlice(new Set([grandma.id]), [], [], []), openers.guestSlice(withPhoto(...guestIds), [], [], [])], [null, null, null, null]);
+    check('guest slice: none with the set off or locked, with no guest unlocked, or with every guest found', [openers.guestSlice(withPhoto(), ['mejiro-estate'], [], []), openers.guestSlice(withPhoto(), [], ['mejiro-estate'], []), openers.guestSlice(new Set([grandma.id]), [], [], []), openers.guestSlice(withPhoto(...guestIds), [], [], [])], [null, null, null, null]);
     // Through extraChances and the Boosts view, from the database.
     const GG = `test-guests-${Date.now()}`;
     const GT = 'g1';
@@ -688,6 +761,13 @@ async function main() {
         await rares.recordRareOpener(GG, GT, openers.specialById('guest.satono')!.text);
         check('guest slice: shrinks as guests are found (3.2% after one)', (await extraChances(GG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).map((e) => near(e.chance, 0.032)), [true]);
     }
+    {
+        const PG = `test-guests-palmer-${Date.now()}`;
+        for (const id of ['set1.mejiro', grandma.id, 'mejiro.palmer']) await rares.recordRareOpener(PG, GT, openers.specialById(id)!.text);
+        const pe = (await extraChances(PG, GT, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).filter((e) => e.content);
+        check('guest slice: from the database, Palmer alone: 4%, Helios only', [pe.length, near(pe[0]?.chance ?? 0, 0.04), pe[0]?.pool.length, pe[0]?.pool[0] === helios0.text], [1, true, 1, true]);
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: PG } });
+    }
     // Helios's introductions (owner, 2026-11-15): the next run is a guest not yet met; never while a Rehearsal is owed.
     const helios = openers.specialById('guest.helios')!;
     const intro = openers.rollOutcome(helios, 0.5)!;
@@ -702,6 +782,26 @@ async function main() {
     await rares.applyOutcome(HG, 'h1', helios.text, intro, () => 0.999);
     const allMet = (await rares.outcomeState(HG, 'h1')).guaranteedSpecialId;
     check('helios: once every guest is met, any guest but Helios', [guestIds.includes(allMet!), allMet === 'guest.helios'], [true, false]);
+    // Unlocked guests only (owner, 2026-11-18).
+    const HU = `test-helios-unlock-${Date.now()}`;
+    for (const id of ['set1.mejiro', grandma.id, 'mejiro.palmer', 'guest.helios']) await rares.recordRareOpener(HU, 'h2', openers.specialById(id)!.text);
+    await rares.applyOutcome(HU, 'h2', helios.text, intro, () => 0);
+    check('helios: with only Helios unlocked, introductions do nothing', (await rares.outcomeState(HU, 'h2')).guaranteedSpecialId, null);
+    await rares.recordRareOpener(HU, 'h2', ramonu.text);
+    await rares.applyOutcome(HU, 'h2', helios.text, intro, () => 0.999);
+    check('helios: with Palmer and Ramonu, the Symbolis (the only other unlocked guest)', (await rares.outcomeState(HU, 'h2')).guaranteedSpecialId, 'guest.symboli');
+    await rares.applyOutcome(HU, 'h2', openers.specialById('guest.symboli')!.text, null);
+    await rares.recordRareOpener(HU, 'h2', openers.specialById('guest.symboli')!.text);
+    await rares.recordRareOpener(HU, 'h2', openers.specialById('mejiro.mcqueen')!.text);
+    const heliosPicks: string[] = [];
+    for (const r of [0, 0.5, 0.999]) {
+        await prisma.timerUserSettings.deleteMany({ where: { guildId: HU } });
+        await rares.applyOutcome(HU, 'h2', helios.text, intro, () => r);
+        heliosPicks.push((await rares.outcomeState(HU, 'h2')).guaranteedSpecialId!);
+    }
+    check('helios: once McQueen is found, an unmet McQueen guest first (never the met Symbolis or Helios)', heliosPicks, ['guest.satono', 'guest.goldship', 'guest.teio']);
+    await prisma.rareOpenerHit.deleteMany({ where: { guildId: HU } });
+    await prisma.timerUserSettings.deleteMany({ where: { guildId: HU } });
     // Ramonu's lesson overrides a pending guest guarantee.
     await rares.applyOutcome(HG, 'h1', ramonu.text, openers.rollOutcome(ramonu, 0.1), () => 0);
     check('helios: Ramonu\'s lesson overrides a pending guest guarantee', await rares.outcomeState(HG, 'h1'), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: [] });
@@ -725,9 +825,11 @@ async function main() {
     await rares.recordRareOpener(AG, AU, lastMain.text);
     await done1!.record();
     const restingNow = rares.restingLines('mejiro-estate', await rares.foundSpecialIds(AG, AU), (await usA.getUserSettings(AG, AU)).autoOffSets ?? []);
-    check('auto-off: found lines rest, but Ramonu (the Rehearsal needs her) and the photo (the guests) stay', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(photo.text)], [7, false, false]);
+    const palmerText = openers.specialById('mejiro.palmer')!.text;
+    const mcqueenText = openers.specialById('mejiro.mcqueen')!.text;
+    check('auto-off: found lines rest, but Ramonu stays (the Rehearsal); guest counterparts and the photo rest', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(palmerText), restingNow.includes(mcqueenText), restingNow.includes(photo.text)], [8, false, true, true, true]);
     const mejiroAll = mejiroMain.map((o) => o.text);
-    check('auto-off: the pool leaves resting lines out', (await rares.trainerPool(AG, AU, mejiroAll)).sort(), [ramonu.text, photo.text].sort());
+    check('auto-off: the pool leaves resting lines out', await rares.trainerPool(AG, AU, mejiroAll), [ramonu.text]);
     check('auto-off: a repeat find says nothing more', await rares.completionNotice(AG, AU, lastMain.text), null);
     const restPage = json(await rares.mySpecialsView(AG, AU, rares.pageOfSet('mejiro-estate'), PRE));
     check('auto-off: the page says Resting, and so does its button', [restPage.embeds[0]!.description?.includes('Resting: every line found'), restPage.components[0]!.components[1]?.label], [true, 'The Mejiro Estate: Resting']);
@@ -1112,6 +1214,50 @@ async function main() {
         check('reset: the migration SQL itself keeps her earliest and removes her finds', [statements.length, (await prisma.timerFirstFinder.findUnique({ where: { guildId_specialId: { guildId: R3, specialId: GM } } }))?.at.toISOString(), await prisma.rareOpenerHit.count({ where: { guildId: R3, discordUserId: TY, specialId: GM } })], [2, '2026-11-15T21:00:00.000Z', 0]);
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [R1, R2, R3] } } });
         await prisma.timerFirstFinder.deleteMany({ where: { guildId: { in: [R1, R2, R3] } } });
+    }
+
+    // One-time McQueen (owner, 2026-11-18): the migration's SQL, run as written on scratch guilds.
+    {
+        const fsMig = await import('fs');
+        const MU = '801847462209126411';
+        const stamp = Date.now();
+        const M1 = `test-mcq1-${stamp}`; // two runs, no settings row
+        const M2 = `test-mcq2-${stamp}`; // a run and a live timer, settings with no guarantee
+        const M3 = `test-mcq3-${stamp}`; // a run, a pending Rehearsal
+        const M4 = `test-mcq4-${stamp}`; // only a timer
+        const M5 = `test-mcq5-${stamp}`; // another trainer only
+        const run = (guildId: string, discordUserId = MU) => prisma.trainingRun.create({ data: { guildId, discordUserId, startedAt: new Date(Date.now() - 3_600_000), completedAt: new Date() } });
+        const timer = (guildId: string) => prisma.trainingTimer.create({ data: { guildId, channelId: 'mcq-chan', discordUserId: MU, expiresAt: new Date(Date.now() + 1_800_000) } });
+        await run(M1);
+        await run(M1);
+        await run(M2);
+        await timer(M2);
+        await prisma.timerUserSettings.create({ data: { guildId: M2, discordUserId: MU, dmPing: true, disabledSets: ['online-sensations'] } });
+        await run(M3);
+        await prisma.timerUserSettings.create({ data: { guildId: M3, discordUserId: MU, guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 7 } });
+        await timer(M4);
+        await run(M5, 'someone-else');
+        const sql = fsMig.readFileSync('prisma/migrations/20261118000000_one_time_mcqueen_guarantee/migration.sql', 'utf8');
+        const statements = sql.split(';').map((x) => x.replace(/^\s*--.*$/gm, '').trim()).filter((x) => x.startsWith('INSERT'));
+        check('mcqueen migration: one INSERT ... ON CONFLICT DO UPDATE only where no guarantee is pending', [statements.length, sql.includes('ON CONFLICT ("guildId", "discordUserId") DO UPDATE'), sql.includes('WHERE "TimerUserSettings"."guaranteedSpecialId" IS NULL')], [1, true, true]);
+        for (const st of statements) await prisma.$executeRawUnsafe(st);
+        const rowOf = (guildId: string, discordUserId = MU) => prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } } });
+        const view = async (guildId: string, discordUserId = MU) => {
+            const r = await rowOf(guildId, discordUserId);
+            return r ? [r.guaranteedSpecialId, r.guaranteedInRuns] : null;
+        };
+        check('mcqueen migration: McQueen due next ping where they ran or have a timer; a pending Rehearsal kept; no one else touched', [await view(M1), await view(M2), await view(M3), await view(M4), await view(M5), await view(M5, 'someone-else')], [['mejiro.mcqueen', 1], ['mejiro.mcqueen', 1], ['mejiro.rehearsal', 7], ['mejiro.mcqueen', 1], null, null]);
+        const m2 = await rowOf(M2);
+        const m1 = await rowOf(M1);
+        check('mcqueen migration: other settings kept on update; a new row gets the defaults', [m2?.dmPing, m2?.disabledSets, m1?.boosts, m1?.dmPing, m1?.losingStreak, m1?.updatedAt instanceof Date], [true, ['online-sensations'], true, false, [], true]);
+        // Run again with a pending Rehearsal where McQueen was: not overwritten.
+        await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: M1, discordUserId: MU } }, data: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 3 } });
+        for (const st of statements) await prisma.$executeRawUnsafe(st);
+        check('mcqueen migration: run again, a pending guarantee is never overwritten', [await view(M1), await view(M3), await view(M2)], [['mejiro.rehearsal', 3], ['mejiro.rehearsal', 7], ['mejiro.mcqueen', 1]]);
+        const all = [M1, M2, M3, M4, M5];
+        await prisma.trainingRun.deleteMany({ where: { guildId: { in: all } } });
+        await prisma.trainingTimer.deleteMany({ where: { guildId: { in: all } } });
+        await prisma.timerUserSettings.deleteMany({ where: { guildId: { in: all } } });
     }
 
     check('expired timer removed', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-a' } }), 0);

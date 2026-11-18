@@ -4,6 +4,92 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-18 — Weekly tiers with boosts; Tylina's Forecast
+
+- Owner: weekly tiers by place, each with a special-chance boost held until
+  the next week's results: places 1–2 Abusers +5%, 3–5 Enjoyers +3%,
+  6–10 Regulars +1% (`WEEKLY_TIERS` in `rewards.ts`). The boost reads the
+  trainer's place in `TimerSettings.lastAwardedWeek` from
+  `TimerWeeklyAward` (`weeklyTierOf`), not the Discord role, so a role
+  given by hand gives no boost. It draws from the usual special pool and
+  pauses with Boosts off, like personal boosts.
+- The award now records the top 10 (`AWARD_PLACES` 5 → 10;
+  `SECOND_ROLE_PLACES` = 5). Places 6–10 get an optional third role
+  (`TimerSettings.thirdRoleId`, migration
+  `20261118100000_weekly_third_tier`, `/timer rewards third_role`). The
+  results post names and pings the top 10.
+- The boards' roles line is now always shown, without "take/hold":
+  "1–2 Abusers · 3–5 Enjoyers · 6–10 Regulars", with a role's name where
+  one is set.
+- Tylina: "Ei, Ei, Mun!" 3% → 4%, plus "Fuku-chan's Forecast" +4% (the
+  other Matikane). 8% personal; as an Abuser 6 + 8 + 5 = 19% raw, under
+  the 20% soft cap.
+- Not covered by a test: the third role's hand-off in `runWeeklyAwards`
+  (same slice code as the second role; the existing test has 4 runners).
+
+---
+
+## 2026-11-18 — Resting Estate: guest counterparts rest too
+
+- Review fix to the guest-unlock change: `restingLines` kept every found
+  line an unfound extra lists in `after`, so Palmer and McQueen stayed in a
+  resting Estate's pool for their guests. A guest comes from the guest
+  slice once its counterpart is found, not from rolling it, so guests no
+  longer keep lines. Only the Rehearsal keeps Ramonu.
+
+## 2026-11-18 — One-time McQueen; guarantees respect staging
+
+- Owner: trainer `801847462209126411` gets Mejiro McQueen on their next
+  possible ping. Migration `20261118000000_one_time_mcqueen_guarantee` sets
+  `TimerUserSettings.guaranteedSpecialId = 'mejiro.mcqueen'`,
+  `guaranteedInRuns = 1` in every guild where they have a `TrainingRun` or
+  `TrainingTimer` (INSERT ... SELECT DISTINCT guildId ... ON CONFLICT DO
+  UPDATE), only where no guarantee is pending (a Rehearsal owed is kept).
+  New rows get `updatedAt = NOW()` and the column defaults.
+- `guaranteedOpener` takes the trainer's closed specials (`closedSpecials`,
+  via `closedSpecialsFor` in the scheduler): a guaranteed special whose
+  `after` is not all found does not fire yet; it stays due (as it already
+  did while its set is locked, off or paused). So McQueen waits for
+  Grandmother if she has not been found.
+- Tests: the closed case (pure and from the database), and the migration's
+  SQL run as written on scratch guilds, twice (a pending guarantee is never
+  overwritten).
+
+---
+
+## 2026-11-18 — Guests unlock with their counterpart Mejiro
+
+- Owner: each guest's `after` is its counterpart, not the photo: Helios
+  after Palmer, the Symbolis after Ramonu, Satono & Kita, Gold Ship and
+  Teio after McQueen. The Rehearsal still waits on Ramonu.
+- Guest slice: open once at least one guest is unlocked (`unlockedGuests`
+  in `openers.ts`); its chance is still 4% x (guests not found, out of all
+  five) / 5; its pool is only the unlocked guests (found or not). No slice
+  with none unlocked or all five found. `GUEST_SLICE.requires` is gone;
+  `guestSliceChance`/`guestSlice` keep their signatures (they already take
+  the trainer's finds).
+- Helios's introductions (`applyOutcome`) pick among unlocked guests only
+  (unmet first, never Helios); nothing if no other guest is unlocked.
+- Side effect on auto-off: a resting Estate now keeps Palmer, McQueen and
+  Ramonu in the pool while their guests are unfound (`restingLines` follows
+  the extras' `after`); the photo rests.
+
+---
+
+## 2026-11-18 — The Family Photograph comes free
+
+- Owner: once a trainer has found Grandmother and the seven Mejiro (the
+  photo's `after`) and not the photo, every roll on a Mejiro Estate line
+  (not an extra) gives the photo: base pool, "any Mejiro line" outcome
+  boosts, Mejiro week, Ramonu's buff, anything through `trainerPool`. So
+  their next Estate roll is the photo, 100%.
+- `Special.claimsSet` (set on `mejiro.photo`) and `claimOpener` in
+  `openers.ts`; `trainerPool` applies it after `redirectOpener` and after
+  the `heldUntilPassed` filter, so a held Ramonu stays out instead of
+  becoming the photo. Once the photo is found, pools are as before.
+
+---
+
 ## 2026-11-15 — Tylina meets Grandmother again
 
 - Owner: Tylina's Grandmother finds are reset. Migration

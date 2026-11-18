@@ -91,10 +91,11 @@ export interface SpecialOutcome {
      */
     schedule?: { special: string; within: number };
     /**
-     * Guarantees the trainer's next run is a guest (`Special.guest`) they have
-     * not met, at random; once they have met them all, any guest. Never the
-     * special that rolled it (no chaining into itself). Only when no other
-     * guarantee is pending; a lesson (`schedule`) always wins over it.
+     * Guarantees the trainer's next run is a guest (`Special.guest`) unlocked
+     * for them (`unlockedGuests`) they have not met, at random; once they have
+     * met those, any unlocked guest. Never the special that rolled it (no
+     * chaining into itself); nothing when no other guest is unlocked. Only
+     * when no other guarantee is pending; a lesson (`schedule`) always wins.
      */
     guaranteeGuest?: boolean;
     /** A win: the losing streak goes back to 0. */
@@ -140,6 +141,14 @@ export interface Special {
      * says so: it just shows "???".
      */
     after?: readonly string[];
+    /**
+     * Once open (every `after` found) and not yet found, it takes every roll
+     * on its set's lines (not the extras): base pool, set-wide boosts and
+     * buffs, a single line's buff (`claimOpener`, through `trainerPool`). The
+     * Family Photograph (owner, 2026-11-18): with all eight found, the next
+     * Estate roll is the photo. Once found, nothing changes.
+     */
+    claimsSet?: boolean;
     /**
      * A file in `src/assets/specials/` (a video or GIF) posted with the line:
      * on the ping, its DM copy, and when the special is read in full.
@@ -271,7 +280,8 @@ const REHEARSAL_OUTCOMES: readonly SpecialOutcome[] = [
 /**
  * Daitaku Helios's after-party (owner, 2026-11-15): every time, Palmer is
  * talked into introducing the trainer to another guest, so their next run
- * is a guest they have not met (any guest, once they have met them all).
+ * is an unlocked guest they have not met (any unlocked guest, once they
+ * have met those; never Helios; nothing if no other guest is unlocked).
  */
 const HELIOS_OUTCOMES: readonly SpecialOutcome[] = [
     {
@@ -376,15 +386,16 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: 'mejiro.ardan', name: "Mejiro Ardan", text: "Good evening, {user}-san. ...My my, you look tired. Business talk with the Satonos, I take it? No overdoing it, Trainer-san... めっ！ Fufu, Creek-san taught me that one.\nI had the kitchen brew a pot of herbal tea. Oh yes, Baaya's recipe; she swears by it. I added a few notes of my own. And yes, before any dancing. ...You're fine, you say? Fufu. Hush, and drink. The moon is lovely tonight, isn't it?\nOh dear, your shoulders are up by your ears again. Nervous, are we? I've watched you practise; you are far better than you think, and \"I can't dance\" is not an answer I accept tonight. 参りましょう。", after: ['mejiro.grandmother'] },
             { id: 'mejiro.bright', name: "Mejiro Bright", text: "...zzz... oh? Ah~ {user}-sama, good evening~ I dozed off while sewing, desu wa~ Look: a tiny suit for Maki-chan, just like yours~ Now she can come to the party with you too. Ufufu~\nYou came to fetch me for... the party? Oh, right. I'll be down in a moment~ But hold still first... Yes, the length is perfect~ Oh, what was I measuring? It gets rather cold here in winter, so I'm knitting you a scarf. Well, the beginnings of one anyway. It will be ready by winter... next winter, perhaps. Good things take their time, after all~", after: ['mejiro.grandmother'] },
             { id: 'mejiro.ramonu', name: "Mejiro Ramonu", text: "Ah, {user}. Your arrival is appreciated. Offer me your arm. Mmm... you're warm.\n...Still thinking about our training analysis? How... boorish of you. First the Symbolis, and now this. Eyes here, if you please. ...There we go. Good. Look all you want; I did *not* dress like this for no one, after all.\nArdan is dancing tonight, you see. Isn't her stubbornness lovely? You had better keep up too. The track can wait until tomorrow... tonight, it's just you and me.", after: ['mejiro.grandmother'], outcomes: RAMONU_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
-            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. No, {user}, I shall take this one myself. I have taken plenty of these with them, after all.\nRamonu, in the centre; yes, just like that. You look radiant, dear. McQueen, the cake can wait. ...Hoho, am I wrong? Ryan, it looks lovely, stop tugging the hem. Dober, eyes up; nobody is looking at anyone but you, and that is the point. Palmer, wake Bright. Brighttt, eyes here... yes, good. Ardan, beside your sister, please.\nVery well... there. One for the album. Now then, {user}: how does it feel, knowing that every road these girls ever ran somehow led them to you?\nThey are all smiling at you, you know. I would say that settles it. Welcome to the Mejiro Family, {user}.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'], media: 'mejiro-family-photograph.jpg', credit: 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>' },
+            { id: 'mejiro.photo', name: "The Family Photograph", text: "Everyone, gather round. No, {user}, I shall take this one myself. I have taken plenty of these with them, after all.\nRamonu, in the centre; yes, just like that. You look radiant, dear. McQueen, the cake can wait. ...Hoho, am I wrong? Ryan, it looks lovely, stop tugging the hem. Dober, eyes up; nobody is looking at anyone but you, and that is the point. Palmer, wake Bright. Brighttt, eyes here... yes, good. Ardan, beside your sister, please.\nVery well... there. One for the album. Now then, {user}: how does it feel, knowing that every road these girls ever ran somehow led them to you?\nThey are all smiling at you, you know. I would say that settles it. Welcome to the Mejiro Family, {user}.", after: ['mejiro.grandmother', 'mejiro.mcqueen', 'mejiro.ryan', 'mejiro.dober', 'mejiro.palmer', 'mejiro.ardan', 'mejiro.bright', 'mejiro.ramonu'], claimsSet: true, media: 'mejiro-family-photograph.jpg', credit: 'Art: <https://x.com/mokumoku_warabi/status/1783425000428757341>' },
             // An extra (owner, 2026-11-15): only through Ramonu's lesson boost or a lost lesson's guarantee.
             { id: 'mejiro.rehearsal', name: "Ramonu's Remedial Rehearsal", text: "Ah, {user}. Welcome back. We both know why you are here: your footwork has become... rather insufficient. Eyes on me, not on your feet. Now, shall we begin?", after: ['mejiro.ramonu'], extra: true, outcomes: REHEARSAL_OUTCOMES, forcedSuccess: REHEARSAL_FORCED },
-            // Guests (owner, 2026-11-15): extras of their own, only through the guest slice (`guestSlice`), once the Family Photograph is found.
-            { id: "guest.helios", name: "#MejiroAfterParty", text: "Weeei, Tore-pippi! SURPRIIISE~☆ ...Huh? You didn't expect me?! ぴえん... #DJHelios is literally everywhere, no cap! Okok, so why am I here? Pama-chin was like \"I wanna party\", and also like \"my テンアゲ playlist deserves to be heard by ALL the Meji-uwus!\", and I was like, say less! So I made her smuggle my decks into the ballroom, and Grandmother said \"one hour\". ONE HOUR?! よいちょまる, that's basically a #MusicalEternity, frfr! The whole Estate's gonna be shook, ya know! Oh, it's timeeeee! {user}, get on the floor, Pama-chin's already mega age-age! #MejiroAfterParty #ZuttomoDJ #BakunigeBPM", after: ['mejiro.photo'], extra: true, guest: true, outcomes: HELIOS_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
-            { id: "guest.satono", name: "Satono & Kita", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, along with some... discussions. Ah, you have informed McQueen-san... how thoughtful of you. Speaking of which, I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi, Trainer-san! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? ドドン!\"\nDiamond: \"Kita-chan, it's a dinner party. ...ふむふむ. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you mind letting McQueen-san know of our little plan?~\"\nMcQueen: \"Ah, right on time! Welcome to the Mejiro Estate. A festival? ...We shall see, desu wa. Thank you for greeting them for me, Trainer-san. Please, come in!\"", after: ['mejiro.photo'], extra: true, guest: true },
-            { id: "guest.goldship", name: "Golshi's Crashdown", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.photo'], extra: true, guest: true },
-            { id: "guest.symboli", name: "The Symboli-cs", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that.\"", after: ['mejiro.photo'], extra: true, guest: true, outcomes: SYMBOLI_OUTCOMES },
-            { id: "guest.teio", name: "Teio's Tag-along", text: "Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~\nWell yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~\n...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~\nNow come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!", after: ['mejiro.photo'], extra: true, guest: true, media: 'halloween-pose.mp4', credit: 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>', outcomes: TEIO_OUTCOMES },
+            // Guests (owner, 2026-11-15): extras of their own, only through the guest slice (`guestSlice`).
+            // Each unlocks with its counterpart Mejiro (owner, 2026-11-18): Helios with Palmer, the Symbolis with Ramonu, the rest with McQueen.
+            { id: "guest.helios", name: "#MejiroAfterParty", text: "Weeei, Tore-pippi! SURPRIIISE~☆ ...Huh? You didn't expect me?! ぴえん... #DJHelios is literally everywhere, no cap! Okok, so why am I here? Pama-chin was like \"I wanna party\", and also like \"my テンアゲ playlist deserves to be heard by ALL the Meji-uwus!\", and I was like, say less! So I made her smuggle my decks into the ballroom, and Grandmother said \"one hour\". ONE HOUR?! よいちょまる, that's basically a #MusicalEternity, frfr! The whole Estate's gonna be shook, ya know! Oh, it's timeeeee! {user}, get on the floor, Pama-chin's already mega age-age! #MejiroAfterParty #ZuttomoDJ #BakunigeBPM", after: ['mejiro.palmer'], extra: true, guest: true, outcomes: HELIOS_OUTCOMES, heldUntilPassed: 'mejiro.rehearsal' },
+            { id: "guest.satono", name: "Satono & Kita", text: "Diamond: \"Good evening, {user}-san. McQueen-san invited the Satono house to dinner, along with some... discussions. Ah, you have informed McQueen-san... how thoughtful of you. Speaking of which, I may have brought a plus-one... fufu.\"\nKitasan: \"Wasshoi, Trainer-san! Dia-chan, this place is HUGE! Can we have a festival in the east garden? Just a little one? ドドン!\"\nDiamond: \"Kita-chan, it's a dinner party. ...ふむふむ. Then again, nobody has ever tried. A jinx worth breaking, perhaps? Trainer-san, would you mind letting McQueen-san know of our little plan?~\"\nMcQueen: \"Ah, right on time! Welcome to the Mejiro Estate. A festival? ...We shall see, desu wa. Thank you for greeting them for me, Trainer-san. Please, come in!\"", after: ['mejiro.mcqueen'], extra: true, guest: true },
+            { id: "guest.goldship", name: "Golshi's Crashdown", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.mcqueen'], extra: true, guest: true },
+            { id: "guest.symboli", name: "The Symboli-cs", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that.\"", after: ['mejiro.ramonu'], extra: true, guest: true, outcomes: SYMBOLI_OUTCOMES },
+            { id: "guest.teio", name: "Teio's Tag-along", text: "Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~\nWell yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~\n...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~\nNow come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!", after: ['mejiro.mcqueen'], extra: true, guest: true, media: 'halloween-pose.mp4', credit: 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>', outcomes: TEIO_OUTCOMES },
         ],
     },
 ];
@@ -525,27 +536,35 @@ export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonl
 }
 
 /**
- * The guest slice (owner, 2026-11-15): once a trainer has found the Family
- * Photograph, an extra chance of a guest, `chance` x (guests they have not
- * found / all guests), drawn from every guest (repeats can come up while it
- * is open). It is content, not a boost: Boosts off does not pause it, but
- * it gives nothing while the set is paused, off or locked for them.
+ * The guest slice (owner, 2026-11-15; unlocks 2026-11-18): once a trainer
+ * has unlocked at least one guest (found its counterpart Mejiro, its
+ * `after`), an extra chance of a guest, `chance` x (guests they have not
+ * found / all guests), drawn from the guests unlocked for them (repeats can
+ * come up while it is open). It is content, not a boost: Boosts off does
+ * not pause it, but it gives nothing while the set is paused, off or locked
+ * for them.
  */
-export const GUEST_SLICE = { set: 'mejiro-estate', requires: 'mejiro.photo', chance: 0.04, label: 'The Mejiro Estate: guests are dropping by.' } as const;
+export const GUEST_SLICE = { set: 'mejiro-estate', chance: 0.04, label: 'The Mejiro Estate: guests are dropping by.' } as const;
 
 /** Every guest (`Special.guest`), in list order. */
 export const GUESTS: readonly (Special & { set: string })[] = RARE_OPENERS.filter((o) => o.guest);
 
-/** The guest slice's chance for a trainer who has found `foundIds`: 0 before the photo, and once every guest is found. */
+/** The guests unlocked for a trainer who has found `foundIds` (each one's `after` all found), found or not, in list order. */
+export function unlockedGuests(foundIds: ReadonlySet<string>): (Special & { set: string })[] {
+    return GUESTS.filter((g) => !g.after?.some((id) => !foundIds.has(id)));
+}
+
+/** The guest slice's chance for a trainer who has found `foundIds`: 0 with no guest unlocked, and once every guest is found. */
 export function guestSliceChance(foundIds: ReadonlySet<string>): number {
-    if (GUESTS.length === 0 || !foundIds.has(GUEST_SLICE.requires)) return 0;
+    if (GUESTS.length === 0 || unlockedGuests(foundIds).length === 0) return 0;
     const unfound = GUESTS.filter((g) => !foundIds.has(g.id)).length;
     return (GUEST_SLICE.chance * unfound) / GUESTS.length;
 }
 
 /**
  * A trainer's guest slice, or null when it has no chance or its set is
- * paused (`paused`), turned off or locked for them. `content`: not a boost.
+ * paused (`paused`), turned off or locked for them. Its pool is the guests
+ * unlocked for them. `content`: not a boost.
  */
 export function guestSlice(
     foundIds: ReadonlySet<string>,
@@ -557,7 +576,7 @@ export function guestSlice(
     if (paused.includes(set) || disabledSets.includes(set) || lockedSets.includes(set)) return null;
     const chance = guestSliceChance(foundIds);
     if (chance <= 0) return null;
-    return { chance, pool: GUESTS.map((g) => g.text), label: GUEST_SLICE.label, content: true };
+    return { chance, pool: unlockedGuests(foundIds).map((g) => g.text), label: GUEST_SLICE.label, content: true };
 }
 
 /** A set's lines for a set-wide outcome boost ("any Mejiro line"): all but its extras; none while it is paused. */
@@ -723,7 +742,10 @@ export const SPECIAL_LOCKS: readonly { id: string; owner: string; ownerChance: n
  */
 export const PERSONAL_BOOSTS: readonly { owner: string; chance: number; label: string }[] = [
     // Owner, 2026-11-11: Machitan answers her biggest fan's cheers (Tannhauser, voice 91020).
-    { owner: '457773317739380738', chance: 0.03, label: 'Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!' },
+    // Owner, 2026-11-18: raised to 4%, and a second 4% from the other Matikane
+    // (Fukukitaru, the fortune-teller): 8% in all, 19% with the Abusers tier.
+    { owner: '457773317739380738', chance: 0.04, label: 'Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!' },
+    { owner: '457773317739380738', chance: 0.04, label: "Fuku-chan's Forecast: Fukukitaru peers into her crystal ball and sees a great Mambologist in your future!" },
     // Owner, 2026-11-12: two at +1.5% each (3% in all). Tachyon hums "fuun", calls the
     // trainer Guinea Pig-kun, and aims 更にその先 ("even beyond that": past faster-than-light,
     // voice 91001); Win Variation dreams of the principal role (ballet).
@@ -781,6 +803,19 @@ export function redirectOpener(text: string, foundIds: ReadonlySet<string>): str
         special = specialById(missing);
     }
     return special?.text ?? text;
+}
+
+/**
+ * What a roll on `text` gives once staging is done (`redirectOpener`): a
+ * set's line (not an extra) becomes the set's claiming special
+ * (`Special.claimsSet`) while that is open and unfound for the trainer;
+ * anything else stays as it is.
+ */
+export function claimOpener(text: string, foundIds: ReadonlySet<string>): string {
+    const special = RARE_OPENERS.find((o) => o.text === text);
+    if (!special || special.extra) return text;
+    const claimer = RARE_OPENERS.find((o) => o.claimsSet && o.set === special.set && !foundIds.has(o.id) && !o.after?.some((id) => !foundIds.has(id)));
+    return claimer?.text ?? text;
 }
 
 /** The credit shown under `opener`'s media, or null. */

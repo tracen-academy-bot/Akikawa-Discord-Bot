@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelec
 import { getUserSettings } from './userSettings';
 import { FORTUNE_LINES, fortuneLineById, tentIsOpen } from './fortuneLines';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, closedSpecials, redirectOpener, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, claimOpener, closedSpecials, redirectOpener, unlockedGuests, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -440,7 +440,9 @@ export async function closedSpecialsFor(guildId: string, discordUserId: string):
  * A trainer's special pool with every closed special redirected to what it
  * waits on (`redirectOpener`): before Grandmother's welcome, every Mejiro
  * line in the pool is her line. Lines held until a special is passed
- * (`Special.heldUntilPassed`) are left out while the trainer owes it.
+ * (`Special.heldUntilPassed`) are left out while the trainer owes it. Then
+ * a set's claiming special takes its lines (`claimOpener`): with all eight
+ * found and no photo, every Mejiro Estate line left is the Family Photograph.
  */
 export async function trainerPool(guildId: string, discordUserId: string, pool: readonly string[]): Promise<string[]> {
     const found = await foundSpecialIds(guildId, discordUserId);
@@ -454,7 +456,11 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
         const holder = RARE_OPENERS.find((o) => o.text === t)?.heldUntilPassed;
         return holder !== undefined && holder === owed;
     };
-    return pool.map((t) => redirectOpener(t, found)).filter((t) => !held(t) && !resting.has(t));
+    return pool
+        .map((t) => redirectOpener(t, found))
+        .filter((t) => !held(t))
+        .map((t) => claimOpener(t, found))
+        .filter((t) => !resting.has(t));
 }
 
 /** True when a set is resting for a trainer: auto-off with extras left, not turned back on. */
@@ -465,13 +471,17 @@ export function isResting(setId: string, autoOffSets: readonly string[]): boolea
 /**
  * The texts of a resting set's lines that stay out of a trainer's pools
  * (owner, 2026-11-15): every found line of the set, except those an extra
- * not yet found still needs (its `after`, e.g. Ramonu for the Rehearsal,
- * the photo for the guests). Empty when the set is not resting.
+ * not yet found still needs (its `after`, e.g. Ramonu for the Rehearsal;
+ * not a guest's counterpart, since guests come from the guest slice).
+ * Empty when the set is not resting.
  */
 export function restingLines(setId: string, found: ReadonlySet<string>, autoOffSets: readonly string[]): string[] {
     if (!isResting(setId, autoOffSets)) return [];
     const inSet = RARE_OPENERS.filter((o) => o.set === setId);
-    const needed = new Set(inSet.filter((o) => o.extra && !found.has(o.id)).flatMap((o) => o.after ?? []));
+    // Only an extra that comes from rolling a line keeps it (the Rehearsal
+    // from Ramonu). A guest comes from the guest slice once its counterpart
+    // is found, so its counterpart can rest.
+    const needed = new Set(inSet.filter((o) => o.extra && !o.guest && !found.has(o.id)).flatMap((o) => o.after ?? []));
     return inSet.filter((o) => !o.extra && found.has(o.id) && !needed.has(o.id)).map((o) => o.text);
 }
 
@@ -602,13 +612,15 @@ export async function tickGuarantee(guildId: string, discordUserId: string, open
 
 /**
  * The text of the special a trainer's next ping is guaranteed to be, or
- * undefined: none is pending, or its set is off, locked or paused for them
- * (it then waits until the set is usable again).
+ * undefined: none is pending, its set is off, locked or paused for them, or
+ * it is still closed for them (`closed`, from `closedSpecials`: its `after`
+ * not all found). It then waits, due, until it can come up.
  */
-export function guaranteedOpener(state: OutcomeState, disabledSets: readonly string[], lockedSets: readonly string[]): string | undefined {
+export function guaranteedOpener(state: OutcomeState, disabledSets: readonly string[], lockedSets: readonly string[], closed: readonly string[] = []): string | undefined {
     if (state.guaranteedInRuns > 1) return undefined;
     const special = state.guaranteedSpecialId ? specialById(state.guaranteedSpecialId) : undefined;
     if (!special || disabledSets.includes(special.set) || lockedSets.includes(special.set) || PAUSED_SETS.includes(special.set)) return undefined;
+    if (closed.includes(special.text)) return undefined;
     return special.text;
 }
 
@@ -646,12 +658,12 @@ export async function applyOutcome(
         guaranteedSpecialId = rolled.schedule.special;
         guaranteedInRuns = 1 + Math.min(rolled.schedule.within - 1, Math.floor(random() * rolled.schedule.within));
     }
-    // Helios's introductions: the next run is a guest not yet met (any guest
-    // once all are met), never the one that rolled it; only if nothing else
-    // is pending.
+    // Helios's introductions: the next run is an unlocked guest not yet met
+    // (any unlocked guest once those are met), never the one that rolled it;
+    // nothing when no other guest is unlocked, or something else is pending.
     if (rolled?.guaranteeGuest && !guaranteedSpecialId && losingStreak.length === 0) {
         const found = await foundSpecialIds(guildId, discordUserId);
-        const guests = RARE_OPENERS.filter((o) => o.guest && o.id !== specialId);
+        const guests = unlockedGuests(found).filter((o) => o.id !== specialId);
         const unmet = guests.filter((o) => !found.has(o.id));
         const from = unmet.length > 0 ? unmet : guests;
         if (from.length > 0) {
