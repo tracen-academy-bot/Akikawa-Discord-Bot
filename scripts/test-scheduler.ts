@@ -592,6 +592,21 @@ async function main() {
     check('ramonu: a lesson during a losing streak schedules nothing new', await stateOf(), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] });
     const st = await rares.outcomeState(OG, T);
     check('guarantee: due now, it fires; not while the set is off or locked', [rares.guaranteedOpener(st, [], []), rares.guaranteedOpener(st, ['mejiro-estate'], []), rares.guaranteedOpener(st, [], ['mejiro-estate'])], [rehearsal.text, undefined, undefined]);
+    // A guarantee waits while its special is still closed for the trainer (owner, 2026-11-18): McQueen before Grandmother.
+    const mcqueenSp = openers.specialById('mejiro.mcqueen')!;
+    const mcqDue = { guaranteedSpecialId: 'mejiro.mcqueen', guaranteedInRuns: 1, losingStreak: [] as string[] };
+    check('guarantee: a closed special waits (McQueen before Grandmother), fires once open', [rares.guaranteedOpener(mcqDue, [], [], openers.closedSpecials(new Set())), rares.guaranteedOpener(mcqDue, [], [], openers.closedSpecials(new Set([grandma.id]))) === mcqueenSp.text, rares.guaranteedOpener(mcqDue, [], ['mejiro-estate'], openers.closedSpecials(new Set([grandma.id])))], [undefined, true, undefined]);
+    {
+        const CGd = `test-closed-guarantee-${Date.now()}`;
+        await prisma.timerUserSettings.create({ data: { guildId: CGd, discordUserId: 'c1', guaranteedSpecialId: 'mejiro.mcqueen', guaranteedInRuns: 1 } });
+        const before = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], [], await rares.closedSpecialsFor(CGd, 'c1'));
+        await rares.tickGuarantee(CGd, 'c1', PING_OPENERS[0]!);
+        await rares.recordRareOpener(CGd, 'c1', grandma.text);
+        const after = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], [], await rares.closedSpecialsFor(CGd, 'c1'));
+        check('guarantee: from the database, closed McQueen waits (still due after a ping), then fires once Grandmother is found', [before, (await rares.outcomeState(CGd, 'c1')).guaranteedInRuns, after === mcqueenSp.text], [undefined, 1, true]);
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: CGd } });
+        await prisma.timerUserSettings.deleteMany({ where: { guildId: CGd } });
+    }
     check('guarantee: chooseOpener honours it, whatever the roll and before any boost', [await rares.chooseOpener(OG, T, 0.99, fullPool, [], PING_OPENERS, rehearsal.text), await rares.chooseOpener(OG, T, 0.001, fullPool, extras, PING_OPENERS, rehearsal.text)], [rehearsal.text, rehearsal.text]);
     const lost2 = await ping(rehearsal.text, 0.5);
     const lost3 = await ping(rehearsal.text, 0.5);
@@ -1175,6 +1190,50 @@ async function main() {
         check('reset: the migration SQL itself keeps her earliest and removes her finds', [statements.length, (await prisma.timerFirstFinder.findUnique({ where: { guildId_specialId: { guildId: R3, specialId: GM } } }))?.at.toISOString(), await prisma.rareOpenerHit.count({ where: { guildId: R3, discordUserId: TY, specialId: GM } })], [2, '2026-11-15T21:00:00.000Z', 0]);
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: { in: [R1, R2, R3] } } });
         await prisma.timerFirstFinder.deleteMany({ where: { guildId: { in: [R1, R2, R3] } } });
+    }
+
+    // One-time McQueen (owner, 2026-11-18): the migration's SQL, run as written on scratch guilds.
+    {
+        const fsMig = await import('fs');
+        const MU = '801847462209126411';
+        const stamp = Date.now();
+        const M1 = `test-mcq1-${stamp}`; // two runs, no settings row
+        const M2 = `test-mcq2-${stamp}`; // a run and a live timer, settings with no guarantee
+        const M3 = `test-mcq3-${stamp}`; // a run, a pending Rehearsal
+        const M4 = `test-mcq4-${stamp}`; // only a timer
+        const M5 = `test-mcq5-${stamp}`; // another trainer only
+        const run = (guildId: string, discordUserId = MU) => prisma.trainingRun.create({ data: { guildId, discordUserId, startedAt: new Date(Date.now() - 3_600_000), completedAt: new Date() } });
+        const timer = (guildId: string) => prisma.trainingTimer.create({ data: { guildId, channelId: 'mcq-chan', discordUserId: MU, expiresAt: new Date(Date.now() + 1_800_000) } });
+        await run(M1);
+        await run(M1);
+        await run(M2);
+        await timer(M2);
+        await prisma.timerUserSettings.create({ data: { guildId: M2, discordUserId: MU, dmPing: true, disabledSets: ['online-sensations'] } });
+        await run(M3);
+        await prisma.timerUserSettings.create({ data: { guildId: M3, discordUserId: MU, guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 7 } });
+        await timer(M4);
+        await run(M5, 'someone-else');
+        const sql = fsMig.readFileSync('prisma/migrations/20261118000000_one_time_mcqueen_guarantee/migration.sql', 'utf8');
+        const statements = sql.split(';').map((x) => x.replace(/^\s*--.*$/gm, '').trim()).filter((x) => x.startsWith('INSERT'));
+        check('mcqueen migration: one INSERT ... ON CONFLICT DO UPDATE only where no guarantee is pending', [statements.length, sql.includes('ON CONFLICT ("guildId", "discordUserId") DO UPDATE'), sql.includes('WHERE "TimerUserSettings"."guaranteedSpecialId" IS NULL')], [1, true, true]);
+        for (const st of statements) await prisma.$executeRawUnsafe(st);
+        const rowOf = (guildId: string, discordUserId = MU) => prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } } });
+        const view = async (guildId: string, discordUserId = MU) => {
+            const r = await rowOf(guildId, discordUserId);
+            return r ? [r.guaranteedSpecialId, r.guaranteedInRuns] : null;
+        };
+        check('mcqueen migration: McQueen due next ping where they ran or have a timer; a pending Rehearsal kept; no one else touched', [await view(M1), await view(M2), await view(M3), await view(M4), await view(M5), await view(M5, 'someone-else')], [['mejiro.mcqueen', 1], ['mejiro.mcqueen', 1], ['mejiro.rehearsal', 7], ['mejiro.mcqueen', 1], null, null]);
+        const m2 = await rowOf(M2);
+        const m1 = await rowOf(M1);
+        check('mcqueen migration: other settings kept on update; a new row gets the defaults', [m2?.dmPing, m2?.disabledSets, m1?.boosts, m1?.dmPing, m1?.losingStreak, m1?.updatedAt instanceof Date], [true, ['online-sensations'], true, false, [], true]);
+        // Run again with a pending Rehearsal where McQueen was: not overwritten.
+        await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: M1, discordUserId: MU } }, data: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 3 } });
+        for (const st of statements) await prisma.$executeRawUnsafe(st);
+        check('mcqueen migration: run again, a pending guarantee is never overwritten', [await view(M1), await view(M3), await view(M2)], [['mejiro.rehearsal', 3], ['mejiro.rehearsal', 7], ['mejiro.mcqueen', 1]]);
+        const all = [M1, M2, M3, M4, M5];
+        await prisma.trainingRun.deleteMany({ where: { guildId: { in: all } } });
+        await prisma.trainingTimer.deleteMany({ where: { guildId: { in: all } } });
+        await prisma.timerUserSettings.deleteMany({ where: { guildId: { in: all } } });
     }
 
     check('expired timer removed', await prisma.trainingTimer.count({ where: { guildId: G, discordUserId: 'trainer-a' } }), 0);

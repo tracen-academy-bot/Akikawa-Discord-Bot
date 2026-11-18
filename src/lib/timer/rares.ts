@@ -608,13 +608,15 @@ export async function tickGuarantee(guildId: string, discordUserId: string, open
 
 /**
  * The text of the special a trainer's next ping is guaranteed to be, or
- * undefined: none is pending, or its set is off, locked or paused for them
- * (it then waits until the set is usable again).
+ * undefined: none is pending, its set is off, locked or paused for them, or
+ * it is still closed for them (`closed`, from `closedSpecials`: its `after`
+ * not all found). It then waits, due, until it can come up.
  */
-export function guaranteedOpener(state: OutcomeState, disabledSets: readonly string[], lockedSets: readonly string[]): string | undefined {
+export function guaranteedOpener(state: OutcomeState, disabledSets: readonly string[], lockedSets: readonly string[], closed: readonly string[] = []): string | undefined {
     if (state.guaranteedInRuns > 1) return undefined;
     const special = state.guaranteedSpecialId ? specialById(state.guaranteedSpecialId) : undefined;
     if (!special || disabledSets.includes(special.set) || lockedSets.includes(special.set) || PAUSED_SETS.includes(special.set)) return undefined;
+    if (closed.includes(special.text)) return undefined;
     return special.text;
 }
 

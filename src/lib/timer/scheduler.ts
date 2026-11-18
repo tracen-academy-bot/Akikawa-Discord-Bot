@@ -13,7 +13,7 @@ import { prisma } from '../../db/prisma';
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, grantSecondLove, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { applyOutcome, chooseOpener, completionNotice, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
+import { applyOutcome, chooseOpener, closedSpecialsFor, completionNotice, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances, fortuneBaseAdjust } from './boosts';
 import { tentIntroDue, tentIntroShown, tentIntroText, tentUnlockNotice } from './fortune';
 import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
@@ -187,9 +187,11 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 );
                 // Reminder lines don't repeat within 4 pings in a row (see COMMON_NO_REPEAT).
                 const commons = commonsFor(await recentCommons(timer.guildId, timer.discordUserId));
-                // A lost Remedial Rehearsal guarantees the next ping (while its set is usable).
+                // A lost Remedial Rehearsal guarantees the next ping (while its set is usable
+                // and the special is open for the trainer: a closed one waits, due).
                 const state = await outcomeState(timer.guildId, timer.discordUserId);
-                const guaranteed = guaranteedOpener(state, settings.disabledSets, lockedSets);
+                const closed = state.guaranteedSpecialId ? await closedSpecialsFor(timer.guildId, timer.discordUserId) : [];
+                const guaranteed = guaranteedOpener(state, settings.disabledSets, lockedSets, closed);
                 // Fuku-chan's Fortune Tent: owed its introduction, this run's ping is it (a due guarantee wins; the intro waits).
                 const intro = await tentIntroDue(timer.guildId, timer.discordUserId, guaranteed !== undefined, now);
                 // A Fortune Tent curse lowers the base for the day, Boosts on or off.

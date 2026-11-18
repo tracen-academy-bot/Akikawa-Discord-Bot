@@ -4,6 +4,26 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-18 — One-time McQueen; guarantees respect staging
+
+- Owner: trainer `801847462209126411` gets Mejiro McQueen on their next
+  possible ping. Migration `20261118000000_one_time_mcqueen_guarantee` sets
+  `TimerUserSettings.guaranteedSpecialId = 'mejiro.mcqueen'`,
+  `guaranteedInRuns = 1` in every guild where they have a `TrainingRun` or
+  `TrainingTimer` (INSERT ... SELECT DISTINCT guildId ... ON CONFLICT DO
+  UPDATE), only where no guarantee is pending (a Rehearsal owed is kept).
+  New rows get `updatedAt = NOW()` and the column defaults.
+- `guaranteedOpener` takes the trainer's closed specials (`closedSpecials`,
+  via `closedSpecialsFor` in the scheduler): a guaranteed special whose
+  `after` is not all found does not fire yet; it stays due (as it already
+  did while its set is locked, off or paused). So McQueen waits for
+  Grandmother if she has not been found.
+- Tests: the closed case (pure and from the database), and the migration's
+  SQL run as written on scratch guilds, twice (a pending guarantee is never
+  overwritten).
+
+---
+
 ## 2026-11-18 — Guests unlock with their counterpart Mejiro
 
 - Owner: each guest's `after` is its counterpart, not the photo: Helios
