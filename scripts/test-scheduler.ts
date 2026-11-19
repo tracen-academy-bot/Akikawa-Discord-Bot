@@ -821,7 +821,7 @@ async function main() {
     for (const o of mejiroMain.slice(0, 8)) await rares.recordRareOpener(AG, AU, o.text);
     const lastMain = mejiroMain[8]!;
     const done1 = await rares.completionNotice(AG, AU, lastMain.text);
-    check('auto-off: the 9th line completes the set: the ping says it rests', done1?.line.startsWith('**Complete!** The Mejiro Estate: every line found! Your lines rest now'), true);
+    check('auto-off: the 9th line completes the set: the ping says it rests', done1?.line, 'Congratulations on finishing the main set in The Mejiro Estate! The main set has been disabled, but you can re-enable it anytime. Enjoy the extras!');
     await rares.recordRareOpener(AG, AU, lastMain.text);
     await done1!.record();
     const restingNow = rares.restingLines('mejiro-estate', await rares.foundSpecialIds(AG, AU), (await usA.getUserSettings(AG, AU)).autoOffSets ?? []);
@@ -836,9 +836,12 @@ async function main() {
     // Every extra found too: the set turns off.
     const extrasList = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && o.extra);
     for (const o of extrasList.slice(0, -1)) await rares.recordRareOpener(AG, AU, o.text);
-    const done2 = await rares.completionNotice(AG, AU, extrasList.at(-1)!.text);
-    check('auto-off: the last extra completes everything: the ping says it is off', done2?.line.startsWith("**Complete!** The Mejiro Estate: every line found, so it's off for you now"), true);
+    // Owner, 2026-11-19: the Rehearsal is done only with Ramonu's Second Love; until then Ramonu stays and the extras are not finished.
+    check('auto-off: every extra seen but no Second Love: no notice, Ramonu stays', [await rares.completionNotice(AG, AU, extrasList.at(-1)!.text), await rares.trainerPool(AG, AU, mejiroAll)], [null, [ramonu.text]]);
     await rares.recordRareOpener(AG, AU, extrasList.at(-1)!.text);
+    await (await import('../src/lib/timer/rewards')).grantSecondLove(null, AG, AU);
+    const done2 = await rares.completionNotice(AG, AU, openers.specialById('mejiro.rehearsal')!.text);
+    check('auto-off: the Rehearsal won with the role completes everything: the extras notice', done2?.line, 'Congratulations on finishing the extras in The Mejiro Estate! The extras have been disabled, but you can re-enable them anytime.');
     await done2!.record();
     check('auto-off: the set is off for them', (await usA.getUserSettings(AG, AU)).disabledSets, ['mejiro-estate']);
     await usA.toggleSetting(AG, AU, 'set:mejiro-estate');
@@ -859,7 +862,7 @@ async function main() {
     const set1Done = await rares.completionNotice(OGx, AU, set1Lines.at(-1)!.text);
     await rares.recordRareOpener(OGx, AU, set1Lines.at(-1)!.text);
     await set1Done!.record();
-    check('auto-off: a set without extras turns off when complete', [set1Done?.line.includes("Lobby Loungers: every line found, so it's off"), (await usA.getUserSettings(OGx, AU)).disabledSets], [true, ['set1']]);
+    check('auto-off: a set without extras turns off when complete', [set1Done?.line === 'Congratulations on finishing Lobby Loungers! The set has been disabled, but you can re-enable it anytime.', (await usA.getUserSettings(OGx, AU)).disabledSets], [true, ['set1']]);
 
     // Counts and completion: guests never count, but score.
     const GB = `${GG}-board`;

@@ -295,6 +295,10 @@ async function setRole(guild: Guild, userId: string, roleId: string, give: boole
  * text without the role footer.
  */
 export async function grantSecondLove(guild: Guild | null, guildId: string, userId: string): Promise<{ roleId: string; had: boolean } | null> {
+    // Theirs for good: the Rehearsal is done for auto-off (`doneSpecialIds`), role set or not.
+    await prisma.timerUserSettings
+        .upsert({ where: { guildId_discordUserId: { guildId, discordUserId: userId } }, create: { guildId, discordUserId: userId, secondLove: true }, update: { secondLove: true } })
+        .catch((e) => console.warn(`Ramonu's Second Love: could not record it for ${userId} in ${guildId}:`, e instanceof Error ? e.message : e));
     // The server's first forced success ends Ramonu's own buff (`SeasonalBuff.endsOnSecondLove`).
     await prisma.timerSecondLove
         .upsert({ where: { guildId }, create: { guildId, firstUserId: userId }, update: {} })

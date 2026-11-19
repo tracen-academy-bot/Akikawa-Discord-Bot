@@ -430,6 +430,20 @@ export async function foundSpecialIds(guildId: string, discordUserId: string): P
     return new Set(hits.flatMap((h) => (h.specialId ? [h.specialId] : [])));
 }
 
+/**
+ * The specials a trainer is done with, for auto-off (owner, 2026-11-19):
+ * their finds, except a special with a forced success (the Remedial
+ * Rehearsal) until they have earned it (`TimerUserSettings.secondLove`).
+ * So a resting Estate keeps Ramonu, and its extras are not finished, until
+ * the role is won.
+ */
+export async function doneSpecialIds(guildId: string, discordUserId: string, found?: Set<string>): Promise<Set<string>> {
+    const done = new Set(found ?? (await foundSpecialIds(guildId, discordUserId)));
+    const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } }, select: { secondLove: true } });
+    if (!row?.secondLove) for (const o of RARE_OPENERS) if (o.forcedSuccess) done.delete(o.id);
+    return done;
+}
+
 /** The specials still closed to a trainer (see `Special.after`): out of their pool and boosts. */
 export async function closedSpecialsFor(guildId: string, discordUserId: string): Promise<string[]> {
     if (!RARE_OPENERS.some((o) => o.after)) return [];
@@ -448,7 +462,8 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
     const found = await foundSpecialIds(guildId, discordUserId);
     const state = await outcomeState(guildId, discordUserId);
     const autoOffSets = (await getUserSettings(guildId, discordUserId)).autoOffSets ?? [];
-    const resting = new Set(SPECIAL_SETS.flatMap((s) => restingLines(s.id, found, autoOffSets)));
+    const done = await doneSpecialIds(guildId, discordUserId, found);
+    const resting = new Set(SPECIAL_SETS.flatMap((s) => restingLines(s.id, done, autoOffSets)));
     // The special owed: scheduled or guaranteed, or mid losing streak (a streak belongs to the special with a forced success).
     const streakOn = RARE_OPENERS.find((o) => o.forcedSuccess)?.id ?? null;
     const owed = state.guaranteedSpecialId ?? (state.losingStreak.length > 0 ? streakOn : null);
@@ -497,8 +512,9 @@ export async function completionNotice(guildId: string, discordUserId: string, o
     if (!special) return null;
     const set = SPECIAL_SETS.find((s) => s.id === special.set);
     if (!set) return null;
-    const found = await foundSpecialIds(guildId, discordUserId);
-    found.add(special.id);
+    const found = await doneSpecialIds(guildId, discordUserId);
+    // This ping's special is found now; a forced-success special only once earned (granted before this runs).
+    if (!special.forcedSuccess || (await doneSpecialIds(guildId, discordUserId, new Set([special.id]))).has(special.id)) found.add(special.id);
     // A special not open yet (Special.opensAt) does not hold up a completion.
     const inSet = RARE_OPENERS.filter((o) => o.set === set.id && isOpenAt(o));
     const mainDone = inSet.filter((o) => !o.extra).every((o) => found.has(o.id));
@@ -514,7 +530,12 @@ export async function completionNotice(guildId: string, discordUserId: string, o
         });
     if (allDone && !handled.includes(`${set.id}:all`)) {
         return {
-            line: `**Complete!** ${set.name}: every line found, so it's off for you now and others come up more. Turn it back on in Specials anytime.`,
+            // Owner, 2026-11-19: the completion wording. The extras get their own
+            // when the main lines' notice already went out; one find finishing
+            // both at once (or a set without extras) gets the set's.
+            line: handled.includes(set.id)
+                ? `Congratulations on finishing the extras in ${set.name}! The extras have been disabled, but you can re-enable them anytime.`
+                : `Congratulations on finishing ${set.name}! The set has been disabled, but you can re-enable it anytime.`,
             record: async () => {
                 const now = await getUserSettings(guildId, discordUserId);
                 const auto = [...new Set([...(now.autoOffSets ?? []), set.id, `${set.id}:all`])];
@@ -525,7 +546,7 @@ export async function completionNotice(guildId: string, discordUserId: string, o
     }
     if (mainDone && !allDone && !handled.includes(set.id)) {
         return {
-            line: `**Complete!** ${set.name}: every line found! Your lines rest now, all but what its extras still need, so others come up more. Wake them in Specials anytime.`,
+            line: `Congratulations on finishing the main set in ${set.name}! The main set has been disabled, but you can re-enable it anytime. Enjoy the extras!`,
             record: async () => {
                 const now = await getUserSettings(guildId, discordUserId);
                 await save([...new Set([...(now.autoOffSets ?? []), set.id])], now.disabledSets);
