@@ -4,6 +4,31 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-19 — Completion wording; the Rehearsal is done only with the role
+
+- Owner's wording for auto-off notices (`completionNotice`):
+  - main lines done, extras left: "Congratulations on finishing the main
+    set in {set}! The main set has been disabled, but you can re-enable it
+    anytime. Enjoy the extras!";
+  - extras done after that: "Congratulations on finishing the extras in
+    {set}! The extras have been disabled, but you can re-enable them
+    anytime.";
+  - a set without extras, or one find finishing both: "Congratulations on
+    finishing {set}! The set has been disabled, but you can re-enable it
+    anytime."
+- Owner: the Remedial Rehearsal relies on Ramonu, so it is not done until
+  the trainer has earned Ramonu's Second Love. New
+  `TimerUserSettings.secondLove`, set by `grantSecondLove` (role set or
+  not). `doneSpecialIds` is the finds minus forced-success specials until
+  earned; `restingLines` (via `trainerPool`) and `completionNotice` use it.
+  So a resting Estate keeps Ramonu, and the extras notice waits, until the
+  role is won; then Ramonu rests too. This is the precedent for any later
+  extra with a role.
+- Migration `20261119000000_second_love_per_trainer` adds the column and
+  backfills each guild's first winner from `TimerSecondLove`. That is the
+  only per-trainer record; anyone else who won the role before this has
+  `secondLove = false` until their next forced success.
+
 ## 2026-11-18 — Weekly tiers with boosts; Tylina's Forecast
 
 - Owner: weekly tiers by place, each with a special-chance boost held until

@@ -204,6 +204,10 @@ model TimerUserSettings {
     /// extras are too (the set turns off), "<set>:kept" once the trainer
     /// turned it back on themselves (no more auto-off for it).
     autoOffSets   String[] @default([])
+    /// Earned "Ramonu's Second Love" (a forced success at her Remedial
+    /// Rehearsal). Until then the Rehearsal is not done for auto-off: a
+    /// resting Estate keeps Ramonu, and its extras are not finished.
+    secondLove    Boolean  @default(false)
     /// Fuku-chan's Fortune Tent: its unlock was announced ("Congrats!") on a ping.
     tentUnlocked  Boolean  @default(false)
     /// The tent's introduction is owed: it is the trainer's next run's ping
