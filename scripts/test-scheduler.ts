@@ -573,7 +573,7 @@ async function main() {
     await ping(ramonu.text, 0.1, 0.4);
     check('ramonu: the lesson schedules the Rehearsal 11 runs out (pick 0.4), with no boost', [await stateOf(), await rares.activeBoosts(OG, T)], [{ guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 11, losingStreak: [] }, []]);
     check('ramonu: the pick covers runs 1 to 25', [0, 0.04, 0.5, 0.9999].map((x) => 1 + Math.min(24, Math.floor(x * 25))), [1, 2, 13, 25]);
-    check('schedule: not due yet, so no guarantee', rares.guaranteedOpener(await stateOf(), [], []), undefined);
+    check('schedule: not due yet, so no guarantee', rares.guaranteedOpener(await stateOf(), []), undefined);
     // No Ramonu until her Rehearsal is passed (owner, 2026-11-15): out of every pool while it is owed.
     const mejiroLines = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
     const hasRamonu = async () => (await rares.trainerPool(OG, T, mejiroLines)).includes(ramonu.text);
@@ -616,18 +616,18 @@ async function main() {
     await ping(ramonu.text, 0.1, 0.9);
     check('ramonu: a lesson during a losing streak schedules nothing new', await stateOf(), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] });
     const st = await rares.outcomeState(OG, T);
-    check('guarantee: due now, it fires; not while the set is off or locked', [rares.guaranteedOpener(st, [], []), rares.guaranteedOpener(st, ['mejiro-estate'], []), rares.guaranteedOpener(st, [], ['mejiro-estate'])], [rehearsal.text, undefined, undefined]);
+    check('guarantee: due now, it fires, even with the set turned off; not while locked', [rares.guaranteedOpener(st, []), rares.guaranteedOpener(st, ['mejiro-estate'])], [rehearsal.text, undefined]);
     // A guarantee waits while its special is still closed for the trainer (owner, 2026-11-18): McQueen before Grandmother.
     const mcqueenSp = openers.specialById('mejiro.mcqueen')!;
     const mcqDue = { guaranteedSpecialId: 'mejiro.mcqueen', guaranteedInRuns: 1, losingStreak: [] as string[] };
-    check('guarantee: a closed special waits (McQueen before Grandmother), fires once open', [rares.guaranteedOpener(mcqDue, [], [], openers.closedSpecials(new Set())), rares.guaranteedOpener(mcqDue, [], [], openers.closedSpecials(new Set([grandma.id]))) === mcqueenSp.text, rares.guaranteedOpener(mcqDue, [], ['mejiro-estate'], openers.closedSpecials(new Set([grandma.id])))], [undefined, true, undefined]);
+    check('guarantee: a closed special waits (McQueen before Grandmother), fires once open', [rares.guaranteedOpener(mcqDue, [], openers.closedSpecials(new Set())), rares.guaranteedOpener(mcqDue, [], openers.closedSpecials(new Set([grandma.id]))) === mcqueenSp.text, rares.guaranteedOpener(mcqDue, ['mejiro-estate'], openers.closedSpecials(new Set([grandma.id])))], [undefined, true, undefined]);
     {
         const CGd = `test-closed-guarantee-${Date.now()}`;
         await prisma.timerUserSettings.create({ data: { guildId: CGd, discordUserId: 'c1', guaranteedSpecialId: 'mejiro.mcqueen', guaranteedInRuns: 1 } });
-        const before = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], [], await rares.closedSpecialsFor(CGd, 'c1'));
+        const before = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], await rares.closedSpecialsFor(CGd, 'c1'));
         await rares.tickGuarantee(CGd, 'c1', PING_OPENERS[0]!);
         await rares.recordRareOpener(CGd, 'c1', grandma.text);
-        const after = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], [], await rares.closedSpecialsFor(CGd, 'c1'));
+        const after = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], await rares.closedSpecialsFor(CGd, 'c1'));
         check('guarantee: from the database, closed McQueen waits (still due after a ping), then fires once Grandmother is found', [before, (await rares.outcomeState(CGd, 'c1')).guaranteedInRuns, after === mcqueenSp.text], [undefined, 1, true]);
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: CGd } });
         await prisma.timerUserSettings.deleteMany({ where: { guildId: CGd } });
@@ -1051,7 +1051,7 @@ async function main() {
         check('intro: a due guarantee (Rehearsal, a Helios guest) wins; the intro waits', await fortune.tentIntroDue(FG, 't1', true, OPEN), false);
         await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 't1' } }, data: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1 } });
         const st = await rares.outcomeState(FG, 't1');
-        check('intro: the guarantee check is guaranteedOpener (due at 1 run)', [rares.guaranteedOpener(st, [], []) !== undefined, rares.guaranteedOpener({ ...st, guaranteedInRuns: 3 }, [], [])], [true, undefined]);
+        check('intro: the guarantee check is guaranteedOpener (due at 1 run)', [rares.guaranteedOpener(st, []) !== undefined, rares.guaranteedOpener({ ...st, guaranteedInRuns: 3 }, [], [])], [true, undefined]);
         check('intro: still owed while it waits', await fortune.tentIntroDue(FG, 't1', false, OPEN), true);
         const intro = fortune.tentIntroText('t1').split('\n');
         check('intro: four speakers, then the -# line, the mention once', [intro.length, intro.map((l) => l.split(':')[0]), intro[4]!.startsWith("-# Fuku-chan's Fortune Tent is open"), fortune.TENT_INTRO.split('{user}').length - 1, intro.join('\n').includes('<@t1>')], [5, ['Machitan', 'Fuku', 'Machitan', 'Fuku', "-# Fuku-chan's Fortune Tent is open"], true, 1, true]);

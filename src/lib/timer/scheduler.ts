@@ -187,11 +187,12 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 );
                 // Reminder lines don't repeat within 4 pings in a row (see COMMON_NO_REPEAT).
                 const commons = commonsFor(await recentCommons(timer.guildId, timer.discordUserId));
-                // A lost Remedial Rehearsal guarantees the next ping (while its set is usable
-                // and the special is open for the trainer: a closed one waits, due).
+                // A lost Remedial Rehearsal guarantees the next ping (while its set is unlocked
+                // and not paused, even if turned off, and the special is open for the trainer:
+                // a closed one waits, due).
                 const state = await outcomeState(timer.guildId, timer.discordUserId);
                 const closed = state.guaranteedSpecialId ? await closedSpecialsFor(timer.guildId, timer.discordUserId) : [];
-                const guaranteed = guaranteedOpener(state, settings.disabledSets, lockedSets, closed);
+                const guaranteed = guaranteedOpener(state, lockedSets, closed);
                 // Fuku-chan's Fortune Tent: owed its introduction, this run's ping is it (a due guarantee wins; the intro waits).
                 const intro = await tentIntroDue(timer.guildId, timer.discordUserId, guaranteed !== undefined, now);
                 // A Fortune Tent curse lowers the base for the day, Boosts on or off.

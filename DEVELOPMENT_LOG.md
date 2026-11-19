@@ -20,6 +20,12 @@ Newest first. Each entry records what changed and, more importantly, why.
   trainer who has not met her); the scheduler did this one step later anyway.
 - Unchanged (owner): Ramonu's outcomes still roll after Second Love when the
   Estate is on.
+- Guarantees fire even when the trainer turned the set off (owner,
+  2026-11-19): an owed lesson is a debt from a roll already made, and
+  firing it ends Ramonu's hold (`heldUntilPassed`: out of every pool from
+  the scheduling hit until the Rehearsal is passed). They still wait while
+  the set is locked or paused, or the special is closed. `guaranteedOpener`
+  drops its `disabledSets` argument.
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role
 
