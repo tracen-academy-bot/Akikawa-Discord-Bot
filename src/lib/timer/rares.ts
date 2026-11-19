@@ -514,7 +514,8 @@ export async function completionNotice(guildId: string, discordUserId: string, o
         });
     if (allDone && !handled.includes(`${set.id}:all`)) {
         return {
-            line: `**Complete!** ${set.name}: every line found, so it's off for you now and others come up more. Turn it back on in Specials anytime.`,
+            // Owner, 2026-11-19: the completion wording.
+            line: `Congratulations on finishing ${set.name}! The set has been disabled, but you can re-enable it anytime.`,
             record: async () => {
                 const now = await getUserSettings(guildId, discordUserId);
                 const auto = [...new Set([...(now.autoOffSets ?? []), set.id, `${set.id}:all`])];
@@ -525,7 +526,7 @@ export async function completionNotice(guildId: string, discordUserId: string, o
     }
     if (mainDone && !allDone && !handled.includes(set.id)) {
         return {
-            line: `**Complete!** ${set.name}: every line found! Your lines rest now, all but what its extras still need, so others come up more. Wake them in Specials anytime.`,
+            line: `Congratulations on finishing ${set.name}! The set has been disabled, but you can re-enable it anytime. Enjoy the extras!`,
             record: async () => {
                 const now = await getUserSettings(guildId, discordUserId);
                 await save([...new Set([...(now.autoOffSets ?? []), set.id])], now.disabledSets);
