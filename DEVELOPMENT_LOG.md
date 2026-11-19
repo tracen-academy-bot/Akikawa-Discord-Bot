@@ -4,6 +4,23 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-19 — Boosts keep their rate per line
+
+- Bug (seen live): Ramonu's footwork outcome (+5%, "any Mejiro line") on a
+  resting Estate put the whole 5% on Ramonu, the only line left in the pool
+  (others rest; she stays until Second Love). Mejiro week's +2% and the
+  Rehearsal win's +3% did the same.
+- Fix (owner, 2026-11-19): `extraChances` narrows each boost's pool with
+  `trainerPool` and cuts its chance by the share of lines left out
+  (`perLine`). Footwork on a resting Estate is 5%/9 ≈ 0.56% on Ramonu.
+  Boosts on the trainer's own pool lose nothing; the guest slice keeps its
+  own math. `/timer boosts` shows the cut chance. No grandfathering: boosts
+  already held are cut on deploy.
+- Side effect: extras' pools now come back redirected (Grandmother for a
+  trainer who has not met her); the scheduler did this one step later anyway.
+- Unchanged (owner): Ramonu's outcomes still roll after Second Love when the
+  Estate is on.
+
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role
 
 - Owner's wording for auto-off notices (`completionNotice`):

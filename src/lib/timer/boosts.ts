@@ -115,8 +115,21 @@ export async function extraChances(
     }
     const fortune = await fortuneToday(guildId, discordUserId, now);
     if (fortune && fortune.tier.delta > 0) extras.push({ chance: fortune.tier.delta, pool, label: fortune.tier.label });
-    if (guests) extras.push(guests);
-    return extras;
+    // Each boost keeps its rate per line (owner, 2026-11-19): it shrinks by the
+    // share of its lines out of the trainer's pool (`trainerPool`: resting,
+    // held). So "any Mejiro line" on a resting Estate with only Ramonu left is
+    // a ninth of its chance on Ramonu, not all of it. Boosts on the trainer's
+    // own pool lose nothing; the guest slice keeps its own math.
+    const scaled = await Promise.all(extras.map((e) => perLine(guildId, discordUserId, e)));
+    if (guests) scaled.push(guests);
+    return scaled;
+}
+
+/** A boost with its pool narrowed to the trainer's (`trainerPool`) and its chance cut by the share of lines left out. */
+async function perLine(guildId: string, discordUserId: string, e: ExtraChance): Promise<ExtraChance> {
+    if (e.pool.length === 0) return e;
+    const left = await trainerPool(guildId, discordUserId, e.pool);
+    return left.length === e.pool.length ? { ...e, pool: left } : { ...e, pool: left, chance: (e.chance * left.length) / e.pool.length };
 }
 
 /**

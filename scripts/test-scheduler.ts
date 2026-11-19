@@ -386,7 +386,8 @@ async function main() {
     const mwLocked = await extraChances(XG, 'mw-new', mwBase, ['online-sensations', 'mejiro-estate'], false, fullPool, MW);
     const mwOpen = await extraChances(XG, 'mw-open', mwBase, ['online-sensations'], false, fullPool, MW);
     check('season: before the Estate opens, +2% on the invitation; after, +2% on its 9 lines', [mwLocked.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length]), mwOpen.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length])], [[[0.02, 1]], [[0.02, 9]]]);
-    check('season: Mejiro week also gives Ramonu her own +2% once the Estate is open', [mwLocked.some((e) => e.label?.startsWith('Mejiro Ramonu')), mwOpen.filter((e) => e.label?.startsWith('Mejiro Ramonu: You stayed when it mattered')).map((e) => [e.chance, e.pool.length, e.pool[0] === openers.specialById('mejiro.ramonu')!.text])], [false, [[0.02, 1, true]]]);
+    // Her line waits on Grandmother for a trainer who has not met her (`trainerPool` redirects it).
+    check('season: Mejiro week also gives Ramonu her own +2% once the Estate is open', [mwLocked.some((e) => e.label?.startsWith('Mejiro Ramonu')), mwOpen.filter((e) => e.label?.startsWith('Mejiro Ramonu: You stayed when it mattered')).map((e) => [e.chance, e.pool.length, e.pool[0] === openers.specialById('mejiro.grandmother')!.text])], [false, [[0.02, 1, true]]]);
     check('season: the Estate label', openers.SEASONAL_BUFFS[2]?.label, 'Mejiro week: Come meet the Mejiros at the Estate!');
     // Ramonu's +2% runs until the server's first Ramonu's Second Love, its end never shown (owner, 2026-11-15).
     const ramonuBuff = mwOpen.find((e) => e.label?.startsWith('Mejiro Ramonu'));
@@ -830,6 +831,15 @@ async function main() {
     check('auto-off: found lines rest, but Ramonu stays (the Rehearsal); guest counterparts and the photo rest', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(palmerText), restingNow.includes(mcqueenText), restingNow.includes(photo.text)], [8, false, true, true, true]);
     const mejiroAll = mejiroMain.map((o) => o.text);
     check('auto-off: the pool leaves resting lines out', await rares.trainerPool(AG, AU, mejiroAll), [ramonu.text]);
+    // Per-line boosts (owner, 2026-11-19): Ramonu's footwork boost (+5%, any Mejiro line) on a resting Estate is a ninth of it, on Ramonu only.
+    {
+        const footwork = openers.outcomeBoostByKey('mejiro.ramonu:footwork')!;
+        await rares.grantOutcomeBoost(AG, AU, footwork);
+        const { extraChances: ec } = await import('../src/lib/timer/boosts');
+        const fw = (await ec(AG, AU, await usA.getUserSettings(AG, AU), [], false, [], new Date('2026-01-01T00:00:00Z'))).filter((e) => e.label?.startsWith('The Mejiro Estate: any Mejiro line'));
+        check('per line: a resting Estate keeps a ninth of an Estate boost, on Ramonu', fw.map((e) => [Math.round(e.chance * 1e6) / 1e6, e.pool]), [[Math.round((0.05 / 9) * 1e6) / 1e6, [ramonu.text]]]);
+        await prisma.timerSpecialBoost.deleteMany({ where: { guildId: AG, discordUserId: AU } });
+    }
     check('auto-off: a repeat find says nothing more', await rares.completionNotice(AG, AU, lastMain.text), null);
     const restPage = json(await rares.mySpecialsView(AG, AU, rares.pageOfSet('mejiro-estate'), PRE));
     check('auto-off: the page says Resting, and so does its button', [restPage.embeds[0]!.description?.includes('Resting: every line found'), restPage.components[0]!.components[1]?.label], [true, 'The Mejiro Estate: Resting']);
