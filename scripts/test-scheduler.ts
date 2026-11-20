@@ -201,9 +201,10 @@ async function main() {
     check('sets: every special belongs to a set', openers.RARE_OPENERS.every((o) => openers.SPECIAL_SETS.some((set) => set.id === o.set)), true);
     // Paused sets (The Mejiro Estate, owner 2026-11-10) give no new finds: never in the pool.
     // A special not open yet (Matikanefukukitaru, until the Fortune Tent opens) is in no pool either.
-    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set) && !o.extra && openers.isOpenAt(o)).length;
+    // Guests are in the usual pool too (owner, 2026-11-19); other extras never.
+    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set) && (!o.extra || o.guest) && openers.isOpenAt(o)).length;
     const set1Open = openers.SPECIAL_SETS[0]!.openers.filter((o) => openers.isOpenAt(o)).length;
-    check('sets: all on gives every special of the sets not paused (extras never)', openers.rarePoolFor([]).length, liveSpecials);
+    check('sets: all on gives every special of the sets not paused (guests too; other extras never)', openers.rarePoolFor([]).length, liveSpecials);
     check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, liveSpecials - set1Open);
     // The Mejiro Estate was paused 2026-11-10 and resumed 2026-11-15 (owner).
     check('paused: no set is paused', openers.PAUSED_SETS, []);
@@ -714,7 +715,7 @@ async function main() {
     const guestTexts = guests.map((g) => g.text);
     const hasGuest = (pool: readonly string[]) => pool.some((t) => guestTexts.includes(t));
     const mejiroLinesLive = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
-    check('guests: out of every normal pool (base, set-wide, boosts, the photo\'s wait)', [hasGuest(openers.rarePoolFor([], [])), hasGuest(openers.setLinesPool('mejiro-estate')), hasGuest(mejiroLinesLive), hasGuest(openers.boostPool('mejiro-estate', 'collab')), hasGuest(openers.outcomeBoostPool({ set: 'mejiro-estate' })), photo.after?.some((id) => guestIds.includes(id))], [false, false, false, false, false, false]);
+    check('guests: in the usual pool (owner, 2026-11-19), but out of set-wide pools, boosts and the photo\'s wait', [!hasGuest(openers.rarePoolFor([], [])), hasGuest(openers.setLinesPool('mejiro-estate')), hasGuest(mejiroLinesLive), hasGuest(openers.boostPool('mejiro-estate', 'collab')), hasGuest(openers.outcomeBoostPool({ set: 'mejiro-estate' })), photo.after?.some((id) => guestIds.includes(id))], [false, false, false, false, false, false]);
     const openGuests = (...ids: string[]) => guestIds.filter((id) => !openers.closedSpecials(new Set([grandma.id, ...ids])).includes(openers.specialById(id)!.text));
     check('guests: each opens with its counterpart (none with Grandmother alone; Palmer: Helios; Ramonu: the Symbolis; McQueen: the other three; all seven: all five)', [
         openGuests(),
@@ -831,6 +832,16 @@ async function main() {
     check('auto-off: found lines rest, but Ramonu stays (the Rehearsal); guest counterparts and the photo rest', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(palmerText), restingNow.includes(mcqueenText), restingNow.includes(photo.text)], [8, false, true, true, true]);
     const mejiroAll = mejiroMain.map((o) => o.text);
     check('auto-off: the pool leaves resting lines out', await rares.trainerPool(AG, AU, mejiroAll), [ramonu.text]);
+    // The usual pool hunts guests too (owner, 2026-11-19): a resting Estate with the other sets off is Ramonu plus unfound guests; a found guest rests.
+    {
+        const usual = () => rares.trainerPool(AG, AU, openers.rarePoolFor(['set1', 'online-sensations']));
+        const guestTexts5 = RARE_OPENERS.filter((o) => o.guest).map((o) => o.text);
+        check('usual pool: Ramonu and every unlocked unfound guest', (await usual()).sort(), [ramonu.text, ...guestTexts5].sort());
+        await rares.recordRareOpener(AG, AU, openers.specialById('guest.teio')!.text);
+        check('usual pool: a found guest rests', (await usual()).includes(openers.specialById('guest.teio')!.text), false);
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: AG, discordUserId: AU, specialId: 'guest.teio' } });
+        check('usual pool: a locked guest stays out (no Palmer, no Helios)', (await rares.trainerPool(AG, 'nobody', openers.rarePoolFor([]))).some((t) => guestTexts5.includes(t)), false);
+    }
     // Per-line boosts (owner, 2026-11-19): Ramonu's footwork boost (+5%, any Mejiro line) on a resting Estate is a ninth of it, on Ramonu only.
     {
         const footwork = openers.outcomeBoostByKey('mejiro.ramonu:footwork')!;

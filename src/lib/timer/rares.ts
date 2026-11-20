@@ -471,7 +471,13 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
         const holder = RARE_OPENERS.find((o) => o.text === t)?.heldUntilPassed;
         return holder !== undefined && holder === owed;
     };
+    // A guest still locked (its counterpart not found) is left out, not redirected.
+    const lockedGuest = (t: string) => {
+        const o = RARE_OPENERS.find((x) => x.text === t);
+        return o?.guest === true && (o.after ?? []).some((id) => !found.has(id));
+    };
     return pool
+        .filter((t) => !lockedGuest(t))
         .map((t) => redirectOpener(t, found))
         .filter((t) => !held(t))
         .map((t) => claimOpener(t, found))
@@ -497,7 +503,8 @@ export function restingLines(setId: string, found: ReadonlySet<string>, autoOffS
     // from Ramonu). A guest comes from the guest slice once its counterpart
     // is found, so its counterpart can rest.
     const needed = new Set(inSet.filter((o) => o.extra && !o.guest && !found.has(o.id)).flatMap((o) => o.after ?? []));
-    return inSet.filter((o) => !o.extra && found.has(o.id) && !needed.has(o.id)).map((o) => o.text);
+    // Found guests rest too (they are in the usual pool); the Rehearsal never is.
+    return inSet.filter((o) => (!o.extra || o.guest) && found.has(o.id) && !needed.has(o.id)).map((o) => o.text);
 }
 
 /**

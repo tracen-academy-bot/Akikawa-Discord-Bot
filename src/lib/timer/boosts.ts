@@ -120,7 +120,8 @@ export async function extraChances(
     // held). So "any Mejiro line" on a resting Estate with only Ramonu left is
     // a ninth of its chance on Ramonu, not all of it. Boosts on the trainer's
     // own pool lose nothing; the guest slice keeps its own math.
-    const scaled = await Promise.all(extras.map((e) => perLine(guildId, discordUserId, e)));
+    // Boosts on the usual pool (`pool`, already the trainer's) are left whole.
+    const scaled = await Promise.all(extras.map((e) => (e.pool === pool ? e : perLine(guildId, discordUserId, e))));
     if (guests) scaled.push(guests);
     return scaled;
 }

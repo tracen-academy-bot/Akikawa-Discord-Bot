@@ -4,6 +4,22 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-19 — The usual pool hunts guests too
+
+- Seen live: Tylina (Set 1 and #OnlineSensations complete and off, Estate
+  resting, Ramonu held for a lesson) had an empty usual pool, so her base,
+  personal and tier boosts had nothing to draw on and `/timer boosts` hid
+  them. Her only live chance was the guest slice.
+- Owner: "the pool should hunt for everything, extras included". Guests
+  join the usual pool (`rarePoolFor`); `trainerPool` leaves out locked
+  guests (not redirected) and `restingLines` rests found guests. The
+  Rehearsal stays out (lesson mechanics only); set-wide "any Mejiro line"
+  pools stay on the nine lines; the guest slice is unchanged.
+- `extraChances` leaves boosts on the usual pool whole (no per-line cut):
+  that pool is already the trainer's.
+- For everyone: 5 more lines in the usual pool once unlocked, so guests
+  also come from the base roll.
+
 ## 2026-11-19 — Boosts keep their rate per line
 
 - Bug (seen live): Ramonu's footwork outcome (+5%, "any Mejiro line") on a

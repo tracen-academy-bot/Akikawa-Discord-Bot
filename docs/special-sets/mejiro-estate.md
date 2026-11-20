@@ -171,6 +171,13 @@ dialogue is for guests only. Gold Ship and Teio use the owner's final copy
   after one, 0 (no slice) once all five are found, or while none is
   unlocked. It draws only from the guests unlocked for the trainer (found
   or not, `unlockedGuests`), so repeats can come up while it is open.
+- Also in the usual pool (owner, 2026-11-19: "the pool should hunt for
+  everything, extras included"): `rarePoolFor` includes guests, and
+  `trainerPool` keeps only those unlocked (a locked guest is left out, not
+  redirected). So the base 6% and every boost on the usual pool (personal,
+  tier, Fortune, early start) can land on a guest. Found guests rest with a
+  resting Estate. "Any Mejiro line" boosts stay on the nine Mejiro lines.
+  The Rehearsal is never in the usual pool.
 - Helios's introductions (`guaranteeGuest`, every time she comes up): the
   next run is an unlocked guest the trainer has not met (any unlocked guest
   once those are met), never Helios herself; nothing when no other guest is
