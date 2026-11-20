@@ -19,6 +19,11 @@ Newest first. Each entry records what changed and, more importantly, why.
   that pool is already the trainer's.
 - For everyone: 5 more lines in the usual pool once unlocked, so guests
   also come from the base roll.
+- `/timer boosts` (owner: "if everything is actually turned off then say
+  so"): with nothing anywhere to find it leads with "**Nothing left to
+  find.**", shows 0%, and drops the Early Start tip. A boost with nothing to
+  land on is listed as "**0%** … (nothing to find right now)" instead of
+  hidden (e.g. Estate boosts while Ramonu is held).
 
 ## 2026-11-19 — Boosts keep their rate per line
 

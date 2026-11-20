@@ -156,9 +156,12 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
     ]);
     const pool = await trainerPool(guildId, discordUserId, rarePoolFor(settings.disabledSets, lockedSets, now));
     // Listed as if Boosts were on, so paused ones still show.
-    const extras = (await extraChances(guildId, discordUserId, { ...settings, boosts: true }, lockedSets, timer?.earlyStart ?? false, pool, now)).filter(
-        (e) => e.pool.length > 0,
-    );
+    const all = await extraChances(guildId, discordUserId, { ...settings, boosts: true }, lockedSets, timer?.earlyStart ?? false, pool, now);
+    // A boost with nothing to land on stays listed, at 0% (owner, 2026-11-19: say so, don't hide it).
+    const extras = all.filter((e) => e.pool.length > 0 && e.chance > 0);
+    const idle = all.filter((e) => !(e.pool.length > 0 && e.chance > 0));
+    // Nothing anywhere: no line on, no boost or slice with anything to find.
+    const nothing = pool.length === 0 && extras.length === 0;
     // Fortune Tent: a curse lowers the base, Boosts on or off; the button once they have the tent.
     const fortune = await fortuneToday(guildId, discordUserId, now);
     const curse = fortune && fortune.tier.delta < 0 ? fortune : null;
@@ -168,11 +171,15 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
     const rawTotal = base + extras.filter((e) => settings.boosts || e.content).reduce((sum, e) => sum + e.chance, 0);
     const total = base > 0 ? effectiveChance(rawTotal) : rawTotal;
 
-    const lines = [`**Base:** ${percent(RARE_OPENER_CHANCE)} on every ping${pool.length === 0 ? ' (every special set is off for you)' : ''}.`];
+    const lines = nothing
+        ? ["**Nothing left to find.** Every special set is off or finished for you, so your pings can't be specials right now. Turn a set back on in Specials to find repeats.", '']
+        : [];
+    lines.push(`**Base:** ${percent(RARE_OPENER_CHANCE)} on every ping${pool.length === 0 ? ' (nothing to find in your sets)' : ''}.`);
     if (curse) lines.push(`**-${percent(-curse.tier.delta)}** ${curse.tier.label}`);
-    if (extras.length === 0) lines.push('No boosts right now.');
+    if (extras.length === 0 && idle.length === 0) lines.push('No boosts right now.');
     for (const e of extras) lines.push(`**+${percent(e.chance)}** ${e.label ?? ''}${settings.boosts || e.content ? '' : ' (paused)'}`);
-    if (!timer?.earlyStart) {
+    for (const e of idle) lines.push(`**0%** ${e.label ?? ''} (nothing to find right now)`);
+    if (!timer?.earlyStart && !nothing) {
         lines.push(
             `-# Early Start: start your next run quickly for +${percent(EARLY_START.chance)} overall!`,
         );

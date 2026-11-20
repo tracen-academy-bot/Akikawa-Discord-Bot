@@ -425,6 +425,13 @@ async function main() {
     check('boosts view: off pauses them, total is the base', [offText.includes('(paused)'), offText.includes('**Your next ping: 6% chance of a special.**'), (off.components[0]!.toJSON().components[0] as { custom_id: string; label: string }).custom_id, (off.components[0]!.toJSON().components[0] as { label: string }).label], [true, true, BOOSTS_TOGGLE_ID, 'Boosts: Off']);
     const quiet = (await boostsView(SN, 'nobody', OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
     check('boosts view: nothing running, with the early-start tip', [quiet.includes('No boosts right now.'), quiet.includes('-# Early Start: start your next run quickly for +1% overall!'), quiet.includes('**Your next ping: 6% chance')], [true, true, true]);
+    // Everything off (owner, 2026-11-19): the view says so, personal boosts stay listed at 0%, no early-start tip.
+    {
+        const ty = '457773317739380738';
+        for (const id of ['set1', 'online-sensations', 'mejiro-estate']) await us0.toggleSetting(SN, ty, `set:${id}`);
+        const allOff = (await boostsView(SN, ty, OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
+        check('boosts view: everything off says so, lists idle boosts at 0%, total 0%', [allOff.startsWith('**Nothing left to find.**'), allOff.includes("**0%** Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist! (nothing to find right now)"), allOff.includes('Early Start: start your next run'), allOff.includes('**Your next ping: 0% chance of a special.**')], [true, true, false, true]);
+    }
     const inWeek = new Date(week.from.getTime() + 60_000);
     const before = (await boostsView(SN, 'not-unlocked', inWeek)).embeds[0]!.toJSON().description ?? '';
     check('boosts view: Curren Chan week before unlocking, total 7%', [before.includes(`**+1%** Curren Chan: meet her in the lobby! Ends <t:${Math.floor(week.until.getTime() / 1000)}:R>.`), before.includes('**Your next ping: 7% chance')], [true, true]);
