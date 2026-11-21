@@ -28,7 +28,7 @@ const SCALE = 2;
 const MARGIN = 48;
 const HEADER_H = 178;
 const COLUMN_HEAD_H = 40;
-const BAND_H = 92;
+const BAND_H = 62;
 const ROW_H = 84;
 const SECTION_GAP = 26;
 const FOOTER_H = 84;
@@ -44,7 +44,7 @@ const COL = {
     quota: 600,
     perDay: 808,
     members: 918,
-    open: WIDTH - MARGIN, // right edge
+    open: WIDTH - MARGIN - 20, // right edge, inset from the row's
 };
 
 /**
@@ -258,15 +258,13 @@ async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: n
 
     await drawClubIcon(ctx, club, COL.avatar, cy, 28, 24);
 
-    // The name, with the club's uma.moe rank this month under it as a bare
-    // number; an unranked club's name sits centred instead.
-    const name = fit(ctx, club.name, COL.rank - 34 - COL.name, '700 27px');
-    if (club.monthlyRank) {
-        drawText(ctx, name, COL.name, cy - 2, { spec: '700 27px', color: THEME.text });
-        drawText(ctx, `#${club.monthlyRank.toLocaleString('en-US')}`, COL.name, cy + 24, { spec: '500 16px', color: THEME.muted });
-    } else {
-        drawText(ctx, name, COL.name, cy + 10, { spec: '700 27px', color: THEME.text });
-    }
+    // The name, then the club's uma.moe rank this month as a bare number.
+    const rank = club.monthlyRank ? `#${club.monthlyRank.toLocaleString('en-US')}` : '';
+    ctx.font = font('500 18px');
+    const rankW = rank ? ctx.measureText(rank).width + 12 : 0;
+    const name = fit(ctx, club.name, COL.rank - 34 - COL.name - rankW, '700 27px');
+    const nameW = drawText(ctx, name, COL.name, cy + 10, { spec: '700 27px', color: THEME.text });
+    if (rank) drawText(ctx, rank, COL.name + nameW + 12, cy + 10, { spec: '500 18px', color: THEME.muted });
 
     await drawRankBadge(ctx, club.rank, COL.rank, cy, 24, 18);
 
@@ -307,9 +305,8 @@ function drawBand(ctx: SKRSContext2D, tier: ClubTier, y: number, page: Backdrop)
     ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, BAND_H);
     ctx.fillStyle = hex(info.color);
     ctx.fillRect(MARGIN, y, 6, BAND_H);
-    drawText(ctx, info.title, MARGIN + 26, y + 40, { spec: '700 29px', color: hex(info.color) });
-    drawText(ctx, fit(ctx, info.blurb, WIDTH - MARGIN * 2 - 52, '400 16px'), MARGIN + 26, y + 70, { spec: '400 16px', color: THEME.muted });
-    drawText(ctx, info.ranks, WIDTH - MARGIN - 22, y + 40, { spec: '600 20px', color: THEME.text, align: 'right' });
+    drawText(ctx, info.title, MARGIN + 26, y + 41, { spec: '700 29px', color: hex(info.color) });
+    drawText(ctx, info.ranks, COL.open, y + 39, { spec: '600 20px', color: THEME.text, align: 'right' });
 }
 
 /** A big figure over its label, right-aligned at `right`. */
@@ -380,7 +377,7 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
         drawLabel(ctx, 'Quota', COL.quota, labelY, page.inkMuted, 11);
         drawLabel(ctx, 'Per day', COL.perDay, labelY, page.inkMuted, 11);
         drawLabel(ctx, 'Members', COL.members, labelY, page.inkMuted, 11);
-        drawLabel(ctx, 'Open', COL.open - 12, labelY, page.inkMuted, 11, 'right');
+        drawLabel(ctx, 'Open', COL.open - 14, labelY, page.inkMuted, 11, 'right');
         y += COLUMN_HEAD_H;
     }
     ctx.restore();

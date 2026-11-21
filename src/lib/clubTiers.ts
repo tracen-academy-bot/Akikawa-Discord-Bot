@@ -2,13 +2,14 @@ import type { ClubTier } from '@prisma/client';
 
 /**
  * The club tiers: what each means and its colour, shared by the club
- * directory and the club poster (which draws each tier's blurb and ranks).
+ * directory and the club poster (which draws each tier's title and ranks).
  */
 
 /** What a tier means, as the club poster explains it. */
 export interface TierInfo {
     label: string;
     title: string;
+    /** What the tier is for. Not shown anywhere since 2026-11-21; kept for the wording. */
     blurb: string;
     ranks: string;
     color: number;
