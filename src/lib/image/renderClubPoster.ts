@@ -258,11 +258,15 @@ async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: n
 
     await drawClubIcon(ctx, club, COL.avatar, cy, 28, 24);
 
-    drawText(ctx, fit(ctx, club.name, COL.rank - 34 - COL.name, '700 27px'), COL.name, cy - 2, { spec: '700 27px', color: THEME.text });
-    drawText(ctx, club.monthlyRank ? `#${club.monthlyRank.toLocaleString('en-US')} on uma.moe this month` : 'not ranked on uma.moe', COL.name, cy + 24, {
-        spec: '400 14px',
-        color: THEME.faint,
-    });
+    // The name, with the club's uma.moe rank this month under it as a bare
+    // number; an unranked club's name sits centred instead.
+    const name = fit(ctx, club.name, COL.rank - 34 - COL.name, '700 27px');
+    if (club.monthlyRank) {
+        drawText(ctx, name, COL.name, cy - 2, { spec: '700 27px', color: THEME.text });
+        drawText(ctx, `#${club.monthlyRank.toLocaleString('en-US')}`, COL.name, cy + 24, { spec: '500 16px', color: THEME.muted });
+    } else {
+        drawText(ctx, name, COL.name, cy + 10, { spec: '700 27px', color: THEME.text });
+    }
 
     await drawRankBadge(ctx, club.rank, COL.rank, cy, 24, 18);
 
@@ -305,8 +309,7 @@ function drawBand(ctx: SKRSContext2D, tier: ClubTier, y: number, page: Backdrop)
     ctx.fillRect(MARGIN, y, 6, BAND_H);
     drawText(ctx, info.title, MARGIN + 26, y + 40, { spec: '700 29px', color: hex(info.color) });
     drawText(ctx, fit(ctx, info.blurb, WIDTH - MARGIN * 2 - 52, '400 16px'), MARGIN + 26, y + 70, { spec: '400 16px', color: THEME.muted });
-    drawLabel(ctx, 'Est. ranks', WIDTH - MARGIN - 22, y + 24, THEME.faint, 11, 'right');
-    drawText(ctx, info.ranks, WIDTH - MARGIN - 22, y + 48, { spec: '600 18px', color: THEME.text, align: 'right' });
+    drawText(ctx, info.ranks, WIDTH - MARGIN - 22, y + 40, { spec: '600 20px', color: THEME.text, align: 'right' });
 }
 
 /** A big figure over its label, right-aligned at `right`. */
