@@ -46,6 +46,59 @@ const COL = {
     open: WIDTH - MARGIN, // right edge
 };
 
+/**
+ * The page behind the rows: its fill, the rows' and bands' base, and the
+ * colours of what is drawn straight on it (header, column labels, footer).
+ * Rows and bands always sit on `row`, so they read the same on any page.
+ */
+export interface Backdrop {
+    fill(ctx: SKRSContext2D, height: number): void;
+    row: string;
+    rowAlt: string;
+    /** Title, big figures. */
+    ink: string;
+    /** Labels and the footer's small print. */
+    inkMuted: string;
+    /** The "Tracen Academy" label, the header rule and the footer line. */
+    accent: string;
+    /** The open-spots total in the header. */
+    highlight: string;
+}
+
+/** A flat fill. */
+function flat(color: string): Backdrop['fill'] {
+    return (ctx, height) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, WIDTH, height);
+    };
+}
+
+/** Backdrops to choose from; `dark` is the bot's usual theme. */
+export const BACKDROPS = {
+    dark: { fill: flat(THEME.bg), row: THEME.bg, rowAlt: THEME.bgRaised, ink: THEME.text, inkMuted: THEME.muted, accent: THEME.gold, highlight: THEME.green },
+    /** #ff4646 darkened to a near-black red. */
+    darkRed: { fill: flat('#1c0909'), row: '#1c0909', rowAlt: '#260d0d', ink: THEME.text, inkMuted: '#b08a86', accent: '#ff4646', highlight: THEME.green },
+    /** #ff4646 at the top, fading to the dark red behind the rows. */
+    gradient: {
+        fill: (ctx, height) => {
+            const g = ctx.createLinearGradient(0, 0, 0, Math.min(height, 700));
+            g.addColorStop(0, '#ff4646');
+            g.addColorStop(0.32, '#8a1f1f');
+            g.addColorStop(1, '#1c0909');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, WIDTH, height);
+        },
+        row: '#1c0909',
+        rowAlt: '#260d0d',
+        ink: '#ffffff',
+        inkMuted: '#f1c9c5',
+        accent: '#ffffff',
+        highlight: '#ffffff',
+    },
+    /** Full #ff4646, rows on dark panels. */
+    red: { fill: flat('#ff4646'), row: '#170707', rowAlt: '#210b0b', ink: '#ffffff', inkMuted: '#3d0b0b', accent: '#3d0b0b', highlight: '#ffffff' },
+} satisfies Record<string, Backdrop>;
+
 /** Expected ranks, highest first; clubs with none set come last. */
 const RANK_ORDER: (ClubRank | null)[] = ['S_PLUS', 'S', 'A_PLUS', 'A', 'B_PLUS', 'CASUAL', null];
 
@@ -101,7 +154,7 @@ function openSpots(club: PosterClub): number | null {
 }
 
 /** The open-spots pill, right-aligned at `right`, centred on `cy`. */
-function drawOpen(ctx: SKRSContext2D, open: number | null, right: number, cy: number) {
+function drawOpen(ctx: SKRSContext2D, open: number | null, right: number, cy: number, under: string) {
     const h = 34;
     if (open === null) {
         drawText(ctx, '—', right - 12, cy + 7, { spec: '600 20px', color: THEME.faint, align: 'right' });
@@ -121,16 +174,14 @@ function drawOpen(ctx: SKRSContext2D, open: number | null, right: number, cy: nu
         ctx.lineWidth = 1.5;
         ctx.stroke();
     }
-    drawText(ctx, text, right - w / 2, cy + 6, { spec: '700 17px', color: open > 0 ? THEME.bg : THEME.faint, align: 'center', tracking: 1.5 });
+    drawText(ctx, text, right - w / 2, cy + 6, { spec: '700 17px', color: open > 0 ? under : THEME.faint, align: 'center', tracking: 1.5 });
 }
 
 /** One club's row. */
-async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: number, shaded: boolean) {
+async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: number, shaded: boolean, page: Backdrop) {
     const cy = y + ROW_H / 2;
-    if (shaded) {
-        ctx.fillStyle = THEME.bgRaised;
-        ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, ROW_H);
-    }
+    ctx.fillStyle = shaded ? page.rowAlt : page.row;
+    ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, ROW_H);
 
     await drawClubIcon(ctx, club, COL.avatar, cy, 28, 24);
 
@@ -167,12 +218,14 @@ async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: n
         ctx.fill();
     }
 
-    drawOpen(ctx, openSpots(club), COL.open, cy);
+    drawOpen(ctx, openSpots(club), COL.open, cy, page.row);
 }
 
 /** A tier's band: its colour, title, what it means and its estimated ranks. */
-function drawBand(ctx: SKRSContext2D, tier: ClubTier, y: number) {
+function drawBand(ctx: SKRSContext2D, tier: ClubTier, y: number, page: Backdrop) {
     const info = TIERS[tier];
+    ctx.fillStyle = page.row;
+    ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, BAND_H);
     ctx.fillStyle = tint(info.color, 0.1);
     ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, BAND_H);
     ctx.fillStyle = hex(info.color);
@@ -184,8 +237,8 @@ function drawBand(ctx: SKRSContext2D, tier: ClubTier, y: number) {
 }
 
 /** A big figure over its label, right-aligned at `right`. */
-function drawStat(ctx: SKRSContext2D, label: string, value: string, right: number, color: string) {
-    drawLabel(ctx, label, right, 76, THEME.muted, 12, 'right');
+function drawStat(ctx: SKRSContext2D, label: string, value: string, right: number, color: string, page: Backdrop) {
+    drawLabel(ctx, label, right, 76, page.inkMuted, 12, 'right');
     drawText(ctx, value, right, 120, { spec: '700 38px', color, align: 'right' });
 }
 
@@ -199,7 +252,7 @@ function shortDate(date: Date): string {
  * tiers with no clubs are left out. `updatedAt` is printed in the footer, so
  * a reader can tell how fresh the members and ranks are.
  */
-export async function renderClubPoster(clubs: PosterClub[], options: { title?: string; footer?: string; updatedAt?: Date } = {}): Promise<Buffer> {
+export async function renderClubPoster(clubs: PosterClub[], options: { title?: string; footer?: string; updatedAt?: Date; backdrop?: Backdrop } = {}): Promise<Buffer> {
     const sections = TIER_ORDER.map((tier) => ({ tier, clubs: posterOrder(clubs.filter((c) => c.tier === tier)) })).filter((s) => s.clubs.length > 0);
     const body = sections.reduce((sum, s) => sum + BAND_H + s.clubs.length * ROW_H + SECTION_GAP, 0);
     const height = HEADER_H + (sections.length > 0 ? COLUMN_HEAD_H + body : 80) + FOOTER_H;
@@ -207,57 +260,57 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
     const canvas = createCanvas(WIDTH * SCALE, height * SCALE);
     const ctx = canvas.getContext('2d');
     ctx.scale(SCALE, SCALE);
-    ctx.fillStyle = THEME.bg;
-    ctx.fillRect(0, 0, WIDTH, height);
+    const page = options.backdrop ?? BACKDROPS.dark;
+    page.fill(ctx, height);
 
     // ── Header: title, then the totals an applicant cares about ──────────────
-    drawLabel(ctx, 'Tracen Academy', MARGIN, 64, THEME.gold, 14);
-    drawText(ctx, options.title ?? 'Our Clubs', MARGIN, 120, { spec: '700 52px', color: THEME.text });
+    drawLabel(ctx, 'Tracen Academy', MARGIN, 64, page.accent, 14);
+    drawText(ctx, options.title ?? 'Our Clubs', MARGIN, 120, { spec: '700 52px', color: page.ink });
     const tracked = clubs.filter((c) => c.headcount !== null);
     const right = WIDTH - MARGIN;
     if (tracked.length > 0) {
         const open = tracked.reduce((sum, c) => sum + (openSpots(c) ?? 0), 0);
         const members = tracked.reduce((sum, c) => sum + c.headcount!, 0);
-        drawStat(ctx, 'Open spots', String(open), right, open > 0 ? THEME.green : THEME.faint);
-        drawStat(ctx, 'Trainers', members.toLocaleString('en-US'), right - 190, THEME.text);
-        drawStat(ctx, 'Clubs', String(clubs.length), right - 380, THEME.text);
+        drawStat(ctx, 'Open spots', String(open), right, open > 0 ? page.highlight : page.inkMuted, page);
+        drawStat(ctx, 'Trainers', members.toLocaleString('en-US'), right - 190, page.ink, page);
+        drawStat(ctx, 'Clubs', String(clubs.length), right - 380, page.ink, page);
     } else {
-        drawStat(ctx, 'Clubs', String(clubs.length), right, THEME.text);
+        drawStat(ctx, 'Clubs', String(clubs.length), right, page.ink, page);
     }
-    drawRule(ctx, MARGIN, HEADER_H - 30, WIDTH - MARGIN * 2, THEME.gold, 2);
+    drawRule(ctx, MARGIN, HEADER_H - 30, WIDTH - MARGIN * 2, page.accent, 2);
 
     let y = HEADER_H;
     if (sections.length === 0) {
-        drawText(ctx, 'No clubs have a tier yet.', MARGIN, y + 40, { spec: '400 18px', color: THEME.faint });
+        drawText(ctx, 'No clubs have a tier yet.', MARGIN, y + 40, { spec: '400 18px', color: page.inkMuted });
         y += 80;
     } else {
         // Column labels, once, over every tier.
         const labelY = y + 16;
-        drawLabel(ctx, 'Club', COL.name, labelY, THEME.muted, 11);
-        drawLabel(ctx, 'Rank', COL.rank, labelY, THEME.muted, 11, 'center');
-        drawLabel(ctx, 'Quota', COL.quota, labelY, THEME.muted, 11);
-        drawLabel(ctx, 'Per day', COL.perDay, labelY, THEME.muted, 11);
-        drawLabel(ctx, 'Members', COL.members, labelY, THEME.muted, 11);
-        drawLabel(ctx, 'Open', COL.open - 12, labelY, THEME.muted, 11, 'right');
+        drawLabel(ctx, 'Club', COL.name, labelY, page.inkMuted, 11);
+        drawLabel(ctx, 'Rank', COL.rank, labelY, page.inkMuted, 11, 'center');
+        drawLabel(ctx, 'Quota', COL.quota, labelY, page.inkMuted, 11);
+        drawLabel(ctx, 'Per day', COL.perDay, labelY, page.inkMuted, 11);
+        drawLabel(ctx, 'Members', COL.members, labelY, page.inkMuted, 11);
+        drawLabel(ctx, 'Open', COL.open - 12, labelY, page.inkMuted, 11, 'right');
         y += COLUMN_HEAD_H;
     }
 
     // ── Tiers ─────────────────────────────────────────────────────────────────
     for (const section of sections) {
-        drawBand(ctx, section.tier, y);
+        drawBand(ctx, section.tier, y, page);
         y += BAND_H;
         for (const [i, club] of section.clubs.entries()) {
-            await drawRow(ctx, club, y, TIERS[section.tier].color, i % 2 === 1);
+            await drawRow(ctx, club, y, TIERS[section.tier].color, i % 2 === 1, page);
             y += ROW_H;
         }
         y += SECTION_GAP;
     }
 
     // ── Footer ────────────────────────────────────────────────────────────────
-    drawRule(ctx, MARGIN, height - FOOTER_H + 10, WIDTH - MARGIN * 2, THEME.line, 1);
-    drawText(ctx, options.footer ?? 'Want in? Open a post in #apply-for-club with your trainer ID.', MARGIN, height - 32, { spec: '600 19px', color: THEME.gold });
+    drawRule(ctx, MARGIN, height - FOOTER_H + 10, WIDTH - MARGIN * 2, page.inkMuted, 1);
+    drawText(ctx, options.footer ?? 'Want in? Open a post in #apply-for-club with your trainer ID.', MARGIN, height - 32, { spec: '600 19px', color: page.accent });
     const source = options.updatedAt ? `Members and ranks from uma.moe, ${shortDate(options.updatedAt)}` : 'Members and ranks from uma.moe';
-    drawText(ctx, source, WIDTH - MARGIN, height - 32, { spec: '400 13px', color: THEME.faint, align: 'right' });
+    drawText(ctx, source, WIDTH - MARGIN, height - 32, { spec: '400 13px', color: page.inkMuted, align: 'right' });
 
     return canvas.encode('png');
 }
