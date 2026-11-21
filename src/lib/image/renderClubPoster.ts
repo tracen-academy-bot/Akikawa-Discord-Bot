@@ -1,4 +1,5 @@
-import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
+import * as path from 'node:path';
+import { createCanvas, loadImage, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import type { ClubRank, ClubTier } from '@prisma/client';
 import { drawClubIcon, drawRankBadge, roundRect } from './canvasUtils';
 import { THEME, drawLabel, drawRule, drawText } from './theme';
@@ -52,7 +53,9 @@ const COL = {
  * Rows and bands always sit on `row`, so they read the same on any page.
  */
 export interface Backdrop {
-    fill(ctx: SKRSContext2D, height: number): void;
+    fill(ctx: SKRSContext2D, height: number): void | Promise<void>;
+    /** Height of the header the title sits in; taller to show a picture. */
+    headerH?: number;
     row: string;
     rowAlt: string;
     /** Title, big figures. */
@@ -71,6 +74,42 @@ function flat(color: string): Backdrop['fill'] {
         ctx.fillStyle = color;
         ctx.fillRect(0, 0, WIDTH, height);
     };
+}
+
+/** The beach picture (`assets/scenes/club-poster-beach.jpg`), loaded once; null when missing. */
+let beach: Promise<Image | null> | undefined;
+function beachImage(): Promise<Image | null> {
+    beach ??= loadImage(path.join(__dirname, '..', '..', 'assets', 'scenes', 'club-poster-beach.jpg')).catch(() => null);
+    return beach;
+}
+
+/** Height of the beach banner: the picture at full width, cropped at the bottom. */
+const BEACH_H = 470;
+
+/**
+ * The beach picture across the top at full width, fading into the dark page
+ * the rows sit on. A shade along the top keeps the title and figures legible
+ * over the bright sky. Without the picture, the page is plain dark.
+ */
+async function beachFill(ctx: SKRSContext2D, height: number) {
+    ctx.fillStyle = THEME.bg;
+    ctx.fillRect(0, 0, WIDTH, height);
+    const img = await beachImage();
+    if (!img) return;
+    // Only as much of the picture as the fade reaches, so no edge shows below it.
+    const shown = Math.min(BEACH_H + 40, (img.height * WIDTH) / img.width);
+    ctx.drawImage(img, 0, 0, img.width, (shown * img.width) / WIDTH, 0, 0, WIDTH, shown);
+    const top = ctx.createLinearGradient(0, 0, 0, 230);
+    top.addColorStop(0, 'rgba(12, 11, 11, 0.82)');
+    top.addColorStop(0.55, 'rgba(12, 11, 11, 0.45)');
+    top.addColorStop(1, 'rgba(12, 11, 11, 0)');
+    ctx.fillStyle = top;
+    ctx.fillRect(0, 0, WIDTH, 230);
+    const fade = ctx.createLinearGradient(0, BEACH_H - 170, 0, shown);
+    fade.addColorStop(0, 'rgba(12, 11, 11, 0)');
+    fade.addColorStop(1, THEME.bg);
+    ctx.fillStyle = fade;
+    ctx.fillRect(0, BEACH_H - 170, WIDTH, shown - BEACH_H + 170);
 }
 
 /** Backdrops to choose from; `dark` is the bot's usual theme. */
@@ -95,6 +134,8 @@ export const BACKDROPS = {
         accent: '#ffffff',
         highlight: '#ffffff',
     },
+    /** The beach picture as a banner over the usual dark page. */
+    beach: { fill: beachFill, headerH: BEACH_H, row: THEME.bg, rowAlt: THEME.bgRaised, ink: '#ffffff', inkMuted: '#d8d2c8', accent: THEME.gold, highlight: THEME.green },
     /** Full #ff4646, rows on dark panels. */
     red: { fill: flat('#ff4646'), row: '#170707', rowAlt: '#210b0b', ink: '#ffffff', inkMuted: '#3d0b0b', accent: '#3d0b0b', highlight: '#ffffff' },
 } satisfies Record<string, Backdrop>;
@@ -255,13 +296,14 @@ function shortDate(date: Date): string {
 export async function renderClubPoster(clubs: PosterClub[], options: { title?: string; footer?: string; updatedAt?: Date; backdrop?: Backdrop } = {}): Promise<Buffer> {
     const sections = TIER_ORDER.map((tier) => ({ tier, clubs: posterOrder(clubs.filter((c) => c.tier === tier)) })).filter((s) => s.clubs.length > 0);
     const body = sections.reduce((sum, s) => sum + BAND_H + s.clubs.length * ROW_H + SECTION_GAP, 0);
-    const height = HEADER_H + (sections.length > 0 ? COLUMN_HEAD_H + body : 80) + FOOTER_H;
+    const page: Backdrop = options.backdrop ?? BACKDROPS.dark;
+    const headerH = page.headerH ?? HEADER_H;
+    const height = headerH + (sections.length > 0 ? COLUMN_HEAD_H + body : 80) + FOOTER_H;
 
     const canvas = createCanvas(WIDTH * SCALE, height * SCALE);
     const ctx = canvas.getContext('2d');
     ctx.scale(SCALE, SCALE);
-    const page = options.backdrop ?? BACKDROPS.dark;
-    page.fill(ctx, height);
+    await page.fill(ctx, height);
 
     // ── Header: title, then the totals an applicant cares about ──────────────
     drawLabel(ctx, 'Tracen Academy', MARGIN, 64, page.accent, 14);
@@ -277,9 +319,9 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
     } else {
         drawStat(ctx, 'Clubs', String(clubs.length), right, page.ink, page);
     }
-    drawRule(ctx, MARGIN, HEADER_H - 30, WIDTH - MARGIN * 2, page.accent, 2);
+    drawRule(ctx, MARGIN, headerH - 30, WIDTH - MARGIN * 2, page.accent, 2);
 
-    let y = HEADER_H;
+    let y = headerH;
     if (sections.length === 0) {
         drawText(ctx, 'No clubs have a tier yet.', MARGIN, y + 40, { spec: '400 18px', color: page.inkMuted });
         y += 80;
