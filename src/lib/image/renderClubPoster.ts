@@ -266,7 +266,7 @@ async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: n
     const nameW = drawText(ctx, name, COL.name, cy + 10, { spec: '700 27px', color: THEME.text });
     if (rank) drawText(ctx, rank, COL.name + nameW + 12, cy + 10, { spec: '500 18px', color: THEME.muted });
 
-    await drawRankBadge(ctx, club.rank, COL.rank, cy, 24, 18);
+    await drawRankBadge(ctx, club.rank, COL.rank, cy, 29, 18);
 
     const unset = club.quotaText === 'Not set';
     drawText(ctx, unset ? '—' : fit(ctx, club.quotaText, COL.perDay - 24 - COL.quota, '600 20px'), COL.quota, cy + 7, {

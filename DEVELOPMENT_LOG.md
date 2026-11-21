@@ -67,6 +67,12 @@ Same day: "no space with /". `describeQuota` now gives "102.3M/month" (was
 column reads "533K/day", and the poster's "/day" sits against its figure.
 The old club fan count format already had no space.
 
+Same day: rank badges kept their proportions. `drawRankBadge` drew the
+badge art (310x360) into a 2r square, squashing it in every image that
+shows one (poster, `/club list`, club card, applicant card). It now fits
+the art in the box at its own ratio, so badges are a little narrower; the
+poster's grew from r 24 to 29 to make up for it.
+
 ---
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role
