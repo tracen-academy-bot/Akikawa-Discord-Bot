@@ -4,6 +4,93 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-21 — #club-bio: the poster closes the directory, and is redesigned
+
+Asked: the poster should be part of the #club-bio directory, at the bottom
+(Discord opens a channel at its newest message), with the links at the top;
+then "redesign the poster itself".
+
+**Directory layout** (`src/lib/clubDirectory.ts`), top to bottom:
+
+- `index`: the jump links, now first. It links to messages posted after it,
+  so a fresh run posts it without links and, once every message ID is known,
+  edits in the links. The fill-in pass is generic: any part whose content
+  changes once every ID is known is edited.
+- Tier headings and club cards, unchanged.
+- `poster`: the poster, last, only when at least one club is listed.
+- The tier explainer (four embeds) is gone; the poster's tier bands say the
+  same thing.
+- The first refresh after deploy finds a different layout, so it deletes the
+  old run and posts the new one. Nothing in it pings.
+
+**Refreshes.** The poster shows headcounts and uma.moe ranks, which only the
+fan sync changes. `startFanScheduler` now calls `refreshDirectory` for every
+guild after an hourly or daily sync. The fingerprint check edits only messages
+that changed, so a sync that moves a rank edits the poster alone (tested).
+The footer prints the UTC date, so the poster is also edited once a day.
+
+**`/club poster`** no longer takes a channel. It previews the picture in
+place; the directory posts the real one. `clubHeadcount` and `posterClubs`
+moved to `clubDirectory.ts` so both share them. The tier definitions moved to
+`src/lib/clubTiers.ts` so the renderer and the directory do not import each
+other.
+
+**Poster redesign** (`src/lib/image/renderClubPoster.ts`). Same fonts, theme
+and tier colours as before; layout and emphasis changed:
+
+- Rows with aligned columns instead of a three-column card grid, so clubs
+  compare down a column: rank badge, quota as set, quota per day
+  (`clubDailyRequirement`, so weekly and monthly quotas compare), members
+  with a bar, open spots.
+- Open spots are a filled green pill ("3 OPEN"), the only filled shape;
+  full clubs get an outlined "FULL". They were small green text before.
+- Header totals: clubs, trainers, open spots.
+- Tier bands are tinted in the tier colour; estimated ranks are readable
+  text instead of a faint label.
+- Within a tier: expected rank, then per-day quota (highest first), then
+  name (`posterOrder`). Before, it was by name only.
+- 1200 layout px wide (was 1400), drawn at 2x.
+
+**Not verified.** How Discord scales a tall image in the chat preview. The
+poster is about 1:1.55 for 13 clubs. It reads at full size; I did not check
+it in the Discord client, inline or on a phone.
+
+**Tests.** `test-commands`: new directory order, the index filled in after
+posting, the poster last, and a rank-only change editing only the poster
+(308 pass). `test-applications`: poster with the new field, `posterOrder`,
+`shortFans` (141 pass).
+
+Same day: "no space with /". `describeQuota` now gives "102.3M/month" (was
+"102.3M / month"), so every place that shows a quota changes: club cards,
+`/club list`, reports, the dashboard and the poster; biweekly reads
+"150.0M/2wk". `/club list`'s daily
+column reads "533K/day", and the poster's "/day" sits against its figure.
+The old club fan count format already had no space.
+
+Same day: rank badges kept their proportions. `drawRankBadge` drew the
+badge art (310x360) into a 2r square, squashing it in every image that
+shows one (poster, `/club list`, club card, applicant card). It now fits
+the art in the box at its own ratio, so badges are a little narrower; the
+poster's grew from r 24 to 29 to make up for it.
+
+Same day: a JP section at the bottom of the poster. uma.moe does not track
+the Japanese server, so its clubs are written down by hand in
+`src/lib/jpClubs.ts` (`JP_SECTION`) and passed to `renderClubPoster` as
+`extra` sections, drawn after the tiers in the order given. Header totals
+count them. First entry, 風と風船: B+, no quota, 29 members, from its
+leader. Nothing about it updates itself.
+
+Later the same day, the user's design passes on the poster: a `beach`
+backdrop (their picture as a banner, blurred copy behind the page, rows
+see-through, figures on a panel), the uma.moe rank as a bare number beside
+the name, no tier blurbs, pills inset from the edge.
+
+Then: `beach` became the poster's default backdrop, and the three #ff4646
+candidates (darkRed, gradient, red) were removed. `dark` stays as the
+plain theme, and `beach` falls back to it if the picture file is missing.
+
+---
+
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role
 
 - Owner's wording for auto-off notices (`completionNotice`):

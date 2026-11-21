@@ -11,6 +11,7 @@ import { layoutsOf, renderFanReport, type FanReportMeta } from '../image/renderF
 import { paletteOf } from '../image/theme';
 import { formatCompactFans, formatFans, describeQuota } from './metrics';
 import { guildClubs, staffRolesOf, type LinkableGuild } from '../clubLinks';
+import { refreshDirectory } from '../clubDirectory';
 
 /**
  * Fan sync and report posting:
@@ -365,8 +366,17 @@ export function startFanScheduler(client: Client): () => void {
         running = true;
         try {
             const now = new Date();
-            if (await isDue(now)) await runDaily(now);
-            else if (await isHourlyDue(now)) await runHourlySync(now);
+            let synced = false;
+            if (await isDue(now)) {
+                await runDaily(now);
+                synced = true;
+            } else if (await isHourlyDue(now)) {
+                await runHourlySync(now);
+                synced = true;
+            }
+            // The directory's poster shows headcounts and uma.moe ranks, which
+            // only a sync changes. Unchanged messages are not edited.
+            if (synced) await Promise.all([...client.guilds.cache.values()].map((g) => refreshDirectory(g)));
         } catch (e) {
             console.error('Fan sync failed:', e);
         }

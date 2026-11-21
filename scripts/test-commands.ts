@@ -501,7 +501,7 @@ async function main() {
     const afterQuota = await reload();
     check('/club fancount saves the quota, and not the rank', [afterQuota.rank, String(afterQuota.quota), afterQuota.quotaPeriod], ['S', '14000000', 'WEEK']);
     check('the old club fan count is cleared, not left as a second number', [afterQuota.fanCountAmount, afterQuota.fanCountPeriod], [null, null]);
-    check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M / week')], [false, true]);
+    check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M/week')], [false, true]);
     await submitClub(fancountForm.custom_id, 'u-officer', true, { 'club:quota': '15M' });
     check('not picking a period keeps the current one', [String((await reload()).quota), (await reload()).quotaPeriod], ['15000000', 'WEEK']);
     const plain = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall', 'club:alerts': 'on' });
@@ -941,22 +941,28 @@ async function main() {
     const dirPostedText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory' } }));
     check('/club directory posts it', dirPostedText.startsWith('Posted the directory in <#c-directory> with 1 club.'), true);
     check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no tier yet:') && dirPostedText.includes('**Otherrose**'), true);
-    check('its messages: tiers, a heading, the card, the index', dirA.rec.sent.map((m) => shape(m.payload)), ['|4|0', '## Current G1 Clubs|0|0', '|2|1', '|1|0']);
-    check('the tiers explain themselves', dirA.rec.sent[0]?.payload.embeds.map((e) => e.toJSON().title),
-        ['G1 [Competitive]', 'G2 [Semi Competitive+]', 'G3 [Semi-Competitive]', 'Debut [Casual]']);
-    check('the index links to the card', dirA.rec.sent[3]?.payload.embeds[0]?.toJSON().description,
-        `**G1**: [Checkrose](https://discord.com/channels/${GUILD}/c-directory/c-directory-m3)`);
+    check('its messages: the index, a heading, the card, the poster', dirA.rec.sent.map((m) => shape(m.payload)), ['|1|0', '## Current G1 Clubs|0|0', '|2|1', '|0|1']);
+    check('the index is first and titled', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().title, 'Directory');
+    check('it is posted before the cards, without links', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().description?.startsWith('**G1**: Checkrose\n'), true);
+    check('then filled in with a link to the card, and only it is edited', [dirA.rec.edits, dirA.rec.live.get('c-directory-m1')?.embeds[0]?.toJSON().description],
+        [['c-directory-m1'], `**G1**: [Checkrose](https://discord.com/channels/${GUILD}/c-directory/c-directory-m3)\n\nEvery club on one picture is at the bottom of the channel.`]);
+    const posterFile = dirA.rec.sent[3]?.payload.files[0] as { name?: string; attachment?: Buffer } | undefined;
+    check('the poster is last, a PNG', [posterFile?.name, posterFile?.attachment?.subarray(1, 4).toString()], ['clubs.png', 'PNG']);
     check('nothing in it pings', dirA.rec.sent.every((m) => JSON.stringify(m.payload.allowedMentions?.parse) === '[]'), true);
 
     // Same clubs: edited in place, and only what changed.
     const dirAgain = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
-    check('a refresh with nothing changed edits nothing', [dirAgain.mode, dirA.rec.edits.length, dirA.rec.sent.length], ['edited', 0, 4]);
-    check('a forced refresh edits every message', [(await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, dirA.rec.edits.length], ['edited', 4]);
+    check('a refresh with nothing changed edits nothing', [dirAgain.mode, dirA.rec.edits.length, dirA.rec.sent.length], ['edited', 1, 4]);
+    check('a forced refresh edits every message', [(await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, dirA.rec.edits.length], ['edited', 5]);
     // A profile change refreshes it on its own: just that card.
     await submitProfile(staffProfile, 'u-trainer', false, { ...kept, 'club:profile:bio': 'Now T30 pushing' });
     await directory.refreshDirectory(FAKE_GUILD);
     check('saving a profile updates the card', dirA.rec.live.get('c-directory-m3')?.embeds.at(-1)?.toJSON().description?.endsWith('> Now T30 pushing'), true);
-    check('and only the card', dirA.rec.edits.slice(4), ['c-directory-m3']);
+    check('and only the card', dirA.rec.edits.slice(5), ['c-directory-m3']);
+    // A sync moves the club's uma.moe rank, which only the poster shows.
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { monthlyRank: 4321 } });
+    await directory.refreshDirectory(FAKE_GUILD);
+    check('a new uma.moe rank updates only the poster', dirA.rec.edits.slice(6), ['c-directory-m4']);
 
     // A club joins a tier: the run no longer fits, so it is posted afresh.
     await prisma.trackedCircle.update({ where: { id: other.id }, data: { tier: 'G2' } });
