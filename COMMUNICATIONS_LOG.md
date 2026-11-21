@@ -21,6 +21,10 @@ Decisions that changed project direction. Newest first.
   tried first); numbers instead of small text.
 - JP clubs go at the bottom, written down by hand in `src/lib/jpClubs.ts`:
   "it will be written down whereas everything else have to follow uma.moe".
+- "People already set up", but the directory listed none: no tiers had
+  been picked. Reverses the 10-05 "tiers are set explicitly" decision: an
+  unpicked tier now follows the expected rank (A goes to G2, B+ to G3, my
+  call). A picked tier still wins.
 
 ---
 

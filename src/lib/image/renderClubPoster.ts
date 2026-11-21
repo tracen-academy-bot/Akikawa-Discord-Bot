@@ -169,6 +169,11 @@ export interface PosterClub {
     quotaText: string;
     /** The quota as fans a day (`clubDailyRequirement`); null when not set. */
     dailyRequirement: number | null;
+    /**
+     * The avatar file in `assets/clubs` to use, by base name, when the club's
+     * name cannot find it (a Japanese name has no words to match on).
+     */
+    avatar?: string;
     /** uma.moe monthly rank at the last sync, if tracked. */
     monthlyRank: number | null;
 }
@@ -260,7 +265,7 @@ async function drawRow(ctx: SKRSContext2D, club: Omit<PosterClub, 'tier'>, y: nu
     ctx.fillStyle = shaded ? page.rowAlt : page.row;
     ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, ROW_H);
 
-    await drawClubIcon(ctx, club, COL.avatar, cy, 28, 24);
+    await drawClubIcon(ctx, club.avatar ? { ...club, name: club.avatar } : club, COL.avatar, cy, 28, 24);
 
     // The name, then the club's uma.moe rank this month as a bare number.
     const rank = club.monthlyRank ? `#${club.monthlyRank.toLocaleString('en-US')}` : '';
