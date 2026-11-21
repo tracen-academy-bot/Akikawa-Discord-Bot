@@ -66,6 +66,10 @@ export interface Backdrop {
     accent: string;
     /** The open-spots total in the header. */
     highlight: string;
+    /** A soft shadow under the header text, for a page with a picture behind it. */
+    textShadow?: string;
+    /** A rounded panel behind the header figures, where the picture is too bright for them. */
+    statsPanel?: string;
 }
 
 /** A flat fill. */
@@ -87,29 +91,45 @@ function beachImage(): Promise<Image | null> {
 const BEACH_H = 470;
 
 /**
- * The beach picture across the top at full width, fading into the dark page
- * the rows sit on. A shade along the top keeps the title and figures legible
- * over the bright sky. Without the picture, the page is plain dark.
+ * The beach picture across the top at full width, over a heavily blurred,
+ * darkened copy of itself that fills the whole page, so its colours carry
+ * down behind the rows. The sharp banner fades out into that copy rather
+ * than into flat dark. Without the picture, the page is plain dark.
  */
 async function beachFill(ctx: SKRSContext2D, height: number) {
     ctx.fillStyle = THEME.bg;
     ctx.fillRect(0, 0, WIDTH, height);
     const img = await beachImage();
     if (!img) return;
-    // Only as much of the picture as the fade reaches, so no edge shows below it.
-    const shown = Math.min(BEACH_H + 40, (img.height * WIDTH) / img.width);
-    ctx.drawImage(img, 0, 0, img.width, (shown * img.width) / WIDTH, 0, 0, WIDTH, shown);
-    const top = ctx.createLinearGradient(0, 0, 0, 230);
-    top.addColorStop(0, 'rgba(12, 11, 11, 0.82)');
-    top.addColorStop(0.55, 'rgba(12, 11, 11, 0.45)');
-    top.addColorStop(1, 'rgba(12, 11, 11, 0)');
-    ctx.fillStyle = top;
-    ctx.fillRect(0, 0, WIDTH, 230);
-    const fade = ctx.createLinearGradient(0, BEACH_H - 170, 0, shown);
-    fade.addColorStop(0, 'rgba(12, 11, 11, 0)');
-    fade.addColorStop(1, THEME.bg);
-    ctx.fillStyle = fade;
-    ctx.fillRect(0, BEACH_H - 170, WIDTH, shown - BEACH_H + 170);
+
+    // The whole page: the picture, scaled to cover it, blurred to colour fields.
+    const cover = Math.max(WIDTH / img.width, height / img.height);
+    const cw = img.width * cover;
+    const ch = img.height * cover;
+    ctx.save();
+    ctx.filter = 'blur(60px)';
+    ctx.drawImage(img, (WIDTH - cw) / 2, (height - ch) / 2, cw, ch);
+    ctx.restore();
+    // Darker further down, so the colour is strongest under the banner.
+    const dim = ctx.createLinearGradient(0, BEACH_H - 120, 0, height);
+    dim.addColorStop(0, 'rgba(12, 11, 11, 0.45)');
+    dim.addColorStop(1, 'rgba(12, 11, 11, 0.82)');
+    ctx.fillStyle = dim;
+    ctx.fillRect(0, 0, WIDTH, height);
+
+    // The sharp banner, faded out at the bottom with an alpha mask.
+    const shown = Math.min(BEACH_H + 60, (img.height * WIDTH) / img.width);
+    const banner = createCanvas(WIDTH * SCALE, Math.ceil(shown * SCALE));
+    const b = banner.getContext('2d');
+    b.scale(SCALE, SCALE);
+    b.drawImage(img, 0, 0, img.width, (shown * img.width) / WIDTH, 0, 0, WIDTH, shown);
+    const mask = b.createLinearGradient(0, BEACH_H - 200, 0, shown);
+    mask.addColorStop(0, 'rgba(0, 0, 0, 1)');
+    mask.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    b.globalCompositeOperation = 'destination-in';
+    b.fillStyle = mask;
+    b.fillRect(0, 0, WIDTH, shown);
+    ctx.drawImage(banner, 0, 0, WIDTH, shown);
 }
 
 /** Backdrops to choose from; `dark` is the bot's usual theme. */
@@ -135,7 +155,19 @@ export const BACKDROPS = {
         highlight: '#ffffff',
     },
     /** The beach picture as a banner over the usual dark page. */
-    beach: { fill: beachFill, headerH: BEACH_H, row: THEME.bg, rowAlt: THEME.bgRaised, ink: '#ffffff', inkMuted: '#d8d2c8', accent: THEME.gold, highlight: THEME.green },
+    beach: {
+        fill: beachFill,
+        headerH: BEACH_H,
+        // See-through, so the blurred picture tints the rows too.
+        row: 'rgba(12, 11, 11, 0.78)',
+        rowAlt: 'rgba(26, 22, 20, 0.78)',
+        ink: '#ffffff',
+        inkMuted: '#e6e0d6',
+        accent: THEME.gold,
+        highlight: THEME.green,
+        textShadow: 'rgba(0, 0, 0, 0.75)',
+        statsPanel: 'rgba(12, 11, 11, 0.55)',
+    },
     /** Full #ff4646, rows on dark panels. */
     red: { fill: flat('#ff4646'), row: '#170707', rowAlt: '#210b0b', ink: '#ffffff', inkMuted: '#3d0b0b', accent: '#3d0b0b', highlight: '#ffffff' },
 } satisfies Record<string, Backdrop>;
@@ -259,7 +291,7 @@ async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: n
         ctx.fill();
     }
 
-    drawOpen(ctx, openSpots(club), COL.open, cy, page.row);
+    drawOpen(ctx, openSpots(club), COL.open, cy, THEME.bg);
 }
 
 /** A tier's band: its colour, title, what it means and its estimated ranks. */
@@ -306,10 +338,22 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
     await page.fill(ctx, height);
 
     // ── Header: title, then the totals an applicant cares about ──────────────
+    ctx.save();
+    if (page.textShadow) {
+        ctx.shadowColor = page.textShadow;
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 1;
+    }
     drawLabel(ctx, 'Tracen Academy', MARGIN, 64, page.accent, 14);
     drawText(ctx, options.title ?? 'Our Clubs', MARGIN, 120, { spec: '700 52px', color: page.ink });
     const tracked = clubs.filter((c) => c.headcount !== null);
     const right = WIDTH - MARGIN;
+    if (page.statsPanel) {
+        const left = tracked.length > 0 ? right - 470 : right - 130;
+        roundRect(ctx, left, 44, WIDTH - 24 - left, 98, 16);
+        ctx.fillStyle = page.statsPanel;
+        ctx.fill();
+    }
     if (tracked.length > 0) {
         const open = tracked.reduce((sum, c) => sum + (openSpots(c) ?? 0), 0);
         const members = tracked.reduce((sum, c) => sum + c.headcount!, 0);
@@ -336,6 +380,7 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
         drawLabel(ctx, 'Open', COL.open - 12, labelY, page.inkMuted, 11, 'right');
         y += COLUMN_HEAD_H;
     }
+    ctx.restore();
 
     // ── Tiers ─────────────────────────────────────────────────────────────────
     for (const section of sections) {
