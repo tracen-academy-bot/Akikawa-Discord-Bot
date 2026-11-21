@@ -138,7 +138,7 @@ export async function renderClubList(clubs: ClubSummary[]): Promise<Buffer> {
 
             ctx.font = font('bold 16px');
             ctx.fillStyle = THEME.text;
-            ctx.fillText(club.dailyRequirement == null ? '\u2014' : `${shortDaily(club.dailyRequirement)} / day`, colDaily, cy + 6);
+            ctx.fillText(club.dailyRequirement == null ? '\u2014' : `${shortDaily(club.dailyRequirement)}/day`, colDaily, cy + 6);
 
             ctx.font = font('16px');
             ctx.fillStyle = THEME.muted;

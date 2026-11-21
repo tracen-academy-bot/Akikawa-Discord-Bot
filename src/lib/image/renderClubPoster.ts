@@ -57,7 +57,7 @@ export interface PosterClub {
     rank: ClubRank | null;
     /** Current members on uma.moe; null when not tracked. */
     headcount: number | null;
-    /** e.g. "80.0M / month", or "Not set". */
+    /** e.g. "80.0M/month", or "Not set". */
     quotaText: string;
     /** The quota as fans a day (`clubDailyRequirement`); null when not set. */
     dailyRequirement: number | null;
@@ -151,7 +151,7 @@ async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: n
         drawText(ctx, '—', COL.perDay, cy + 7, { spec: '600 20px', color: THEME.faint });
     } else {
         const w = drawText(ctx, shortFans(club.dailyRequirement), COL.perDay, cy + 7, { spec: '600 20px', color: THEME.text });
-        drawText(ctx, '/day', COL.perDay + w + 4, cy + 7, { spec: '400 14px', color: THEME.muted });
+        drawText(ctx, '/day', COL.perDay + w + 1, cy + 7, { spec: '400 14px', color: THEME.muted });
     }
 
     if (club.headcount === null) {

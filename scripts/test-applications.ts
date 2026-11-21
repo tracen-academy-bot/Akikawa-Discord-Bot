@@ -311,9 +311,9 @@ async function main() {
     });
     check('card: renders with no data', emptyCard.subarray(1, 4).toString(), 'PNG');
     const poster = await renderClubPoster([
-        { id: '1', name: 'Rose', tier: 'G3', rank: 'B_PLUS', headcount: 29, quotaText: '2.0M / day', dailyRequirement: 2_000_000, monthlyRank: 722 },
+        { id: '1', name: 'Rose', tier: 'G3', rank: 'B_PLUS', headcount: 29, quotaText: '2.0M/day', dailyRequirement: 2_000_000, monthlyRank: 722 },
         { id: '2', name: 'Nameless Club With A Very Long Name Indeed', tier: 'DEBUT', rank: null, headcount: null, quotaText: 'Not set', dailyRequirement: null, monthlyRank: null },
-        { id: '3', name: 'Full', tier: 'G1', rank: 'S', headcount: 30, quotaText: '90.0M / month', dailyRequirement: 3_000_000, monthlyRank: 12 },
+        { id: '3', name: 'Full', tier: 'G1', rank: 'S', headcount: 30, quotaText: '90.0M/month', dailyRequirement: 3_000_000, monthlyRank: 12 },
     ], { updatedAt: new Date('2026-11-21T00:00:00Z') });
     const pc = (name: string, rank: PosterClub['rank'], dailyRequirement: number | null): PosterClub =>
         ({ id: name, name, tier: 'G2', rank, headcount: 20, quotaText: 'x', dailyRequirement, monthlyRank: null });

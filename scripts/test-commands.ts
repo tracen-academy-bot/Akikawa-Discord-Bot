@@ -501,7 +501,7 @@ async function main() {
     const afterQuota = await reload();
     check('/club fancount saves the quota, and not the rank', [afterQuota.rank, String(afterQuota.quota), afterQuota.quotaPeriod], ['S', '14000000', 'WEEK']);
     check('the old club fan count is cleared, not left as a second number', [afterQuota.fanCountAmount, afterQuota.fanCountPeriod], [null, null]);
-    check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M / week')], [false, true]);
+    check('/club fancount confirms publicly with the quota', [saved?.ephemeral, saved?.description?.includes('14.0M/week')], [false, true]);
     await submitClub(fancountForm.custom_id, 'u-officer', true, { 'club:quota': '15M' });
     check('not picking a period keeps the current one', [String((await reload()).quota), (await reload()).quotaPeriod], ['15000000', 'WEEK']);
     const plain = await submitClub(reportsForm.custom_id, 'u-officer', true, { 'club:layouts': 'tall', 'club:alerts': 'on' });
