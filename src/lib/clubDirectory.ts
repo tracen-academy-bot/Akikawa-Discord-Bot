@@ -24,7 +24,8 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  *      says what each tier means. It is last because Discord opens a channel
  *      at its newest message, so readers land on it.
  *
- * Clubs without a tier are left out. `/club directory` posts it; after that
+ * A club's tier is the one a Club Manager picked, else its expected rank's
+ * (`effectiveTier`); clubs with neither are left out. `/club directory` posts it; after that
  * any change to a club (`/club reports`, `/club profile`, `/club admin`, staff, create, delete)
  * refreshes it, and so does every fan sync, since the poster shows each
  * club's headcount and uma.moe rank. When the same messages still fit (same clubs, same order)
@@ -36,12 +37,12 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  * by hand.
  */
 
-import { TIERS, TIER_ORDER } from './clubTiers';
+import { TIERS, TIER_ORDER, effectiveTier } from './clubTiers';
 import { currentCircleProgress } from './fans/reports';
 import { renderClubPoster, type PosterClub } from './image/renderClubPoster';
 import { JP_SECTION } from './jpClubs';
 
-export { TIERS, TIER_ORDER, type TierInfo } from './clubTiers';
+export { TIERS, TIER_ORDER, effectiveTier, type TierInfo } from './clubTiers';
 
 /** A role as the directory reads it: its holders, when the member list is loaded. */
 export interface DirectoryRole extends NamedThing {
@@ -206,7 +207,8 @@ export interface Banner {
  * the club's avatar (see `clubAvatar`) as its thumbnail.
  */
 export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Banner | null): Payload & { rulesMessages: string[] } {
-    const color = club.tier ? TIERS[club.tier].color : COLORS.info;
+    const tier = effectiveTier(club);
+    const color = tier ? TIERS[tier].color : COLORS.info;
     const embeds: EmbedBuilder[] = [];
     const files: AttachmentBuilder[] = [];
     if (banner) {
@@ -277,11 +279,11 @@ export async function clubHeadcount(club: TrackedCircle): Promise<number | null>
 export async function posterClubs(clubs: TrackedCircle[]): Promise<PosterClub[]> {
     return Promise.all(
         clubs
-            .filter((c) => c.tier !== null)
+            .filter((c) => effectiveTier(c) !== null)
             .map(async (c) => ({
                 id: c.id,
                 name: c.name,
-                tier: c.tier!,
+                tier: effectiveTier(c)!,
                 rank: c.rank,
                 headcount: await clubHeadcount(c),
                 quotaText: clubQuotaText(c),
@@ -306,13 +308,13 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
     const all = await prisma.trackedCircle.findMany({ where: { guildId: guild.id }, include: { banner: true }, orderBy: { name: 'asc' } });
     const linkable = await guildClubs(guild.id);
     const membersLoaded = await loadMembers(guild);
-    const untiered = all.filter((c) => c.tier === null).map((c) => c.name);
+    const untiered = all.filter((c) => effectiveTier(c) === null).map((c) => c.name);
 
     const parts: Part[] = [];
     const sections: { tier: ClubTier; clubs: { key: string; name: string }[] }[] = [];
     let listed = 0;
     for (const tier of TIER_ORDER) {
-        const clubs = all.filter((c) => c.tier === tier);
+        const clubs = all.filter((c) => effectiveTier(c) === tier);
         if (clubs.length === 0) continue;
         parts.push({ key: `tier:${tier}`, build: () => ({ content: `## Current ${TIERS[tier].label} Clubs`, embeds: [], files: [] }) });
         const section = { tier, clubs: [] as { key: string; name: string }[] };
@@ -340,7 +342,9 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
             };
         },
     });
-    if (listed > 0) {
+    // The poster also carries the hand-written JP clubs, so it is posted even
+    // when no tracked club is listed.
+    if (listed > 0 || JP_SECTION.clubs.length > 0) {
         const poster = new AttachmentBuilder(await renderClubPoster(await posterClubs(all), { updatedAt: new Date(), extra: [JP_SECTION] }), { name: 'clubs.png' });
         parts.push({ key: 'poster', build: () => ({ embeds: [], files: [poster] }) });
     }

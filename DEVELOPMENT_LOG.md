@@ -96,6 +96,18 @@ only a-z and 0-9, so a Japanese name finds nothing. Rather than change
 that matcher (it also matches staff roles), a poster entry can name its
 file with `avatar`; the JP entry uses `kazetofuusen`.
 
+Then, live: `/club directory` posted "0 clubs", with all 13 "with no tier
+yet". The tier is a separate field that only Club Managers set, in the
+`/club profile` dropdown, and none had been set; clubs were set up with an
+expected rank (required on `/club create`). The 10-05 design kept tier
+explicit because the rank ranges overlap. Now `effectiveTier`
+(`src/lib/clubTiers.ts`) uses the picked tier, else the expected rank's
+(`TIER_FOR_RANK`: S+/S G1, A+/A G2, B+ G3, Casual Debut; A and B+ sit in
+two published ranges, so they take the higher tier), else none. The
+directory, its cards' colours, the poster and the replies all use it. The
+dropdown's "Not listed" is now "From expected rank". The poster also posts
+when only the JP section has clubs.
+
 ---
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role

@@ -31,7 +31,7 @@ import { backfillOnce, syncCircle } from '../lib/fans/ingest';
 import { PERIOD_CHOICES, RANK_CHOICES, clubQuotaText, formatRank, clubDailyRequirement } from '../lib/clubFormat';
 import { cutoffDetail, cutoffForRank, cutoffLine } from '../lib/fans/cutoff';
 import { toSafeNumber } from '../lib/fans/metrics';
-import { clubHeadcount, posterClubs, publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
+import { clubHeadcount, effectiveTier, posterClubs, publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
 import { buildProfileModal } from './clubProfile';
 import { renderClubPoster } from '../lib/image/renderClubPoster';
 import { JP_SECTION } from '../lib/jpClubs';
@@ -887,7 +887,7 @@ async function handleDirectory(interaction: ChatInputCommandInteraction, member:
         const lines = [
             `${result.mode === 'edited' ? 'Updated' : 'Posted'} the directory in <#${channel.id}> with ${result.listed} club${result.listed === 1 ? '' : 's'}.`,
             ...(result.untiered.length > 0
-                ? [`Not listed, with no tier yet: ${result.untiered.map((n) => `**${n}**`).join(', ')}. Set one with \`/club profile\`.`]
+                ? [`Not listed, with no expected rank or tier: ${result.untiered.map((n) => `**${n}**`).join(', ')}. Set an expected rank with \`/club admin\`, or a tier with \`/club profile\`.`]
                 : []),
             'It updates itself when a club changes.',
         ];
@@ -907,9 +907,9 @@ async function handleDirectory(interaction: ChatInputCommandInteraction, member:
 async function handlePoster(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
     const clubs = await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId! }, orderBy: { name: 'asc' } });
-    const untiered = clubs.filter((c) => c.tier === null).map((c) => `**${c.name}**`);
+    const untiered = clubs.filter((c) => effectiveTier(c) === null).map((c) => `**${c.name}**`);
     const file = new AttachmentBuilder(await renderClubPoster(await posterClubs(clubs), { extra: [JP_SECTION] }), { name: 'clubs.png' });
-    const skipped = untiered.length > 0 ? `Not on it, with no tier yet: ${untiered.join(', ')}. Set one with \`/club profile\`.` : null;
+    const skipped = untiered.length > 0 ? `Not on it, with no expected rank or tier: ${untiered.join(', ')}. Set an expected rank with \`/club admin\`, or a tier with \`/club profile\`.` : null;
     await interaction.editReply({ ...(skipped ? { content: skipped } : {}), files: [file] });
 }
 

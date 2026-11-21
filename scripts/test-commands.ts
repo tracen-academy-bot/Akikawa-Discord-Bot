@@ -778,7 +778,7 @@ async function main() {
     const staffSave = await submitProfile(staffProfile, 'u-assistant', false, kept);
     check('club staff can save the bio and rules', [(await reload()).bio, (await reload()).rules], [BIO, RULES]);
     check('the reply is private and shows the card', [staffSave[0]?.kind, staffSave.at(-1)?.content],
-        ['defer', 'Saved. **Checkrose** is not listed in the directory (a Club Manager sets its tier). Its card:']);
+        ['defer', 'Saved. **Checkrose** is listed under **G2 [Semi Competitive+]** (from its expected rank). Its card:']);
     check('staff cannot submit the tier form',
         (await submitProfile(fullProfile, 'u-assistant', false, { 'club:profile:tier': 'G1', ...kept }))[0]?.description, "Only Club Managers can change a club's tier.");
     check('outsiders cannot edit the profile',
@@ -934,13 +934,21 @@ async function main() {
     const shape = (p: DirSent) => `${p.content ?? ''}|${p.embeds.length}|${p.files.length}`;
     const lastDesc = (log: Sent[]) => log.at(-1)?.embeds?.[0]?.description ?? '';
 
+    // Tiers: picked wins, else from the expected rank, else not listed.
+    check('a tier comes from the expected rank when none is picked',
+        (['S_PLUS', 'S', 'A_PLUS', 'A', 'B_PLUS', 'CASUAL'] as const).map((rank) => directory.effectiveTier({ tier: null, rank })), ['G1', 'G1', 'G2', 'G2', 'G3', 'DEBUT']);
+    check('a picked tier wins over the rank', directory.effectiveTier({ tier: 'G3', rank: 'S' }), 'G3');
+    check('no tier and no rank: not listed', directory.effectiveTier({ tier: null, rank: null }), null);
+    // The directory tests below list Checkrose only: Looser Club's rank would list it under G3.
+    await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: null } });
+
     check('/club directory is for Club Managers', desc(await runClubCmd({ sub: 'directory', userId: 'u-trainer' })), 'Only Club Managers can post the club directory.');
     check('/club directory needs a channel the first time', desc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })), 'Pick a channel to post the directory in.');
 
     const dirA = dirChannel('c-directory');
     const dirPostedText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory' } }));
     check('/club directory posts it', dirPostedText.startsWith('Posted the directory in <#c-directory> with 1 club.'), true);
-    check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no tier yet:') && dirPostedText.includes('**Otherrose**'), true);
+    check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no expected rank or tier:') && dirPostedText.includes('**Otherrose**'), true);
     check('its messages: the index, a heading, the card, the poster', dirA.rec.sent.map((m) => shape(m.payload)), ['|1|0', '## Current G1 Clubs|0|0', '|2|1', '|0|1']);
     check('the index is first and titled', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().title, 'Directory');
     check('it is posted before the cards, without links', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().description?.startsWith('**G1**: Checkrose\n'), true);
@@ -979,6 +987,13 @@ async function main() {
     check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, dirA.rec.live.size], [true, 6, 0]);
     check('/club directory with no channel refreshes it where it is',
         lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })).startsWith('Updated the directory in <#c-directory-2>'), true);
+
+    // A club with an expected rank but no picked tier is listed from its rank.
+    await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: 'B_PLUS', tier: null } });
+    await directory.refreshDirectory(FAKE_GUILD);
+    check('a club with only an expected rank gets its section', [...dirB.rec.live.values()].some((p) => p.content === '## Current G3 Clubs'), true);
+    await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: null } });
+    await directory.refreshDirectory(FAKE_GUILD);
 
     // A rules file posts after the club's card, in messages of its own.
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: LONG_RULES.trim(), rulesFileName: 'rules.md' } });

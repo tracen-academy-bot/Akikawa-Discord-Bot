@@ -1,4 +1,4 @@
-import type { ClubTier } from '@prisma/client';
+import type { ClubRank, ClubTier } from '@prisma/client';
 
 /**
  * The club tiers: what each means and its colour, shared by the club
@@ -48,3 +48,23 @@ export const TIERS: Record<ClubTier, TierInfo> = {
 
 /** Tiers in directory order. */
 export const TIER_ORDER: ClubTier[] = ['G1', 'G2', 'G3', 'DEBUT'];
+
+/**
+ * The tier a club's expected rank puts it in, when a Club Manager has not
+ * picked one. The published ranges overlap: A is in both G2 ("A to A+") and
+ * G3 ("B+ to A"), and B+ in both G3 and Debut. A goes to G2 and B+ to G3;
+ * Casual is Debut. A tier picked in `/club profile` always wins.
+ */
+export const TIER_FOR_RANK: Record<ClubRank, ClubTier> = {
+    S_PLUS: 'G1',
+    S: 'G1',
+    A_PLUS: 'G2',
+    A: 'G2',
+    B_PLUS: 'G3',
+    CASUAL: 'DEBUT',
+};
+
+/** The tier a club is listed under: the one picked, else its expected rank's, else none. */
+export function effectiveTier(club: { tier: ClubTier | null; rank: ClubRank | null }): ClubTier | null {
+    return club.tier ?? (club.rank ? TIER_FOR_RANK[club.rank] : null);
+}
