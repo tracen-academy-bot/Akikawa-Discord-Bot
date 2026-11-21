@@ -85,6 +85,10 @@ backdrop (their picture as a banner, blurred copy behind the page, rows
 see-through, figures on a panel), the uma.moe rank as a bare number beside
 the name, no tier blurbs, pills inset from the edge.
 
+Then: `beach` became the poster's default backdrop, and the three #ff4646
+candidates (darkRed, gradient, red) were removed. `dark` stays as the
+plain theme, and `beach` falls back to it if the picture file is missing.
+
 ---
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role

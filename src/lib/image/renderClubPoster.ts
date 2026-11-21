@@ -132,28 +132,12 @@ async function beachFill(ctx: SKRSContext2D, height: number) {
     ctx.drawImage(banner, 0, 0, WIDTH, shown);
 }
 
-/** Backdrops to choose from; `dark` is the bot's usual theme. */
+/**
+ * Backdrops: `beach` is the poster's (the default), `dark` the bot's usual
+ * theme without a picture. (Three #ff4646 versions were tried and dropped.)
+ */
 export const BACKDROPS = {
     dark: { fill: flat(THEME.bg), row: THEME.bg, rowAlt: THEME.bgRaised, ink: THEME.text, inkMuted: THEME.muted, accent: THEME.gold, highlight: THEME.green },
-    /** #ff4646 darkened to a near-black red. */
-    darkRed: { fill: flat('#1c0909'), row: '#1c0909', rowAlt: '#260d0d', ink: THEME.text, inkMuted: '#b08a86', accent: '#ff4646', highlight: THEME.green },
-    /** #ff4646 at the top, fading to the dark red behind the rows. */
-    gradient: {
-        fill: (ctx, height) => {
-            const g = ctx.createLinearGradient(0, 0, 0, Math.min(height, 700));
-            g.addColorStop(0, '#ff4646');
-            g.addColorStop(0.32, '#8a1f1f');
-            g.addColorStop(1, '#1c0909');
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, WIDTH, height);
-        },
-        row: '#1c0909',
-        rowAlt: '#260d0d',
-        ink: '#ffffff',
-        inkMuted: '#f1c9c5',
-        accent: '#ffffff',
-        highlight: '#ffffff',
-    },
     /** The beach picture as a banner over the usual dark page. */
     beach: {
         fill: beachFill,
@@ -168,8 +152,6 @@ export const BACKDROPS = {
         textShadow: 'rgba(0, 0, 0, 0.75)',
         statsPanel: 'rgba(12, 11, 11, 0.55)',
     },
-    /** Full #ff4646, rows on dark panels. */
-    red: { fill: flat('#ff4646'), row: '#170707', rowAlt: '#210b0b', ink: '#ffffff', inkMuted: '#3d0b0b', accent: '#3d0b0b', highlight: '#ffffff' },
 } satisfies Record<string, Backdrop>;
 
 /** Expected ranks, highest first; clubs with none set come last. */
@@ -355,7 +337,7 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
     // Header totals count every club drawn, hand-written ones included.
     const all = sections.flatMap((s) => s.clubs);
     const body = sections.reduce((sum, s) => sum + BAND_H + s.clubs.length * ROW_H + SECTION_GAP, 0);
-    const page: Backdrop = options.backdrop ?? BACKDROPS.dark;
+    const page: Backdrop = options.backdrop ?? BACKDROPS.beach;
     const headerH = page.headerH ?? HEADER_H;
     const height = headerH + (sections.length > 0 ? COLUMN_HEAD_H + body : 80) + FOOTER_H;
 
