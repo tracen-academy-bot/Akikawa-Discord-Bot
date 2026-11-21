@@ -397,7 +397,7 @@ export function quotaPerDayFor(period: QuotaPeriod, quota: number, daysInMonth: 
 
 /** Lower-case unit for a period, as in "80.0M per week". */
 export function periodUnit(period: QuotaPeriod): string {
-    return { DAY: 'day', WEEK: 'week', BIWEEKLY: '2 weeks', MONTH: 'month' }[period];
+    return { DAY: 'day', WEEK: 'week', BIWEEKLY: '2wk', MONTH: 'month' }[period];
 }
 
 /** "Daily" / "Weekly" / "Biweekly" / "Monthly". */

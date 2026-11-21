@@ -230,7 +230,7 @@ async function main() {
     const afterBiweekly = await prisma.trackedCircle.findUnique({ where: { id: circle.id } });
     check('period was set to biweekly', afterBiweekly?.quotaPeriod, 'BIWEEKLY');
     const biweeklyPage = await get(`/circles/${circle.id}`, officer.cookie);
-    check('circle page states the biweekly quota', biweeklyPage.body.includes('150.0M/2 weeks'), true);
+    check('circle page states the biweekly quota', biweeklyPage.body.includes('150.0M/2wk'), true);
     check('settings form offers biweekly, selected', biweeklyPage.body.includes('<option value="BIWEEKLY" selected>'), true);
     await post(`/circles/${circle.id}`, { quota: '70M', period: 'WEEK', active: 'true', _csrf: officerCsrf }, officer.cookie);
 

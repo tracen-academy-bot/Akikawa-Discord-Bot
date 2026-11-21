@@ -62,7 +62,8 @@ posting, the poster last, and a rank-only change editing only the poster
 
 Same day: "no space with /". `describeQuota` now gives "102.3M/month" (was
 "102.3M / month"), so every place that shows a quota changes: club cards,
-`/club list`, reports, the dashboard and the poster. `/club list`'s daily
+`/club list`, reports, the dashboard and the poster; biweekly reads
+"150.0M/2wk". `/club list`'s daily
 column reads "533K/day", and the poster's "/day" sits against its figure.
 The old club fan count format already had no space.
 
