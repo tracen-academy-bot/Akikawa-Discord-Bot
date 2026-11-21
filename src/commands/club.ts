@@ -34,6 +34,7 @@ import { toSafeNumber } from '../lib/fans/metrics';
 import { clubHeadcount, posterClubs, publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
 import { buildProfileModal } from './clubProfile';
 import { renderClubPoster } from '../lib/image/renderClubPoster';
+import { JP_SECTION } from '../lib/jpClubs';
 import {
     COMMON_ZONES,
     JAPAN_TIME_ZONE,
@@ -907,7 +908,7 @@ async function handlePoster(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
     const clubs = await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId! }, orderBy: { name: 'asc' } });
     const untiered = clubs.filter((c) => c.tier === null).map((c) => `**${c.name}**`);
-    const file = new AttachmentBuilder(await renderClubPoster(await posterClubs(clubs)), { name: 'clubs.png' });
+    const file = new AttachmentBuilder(await renderClubPoster(await posterClubs(clubs), { extra: [JP_SECTION] }), { name: 'clubs.png' });
     const skipped = untiered.length > 0 ? `Not on it, with no tier yet: ${untiered.join(', ')}. Set one with \`/club profile\`.` : null;
     await interaction.editReply({ ...(skipped ? { content: skipped } : {}), files: [file] });
 }

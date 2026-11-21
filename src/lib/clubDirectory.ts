@@ -39,6 +39,7 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
 import { TIERS, TIER_ORDER } from './clubTiers';
 import { currentCircleProgress } from './fans/reports';
 import { renderClubPoster, type PosterClub } from './image/renderClubPoster';
+import { JP_SECTION } from './jpClubs';
 
 export { TIERS, TIER_ORDER, type TierInfo } from './clubTiers';
 
@@ -340,7 +341,7 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
         },
     });
     if (listed > 0) {
-        const poster = new AttachmentBuilder(await renderClubPoster(await posterClubs(all), { updatedAt: new Date() }), { name: 'clubs.png' });
+        const poster = new AttachmentBuilder(await renderClubPoster(await posterClubs(all), { updatedAt: new Date(), extra: [JP_SECTION] }), { name: 'clubs.png' });
         parts.push({ key: 'poster', build: () => ({ embeds: [], files: [poster] }) });
     }
     return { parts, listed, untiered };

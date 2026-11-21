@@ -73,6 +73,18 @@ shows one (poster, `/club list`, club card, applicant card). It now fits
 the art in the box at its own ratio, so badges are a little narrower; the
 poster's grew from r 24 to 29 to make up for it.
 
+Same day: a JP section at the bottom of the poster. uma.moe does not track
+the Japanese server, so its clubs are written down by hand in
+`src/lib/jpClubs.ts` (`JP_SECTION`) and passed to `renderClubPoster` as
+`extra` sections, drawn after the tiers in the order given. Header totals
+count them. First entry, 風と風船: B+, no quota, 29 members, from its
+leader. Nothing about it updates itself.
+
+Later the same day, the user's design passes on the poster: a `beach`
+backdrop (their picture as a banner, blurred copy behind the page, rows
+see-through, figures on a panel), the uma.moe rank as a bare number beside
+the name, no tier blurbs, pills inset from the edge.
+
 ---
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role

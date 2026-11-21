@@ -322,6 +322,9 @@ async function main() {
     check('poster: short per-day figures', [shortFans(3_266_666), shortFans(533_333), shortFans(950)], ['3.3M', '533K', '950']);
     check('poster: renders a PNG', poster.subarray(1, 4).toString(), 'PNG');
     check('poster: renders with no clubs', (await renderClubPoster([])).subarray(1, 4).toString(), 'PNG');
+    const { JP_SECTION } = await import('../src/lib/jpClubs');
+    check('poster: hand-written JP section renders, with no tracked clubs too',
+        [(await renderClubPoster([], { extra: [JP_SECTION] })).subarray(1, 4).toString(), JP_SECTION.clubs.map((c) => c.name)], ['PNG', ['風と風船']]);
 
     // ── Matching old posts ────────────────────────────────────────────────────
     const ourClubs = [

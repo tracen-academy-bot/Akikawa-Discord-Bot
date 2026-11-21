@@ -16,6 +16,11 @@ Decisions that changed project direction. Newest first.
 - "Redesign the poster itself": no direction given. I went with a board of
   aligned rows, open spots as the most visible item, and per-day quotas. Open
   to change.
+- Then: no spaces around "/" in quotas ("102.3M/month", "150.0M/2wk"); a
+  beach picture the user supplied as the poster's backdrop (red versions
+  tried first); numbers instead of small text.
+- JP clubs go at the bottom, written down by hand in `src/lib/jpClubs.ts`:
+  "it will be written down whereas everything else have to follow uma.moe".
 
 ---
 

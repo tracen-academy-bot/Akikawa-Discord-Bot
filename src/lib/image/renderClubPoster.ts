@@ -191,6 +191,28 @@ export interface PosterClub {
     monthlyRank: number | null;
 }
 
+/**
+ * A section drawn after the tiers, from data written down by hand rather
+ * than tracked (see `src/lib/jpClubs.ts`). Its clubs are drawn in the order
+ * given.
+ */
+export interface ExtraSection {
+    title: string;
+    /** Shown at the band's right, like a tier's rank range. */
+    note?: string;
+    /** 0xRRGGBB. */
+    color: number;
+    clubs: Omit<PosterClub, 'tier'>[];
+}
+
+/** One band and its rows, as drawn. */
+interface Section {
+    title: string;
+    note?: string;
+    color: number;
+    clubs: Omit<PosterClub, 'tier'>[];
+}
+
 /** `#rrggbb` from a 0xRRGGBB number. */
 function hex(color: number): string {
     return `#${color.toString(16).padStart(6, '0')}`;
@@ -222,7 +244,7 @@ export function posterOrder(clubs: PosterClub[]): PosterClub[] {
 }
 
 /** Open spots, or null when the headcount is unknown. */
-function openSpots(club: PosterClub): number | null {
+function openSpots(club: Pick<PosterClub, 'headcount'>): number | null {
     return club.headcount === null ? null : Math.max(0, CLUB_SIZE - club.headcount);
 }
 
@@ -251,7 +273,7 @@ function drawOpen(ctx: SKRSContext2D, open: number | null, right: number, cy: nu
 }
 
 /** One club's row. */
-async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: number, shaded: boolean, page: Backdrop) {
+async function drawRow(ctx: SKRSContext2D, club: Omit<PosterClub, 'tier'>, y: number, color: number, shaded: boolean, page: Backdrop) {
     const cy = y + ROW_H / 2;
     ctx.fillStyle = shaded ? page.rowAlt : page.row;
     ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, ROW_H);
@@ -297,8 +319,7 @@ async function drawRow(ctx: SKRSContext2D, club: PosterClub, y: number, color: n
 }
 
 /** A tier's band: its colour, title, what it means and its estimated ranks. */
-function drawBand(ctx: SKRSContext2D, tier: ClubTier, y: number, page: Backdrop) {
-    const info = TIERS[tier];
+function drawBand(ctx: SKRSContext2D, info: Section, y: number, page: Backdrop) {
     ctx.fillStyle = page.row;
     ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, BAND_H);
     ctx.fillStyle = tint(info.color, 0.1);
@@ -306,7 +327,7 @@ function drawBand(ctx: SKRSContext2D, tier: ClubTier, y: number, page: Backdrop)
     ctx.fillStyle = hex(info.color);
     ctx.fillRect(MARGIN, y, 6, BAND_H);
     drawText(ctx, info.title, MARGIN + 26, y + 41, { spec: '700 29px', color: hex(info.color) });
-    drawText(ctx, info.ranks, COL.open, y + 39, { spec: '600 20px', color: THEME.text, align: 'right' });
+    if (info.note) drawText(ctx, info.note, COL.open, y + 39, { spec: '600 20px', color: THEME.text, align: 'right' });
 }
 
 /** A big figure over its label, right-aligned at `right`. */
@@ -322,11 +343,17 @@ function shortDate(date: Date): string {
 
 /**
  * Renders the poster. Within a tier, clubs are ordered by `posterOrder`;
- * tiers with no clubs are left out. `updatedAt` is printed in the footer, so
+ * tiers with no clubs are left out. `extra` sections follow the tiers. `updatedAt` is printed in the footer, so
  * a reader can tell how fresh the members and ranks are.
  */
-export async function renderClubPoster(clubs: PosterClub[], options: { title?: string; footer?: string; updatedAt?: Date; backdrop?: Backdrop } = {}): Promise<Buffer> {
-    const sections = TIER_ORDER.map((tier) => ({ tier, clubs: posterOrder(clubs.filter((c) => c.tier === tier)) })).filter((s) => s.clubs.length > 0);
+export async function renderClubPoster(clubs: PosterClub[], options: { title?: string; footer?: string; updatedAt?: Date; backdrop?: Backdrop; extra?: ExtraSection[] } = {},
+): Promise<Buffer> {
+    const sections: Section[] = [
+        ...TIER_ORDER.map((tier) => ({ title: TIERS[tier].title, note: TIERS[tier].ranks, color: TIERS[tier].color, clubs: posterOrder(clubs.filter((c) => c.tier === tier)) })),
+        ...(options.extra ?? []),
+    ].filter((s) => s.clubs.length > 0);
+    // Header totals count every club drawn, hand-written ones included.
+    const all = sections.flatMap((s) => s.clubs);
     const body = sections.reduce((sum, s) => sum + BAND_H + s.clubs.length * ROW_H + SECTION_GAP, 0);
     const page: Backdrop = options.backdrop ?? BACKDROPS.dark;
     const headerH = page.headerH ?? HEADER_H;
@@ -346,7 +373,7 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
     }
     drawLabel(ctx, 'Tracen Academy', MARGIN, 64, page.accent, 14);
     drawText(ctx, options.title ?? 'Our Clubs', MARGIN, 120, { spec: '700 52px', color: page.ink });
-    const tracked = clubs.filter((c) => c.headcount !== null);
+    const tracked = all.filter((c) => c.headcount !== null);
     const right = WIDTH - MARGIN;
     if (page.statsPanel) {
         const left = tracked.length > 0 ? right - 392 : right - 130;
@@ -359,9 +386,9 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
         const members = tracked.reduce((sum, c) => sum + c.headcount!, 0);
         drawStat(ctx, 'Open spots', String(open), right, open > 0 ? page.highlight : page.inkMuted, page);
         drawStat(ctx, 'Trainers', members.toLocaleString('en-US'), right - 160, page.ink, page);
-        drawStat(ctx, 'Clubs', String(clubs.length), right - 300, page.ink, page);
+        drawStat(ctx, 'Clubs', String(all.length), right - 300, page.ink, page);
     } else {
-        drawStat(ctx, 'Clubs', String(clubs.length), right, page.ink, page);
+        drawStat(ctx, 'Clubs', String(all.length), right, page.ink, page);
     }
     drawRule(ctx, MARGIN, headerH - 30, WIDTH - MARGIN * 2, page.accent, 2);
 
@@ -384,10 +411,10 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
 
     // ── Tiers ─────────────────────────────────────────────────────────────────
     for (const section of sections) {
-        drawBand(ctx, section.tier, y, page);
+        drawBand(ctx, section, y, page);
         y += BAND_H;
         for (const [i, club] of section.clubs.entries()) {
-            await drawRow(ctx, club, y, TIERS[section.tier].color, i % 2 === 1, page);
+            await drawRow(ctx, club, y, section.color, i % 2 === 1, page);
             y += ROW_H;
         }
         y += SECTION_GAP;
