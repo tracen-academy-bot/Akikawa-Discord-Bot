@@ -17,6 +17,8 @@ export const JP_SECTION: ExtraSection = {
         {
             id: 'jp-kaze-to-fuusen',
             name: '風と風船',
+            // assets/clubs/kazetofuusen.png; the Japanese name has no words to match.
+            avatar: 'kazetofuusen',
             rank: 'B_PLUS',
             headcount: 29,
             quotaText: 'None',

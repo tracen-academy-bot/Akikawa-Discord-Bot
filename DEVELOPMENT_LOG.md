@@ -89,6 +89,13 @@ Then: `beach` became the poster's default backdrop, and the three #ff4646
 candidates (darkRed, gradient, red) were removed. `dark` stays as the
 plain theme, and `beach` falls back to it if the picture file is missing.
 
+Then: 風と風船's avatar, cut from a chibi the user supplied, at
+`src/assets/clubs/kazetofuusen.png` (256, circle mask, like the others).
+Avatars are found from the words of a club's name, and `nameWords` keeps
+only a-z and 0-9, so a Japanese name finds nothing. Rather than change
+that matcher (it also matches staff roles), a poster entry can name its
+file with `avatar`; the JP entry uses `kazetofuusen`.
+
 ---
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role
