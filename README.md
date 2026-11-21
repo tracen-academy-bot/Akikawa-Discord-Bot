@@ -248,9 +248,15 @@ as an outlined label. Months uma.moe
 has no record of are left out of the averages, not counted as zero. The
 first month on record is also left out, because it may be partial.
 
-`/club poster [channel]` draws every club with a tier on one picture, for
-#club-bio. The picture shows tiers, avatars, expected ranks, quotas and open
-spots. It does not update itself; run it again after clubs change.
+The club directory (`/club directory channel:`, for #club-bio) runs, top to
+bottom: jump links to every club, then each tier's clubs as cards (banner,
+staff, requirements, rules, bio), then the club poster. The poster is last
+because Discord opens a channel at its newest message. It draws every club
+with a tier as one row: expected rank, quota (as set and per day), members,
+and open spots, under a band per tier that says what the tier means. The
+directory updates itself after club changes and after every fan sync, and
+edits only the messages that changed. `/club poster` shows the same picture
+in place, to preview it.
 
 ## Welcome message
 

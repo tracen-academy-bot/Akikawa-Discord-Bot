@@ -4,7 +4,7 @@ import type { ClubTier, TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { COLORS } from './embeds';
 import { clubAvatar } from './clubAvatar';
-import { clubQuotaText, formatRank } from './clubFormat';
+import { clubDailyRequirement, clubQuotaText, formatRank } from './clubFormat';
 import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing } from './clubLinks';
 
 /**
@@ -13,17 +13,21 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  *
  * It is a run of messages, in order:
  *
- *   1. `tiers`: what each tier means (four embeds).
+ *   1. `index`: jump links to every card. It links to messages posted after
+ *      it, so a fresh run posts it without links and fills them in at the end.
  *   2. For each tier with clubs, `tier:<tier>` ("Current G1 Clubs"), then one
  *      `club:<id>` card per club in it, by name. A card is the club's banner
  *      (if it has one) above an embed with its staff, requirements, expected
  *      rank, rules and bio. A rules file follows in `club:<id>:rules:<n>`
  *      messages of its own, plain text split at line breaks.
- *   3. `index`: jump links to every card.
+ *   3. `poster`: every club on one picture (`renderClubPoster`), which also
+ *      says what each tier means. It is last because Discord opens a channel
+ *      at its newest message, so readers land on it.
  *
  * Clubs without a tier are left out. `/club directory` posts it; after that
  * any change to a club (`/club reports`, `/club profile`, `/club admin`, staff, create, delete)
- * refreshes it. When the same messages still fit (same clubs, same order)
+ * refreshes it, and so does every fan sync, since the poster shows each
+ * club's headcount and uma.moe rank. When the same messages still fit (same clubs, same order)
  * they are edited in place, and only those whose content changed (each
  * message's content is fingerprinted), so one club's edit does not re-upload
  * every banner. Otherwise the old ones are deleted and the run is posted
@@ -32,48 +36,11 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  * by hand.
  */
 
-/** What a tier means, as the directory's first message explains it. */
-export interface TierInfo {
-    label: string;
-    title: string;
-    blurb: string;
-    ranks: string;
-    color: number;
-}
+import { TIERS, TIER_ORDER } from './clubTiers';
+import { currentCircleProgress } from './fans/reports';
+import { renderClubPoster, type PosterClub } from './image/renderClubPoster';
 
-export const TIERS: Record<ClubTier, TierInfo> = {
-    G1: {
-        label: 'G1',
-        title: 'G1 [Competitive]',
-        blurb: 'The top clubs in our network, pushing for gold!',
-        ranks: 'S to S+ (Top 100)',
-        color: 0xf5c84c,
-    },
-    G2: {
-        label: 'G2',
-        title: 'G2 [Semi Competitive+]',
-        blurb: 'Our more intense and active semi-competitive clubs that aim for strong monthly results.',
-        ranks: 'A to A+ (Top 300~500)',
-        color: 0xa7d8f5,
-    },
-    G3: {
-        label: 'G3',
-        title: 'G3 [Semi-Competitive]',
-        blurb: 'Our mid-range clubs that offer a good balance between activity and commitment!',
-        ranks: 'B+ to A',
-        color: 0xd9784a,
-    },
-    DEBUT: {
-        label: 'Debut',
-        title: 'Debut [Casual]',
-        blurb: 'Our clubs for trainers who just want to relax and have fun!',
-        ranks: 'C+ to B+',
-        color: 0x4ade80,
-    },
-};
-
-/** Tiers in directory order. */
-export const TIER_ORDER: ClubTier[] = ['G1', 'G2', 'G3', 'DEBUT'];
+export { TIERS, TIER_ORDER, type TierInfo } from './clubTiers';
 
 /** A role as the directory reads it: its holders, when the member list is loaded. */
 export interface DirectoryRole extends NamedThing {
@@ -288,16 +255,6 @@ export function rulesMessage(chunk: string): Payload {
     return { content: chunk, embeds: [], files: [] };
 }
 
-/** The tier explainer: one embed per tier. */
-function tiersPayload(): Payload {
-    return {
-        embeds: TIER_ORDER.map((t) =>
-            new EmbedBuilder().setColor(TIERS[t].color).setTitle(TIERS[t].title).setDescription(`${TIERS[t].blurb}\n**Estimated Ranks:** ${TIERS[t].ranks}`),
-        ),
-        files: [],
-    };
-}
-
 /** A message link. */
 function jumpLink(guildId: string, channelId: string, messageId: string): string {
     return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
@@ -307,6 +264,30 @@ function jumpLink(guildId: string, channelId: string, messageId: string): string
 interface Part {
     key: string;
     build(ids: Map<string, string>): Payload;
+}
+
+/** Current members on uma.moe; null when the club is not tracked or has no data yet. */
+export async function clubHeadcount(club: TrackedCircle): Promise<number | null> {
+    if (club.circleId === null) return null;
+    return (await currentCircleProgress(club))?.members.length ?? null;
+}
+
+/** The clubs with a tier, as the poster draws them. */
+export async function posterClubs(clubs: TrackedCircle[]): Promise<PosterClub[]> {
+    return Promise.all(
+        clubs
+            .filter((c) => c.tier !== null)
+            .map(async (c) => ({
+                id: c.id,
+                name: c.name,
+                tier: c.tier!,
+                rank: c.rank,
+                headcount: await clubHeadcount(c),
+                quotaText: clubQuotaText(c),
+                dailyRequirement: clubDailyRequirement(c),
+                monthlyRank: c.circleId !== null ? c.monthlyRank : null,
+            })),
+    );
 }
 
 /** The result of posting or refreshing. */
@@ -326,7 +307,7 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
     const membersLoaded = await loadMembers(guild);
     const untiered = all.filter((c) => c.tier === null).map((c) => c.name);
 
-    const parts: Part[] = [{ key: 'tiers', build: tiersPayload }];
+    const parts: Part[] = [];
     const sections: { tier: ClubTier; clubs: { key: string; name: string }[] }[] = [];
     let listed = 0;
     for (const tier of TIER_ORDER) {
@@ -346,18 +327,22 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
         }
         sections.push(section);
     }
-    parts.push({
+    parts.unshift({
         key: 'index',
         build: (ids) => {
             const lines = sections.map(
                 (s) => `**${TIERS[s.tier].label}**: ${s.clubs.map((c) => (ids.has(c.key) ? `[${c.name}](${jumpLink(guild.id, channelId, ids.get(c.key)!)})` : c.name)).join(' · ')}`,
             );
             return {
-                embeds: [new EmbedBuilder().setColor(COLORS.info).setTitle('Directory').setDescription(lines.join('\n') || 'No clubs are listed yet.')],
+                embeds: [new EmbedBuilder().setColor(COLORS.info).setTitle('Directory').setDescription(lines.length > 0 ? `${lines.join('\n')}\n\nEvery club on one picture is at the bottom of the channel.` : 'No clubs are listed yet.')],
                 files: [],
             };
         },
     });
+    if (listed > 0) {
+        const poster = new AttachmentBuilder(await renderClubPoster(await posterClubs(all), { updatedAt: new Date() }), { name: 'clubs.png' });
+        parts.push({ key: 'poster', build: () => ({ embeds: [], files: [poster] }) });
+    }
     return { parts, listed, untiered };
 }
 
@@ -417,6 +402,16 @@ export async function publishDirectory(
         ids.set(part.key, sent.id);
         messageIds.push(sent.id);
         signatures.push(payloadSignature(p));
+    }
+    // A message that links to later ones (the index, first) was posted before
+    // they existed; now that every ID is known, fill those links in.
+    for (const [i, part] of parts.entries()) {
+        const p = part.build(ids);
+        const signature = payloadSignature(p);
+        if (signature === signatures[i]) continue;
+        const message = await channel.messages.fetch(messageIds[i]!);
+        await message.edit({ content: p.content ?? '', embeds: p.embeds, files: p.files, attachments: [], allowedMentions: NO_PINGS });
+        signatures[i] = signature;
     }
     await prisma.clubDirectory.upsert({
         where: { guildId: guild.id },

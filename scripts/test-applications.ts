@@ -34,7 +34,8 @@ async function main() {
     const h = await import('../src/lib/applications/history');
     const svc = await import('../src/lib/applications/service');
     const { renderApplicantCard, rankFileStem } = await import('../src/lib/image/renderApplicant');
-    const { renderClubPoster } = await import('../src/lib/image/renderClubPoster');
+    const { renderClubPoster, posterOrder, shortFans } = await import('../src/lib/image/renderClubPoster');
+    type PosterClub = import('../src/lib/image/renderClubPoster').PosterClub;
     const { prisma } = await import('../src/db/prisma');
     const bf = await import('../src/lib/applications/backfill');
     const tidyMod = await import('../src/lib/applications/tidy');
@@ -310,9 +311,15 @@ async function main() {
     });
     check('card: renders with no data', emptyCard.subarray(1, 4).toString(), 'PNG');
     const poster = await renderClubPoster([
-        { id: '1', name: 'Rose', tier: 'G3', rank: 'B_PLUS', headcount: 29, quotaText: '2.0M / day', monthlyRank: 722 },
-        { id: '2', name: 'Nameless Club With A Very Long Name Indeed', tier: 'DEBUT', rank: null, headcount: null, quotaText: 'Not set', monthlyRank: null },
-    ]);
+        { id: '1', name: 'Rose', tier: 'G3', rank: 'B_PLUS', headcount: 29, quotaText: '2.0M / day', dailyRequirement: 2_000_000, monthlyRank: 722 },
+        { id: '2', name: 'Nameless Club With A Very Long Name Indeed', tier: 'DEBUT', rank: null, headcount: null, quotaText: 'Not set', dailyRequirement: null, monthlyRank: null },
+        { id: '3', name: 'Full', tier: 'G1', rank: 'S', headcount: 30, quotaText: '90.0M / month', dailyRequirement: 3_000_000, monthlyRank: 12 },
+    ], { updatedAt: new Date('2026-11-21T00:00:00Z') });
+    const pc = (name: string, rank: PosterClub['rank'], dailyRequirement: number | null): PosterClub =>
+        ({ id: name, name, tier: 'G2', rank, headcount: 20, quotaText: 'x', dailyRequirement, monthlyRank: null });
+    check('poster: a tier orders by expected rank, then per day (none last), then name',
+        posterOrder([pc('d', null, 9), pc('c', 'A', null), pc('b', 'A', 1), pc('a', 'A', 1), pc('e', 'A_PLUS', 1)]).map((c) => c.name), ['e', 'a', 'b', 'c', 'd']);
+    check('poster: short per-day figures', [shortFans(3_266_666), shortFans(533_333), shortFans(950)], ['3.3M', '533K', '950']);
     check('poster: renders a PNG', poster.subarray(1, 4).toString(), 'PNG');
     check('poster: renders with no clubs', (await renderClubPoster([])).subarray(1, 4).toString(), 'PNG');
 

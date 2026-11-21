@@ -4,6 +4,21 @@ Decisions that changed project direction. Newest first.
 
 ---
 
+## 2026-11-21 — #club-bio: poster at the bottom, links at the top; poster redesigned
+
+- Settles the open question from 2026-11-04: the poster is part of the
+  directory, not a one-off. The user put it at the bottom (newest message,
+  where readers land) and the links at the top.
+- The rest of the directory: the user had no preference. I dropped the tier
+  explainer (the poster covers it) and kept the club cards, which clubs edit
+  themselves. The poster refreshes after each fan sync. `/club poster` is now
+  preview-only.
+- "Redesign the poster itself": no direction given. I went with a board of
+  aligned rows, open spots as the most visible item, and per-day quotas. Open
+  to change.
+
+---
+
 ## 2026-11-15 — Mejiro lines final; Ramonu's Rehearsal built (still paused)
 
 - The owner's eight Mejiro lines are in. Ramonu now rolls an outcome, and her
@@ -230,7 +245,7 @@ Open:
   call).
 - Whether the forum has a "Rejected" tag. Without one, or without
   `TAG_REJECTED_ID`, rejected posts are locked but not tagged.
-- Whether the poster should replace or head the #club-bio directory.
+- Whether the poster should replace or head the #club-bio directory. (Settled 2026-11-21: it closes the directory, at the bottom.)
 
 ---
 
