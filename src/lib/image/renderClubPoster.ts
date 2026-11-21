@@ -1,16 +1,19 @@
 import * as path from 'node:path';
 import { createCanvas, loadImage, type Image, type SKRSContext2D } from '@napi-rs/canvas';
-import type { ClubRank, ClubTier } from '@prisma/client';
+import type { ClubRank } from '@prisma/client';
 import { drawClubIcon, drawRankBadge, roundRect } from './canvasUtils';
 import { THEME, drawLabel, drawRule, drawText } from './theme';
 import { fit } from './cards';
 import { font } from './fonts';
-import { TIERS, TIER_ORDER } from '../clubTiers';
+import { GROUPS, GROUP_ORDER, type RankGroup } from '../clubGroups';
 
 /**
  * Every club on one picture, the last message of the club directory: a band
- * per tier (directory order, in the tier's colour, with what the tier means
- * and its estimated ranks), then one row per club.
+ * per rank group (S, A+, A, B+, Casual; `clubGroups.ts`) in the group's
+ * colour, then one row per club.
+ *
+ * Landscape: the groups flow, in order, into two columns of rows under a
+ * full-width banner (`splitColumns` balances their heights).
  *
  * Rows rather than cards, so the columns line up and clubs compare at a
  * glance: expected rank, quota (as set, and per day so a weekly and a
@@ -19,15 +22,18 @@ import { TIERS, TIER_ORDER } from '../clubTiers';
  * applicant looks for first.
  *
  * Drawn at twice its layout size so it stays sharp when Discord scales it
- * to the reader's screen.
+ * to the reader's screen, and encoded as JPEG (see the end of `renderClubPoster`).
  */
 
-/** Layout width; the image is `SCALE` times this. */
-const WIDTH = 1200;
-const SCALE = 2;
+/** One column of rows; two sit side by side, so the poster is landscape. */
+const COLUMN_W = 1104;
+const COLUMNS = 2;
+const GUTTER = 40;
 const MARGIN = 48;
+/** Layout width; the image is `SCALE` times this. */
+const WIDTH = MARGIN * 2 + COLUMN_W * COLUMNS + GUTTER * (COLUMNS - 1);
+const SCALE = 2;
 const HEADER_H = 178;
-const COLUMN_HEAD_H = 40;
 const BAND_H = 62;
 const ROW_H = 84;
 const SECTION_GAP = 26;
@@ -36,15 +42,15 @@ const FOOTER_H = 84;
 /** Members a club holds in game. */
 const CLUB_SIZE = 30;
 
-/** Column positions (left edges, or centres where noted). */
+/** Positions within a column, from its left edge (left edges, or centres where noted). */
 const COL = {
-    avatar: MARGIN + 44, // centre
-    name: MARGIN + 88,
-    rank: 548, // centre
-    quota: 600,
-    perDay: 808,
-    members: 918,
-    open: WIDTH - MARGIN - 20, // right edge, inset from the row's
+    avatar: 44, // centre
+    name: 88,
+    rank: 500, // centre
+    quota: 552,
+    perDay: 760,
+    members: 870,
+    open: COLUMN_W - 20, // right edge, inset from the row's
 };
 
 /**
@@ -88,7 +94,7 @@ function beachImage(): Promise<Image | null> {
 }
 
 /** Height of the beach banner: the picture at full width, cropped at the bottom. */
-const BEACH_H = 570;
+const BEACH_H = 760;
 
 /**
  * The beach picture across the top at full width, over a heavily blurred,
@@ -161,7 +167,8 @@ const RANK_ORDER: (ClubRank | null)[] = ['S_PLUS', 'S', 'A_PLUS', 'A', 'B_PLUS',
 export interface PosterClub {
     id: string;
     name: string;
-    tier: ClubTier;
+    /** The rank group it is drawn under (`rankGroup`). */
+    group: RankGroup;
     rank: ClubRank | null;
     /** Current members on uma.moe; null when not tracked. */
     headcount: number | null;
@@ -179,17 +186,17 @@ export interface PosterClub {
 }
 
 /**
- * A section drawn after the tiers, from data written down by hand rather
+ * A section drawn after the rank groups, from data written down by hand rather
  * than tracked (see `src/lib/jpClubs.ts`). Its clubs are drawn in the order
  * given.
  */
 export interface ExtraSection {
     title: string;
-    /** Shown at the band's right, like a tier's rank range. */
+    /** Shown at the band's right. */
     note?: string;
     /** 0xRRGGBB. */
     color: number;
-    clubs: Omit<PosterClub, 'tier'>[];
+    clubs: Omit<PosterClub, 'group'>[];
 }
 
 /** One band and its rows, as drawn. */
@@ -197,7 +204,7 @@ interface Section {
     title: string;
     note?: string;
     color: number;
-    clubs: Omit<PosterClub, 'tier'>[];
+    clubs: Omit<PosterClub, 'group'>[];
 }
 
 /** `#rrggbb` from a 0xRRGGBB number. */
@@ -218,7 +225,7 @@ export function shortFans(fans: number): string {
 }
 
 /**
- * Orders a tier's clubs: by expected rank, highest first, then by daily
+ * Orders a group's clubs: by expected rank, highest first, then by daily
  * requirement, highest first (clubs without a quota last), then by name.
  */
 export function posterOrder(clubs: PosterClub[]): PosterClub[] {
@@ -260,61 +267,62 @@ function drawOpen(ctx: SKRSContext2D, open: number | null, right: number, cy: nu
 }
 
 /** One club's row. */
-async function drawRow(ctx: SKRSContext2D, club: Omit<PosterClub, 'tier'>, y: number, color: number, shaded: boolean, page: Backdrop) {
+async function drawRow(ctx: SKRSContext2D, club: Omit<PosterClub, 'group'>, x: number, y: number, color: number, shaded: boolean, page: Backdrop) {
     const cy = y + ROW_H / 2;
     ctx.fillStyle = shaded ? page.rowAlt : page.row;
-    ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, ROW_H);
+    ctx.fillRect(x, y, COLUMN_W, ROW_H);
+    const c = Object.fromEntries(Object.entries(COL).map(([k, v]) => [k, x + v])) as typeof COL;
 
-    await drawClubIcon(ctx, club.avatar ? { ...club, name: club.avatar } : club, COL.avatar, cy, 28, 24);
+    await drawClubIcon(ctx, club.avatar ? { ...club, name: club.avatar } : club, c.avatar, cy, 28, 24);
 
     // The name, then the club's uma.moe rank this month as a bare number.
     const rank = club.monthlyRank ? `#${club.monthlyRank.toLocaleString('en-US')}` : '';
     ctx.font = font('500 18px');
     const rankW = rank ? ctx.measureText(rank).width + 12 : 0;
-    const name = fit(ctx, club.name, COL.rank - 34 - COL.name - rankW, '700 27px');
-    const nameW = drawText(ctx, name, COL.name, cy + 10, { spec: '700 27px', color: THEME.text });
-    if (rank) drawText(ctx, rank, COL.name + nameW + 12, cy + 10, { spec: '500 18px', color: THEME.muted });
+    const name = fit(ctx, club.name, c.rank - 34 - c.name - rankW, '700 27px');
+    const nameW = drawText(ctx, name, c.name, cy + 10, { spec: '700 27px', color: THEME.text });
+    if (rank) drawText(ctx, rank, c.name + nameW + 12, cy + 10, { spec: '500 18px', color: THEME.muted });
 
-    await drawRankBadge(ctx, club.rank, COL.rank, cy, 29, 18);
+    await drawRankBadge(ctx, club.rank, c.rank, cy, 29, 18);
 
     const unset = club.quotaText === 'Not set';
-    drawText(ctx, unset ? '—' : fit(ctx, club.quotaText, COL.perDay - 24 - COL.quota, '600 20px'), COL.quota, cy + 7, {
+    drawText(ctx, unset ? '—' : fit(ctx, club.quotaText, c.perDay - 24 - c.quota, '600 20px'), c.quota, cy + 7, {
         spec: '600 20px',
         color: unset ? THEME.faint : THEME.text,
     });
     if (club.dailyRequirement === null) {
-        drawText(ctx, '—', COL.perDay, cy + 7, { spec: '600 20px', color: THEME.faint });
+        drawText(ctx, '—', c.perDay, cy + 7, { spec: '600 20px', color: THEME.faint });
     } else {
-        const w = drawText(ctx, shortFans(club.dailyRequirement), COL.perDay, cy + 7, { spec: '600 20px', color: THEME.text });
-        drawText(ctx, '/day', COL.perDay + w + 1, cy + 7, { spec: '400 14px', color: THEME.muted });
+        const w = drawText(ctx, shortFans(club.dailyRequirement), c.perDay, cy + 7, { spec: '600 20px', color: THEME.text });
+        drawText(ctx, '/day', c.perDay + w + 1, cy + 7, { spec: '400 14px', color: THEME.muted });
     }
 
     if (club.headcount === null) {
-        drawText(ctx, '—', COL.members, cy + 7, { spec: '600 20px', color: THEME.faint });
+        drawText(ctx, '—', c.members, cy + 7, { spec: '600 20px', color: THEME.faint });
     } else {
-        drawText(ctx, `${club.headcount}/${CLUB_SIZE}`, COL.members, cy + 2, { spec: '600 20px', color: THEME.text });
+        drawText(ctx, `${club.headcount}/${CLUB_SIZE}`, c.members, cy + 2, { spec: '600 20px', color: THEME.text });
         const barW = 92;
-        roundRect(ctx, COL.members, cy + 12, barW, 5, 2.5);
+        roundRect(ctx, c.members, cy + 12, barW, 5, 2.5);
         ctx.fillStyle = THEME.line;
         ctx.fill();
-        roundRect(ctx, COL.members, cy + 12, Math.max(5, barW * Math.min(1, club.headcount / CLUB_SIZE)), 5, 2.5);
+        roundRect(ctx, c.members, cy + 12, Math.max(5, barW * Math.min(1, club.headcount / CLUB_SIZE)), 5, 2.5);
         ctx.fillStyle = hex(color);
         ctx.fill();
     }
 
-    drawOpen(ctx, openSpots(club), COL.open, cy, THEME.bg);
+    drawOpen(ctx, openSpots(club), c.open, cy, THEME.bg);
 }
 
-/** A tier's band: its colour, title, what it means and its estimated ranks. */
-function drawBand(ctx: SKRSContext2D, info: Section, y: number, page: Backdrop) {
+/** A section's band: its colour, title and note. */
+function drawBand(ctx: SKRSContext2D, info: Section, x: number, y: number, page: Backdrop) {
     ctx.fillStyle = page.row;
-    ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, BAND_H);
+    ctx.fillRect(x, y, COLUMN_W, BAND_H);
     ctx.fillStyle = tint(info.color, 0.1);
-    ctx.fillRect(MARGIN, y, WIDTH - MARGIN * 2, BAND_H);
+    ctx.fillRect(x, y, COLUMN_W, BAND_H);
     ctx.fillStyle = hex(info.color);
-    ctx.fillRect(MARGIN, y, 6, BAND_H);
-    drawText(ctx, info.title, MARGIN + 26, y + 41, { spec: '700 29px', color: hex(info.color) });
-    if (info.note) drawText(ctx, info.note, COL.open, y + 39, { spec: '600 20px', color: THEME.text, align: 'right' });
+    ctx.fillRect(x, y, 6, BAND_H);
+    drawText(ctx, info.title, x + 26, y + 41, { spec: '700 29px', color: hex(info.color) });
+    if (info.note) drawText(ctx, info.note, x + COL.open, y + 39, { spec: '600 20px', color: THEME.text, align: 'right' });
 }
 
 /** A big figure over its label, right-aligned at `right`. */
@@ -323,28 +331,56 @@ function drawStat(ctx: SKRSContext2D, label: string, value: string, right: numbe
     drawText(ctx, value, right, 120, { spec: '700 38px', color, align: 'right' });
 }
 
+/** A section's height: its band, its rows and the gap after it. */
+function sectionHeight(s: Section): number {
+    return BAND_H + s.clubs.length * ROW_H + SECTION_GAP;
+}
+
+/**
+ * Splits the sections, in order, into two columns: the left takes the first
+ * few, the right the rest, at the split that makes the taller column
+ * shortest.
+ */
+export function splitColumns<T>(heights: number[], items: T[]): [T[], T[]] {
+    const total = heights.reduce((a, b) => a + b, 0);
+    let best = 0;
+    let bestTaller = Infinity;
+    let left = 0;
+    for (let k = 0; k <= items.length; k++) {
+        const taller = Math.max(left, total - left);
+        if (taller < bestTaller) {
+            bestTaller = taller;
+            best = k;
+        }
+        left += heights[k] ?? 0;
+    }
+    return [items.slice(0, best), items.slice(best)];
+}
+
 /** "21 Nov 2026" in UTC. */
 function shortDate(date: Date): string {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 /**
- * Renders the poster. Within a tier, clubs are ordered by `posterOrder`;
- * tiers with no clubs are left out. `extra` sections follow the tiers. `updatedAt` is printed in the footer, so
+ * Renders the poster. Within a rank group, clubs are ordered by `posterOrder`;
+ * groups with no clubs are left out. `extra` sections follow the groups.
+ * No column labels: each value carries its unit ("/month", "/day", "29/30"). `updatedAt` is printed in the footer, so
  * a reader can tell how fresh the members and ranks are.
  */
 export async function renderClubPoster(clubs: PosterClub[], options: { title?: string; footer?: string; updatedAt?: Date; backdrop?: Backdrop; extra?: ExtraSection[] } = {},
 ): Promise<Buffer> {
     const sections: Section[] = [
-        ...TIER_ORDER.map((tier) => ({ title: TIERS[tier].title, note: TIERS[tier].ranks, color: TIERS[tier].color, clubs: posterOrder(clubs.filter((c) => c.tier === tier)) })),
+        ...GROUP_ORDER.map((group) => ({ title: GROUPS[group].label, color: GROUPS[group].color, clubs: posterOrder(clubs.filter((c) => c.group === group)) })),
         ...(options.extra ?? []),
     ].filter((s) => s.clubs.length > 0);
     // Header totals count every club drawn, hand-written ones included.
     const all = sections.flatMap((s) => s.clubs);
-    const body = sections.reduce((sum, s) => sum + BAND_H + s.clubs.length * ROW_H + SECTION_GAP, 0);
+    const columns = splitColumns(sections.map(sectionHeight), sections);
+    const body = Math.max(...columns.map((col) => col.reduce((sum, s) => sum + sectionHeight(s), 0)));
     const page: Backdrop = options.backdrop ?? BACKDROPS.beach;
     const headerH = page.headerH ?? HEADER_H;
-    const height = headerH + (sections.length > 0 ? COLUMN_HEAD_H + body : 80) + FOOTER_H;
+    const height = headerH + (sections.length > 0 ? body : 80) + FOOTER_H;
 
     const canvas = createCanvas(WIDTH * SCALE, height * SCALE);
     const ctx = canvas.getContext('2d');
@@ -358,8 +394,8 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
         ctx.shadowBlur = 14;
         ctx.shadowOffsetY = 1;
     }
-    drawLabel(ctx, 'Tracen Academy', MARGIN, 64, page.accent, 14);
-    drawText(ctx, options.title ?? 'Our Clubs', MARGIN, 120, { spec: '700 52px', color: page.ink });
+    drawLabel(ctx, 'Tracen Academy', MARGIN, 62, page.accent, 16);
+    drawText(ctx, options.title ?? 'Our Clubs', MARGIN, 128, { spec: '700 68px', color: page.ink });
     const tracked = all.filter((c) => c.headcount !== null);
     const right = WIDTH - MARGIN;
     if (page.statsPanel) {
@@ -381,30 +417,24 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
 
     let y = headerH;
     if (sections.length === 0) {
-        drawText(ctx, 'No clubs have a tier yet.', MARGIN, y + 40, { spec: '400 18px', color: page.inkMuted });
+        drawText(ctx, 'No clubs have an expected rank yet.', MARGIN, y + 40, { spec: '400 18px', color: page.inkMuted });
         y += 80;
-    } else {
-        // Column labels, once, over every tier.
-        const labelY = y + 16;
-        drawLabel(ctx, 'Club', COL.name, labelY, page.inkMuted, 11);
-        drawLabel(ctx, 'Rank', COL.rank, labelY, page.inkMuted, 11, 'center');
-        drawLabel(ctx, 'Quota', COL.quota, labelY, page.inkMuted, 11);
-        drawLabel(ctx, 'Per day', COL.perDay, labelY, page.inkMuted, 11);
-        drawLabel(ctx, 'Members', COL.members, labelY, page.inkMuted, 11);
-        drawLabel(ctx, 'Open', COL.open - 14, labelY, page.inkMuted, 11, 'right');
-        y += COLUMN_HEAD_H;
     }
     ctx.restore();
 
-    // ── Tiers ─────────────────────────────────────────────────────────────────
-    for (const section of sections) {
-        drawBand(ctx, section, y, page);
-        y += BAND_H;
-        for (const [i, club] of section.clubs.entries()) {
-            await drawRow(ctx, club, y, section.color, i % 2 === 1, page);
-            y += ROW_H;
+    // ── Rank groups, in two columns ───────────────────────────────────────────
+    for (const [i, column] of columns.entries()) {
+        const x = MARGIN + i * (COLUMN_W + GUTTER);
+        let cy = y;
+        for (const section of column) {
+            drawBand(ctx, section, x, cy, page);
+            cy += BAND_H;
+            for (const [j, club] of section.clubs.entries()) {
+                await drawRow(ctx, club, x, cy, section.color, j % 2 === 1, page);
+                cy += ROW_H;
+            }
+            cy += SECTION_GAP;
         }
-        y += SECTION_GAP;
     }
 
     // ── Footer ────────────────────────────────────────────────────────────────
@@ -413,5 +443,7 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
     const source = options.updatedAt ? `Members and ranks from uma.moe, ${shortDate(options.updatedAt)}` : 'Members and ranks from uma.moe';
     drawText(ctx, source, WIDTH - MARGIN, height - 32, { spec: '400 13px', color: page.inkMuted, align: 'right' });
 
-    return canvas.encode('png');
+    // JPEG: the poster is mostly picture, and as PNG it ran to about 6 MB,
+    // close to Discord's upload limit. Quality 92 keeps the text crisp.
+    return canvas.encode('jpeg', 92);
 }

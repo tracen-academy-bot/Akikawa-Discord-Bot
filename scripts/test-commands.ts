@@ -728,14 +728,13 @@ async function main() {
     const staffProfile = profileForm(ck, false, false).custom_id;
     const fullProfile = profileForm(ck, true, false).custom_id;
     check('the staff profile form: bio, rules, files', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner and rules file']);
-    check('Club Managers also set the tier', profileForm(ck, true, false).components.map((c) => c.label), ['Tier', 'Bio', 'Rules', 'Banner and rules file']);
-    check('a club starts not listed', profileForm(ck, true, false).components[0]?.component.options?.find((o) => o.default)?.value, 'NONE');
+    check('the Club Manager form has no tier any more', profileForm(ck, true, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner and rules file']);
     check('a Remove list only when there is something to remove',
         [profileForm(ck, false, false).components.some((c) => c.label === 'Remove'), profileForm(ck, false, true).components.map((c) => c.label).at(-1)], [false, 'Remove']);
     check('with a banner, the list offers it', profileForm(ck, false, true).components.at(-1)?.component.options?.map((o) => o.value), ['banner']);
-    check('the Club Manager form with a banner and a rules file has five fields',
+    check('the Club Manager form with a banner and a rules file has four fields',
         profileForm({ ...ck, rulesFile: '# Rules', rulesFileName: 'rules.md' }, true, true).components.map((c) => c.label),
-        ['Tier', 'Bio', 'Rules', 'Banner and rules file', 'Remove']);
+        ['Bio', 'Rules', 'Banner and rules file', 'Remove']);
 
     type Upload = { url: string; name: string; contentType: string; size: number };
     /** Submits the profile form; returns what the bot replied, in order. */
@@ -778,15 +777,13 @@ async function main() {
     const staffSave = await submitProfile(staffProfile, 'u-assistant', false, kept);
     check('club staff can save the bio and rules', [(await reload()).bio, (await reload()).rules], [BIO, RULES]);
     check('the reply is private and shows the card', [staffSave[0]?.kind, staffSave.at(-1)?.content],
-        ['defer', 'Saved. **Checkrose** is listed under **G2 [Semi Competitive+]** (from its expected rank). Its card:']);
-    check('staff cannot submit the tier form',
-        (await submitProfile(fullProfile, 'u-assistant', false, { 'club:profile:tier': 'G1', ...kept }))[0]?.description, "Only Club Managers can change a club's tier.");
+        ['defer', 'Saved. **Checkrose** is listed under **A**. Its card:']);
+    check('staff cannot submit the Club Manager form',
+        (await submitProfile(fullProfile, 'u-assistant', false, kept))[0]?.description, 'Only Club Managers can use that form.');
     check('outsiders cannot edit the profile',
         (await submitProfile(staffProfile, 'u-behind', false, kept))[0]?.description?.startsWith('You must be a trainer or assistant'), true);
     check('a staff role holder can', (await submitProfile(staffProfile, 'u-role-asst', false, kept, { held: ['r-ck-asst'] })).at(-1)?.kind, 'edit');
-    const tiered = await submitProfile(fullProfile, 'u-officer', true, { 'club:profile:tier': 'G1', ...kept });
-    check('a Club Manager sets the tier', (await reload()).tier, 'G1');
-    check('and is told where it is listed', tiered.at(-1)?.content, 'Saved. **Checkrose** is listed under **G1 [Competitive]**. Its card:');
+    check('a Club Manager can save the profile too', (await submitProfile(fullProfile, 'u-officer', true, kept)).at(-1)?.content, 'Saved. **Checkrose** is listed under **A**. Its card:');
 
     // The banner: downloaded from Discord's CDN (stubbed) and stored.
     const bannerPng = Buffer.from('89504e470d0a1a0a', 'hex');
@@ -876,7 +873,7 @@ async function main() {
     const ckCard = directory.clubCard(ckFull, ckStaff, ckFull.banner);
     const [bannerEmbed, cardEmbed] = ckCard.embeds.map((e) => e.toJSON());
     check('the banner embed points at the attached file', [bannerEmbed?.image?.url, ckCard.files.length], [`attachment://banner-${club.id}.png`, 1]);
-    check('the card is in its tier colour', [bannerEmbed?.color, cardEmbed?.color], [directory.TIERS.G1.color, directory.TIERS.G1.color]);
+    check('the card is in its rank group colour', [bannerEmbed?.color, cardEmbed?.color], [directory.GROUPS.A.color, directory.GROUPS.A.color]);
     check('the card lists staff, requirements and expected rank', cardEmbed?.description?.split('\n').slice(0, 4),
         ['**Trainer**: <@u-trainer>', '**Assistants**: <@u-assistant>, <@u-role-asst>', `**Requirements**: ${clubQuotaText(ckFull)}`, '**Expected rank**: A']);
     check('rules as a link, then the bio as a quote', cardEmbed?.description?.endsWith(`[Checkrose goals and rules](${RULES})\n\n> Text Chat Heavy\n> Wordle Boomers`), true);
@@ -934,12 +931,11 @@ async function main() {
     const shape = (p: DirSent) => `${p.content ?? ''}|${p.embeds.length}|${p.files.length}`;
     const lastDesc = (log: Sent[]) => log.at(-1)?.embeds?.[0]?.description ?? '';
 
-    // Tiers: picked wins, else from the expected rank, else not listed.
-    check('a tier comes from the expected rank when none is picked',
-        (['S_PLUS', 'S', 'A_PLUS', 'A', 'B_PLUS', 'CASUAL'] as const).map((rank) => directory.effectiveTier({ tier: null, rank })), ['G1', 'G1', 'G2', 'G2', 'G3', 'DEBUT']);
-    check('a picked tier wins over the rank', directory.effectiveTier({ tier: 'G3', rank: 'S' }), 'G3');
-    check('no tier and no rank: not listed', directory.effectiveTier({ tier: null, rank: null }), null);
-    // The directory tests below list Checkrose only: Looser Club's rank would list it under G3.
+    // Groups come from the expected rank, with S+ and S together.
+    check('rank groups: S+ and S together, the rest as they are',
+        (['S_PLUS', 'S', 'A_PLUS', 'A', 'B_PLUS', 'CASUAL'] as const).map((rank) => directory.rankGroup(rank)), ['S', 'S', 'A_PLUS', 'A', 'B_PLUS', 'CASUAL']);
+    check('no expected rank: not listed', directory.rankGroup(null), null);
+    // The directory tests below list Checkrose only: Looser Club's rank would list it under B+.
     await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: null } });
 
     check('/club directory is for Club Managers', desc(await runClubCmd({ sub: 'directory', userId: 'u-trainer' })), 'Only Club Managers can post the club directory.');
@@ -948,14 +944,14 @@ async function main() {
     const dirA = dirChannel('c-directory');
     const dirPostedText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory' } }));
     check('/club directory posts it', dirPostedText.startsWith('Posted the directory in <#c-directory> with 1 club.'), true);
-    check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no expected rank or tier:') && dirPostedText.includes('**Otherrose**'), true);
-    check('its messages: the index, a heading, the card, the poster', dirA.rec.sent.map((m) => shape(m.payload)), ['|1|0', '## Current G1 Clubs|0|0', '|2|1', '|0|1']);
+    check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no expected rank:') && dirPostedText.includes('**Otherrose**'), true);
+    check('its messages: the index, a heading, the card, the poster', dirA.rec.sent.map((m) => shape(m.payload)), ['|1|0', '## A Clubs|0|0', '|2|1', '|0|1']);
     check('the index is first and titled', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().title, 'Directory');
-    check('it is posted before the cards, without links', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().description?.startsWith('**G1**: Checkrose\n'), true);
+    check('it is posted before the cards, without links', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().description?.startsWith('**A**: Checkrose\n'), true);
     check('then filled in with a link to the card, and only it is edited', [dirA.rec.edits, dirA.rec.live.get('c-directory-m1')?.embeds[0]?.toJSON().description],
-        [['c-directory-m1'], `**G1**: [Checkrose](https://discord.com/channels/${GUILD}/c-directory/c-directory-m3)\n\nEvery club on one picture is at the bottom of the channel.`]);
+        [['c-directory-m1'], `**A**: [Checkrose](https://discord.com/channels/${GUILD}/c-directory/c-directory-m3)\n\nEvery club on one picture is at the bottom of the channel.`]);
     const posterFile = dirA.rec.sent[3]?.payload.files[0] as { name?: string; attachment?: Buffer } | undefined;
-    check('the poster is last, a PNG', [posterFile?.name, posterFile?.attachment?.subarray(1, 4).toString()], ['clubs.png', 'PNG']);
+    check('the poster is last, a JPEG', [posterFile?.name, posterFile?.attachment?.subarray(0, 3).toString('hex')], ['clubs.jpg', 'ffd8ff']);
     check('nothing in it pings', dirA.rec.sent.every((m) => JSON.stringify(m.payload.allowedMentions?.parse) === '[]'), true);
 
     // Same clubs: edited in place, and only what changed.
@@ -972,11 +968,11 @@ async function main() {
     await directory.refreshDirectory(FAKE_GUILD);
     check('a new uma.moe rank updates only the poster', dirA.rec.edits.slice(6), ['c-directory-m4']);
 
-    // A club joins a tier: the run no longer fits, so it is posted afresh.
-    await prisma.trackedCircle.update({ where: { id: other.id }, data: { tier: 'G2' } });
+    // A club gets an expected rank: the run no longer fits, so it is posted afresh.
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { rank: 'S' } });
     const dirRegrouped = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
     check('a new club reposts the directory', [dirRegrouped.mode, dirRegrouped.listed, dirA.rec.deleted.length, dirA.rec.live.size], ['posted', 2, 4, 6]);
-    check('with a section per tier', [...dirA.rec.live.values()].map((p) => p.content).filter(Boolean), ['## Current G1 Clubs', '## Current G2 Clubs']);
+    check('with a section per rank group, highest first', [...dirA.rec.live.values()].map((p) => p.content).filter(Boolean), ['## S Clubs', '## A Clubs']);
     // A message deleted by hand: posted afresh too.
     dirA.rec.live.delete([...dirA.rec.live.keys()][2]!);
     check('an automatic refresh with nothing changed does not look', (await directory.publishDirectory(FAKE_GUILD, dirA.channel)).mode, 'edited');
@@ -988,10 +984,10 @@ async function main() {
     check('/club directory with no channel refreshes it where it is',
         lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })).startsWith('Updated the directory in <#c-directory-2>'), true);
 
-    // A club with an expected rank but no picked tier is listed from its rank.
-    await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: 'B_PLUS', tier: null } });
+    // Another rank, another section.
+    await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: 'B_PLUS' } });
     await directory.refreshDirectory(FAKE_GUILD);
-    check('a club with only an expected rank gets its section', [...dirB.rec.live.values()].some((p) => p.content === '## Current G3 Clubs'), true);
+    check('a B+ club gets the B+ section', [...dirB.rec.live.values()].some((p) => p.content === '## B+ Clubs'), true);
     await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: null } });
     await directory.refreshDirectory(FAKE_GUILD);
 

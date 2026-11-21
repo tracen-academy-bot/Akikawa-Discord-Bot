@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
-import type { ClubTier, TrackedCircle } from '@prisma/client';
+import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { COLORS } from './embeds';
 import { clubAvatar } from './clubAvatar';
@@ -8,24 +8,24 @@ import { clubDailyRequirement, clubQuotaText, formatRank } from './clubFormat';
 import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing } from './clubLinks';
 
 /**
- * The club directory: a channel listing every club by tier, posted and kept
+ * The club directory: a channel listing every club by expected rank, posted and kept
  * up to date by the bot.
  *
  * It is a run of messages, in order:
  *
  *   1. `index`: jump links to every card. It links to messages posted after
  *      it, so a fresh run posts it without links and fills them in at the end.
- *   2. For each tier with clubs, `tier:<tier>` ("Current G1 Clubs"), then one
+ *   2. For each rank group with clubs (`clubGroups.ts`: S, A+, A, B+, Casual),
+ *      `group:<group>` ("S Clubs"), then one
  *      `club:<id>` card per club in it, by name. A card is the club's banner
  *      (if it has one) above an embed with its staff, requirements, expected
  *      rank, rules and bio. A rules file follows in `club:<id>:rules:<n>`
  *      messages of its own, plain text split at line breaks.
  *   3. `poster`: every club on one picture (`renderClubPoster`), which also
- *      says what each tier means. It is last because Discord opens a channel
+ *      groups the same way. It is last because Discord opens a channel
  *      at its newest message, so readers land on it.
  *
- * A club's tier is the one a Club Manager picked, else its expected rank's
- * (`effectiveTier`); clubs with neither are left out. `/club directory` posts it; after that
+ * Clubs with no expected rank are left out. `/club directory` posts it; after that
  * any change to a club (`/club reports`, `/club profile`, `/club admin`, staff, create, delete)
  * refreshes it, and so does every fan sync, since the poster shows each
  * club's headcount and uma.moe rank. When the same messages still fit (same clubs, same order)
@@ -37,12 +37,12 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  * by hand.
  */
 
-import { TIERS, TIER_ORDER, effectiveTier } from './clubTiers';
+import { GROUPS, GROUP_ORDER, rankGroup, type RankGroup } from './clubGroups';
 import { currentCircleProgress } from './fans/reports';
 import { renderClubPoster, type PosterClub } from './image/renderClubPoster';
 import { JP_SECTION } from './jpClubs';
 
-export { TIERS, TIER_ORDER, effectiveTier, type TierInfo } from './clubTiers';
+export { GROUPS, GROUP_ORDER, rankGroup, type RankGroup } from './clubGroups';
 
 /** A role as the directory reads it: its holders, when the member list is loaded. */
 export interface DirectoryRole extends NamedThing {
@@ -207,8 +207,8 @@ export interface Banner {
  * the club's avatar (see `clubAvatar`) as its thumbnail.
  */
 export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Banner | null): Payload & { rulesMessages: string[] } {
-    const tier = effectiveTier(club);
-    const color = tier ? TIERS[tier].color : COLORS.info;
+    const group = rankGroup(club.rank);
+    const color = group ? GROUPS[group].color : COLORS.info;
     const embeds: EmbedBuilder[] = [];
     const files: AttachmentBuilder[] = [];
     if (banner) {
@@ -275,15 +275,15 @@ export async function clubHeadcount(club: TrackedCircle): Promise<number | null>
     return (await currentCircleProgress(club))?.members.length ?? null;
 }
 
-/** The clubs with a tier, as the poster draws them. */
+/** The clubs with an expected rank, as the poster draws them. */
 export async function posterClubs(clubs: TrackedCircle[]): Promise<PosterClub[]> {
     return Promise.all(
         clubs
-            .filter((c) => effectiveTier(c) !== null)
+            .filter((c) => rankGroup(c.rank) !== null)
             .map(async (c) => ({
                 id: c.id,
                 name: c.name,
-                tier: effectiveTier(c)!,
+                group: rankGroup(c.rank)!,
                 rank: c.rank,
                 headcount: await clubHeadcount(c),
                 quotaText: clubQuotaText(c),
@@ -299,7 +299,7 @@ export interface DirectoryResult {
     mode: 'edited' | 'posted';
     /** Clubs on the directory. */
     listed: number;
-    /** Clubs left out for having no tier. */
+    /** Clubs left out for having no expected rank. */
     untiered: string[];
 }
 
@@ -308,16 +308,16 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
     const all = await prisma.trackedCircle.findMany({ where: { guildId: guild.id }, include: { banner: true }, orderBy: { name: 'asc' } });
     const linkable = await guildClubs(guild.id);
     const membersLoaded = await loadMembers(guild);
-    const untiered = all.filter((c) => effectiveTier(c) === null).map((c) => c.name);
+    const untiered = all.filter((c) => rankGroup(c.rank) === null).map((c) => c.name);
 
     const parts: Part[] = [];
-    const sections: { tier: ClubTier; clubs: { key: string; name: string }[] }[] = [];
+    const sections: { group: RankGroup; clubs: { key: string; name: string }[] }[] = [];
     let listed = 0;
-    for (const tier of TIER_ORDER) {
-        const clubs = all.filter((c) => effectiveTier(c) === tier);
+    for (const group of GROUP_ORDER) {
+        const clubs = all.filter((c) => rankGroup(c.rank) === group);
         if (clubs.length === 0) continue;
-        parts.push({ key: `tier:${tier}`, build: () => ({ content: `## Current ${TIERS[tier].label} Clubs`, embeds: [], files: [] }) });
-        const section = { tier, clubs: [] as { key: string; name: string }[] };
+        parts.push({ key: `group:${group}`, build: () => ({ content: `## ${GROUPS[group].label} Clubs`, embeds: [], files: [] }) });
+        const section = { group, clubs: [] as { key: string; name: string }[] };
         for (const club of clubs) {
             const staff = await clubStaff(club, linkable, guild, membersLoaded);
             const key = `club:${club.id}`;
@@ -334,7 +334,7 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
         key: 'index',
         build: (ids) => {
             const lines = sections.map(
-                (s) => `**${TIERS[s.tier].label}**: ${s.clubs.map((c) => (ids.has(c.key) ? `[${c.name}](${jumpLink(guild.id, channelId, ids.get(c.key)!)})` : c.name)).join(' · ')}`,
+                (s) => `**${GROUPS[s.group].label}**: ${s.clubs.map((c) => (ids.has(c.key) ? `[${c.name}](${jumpLink(guild.id, channelId, ids.get(c.key)!)})` : c.name)).join(' · ')}`,
             );
             return {
                 embeds: [new EmbedBuilder().setColor(COLORS.info).setTitle('Directory').setDescription(lines.length > 0 ? `${lines.join('\n')}\n\nEvery club on one picture is at the bottom of the channel.` : 'No clubs are listed yet.')],
@@ -345,7 +345,7 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
     // The poster also carries the hand-written JP clubs, so it is posted even
     // when no tracked club is listed.
     if (listed > 0 || JP_SECTION.clubs.length > 0) {
-        const poster = new AttachmentBuilder(await renderClubPoster(await posterClubs(all), { updatedAt: new Date(), extra: [JP_SECTION] }), { name: 'clubs.png' });
+        const poster = new AttachmentBuilder(await renderClubPoster(await posterClubs(all), { updatedAt: new Date(), extra: [JP_SECTION] }), { name: 'clubs.jpg' });
         parts.push({ key: 'poster', build: () => ({ embeds: [], files: [poster] }) });
     }
     return { parts, listed, untiered };

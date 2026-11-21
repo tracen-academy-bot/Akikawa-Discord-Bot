@@ -108,6 +108,27 @@ directory, its cards' colours, the poster and the replies all use it. The
 dropdown's "Not listed" is now "From expected rank". The poster also posts
 when only the JP section has clubs.
 
+Same day, superseding that: "just separate back to S/A+/A/B+/casual for
+simplicity". The tiers are gone from the directory and the poster; clubs
+group by expected rank (`src/lib/clubGroups.ts`: S+ and S as S, then A+,
+A, B+, Casual), with headings "S Clubs" and so on, colours close to each
+badge's art. `clubTiers.ts` and `effectiveTier` are removed, and so is the
+tier dropdown in `/club profile` (the `tier` column stays in the database,
+unused). Also:
+
+- The poster's column labels (CLUB, RANK, QUOTA...) floated over the
+  picture with nothing under them; removed. Every value carries its unit.
+- The poster is landscape: two 1104 columns under a full-width banner
+  (760). `splitColumns` splits the groups, in order, where the taller
+  column is shortest. The title grew to 68.
+- It is JPEG (quality 92), `clubs.jpg`. As PNG the landscape version was
+  6.0 MB; as JPEG 1.3 MB, text still sharp.
+
+Not done: the user said to "read how the other bot actually made
+directory". All the repo holds is the 10-05 note ("Dia's tier posts, then
+per-club banner and card posts"); the session cannot read Discord, so the
+user was asked for screenshots.
+
 ---
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role

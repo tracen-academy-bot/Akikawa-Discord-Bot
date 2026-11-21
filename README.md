@@ -249,16 +249,17 @@ has no record of are left out of the averages, not counted as zero. The
 first month on record is also left out, because it may be partial.
 
 The club directory (`/club directory channel:`, for #club-bio) runs, top to
-bottom: jump links to every club, then each tier's clubs as cards (banner,
-staff, requirements, rules, bio), then the club poster. The poster is last
-because Discord opens a channel at its newest message. It draws every club
-with a tier as one row: expected rank, quota (as set and per day), members,
-and open spots, under a band per tier with its rank range. JP clubs, which
-uma.moe does not track, follow the tiers; they are written by hand in
-`src/lib/jpClubs.ts` and do not update themselves. The
-directory updates itself after club changes and after every fan sync, and
-edits only the messages that changed. `/club poster` shows the same picture
-in place, to preview it.
+bottom: jump links to every club, then the clubs as cards (banner, staff,
+requirements, rules, bio) under a heading per expected rank (S, A+, A, B+,
+Casual; S+ counts as S), then the club poster. The poster is last because
+Discord opens a channel at its newest message. It is a landscape JPEG: a
+banner, then the same groups in two columns, one row per club with expected
+rank, quota (as set and per day), members and open spots. JP clubs, which
+uma.moe does not track, come after the groups; they are written by hand in
+`src/lib/jpClubs.ts` and do not update themselves. A club with no expected
+rank is left out. The directory updates itself after club changes and after
+every fan sync, and edits only the messages that changed. `/club poster`
+shows the same picture in place, to preview it.
 
 ## Welcome message
 

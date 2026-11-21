@@ -25,6 +25,12 @@ Decisions that changed project direction. Newest first.
   been picked. Reverses the 10-05 "tiers are set explicitly" decision: an
   unpicked tier now follows the expected rank (A goes to G2, B+ to G3, my
   call). A picked tier still wins.
+- Then reversed again: group by expected rank only, S/A+/A/B+/Casual, "for
+  simplicity". Tiers are gone. The poster goes landscape ("horizontal"),
+  without the floating column labels.
+- Open: match the directory to how "the other bot" made it. Needs
+  screenshots; the repo has no record beyond "tier posts, then per-club
+  banner and card posts".
 
 ---
 
