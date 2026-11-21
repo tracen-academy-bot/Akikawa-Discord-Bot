@@ -88,7 +88,7 @@ function beachImage(): Promise<Image | null> {
 }
 
 /** Height of the beach banner: the picture at full width, cropped at the bottom. */
-const BEACH_H = 470;
+const BEACH_H = 570;
 
 /**
  * The beach picture across the top at full width, over a heavily blurred,
@@ -349,7 +349,7 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
     const tracked = clubs.filter((c) => c.headcount !== null);
     const right = WIDTH - MARGIN;
     if (page.statsPanel) {
-        const left = tracked.length > 0 ? right - 470 : right - 130;
+        const left = tracked.length > 0 ? right - 392 : right - 130;
         roundRect(ctx, left, 44, WIDTH - 24 - left, 98, 16);
         ctx.fillStyle = page.statsPanel;
         ctx.fill();
@@ -358,8 +358,8 @@ export async function renderClubPoster(clubs: PosterClub[], options: { title?: s
         const open = tracked.reduce((sum, c) => sum + (openSpots(c) ?? 0), 0);
         const members = tracked.reduce((sum, c) => sum + c.headcount!, 0);
         drawStat(ctx, 'Open spots', String(open), right, open > 0 ? page.highlight : page.inkMuted, page);
-        drawStat(ctx, 'Trainers', members.toLocaleString('en-US'), right - 190, page.ink, page);
-        drawStat(ctx, 'Clubs', String(clubs.length), right - 380, page.ink, page);
+        drawStat(ctx, 'Trainers', members.toLocaleString('en-US'), right - 160, page.ink, page);
+        drawStat(ctx, 'Clubs', String(clubs.length), right - 300, page.ink, page);
     } else {
         drawStat(ctx, 'Clubs', String(clubs.length), right, page.ink, page);
     }
