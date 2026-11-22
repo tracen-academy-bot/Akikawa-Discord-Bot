@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
-import { FORTUNE_LINES, fortuneLineById, tentIsOpen } from './fortuneLines';
+import { FORTUNE_LINES, TENT_INTRO, fortuneLineById, tentIsOpen } from './fortuneLines';
 import { prisma } from '../../db/prisma';
 import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, claimOpener, countsAsSet, setNumber, closedSpecials, redirectOpener, unlockedGuests, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
@@ -206,6 +206,18 @@ export interface SpecialsViewMore {
     fortunes?: readonly FortuneTally[];
     /** The server's first Ramonu's Second Love (`TimerSecondLove`), shown on Set 3.5; null or none: nobody yet. */
     firstVictor?: { userId: string; at: Date } | null;
+    /** The tent's intro was seen (personal: by them; server: by anyone). Shown on Set 4, never counted. */
+    introSeen?: boolean;
+}
+
+/** The read menu's value for the tent's intro, and its row's name on Set 4 (owner, 2026-11-22: listed, not counted). */
+export const INTRO_READ_ID = 'fortune:intro';
+export const INTRO_NAME = 'Welcome to the Matikane Fortune Tent';
+
+/** Whether the tent's intro was seen: by `discordUserId`, or by anyone in the guild. */
+async function introSeenBy(guildId: string, discordUserId?: string): Promise<boolean> {
+    const n = await prisma.timerUserSettings.count({ where: { guildId, ...(discordUserId ? { discordUserId } : {}), tentUnlocked: true, tentIntroOwed: false } });
+    return n > 0;
 }
 
 /** The set whose extras page shows the First Victor: The Mejiro Estate (Ramonu's Remedial Rehearsal). */
@@ -267,18 +279,20 @@ export function specialsView(allTally: RareTally[], page: number, extras?: Perso
             .setTitle(title)
             .setDescription(`**${FORTUNE_SET_TITLE}**: ${drawnHere} of ${fortunes.length} drawn`)
             .addFields(
-                { name: 'Fortune', value: fortunes.map((f, n) => `**${n + 1}.** ${f.count > 0 ? f.name : '???'}`).join('\n').slice(0, 1024), inline: true },
-                { name: 'Times', value: fortunes.map((f) => (f.count > 0 ? `**×${f.count}**` : '—')).join('\n').slice(0, 1024), inline: true },
+                // The intro heads the list, unnumbered and never counted (owner, 2026-11-22).
+                { name: 'Fortune', value: [`**Intro.** ${more.introSeen ? INTRO_NAME : '???'}`, ...fortunes.map((f, n) => `**${n + 1}.** ${f.count > 0 ? f.name : '???'}`)].join('\n').slice(0, 1024), inline: true },
+                { name: 'Times', value: ['—', ...fortunes.map((f) => (f.count > 0 ? `**×${f.count}**` : '—'))].join('\n').slice(0, 1024), inline: true },
                 {
                     name: personal ? 'First drawn' : 'First drawn by',
-                    value: fortunes.map((f) => (f.count > 0 && f.firstUserId && f.firstAt ? (personal ? when(f.firstAt) : `<@${f.firstUserId}> ${when(f.firstAt)}`) : '—')).join('\n').slice(0, 1024),
+                    value: ['—', ...fortunes.map((f) => (f.count > 0 && f.firstUserId && f.firstAt ? (personal ? when(f.firstAt) : `<@${f.firstUserId}> ${when(f.firstAt)}`) : '—'))].join('\n').slice(0, 1024),
                     inline: true,
                 },
             )
             .setFooter({ text: footer.join('\n') });
         // No On/Off: the tent is not a pool.
         const components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = [navRow(mode, pg, pages.length)];
-        const options = personal ? fortunes.map((f, n) => ({ f, n })).filter(({ f }) => f.count > 0).map(({ f, n }) => ({ label: `${n + 1}. ${f.name}`.slice(0, 100), value: `${FORTUNE_READ_PREFIX}${f.id}` })) : [];
+        const drawnOptions = personal ? fortunes.map((f, n) => ({ f, n })).filter(({ f }) => f.count > 0).map(({ f, n }) => ({ label: `${n + 1}. ${f.name}`.slice(0, 100), value: `${FORTUNE_READ_PREFIX}${f.id}` })) : [];
+        const options = personal && more.introSeen ? [{ label: `Intro. ${INTRO_NAME}`.slice(0, 100), value: INTRO_READ_ID }, ...drawnOptions] : drawnOptions;
         if (options.length > 0) {
             components.push(new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder().setCustomId(READ_MENU_ID).setPlaceholder("Read a fortune from Fuku-chan's Fortune Tent").addOptions(options)));
         }
@@ -367,13 +381,13 @@ export async function mySpecialsView(guildId: string, discordUserId: string, pag
         getUserSettings(guildId, discordUserId),
         fortuneTally(guildId, discordUserId),
     ]);
-    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts }, now, { fortunes, firstVictor: await firstVictor(guildId) });
+    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts }, now, { fortunes, firstVictor: await firstVictor(guildId), introSeen: await introSeenBy(guildId, discordUserId) });
 }
 
 /** The server's Specials page `page` (Club Managers), from the database. */
 export async function serverSpecialsView(guildId: string, page: number, now: Date = new Date()) {
     const [tally, fortunes, victor] = await Promise.all([rareTally(guildId), fortuneTally(guildId), firstVictor(guildId)]);
-    return specialsView(tally, page, undefined, now, { fortunes, firstVictor: victor });
+    return specialsView(tally, page, undefined, now, { fortunes, firstVictor: victor, introSeen: await introSeenBy(guildId) });
 }
 
 /** The page of `setId` in the Specials list (Set 1 is page 1), or the first page. */
@@ -391,6 +405,11 @@ export function pageOfSet(setId: string, now: Date = new Date()): number {
  * result box: the tier heading, the scene, the effect line; only if drawn.
  */
 export async function readSpecial(guildId: string, discordUserId: string, choice: string): Promise<{ name: string; text: string; media: string | null; credit: string | null } | null> {
+    // The tent's intro, once seen (listed on Set 4, not counted).
+    if (choice === INTRO_READ_ID) {
+        if (!(await introSeenBy(guildId, discordUserId))) return null;
+        return { name: INTRO_NAME, text: TENT_INTRO.replaceAll('{user}', `<@${discordUserId}>`), media: null, credit: null };
+    }
     if (choice.startsWith(FORTUNE_READ_PREFIX)) {
         const fortune = fortuneLineById(choice.slice(FORTUNE_READ_PREFIX.length));
         if (!fortune) return null;

@@ -1164,15 +1164,20 @@ async function main() {
         const s4 = vj(await rares.mySpecialsView(FG, 't1', 6, OPEN)); // after Set 1.2's page (owner, 2026-11-22)
         const s4e = s4.embeds[0]!;
         const s4col = (n: number) => s4e.fields?.[n]?.value.split('\n') ?? [];
-        check('set 4: the last page, after Set 3.5, titled and counted', [s4e.description, s4e.footer?.text.endsWith('Page 7 of 7'), s4e.fields?.map((f) => f.name), s4col(0).length], ["**Set 4: Fuku-chan's Fortune Tent**: 2 of 13 drawn", true, ['Fortune', 'Times', 'First drawn'], 13]);
-        check('set 4: ??? until drawn; the drawn one by name, count and when', [s4col(0)[0], s4col(0)[2], s4col(1)[2], s4col(2)[2]?.startsWith('<t:'), s4col(0)[3], s4col(0)[4]], ['**1.** ???', '**3.** 大吉: Tea Stalks', '**×1**', true, '**4.** 大吉: Taiki Shuttle', '**5.** ???']);
+        check('set 4: the last page, after Set 3.5, titled and counted', [s4e.description, s4e.footer?.text.endsWith('Page 7 of 7'), s4e.fields?.map((f) => f.name), s4col(0).length], ["**Set 4: Fuku-chan's Fortune Tent**: 2 of 13 drawn", true, ['Fortune', 'Times', 'First drawn'], 14]); // the intro + 13
+        // The intro heads the list (seen by t1), unnumbered, never counted (owner, 2026-11-22).
+        check('set 4: the intro row first, then ??? until drawn; the drawn one by name, count and when', [s4col(0)[0], s4col(1)[0], s4col(0)[1], s4col(0)[3], s4col(1)[3], s4col(2)[3]?.startsWith('<t:'), s4col(0)[4], s4col(0)[5]], ['**Intro.** Welcome to the Matikane Fortune Tent', '—', '**1.** ???', '**3.** 大吉: Tea Stalks', '**×1**', true, '**4.** 大吉: Taiki Shuttle', '**5.** ???']);
         check('set 4: the row names, in order', fortune.FORTUNE_LINES.map((l) => l.name), ["Shiraoki-sama's Oracle", '超吉: Copano Rickey', '大吉: Tea Stalks', '大吉: Taiki Shuttle', '吉: Rice Shower', '吉: Blue Machitan', '吉: Silence Suzuka', '小吉: Matikanetannhauser', '小吉: Nice Nature', '凶: The Cloudy Crystal Ball', '凶: Meisho Doto', '大凶: The Black Cat', '大凶: Air Groove']);
-        check('set 4: no On/Off, a read menu of drawn fortunes', [s4.components[0]!.components.map((b) => b.label), s4.components[1]?.components[0]?.options?.map((o) => [o.label, o.value])], [['Back', 'Next'], [['3. 大吉: Tea Stalks', 'fortune:great.tea'], ['4. 大吉: Taiki Shuttle', 'fortune:great.taiki']]]);
+        check('set 4: no On/Off, a read menu of drawn fortunes', [s4.components[0]!.components.map((b) => b.label), s4.components[1]?.components[0]?.options?.map((o) => [o.label, o.value])], [['Back', 'Next'], [['Intro. Welcome to the Matikane Fortune Tent', 'fortune:intro'], ['3. 大吉: Tea Stalks', 'fortune:great.tea'], ['4. 大吉: Taiki Shuttle', 'fortune:great.taiki']]]);
         const readF = await rares.readSpecial(FG, 't1', 'fortune:great.tea');
         check('set 4: reading a fortune shows its result box text; not one not drawn', [readF?.name, readF?.text.includes('<@t1>-san, three tea stalks'), readF?.text.endsWith("-# Today's fortune: +2% chance of a special line until the daily reset."), await rares.readSpecial(FG, 't1', 'fortune:oracle.sky'), await rares.readSpecial(FG, 't1', 'fortune:nope')], ['大吉 Great blessing', true, true, null, null]);
         check('set 4: fortunes count in the "N of M" totals (personal: 2 Matikanes + 2 fortunes)', s4e.title, `Your specials: 4 of ${nAll + 13}`);
         const s4srv = vj(await rares.serverSpecialsView(FG, 6, OPEN)).embeds[0]!;
-        check('set 4: the server list, first drawn by', [s4srv.fields?.[2]?.name, s4srv.fields?.[2]?.value.split('\n')[2]?.startsWith('<@t1> <t:')], ['First drawn by', true]);
+        check('set 4: the server list, first drawn by', [s4srv.fields?.[2]?.name, s4srv.fields?.[2]?.value.split('\n')[3]?.startsWith('<@t1> <t:')], ['First drawn by', true]);
+        const readIntro = await rares.readSpecial(FG, 't1', 'fortune:intro');
+        check('set 4: the intro can be read once seen, not before', [readIntro?.name, readIntro?.text.includes('<@t1>, welcome to the Matikane Fortune Tent'), await rares.readSpecial(FG, 'nobody', 'fortune:intro')], ['Welcome to the Matikane Fortune Tent', true, null]);
+        const unseen = vj(await rares.mySpecialsView(FG, 'nobody', 6, OPEN)).embeds[0]!;
+        check('set 4: the intro row is ??? until seen', unseen.fields?.[0]?.value.split('\n')[0], '**Intro.** ???');
         // Scoring: 15 a new fortune, 3 a repeat, 100 for all 13.
         const SB = `${FG}-score`;
         let k = 0;

@@ -4,6 +4,18 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-22 — The tent's intro on Set 4, not counted
+
+- Owner: "add as intro but don't count". Set 4's page opens with an
+  unnumbered "**Intro.** Welcome to the Matikane Fortune Tent" row (??? until
+  seen; on the server list, shown once anyone has seen it). It is readable
+  from the read menu (`fortune:intro`) once seen. Never counted: "N of 13
+  drawn", the set's +100, the board and the totals are unchanged.
+- Also: the tent's opening notice (#97) went out late, 18:40Z, inside its
+  24h window.
+
+---
+
 ## 2026-11-22 — Forced pings in one place; the tent waits for its intro; copy fixes
 
 - Owner: "the intro ping is guaranteed the same way your next forced lesson
