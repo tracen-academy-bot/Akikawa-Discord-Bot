@@ -2,28 +2,25 @@ import { createHash } from 'node:crypto';
 import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
 import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
-import { COLORS } from './embeds';
-import { clubAvatar } from './clubAvatar';
-import { clubDailyRequirement, clubQuotaText, formatRank } from './clubFormat';
+import { clubDailyRequirement, clubQuotaText } from './clubFormat';
 import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing } from './clubLinks';
 
 /**
  * The club directory: a channel listing every club by expected rank, posted and kept
  * up to date by the bot.
  *
- * It is a run of messages, in order:
+ * It is a run of messages, in order, modelled on the server's old hand-made
+ * directory:
  *
- *   1. `index`: jump links to every card. It links to messages posted after
- *      it, so a fresh run posts it without links and fills them in at the end.
- *   2. For each rank group with clubs (`clubGroups.ts`: S, A+, A, B+, Casual),
- *      `group:<group>` ("S Clubs"), then one
- *      `club:<id>` card per club in it, by name. A card is the club's banner
- *      (if it has one) above an embed with its staff, requirements, expected
- *      rank, rules and bio. A rules file follows in `club:<id>:rules:<n>`
- *      messages of its own, plain text split at line breaks.
- *   3. `poster`: every club on one picture (`renderClubPoster`), which also
- *      groups the same way. It is last because Discord opens a channel
- *      at its newest message, so readers land on it.
+ *   1. For each rank group with clubs (`clubGroups.ts`: S, A+, A, B+, Casual),
+ *      `group:<group>` ("Current S Clubs"), then one `club:<id>` post per
+ *      club in it, by name: a plain message with the banner attached (see
+ *      `clubCard`). Overflow and a rules file follow in `club:<id>:rules:<n>`.
+ *   2. `index`: a rule, then "Directory" and a link to each post.
+ *   3. `groups`: what each group means, a box each.
+ *   4. `apply`: how to apply.
+ *   5. `poster`: every club on one picture (`renderClubPoster`). It is last
+ *      because Discord opens a channel at its newest message.
  *
  * Clubs with no expected rank are left out. `/club directory` posts it; after that
  * any change to a club (`/club reports`, `/club profile`, `/club admin`, staff, create, delete)
@@ -157,9 +154,6 @@ function bannerFileName(clubId: string, fileName: string): string {
     return `banner-${clubId}.${ext}`;
 }
 
-/** Longest card description Discord accepts. */
-const CARD_LIMIT = 4096;
-
 /** Longest plain message Discord accepts. */
 const MESSAGE_LIMIT = 2000;
 
@@ -202,60 +196,55 @@ export interface Banner {
 }
 
 /**
- * A club's directory card: its banner (when it has one) as an image-only
- * embed above the card, so it reads as a header, then the card itself, with
- * the club's avatar (see `clubAvatar`) as its thumbnail.
+ * A club's directory post, laid out like the server's old hand-made
+ * directory: a plain message (no embed) with the banner attached, then
+ *
+ *   **★ ─── Spica ─── ★**
+ *   **Trainers**: @a, @b - **Assistants**: @c
+ *   **Requirements**: 9.0M/day
+ *
+ *   [Link to Spica Goals/Rules](...)   (or the rules as text)
+ *   > the bio, quoted
+ *
+ * A message holds 2000 characters, so text past that continues in
+ * `followUps`, and a rules file follows in messages of its own after that.
  */
-export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Banner | null): Payload & { rulesMessages: string[] } {
-    const group = rankGroup(club.rank);
-    const color = group ? GROUPS[group].color : COLORS.info;
-    const embeds: EmbedBuilder[] = [];
+export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Banner | null): Payload & { followUps: string[] } {
     const files: AttachmentBuilder[] = [];
-    if (banner) {
-        const name = bannerFileName(club.id, banner.fileName);
-        files.push(new AttachmentBuilder(Buffer.from(banner.data), { name }));
-        embeds.push(new EmbedBuilder().setColor(color).setImage(`attachment://${name}`));
-    }
+    if (banner) files.push(new AttachmentBuilder(Buffer.from(banner.data), { name: bannerFileName(club.id, banner.fileName) }));
 
-    const lines: string[] = [];
-    const list = (one: string, many: string, who: string[]) => {
-        if (who.length > 0) lines.push(`**${who.length === 1 ? one : many}**: ${who.join(', ')}`);
-    };
-    list('Trainer', 'Trainers', staff.trainers);
-    list('Assistant', 'Assistants', staff.assistants);
+    const lines: string[] = [`**\u2605 \u2500\u2500\u2500 ${club.name} \u2500\u2500\u2500 \u2605**`];
+    const who = (one: string, many: string, list: string[]) => (list.length > 0 ? `**${list.length === 1 ? one : many}**: ${list.join(', ')}` : null);
+    const staffLine = [who('Trainer', 'Trainers', staff.trainers), who('Assistant', 'Assistants', staff.assistants)].filter(Boolean).join(' - ');
+    if (staffLine) lines.push(staffLine);
     const quota = clubQuotaText(club);
     if (quota !== 'Not set') lines.push(`**Requirements**: ${quota}`);
-    if (club.rank) lines.push(`**Expected rank**: ${formatRank(club.rank)}`);
     if (club.rules) {
-        lines.push('', isLink(club.rules) ? `[${club.name} goals and rules](${club.rules})` : `**Rules**\n${club.rules}`);
+        lines.push('', isLink(club.rules) ? `[Link to ${club.name} Goals/Rules](${club.rules})` : `**Rules**\n${club.rules}`);
     }
-    const bio = club.bio ? ['', club.bio.split('\n').map((l) => `> ${l}`).join('\n')] : [];
-    let rulesMessages: string[] = [];
-    if (club.rulesFile) {
-        // A rules file gets its own messages after the card, as plain text so
-        // all of its Markdown renders, split at line breaks into Discord's
-        // 2000 characters per message.
-        lines.push('', '**Rules and goals**: in the messages below this card.');
-        rulesMessages = splitByLines(`## ${club.name}: rules and goals\n${club.rulesFile}`, MESSAGE_LIMIT);
-    }
-    lines.push(...bio);
+    if (club.rulesFile) lines.push('', '**Rules and goals**: in the messages below.');
+    if (club.bio) lines.push('', club.bio.split('\n').map((l) => `> ${l}`).join('\n'));
 
-    const card = new EmbedBuilder().setColor(color).setTitle(club.name);
-    const avatar = clubAvatar(club.name);
-    if (avatar) {
-        const name = `avatar-${club.id}.png`;
-        files.push(new AttachmentBuilder(avatar, { name }));
-        card.setThumbnail(`attachment://${name}`);
-    }
-    const description = lines.join('\n').trim();
-    if (description) card.setDescription(description.slice(0, CARD_LIMIT));
-    embeds.push(card);
-    return { embeds, files, rulesMessages };
+    const [content = '', ...overflow] = splitByLines(lines.join('\n'), MESSAGE_LIMIT);
+    // A rules file as plain text, so all of its Markdown renders.
+    const rulesFile = club.rulesFile ? splitByLines(`## ${club.name}: rules and goals\n${club.rulesFile}`, MESSAGE_LIMIT) : [];
+    return { content, embeds: [], files, followUps: [...overflow, ...rulesFile] };
 }
 
-/** One message of a club's rules file, posted after its card. */
+/** One message after a club's post: its overflow, or a piece of its rules file. */
 export function rulesMessage(chunk: string): Payload {
     return { content: chunk, embeds: [], files: [] };
+}
+
+/** The how-to-apply message, just above the poster. */
+export function howToApply(): string {
+    const forumId = process.env.FORUM_CHANNEL_ID;
+    const forum = forumId ? `<#${forumId}>` : '#apply-for-club';
+    return [
+        '## How to apply',
+        `Open a post in ${forum} with your trainer ID (the 9 to 12 digits on your in-game profile).`,
+        'Say which club you want, or that you are open to any. Club staff look at your fan numbers and answer in your post.',
+    ].join('\n');
 }
 
 /** A message link. */
@@ -316,32 +305,37 @@ async function directoryParts(guild: DirectoryGuild, channelId: string): Promise
     for (const group of GROUP_ORDER) {
         const clubs = all.filter((c) => rankGroup(c.rank) === group);
         if (clubs.length === 0) continue;
-        parts.push({ key: `group:${group}`, build: () => ({ content: `## ${GROUPS[group].label} Clubs`, embeds: [], files: [] }) });
+        parts.push({ key: `group:${group}`, build: () => ({ content: `## __Current ${GROUPS[group].label} Clubs__`, embeds: [], files: [] }) });
         const section = { group, clubs: [] as { key: string; name: string }[] };
         for (const club of clubs) {
             const staff = await clubStaff(club, linkable, guild, membersLoaded);
             const key = `club:${club.id}`;
             const card = clubCard(club, staff, club.banner);
             parts.push({ key, build: () => card });
-            // A rules file follows the card in messages of its own.
-            card.rulesMessages.forEach((chunk, i) => parts.push({ key: `${key}:rules:${i + 1}`, build: () => rulesMessage(chunk) }));
+            // Overflow and a rules file follow the post in messages of their own.
+            card.followUps.forEach((chunk, i) => parts.push({ key: `${key}:rules:${i + 1}`, build: () => rulesMessage(chunk) }));
             section.clubs.push({ key, name: club.name });
             listed += 1;
         }
         sections.push(section);
     }
-    parts.unshift({
+    // After the posts, as in the old directory: a rule, then a link to each.
+    parts.push({
         key: 'index',
         build: (ids) => {
-            const lines = sections.map(
-                (s) => `**${GROUPS[s.group].label}**: ${s.clubs.map((c) => (ids.has(c.key) ? `[${c.name}](${jumpLink(guild.id, channelId, ids.get(c.key)!)})` : c.name)).join(' · ')}`,
-            );
-            return {
-                embeds: [new EmbedBuilder().setColor(COLORS.info).setTitle('Directory').setDescription(lines.length > 0 ? `${lines.join('\n')}\n\nEvery club on one picture is at the bottom of the channel.` : 'No clubs are listed yet.')],
-                files: [],
-            };
+            const links = sections.flatMap((s) => s.clubs.map((c) => (ids.has(c.key) ? `[${c.name}](${jumpLink(guild.id, channelId, ids.get(c.key)!)})` : c.name)));
+            return { content: `${'-'.repeat(88)}\n__**Directory**__\n${links.length > 0 ? links.join('\n') : 'No clubs are listed yet.'}`, embeds: [], files: [] };
         },
     });
+    // What each group means, one box each, as the old directory opened with.
+    parts.push({
+        key: 'groups',
+        build: () => ({
+            embeds: GROUP_ORDER.map((g) => new EmbedBuilder().setColor(GROUPS[g].color).setTitle(GROUPS[g].title).setDescription(GROUPS[g].blurb)),
+            files: [],
+        }),
+    });
+    parts.push({ key: 'apply', build: () => ({ content: howToApply(), embeds: [], files: [] }) });
     // The poster also carries the hand-written JP clubs, so it is posted even
     // when no tracked club is listed.
     if (listed > 0 || JP_SECTION.clubs.length > 0) {

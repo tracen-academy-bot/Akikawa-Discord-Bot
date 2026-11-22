@@ -249,9 +249,11 @@ has no record of are left out of the averages, not counted as zero. The
 first month on record is also left out, because it may be partial.
 
 The club directory (`/club directory channel:`, for #club-bio) runs, top to
-bottom: jump links to every club, then the clubs as cards (banner, staff,
-requirements, rules, bio) under a heading per expected rank (S, A+, A, B+,
-Casual; S+ counts as S), then the club poster. The poster is last because
+bottom: each club's post (a plain message with its banner, staff,
+requirements, rules and bio, like the server's old hand-made directory)
+under a heading per expected rank (S, A+, A, B+, Casual; S+ counts as S),
+then a "Directory" list of links, a box per group, how to apply, and the
+club poster. The poster is last because
 Discord opens a channel at its newest message. It is a landscape JPEG: a
 banner, then the same groups in two columns, one row per club with expected
 rank, quota (as set and per day), members and open spots. JP clubs, which

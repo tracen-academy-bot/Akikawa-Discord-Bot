@@ -31,6 +31,10 @@ Decisions that changed project direction. Newest first.
 - Open: match the directory to how "the other bot" made it. Needs
   screenshots; the repo has no record beyond "tier posts, then per-club
   banner and card posts".
+- Screenshots came. Order in #club-bios: the old-style club posts and their
+  Directory list, then the group boxes and a how-to-apply note, then the
+  poster. Headings stay S/A+/A/B+/Casual. The B+ box text and the
+  how-to-apply wording are Claude's drafts, to be checked.
 
 ---
 

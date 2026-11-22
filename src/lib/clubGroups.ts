@@ -9,18 +9,25 @@ import type { ClubRank } from '@prisma/client';
 
 export type RankGroup = 'S' | 'A_PLUS' | 'A' | 'B_PLUS' | 'CASUAL';
 
-/** A group's name and colour (0xRRGGBB, close to its rank badge's art). */
+/**
+ * A group's name, colour (0xRRGGBB, close to its rank badge's art), and the
+ * box the directory shows for it: `title` and `blurb`. The blurbs are the
+ * old directory's (G1 for S, G2 for A+, G3 for A, Debut for Casual); B+ had
+ * none of its own, so its text is new.
+ */
 export interface GroupInfo {
     label: string;
     color: number;
+    title: string;
+    blurb: string;
 }
 
 export const GROUPS: Record<RankGroup, GroupInfo> = {
-    S: { label: 'S', color: 0xf5c84c },
-    A_PLUS: { label: 'A+', color: 0xff8a3d },
-    A: { label: 'A', color: 0xd9784a },
-    B_PLUS: { label: 'B+', color: 0xf27bbd },
-    CASUAL: { label: 'Casual', color: 0x4ade80 },
+    S: { label: 'S', color: 0xf5c84c, title: 'S [Competitive]', blurb: 'The top clubs in our network, pushing for gold!' },
+    A_PLUS: { label: 'A+', color: 0xff8a3d, title: 'A+ [Semi Competitive+]', blurb: 'Our more intense and active semi-competitive clubs that aim for strong monthly results.' },
+    A: { label: 'A', color: 0xd9784a, title: 'A [Semi-Competitive]', blurb: 'Our mid-range clubs that offer a good balance between activity and commitment!' },
+    B_PLUS: { label: 'B+', color: 0xf27bbd, title: 'B+ [Semi-Casual]', blurb: 'Steady clubs with a light quota, for trainers who want some structure without the grind.' },
+    CASUAL: { label: 'Casual', color: 0x4ade80, title: 'Casual', blurb: 'Our clubs for trainers who just want to relax and have fun!' },
 };
 
 /** Groups in directory order, highest first. */

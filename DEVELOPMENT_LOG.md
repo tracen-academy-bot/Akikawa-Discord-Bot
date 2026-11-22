@@ -129,6 +129,29 @@ directory". All the repo holds is the 10-05 note ("Dia's tier posts, then
 per-club banner and card posts"); the session cannot read Discord, so the
 user was asked for screenshots.
 
+Then the screenshots came (the old directory, made by hand by staff and
+the Dia bot on 2026-05-24). Its club posts were plain messages, not
+embeds: the banner image, a bold "★ ─── Spica ─── ★" line, Trainers and
+Assistants on one line, Requirements, a rules link, the bio as a quote.
+The directory now copies that (`clubCard` returns content, not embeds):
+
+- Per rank group, `## __Current S Clubs__`, then each club's post. No
+  avatar thumbnail and no Expected rank line (the heading says it). A plain
+  message holds 2000 characters, not an embed's 4096, so text past that
+  continues in the follow-up messages that a rules file already used.
+- Then, as the old one ended: a rule of hyphens, `__**Directory**__`, and a
+  link to each post, one per line. It comes after the posts, so it is
+  posted with its links and needs no second edit.
+- Then the group boxes (the old tier boxes, retitled: S [Competitive], A+
+  [Semi Competitive+], A [Semi-Competitive], B+ [Semi-Casual], Casual; the
+  B+ text is new), then "How to apply" (pointing at `FORUM_CHANNEL_ID`),
+  then the poster.
+- `/club profile` replies "Saved..." and then shows the post as the
+  directory will.
+
+The old per-club symbols (♥ for First) were hand-picked; every post uses
+★ for now.
+
 ---
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role
