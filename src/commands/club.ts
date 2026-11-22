@@ -28,13 +28,13 @@ import { buildCircleReport } from '../lib/fans/scheduler';
 import { DEFAULT_PALETTE, PALETTES, paletteOf } from '../lib/image/theme';
 import { FAN_REPORT_LAYOUTS, layoutsOf, type FanReportLayout } from '../lib/image/renderFanReport';
 import { backfillOnce, syncCircle } from '../lib/fans/ingest';
-import { currentCircleProgress } from '../lib/fans/reports';
 import { PERIOD_CHOICES, RANK_CHOICES, clubQuotaText, formatRank, clubDailyRequirement } from '../lib/clubFormat';
 import { cutoffDetail, cutoffForRank, cutoffLine } from '../lib/fans/cutoff';
 import { toSafeNumber } from '../lib/fans/metrics';
-import { publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
+import { clubHeadcount, effectiveTier, posterClubs, publishDirectory, refreshDirectory, type DirectoryChannel, type DirectoryGuild } from '../lib/clubDirectory';
 import { buildProfileModal } from './clubProfile';
-import { renderClubPoster, type PosterClub } from '../lib/image/renderClubPoster';
+import { renderClubPoster } from '../lib/image/renderClubPoster';
+import { JP_SECTION } from '../lib/jpClubs';
 import {
     COMMON_ZONES,
     JAPAN_TIME_ZONE,
@@ -74,10 +74,6 @@ function formatMemberRole(role: ClubMemberRole): string {
  * members, by the same rule the fan reports use (so it matches their member
  * count). Null for a club without a uma.moe circle, or before any data.
  */
-async function clubHeadcount(club: Club): Promise<number | null> {
-    if (club.circleId === null) return null;
-    return (await currentCircleProgress(club))?.members.length ?? null;
-}
 
 /** What the club directory and club card show for a club. */
 async function clubSummary(club: Club): Promise<ClubSummary> {
@@ -169,13 +165,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((sub) =>
         sub
             .setName('poster')
-            .setDescription('Every club with a tier on one picture. Posting it to a channel is for Club Managers.')
-            .addChannelOption((opt) =>
-                opt
-                    .setName('channel')
-                    .setDescription('Post it there (e.g. #club-bio). Leave empty to show it here.')
-                    .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
-            )
+            .setDescription('Every club with a tier on one picture, as it stands now. The directory posts it too.')
     )
     .addSubcommand((sub) =>
         sub
@@ -284,7 +274,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             await handleDirectory(interaction, member);
             break;
         case 'poster':
-            await handlePoster(interaction, member);
+            await handlePoster(interaction);
             break;
         case 'fancount':
             await handleFancount(interaction, member);
@@ -897,7 +887,7 @@ async function handleDirectory(interaction: ChatInputCommandInteraction, member:
         const lines = [
             `${result.mode === 'edited' ? 'Updated' : 'Posted'} the directory in <#${channel.id}> with ${result.listed} club${result.listed === 1 ? '' : 's'}.`,
             ...(result.untiered.length > 0
-                ? [`Not listed, with no tier yet: ${result.untiered.map((n) => `**${n}**`).join(', ')}. Set one with \`/club profile\`.`]
+                ? [`Not listed, with no expected rank or tier: ${result.untiered.map((n) => `**${n}**`).join(', ')}. Set an expected rank with \`/club admin\`, or a tier with \`/club profile\`.`]
                 : []),
             'It updates itself when a club changes.',
         ];
@@ -910,50 +900,17 @@ async function handleDirectory(interaction: ChatInputCommandInteraction, member:
 }
 
 /**
- * `/club poster [channel]`: every club with a tier on one picture (see
- * `renderClubPoster`). Shown in place, or posted in `channel` by a Club
- * Manager. It does not update itself; run it again after clubs change.
+ * `/club poster`: every club with a tier on one picture (see
+ * `renderClubPoster`), shown here. The club directory posts the same picture
+ * as its last message and keeps it up to date, so there is no channel option.
  */
-async function handlePoster(interaction: ChatInputCommandInteraction, member: GuildMember) {
-    const target = interaction.options.getChannel('channel');
-    if (target && !isOfficer(member)) {
-        await interaction.reply({ embeds: [errorEmbed('Only Club Managers can post the poster to a channel. Leave `channel` empty to see it here.')], flags: MessageFlags.Ephemeral });
-        return;
-    }
-    await interaction.deferReply(target ? { flags: MessageFlags.Ephemeral } : {});
-
+async function handlePoster(interaction: ChatInputCommandInteraction) {
+    await interaction.deferReply();
     const clubs = await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId! }, orderBy: { name: 'asc' } });
-    const tiered = clubs.filter((c) => c.tier !== null);
-    const untiered = clubs.filter((c) => c.tier === null).map((c) => `**${c.name}**`);
-    const posterClubs: PosterClub[] = await Promise.all(
-        tiered.map(async (c) => ({
-            id: c.id,
-            name: c.name,
-            tier: c.tier!,
-            rank: c.rank,
-            headcount: await clubHeadcount(c),
-            quotaText: clubQuotaText(c),
-            monthlyRank: c.circleId !== null ? c.monthlyRank : null,
-        })),
-    );
-    const file = new AttachmentBuilder(await renderClubPoster(posterClubs), { name: 'clubs.png' });
-    const skipped = untiered.length > 0 ? `Not on it, with no tier yet: ${untiered.join(', ')}. Set one with \`/club profile\`.` : null;
-
-    if (!target) {
-        await interaction.editReply({ ...(skipped ? { content: skipped } : {}), files: [file] });
-        return;
-    }
-    const channel = await interaction.client.channels.fetch(target.id).catch(() => null);
-    if (!channel?.isSendable()) {
-        await interaction.editReply({ embeds: [errorEmbed(`Akikawa cannot post in <#${target.id}>.`)] });
-        return;
-    }
-    try {
-        const sent = await channel.send({ files: [file] });
-        await interaction.editReply({ embeds: [successEmbed('Club poster', [`Posted in <#${target.id}>: ${sent.url}`, ...(skipped ? [skipped] : [])].join('\n'))] });
-    } catch (e) {
-        await interaction.editReply({ embeds: [errorEmbed(`Could not post in <#${target.id}>: ${e instanceof Error ? e.message : String(e)}. Check Akikawa can send messages and attach files there.`)] });
-    }
+    const untiered = clubs.filter((c) => effectiveTier(c) === null).map((c) => `**${c.name}**`);
+    const file = new AttachmentBuilder(await renderClubPoster(await posterClubs(clubs), { extra: [JP_SECTION] }), { name: 'clubs.png' });
+    const skipped = untiered.length > 0 ? `Not on it, with no expected rank or tier: ${untiered.join(', ')}. Set an expected rank with \`/club admin\`, or a tier with \`/club profile\`.` : null;
+    await interaction.editReply({ ...(skipped ? { content: skipped } : {}), files: [file] });
 }
 
 async function handleDelete(interaction: ChatInputCommandInteraction, member: GuildMember) {

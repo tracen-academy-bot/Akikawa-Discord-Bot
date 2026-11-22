@@ -91,7 +91,12 @@ async function drawRankBadgeInner(ctx: SKRSContext2D, rank: ClubRank | null, cx:
     const icon = await loadRankIcon(rank);
 
     if (icon) {
-        ctx.drawImage(icon, cx - r, cy - r, r*2, r*2);
+        // Fit the picture in the 2r box with its own proportions; the badge
+        // art is taller than wide (310x360), and a square squashed it.
+        const scale = Math.min((r * 2) / icon.width, (r * 2) / icon.height);
+        const w = icon.width * scale;
+        const h = icon.height * scale;
+        ctx.drawImage(icon, cx - w / 2, cy - h / 2, w, h);
         return;
     }
 

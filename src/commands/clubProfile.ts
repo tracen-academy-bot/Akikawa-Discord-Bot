@@ -13,7 +13,7 @@ import { prisma } from '../db/prisma';
 import { canManageClubStats, isOfficer, type StaffCandidate } from '../lib/permissions';
 import { errorEmbed } from '../lib/embeds';
 import { guildClubs } from '../lib/clubLinks';
-import { TIERS, TIER_ORDER, clubCard, clubStaff, loadMembers, refreshDirectory, rulesMessage, type DirectoryGuild } from '../lib/clubDirectory';
+import { TIERS, TIER_ORDER, effectiveTier, clubCard, clubStaff, loadMembers, refreshDirectory, rulesMessage, type DirectoryGuild } from '../lib/clubDirectory';
 
 /**
  * `/club profile`: what a club's directory card says about it.
@@ -72,7 +72,7 @@ export function buildProfileModal(club: TrackedCircle, full: boolean, hasBanner:
                 .setStringSelectMenuComponent(
                     new StringSelectMenuBuilder().setCustomId(FIELD.tier).addOptions(
                         ...TIER_ORDER.map((t) => ({ label: TIERS[t].title, value: t, description: `Estimated ranks: ${TIERS[t].ranks}`, default: club.tier === t })),
-                        { label: 'Not listed', value: NO_TIER, description: 'Left out of the directory.', default: club.tier === null },
+                        { label: 'From expected rank', value: NO_TIER, description: 'G1 for S/S+, G2 for A/A+, G3 for B+, Debut for Casual.', default: club.tier === null },
                     ),
                 ),
         );
@@ -210,7 +210,10 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
         ? await clubStaff(updated, await guildClubs(updated.guildId), guild, await loadMembers(guild))
         : { trainers: [], assistants: [] };
     const card = clubCard(updated, staff, updated.banner);
-    const listed = updated.tier ? `listed under **${TIERS[updated.tier].title}**` : 'not listed in the directory (a Club Manager sets its tier)';
+    const shownTier = effectiveTier(updated);
+    const listed = shownTier
+        ? `listed under **${TIERS[shownTier].title}**${updated.tier ? '' : ' (from its expected rank)'}`
+        : 'not listed in the directory (it needs an expected rank, or a Club Manager sets its tier)';
     const more = card.rulesMessages.length;
     const moreNote = more > 0 ? ` Its rules follow in ${more} message${more === 1 ? '' : 's'} after the card.` : '';
     await interaction.editReply({ content: `Saved. **${updated.name}** is ${listed}.${moreNote} Its card:`, embeds: card.embeds, files: card.files });

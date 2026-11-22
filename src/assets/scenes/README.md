@@ -45,3 +45,8 @@ The 163 in `mambo-crowd/` are UmaViewer screenshots of the game's chibis
 (Cygames' art), supplied by Fwoxie on 2026-10-31: 266 shrunk to 160px and
 256 colours with `shrink_chibis.py`, then near-duplicates (the same pose
 taken twice) removed, keeping the first of each.
+
+`club-poster-beach.jpg` is the banner across the top of the club poster's
+`beach` backdrop (`src/lib/image/renderClubPoster.ts`). It is an official
+story still, supplied by the server owner on 2026-11-21 and saved as JPEG.
+Without it, that backdrop is plain dark.
