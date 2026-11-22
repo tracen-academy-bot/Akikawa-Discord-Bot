@@ -31,6 +31,7 @@ import { GROUPS, rankGroup, clubCard, clubStaff, loadMembers, refreshDirectory, 
 
 const PROFILE_MODAL_PREFIX = 'club:profile:';
 const FIELD = {
+    symbol: 'club:profile:symbol',
     bio: 'club:profile:bio',
     rules: 'club:profile:rules',
     files: 'club:profile:files',
@@ -39,6 +40,8 @@ const FIELD = {
 
 /** Longest bio and rules. Both fit one card (4096 characters) with room for staff. */
 export const MAX_BIO = 1500;
+/** Longest symbol: room for a couple of emoji, or a custom one's `<:name:id>`. */
+export const MAX_SYMBOL = 40;
 export const MAX_RULES = 1000;
 /** Largest banner, in bytes. It is re-uploaded with every directory refresh. */
 export const MAX_BANNER_BYTES = 8 * 1024 * 1024;
@@ -65,12 +68,18 @@ export function buildProfileModal(club: TrackedCircle, full: boolean, hasBanner:
     if (club.bio) bio.setValue(club.bio);
     const rules = new TextInputBuilder().setCustomId(FIELD.rules).setStyle(TextInputStyle.Paragraph).setRequired(false).setMaxLength(MAX_RULES);
     if (club.rules) rules.setValue(club.rules);
+    const symbol = new TextInputBuilder().setCustomId(FIELD.symbol).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(MAX_SYMBOL).setPlaceholder('\u2605');
+    if (club.symbol) symbol.setValue(club.symbol);
     labels.push(
         new LabelBuilder().setLabel('Bio').setDescription('What the club is like. Markdown works; one line per point is fine.').setTextInputComponent(bio),
         new LabelBuilder()
             .setLabel('Rules')
             .setDescription('The rules as text, or a link to your rules post. Longer? Upload a .md or .txt file below.')
             .setTextInputComponent(rules),
+        new LabelBuilder()
+            .setLabel('Symbol')
+            .setDescription('Shown either side of the name in the directory post. An emoji works. Empty for \u2605.')
+            .setTextInputComponent(symbol),
         new LabelBuilder()
             .setLabel('Banner and rules file')
             .setDescription('A banner image and/or a rules file (.md or .txt). A new one replaces the current one.')
@@ -142,7 +151,8 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const text = (id: string) => interaction.fields.getTextInputValue(id).trim() || null;
-    const data: { bio: string | null; rules: string | null; rulesFile?: string | null; rulesFileName?: string | null } = {
+    const data: { symbol: string | null; bio: string | null; rules: string | null; rulesFile?: string | null; rulesFileName?: string | null } = {
+        symbol: text(FIELD.symbol),
         bio: text(FIELD.bio),
         rules: text(FIELD.rules),
     };

@@ -199,7 +199,7 @@ export interface Banner {
  * A club's directory post, laid out like the server's old hand-made
  * directory: a plain message (no embed) with the banner attached, then
  *
- *   **★ ─── Spica ─── ★**
+ *   **★ ─── Spica ─── ★**          (the club's `symbol`, else ★)
  *   **Trainers**: @a, @b - **Assistants**: @c
  *   **Requirements**: 9.0M/day
  *
@@ -213,7 +213,8 @@ export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Bann
     const files: AttachmentBuilder[] = [];
     if (banner) files.push(new AttachmentBuilder(Buffer.from(banner.data), { name: bannerFileName(club.id, banner.fileName) }));
 
-    const lines: string[] = [`**\u2605 \u2500\u2500\u2500 ${club.name} \u2500\u2500\u2500 \u2605**`];
+    const symbol = club.symbol?.trim() || '\u2605';
+    const lines: string[] = [`**${symbol} \u2500\u2500\u2500 ${club.name} \u2500\u2500\u2500 ${symbol}**`];
     const who = (one: string, many: string, list: string[]) => (list.length > 0 ? `**${list.length === 1 ? one : many}**: ${list.join(', ')}` : null);
     const staffLine = [who('Trainer', 'Trainers', staff.trainers), who('Assistant', 'Assistants', staff.assistants)].filter(Boolean).join(' - ');
     if (staffLine) lines.push(staffLine);

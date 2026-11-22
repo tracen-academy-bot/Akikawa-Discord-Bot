@@ -727,14 +727,14 @@ async function main() {
     const ck = await reload();
     const staffProfile = profileForm(ck, false, false).custom_id;
     const fullProfile = profileForm(ck, true, false).custom_id;
-    check('the staff profile form: bio, rules, files', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner and rules file']);
-    check('the Club Manager form has no tier any more', profileForm(ck, true, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner and rules file']);
+    check('the staff profile form: bio, rules, symbol, files', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Symbol', 'Banner and rules file']);
+    check('the Club Manager form has no tier any more', profileForm(ck, true, false).components.map((c) => c.label), ['Bio', 'Rules', 'Symbol', 'Banner and rules file']);
     check('a Remove list only when there is something to remove',
         [profileForm(ck, false, false).components.some((c) => c.label === 'Remove'), profileForm(ck, false, true).components.map((c) => c.label).at(-1)], [false, 'Remove']);
     check('with a banner, the list offers it', profileForm(ck, false, true).components.at(-1)?.component.options?.map((o) => o.value), ['banner']);
-    check('the Club Manager form with a banner and a rules file has four fields',
+    check('with a banner and a rules file: five fields, the Discord limit',
         profileForm({ ...ck, rulesFile: '# Rules', rulesFileName: 'rules.md' }, true, true).components.map((c) => c.label),
-        ['Bio', 'Rules', 'Banner and rules file', 'Remove']);
+        ['Bio', 'Rules', 'Symbol', 'Banner and rules file', 'Remove']);
 
     type Upload = { url: string; name: string; contentType: string; size: number };
     /** Submits the profile form; returns what the bot replied, in order. */
@@ -776,6 +776,8 @@ async function main() {
 
     const staffSave = await submitProfile(staffProfile, 'u-assistant', false, kept);
     check('club staff can save the bio and rules', [(await reload()).bio, (await reload()).rules], [BIO, RULES]);
+    await submitProfile(staffProfile, 'u-assistant', false, { ...kept, 'club:profile:symbol': ' \u{1F90D} ' });
+    check('staff set the symbol; empty clears it', [(await reload()).symbol, (await submitProfile(staffProfile, 'u-assistant', false, kept), (await reload()).symbol)], ['\u{1F90D}', null]);
     check('the reply is private, says where it is listed, then shows the post', [staffSave[0]?.kind, staffSave.find((o) => o.kind === 'edit')?.content, staffSave.at(-1)?.content?.split('\n')[0]],
         ['defer', 'Saved. **Checkrose** is listed under **A**. Its directory post:', '**\u2605 \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u2605**']);
     check('staff cannot submit the Club Manager form',
@@ -877,6 +879,8 @@ async function main() {
     check('rules as a link, then the bio as a quote', ckCard.content?.endsWith(`[Link to Checkrose Goals/Rules](${RULES})\n\n> Text Chat Heavy\n> Wordle Boomers`), true);
     check('rules as text get a heading', directory.clubCard({ ...ckFull, rules: 'Be active.' }, ckStaff, null).content?.includes('**Rules**\nBe active.'), true);
     check('no banner, no file', directory.clubCard(ckFull, ckStaff, null).files.length, 0);
+    check("a club's own symbol frames its name", directory.clubCard({ ...ckFull, symbol: '\u{1F90D}' }, ckStaff, null).content?.split('\n')[0],
+        '**\u{1F90D} \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u{1F90D}**');
     const longCard = directory.clubCard({ ...ckFull, bio: 'b'.repeat(1400), rules: 'r'.repeat(900) }, ckStaff, null);
     check('a post past 2000 characters continues in a message after it',
         [longCard.content!.length <= 2000, longCard.followUps.length, longCard.followUps.every((m) => m.length <= 2000)], [true, 1, true]);

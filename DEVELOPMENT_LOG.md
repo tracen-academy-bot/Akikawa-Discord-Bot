@@ -149,8 +149,13 @@ The directory now copies that (`clubCard` returns content, not embeds):
 - `/club profile` replies "Saved..." and then shows the post as the
   directory will.
 
-The old per-club symbols (♥ for First) were hand-picked; every post uses
-★ for now.
+The old per-club symbols were hand-picked. Club staff now set theirs in
+`/club profile` (Symbol, up to 40 characters, so an emoji or a custom
+emoji's `<:name:id>` fits); empty shows ★. Migration
+`20261122000000_club_symbol` adds `TrackedCircle.symbol` and sets First's
+to 🤍, read off the screenshot (a solid white heart; Discord shows a plain
+♥ as a red emoji, so it is most likely 🤍). Spica's star is the default.
+The form is now five fields with Remove, Discord's limit.
 
 ---
 
