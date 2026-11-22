@@ -471,7 +471,13 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
         const holder = RARE_OPENERS.find((o) => o.text === t)?.heldUntilPassed;
         return holder !== undefined && holder === owed;
     };
+    // A guest still locked (its counterpart not found) is left out, not redirected.
+    const lockedGuest = (t: string) => {
+        const o = RARE_OPENERS.find((x) => x.text === t);
+        return o?.guest === true && (o.after ?? []).some((id) => !found.has(id));
+    };
     return pool
+        .filter((t) => !lockedGuest(t))
         .map((t) => redirectOpener(t, found))
         .filter((t) => !held(t))
         .map((t) => claimOpener(t, found))
@@ -497,7 +503,8 @@ export function restingLines(setId: string, found: ReadonlySet<string>, autoOffS
     // from Ramonu). A guest comes from the guest slice once its counterpart
     // is found, so its counterpart can rest.
     const needed = new Set(inSet.filter((o) => o.extra && !o.guest && !found.has(o.id)).flatMap((o) => o.after ?? []));
-    return inSet.filter((o) => !o.extra && found.has(o.id) && !needed.has(o.id)).map((o) => o.text);
+    // Found guests rest too (they are in the usual pool); the Rehearsal never is.
+    return inSet.filter((o) => (!o.extra || o.guest) && found.has(o.id) && !needed.has(o.id)).map((o) => o.text);
 }
 
 /**
@@ -633,14 +640,16 @@ export async function tickGuarantee(guildId: string, discordUserId: string, open
 
 /**
  * The text of the special a trainer's next ping is guaranteed to be, or
- * undefined: none is pending, its set is off, locked or paused for them, or
- * it is still closed for them (`closed`, from `closedSpecials`: its `after`
- * not all found). It then waits, due, until it can come up.
+ * undefined: none is pending, its set is locked or paused for them, or it
+ * is still closed for them (`closed`, from `closedSpecials`: its `after` not
+ * all found). It then waits, due, until it can come up. A set the trainer
+ * turned off does not hold it (owner, 2026-11-19): an owed lesson is a debt
+ * from a roll already made, and it fires, ending Ramonu's hold.
  */
-export function guaranteedOpener(state: OutcomeState, disabledSets: readonly string[], lockedSets: readonly string[], closed: readonly string[] = []): string | undefined {
+export function guaranteedOpener(state: OutcomeState, lockedSets: readonly string[], closed: readonly string[] = []): string | undefined {
     if (state.guaranteedInRuns > 1) return undefined;
     const special = state.guaranteedSpecialId ? specialById(state.guaranteedSpecialId) : undefined;
-    if (!special || disabledSets.includes(special.set) || lockedSets.includes(special.set) || PAUSED_SETS.includes(special.set)) return undefined;
+    if (!special || lockedSets.includes(special.set) || PAUSED_SETS.includes(special.set)) return undefined;
     if (closed.includes(special.text)) return undefined;
     return special.text;
 }
@@ -732,6 +741,12 @@ export interface ExtraChance {
     label?: string;
     /** Content, not a boost (the guest slice): Boosts off does not pause it. */
     content?: boolean;
+    /**
+     * Its set is turned off by the trainer (owner, 2026-11-20): listed in the
+     * Boosts view as "(inactive)" at its own chance, with an empty pool so it
+     * gives nothing.
+     */
+    inactive?: boolean;
 }
 
 /**

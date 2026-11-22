@@ -110,6 +110,63 @@ when only the JP section has clubs.
 
 ---
 
+## 2026-11-19 — The usual pool hunts guests too
+
+- Seen live: Tylina (Set 1 and #OnlineSensations complete and off, Estate
+  resting, Ramonu held for a lesson) had an empty usual pool, so her base,
+  personal and tier boosts had nothing to draw on and `/timer boosts` hid
+  them. Her only live chance was the guest slice.
+- Owner: "the pool should hunt for everything, extras included". Guests
+  join the usual pool (`rarePoolFor`); `trainerPool` leaves out locked
+  guests (not redirected) and `restingLines` rests found guests. The
+  Rehearsal stays out (lesson mechanics only); set-wide "any Mejiro line"
+  pools stay on the nine lines; the guest slice is unchanged.
+- `extraChances` leaves boosts on the usual pool whole (no per-line cut):
+  that pool is already the trainer's.
+- For everyone: 5 more lines in the usual pool once unlocked, so guests
+  also come from the base roll.
+- `/timer boosts` (owner: "if everything is actually turned off then say
+  so"): with nothing anywhere to find it leads with "**Nothing left to
+  find.**", shows 0%, and drops the Early Start tip. A boost with nothing to
+  land on is listed as "**0%** … (nothing to find right now)" instead of
+  hidden (e.g. Estate boosts while Ramonu is held).
+- Revised (owner, 2026-11-20): with every set they could have on turned
+  off, the view opens "**All sets have been disabled. Enable one to find
+  specials!**" and lists boosts on the usual pool (personal, tier, Fortune,
+  early start) as "(inactive)" at their own chance. A boost whose set is
+  turned off is listed the same way (`ExtraChance.inactive`, empty pool, so
+  it gives nothing; locked or paused sets still hide theirs). Live first,
+  then inactive.
+- Simplified (owner, 2026-11-20: "keep it simple for user"): "(inactive)"
+  only for what the trainer turned off (a set, or every set). A boost with
+  nothing to land on for other reasons (Ramonu held for a lesson) is a
+  hidden thing and is not shown. No "0% (nothing to find right now)".
+
+## 2026-11-19 — Boosts keep their rate per line
+
+- Bug (seen live): Ramonu's footwork outcome (+5%, "any Mejiro line") on a
+  resting Estate put the whole 5% on Ramonu, the only line left in the pool
+  (others rest; she stays until Second Love). Mejiro week's +2% and the
+  Rehearsal win's +3% did the same.
+- Fix (owner, 2026-11-19): `extraChances` narrows each boost's pool with
+  `trainerPool` and cuts its chance by the share of lines left out
+  (`perLine`). Footwork on a resting Estate is 5%/9 ≈ 0.56% on Ramonu.
+  Boosts on the trainer's own pool lose nothing; the guest slice keeps its
+  own math. `/timer boosts` shows the cut chance. No grandfathering: boosts
+  already held are cut on deploy.
+- Side effect: extras' pools now come back redirected (Grandmother for a
+  trainer who has not met her); the scheduler did this one step later anyway.
+- Unchanged (owner): Ramonu's outcomes still roll after Second Love when the
+  Estate is on.
+- Guarantees fire even when the trainer turned the set off (owner,
+  2026-11-19): an owed lesson is a debt from a roll already made, and
+  firing it ends Ramonu's hold (`heldUntilPassed`: out of every pool from
+  the scheduling hit until the Rehearsal is passed). They still wait while
+  the set is locked or paused, or the special is closed. `guaranteedOpener`
+  drops its `disabledSets` argument.
+
+---
+
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role
 
 - Owner's wording for auto-off notices (`completionNotice`):

@@ -532,7 +532,10 @@ export function isOpenAt(special: Pick<Special, 'opensAt'>, now: Date = new Date
  * Extras (`Special.extra`) are never in it, nor a special not open yet at `now` (`Special.opensAt`).
  */
 export function rarePoolFor(disabledSets: readonly string[], lockedSets: readonly string[] = [], now: Date = new Date()): string[] {
-    return RARE_OPENERS.filter((o) => !o.extra && isOpenAt(o, now) && !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
+    // Guests are in the usual pool too (owner, 2026-11-19: "the pool should hunt
+    // for everything, extras included"); `trainerPool` keeps only those unlocked.
+    // Other extras (the Rehearsal) come only through their own mechanics.
+    return RARE_OPENERS.filter((o) => (!o.extra || o.guest) && isOpenAt(o, now) && !disabledSets.includes(o.set) && !lockedSets.includes(o.set) && !PAUSED_SETS.includes(o.set)).map((o) => o.text);
 }
 
 /**

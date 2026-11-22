@@ -201,9 +201,10 @@ async function main() {
     check('sets: every special belongs to a set', openers.RARE_OPENERS.every((o) => openers.SPECIAL_SETS.some((set) => set.id === o.set)), true);
     // Paused sets (The Mejiro Estate, owner 2026-11-10) give no new finds: never in the pool.
     // A special not open yet (Matikanefukukitaru, until the Fortune Tent opens) is in no pool either.
-    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set) && !o.extra && openers.isOpenAt(o)).length;
+    // Guests are in the usual pool too (owner, 2026-11-19); other extras never.
+    const liveSpecials = RARE_OPENERS.filter((o) => !openers.PAUSED_SETS.includes(o.set) && (!o.extra || o.guest) && openers.isOpenAt(o)).length;
     const set1Open = openers.SPECIAL_SETS[0]!.openers.filter((o) => openers.isOpenAt(o)).length;
-    check('sets: all on gives every special of the sets not paused (extras never)', openers.rarePoolFor([]).length, liveSpecials);
+    check('sets: all on gives every special of the sets not paused (guests too; other extras never)', openers.rarePoolFor([]).length, liveSpecials);
     check('sets: a set off leaves its specials out', openers.rarePoolFor(['set1']).length, liveSpecials - set1Open);
     // The Mejiro Estate was paused 2026-11-10 and resumed 2026-11-15 (owner).
     check('paused: no set is paused', openers.PAUSED_SETS, []);
@@ -305,7 +306,9 @@ async function main() {
     const leneya = await extraChances(XG, '340238209147600897', base, ['online-sensations'], false, fullPool, OFF_SEASON);
     check('personal: two boosts are two lines, +1.5% each', leneya.map((e) => [e.chance, e.label?.split(':')[0]]), [[0.015, 'Faster Than Light'], [0.015, "Principal's Pirouette"]]);
     check('personal: paused with her Boosts off', await extraChances(XG, tylina.owner, { ...base, boosts: false }, [], false, fullPool, OFF_SEASON), []);
-    check('extras: none for a set turned off', (await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool, OFF_SEASON)).length, 0);
+    // A turned-off set's boosts are listed inactive (owner, 2026-11-20), with nothing to draw on.
+    const offExtras = await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool, OFF_SEASON);
+    check('extras: a set turned off gives nothing (its boosts inactive, empty pools)', [offExtras.filter((e) => !e.inactive).length, offExtras.every((e) => e.inactive && e.pool.length === 0)], [0, true]);
     // The chances add: 4% boost + 1% early + 1% unlock bonus + the base 6% = 12%, the base intact.
     const extras = await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON);
     const counts = new Map<string, number>();
@@ -386,7 +389,8 @@ async function main() {
     const mwLocked = await extraChances(XG, 'mw-new', mwBase, ['online-sensations', 'mejiro-estate'], false, fullPool, MW);
     const mwOpen = await extraChances(XG, 'mw-open', mwBase, ['online-sensations'], false, fullPool, MW);
     check('season: before the Estate opens, +2% on the invitation; after, +2% on its 9 lines', [mwLocked.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length]), mwOpen.filter((e) => e.label?.startsWith('Mejiro week')).map((e) => [e.chance, e.pool.length])], [[[0.02, 1]], [[0.02, 9]]]);
-    check('season: Mejiro week also gives Ramonu her own +2% once the Estate is open', [mwLocked.some((e) => e.label?.startsWith('Mejiro Ramonu')), mwOpen.filter((e) => e.label?.startsWith('Mejiro Ramonu: You stayed when it mattered')).map((e) => [e.chance, e.pool.length, e.pool[0] === openers.specialById('mejiro.ramonu')!.text])], [false, [[0.02, 1, true]]]);
+    // Her line waits on Grandmother for a trainer who has not met her (`trainerPool` redirects it).
+    check('season: Mejiro week also gives Ramonu her own +2% once the Estate is open', [mwLocked.some((e) => e.label?.startsWith('Mejiro Ramonu')), mwOpen.filter((e) => e.label?.startsWith('Mejiro Ramonu: You stayed when it mattered')).map((e) => [e.chance, e.pool.length, e.pool[0] === openers.specialById('mejiro.grandmother')!.text])], [false, [[0.02, 1, true]]]);
     check('season: the Estate label', openers.SEASONAL_BUFFS[2]?.label, 'Mejiro week: Come meet the Mejiros at the Estate!');
     // Ramonu's +2% runs until the server's first Ramonu's Second Love, its end never shown (owner, 2026-11-15).
     const ramonuBuff = mwOpen.find((e) => e.label?.startsWith('Mejiro Ramonu'));
@@ -409,7 +413,7 @@ async function main() {
     check('season: not before or after the window', [(await extraChances(SN, 's1', plain, LOCKED, false, [], new Date(buff.from.getTime() - 1), [buff])).length, (await extraChances(SN, 's1', plain, LOCKED, false, [], buff.until, [buff])).length], [0, 0]);
     // (This sample week is in December, after the #OnlineSensations unlock bonus ended on Nov 22.)
     check('season: a prerequisite buff stops once its set is unlocked (and by December the unlock bonus is over)', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), []);
-    check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
+    check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).filter((e) => !e.inactive && e.pool.length > 0).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
 
     // The Boosts view: base, each boost, and the next ping's total.
     const { boostsView, BOOSTS_TOGGLE_ID } = await import('../src/lib/timer/boosts');
@@ -423,6 +427,19 @@ async function main() {
     check('boosts view: off pauses them, total is the base', [offText.includes('(paused)'), offText.includes('**Your next ping: 6% chance of a special.**'), (off.components[0]!.toJSON().components[0] as { custom_id: string; label: string }).custom_id, (off.components[0]!.toJSON().components[0] as { label: string }).label], [true, true, BOOSTS_TOGGLE_ID, 'Boosts: Off']);
     const quiet = (await boostsView(SN, 'nobody', OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
     check('boosts view: nothing running, with the early-start tip', [quiet.includes('No boosts right now.'), quiet.includes('-# Early Start: start your next run quickly for +1% overall!'), quiet.includes('**Your next ping: 6% chance')], [true, true, true]);
+    // Everything off (owner, 2026-11-19): the view says so, personal boosts stay listed at 0%, no early-start tip.
+    {
+        const ty = '457773317739380738';
+        // Unlock #OnlineSensations and hold its Loves boost, then turn only that set off: the boost is inactive.
+        await rares.recordRareOpener(SN, ty, curren.text);
+        await rares.grantBoost(SN, ty, loves.text);
+        await us0.toggleSetting(SN, ty, 'set:online-sensations');
+        const oneOff = (await boostsView(SN, ty, OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
+        check('boosts view: a turned-off set\'s boost says inactive; her personal boosts stay live', [oneOff.includes('**+4%** #OnlineSensations collab lines, 50 runs left. (inactive)'), oneOff.includes('**+4%** Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!\n'), oneOff.includes('All sets have been disabled')], [true, true, false]);
+        for (const id of ['set1', 'mejiro-estate']) await us0.toggleSetting(SN, ty, `set:${id}`);
+        const allOff = (await boostsView(SN, ty, OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
+        check('boosts view: all sets off says so, lists her personal boosts as inactive, total 0%', [allOff.startsWith('**All sets have been disabled. Enable one to find specials!**'), allOff.includes('**+4%** Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist! (inactive)'), allOff.includes('Early Start: start your next run'), allOff.includes('**Your next ping: 0% chance of a special.**')], [true, true, false, true]);
+    }
     const inWeek = new Date(week.from.getTime() + 60_000);
     const before = (await boostsView(SN, 'not-unlocked', inWeek)).embeds[0]!.toJSON().description ?? '';
     check('boosts view: Curren Chan week before unlocking, total 7%', [before.includes(`**+1%** Curren Chan: meet her in the lobby! Ends <t:${Math.floor(week.until.getTime() / 1000)}:R>.`), before.includes('**Your next ping: 7% chance')], [true, true]);
@@ -572,7 +589,7 @@ async function main() {
     await ping(ramonu.text, 0.1, 0.4);
     check('ramonu: the lesson schedules the Rehearsal 11 runs out (pick 0.4), with no boost', [await stateOf(), await rares.activeBoosts(OG, T)], [{ guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 11, losingStreak: [] }, []]);
     check('ramonu: the pick covers runs 1 to 25', [0, 0.04, 0.5, 0.9999].map((x) => 1 + Math.min(24, Math.floor(x * 25))), [1, 2, 13, 25]);
-    check('schedule: not due yet, so no guarantee', rares.guaranteedOpener(await stateOf(), [], []), undefined);
+    check('schedule: not due yet, so no guarantee', rares.guaranteedOpener(await stateOf(), []), undefined);
     // No Ramonu until her Rehearsal is passed (owner, 2026-11-15): out of every pool while it is owed.
     const mejiroLines = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
     const hasRamonu = async () => (await rares.trainerPool(OG, T, mejiroLines)).includes(ramonu.text);
@@ -593,7 +610,7 @@ async function main() {
     for (let k = 0; k < 10; k += 1) await ping(PING_OPENERS[0]!, 0.5);
     check('schedule: counts down to 1 and stays due (the set is paused, so it waits)', (await stateOf()).guaranteedInRuns, 1);
     // McQueen is found, so her three guests are unlocked: the guest slice (content) stays with Boosts off (owner, 2026-11-18).
-    check('boosts: outcome boosts apply, but give nothing with Boosts off (the guest slice stays) or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length], [2, 1, 0]);
+    check('boosts: outcome boosts apply, but give nothing with Boosts off (the guest slice stays) or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).filter((e) => !e.inactive && e.pool.length > 0).length], [2, 1, 0]);
     // The same storage on a set that is not paused (stored by hand: no Set 1 line has outcomes).
     const UG = `${OG}-live`;
     await prisma.timerSpecialBoost.createMany({ data: [
@@ -615,18 +632,18 @@ async function main() {
     await ping(ramonu.text, 0.1, 0.9);
     check('ramonu: a lesson during a losing streak schedules nothing new', await stateOf(), { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1, losingStreak: ['tail'] });
     const st = await rares.outcomeState(OG, T);
-    check('guarantee: due now, it fires; not while the set is off or locked', [rares.guaranteedOpener(st, [], []), rares.guaranteedOpener(st, ['mejiro-estate'], []), rares.guaranteedOpener(st, [], ['mejiro-estate'])], [rehearsal.text, undefined, undefined]);
+    check('guarantee: due now, it fires, even with the set turned off; not while locked', [rares.guaranteedOpener(st, []), rares.guaranteedOpener(st, ['mejiro-estate'])], [rehearsal.text, undefined]);
     // A guarantee waits while its special is still closed for the trainer (owner, 2026-11-18): McQueen before Grandmother.
     const mcqueenSp = openers.specialById('mejiro.mcqueen')!;
     const mcqDue = { guaranteedSpecialId: 'mejiro.mcqueen', guaranteedInRuns: 1, losingStreak: [] as string[] };
-    check('guarantee: a closed special waits (McQueen before Grandmother), fires once open', [rares.guaranteedOpener(mcqDue, [], [], openers.closedSpecials(new Set())), rares.guaranteedOpener(mcqDue, [], [], openers.closedSpecials(new Set([grandma.id]))) === mcqueenSp.text, rares.guaranteedOpener(mcqDue, [], ['mejiro-estate'], openers.closedSpecials(new Set([grandma.id])))], [undefined, true, undefined]);
+    check('guarantee: a closed special waits (McQueen before Grandmother), fires once open', [rares.guaranteedOpener(mcqDue, [], openers.closedSpecials(new Set())), rares.guaranteedOpener(mcqDue, [], openers.closedSpecials(new Set([grandma.id]))) === mcqueenSp.text, rares.guaranteedOpener(mcqDue, ['mejiro-estate'], openers.closedSpecials(new Set([grandma.id])))], [undefined, true, undefined]);
     {
         const CGd = `test-closed-guarantee-${Date.now()}`;
         await prisma.timerUserSettings.create({ data: { guildId: CGd, discordUserId: 'c1', guaranteedSpecialId: 'mejiro.mcqueen', guaranteedInRuns: 1 } });
-        const before = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], [], await rares.closedSpecialsFor(CGd, 'c1'));
+        const before = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], await rares.closedSpecialsFor(CGd, 'c1'));
         await rares.tickGuarantee(CGd, 'c1', PING_OPENERS[0]!);
         await rares.recordRareOpener(CGd, 'c1', grandma.text);
-        const after = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], [], await rares.closedSpecialsFor(CGd, 'c1'));
+        const after = rares.guaranteedOpener(await rares.outcomeState(CGd, 'c1'), [], await rares.closedSpecialsFor(CGd, 'c1'));
         check('guarantee: from the database, closed McQueen waits (still due after a ping), then fires once Grandmother is found', [before, (await rares.outcomeState(CGd, 'c1')).guaranteedInRuns, after === mcqueenSp.text], [undefined, 1, true]);
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: CGd } });
         await prisma.timerUserSettings.deleteMany({ where: { guildId: CGd } });
@@ -713,7 +730,7 @@ async function main() {
     const guestTexts = guests.map((g) => g.text);
     const hasGuest = (pool: readonly string[]) => pool.some((t) => guestTexts.includes(t));
     const mejiroLinesLive = RARE_OPENERS.filter((o) => o.set === 'mejiro-estate' && !o.extra).map((o) => o.text);
-    check('guests: out of every normal pool (base, set-wide, boosts, the photo\'s wait)', [hasGuest(openers.rarePoolFor([], [])), hasGuest(openers.setLinesPool('mejiro-estate')), hasGuest(mejiroLinesLive), hasGuest(openers.boostPool('mejiro-estate', 'collab')), hasGuest(openers.outcomeBoostPool({ set: 'mejiro-estate' })), photo.after?.some((id) => guestIds.includes(id))], [false, false, false, false, false, false]);
+    check('guests: in the usual pool (owner, 2026-11-19), but out of set-wide pools, boosts and the photo\'s wait', [!hasGuest(openers.rarePoolFor([], [])), hasGuest(openers.setLinesPool('mejiro-estate')), hasGuest(mejiroLinesLive), hasGuest(openers.boostPool('mejiro-estate', 'collab')), hasGuest(openers.outcomeBoostPool({ set: 'mejiro-estate' })), photo.after?.some((id) => guestIds.includes(id))], [false, false, false, false, false, false]);
     const openGuests = (...ids: string[]) => guestIds.filter((id) => !openers.closedSpecials(new Set([grandma.id, ...ids])).includes(openers.specialById(id)!.text));
     check('guests: each opens with its counterpart (none with Grandmother alone; Palmer: Helios; Ramonu: the Symbolis; McQueen: the other three; all seven: all five)', [
         openGuests(),
@@ -830,6 +847,30 @@ async function main() {
     check('auto-off: found lines rest, but Ramonu stays (the Rehearsal); guest counterparts and the photo rest', [restingNow.length, restingNow.includes(ramonu.text), restingNow.includes(palmerText), restingNow.includes(mcqueenText), restingNow.includes(photo.text)], [8, false, true, true, true]);
     const mejiroAll = mejiroMain.map((o) => o.text);
     check('auto-off: the pool leaves resting lines out', await rares.trainerPool(AG, AU, mejiroAll), [ramonu.text]);
+    // The usual pool hunts guests too (owner, 2026-11-19): a resting Estate with the other sets off is Ramonu plus unfound guests; a found guest rests.
+    {
+        const usual = () => rares.trainerPool(AG, AU, openers.rarePoolFor(['set1', 'online-sensations']));
+        const guestTexts5 = RARE_OPENERS.filter((o) => o.guest).map((o) => o.text);
+        check('usual pool: Ramonu and every unlocked unfound guest', (await usual()).sort(), [ramonu.text, ...guestTexts5].sort());
+        await rares.recordRareOpener(AG, AU, openers.specialById('guest.teio')!.text);
+        check('usual pool: a found guest rests', (await usual()).includes(openers.specialById('guest.teio')!.text), false);
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: AG, discordUserId: AU, specialId: 'guest.teio' } });
+        check('usual pool: a locked guest stays out (no Palmer, no Helios)', (await rares.trainerPool(AG, 'nobody', openers.rarePoolFor([]))).some((t) => guestTexts5.includes(t)), false);
+    }
+    // Per-line boosts (owner, 2026-11-19): Ramonu's footwork boost (+5%, any Mejiro line) on a resting Estate is a ninth of it, on Ramonu only.
+    {
+        const footwork = openers.outcomeBoostByKey('mejiro.ramonu:footwork')!;
+        await rares.grantOutcomeBoost(AG, AU, footwork);
+        const { extraChances: ec } = await import('../src/lib/timer/boosts');
+        const fw = (await ec(AG, AU, await usA.getUserSettings(AG, AU), [], false, [], new Date('2026-01-01T00:00:00Z'))).filter((e) => e.label?.startsWith('The Mejiro Estate: any Mejiro line'));
+        check('per line: a resting Estate keeps a ninth of an Estate boost, on Ramonu', fw.map((e) => [Math.round(e.chance * 1e6) / 1e6, e.pool]), [[Math.round((0.05 / 9) * 1e6) / 1e6, [ramonu.text]]]);
+        // A lesson owed holds Ramonu: the boost has nothing to land on, a hidden thing (owner, 2026-11-20): not shown.
+        await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: AG, discordUserId: AU } }, data: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 5 } });
+        const heldView = (await (await import('../src/lib/timer/boosts')).boostsView(AG, AU, new Date('2026-01-01T00:00:00Z'))).embeds[0]!.toJSON().description ?? '';
+        check('hidden: Ramonu held for a lesson, the footwork boost (nothing to land on) is not shown', heldView.includes('The Mejiro Estate: any Mejiro line'), false);
+        await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: AG, discordUserId: AU } }, data: { guaranteedSpecialId: null, guaranteedInRuns: null } });
+        await prisma.timerSpecialBoost.deleteMany({ where: { guildId: AG, discordUserId: AU } });
+    }
     check('auto-off: a repeat find says nothing more', await rares.completionNotice(AG, AU, lastMain.text), null);
     const restPage = json(await rares.mySpecialsView(AG, AU, rares.pageOfSet('mejiro-estate'), PRE));
     check('auto-off: the page says Resting, and so does its button', [restPage.embeds[0]!.description?.includes('Resting: every line found'), restPage.components[0]!.components[1]?.label], [true, 'The Mejiro Estate: Resting']);
@@ -1041,7 +1082,7 @@ async function main() {
         check('intro: a due guarantee (Rehearsal, a Helios guest) wins; the intro waits', await fortune.tentIntroDue(FG, 't1', true, OPEN), false);
         await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 't1' } }, data: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 1 } });
         const st = await rares.outcomeState(FG, 't1');
-        check('intro: the guarantee check is guaranteedOpener (due at 1 run)', [rares.guaranteedOpener(st, [], []) !== undefined, rares.guaranteedOpener({ ...st, guaranteedInRuns: 3 }, [], [])], [true, undefined]);
+        check('intro: the guarantee check is guaranteedOpener (due at 1 run)', [rares.guaranteedOpener(st, []) !== undefined, rares.guaranteedOpener({ ...st, guaranteedInRuns: 3 }, [], [])], [true, undefined]);
         check('intro: still owed while it waits', await fortune.tentIntroDue(FG, 't1', false, OPEN), true);
         const intro = fortune.tentIntroText('t1').split('\n');
         check('intro: four speakers, then the -# line, the mention once', [intro.length, intro.map((l) => l.split(':')[0]), intro[4]!.startsWith("-# Fuku-chan's Fortune Tent is open"), fortune.TENT_INTRO.split('{user}').length - 1, intro.join('\n').includes('<@t1>')], [5, ['Machitan', 'Fuku', 'Machitan', 'Fuku', "-# Fuku-chan's Fortune Tent is open"], true, 1, true]);

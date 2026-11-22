@@ -61,21 +61,28 @@ export async function extraChances(
     if (!settings.boosts) return guests ? [guests] : [];
     // A paused set (SpecialSet.paused) gives no new finds, so no boost draws on it.
     const usable = (setId: string) => !settings.disabledSets.includes(setId) && !lockedSets.includes(setId) && !PAUSED_SETS.includes(setId);
+    // Turned off by the trainer (not locked or paused): listed as inactive, giving nothing (owner, 2026-11-20).
+    const turnedOff = (setId: string) => settings.disabledSets.includes(setId) && !lockedSets.includes(setId) && !PAUSED_SETS.includes(setId);
     const extras: ExtraChance[] = [];
+    // Adds a set-tied boost: whole while its set is usable, inactive while turned off, nothing otherwise.
+    const add = (setId: string, e: ExtraChance) => {
+        if (usable(setId)) extras.push(e);
+        else if (turnedOff(setId)) extras.push({ ...e, pool: [], inactive: true });
+    };
     for (const held of await activeBoosts(guildId, discordUserId)) {
-        if (!usable(held.setId)) continue;
+        if (!usable(held.setId) && !turnedOff(held.setId)) continue;
         if (held.key) {
             const set = SPECIAL_SETS.find((s) => s.id === held.setId);
             const known = outcomeBoostByKey(held.key);
             const target = held.specialId ? specialById(held.specialId)?.name : `${set?.name ?? held.setId}: any of its lines`;
             const label = known ? outcomeBoostLabel(known, held.runsLeft) : `${target}, ${held.runsLeft} run${held.runsLeft === 1 ? '' : 's'} left.`;
-            extras.push({ chance: held.chance ?? 0, pool: outcomeBoostPool({ set: held.setId, ...(held.specialId ? { special: held.specialId } : {}) }), label });
+            add(held.setId, { chance: held.chance ?? 0, pool: outcomeBoostPool({ set: held.setId, ...(held.specialId ? { special: held.specialId } : {}) }), label });
             continue;
         }
         const set = SPECIAL_SETS.find((s) => s.id === held.setId);
         const boost = set?.openers.find((o) => o.boost)?.boost;
         if (set && boost) {
-            extras.push({
+            add(held.setId, {
                 chance: boost.chance,
                 pool: boostPool(held.setId, boost.tag),
                 label: `${set.name} ${boost.tag} lines, ${held.runsLeft} run${held.runsLeft === 1 ? '' : 's'} left.`,
@@ -91,32 +98,47 @@ export async function extraChances(
     for (const buff of activeSeasonals(now, buffs)) {
         // A set-wide buff (Mejiro week): that set's lines, while it is usable.
         if (buff.setId) {
-            if (!usable(buff.setId)) continue;
-            extras.push({ chance: buff.chance, pool: setLinesPool(buff.setId), label: `${buff.label} Ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>.` });
+            add(buff.setId, { chance: buff.chance, pool: setLinesPool(buff.setId), label: `${buff.label} Ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>.` });
             continue;
         }
         const special = buff.specialId ? specialById(buff.specialId) : undefined;
-        if (!special || !usable(special.set)) continue;
+        if (!special || (!usable(special.set) && !turnedOff(special.set))) continue;
         // Ends with the server's first Ramonu's Second Love; its end is never shown.
         if (buff.endsOnSecondLove) {
             if (await prisma.timerSecondLove.findUnique({ where: { guildId } })) continue;
-            extras.push({ chance: buff.chance, pool: [special.text], label: buff.label });
+            add(special.set, { chance: buff.chance, pool: [special.text], label: buff.label });
             continue;
         }
         const unlocksDone = SPECIAL_SETS.some((s) => s.requires === buff.specialId && !lockedSets.includes(s.id));
         if (unlocksDone) continue;
-        extras.push({ chance: buff.chance, pool: [special.text], label: `${buff.label} Ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>.` });
+        add(special.set, { chance: buff.chance, pool: [special.text], label: `${buff.label} Ends <t:${Math.floor(buff.until.getTime() / 1000)}:R>.` });
     }
     for (const set of SPECIAL_SETS) {
-        if (!set.unlockBonus || !set.requires || !usable(set.id)) continue;
+        if (!set.unlockBonus || !set.requires || (!usable(set.id) && !turnedOff(set.id))) continue;
         if (set.unlockBonusUntil && now.getTime() >= set.unlockBonusUntil.getTime()) continue;
         const ends = set.unlockBonusUntil ? ` Ends <t:${Math.floor(set.unlockBonusUntil.getTime() / 1000)}:R>.` : '';
-        extras.push({ chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra && isOpenAt(o, now)).map((o) => o.text), label: `${set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.`}${ends}` });
+        add(set.id, { chance: set.unlockBonus, pool: set.openers.filter((o) => !o.extra && isOpenAt(o, now)).map((o) => o.text), label: `${set.unlockBonusLabel ?? `${set.name} unlocked: any of its lines.`}${ends}` });
     }
     const fortune = await fortuneToday(guildId, discordUserId, now);
     if (fortune && fortune.tier.delta > 0) extras.push({ chance: fortune.tier.delta, pool, label: fortune.tier.label });
-    if (guests) extras.push(guests);
-    return extras;
+    // Each boost keeps its rate per line (owner, 2026-11-19): it shrinks by the
+    // share of its lines out of the trainer's pool (`trainerPool`: resting,
+    // held). So "any Mejiro line" on a resting Estate with only Ramonu left is
+    // a ninth of its chance on Ramonu, not all of it. Boosts on the trainer's
+    // own pool lose nothing; the guest slice keeps its own math.
+    // Boosts on the usual pool (`pool`, already the trainer's) are left whole.
+    const scaled = await Promise.all(extras.map((e) => (e.pool === pool ? e : perLine(guildId, discordUserId, e))));
+    if (guests) scaled.push(guests);
+    return scaled;
+}
+
+/** A boost with its pool narrowed to the trainer's (`trainerPool`) and its chance cut by the share of lines left out. */
+async function perLine(guildId: string, discordUserId: string, e: ExtraChance): Promise<ExtraChance> {
+    if (e.pool.length === 0) return e;
+    const left = await trainerPool(guildId, discordUserId, e.pool);
+    // Nothing left: it gives nothing either way; keep its own chance for the Boosts view ("inactive").
+    if (left.length === 0) return { ...e, pool: left };
+    return left.length === e.pool.length ? { ...e, pool: left } : { ...e, pool: left, chance: (e.chance * left.length) / e.pool.length };
 }
 
 /**
@@ -142,9 +164,20 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
     ]);
     const pool = await trainerPool(guildId, discordUserId, rarePoolFor(settings.disabledSets, lockedSets, now));
     // Listed as if Boosts were on, so paused ones still show.
-    const extras = (await extraChances(guildId, discordUserId, { ...settings, boosts: true }, lockedSets, timer?.earlyStart ?? false, pool, now)).filter(
-        (e) => e.pool.length > 0,
-    );
+    const all = await extraChances(guildId, discordUserId, { ...settings, boosts: true }, lockedSets, timer?.earlyStart ?? false, pool, now);
+    // Every set they could have on is turned off (owner, 2026-11-20): boosts on
+    // the usual pool (personal, tier, Fortune, early start) are inactive too.
+    const openSets = SPECIAL_SETS.filter((s) => !lockedSets.includes(s.id) && !PAUSED_SETS.includes(s.id));
+    const allOff = openSets.length > 0 && openSets.every((s) => settings.disabledSets.includes(s.id));
+    // Inactive (owner, 2026-11-20): what the trainer turned off (its set, or
+    // every set), listed at its own chance, "(inactive)". A boost with nothing
+    // to land on for other reasons (e.g. Ramonu held for a lesson) is a hidden
+    // thing: not shown.
+    const isInactive = (e: ExtraChance) => e.inactive === true || (allOff && e.pool === pool && !e.content);
+    const inactive = all.filter(isInactive);
+    const extras = all.filter((e) => !isInactive(e) && e.pool.length > 0 && e.chance > 0);
+    // Nothing anywhere: no line on, no boost or slice with anything to find.
+    const nothing = pool.length === 0 && extras.length === 0;
     // Fortune Tent: a curse lowers the base, Boosts on or off; the button once they have the tent.
     const fortune = await fortuneToday(guildId, discordUserId, now);
     const curse = fortune && fortune.tier.delta < 0 ? fortune : null;
@@ -154,11 +187,17 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
     const rawTotal = base + extras.filter((e) => settings.boosts || e.content).reduce((sum, e) => sum + e.chance, 0);
     const total = base > 0 ? effectiveChance(rawTotal) : rawTotal;
 
-    const lines = [`**Base:** ${percent(RARE_OPENER_CHANCE)} on every ping${pool.length === 0 ? ' (every special set is off for you)' : ''}.`];
+    const lines = allOff
+        ? ['**All sets have been disabled. Enable one to find specials!**', '']
+        : nothing
+          ? ["**Nothing left to find.** Everything you have on is found or waiting, so your pings can't be specials right now. Turn a set back on in Specials to find repeats.", '']
+          : [];
+    lines.push(`**Base:** ${percent(RARE_OPENER_CHANCE)} on every ping${pool.length === 0 ? ' (nothing to find in your sets)' : ''}.`);
     if (curse) lines.push(`**-${percent(-curse.tier.delta)}** ${curse.tier.label}`);
-    if (extras.length === 0) lines.push('No boosts right now.');
+    if (extras.length === 0 && inactive.length === 0) lines.push('No boosts right now.');
     for (const e of extras) lines.push(`**+${percent(e.chance)}** ${e.label ?? ''}${settings.boosts || e.content ? '' : ' (paused)'}`);
-    if (!timer?.earlyStart) {
+    for (const e of inactive) lines.push(`**+${percent(e.chance)}** ${e.label ?? ''} (inactive)`);
+    if (!timer?.earlyStart && !nothing) {
         lines.push(
             `-# Early Start: start your next run quickly for +${percent(EARLY_START.chance)} overall!`,
         );
