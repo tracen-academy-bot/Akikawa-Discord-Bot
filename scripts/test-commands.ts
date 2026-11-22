@@ -823,9 +823,9 @@ async function main() {
     const afterRules = await reload();
     check('the rules file is stored as text, without the byte-order mark', [afterRules.rulesFile, afterRules.rulesFileName], [SHORT_RULES, 'Checkrose rules.md']);
     const rulesPost = withRules.find((o) => o.kind === 'followUp');
-    check('the post points to the rules below it', rulesPost?.content?.includes('**Rules and goals**: in the messages below.'), true);
-    check('the rules follow as their own message, as Markdown with a heading',
-        withRules.filter((o) => o.kind === 'followUp').slice(1).map((o) => o.content), [`## Checkrose: rules and goals\n${SHORT_RULES}`]);
+    check('the post points to its rules thread', rulesPost?.content?.includes('**Rules and goals**: in the Checkrose Goals/Rules thread.'), true);
+    check('the rules follow as their own message, as Markdown',
+        withRules.filter((o) => o.kind === 'followUp').slice(1).map((o) => o.content), [SHORT_RULES]);
     check('a banner can come in the same upload', rulesPost?.files, 1);
     const LONG_RULES = `# Rules\n${'- Earn your quota every week, and say so in chat if you cannot.\n'.repeat(80)}`;
     serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
@@ -836,13 +836,13 @@ async function main() {
     check('each fits a Discord message', longMore.every((m) => m.length <= 2000), true);
     check('the reply says how many follow', longEdit?.content?.includes(`It continues in ${longMore.length} messages after the post.`), true);
     check('only the post carries a file', withLong.filter((o) => o.kind === 'followUp').map((o) => o.files ?? 0).filter((n) => n > 0), [1]);
-    check('every line shows once, in order, none broken', longMore.join('\n'), `## Checkrose: rules and goals\n${LONG_RULES.trim()}`);
+    check('every line shows once, in order, none broken', longMore.join('\n'), LONG_RULES.trim());
     check('the long file is kept whole', (await reload()).rulesFile, LONG_RULES.trim());
     const TXT = 'Be active\n**Bold** still renders';
     serve({ [mdUpload(TXT, 'rules.txt').url]: TXT });
     const withTxt = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(TXT, 'rules.txt') });
     check('a .txt file is accepted and shown as Markdown',
-        [withTxt.filter((o) => o.kind === 'followUp').slice(1).map((o) => o.content), (await reload()).rulesFileName], [[`## Checkrose: rules and goals\n${TXT}`], 'rules.txt']);
+        [withTxt.filter((o) => o.kind === 'followUp').slice(1).map((o) => o.content), (await reload()).rulesFileName], [[TXT], 'rules.txt']);
     serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
     await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(LONG_RULES) });
     serve({ [mdUpload('x').url]: Buffer.from([0xff, 0xfe, 0x00, 0x41]) });
@@ -895,22 +895,35 @@ async function main() {
 
     // ── The directory ─────────────────────────────────────────────────────────
     type DirSent = { content?: string; embeds: { toJSON(): { title?: string; description?: string } }[]; files: unknown[]; allowedMentions?: { parse?: unknown[] } };
-    /** A channel that keeps what is posted in it, and what is edited or deleted. */
+    /**
+     * A channel that keeps what is posted in it and in its threads (`place`
+     * is the channel or thread ID), and what is edited or deleted. Deleting a
+     * thread deletes its messages, as on Discord.
+     */
     const dirChannel = (id: string) => {
-        const rec = { sent: [] as { id: string; payload: DirSent }[], edits: [] as string[], deleted: [] as string[], live: new Map<string, DirSent>() };
+        const rec = {
+            sent: [] as { id: string; place: string; payload: DirSent }[],
+            edits: [] as string[],
+            deleted: [] as string[],
+            live: new Map<string, DirSent>(),
+            placeOf: new Map<string, string>(),
+            threads: new Map<string, { name: string; locked: boolean; archived: boolean }>(),
+        };
         let n = 0;
-        const channel = {
-            id,
+        let t = 0;
+        const target = (place: string) => ({
+            id: place,
             send: async (payload: DirSent) => {
                 n += 1;
                 const mid = `${id}-m${n}`;
                 rec.live.set(mid, payload);
-                rec.sent.push({ id: mid, payload });
+                rec.placeOf.set(mid, place);
+                rec.sent.push({ id: mid, place, payload });
                 return { id: mid };
             },
             messages: {
                 fetch: async (mid: string) => {
-                    if (!rec.live.has(mid)) throw new Error('Unknown Message');
+                    if (!rec.live.has(mid) || rec.placeOf.get(mid) !== place) throw new Error('Unknown Message');
                     return {
                         id: mid,
                         edit: async (p: DirSent) => {
@@ -924,9 +937,39 @@ async function main() {
                     };
                 },
             },
+        });
+        const thread = (tid: string) => ({
+            ...target(tid),
+            get archived() {
+                return rec.threads.get(tid)?.archived ?? false;
+            },
+            setArchived: async (archived: boolean) => void (rec.threads.get(tid)!.archived = archived),
+            setLocked: async (locked: boolean) => void (rec.threads.get(tid)!.locked = locked),
+            delete: async () => {
+                rec.threads.delete(tid);
+                for (const [mid, place] of rec.placeOf) if (place === tid) rec.live.delete(mid);
+                rec.deleted.push(tid);
+            },
+        });
+        const channel = {
+            ...target(id),
+            threads: {
+                create: async ({ name }: { name: string }) => {
+                    t += 1;
+                    const tid = `${id}-t${t}`;
+                    rec.threads.set(tid, { name, locked: false, archived: false });
+                    return thread(tid);
+                },
+                fetch: async (tid: string) => (rec.threads.has(tid) ? thread(tid) : null),
+            },
         };
         FAKE_GUILD.channelsById.set(id, channel);
-        return { channel, rec };
+        /** What a thread holds now, in order. */
+        const inThread = (name: string) => {
+            const tid = [...rec.threads.entries()].find(([, v]) => v.name === name)?.[0];
+            return [...rec.live.entries()].filter(([mid]) => rec.placeOf.get(mid) === tid).map(([, p]) => p);
+        };
+        return { channel, rec, inThread };
     };
     const shape = (p: DirSent) => `${p.content ?? ''}|${p.embeds.length}|${p.files.length}`;
     const lastDesc = (log: Sent[]) => log.at(-1)?.embeds?.[0]?.description ?? '';
@@ -945,11 +988,18 @@ async function main() {
     const dirPostedText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory' } }));
     check('/club directory posts it', dirPostedText.startsWith('Posted the directory in <#c-directory> with 1 club.'), true);
     check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no expected rank:') && dirPostedText.includes('**Otherrose**'), true);
-    const firstLine = (m: { payload: DirSent }) => `${m.payload.content?.split('\n')[0] ?? ''}|${m.payload.embeds.length}|${m.payload.files.length}`;
-    check('its messages: heading, post, Directory, group boxes, how to apply, poster', dirA.rec.sent.map(firstLine),
-        ['## __Current A Clubs__|0|0', '**\u2605 \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u2605**|0|1', `${'-'.repeat(88)}|0|0`, '|5|0', '## How to apply|0|0', '|0|1']);
-    check('the Directory lists a link to each post', dirA.rec.sent[2]?.payload.content,
-        `${'-'.repeat(88)}\n__**Directory**__\n[Checkrose](https://discord.com/channels/${GUILD}/c-directory/c-directory-m2)`);
+    const firstLine = (m: { place: string; payload: DirSent }) => `${m.place}: ${m.payload.content?.split('\n')[0] ?? ''}|${m.payload.embeds.length}|${m.payload.files.length}`;
+    check('a thread per rank group, named after it', [...dirA.rec.threads.values()].map((t) => t.name), ['A']);
+    check('in the thread: heading, post, Directory; then in the channel: group boxes, how to apply, poster', dirA.rec.sent.map(firstLine), [
+        'c-directory-t1: ## __Current A Clubs__|0|0',
+        'c-directory-t1: **\u2605 \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u2605**|0|1',
+        `c-directory-t1: ${'-'.repeat(88)}|0|0`,
+        'c-directory: |5|0',
+        'c-directory: ## How to apply|0|0',
+        'c-directory: |0|1',
+    ]);
+    check("the thread's Directory links to each post in it", dirA.rec.sent[2]?.payload.content,
+        `${'-'.repeat(88)}\n__**Directory**__\n[Checkrose](https://discord.com/channels/${GUILD}/c-directory-t1/c-directory-m2)`);
     check('posted with its links: nothing needs editing after', dirA.rec.edits, []);
     check('a box per rank group', dirA.rec.sent[3]?.payload.embeds.map((e) => e.toJSON().title), ['S [Competitive]', 'A+ [Semi Competitive+]', 'A [Semi-Competitive]', 'B+ [Semi-Casual]', 'Casual']);
     const posterFile = dirA.rec.sent[5]?.payload.files[0] as { name?: string; attachment?: Buffer } | undefined;
@@ -960,7 +1010,7 @@ async function main() {
     const dirAgain = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
     check('a refresh with nothing changed edits nothing', [dirAgain.mode, dirA.rec.edits.length, dirA.rec.sent.length], ['edited', 0, 6]);
     check('a forced refresh edits every message', [(await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, dirA.rec.edits.length], ['edited', 6]);
-    // A profile change refreshes it on its own: just that card.
+    // A profile change refreshes it on its own: just that post.
     await submitProfile(staffProfile, 'u-trainer', false, { ...kept, 'club:profile:bio': 'Now T30 pushing' });
     await directory.refreshDirectory(FAKE_GUILD);
     check('saving a profile updates the post', dirA.rec.live.get('c-directory-m2')?.content?.endsWith('> Now T30 pushing'), true);
@@ -969,39 +1019,45 @@ async function main() {
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { monthlyRank: 4321 } });
     await directory.refreshDirectory(FAKE_GUILD);
     check('a new uma.moe rank updates only the poster', dirA.rec.edits.slice(7), ['c-directory-m6']);
+    // A quiet thread archives itself after a week; an edit opens it again first.
+    dirA.rec.threads.get('c-directory-t1')!.archived = true;
+    await submitProfile(staffProfile, 'u-trainer', false, { ...kept, 'club:profile:bio': 'Still T30 pushing' });
+    await directory.refreshDirectory(FAKE_GUILD);
+    check('an archived thread is reopened to edit in it', [dirA.rec.threads.get('c-directory-t1')?.archived, dirA.rec.edits.at(-1)], [false, 'c-directory-m2']);
 
     // A club gets an expected rank: the run no longer fits, so it is posted afresh.
     await prisma.trackedCircle.update({ where: { id: other.id }, data: { rank: 'S' } });
     const dirRegrouped = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
-    check('a new club reposts the directory', [dirRegrouped.mode, dirRegrouped.listed, dirA.rec.deleted.length, dirA.rec.live.size], ['posted', 2, 6, 8]);
-    check('with a section per rank group, highest first', [...dirA.rec.live.values()].map((p) => p.content).filter((c) => c?.startsWith('## __Current')), ['## __Current S Clubs__', '## __Current A Clubs__']);
+    check('a new club reposts the directory: old thread and channel messages go', [dirRegrouped.mode, dirRegrouped.listed, dirA.rec.deleted, dirA.rec.live.size],
+        ['posted', 2, ['c-directory-t1', 'c-directory-m4', 'c-directory-m5', 'c-directory-m6'], 9]);
+    check('with a thread per rank group, highest first', [...dirA.rec.threads.values()].map((t) => t.name), ['S', 'A']);
     // A message deleted by hand: posted afresh too.
-    dirA.rec.live.delete([...dirA.rec.live.keys()][2]!);
+    dirA.rec.live.delete([...dirA.rec.live.keys()][1]!);
     check('an automatic refresh with nothing changed does not look', (await directory.publishDirectory(FAKE_GUILD, dirA.channel)).mode, 'edited');
     check('a forced one finds it and reposts', (await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, 'posted');
 
     const dirB = dirChannel('c-directory-2');
     const dirMoveText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory-2' } }));
-    check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, dirA.rec.live.size], [true, 8, 0]);
+    check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, dirA.rec.live.size, dirA.rec.threads.size], [true, 9, 0, 0]);
     check('/club directory with no channel refreshes it where it is',
         lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })).startsWith('Updated the directory in <#c-directory-2>'), true);
 
-    // Another rank, another section.
+    // Another rank, another thread.
     await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: 'B_PLUS' } });
     await directory.refreshDirectory(FAKE_GUILD);
-    check('a B+ club gets the B+ section', [...dirB.rec.live.values()].some((p) => p.content === '## __Current B+ Clubs__'), true);
+    check('a B+ club gets the B+ thread', dirB.inThread('B+')[0]?.content, '## __Current B+ Clubs__');
     await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: null } });
     await directory.refreshDirectory(FAKE_GUILD);
 
-    // A rules file posts after the club's card, in messages of its own.
+    // A rules file goes in the club's own locked thread, and the post links there.
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: LONG_RULES.trim(), rulesFileName: 'rules.md' } });
     await directory.refreshDirectory(FAKE_GUILD);
-    const liveB = [...dirB.rec.live.values()];
-    const cardAt = liveB.findIndex((p) => p.content?.startsWith('**\u2605 \u2500\u2500\u2500 Checkrose'));
-    const indexAt = liveB.findIndex((p) => p.content?.startsWith('-----'));
-    const rulesAfter = liveB.slice(cardAt + 1, indexAt);
-    check('the rules messages come right after the card', liveB[cardAt + 1]?.content?.startsWith('## Checkrose: rules and goals'), true);
-    check('all of the rules are posted', rulesAfter.map((p) => p.content).join('\n'), `## Checkrose: rules and goals\n${LONG_RULES.trim()}`);
+    const rulesThread = [...dirB.rec.threads.entries()].find(([, v]) => v.name === 'Checkrose Goals/Rules');
+    check('a club with a rules file gets a locked rules thread', rulesThread?.[1].locked, true);
+    check('all of the rules are posted in it, nothing else', dirB.inThread('Checkrose Goals/Rules').map((p) => p.content).join('\n'), LONG_RULES.trim());
+    check('each piece fits a message', dirB.inThread('Checkrose Goals/Rules').every((p) => (p.content?.length ?? 0) <= 2000), true);
+    check("the club's post links to its rules thread",
+        dirB.inThread('A').find((p) => p.content?.startsWith('**\u2605'))?.content?.includes(`[Link to Checkrose Goals/Rules](https://discord.com/channels/${GUILD}/${rulesThread?.[0]})`), true);
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: null, rulesFileName: null } });
 
     await directory.refreshDirectory(FAKE_GUILD);

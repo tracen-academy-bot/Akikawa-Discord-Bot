@@ -157,6 +157,31 @@ to 🤍, read off the screenshot (a solid white heart; Discord shows a plain
 ♥ as a red emoji, so it is most likely 🤍). Spica's star is the default.
 The form is now five fields with Remove, Discord's limit.
 
+Then more screenshots: the old directory kept each tier in a **thread**
+("G1", started by a staff member), each thread holding its heading, posts
+and its own Directory list. Spica's rules were their own thread too
+("Spica Goals/Rules"). The directory now does the same:
+
+- A thread per rank group, named "S", "A+", "A", "B+", "Casual": the
+  heading, each club's post, then the Directory list of that thread's posts.
+- The channel itself holds the group boxes, how to apply, and the poster.
+- A club with a rules file gets a locked "<Club> Goals/Rules" thread with
+  the file in it, and its post links there. Discord has no per-thread
+  posting permission (threads inherit the channel's); asked for a thread
+  "only they can type" in, the nearest is a locked thread the bot writes,
+  fed from the club's own `/club profile` upload, which only its staff can
+  use. Rules files are text, so pictures (Spica's has one) cannot go in.
+- Layout: threads are stored as `thread:<place>` with the thread ID,
+  messages as `<place>|<key>`. A repost deletes the old threads (their
+  messages go with them) and the channel's own messages. A thread archives
+  after a week without new messages; an edit reopens it first. Rules
+  threads are locked after they are filled.
+- Needs the bot to have Create Public Threads, Send Messages in Threads and
+  Manage Threads (to lock and reopen) in the directory channel.
+- Symbols from the screenshots in the migration: First and Rose 🤍, Cosmos
+  ☆, Primrose, Alkes, Canopus, Altair, Ascella, Lily and Umbra ୨୧; Spica
+  and Capella ★ (the default). Tempest was not in them.
+
 ---
 
 ## 2026-11-19 — Completion wording; the Rehearsal is done only with the role

@@ -9,18 +9,25 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  * The club directory: a channel listing every club by expected rank, posted and kept
  * up to date by the bot.
  *
- * It is a run of messages, in order, modelled on the server's old hand-made
- * directory:
+ * It is modelled on the server's old hand-made directory, which kept each
+ * tier in a thread. In order:
  *
- *   1. For each rank group with clubs (`clubGroups.ts`: S, A+, A, B+, Casual),
- *      `group:<group>` ("Current S Clubs"), then one `club:<id>` post per
- *      club in it, by name: a plain message with the banner attached (see
- *      `clubCard`). Overflow and a rules file follow in `club:<id>:rules:<n>`.
- *   2. `index`: a rule, then "Directory" and a link to each post.
- *   3. `groups`: what each group means, a box each.
- *   4. `apply`: how to apply.
- *   5. `poster`: every club on one picture (`renderClubPoster`). It is last
- *      because Discord opens a channel at its newest message.
+ *   1. A locked "<Club> Goals/Rules" thread for each listed club with a rules
+ *      file, holding that file. Locked threads take posts only from the bot
+ *      and moderators, so it changes only when the club's staff upload a new
+ *      file in `/club profile`. The club's post links to it.
+ *   2. A thread per rank group with clubs (`clubGroups.ts`: S, A+, A, B+,
+ *      Casual), named after it: "Current S Clubs", each club's post (a plain
+ *      message with its banner, see `clubCard`), then a rule of hyphens and
+ *      "Directory", a link to each post in the thread.
+ *   3. In the channel itself: a box per group, how to apply, and the poster
+ *      (`renderClubPoster`), last because Discord opens a channel at its
+ *      newest message.
+ *
+ * Threads are stored in the layout as `thread:<place>` with the thread's ID;
+ * messages as `<place>|<key>`, where `place` is `main`, a group, or
+ * `rules:<club id>`. A thread archives itself after a week without new
+ * messages; an edit reopens it first.
  *
  * Clubs with no expected rank are left out. `/club directory` posts it; after that
  * any change to a club (`/club reports`, `/club profile`, `/club admin`, staff, create, delete)
@@ -64,12 +71,31 @@ export interface DirectoryMessage {
     delete(): Promise<unknown>;
 }
 
-/** The parts of a channel the directory posts to; a discord.js text channel fits. */
-export interface DirectoryChannel {
+/** Somewhere the directory posts: the channel itself, or one of its threads. */
+export interface DirectoryTarget {
     id: string;
     send(payload: unknown): Promise<{ id: string }>;
     messages: { fetch(id: string): Promise<DirectoryMessage> };
 }
+
+/** A thread the directory made; a discord.js thread channel fits. */
+export interface DirectoryThread extends DirectoryTarget {
+    archived?: boolean | null;
+    setArchived(archived: boolean): Promise<unknown>;
+    setLocked(locked: boolean): Promise<unknown>;
+    delete(): Promise<unknown>;
+}
+
+/** The parts of a channel the directory posts to; a discord.js text channel fits. */
+export interface DirectoryChannel extends DirectoryTarget {
+    threads: {
+        create(options: { name: string; autoArchiveDuration?: number }): Promise<DirectoryThread>;
+        fetch(id: string): Promise<DirectoryThread | null>;
+    };
+}
+
+/** A week, the longest Discord lets a thread sit before it archives itself. */
+const THREAD_ARCHIVE_MINUTES = 10080;
 
 /** One message's content. */
 interface Payload {
@@ -207,9 +233,16 @@ export interface Banner {
  *   > the bio, quoted
  *
  * A message holds 2000 characters, so text past that continues in
- * `followUps`, and a rules file follows in messages of its own after that.
+ * `followUps`. A rules file is not in the post: the directory puts it in the
+ * club's own locked rules thread and the post links there (`rulesThread`);
+ * its text, split into messages, is `rulesFile`.
  */
-export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Banner | null): Payload & { followUps: string[] } {
+export function clubCard(
+    club: TrackedCircle,
+    staff: StaffMentions,
+    banner: Banner | null,
+    rulesThread: string | null = null,
+): Payload & { followUps: string[]; rulesFile: string[] } {
     const files: AttachmentBuilder[] = [];
     if (banner) files.push(new AttachmentBuilder(Buffer.from(banner.data), { name: bannerFileName(club.id, banner.fileName) }));
 
@@ -223,13 +256,14 @@ export function clubCard(club: TrackedCircle, staff: StaffMentions, banner: Bann
     if (club.rules) {
         lines.push('', isLink(club.rules) ? `[Link to ${club.name} Goals/Rules](${club.rules})` : `**Rules**\n${club.rules}`);
     }
-    if (club.rulesFile) lines.push('', '**Rules and goals**: in the messages below.');
+    if (club.rulesFile) lines.push('', rulesThread ? `[Link to ${club.name} Goals/Rules](${rulesThread})` : `**Rules and goals**: in the ${club.name} Goals/Rules thread.`);
     if (club.bio) lines.push('', club.bio.split('\n').map((l) => `> ${l}`).join('\n'));
 
     const [content = '', ...overflow] = splitByLines(lines.join('\n'), MESSAGE_LIMIT);
-    // A rules file as plain text, so all of its Markdown renders.
-    const rulesFile = club.rulesFile ? splitByLines(`## ${club.name}: rules and goals\n${club.rulesFile}`, MESSAGE_LIMIT) : [];
-    return { content, embeds: [], files, followUps: [...overflow, ...rulesFile] };
+    // A rules file as plain text, so all of its Markdown renders. The
+    // directory posts it in the club's rules thread (`rulesThread`).
+    const rulesFile = club.rulesFile ? splitByLines(club.rulesFile, MESSAGE_LIMIT) : [];
+    return { content, embeds: [], files, followUps: overflow, rulesFile };
 }
 
 /** One message after a club's post: its overflow, or a piece of its rules file. */
@@ -249,14 +283,38 @@ export function howToApply(): string {
 }
 
 /** A message link. */
-function jumpLink(guildId: string, channelId: string, messageId: string): string {
-    return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
+function jumpLink(guildId: string, channelId: string, messageId?: string): string {
+    return `https://discord.com/channels/${guildId}/${channelId}${messageId ? `/${messageId}` : ''}`;
 }
 
-/** A directory message: its layout key, and how to build it once earlier messages' IDs are known. */
+/**
+ * A directory message: its layout key, where it goes (`main`, the channel,
+ * or a rank group's thread), and how to build it once the IDs of the
+ * messages and threads before it are known.
+ */
 interface Part {
     key: string;
+    /** `main`, a rank group (its thread), or `rules:<club id>` (that club's rules thread). */
+    place: string;
     build(ids: Map<string, string>): Payload;
+}
+
+/**
+ * A thread the directory opens before the messages placed in it: one per
+ * rank group, and one per club with a rules file. A locked thread takes
+ * posts only from the bot (and moderators), so a club's rules thread changes
+ * only when its staff upload a new file in `/club profile`.
+ */
+interface ThreadPart {
+    key: string;
+    place: string;
+    name: string;
+    locked?: boolean;
+}
+
+/** The layout key of a part or thread. */
+function layoutKey(part: Part | ThreadPart): string {
+    return 'name' in part ? part.key : `${part.place}|${part.key}`;
 }
 
 /** Current members on uma.moe; null when the club is not tracked or has no data yet. */
@@ -294,54 +352,67 @@ export interface DirectoryResult {
 }
 
 /** The directory's messages for a guild, in order. */
-async function directoryParts(guild: DirectoryGuild, channelId: string): Promise<{ parts: Part[]; listed: number; untiered: string[] }> {
+async function directoryParts(guild: DirectoryGuild): Promise<{ parts: (Part | ThreadPart)[]; listed: number; untiered: string[] }> {
     const all = await prisma.trackedCircle.findMany({ where: { guildId: guild.id }, include: { banner: true }, orderBy: { name: 'asc' } });
     const linkable = await guildClubs(guild.id);
     const membersLoaded = await loadMembers(guild);
     const untiered = all.filter((c) => rankGroup(c.rank) === null).map((c) => c.name);
 
-    const parts: Part[] = [];
-    const sections: { group: RankGroup; clubs: { key: string; name: string }[] }[] = [];
+    const parts: (Part | ThreadPart)[] = [];
+    // First a locked rules thread for each listed club with a rules file, so
+    // its post can link there (as Spica's linked "Spica Goals/Rules").
+    for (const club of all.filter((c) => rankGroup(c.rank) !== null && c.rulesFile)) {
+        const place = `rules:${club.id}`;
+        parts.push({ key: `thread:${place}`, place, name: `${club.name} Goals/Rules`.slice(0, 100), locked: true });
+        splitByLines(club.rulesFile!, MESSAGE_LIMIT).forEach((chunk, i) => parts.push({ key: `part:${i + 1}`, place, build: () => rulesMessage(chunk) }));
+    }
+
+    // One thread per rank group, as the old directory had one per tier: the
+    // heading, each club's post, then a link to each post in the thread.
     let listed = 0;
     for (const group of GROUP_ORDER) {
         const clubs = all.filter((c) => rankGroup(c.rank) === group);
         if (clubs.length === 0) continue;
-        parts.push({ key: `group:${group}`, build: () => ({ content: `## __Current ${GROUPS[group].label} Clubs__`, embeds: [], files: [] }) });
-        const section = { group, clubs: [] as { key: string; name: string }[] };
+        parts.push({ key: `thread:${group}`, place: group, name: GROUPS[group].label });
+        parts.push({ key: 'heading', place: group, build: () => ({ content: `## __Current ${GROUPS[group].label} Clubs__`, embeds: [], files: [] }) });
+        const posts: { key: string; name: string }[] = [];
         for (const club of clubs) {
             const staff = await clubStaff(club, linkable, guild, membersLoaded);
             const key = `club:${club.id}`;
-            const card = clubCard(club, staff, club.banner);
-            parts.push({ key, build: () => card });
-            // Overflow and a rules file follow the post in messages of their own.
-            card.followUps.forEach((chunk, i) => parts.push({ key: `${key}:rules:${i + 1}`, build: () => rulesMessage(chunk) }));
-            section.clubs.push({ key, name: club.name });
+            const rulesThread = `thread:rules:${club.id}`;
+            const card = (ids: Map<string, string>) => clubCard(club, staff, club.banner, ids.has(rulesThread) ? jumpLink(guild.id, ids.get(rulesThread)!) : null);
+            parts.push({ key, place: group, build: card });
+            // A post too long for one message continues in the next.
+            card(new Map()).followUps.forEach((_, i) => parts.push({ key: `${key}:more:${i + 1}`, place: group, build: (ids) => rulesMessage(card(ids).followUps[i] ?? '') }));
+            posts.push({ key: `${group}|${key}`, name: club.name });
             listed += 1;
         }
-        sections.push(section);
+        parts.push({
+            key: 'index',
+            place: group,
+            build: (ids) => {
+                const thread = ids.get(`thread:${group}`) ?? '';
+                const links = posts.map((c) => (ids.has(c.key) ? `[${c.name}](${jumpLink(guild.id, thread, ids.get(c.key))})` : c.name));
+                return { content: `${'-'.repeat(88)}\n__**Directory**__\n${links.join('\n')}`, embeds: [], files: [] };
+            },
+        });
     }
-    // After the posts, as in the old directory: a rule, then a link to each.
-    parts.push({
-        key: 'index',
-        build: (ids) => {
-            const links = sections.flatMap((s) => s.clubs.map((c) => (ids.has(c.key) ? `[${c.name}](${jumpLink(guild.id, channelId, ids.get(c.key)!)})` : c.name)));
-            return { content: `${'-'.repeat(88)}\n__**Directory**__\n${links.length > 0 ? links.join('\n') : 'No clubs are listed yet.'}`, embeds: [], files: [] };
-        },
-    });
-    // What each group means, one box each, as the old directory opened with.
+    // In the channel itself, under the threads: what each group means, a box
+    // each, how to apply, and the poster.
     parts.push({
         key: 'groups',
+        place: 'main',
         build: () => ({
             embeds: GROUP_ORDER.map((g) => new EmbedBuilder().setColor(GROUPS[g].color).setTitle(GROUPS[g].title).setDescription(GROUPS[g].blurb)),
             files: [],
         }),
     });
-    parts.push({ key: 'apply', build: () => ({ content: howToApply(), embeds: [], files: [] }) });
+    parts.push({ key: 'apply', place: 'main', build: () => ({ content: howToApply(), embeds: [], files: [] }) });
     // The poster also carries the hand-written JP clubs, so it is posted even
     // when no tracked club is listed.
     if (listed > 0 || JP_SECTION.clubs.length > 0) {
         const poster = new AttachmentBuilder(await renderClubPoster(await posterClubs(all), { updatedAt: new Date(), extra: [JP_SECTION] }), { name: 'clubs.jpg' });
-        parts.push({ key: 'poster', build: () => ({ embeds: [], files: [poster] }) });
+        parts.push({ key: 'poster', place: 'main', build: () => ({ embeds: [], files: [poster] }) });
     }
     return { parts, listed, untiered };
 }
@@ -360,58 +431,92 @@ export async function publishDirectory(
     oldChannel: (id: string) => Promise<DirectoryChannel | null> = async () => null,
     { force = false }: { force?: boolean } = {},
 ): Promise<DirectoryResult> {
-    const { parts, listed, untiered } = await directoryParts(guild, channel.id);
-    const layout = parts.map((p) => p.key);
+    const { parts, listed, untiered } = await directoryParts(guild);
+    const layout = parts.map(layoutKey);
     const existing = await prisma.clubDirectory.findUnique({ where: { guildId: guild.id } });
+
+    const send = (to: DirectoryTarget, p: Payload) => to.send({ ...(p.content ? { content: p.content } : {}), embeds: p.embeds, files: p.files, allowedMentions: NO_PINGS });
+    const edit = async (to: DirectoryTarget, id: string, p: Payload) =>
+        (await to.messages.fetch(id)).edit({ content: p.content ?? '', embeds: p.embeds, files: p.files, attachments: [], allowedMentions: NO_PINGS });
 
     if (existing && existing.channelId === channel.id && sameList(existing.layout, layout)) {
         const ids = new Map(layout.map((key, i) => [key, existing.messageIds[i]!]));
         const signatures: string[] = [];
+        const threads = new Map<string, DirectoryThread>();
         try {
             for (const [i, part] of parts.entries()) {
+                if ('name' in part) {
+                    signatures.push(part.name);
+                    continue;
+                }
                 const p = part.build(ids);
                 const signature = payloadSignature(p);
                 signatures.push(signature);
                 if (!force && existing.signatures[i] === signature) continue;
-                const message = await channel.messages.fetch(existing.messageIds[i]!);
-                await message.edit({ content: p.content ?? '', embeds: p.embeds, files: p.files, attachments: [], allowedMentions: NO_PINGS });
+                let target: DirectoryTarget = channel;
+                if (part.place !== 'main') {
+                    const threadId = ids.get(`thread:${part.place}`)!;
+                    // (a rules thread is locked; the bot may still edit in it)
+                    let thread = threads.get(threadId);
+                    if (!thread) {
+                        thread = (await channel.threads.fetch(threadId)) ?? undefined;
+                        if (!thread) throw new Error('thread gone');
+                        // A quiet thread archives itself after a week; its messages cannot be edited until it is opened again.
+                        if (thread.archived) await thread.setArchived(false);
+                        threads.set(threadId, thread);
+                    }
+                    target = thread;
+                }
+                await edit(target, existing.messageIds[i]!, p);
             }
             await prisma.clubDirectory.update({ where: { guildId: guild.id }, data: { layout, messageIds: existing.messageIds, signatures } });
             return { mode: 'edited', listed, untiered };
         } catch {
-            // A message was deleted by hand, or cannot be edited: post afresh.
+            // A message or thread was deleted by hand, or cannot be edited: post afresh.
         }
     }
 
     if (existing) {
+        // Deleting a thread takes its messages with it; the channel's own are deleted one by one.
         const from = existing.channelId === channel.id ? channel : await oldChannel(existing.channelId);
-        for (const id of existing.messageIds) {
-            await from?.messages
-                .fetch(id)
-                .then((m) => m.delete())
-                .catch(() => undefined);
+        for (const [i, key] of existing.layout.entries()) {
+            const id = existing.messageIds[i]!;
+            if (key.startsWith('thread:')) {
+                await from?.threads
+                    .fetch(id)
+                    .then((t) => t?.delete())
+                    .catch(() => undefined);
+            } else if (!key.includes('|') || key.startsWith('main|')) {
+                await from?.messages
+                    .fetch(id)
+                    .then((m) => m.delete())
+                    .catch(() => undefined);
+            }
         }
     }
 
     const ids = new Map<string, string>();
     const messageIds: string[] = [];
     const signatures: string[] = [];
+    const threads = new Map<string, DirectoryThread>();
     for (const part of parts) {
+        if ('name' in part) {
+            const thread = await channel.threads.create({ name: part.name, autoArchiveDuration: THREAD_ARCHIVE_MINUTES });
+            threads.set(part.place, thread);
+            ids.set(part.key, thread.id);
+            messageIds.push(thread.id);
+            signatures.push(part.name);
+            continue;
+        }
         const p = part.build(ids);
-        const sent = await channel.send({ ...(p.content ? { content: p.content } : {}), embeds: p.embeds, files: p.files, allowedMentions: NO_PINGS });
-        ids.set(part.key, sent.id);
+        const sent = await send(part.place === 'main' ? channel : threads.get(part.place)!, p);
+        ids.set(layoutKey(part), sent.id);
         messageIds.push(sent.id);
         signatures.push(payloadSignature(p));
     }
-    // A message that links to later ones (the index, first) was posted before
-    // they existed; now that every ID is known, fill those links in.
-    for (const [i, part] of parts.entries()) {
-        const p = part.build(ids);
-        const signature = payloadSignature(p);
-        if (signature === signatures[i]) continue;
-        const message = await channel.messages.fetch(messageIds[i]!);
-        await message.edit({ content: p.content ?? '', embeds: p.embeds, files: p.files, attachments: [], allowedMentions: NO_PINGS });
-        signatures[i] = signature;
+    // Rules threads are locked once filled, so only the bot (and moderators) post there.
+    for (const part of parts) {
+        if ('name' in part && part.locked) await threads.get(part.place)?.setLocked(true).catch(() => undefined);
     }
     await prisma.clubDirectory.upsert({
         where: { guildId: guild.id },
