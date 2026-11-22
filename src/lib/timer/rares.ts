@@ -484,6 +484,33 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
         .filter((t) => !resting.has(t));
 }
 
+/**
+ * Wakes a trainer's sets that auto-off turned off (`<set>:all`, not kept)
+ * once they gain a line the trainer has not found (a `Special.opensAt`
+ * passing, e.g. Matikanefukukitaru in Set 1 at TENT_OPENS). The set is on
+ * again and resting: found lines stay out, the new line is live, and
+ * finding it completes the set again (and turns it off). Returns the sets
+ * woken. Called before each ping and the Boosts view.
+ */
+export async function wakeForNewLines(guildId: string, discordUserId: string, now: Date = new Date()): Promise<string[]> {
+    const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } } });
+    if (!row) return [];
+    const auto = row.autoOffSets ?? [];
+    const candidates = SPECIAL_SETS.filter((s) => auto.includes(`${s.id}:all`) && !auto.includes(`${s.id}:kept`) && row.disabledSets.includes(s.id));
+    if (candidates.length === 0) return [];
+    const found = await foundSpecialIds(guildId, discordUserId);
+    const woken = candidates.filter((s) => s.openers.some((o) => !o.extra && isOpenAt(o, now) && !found.has(o.id))).map((s) => s.id);
+    if (woken.length === 0) return [];
+    await prisma.timerUserSettings.update({
+        where: { guildId_discordUserId: { guildId, discordUserId } },
+        data: {
+            disabledSets: row.disabledSets.filter((id) => !woken.includes(id)),
+            autoOffSets: [...new Set([...auto.filter((k) => !woken.some((id) => k === `${id}:all`)), ...woken])],
+        },
+    });
+    return woken;
+}
+
 /** True when a set is resting for a trainer: auto-off with extras left, not turned back on. */
 export function isResting(setId: string, autoOffSets: readonly string[]): boolean {
     return autoOffSets.includes(setId) && !autoOffSets.includes(`${setId}:all`) && !autoOffSets.includes(`${setId}:kept`);

@@ -13,7 +13,7 @@ import { prisma } from '../../db/prisma';
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, grantSecondLove, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { applyOutcome, chooseOpener, closedSpecialsFor, completionNotice, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
+import { applyOutcome, chooseOpener, closedSpecialsFor, wakeForNewLines, completionNotice, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances, fortuneBaseAdjust } from './boosts';
 import { tentIntroDue, tentIntroShown, tentIntroText, tentUnlockNotice } from './fortune';
 import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
@@ -175,6 +175,8 @@ async function processExpiredTimers(client: Client): Promise<void> {
             if (channel?.isTextBased() && 'send' in channel) {
                 // The opener is picked once, from the sets the trainer has on,
                 // so the line posted is the one recorded.
+                // A set auto-off turned off wakes (resting) when it gains a line they have not found.
+                await wakeForNewLines(timer.guildId, timer.discordUserId).catch((e) => console.warn('Timer: waking sets failed:', e));
                 const settings = await getUserSettings(timer.guildId, timer.discordUserId);
                 const lockedSets = await lockedSetsFor(timer.guildId, timer.discordUserId);
                 // Specials that wait on others (Special.after) stay out of the pool and the boosts until then.

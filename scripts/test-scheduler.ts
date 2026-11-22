@@ -857,6 +857,26 @@ async function main() {
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: AG, discordUserId: AU, specialId: 'guest.teio' } });
         check('usual pool: a locked guest stays out (no Palmer, no Helios)', (await rares.trainerPool(AG, 'nobody', openers.rarePoolFor([]))).some((t) => guestTexts5.includes(t)), false);
     }
+    // A finished Set 1 wakes when Matikanefukukitaru opens (TENT_OPENS): resting, her line live (owner, 2026-11-22).
+    {
+        const WG = `test-wake-${Date.now()}`;
+        const before = new Date(openers.TENT_OPENS.getTime() - 60_000);
+        const after = new Date(openers.TENT_OPENS.getTime() + 60_000);
+        const set1Lines = openers.SPECIAL_SETS[0]!.openers.filter((o) => !o.extra && openers.isOpenAt(o, before));
+        for (const o of set1Lines) await rares.recordRareOpener(WG, 'w1', o.text);
+        await prisma.timerUserSettings.create({ data: { guildId: WG, discordUserId: 'w1', disabledSets: ['set1'], autoOffSets: ['set1', 'set1:all'] } });
+        check('wake: nothing new before the tent opens', await rares.wakeForNewLines(WG, 'w1', before), []);
+        check('wake: Set 1 wakes once Fukukitaru opens', await rares.wakeForNewLines(WG, 'w1', after), ['set1']);
+        const woke = await usA.getUserSettings(WG, 'w1');
+        check('wake: on and resting (not kept), no longer done', [woke.disabledSets, woke.autoOffSets?.includes('set1'), woke.autoOffSets?.includes('set1:all'), rares.isResting('set1', woke.autoOffSets ?? [])], [[], true, false, true]);
+        check('wake: only the new line is live', await rares.trainerPool(WG, 'w1', openers.rarePoolFor([], ['online-sensations', 'mejiro-estate'], after)), [openers.specialById('set1.fukukitaru')!.text]);
+        check('wake: once is enough', await rares.wakeForNewLines(WG, 'w1', after), []);
+        // A set the trainer turned back on themselves (kept) is never touched.
+        await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: WG, discordUserId: 'w1' } }, data: { disabledSets: ['set1'], autoOffSets: ['set1', 'set1:all', 'set1:kept'] } });
+        check('wake: a kept set stays as the trainer left it', await rares.wakeForNewLines(WG, 'w1', after), []);
+        await prisma.rareOpenerHit.deleteMany({ where: { guildId: WG } });
+        await prisma.timerUserSettings.deleteMany({ where: { guildId: WG } });
+    }
     // Per-line boosts (owner, 2026-11-19): Ramonu's footwork boost (+5%, any Mejiro line) on a resting Estate is a ninth of it, on Ramonu only.
     {
         const footwork = openers.outcomeBoostByKey('mejiro.ramonu:footwork')!;

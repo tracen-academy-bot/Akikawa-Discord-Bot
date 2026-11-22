@@ -4,6 +4,18 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-22 — Finished sets wake for new lines (the tent's Fukukitaru)
+
+- Found in the Set 4 review: Matikanefukukitaru is a new Set 1 line opening
+  at TENT_OPENS, and the tent needs her. Anyone who finished Set 1 had it
+  turned off by auto-off (`set1:all`), so she could never come up and the
+  tent could never unlock for them.
+- `wakeForNewLines` (rares.ts), run before each ping and the Boosts view:
+  a set auto-off turned off (not kept) that now has an open line the trainer
+  has not found is turned back on, resting (`<set>` kept, `<set>:all`
+  dropped). Found lines stay out; the new line is live; finding it completes
+  the set again, with its notice, and turns it off.
+
 ## 2026-11-21 — #club-bio: the poster closes the directory, and is redesigned
 
 Asked: the poster should be part of the #club-bio directory, at the bottom
