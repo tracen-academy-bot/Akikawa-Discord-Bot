@@ -968,7 +968,9 @@ async function handleList(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
     
     const clubs = await prisma.trackedCircle.findMany({ where: { guildId: interaction.guildId! }, orderBy: { name: 'asc' } });
-    const buffer = await renderClubList(await Promise.all(clubs.map(clubSummary)));
+    // The JP clubs, written by hand (uma.moe does not track them), come last.
+    const jp = JP_SECTION.clubs.map((c) => ({ id: c.id, name: c.name, rank: c.rank, headcount: c.headcount, quotaText: c.quotaText, dailyRequirement: c.dailyRequirement }));
+    const buffer = await renderClubList(await Promise.all(clubs.map(clubSummary)), { extra: [{ label: JP_SECTION.title, clubs: jp }] });
     const attachment = new AttachmentBuilder(buffer, { name: 'club-directory.png' });
     await interaction.editReply({ files: [attachment] });
 }
