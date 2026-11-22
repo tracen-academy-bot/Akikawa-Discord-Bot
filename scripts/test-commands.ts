@@ -943,6 +943,9 @@ async function main() {
             get archived() {
                 return rec.threads.get(tid)?.archived ?? false;
             },
+            get locked() {
+                return rec.threads.get(tid)?.locked ?? false;
+            },
             setArchived: async (archived: boolean) => void (rec.threads.get(tid)!.archived = archived),
             setLocked: async (locked: boolean) => void (rec.threads.get(tid)!.locked = locked),
             delete: async () => {
@@ -989,7 +992,7 @@ async function main() {
     check('/club directory posts it', dirPostedText.startsWith('Posted the directory in <#c-directory> with 1 club.'), true);
     check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no expected rank:') && dirPostedText.includes('**Otherrose**'), true);
     const firstLine = (m: { place: string; payload: DirSent }) => `${m.place}: ${m.payload.content?.split('\n')[0] ?? ''}|${m.payload.embeds.length}|${m.payload.files.length}`;
-    check('a thread per rank group, named after it', [...dirA.rec.threads.values()].map((t) => t.name), ['A']);
+    check('a thread per rank group, named after it, locked', [...dirA.rec.threads.values()].map((t) => [t.name, t.locked]), [['A', true]]);
     check('in the thread: heading, post, Directory; then in the channel: group boxes, how to apply, poster', dirA.rec.sent.map(firstLine), [
         'c-directory-t1: ## __Current A Clubs__|0|0',
         'c-directory-t1: **\u2605 \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u2605**|0|1',
@@ -1002,6 +1005,8 @@ async function main() {
         `${'-'.repeat(88)}\n__**Directory**__\n[Checkrose](https://discord.com/channels/${GUILD}/c-directory-t1/c-directory-m2)`);
     check('posted with its links: nothing needs editing after', dirA.rec.edits, []);
     check('a box per rank group', dirA.rec.sent[3]?.payload.embeds.map((e) => e.toJSON().title), ['S [Competitive]', 'A+ [Semi Competitive+]', 'A [Semi-Competitive]', 'B+ [Semi-Casual]', 'Casual']);
+    check("a box's title links to its group's thread; a group with no clubs has no link", dirA.rec.sent[3]?.payload.embeds.map((e) => (e.toJSON() as { url?: string }).url ?? null),
+        [null, null, `https://discord.com/channels/${GUILD}/c-directory-t1`, null, null]);
     const posterFile = dirA.rec.sent[5]?.payload.files[0] as { name?: string; attachment?: Buffer } | undefined;
     check('the poster is last, a JPEG', [posterFile?.name, posterFile?.attachment?.subarray(0, 3).toString('hex')], ['clubs.jpg', 'ffd8ff']);
     check('nothing in it pings', dirA.rec.sent.every((m) => JSON.stringify(m.payload.allowedMentions?.parse) === '[]'), true);
@@ -1035,6 +1040,11 @@ async function main() {
     check('Checkrose links its own rules, so it gets none', [...dirA.rec.threads.values()].some((t) => t.name === 'Checkrose Goals/Rules'), false);
     const otherRules = (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: other.id } })).rulesThreadId;
     check('the rules thread opens by saying who may post', dirA.inThread('Otherrose Goals/Rules').map((p) => p.content), [directory.rulesThreadOpening('Otherrose')]);
+    check('and is locked', dirA.rec.threads.get(otherRules!)?.locked, true);
+    // Unlocked by hand: the next refresh locks it again.
+    dirA.rec.threads.get(otherRules!)!.locked = false;
+    await directory.refreshDirectory(FAKE_GUILD);
+    check('a refresh locks a rules thread found unlocked', dirA.rec.threads.get(otherRules!)?.locked, true);
     check("the club's post links to it", dirA.inThread('S').find((p) => p.content?.startsWith('**\u2605'))?.content?.includes(`[Link to Otherrose Goals/Rules](https://discord.com/channels/${GUILD}/${otherRules})`), true);
     await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true });
     check('a repost keeps the rules thread and what is in it', [(await prisma.trackedCircle.findUniqueOrThrow({ where: { id: other.id } })).rulesThreadId, dirA.rec.threads.has(otherRules!)], [otherRules, true]);

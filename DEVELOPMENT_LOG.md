@@ -268,6 +268,26 @@ and its own Directory list. Spica's rules were their own thread too
   Manage Threads (to reopen archived threads) and Manage Messages (to
   remove posts in rules threads) in the directory channel. The guard needs
   the Guild Messages intent, which the bot's fuller intent modes have.
+- Then: "lock is fine... just lock and still have guard". Every thread the
+  directory makes (group and rules) is locked when made, and a refresh
+  locks any rules thread it finds unlocked (group threads, when it next
+  edits in them). Locked threads stay readable to all; only members with
+  Manage Threads (and the bot) post there, so club staff without it cannot
+  post in their rules thread. Threads the bot did not make (Spica's) are
+  not locked, only guarded.
+- The group boxes' titles link to their group's thread, as the old tier
+  boxes' titles did ("did you forget to make the top lines links").
+- Poster columns: the live poster put S, A+ and A (9 clubs) left and the
+  rest (5) right, since `splitColumns` kept each column's groups in one
+  run. Now each group goes to whichever column is shorter so far; on the
+  live clubs that is S, A, JP | A+, B+, Casual, level to the pixel.
+- `/club list` (`renderClubList`) uses the same two columns: with more than
+  one rank group, groups go to the shorter column (`splitColumns`, imported
+  from the poster), worked out from the live clubs each time. On the live
+  clubs: S, A | A+, B+, Casual, 1960x724 instead of 1000 wide and tall.
+  One group stays a single column. It also shows the JP clubs ("where JP"), as a
+  "JP" group after the rank groups, from `jpClubs.ts`; on the live clubs
+  that makes S, A, JP | A+, B+, Casual, level.
 - Symbols from the screenshots in the migration: First and Rose 🤍, Cosmos
   ☆, Primrose, Alkes, Canopus, Altair, Ascella, Lily and Umbra ୨୧; Spica
   and Capella ★ (the default). Tempest was not in them.
