@@ -253,9 +253,11 @@ bottom: a thread per expected rank (S, A+, A, B+, Casual; S+ counts as S),
 each holding its clubs' posts (a plain message with banner, staff,
 requirements, rules and bio, like the server's old hand-made directory) and
 a "Directory" list of links; then a box per group, how to apply, and the
-club poster. A club's uploaded rules file goes in its own locked "Goals/Rules"
-thread. The bot needs Create Public Threads, Send Messages in Threads and
-Manage Threads in that channel. The poster is last because
+club poster. Each club also gets a "<Club> Goals/Rules" thread (unless its
+Rules field already links to one), kept across reposts; only the club's
+staff and Club Managers may post there, and the bot removes anyone else's
+message. The bot needs Create Public Threads, Send Messages in Threads,
+Manage Threads and Manage Messages in that channel. The poster is last because
 Discord opens a channel at its newest message. It is a landscape JPEG: a
 banner, then the same groups in two columns, one row per club with expected
 rank, quota (as set and per day), members and open spots. JP clubs, which

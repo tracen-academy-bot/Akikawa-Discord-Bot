@@ -165,19 +165,30 @@ and its own Directory list. Spica's rules were their own thread too
 - A thread per rank group, named "S", "A+", "A", "B+", "Casual": the
   heading, each club's post, then the Directory list of that thread's posts.
 - The channel itself holds the group boxes, how to apply, and the poster.
-- A club with a rules file gets a locked "<Club> Goals/Rules" thread with
-  the file in it, and its post links there. Discord has no per-thread
-  posting permission (threads inherit the channel's); asked for a thread
-  "only they can type" in, the nearest is a locked thread the bot writes,
-  fed from the club's own `/club profile` upload, which only its staff can
-  use. Rules files are text, so pictures (Spica's has one) cannot go in.
-- Layout: threads are stored as `thread:<place>` with the thread ID,
-  messages as `<place>|<key>`. A repost deletes the old threads (their
-  messages go with them) and the channel's own messages. A thread archives
-  after a week without new messages; an edit reopens it first. Rules
-  threads are locked after they are filled.
-- Needs the bot to have Create Public Threads, Send Messages in Threads and
-  Manage Threads (to lock and reopen) in the directory channel.
+- Club rules threads: "a thread only they can type" in. Discord has no
+  per-thread posting permission (threads inherit the channel's). A locked,
+  bot-written thread was tried first; the user preferred "let humans post
+  there, just set restrictions". So each listed club whose Rules field is
+  not already a link gets a "<Club> Goals/Rules" thread, made once and kept
+  across reposts (`TrackedCircle.rulesThreadId`, migration
+  `20261122010000_club_rules_thread`). Its first message says who may post.
+  `src/lib/clubRulesThreads.ts` (`guardRulesThread`, on every message)
+  deletes a post there by anyone but the club's staff or a Club Manager,
+  and DMs them why. A club whose Rules link points at a thread (Spica's
+  "Spica Goals/Rules") gets no new thread; that linked thread is guarded.
+  Rules files post after the club's post again.
+- Layout: group threads are stored as `thread:<place>` with the thread ID,
+  messages as `<place>|<key>`. A repost deletes the group threads (their
+  messages go with them) and the channel's own messages; rules threads are
+  not in the layout, so they survive. A missing rules thread is made only
+  on a fresh post, before everything else, so the poster stays last. A
+  thread archives after a week without new messages; an edit reopens it
+  first. Moving the directory leaves the old rules threads in the old
+  channel, unguarded, and opens new ones.
+- Needs the bot to have Create Public Threads, Send Messages in Threads,
+  Manage Threads (to reopen archived threads) and Manage Messages (to
+  remove posts in rules threads) in the directory channel. The guard needs
+  the Guild Messages intent, which the bot's fuller intent modes have.
 - Symbols from the screenshots in the migration: First and Rose 🤍, Cosmos
   ☆, Primrose, Alkes, Canopus, Altair, Ascella, Lily and Umbra ୨୧; Spica
   and Capella ★ (the default). Tempest was not in them.

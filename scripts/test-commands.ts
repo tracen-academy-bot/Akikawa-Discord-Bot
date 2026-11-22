@@ -823,7 +823,7 @@ async function main() {
     const afterRules = await reload();
     check('the rules file is stored as text, without the byte-order mark', [afterRules.rulesFile, afterRules.rulesFileName], [SHORT_RULES, 'Checkrose rules.md']);
     const rulesPost = withRules.find((o) => o.kind === 'followUp');
-    check('the post points to its rules thread', rulesPost?.content?.includes('**Rules and goals**: in the Checkrose Goals/Rules thread.'), true);
+    check('the post points to the rules below it', rulesPost?.content?.includes('**Rules and goals**: in the messages below.'), true);
     check('the rules follow as their own message, as Markdown',
         withRules.filter((o) => o.kind === 'followUp').slice(1).map((o) => o.content), [SHORT_RULES]);
     check('a banner can come in the same upload', rulesPost?.files, 1);
@@ -1029,8 +1029,15 @@ async function main() {
     await prisma.trackedCircle.update({ where: { id: other.id }, data: { rank: 'S' } });
     const dirRegrouped = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
     check('a new club reposts the directory: old thread and channel messages go', [dirRegrouped.mode, dirRegrouped.listed, dirA.rec.deleted, dirA.rec.live.size],
-        ['posted', 2, ['c-directory-t1', 'c-directory-m4', 'c-directory-m5', 'c-directory-m6'], 9]);
-    check('with a thread per rank group, highest first', [...dirA.rec.threads.values()].map((t) => t.name), ['S', 'A']);
+        ['posted', 2, ['c-directory-t1', 'c-directory-m4', 'c-directory-m5', 'c-directory-m6'], 10]);
+    check('Otherrose (no rules link) gets its Goals/Rules thread first, then a thread per rank group, highest first',
+        [...dirA.rec.threads.values()].map((t) => t.name), ['Otherrose Goals/Rules', 'S', 'A']);
+    check('Checkrose links its own rules, so it gets none', [...dirA.rec.threads.values()].some((t) => t.name === 'Checkrose Goals/Rules'), false);
+    const otherRules = (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: other.id } })).rulesThreadId;
+    check('the rules thread opens by saying who may post', dirA.inThread('Otherrose Goals/Rules').map((p) => p.content), [directory.rulesThreadOpening('Otherrose')]);
+    check("the club's post links to it", dirA.inThread('S').find((p) => p.content?.startsWith('**\u2605'))?.content?.includes(`[Link to Otherrose Goals/Rules](https://discord.com/channels/${GUILD}/${otherRules})`), true);
+    await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true });
+    check('a repost keeps the rules thread and what is in it', [(await prisma.trackedCircle.findUniqueOrThrow({ where: { id: other.id } })).rulesThreadId, dirA.rec.threads.has(otherRules!)], [otherRules, true]);
     // A message deleted by hand: posted afresh too.
     dirA.rec.live.delete([...dirA.rec.live.keys()][1]!);
     check('an automatic refresh with nothing changed does not look', (await directory.publishDirectory(FAKE_GUILD, dirA.channel)).mode, 'edited');
@@ -1038,7 +1045,9 @@ async function main() {
 
     const dirB = dirChannel('c-directory-2');
     const dirMoveText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory-2' } }));
-    check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, dirA.rec.live.size, dirA.rec.threads.size], [true, 9, 0, 0]);
+    // The old channel keeps only the rules thread, which people may have written in; the new one gets its own.
+    check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, [...dirA.rec.threads.values()].map((t) => t.name)],
+        [true, 10, ['Otherrose Goals/Rules']]);
     check('/club directory with no channel refreshes it where it is',
         lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })).startsWith('Updated the directory in <#c-directory-2>'), true);
 
@@ -1049,15 +1058,36 @@ async function main() {
     await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: null } });
     await directory.refreshDirectory(FAKE_GUILD);
 
-    // A rules file goes in the club's own locked thread, and the post links there.
+    // A rules file posts after the club's post, in messages of its own.
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: LONG_RULES.trim(), rulesFileName: 'rules.md' } });
     await directory.refreshDirectory(FAKE_GUILD);
-    const rulesThread = [...dirB.rec.threads.entries()].find(([, v]) => v.name === 'Checkrose Goals/Rules');
-    check('a club with a rules file gets a locked rules thread', rulesThread?.[1].locked, true);
-    check('all of the rules are posted in it, nothing else', dirB.inThread('Checkrose Goals/Rules').map((p) => p.content).join('\n'), LONG_RULES.trim());
-    check('each piece fits a message', dirB.inThread('Checkrose Goals/Rules').every((p) => (p.content?.length ?? 0) <= 2000), true);
-    check("the club's post links to its rules thread",
-        dirB.inThread('A').find((p) => p.content?.startsWith('**\u2605'))?.content?.includes(`[Link to Checkrose Goals/Rules](https://discord.com/channels/${GUILD}/${rulesThread?.[0]})`), true);
+    const inA = dirB.inThread('A');
+    const postAt = inA.findIndex((p) => p.content?.startsWith('**\u2605 \u2500\u2500\u2500 Checkrose'));
+    const indexAt = inA.findIndex((p) => p.content?.startsWith('-----'));
+    check('the rules file follows the post, all of it', inA.slice(postAt + 1, indexAt).map((p) => p.content).join('\n'), LONG_RULES.trim());
+
+    // Only a club's staff and Club Managers may post in its rules thread.
+    const { guardRulesThread, linkedChannelId } = await import('../src/lib/clubRulesThreads');
+    // After the move, Otherrose's rules thread is the one in the new channel.
+    const otherRulesNow = (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: other.id } })).rulesThreadId!;
+    const guardLog: string[] = [];
+    const threadPost = (channelId: string, userId: string, opts: { officer?: boolean; bot?: boolean } = {}) => ({
+        guildId: GUILD, channelId, channel: { isThread: () => true },
+        author: { bot: opts.bot ?? false, send: async (t: string) => void guardLog.push(`dm ${userId}: ${t}`) },
+        member: { id: userId, roles: { cache: roleCache(opts.officer ?? false) }, guild: FAKE_GUILD },
+        delete: async () => void guardLog.push(`deleted ${userId}`),
+    });
+    check('an outsider in a rules thread is removed and told why', [await guardRulesThread(threadPost(otherRulesNow, 'u-behind')), guardLog],
+        [true, ['deleted u-behind', "dm u-behind: Only **Otherrose**'s trainers and assistants can post in its Goals/Rules thread, so your message there was removed."]]);
+    check('a Club Manager may post', await guardRulesThread(threadPost(otherRulesNow, 'u-officer', { officer: true })), false);
+    check('bots are left alone', await guardRulesThread(threadPost(otherRulesNow, 'u-bot', { bot: true })), false);
+    check('other threads are not guarded', await guardRulesThread(threadPost('t-elsewhere', 'u-behind')), false);
+    check('a thread link gives the thread ID', [linkedChannelId('https://discord.com/channels/123/456'), linkedChannelId('https://discord.com/channels/123/456/789'), linkedChannelId('https://example.com')], ['456', '456', null]);
+    // A club whose Rules link points at its own thread: that thread is guarded too.
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { rules: 'https://discord.com/channels/123/456' } });
+    check("its staff may post in the thread it links", await guardRulesThread(threadPost('456', 'u-trainer')), false);
+    check('an outsider there is removed', await guardRulesThread(threadPost('456', 'u-behind')), true);
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { rules: RULES } });
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: null, rulesFileName: null } });
 
     await directory.refreshDirectory(FAKE_GUILD);

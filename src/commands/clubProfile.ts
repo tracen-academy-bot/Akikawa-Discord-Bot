@@ -201,13 +201,12 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
     const card = clubCard(updated, staff, updated.banner);
     const group = rankGroup(updated.rank);
     const listed = group ? `listed under **${GROUPS[group].label}**` : 'not listed in the directory (it needs an expected rank, set in `/club admin`)';
-    const more = card.followUps.length + card.rulesFile.length;
+    const more = card.followUps.length;
     const moreNote = more > 0 ? ` It continues in ${more} message${more === 1 ? '' : 's'} after the post.` : '';
     await interaction.editReply({ content: `Saved. **${updated.name}** is ${listed}.${moreNote} Its directory post:` });
     // The post exactly as the directory shows it; nobody is pinged.
     await interaction.followUp({ content: card.content ?? '', files: card.files, allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
-    // Then the rules file, as the club's rules thread in the directory shows it.
-    for (const chunk of [...card.followUps, ...card.rulesFile]) {
+    for (const chunk of card.followUps) {
         await interaction.followUp({ ...rulesMessage(chunk), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
     }
 

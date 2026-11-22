@@ -395,6 +395,9 @@ model TrackedCircle {
     /// The symbol either side of the name in the club's directory post
     /// ("★ ─── Spica ─── ★"). Null shows ★.
     symbol          String?
+    /// The club's "Goals/Rules" thread the directory made, kept across
+    /// reposts. Only the club's staff (and Club Managers) may post in it.
+    rulesThreadId   String?
     /// The club's own description, shown on its directory card.
     bio             String?
     /// The club's rules: text, or a link to a rules post.

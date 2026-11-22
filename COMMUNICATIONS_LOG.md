@@ -36,9 +36,10 @@ Decisions that changed project direction. Newest first.
   poster. Headings stay S/A+/A/B+/Casual. The B+ box text and the
   how-to-apply wording are Claude's drafts, to be checked.
 - The old directory used a thread per tier; the new one uses a thread per
-  rank group. Club rules: "a thread only they can type" in. Discord cannot
-  limit posting per thread, so the bot keeps a locked rules thread per club,
-  written from the club staff's own `/club profile` upload.
+  rank group. Club rules: "a thread only they can type" in, and "let
+  humans post there, just set restrictions". Discord cannot limit posting
+  per thread, so the bot removes posts in a club's Goals/Rules thread from
+  anyone but its staff and Club Managers, and DMs them why.
 
 ---
 
