@@ -8,20 +8,20 @@ import {
     TextInputBuilder,
     TextInputStyle,
 } from 'discord.js';
-import type { ClubTier, TrackedCircle } from '@prisma/client';
+import type { TrackedCircle } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { canManageClubStats, isOfficer, type StaffCandidate } from '../lib/permissions';
 import { errorEmbed } from '../lib/embeds';
 import { guildClubs } from '../lib/clubLinks';
-import { TIERS, TIER_ORDER, effectiveTier, clubCard, clubStaff, loadMembers, refreshDirectory, rulesMessage, type DirectoryGuild } from '../lib/clubDirectory';
+import { GROUPS, rankGroup, clubCard, clubStaff, loadMembers, refreshDirectory, rulesMessage, type DirectoryGuild } from '../lib/clubDirectory';
 
 /**
  * `/club profile`: what a club's directory card says about it.
  *
  * The club's own staff (Trainers and Assistants) and Club Managers edit its
  * bio, rules and banner, and can upload longer rules and goals as a Markdown
- * (.md) or text (.txt) file. Club Managers also set its tier, which places it in
- * the directory (G1 to Debut); a club with no tier is left out. One of three
+ * (.md) or text (.txt) file. Its place in the directory comes from its
+ * expected rank (`/club admin`), not from here. One of three
  * forms, with `/club reports` and `/club admin` (see `club.ts`); the quota is
  * `/club fancount`.
  *
@@ -31,7 +31,7 @@ import { TIERS, TIER_ORDER, effectiveTier, clubCard, clubStaff, loadMembers, ref
 
 const PROFILE_MODAL_PREFIX = 'club:profile:';
 const FIELD = {
-    tier: 'club:profile:tier',
+    symbol: 'club:profile:symbol',
     bio: 'club:profile:bio',
     rules: 'club:profile:rules',
     files: 'club:profile:files',
@@ -40,6 +40,8 @@ const FIELD = {
 
 /** Longest bio and rules. Both fit one card (4096 characters) with room for staff. */
 export const MAX_BIO = 1500;
+/** Longest symbol: room for a couple of emoji, or a custom one's `<:name:id>`. */
+export const MAX_SYMBOL = 40;
 export const MAX_RULES = 1000;
 /** Largest banner, in bytes. It is re-uploaded with every directory refresh. */
 export const MAX_BANNER_BYTES = 8 * 1024 * 1024;
@@ -48,8 +50,6 @@ export const MAX_RULES_FILE_BYTES = 64 * 1024;
 /** Values of the Remove select. */
 const REMOVE_BANNER = 'banner';
 const REMOVE_RULES_FILE = 'rules-file';
-/** Tier select value for "not in the directory". */
-const NO_TIER = 'NONE';
 
 /** True for a modal this module owns. */
 export function isProfileModal(customId: string): boolean {
@@ -57,36 +57,29 @@ export function isProfileModal(customId: string): boolean {
 }
 
 /**
- * Builds the profile form, pre-filled. `full` is the Club Manager form, with
- * the tier. One upload field takes the banner and the rules file, and the
- * Remove list appears only when there is one of them to remove: Discord
- * allows five fields, and the Club Manager form uses all five.
+ * Builds the profile form, pre-filled. `full` marks the Club Manager form;
+ * since the tier went (2026-11-21) it has the same fields as the staff form.
+ * One upload field takes the banner and the rules file, and the Remove list
+ * appears only when there is one of them to remove.
  */
 export function buildProfileModal(club: TrackedCircle, full: boolean, hasBanner: boolean): ModalBuilder {
     const labels: LabelBuilder[] = [];
-    if (full) {
-        labels.push(
-            new LabelBuilder()
-                .setLabel('Tier')
-                .setDescription('Where the club sits in the directory.')
-                .setStringSelectMenuComponent(
-                    new StringSelectMenuBuilder().setCustomId(FIELD.tier).addOptions(
-                        ...TIER_ORDER.map((t) => ({ label: TIERS[t].title, value: t, description: `Estimated ranks: ${TIERS[t].ranks}`, default: club.tier === t })),
-                        { label: 'From expected rank', value: NO_TIER, description: 'G1 for S/S+, G2 for A/A+, G3 for B+, Debut for Casual.', default: club.tier === null },
-                    ),
-                ),
-        );
-    }
     const bio = new TextInputBuilder().setCustomId(FIELD.bio).setStyle(TextInputStyle.Paragraph).setRequired(false).setMaxLength(MAX_BIO);
     if (club.bio) bio.setValue(club.bio);
     const rules = new TextInputBuilder().setCustomId(FIELD.rules).setStyle(TextInputStyle.Paragraph).setRequired(false).setMaxLength(MAX_RULES);
     if (club.rules) rules.setValue(club.rules);
+    const symbol = new TextInputBuilder().setCustomId(FIELD.symbol).setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(MAX_SYMBOL).setPlaceholder('\u2605');
+    if (club.symbol) symbol.setValue(club.symbol);
     labels.push(
         new LabelBuilder().setLabel('Bio').setDescription('What the club is like. Markdown works; one line per point is fine.').setTextInputComponent(bio),
         new LabelBuilder()
             .setLabel('Rules')
             .setDescription('The rules as text, or a link to your rules post. Longer? Upload a .md or .txt file below.')
             .setTextInputComponent(rules),
+        new LabelBuilder()
+            .setLabel('Symbol')
+            .setDescription('Shown either side of the name in the directory post. An emoji works. Empty for \u2605.')
+            .setTextInputComponent(symbol),
         new LabelBuilder()
             .setLabel('Banner and rules file')
             .setDescription('A banner image and/or a rules file (.md or .txt). A new one replaces the current one.')
@@ -137,7 +130,7 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
     const member = interaction.member as StaffCandidate;
     const full = kind === 'full';
     if (full ? !isOfficer(member) : !(await canManageClubStats(member, club))) {
-        return void (await refuse(full ? "Only Club Managers can change a club's tier." : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
+        return void (await refuse(full ? 'Only Club Managers can use that form.' : `You must be a trainer or assistant of **${club.name}** or a Club Manager to do that.`));
     }
 
     // The one upload field takes a banner image and a Markdown rules file.
@@ -158,15 +151,11 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const text = (id: string) => interaction.fields.getTextInputValue(id).trim() || null;
-    const data: { bio: string | null; rules: string | null; tier?: ClubTier | null; rulesFile?: string | null; rulesFileName?: string | null } = {
+    const data: { symbol: string | null; bio: string | null; rules: string | null; rulesFile?: string | null; rulesFileName?: string | null } = {
+        symbol: text(FIELD.symbol),
         bio: text(FIELD.bio),
         rules: text(FIELD.rules),
     };
-    if (full) {
-        const tier = interaction.fields.getStringSelectValues(FIELD.tier)[0];
-        if (tier === NO_TIER) data.tier = null;
-        else if (tier && (TIER_ORDER as string[]).includes(tier)) data.tier = tier as ClubTier;
-    }
 
     const removing = interaction.fields.fields.has(FIELD.remove) ? interaction.fields.getStringSelectValues(FIELD.remove) : [];
     if (rulesUpload) {
@@ -210,14 +199,14 @@ export async function handleProfileModal(interaction: ModalSubmitInteraction) {
         ? await clubStaff(updated, await guildClubs(updated.guildId), guild, await loadMembers(guild))
         : { trainers: [], assistants: [] };
     const card = clubCard(updated, staff, updated.banner);
-    const shownTier = effectiveTier(updated);
-    const listed = shownTier
-        ? `listed under **${TIERS[shownTier].title}**${updated.tier ? '' : ' (from its expected rank)'}`
-        : 'not listed in the directory (it needs an expected rank, or a Club Manager sets its tier)';
-    const more = card.rulesMessages.length;
-    const moreNote = more > 0 ? ` Its rules follow in ${more} message${more === 1 ? '' : 's'} after the card.` : '';
-    await interaction.editReply({ content: `Saved. **${updated.name}** is ${listed}.${moreNote} Its card:`, embeds: card.embeds, files: card.files });
-    for (const chunk of card.rulesMessages) {
+    const group = rankGroup(updated.rank);
+    const listed = group ? `listed under **${GROUPS[group].label}**` : 'not listed in the directory (it needs an expected rank, set in `/club admin`)';
+    const more = card.followUps.length;
+    const moreNote = more > 0 ? ` It continues in ${more} message${more === 1 ? '' : 's'} after the post.` : '';
+    await interaction.editReply({ content: `Saved. **${updated.name}** is ${listed}.${moreNote} Its directory post:` });
+    // The post exactly as the directory shows it; nobody is pinged.
+    await interaction.followUp({ content: card.content ?? '', files: card.files, allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+    for (const chunk of card.followUps) {
         await interaction.followUp({ ...rulesMessage(chunk), allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
     }
 

@@ -249,16 +249,23 @@ has no record of are left out of the averages, not counted as zero. The
 first month on record is also left out, because it may be partial.
 
 The club directory (`/club directory channel:`, for #club-bio) runs, top to
-bottom: jump links to every club, then each tier's clubs as cards (banner,
-staff, requirements, rules, bio), then the club poster. The poster is last
-because Discord opens a channel at its newest message. It draws every club
-with a tier as one row: expected rank, quota (as set and per day), members,
-and open spots, under a band per tier with its rank range. JP clubs, which
-uma.moe does not track, follow the tiers; they are written by hand in
-`src/lib/jpClubs.ts` and do not update themselves. The
-directory updates itself after club changes and after every fan sync, and
-edits only the messages that changed. `/club poster` shows the same picture
-in place, to preview it.
+bottom: a thread per expected rank (S, A+, A, B+, Casual; S+ counts as S),
+each holding its clubs' posts (a plain message with banner, staff,
+requirements, rules and bio, like the server's old hand-made directory) and
+a "Directory" list of links; then a box per group, how to apply, and the
+club poster. Each club also gets a "<Club> Goals/Rules" thread (unless its
+Rules field already links to one), kept across reposts; only the club's
+staff and Club Managers may post there, and the bot removes anyone else's
+message. The bot needs Create Public Threads, Send Messages in Threads,
+Manage Threads and Manage Messages in that channel. The poster is last because
+Discord opens a channel at its newest message. It is a landscape JPEG: a
+banner, then the same groups in two columns, one row per club with expected
+rank, quota (as set and per day), members and open spots. JP clubs, which
+uma.moe does not track, come after the groups; they are written by hand in
+`src/lib/jpClubs.ts` and do not update themselves. A club with no expected
+rank is left out. The directory updates itself after club changes and after
+every fan sync, and edits only the messages that changed. `/club poster`
+shows the same picture in place, to preview it.
 
 ## Welcome message
 

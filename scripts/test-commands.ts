@@ -727,15 +727,14 @@ async function main() {
     const ck = await reload();
     const staffProfile = profileForm(ck, false, false).custom_id;
     const fullProfile = profileForm(ck, true, false).custom_id;
-    check('the staff profile form: bio, rules, files', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Banner and rules file']);
-    check('Club Managers also set the tier', profileForm(ck, true, false).components.map((c) => c.label), ['Tier', 'Bio', 'Rules', 'Banner and rules file']);
-    check('a club starts not listed', profileForm(ck, true, false).components[0]?.component.options?.find((o) => o.default)?.value, 'NONE');
+    check('the staff profile form: bio, rules, symbol, files', profileForm(ck, false, false).components.map((c) => c.label), ['Bio', 'Rules', 'Symbol', 'Banner and rules file']);
+    check('the Club Manager form has no tier any more', profileForm(ck, true, false).components.map((c) => c.label), ['Bio', 'Rules', 'Symbol', 'Banner and rules file']);
     check('a Remove list only when there is something to remove',
         [profileForm(ck, false, false).components.some((c) => c.label === 'Remove'), profileForm(ck, false, true).components.map((c) => c.label).at(-1)], [false, 'Remove']);
     check('with a banner, the list offers it', profileForm(ck, false, true).components.at(-1)?.component.options?.map((o) => o.value), ['banner']);
-    check('the Club Manager form with a banner and a rules file has five fields',
+    check('with a banner and a rules file: five fields, the Discord limit',
         profileForm({ ...ck, rulesFile: '# Rules', rulesFileName: 'rules.md' }, true, true).components.map((c) => c.label),
-        ['Tier', 'Bio', 'Rules', 'Banner and rules file', 'Remove']);
+        ['Bio', 'Rules', 'Symbol', 'Banner and rules file', 'Remove']);
 
     type Upload = { url: string; name: string; contentType: string; size: number };
     /** Submits the profile form; returns what the bot replied, in order. */
@@ -766,7 +765,7 @@ async function main() {
             },
             editReply: async (p: Reply) =>
                 void out.push({ kind: 'edit', content: p.content, description: p.embeds?.at(-1)?.toJSON().description, embeds: p.embeds?.length, files: p.files?.length }),
-            followUp: async (p: Reply) => void out.push({ kind: 'followUp', content: p.content }),
+            followUp: async (p: Reply) => void out.push({ kind: 'followUp', content: p.content, files: p.files?.length }),
         };
         await profile.handleProfileModal(interaction as never);
         return out;
@@ -777,16 +776,16 @@ async function main() {
 
     const staffSave = await submitProfile(staffProfile, 'u-assistant', false, kept);
     check('club staff can save the bio and rules', [(await reload()).bio, (await reload()).rules], [BIO, RULES]);
-    check('the reply is private and shows the card', [staffSave[0]?.kind, staffSave.at(-1)?.content],
-        ['defer', 'Saved. **Checkrose** is listed under **G2 [Semi Competitive+]** (from its expected rank). Its card:']);
-    check('staff cannot submit the tier form',
-        (await submitProfile(fullProfile, 'u-assistant', false, { 'club:profile:tier': 'G1', ...kept }))[0]?.description, "Only Club Managers can change a club's tier.");
+    await submitProfile(staffProfile, 'u-assistant', false, { ...kept, 'club:profile:symbol': ' \u{1F90D} ' });
+    check('staff set the symbol; empty clears it', [(await reload()).symbol, (await submitProfile(staffProfile, 'u-assistant', false, kept), (await reload()).symbol)], ['\u{1F90D}', null]);
+    check('the reply is private, says where it is listed, then shows the post', [staffSave[0]?.kind, staffSave.find((o) => o.kind === 'edit')?.content, staffSave.at(-1)?.content?.split('\n')[0]],
+        ['defer', 'Saved. **Checkrose** is listed under **A**. Its directory post:', '**\u2605 \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u2605**']);
+    check('staff cannot submit the Club Manager form',
+        (await submitProfile(fullProfile, 'u-assistant', false, kept))[0]?.description, 'Only Club Managers can use that form.');
     check('outsiders cannot edit the profile',
         (await submitProfile(staffProfile, 'u-behind', false, kept))[0]?.description?.startsWith('You must be a trainer or assistant'), true);
-    check('a staff role holder can', (await submitProfile(staffProfile, 'u-role-asst', false, kept, { held: ['r-ck-asst'] })).at(-1)?.kind, 'edit');
-    const tiered = await submitProfile(fullProfile, 'u-officer', true, { 'club:profile:tier': 'G1', ...kept });
-    check('a Club Manager sets the tier', (await reload()).tier, 'G1');
-    check('and is told where it is listed', tiered.at(-1)?.content, 'Saved. **Checkrose** is listed under **G1 [Competitive]**. Its card:');
+    check('a staff role holder can', (await submitProfile(staffProfile, 'u-role-asst', false, kept, { held: ['r-ck-asst'] })).some((o) => o.kind === 'edit'), true);
+    check('a Club Manager can save the profile too', (await submitProfile(fullProfile, 'u-officer', true, kept)).find((o) => o.kind === 'edit')?.content, 'Saved. **Checkrose** is listed under **A**. Its directory post:');
 
     // The banner: downloaded from Discord's CDN (stubbed) and stored.
     const bannerPng = Buffer.from('89504e470d0a1a0a', 'hex');
@@ -796,7 +795,7 @@ async function main() {
     const withBanner = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: bannerUpload });
     const storedBanner = await prisma.clubBanner.findUnique({ where: { clubId: club.id } });
     check('the banner is stored', [storedBanner ? Buffer.from(storedBanner.data).equals(bannerPng) : false, storedBanner?.fileName], [true, 'Spica banner.png']);
-    check('the card shows it above the details', [withBanner.at(-1)?.embeds, withBanner.at(-1)?.files], [2, 1]);
+    check('the post carries it, with no embed', withBanner.find((o) => o.kind === 'followUp')?.files, 1);
     check('a file that is neither an image nor Markdown is refused',
         (await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: { ...bannerUpload, name: 'rules.pdf', contentType: 'application/pdf' } }))[0]?.description,
         'Upload a banner image (PNG, JPEG, GIF or WebP) and/or a rules file (.md or .txt). Other files are not accepted.');
@@ -823,27 +822,27 @@ async function main() {
     const withRules = await submitProfile(staffProfile, 'u-trainer', false, kept, { uploads: [mdUpload(SHORT_RULES), bannerUpload] });
     const afterRules = await reload();
     check('the rules file is stored as text, without the byte-order mark', [afterRules.rulesFile, afterRules.rulesFileName], [SHORT_RULES, 'Checkrose rules.md']);
-    const rulesEdit = withRules.find((o) => o.kind === 'edit');
-    check('the card points to the rules below it', rulesEdit?.description?.includes('**Rules and goals**: in the messages below this card.'), true);
-    check('the rules follow as their own message, as Markdown with a heading',
-        withRules.filter((o) => o.kind === 'followUp').map((o) => o.content), [`## Checkrose: rules and goals\n${SHORT_RULES}`]);
-    check('a banner can come in the same upload', [rulesEdit?.embeds, rulesEdit?.files], [2, 1]);
+    const rulesPost = withRules.find((o) => o.kind === 'followUp');
+    check('the post points to the rules below it', rulesPost?.content?.includes('**Rules and goals**: in the messages below.'), true);
+    check('the rules follow as their own message, as Markdown',
+        withRules.filter((o) => o.kind === 'followUp').slice(1).map((o) => o.content), [SHORT_RULES]);
+    check('a banner can come in the same upload', rulesPost?.files, 1);
     const LONG_RULES = `# Rules\n${'- Earn your quota every week, and say so in chat if you cannot.\n'.repeat(80)}`;
     serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
     const withLong = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(LONG_RULES) });
     const longEdit = withLong.find((o) => o.kind === 'edit');
-    const longMore = withLong.filter((o) => o.kind === 'followUp').map((o) => o.content ?? '');
+    const longMore = withLong.filter((o) => o.kind === 'followUp').slice(1).map((o) => o.content ?? '');
     check('long rules take several messages', longMore.length > 1, true);
     check('each fits a Discord message', longMore.every((m) => m.length <= 2000), true);
-    check('the reply says how many follow', longEdit?.content?.includes(`Its rules follow in ${longMore.length} messages after the card.`), true);
-    check('nothing is attached for the rules', longEdit?.files, 1);
-    check('every line shows once, in order, none broken', longMore.join('\n'), `## Checkrose: rules and goals\n${LONG_RULES.trim()}`);
+    check('the reply says how many follow', longEdit?.content?.includes(`It continues in ${longMore.length} messages after the post.`), true);
+    check('only the post carries a file', withLong.filter((o) => o.kind === 'followUp').map((o) => o.files ?? 0).filter((n) => n > 0), [1]);
+    check('every line shows once, in order, none broken', longMore.join('\n'), LONG_RULES.trim());
     check('the long file is kept whole', (await reload()).rulesFile, LONG_RULES.trim());
     const TXT = 'Be active\n**Bold** still renders';
     serve({ [mdUpload(TXT, 'rules.txt').url]: TXT });
     const withTxt = await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(TXT, 'rules.txt') });
     check('a .txt file is accepted and shown as Markdown',
-        [withTxt.filter((o) => o.kind === 'followUp').map((o) => o.content), (await reload()).rulesFileName], [[`## Checkrose: rules and goals\n${TXT}`], 'rules.txt']);
+        [withTxt.filter((o) => o.kind === 'followUp').slice(1).map((o) => o.content), (await reload()).rulesFileName], [[TXT], 'rules.txt']);
     serve({ [mdUpload(LONG_RULES).url]: LONG_RULES });
     await submitProfile(staffProfile, 'u-trainer', false, kept, { upload: mdUpload(LONG_RULES) });
     serve({ [mdUpload('x').url]: Buffer.from([0xff, 0xfe, 0x00, 0x41]) });
@@ -874,15 +873,17 @@ async function main() {
     check('without the member list, the role is mentioned',
         (await directory.clubStaff(ckFull, await guildClubs(GUILD), FAKE_GUILD, false)).assistants, ['<@u-assistant>', '<@&r-ck-asst>']);
     const ckCard = directory.clubCard(ckFull, ckStaff, ckFull.banner);
-    const [bannerEmbed, cardEmbed] = ckCard.embeds.map((e) => e.toJSON());
-    check('the banner embed points at the attached file', [bannerEmbed?.image?.url, ckCard.files.length], [`attachment://banner-${club.id}.png`, 1]);
-    check('the card is in its tier colour', [bannerEmbed?.color, cardEmbed?.color], [directory.TIERS.G1.color, directory.TIERS.G1.color]);
-    check('the card lists staff, requirements and expected rank', cardEmbed?.description?.split('\n').slice(0, 4),
-        ['**Trainer**: <@u-trainer>', '**Assistants**: <@u-assistant>, <@u-role-asst>', `**Requirements**: ${clubQuotaText(ckFull)}`, '**Expected rank**: A']);
-    check('rules as a link, then the bio as a quote', cardEmbed?.description?.endsWith(`[Checkrose goals and rules](${RULES})\n\n> Text Chat Heavy\n> Wordle Boomers`), true);
-    check('rules as text get a heading',
-        directory.clubCard({ ...ckFull, rules: 'Be active.' }, ckStaff, null).embeds[0]?.toJSON().description?.includes('**Rules**\nBe active.'), true);
-    check('no banner, one embed', directory.clubCard(ckFull, ckStaff, null).embeds.length, 1);
+    check('a post is plain text with the banner attached, no embed', [ckCard.embeds.length, ckCard.files.map((f) => f.name)], [0, [`banner-${club.id}.png`]]);
+    check('it opens with the name, staff on one line, then requirements', ckCard.content?.split('\n').slice(0, 3),
+        ['**\u2605 \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u2605**', '**Trainer**: <@u-trainer> - **Assistants**: <@u-assistant>, <@u-role-asst>', `**Requirements**: ${clubQuotaText(ckFull)}`]);
+    check('rules as a link, then the bio as a quote', ckCard.content?.endsWith(`[Link to Checkrose Goals/Rules](${RULES})\n\n> Text Chat Heavy\n> Wordle Boomers`), true);
+    check('rules as text get a heading', directory.clubCard({ ...ckFull, rules: 'Be active.' }, ckStaff, null).content?.includes('**Rules**\nBe active.'), true);
+    check('no banner, no file', directory.clubCard(ckFull, ckStaff, null).files.length, 0);
+    check("a club's own symbol frames its name", directory.clubCard({ ...ckFull, symbol: '\u{1F90D}' }, ckStaff, null).content?.split('\n')[0],
+        '**\u{1F90D} \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u{1F90D}**');
+    const longCard = directory.clubCard({ ...ckFull, bio: 'b'.repeat(1400), rules: 'r'.repeat(900) }, ckStaff, null);
+    check('a post past 2000 characters continues in a message after it',
+        [longCard.content!.length <= 2000, longCard.followUps.length, longCard.followUps.every((m) => m.length <= 2000)], [true, 1, true]);
 
     // ── Avatars: fixed files in assets/clubs, matched by a word of the name ──
     const { clubAvatarPath } = await import('../src/lib/clubAvatar');
@@ -891,29 +892,38 @@ async function main() {
     check('any word of the name, any case', avatarOf('Team COSMOS!'), 'cosmos.png');
     check('part of a word is not a match', avatarOf('Checkrose'), null);
     check('a name matching two avatars gets neither', avatarOf('Rose Lily'), null);
-    check('no avatar for an unknown club', ckCard.embeds[1]?.toJSON().thumbnail, undefined);
-    const avCard = directory.clubCard({ ...ckFull, name: 'Cosmos' }, ckStaff, null);
-    check('the avatar is the card thumbnail', [avCard.embeds[0]?.toJSON().thumbnail?.url, avCard.files.map((f) => f.name)],
-        [`attachment://avatar-${club.id}.png`, [`avatar-${club.id}.png`]]);
 
     // ── The directory ─────────────────────────────────────────────────────────
     type DirSent = { content?: string; embeds: { toJSON(): { title?: string; description?: string } }[]; files: unknown[]; allowedMentions?: { parse?: unknown[] } };
-    /** A channel that keeps what is posted in it, and what is edited or deleted. */
+    /**
+     * A channel that keeps what is posted in it and in its threads (`place`
+     * is the channel or thread ID), and what is edited or deleted. Deleting a
+     * thread deletes its messages, as on Discord.
+     */
     const dirChannel = (id: string) => {
-        const rec = { sent: [] as { id: string; payload: DirSent }[], edits: [] as string[], deleted: [] as string[], live: new Map<string, DirSent>() };
+        const rec = {
+            sent: [] as { id: string; place: string; payload: DirSent }[],
+            edits: [] as string[],
+            deleted: [] as string[],
+            live: new Map<string, DirSent>(),
+            placeOf: new Map<string, string>(),
+            threads: new Map<string, { name: string; locked: boolean; archived: boolean }>(),
+        };
         let n = 0;
-        const channel = {
-            id,
+        let t = 0;
+        const target = (place: string) => ({
+            id: place,
             send: async (payload: DirSent) => {
                 n += 1;
                 const mid = `${id}-m${n}`;
                 rec.live.set(mid, payload);
-                rec.sent.push({ id: mid, payload });
+                rec.placeOf.set(mid, place);
+                rec.sent.push({ id: mid, place, payload });
                 return { id: mid };
             },
             messages: {
                 fetch: async (mid: string) => {
-                    if (!rec.live.has(mid)) throw new Error('Unknown Message');
+                    if (!rec.live.has(mid) || rec.placeOf.get(mid) !== place) throw new Error('Unknown Message');
                     return {
                         id: mid,
                         edit: async (p: DirSent) => {
@@ -927,19 +937,48 @@ async function main() {
                     };
                 },
             },
+        });
+        const thread = (tid: string) => ({
+            ...target(tid),
+            get archived() {
+                return rec.threads.get(tid)?.archived ?? false;
+            },
+            setArchived: async (archived: boolean) => void (rec.threads.get(tid)!.archived = archived),
+            setLocked: async (locked: boolean) => void (rec.threads.get(tid)!.locked = locked),
+            delete: async () => {
+                rec.threads.delete(tid);
+                for (const [mid, place] of rec.placeOf) if (place === tid) rec.live.delete(mid);
+                rec.deleted.push(tid);
+            },
+        });
+        const channel = {
+            ...target(id),
+            threads: {
+                create: async ({ name }: { name: string }) => {
+                    t += 1;
+                    const tid = `${id}-t${t}`;
+                    rec.threads.set(tid, { name, locked: false, archived: false });
+                    return thread(tid);
+                },
+                fetch: async (tid: string) => (rec.threads.has(tid) ? thread(tid) : null),
+            },
         };
         FAKE_GUILD.channelsById.set(id, channel);
-        return { channel, rec };
+        /** What a thread holds now, in order. */
+        const inThread = (name: string) => {
+            const tid = [...rec.threads.entries()].find(([, v]) => v.name === name)?.[0];
+            return [...rec.live.entries()].filter(([mid]) => rec.placeOf.get(mid) === tid).map(([, p]) => p);
+        };
+        return { channel, rec, inThread };
     };
     const shape = (p: DirSent) => `${p.content ?? ''}|${p.embeds.length}|${p.files.length}`;
     const lastDesc = (log: Sent[]) => log.at(-1)?.embeds?.[0]?.description ?? '';
 
-    // Tiers: picked wins, else from the expected rank, else not listed.
-    check('a tier comes from the expected rank when none is picked',
-        (['S_PLUS', 'S', 'A_PLUS', 'A', 'B_PLUS', 'CASUAL'] as const).map((rank) => directory.effectiveTier({ tier: null, rank })), ['G1', 'G1', 'G2', 'G2', 'G3', 'DEBUT']);
-    check('a picked tier wins over the rank', directory.effectiveTier({ tier: 'G3', rank: 'S' }), 'G3');
-    check('no tier and no rank: not listed', directory.effectiveTier({ tier: null, rank: null }), null);
-    // The directory tests below list Checkrose only: Looser Club's rank would list it under G3.
+    // Groups come from the expected rank, with S+ and S together.
+    check('rank groups: S+ and S together, the rest as they are',
+        (['S_PLUS', 'S', 'A_PLUS', 'A', 'B_PLUS', 'CASUAL'] as const).map((rank) => directory.rankGroup(rank)), ['S', 'S', 'A_PLUS', 'A', 'B_PLUS', 'CASUAL']);
+    check('no expected rank: not listed', directory.rankGroup(null), null);
+    // The directory tests below list Checkrose only: Looser Club's rank would list it under B+.
     await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: null } });
 
     check('/club directory is for Club Managers', desc(await runClubCmd({ sub: 'directory', userId: 'u-trainer' })), 'Only Club Managers can post the club directory.');
@@ -948,61 +987,107 @@ async function main() {
     const dirA = dirChannel('c-directory');
     const dirPostedText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory' } }));
     check('/club directory posts it', dirPostedText.startsWith('Posted the directory in <#c-directory> with 1 club.'), true);
-    check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no expected rank or tier:') && dirPostedText.includes('**Otherrose**'), true);
-    check('its messages: the index, a heading, the card, the poster', dirA.rec.sent.map((m) => shape(m.payload)), ['|1|0', '## Current G1 Clubs|0|0', '|2|1', '|0|1']);
-    check('the index is first and titled', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().title, 'Directory');
-    check('it is posted before the cards, without links', dirA.rec.sent[0]?.payload.embeds[0]?.toJSON().description?.startsWith('**G1**: Checkrose\n'), true);
-    check('then filled in with a link to the card, and only it is edited', [dirA.rec.edits, dirA.rec.live.get('c-directory-m1')?.embeds[0]?.toJSON().description],
-        [['c-directory-m1'], `**G1**: [Checkrose](https://discord.com/channels/${GUILD}/c-directory/c-directory-m3)\n\nEvery club on one picture is at the bottom of the channel.`]);
-    const posterFile = dirA.rec.sent[3]?.payload.files[0] as { name?: string; attachment?: Buffer } | undefined;
-    check('the poster is last, a PNG', [posterFile?.name, posterFile?.attachment?.subarray(1, 4).toString()], ['clubs.png', 'PNG']);
+    check('and names the clubs with no tier', dirPostedText.includes('Not listed, with no expected rank:') && dirPostedText.includes('**Otherrose**'), true);
+    const firstLine = (m: { place: string; payload: DirSent }) => `${m.place}: ${m.payload.content?.split('\n')[0] ?? ''}|${m.payload.embeds.length}|${m.payload.files.length}`;
+    check('a thread per rank group, named after it', [...dirA.rec.threads.values()].map((t) => t.name), ['A']);
+    check('in the thread: heading, post, Directory; then in the channel: group boxes, how to apply, poster', dirA.rec.sent.map(firstLine), [
+        'c-directory-t1: ## __Current A Clubs__|0|0',
+        'c-directory-t1: **\u2605 \u2500\u2500\u2500 Checkrose \u2500\u2500\u2500 \u2605**|0|1',
+        `c-directory-t1: ${'-'.repeat(88)}|0|0`,
+        'c-directory: |5|0',
+        'c-directory: ## How to apply|0|0',
+        'c-directory: |0|1',
+    ]);
+    check("the thread's Directory links to each post in it", dirA.rec.sent[2]?.payload.content,
+        `${'-'.repeat(88)}\n__**Directory**__\n[Checkrose](https://discord.com/channels/${GUILD}/c-directory-t1/c-directory-m2)`);
+    check('posted with its links: nothing needs editing after', dirA.rec.edits, []);
+    check('a box per rank group', dirA.rec.sent[3]?.payload.embeds.map((e) => e.toJSON().title), ['S [Competitive]', 'A+ [Semi Competitive+]', 'A [Semi-Competitive]', 'B+ [Semi-Casual]', 'Casual']);
+    const posterFile = dirA.rec.sent[5]?.payload.files[0] as { name?: string; attachment?: Buffer } | undefined;
+    check('the poster is last, a JPEG', [posterFile?.name, posterFile?.attachment?.subarray(0, 3).toString('hex')], ['clubs.jpg', 'ffd8ff']);
     check('nothing in it pings', dirA.rec.sent.every((m) => JSON.stringify(m.payload.allowedMentions?.parse) === '[]'), true);
 
     // Same clubs: edited in place, and only what changed.
     const dirAgain = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
-    check('a refresh with nothing changed edits nothing', [dirAgain.mode, dirA.rec.edits.length, dirA.rec.sent.length], ['edited', 1, 4]);
-    check('a forced refresh edits every message', [(await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, dirA.rec.edits.length], ['edited', 5]);
-    // A profile change refreshes it on its own: just that card.
+    check('a refresh with nothing changed edits nothing', [dirAgain.mode, dirA.rec.edits.length, dirA.rec.sent.length], ['edited', 0, 6]);
+    check('a forced refresh edits every message', [(await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, dirA.rec.edits.length], ['edited', 6]);
+    // A profile change refreshes it on its own: just that post.
     await submitProfile(staffProfile, 'u-trainer', false, { ...kept, 'club:profile:bio': 'Now T30 pushing' });
     await directory.refreshDirectory(FAKE_GUILD);
-    check('saving a profile updates the card', dirA.rec.live.get('c-directory-m3')?.embeds.at(-1)?.toJSON().description?.endsWith('> Now T30 pushing'), true);
-    check('and only the card', dirA.rec.edits.slice(5), ['c-directory-m3']);
+    check('saving a profile updates the post', dirA.rec.live.get('c-directory-m2')?.content?.endsWith('> Now T30 pushing'), true);
+    check('and only the post', dirA.rec.edits.slice(6), ['c-directory-m2']);
     // A sync moves the club's uma.moe rank, which only the poster shows.
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { monthlyRank: 4321 } });
     await directory.refreshDirectory(FAKE_GUILD);
-    check('a new uma.moe rank updates only the poster', dirA.rec.edits.slice(6), ['c-directory-m4']);
+    check('a new uma.moe rank updates only the poster', dirA.rec.edits.slice(7), ['c-directory-m6']);
+    // A quiet thread archives itself after a week; an edit opens it again first.
+    dirA.rec.threads.get('c-directory-t1')!.archived = true;
+    await submitProfile(staffProfile, 'u-trainer', false, { ...kept, 'club:profile:bio': 'Still T30 pushing' });
+    await directory.refreshDirectory(FAKE_GUILD);
+    check('an archived thread is reopened to edit in it', [dirA.rec.threads.get('c-directory-t1')?.archived, dirA.rec.edits.at(-1)], [false, 'c-directory-m2']);
 
-    // A club joins a tier: the run no longer fits, so it is posted afresh.
-    await prisma.trackedCircle.update({ where: { id: other.id }, data: { tier: 'G2' } });
+    // A club gets an expected rank: the run no longer fits, so it is posted afresh.
+    await prisma.trackedCircle.update({ where: { id: other.id }, data: { rank: 'S' } });
     const dirRegrouped = await directory.publishDirectory(FAKE_GUILD, dirA.channel);
-    check('a new club reposts the directory', [dirRegrouped.mode, dirRegrouped.listed, dirA.rec.deleted.length, dirA.rec.live.size], ['posted', 2, 4, 6]);
-    check('with a section per tier', [...dirA.rec.live.values()].map((p) => p.content).filter(Boolean), ['## Current G1 Clubs', '## Current G2 Clubs']);
+    check('a new club reposts the directory: old thread and channel messages go', [dirRegrouped.mode, dirRegrouped.listed, dirA.rec.deleted, dirA.rec.live.size],
+        ['posted', 2, ['c-directory-t1', 'c-directory-m4', 'c-directory-m5', 'c-directory-m6'], 10]);
+    check('Otherrose (no rules link) gets its Goals/Rules thread first, then a thread per rank group, highest first',
+        [...dirA.rec.threads.values()].map((t) => t.name), ['Otherrose Goals/Rules', 'S', 'A']);
+    check('Checkrose links its own rules, so it gets none', [...dirA.rec.threads.values()].some((t) => t.name === 'Checkrose Goals/Rules'), false);
+    const otherRules = (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: other.id } })).rulesThreadId;
+    check('the rules thread opens by saying who may post', dirA.inThread('Otherrose Goals/Rules').map((p) => p.content), [directory.rulesThreadOpening('Otherrose')]);
+    check("the club's post links to it", dirA.inThread('S').find((p) => p.content?.startsWith('**\u2605'))?.content?.includes(`[Link to Otherrose Goals/Rules](https://discord.com/channels/${GUILD}/${otherRules})`), true);
+    await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true });
+    check('a repost keeps the rules thread and what is in it', [(await prisma.trackedCircle.findUniqueOrThrow({ where: { id: other.id } })).rulesThreadId, dirA.rec.threads.has(otherRules!)], [otherRules, true]);
     // A message deleted by hand: posted afresh too.
-    dirA.rec.live.delete([...dirA.rec.live.keys()][2]!);
+    dirA.rec.live.delete([...dirA.rec.live.keys()][1]!);
     check('an automatic refresh with nothing changed does not look', (await directory.publishDirectory(FAKE_GUILD, dirA.channel)).mode, 'edited');
     check('a forced one finds it and reposts', (await directory.publishDirectory(FAKE_GUILD, dirA.channel, undefined, { force: true })).mode, 'posted');
 
     const dirB = dirChannel('c-directory-2');
     const dirMoveText = lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true, strings: { channel: 'c-directory-2' } }));
-    check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, dirA.rec.live.size], [true, 6, 0]);
+    // The old channel keeps only the rules thread, which people may have written in; the new one gets its own.
+    check('/club directory can move it', [dirMoveText.startsWith('Posted the directory in <#c-directory-2> with 2 clubs.'), dirB.rec.sent.length, [...dirA.rec.threads.values()].map((t) => t.name)],
+        [true, 10, ['Otherrose Goals/Rules']]);
     check('/club directory with no channel refreshes it where it is',
         lastDesc(await runClubCmd({ sub: 'directory', userId: 'u-officer', officer: true })).startsWith('Updated the directory in <#c-directory-2>'), true);
 
-    // A club with an expected rank but no picked tier is listed from its rank.
-    await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: 'B_PLUS', tier: null } });
+    // Another rank, another thread.
+    await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: 'B_PLUS' } });
     await directory.refreshDirectory(FAKE_GUILD);
-    check('a club with only an expected rank gets its section', [...dirB.rec.live.values()].some((p) => p.content === '## Current G3 Clubs'), true);
+    check('a B+ club gets the B+ thread', dirB.inThread('B+')[0]?.content, '## __Current B+ Clubs__');
     await prisma.trackedCircle.update({ where: { id: loose.id }, data: { rank: null } });
     await directory.refreshDirectory(FAKE_GUILD);
 
-    // A rules file posts after the club's card, in messages of its own.
+    // A rules file posts after the club's post, in messages of its own.
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: LONG_RULES.trim(), rulesFileName: 'rules.md' } });
     await directory.refreshDirectory(FAKE_GUILD);
-    const liveB = [...dirB.rec.live.values()];
-    const cardAt = liveB.findIndex((p) => p.embeds.some((e) => e.toJSON().title === 'Checkrose'));
-    const rulesAfter = liveB.slice(cardAt + 1).filter((p) => p.content?.startsWith('## Checkrose') || (p.embeds.length === 0 && p.content && !p.content.startsWith('## Current')));
-    check('the rules messages come right after the card', liveB[cardAt + 1]?.content?.startsWith('## Checkrose: rules and goals'), true);
-    check('all of the rules are posted', rulesAfter.map((p) => p.content).join('\n'), `## Checkrose: rules and goals\n${LONG_RULES.trim()}`);
+    const inA = dirB.inThread('A');
+    const postAt = inA.findIndex((p) => p.content?.startsWith('**\u2605 \u2500\u2500\u2500 Checkrose'));
+    const indexAt = inA.findIndex((p) => p.content?.startsWith('-----'));
+    check('the rules file follows the post, all of it', inA.slice(postAt + 1, indexAt).map((p) => p.content).join('\n'), LONG_RULES.trim());
+
+    // Only a club's staff and Club Managers may post in its rules thread.
+    const { guardRulesThread, linkedChannelId } = await import('../src/lib/clubRulesThreads');
+    // After the move, Otherrose's rules thread is the one in the new channel.
+    const otherRulesNow = (await prisma.trackedCircle.findUniqueOrThrow({ where: { id: other.id } })).rulesThreadId!;
+    const guardLog: string[] = [];
+    const threadPost = (channelId: string, userId: string, opts: { officer?: boolean; bot?: boolean } = {}) => ({
+        guildId: GUILD, channelId, channel: { isThread: () => true },
+        author: { bot: opts.bot ?? false, send: async (t: string) => void guardLog.push(`dm ${userId}: ${t}`) },
+        member: { id: userId, roles: { cache: roleCache(opts.officer ?? false) }, guild: FAKE_GUILD },
+        delete: async () => void guardLog.push(`deleted ${userId}`),
+    });
+    check('an outsider in a rules thread is removed and told why', [await guardRulesThread(threadPost(otherRulesNow, 'u-behind')), guardLog],
+        [true, ['deleted u-behind', "dm u-behind: Only **Otherrose**'s trainers and assistants can post in its Goals/Rules thread, so your message there was removed."]]);
+    check('a Club Manager may post', await guardRulesThread(threadPost(otherRulesNow, 'u-officer', { officer: true })), false);
+    check('bots are left alone', await guardRulesThread(threadPost(otherRulesNow, 'u-bot', { bot: true })), false);
+    check('other threads are not guarded', await guardRulesThread(threadPost('t-elsewhere', 'u-behind')), false);
+    check('a thread link gives the thread ID', [linkedChannelId('https://discord.com/channels/123/456'), linkedChannelId('https://discord.com/channels/123/456/789'), linkedChannelId('https://example.com')], ['456', '456', null]);
+    // A club whose Rules link points at its own thread: that thread is guarded too.
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { rules: 'https://discord.com/channels/123/456' } });
+    check("its staff may post in the thread it links", await guardRulesThread(threadPost('456', 'u-trainer')), false);
+    check('an outsider there is removed', await guardRulesThread(threadPost('456', 'u-behind')), true);
+    await prisma.trackedCircle.update({ where: { id: club.id }, data: { rules: RULES } });
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesFile: null, rulesFileName: null } });
 
     await directory.refreshDirectory(FAKE_GUILD);

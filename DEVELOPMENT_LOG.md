@@ -187,6 +187,91 @@ directory, its cards' colours, the poster and the replies all use it. The
 dropdown's "Not listed" is now "From expected rank". The poster also posts
 when only the JP section has clubs.
 
+Same day, superseding that: "just separate back to S/A+/A/B+/casual for
+simplicity". The tiers are gone from the directory and the poster; clubs
+group by expected rank (`src/lib/clubGroups.ts`: S+ and S as S, then A+,
+A, B+, Casual), with headings "S Clubs" and so on, colours close to each
+badge's art. `clubTiers.ts` and `effectiveTier` are removed, and so is the
+tier dropdown in `/club profile` (the `tier` column stays in the database,
+unused). Also:
+
+- The poster's column labels (CLUB, RANK, QUOTA...) floated over the
+  picture with nothing under them; removed. Every value carries its unit.
+- The poster is landscape: two 1104 columns under a full-width banner
+  (760). `splitColumns` splits the groups, in order, where the taller
+  column is shortest. The title grew to 68.
+- It is JPEG (quality 92), `clubs.jpg`. As PNG the landscape version was
+  6.0 MB; as JPEG 1.3 MB, text still sharp.
+
+Not done: the user said to "read how the other bot actually made
+directory". All the repo holds is the 10-05 note ("Dia's tier posts, then
+per-club banner and card posts"); the session cannot read Discord, so the
+user was asked for screenshots.
+
+Then the screenshots came (the old directory, made by hand by staff and
+the Dia bot on 2026-05-24). Its club posts were plain messages, not
+embeds: the banner image, a bold "★ ─── Spica ─── ★" line, Trainers and
+Assistants on one line, Requirements, a rules link, the bio as a quote.
+The directory now copies that (`clubCard` returns content, not embeds):
+
+- Per rank group, `## __Current S Clubs__`, then each club's post. No
+  avatar thumbnail and no Expected rank line (the heading says it). A plain
+  message holds 2000 characters, not an embed's 4096, so text past that
+  continues in the follow-up messages that a rules file already used.
+- Then, as the old one ended: a rule of hyphens, `__**Directory**__`, and a
+  link to each post, one per line. It comes after the posts, so it is
+  posted with its links and needs no second edit.
+- Then the group boxes (the old tier boxes, retitled: S [Competitive], A+
+  [Semi Competitive+], A [Semi-Competitive], B+ [Semi-Casual], Casual; the
+  B+ text is new), then "How to apply" (pointing at `FORUM_CHANNEL_ID`),
+  then the poster.
+- `/club profile` replies "Saved..." and then shows the post as the
+  directory will.
+
+The old per-club symbols were hand-picked. Club staff now set theirs in
+`/club profile` (Symbol, up to 40 characters, so an emoji or a custom
+emoji's `<:name:id>` fits); empty shows ★. Migration
+`20261122000000_club_symbol` adds `TrackedCircle.symbol` and sets First's
+to 🤍, read off the screenshot (a solid white heart; Discord shows a plain
+♥ as a red emoji, so it is most likely 🤍). Spica's star is the default.
+The form is now five fields with Remove, Discord's limit.
+
+Then more screenshots: the old directory kept each tier in a **thread**
+("G1", started by a staff member), each thread holding its heading, posts
+and its own Directory list. Spica's rules were their own thread too
+("Spica Goals/Rules"). The directory now does the same:
+
+- A thread per rank group, named "S", "A+", "A", "B+", "Casual": the
+  heading, each club's post, then the Directory list of that thread's posts.
+- The channel itself holds the group boxes, how to apply, and the poster.
+- Club rules threads: "a thread only they can type" in. Discord has no
+  per-thread posting permission (threads inherit the channel's). A locked,
+  bot-written thread was tried first; the user preferred "let humans post
+  there, just set restrictions". So each listed club whose Rules field is
+  not already a link gets a "<Club> Goals/Rules" thread, made once and kept
+  across reposts (`TrackedCircle.rulesThreadId`, migration
+  `20261122010000_club_rules_thread`). Its first message says who may post.
+  `src/lib/clubRulesThreads.ts` (`guardRulesThread`, on every message)
+  deletes a post there by anyone but the club's staff or a Club Manager,
+  and DMs them why. A club whose Rules link points at a thread (Spica's
+  "Spica Goals/Rules") gets no new thread; that linked thread is guarded.
+  Rules files post after the club's post again.
+- Layout: group threads are stored as `thread:<place>` with the thread ID,
+  messages as `<place>|<key>`. A repost deletes the group threads (their
+  messages go with them) and the channel's own messages; rules threads are
+  not in the layout, so they survive. A missing rules thread is made only
+  on a fresh post, before everything else, so the poster stays last. A
+  thread archives after a week without new messages; an edit reopens it
+  first. Moving the directory leaves the old rules threads in the old
+  channel, unguarded, and opens new ones.
+- Needs the bot to have Create Public Threads, Send Messages in Threads,
+  Manage Threads (to reopen archived threads) and Manage Messages (to
+  remove posts in rules threads) in the directory channel. The guard needs
+  the Guild Messages intent, which the bot's fuller intent modes have.
+- Symbols from the screenshots in the migration: First and Rose 🤍, Cosmos
+  ☆, Primrose, Alkes, Canopus, Altair, Ascella, Lily and Umbra ୨୧; Spica
+  and Capella ★ (the default). Tempest was not in them.
+
 ---
 
 ## 2026-11-19 — The usual pool hunts guests too

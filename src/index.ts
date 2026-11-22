@@ -1,3 +1,4 @@
+import { guardRulesThread } from './lib/clubRulesThreads';
 import { Client, GatewayIntentBits, ThreadChannel, Events, MessageFlags } from 'discord.js';
 import 'dotenv/config';
 // Imported before the command modules: several of them read configuration at
@@ -132,6 +133,8 @@ client.on(Events.MessageCreate, (message) => {
     void onChannelMessage(message).catch((e) => console.error('Timer sticky check failed:', e));
     // An applicant replying with their trainer ID after being asked for it.
     void takeIdFromMessage(message);
+    // Only a club's staff may post in its Goals/Rules thread.
+    void guardRulesThread(message).catch((e) => console.error('Rules thread check failed:', e));
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {

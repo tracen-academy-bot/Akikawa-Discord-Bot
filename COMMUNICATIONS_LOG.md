@@ -25,6 +25,21 @@ Decisions that changed project direction. Newest first.
   been picked. Reverses the 10-05 "tiers are set explicitly" decision: an
   unpicked tier now follows the expected rank (A goes to G2, B+ to G3, my
   call). A picked tier still wins.
+- Then reversed again: group by expected rank only, S/A+/A/B+/Casual, "for
+  simplicity". Tiers are gone. The poster goes landscape ("horizontal"),
+  without the floating column labels.
+- Open: match the directory to how "the other bot" made it. Needs
+  screenshots; the repo has no record beyond "tier posts, then per-club
+  banner and card posts".
+- Screenshots came. Order in #club-bios: the old-style club posts and their
+  Directory list, then the group boxes and a how-to-apply note, then the
+  poster. Headings stay S/A+/A/B+/Casual. The B+ box text and the
+  how-to-apply wording are Claude's drafts, to be checked.
+- The old directory used a thread per tier; the new one uses a thread per
+  rank group. Club rules: "a thread only they can type" in, and "let
+  humans post there, just set restrictions". Discord cannot limit posting
+  per thread, so the bot removes posts in a club's Goals/Rules thread from
+  anyone but its staff and Club Managers, and DMs them why.
 
 ---
 
