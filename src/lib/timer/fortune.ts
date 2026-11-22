@@ -30,7 +30,10 @@ export function hasPair(found: ReadonlySet<string>): boolean {
 /** Whether a trainer has the tent at `now`: it is open, and they have found both Matikanes. */
 export async function hasTent(guildId: string, discordUserId: string, now: Date = new Date()): Promise<boolean> {
     if (!tentIsOpen(now)) return false;
-    return hasPair(await foundSpecialIds(guildId, discordUserId));
+    if (!hasPair(await foundSpecialIds(guildId, discordUserId))) return false;
+    // Owner, 2026-11-22: the Fortune button (and draws) wait for the unlock line and the intro.
+    const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } }, select: { tentUnlocked: true, tentIntroOwed: true } });
+    return (row?.tentUnlocked ?? false) && !(row?.tentIntroOwed ?? false);
 }
 
 /** A draw as stored, with its tier and line resolved. */

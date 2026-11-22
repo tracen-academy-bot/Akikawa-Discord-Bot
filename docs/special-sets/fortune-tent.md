@@ -8,14 +8,16 @@ the owner.
 
 These override the draft below where they differ.
 
-1. **Fukukitaru** is a Lobby Loungers special, `set1.fukukitaru`
-   ("Matikanefukukitaru"), a normal find, listed right after
-   `set1.matikane` (ids unchanged).
+1. **Fukukitaru** is a Lobby Loungers 2 special, `set1-2.fukukitaru`
+   ("Matikanefukukitaru"), a normal find. Owner, 2026-11-22: moved from
+   Set 1 into a new Set 1.2 ("Lobby Loungers 2", page right after Set 1),
+   so finishing Set 1 stays finished (no lost set points, no auto-off
+   undone). Set 1.2 counts as a set only from 12 lines
+   (`SpecialSet.countsFrom`); its page appears once she opens.
 2. **Release gate:** nothing before `TENT_OPENS` = 2026-11-22T15:00Z
    (Monday 00:00 JST): no unlock, no button, no intro, and Fukukitaru's
-   line is in no pool (`Special.opensAt`). Until then she does not hold up
-   Set 1's completion either.
-3. **Unlock:** both `set1.matikane` and `set1.fukukitaru` found, from
+   line is in no pool (`Special.opensAt`).
+3. **Unlock:** both `set1.matikane` and `set1-2.fukukitaru` found, from
    `TENT_OPENS`. The ping that completes the pair adds
    `**Congrats!** Fuku-chan's Fortune Tent unlocked!`; trainers who already
    had both get it on their first ping after the opening.
@@ -94,9 +96,9 @@ From `docs/uma-reference/briefs/1056.json` (Fukukitaru) and `1062.json`
 
 ## How a trainer gets it
 
-1. **Find Matikanetannhauser** (Lobby Loungers, already live as
+1. **Find Matikanetannhauser** (Lobby Loungers 1, already live as
    `set1.matikane`). No change.
-2. **Find Matikanefukukitaru**, a new Lobby Loungers special. It hints at the
+2. **Find Matikanefukukitaru**, a Lobby Loungers 2 special (Set 1.2). It hints at the
    tent without showing a lock:
 
    ```text
@@ -115,8 +117,8 @@ From `docs/uma-reference/briefs/1056.json` (Fukukitaru) and `1062.json`
 
    ```text
    Machitan: "Babaan! {user}, welcome to the Matikane Fortune Tent! Every morning, Fuku-chan senpai reads my fortune before breakfast... and this morning it said a very special visitor was coming. Uhihi, and here you are!"
-   Fuku: "Mumu! Shiraoki-sama's oracles are never wrong! Machitan carries my charm, I carry the crystal ball, and together we are... the Matikanes! ...Not sisters, by the way. Just roommates."
-   Machitan: "Totally ordinary roommates! But I'm ordinary at everything, and meeting you was the one lucky thing that's special. So I want to share the luck back. Ei, ei, mun!"
+   Fuku: "Mumu! Shiraoki-sama's oracles are never wrong! Machitan carries my charm, I carry the crystal ball, and together we are... the Matikanes! ...Not sisters, by the way!"
+   Machitan: "Totally not sisters! I'm ordinary at everything, but meeting you was the one lucky thing that's special. So I want to share the luck back. Ei, ei, mun!"
    Fuku: "One omikuji a day, Trainer-san. Great blessing or great curse, Shiraoki-sama decides! Namu, namu!"
    -# Fuku-chan's Fortune Tent is open: draw one omikuji a day from **Boosts**. Blessings raise your special chance for the day; curses lower it.
    ```
@@ -204,7 +206,7 @@ Each result's box: a heading, the scene, then its effect line.
    ```text
    Taiki: "Howdy! Fuku and I baked fortune cookies, and this one is for {user}! Crack it open!"
    Fuku: "Mumu! Great blessing! Taiki-san, your cookies have spiritual power!"
-   Taiki: "Yippee-ki-yay! Fortune party dēsu!"
+   Taiki: "Yippee-ki-yay! Fortune party!"
    ```
 
 ### 吉 Blessing (+1%)
@@ -280,15 +282,16 @@ Each result's box: a heading, the scene, then its effect line.
     Groove: "Mattaku. What is this racket outside the student council room? ...Fukukitaru. It is a cat. Not the end of the world."
     Groove: "...Still. Kisama, take this. A Shigaraki tanuki. Fukukitaru insisted it would bring luck, and I am in no mood to argue with a crystal ball. Just in case."
     Fuku: "Air Groove-san... you kept it all this time?!"
-    Machitan: "Ei, ei, mun! ...It's still a great curse though, isn't it." / Groove: "Yes. But perhaps a smaller one."
+    Machitan: "Ei, ei, mun! ...It's still a great curse though, isn't it."
+    Groove: "Yes. But perhaps a smaller one."
     ```
 
 ## Notes for the build
 
-- **Fukukitaru's line** is a Lobby Loungers special (`set1.fukukitaru`), a
+- **Fukukitaru's line** is a Lobby Loungers 2 special (`set1-2.fukukitaru`), a
   normal find with its 15 points. The tent itself is not a set: no page, no
   completion, no points for draws.
-- **Unlock check:** both `set1.matikane` and `set1.fukukitaru` found.
+- **Unlock check:** both `set1.matikane` and `set1-2.fukukitaru` found.
 - **Storage:** one row per trainer per day (guild, user, day, tier, line), so
   a redeploy cannot give a second draw, and the Boosts view can show today's
   result.

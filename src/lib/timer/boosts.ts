@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'disc
 import { prisma } from '../../db/prisma';
 import { EARLY_START, PAUSED_SETS, setLinesPool, PERSONAL_BOOSTS, RARE_OPENER_CHANCE, effectiveChance, SEASONAL_BUFFS, SPECIAL_SETS, activeSeasonals, boostPool, isOpenAt, guestSlice, outcomeBoostByKey, outcomeBoostLabel, outcomeBoostPool, rarePoolFor, specialById, type SeasonalBuff } from './openers';
 import { fortuneButton, fortuneToday, hasTent } from './fortune';
-import { activeBoosts, foundSpecialIds, lockedSetsFor, trainerPool, type ExtraChance } from './rares';
+import { activeBoosts, foundSpecialIds, lockedSetsFor, trainerPool, wakeForNewLines, type ExtraChance } from './rares';
 import { getUserSettings, type UserSettings } from './userSettings';
 import { weeklyTierOf } from './rewards';
 
@@ -157,6 +157,7 @@ export async function fortuneBaseAdjust(guildId: string, discordUserId: string, 
  * paused and the total is the base. A button turns Boosts on or off.
  */
 export async function boostsView(guildId: string, discordUserId: string, now: Date = new Date()) {
+    await wakeForNewLines(guildId, discordUserId, now);
     const [settings, lockedSets, timer] = await Promise.all([
         getUserSettings(guildId, discordUserId),
         lockedSetsFor(guildId, discordUserId),
@@ -167,7 +168,8 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
     const all = await extraChances(guildId, discordUserId, { ...settings, boosts: true }, lockedSets, timer?.earlyStart ?? false, pool, now);
     // Every set they could have on is turned off (owner, 2026-11-20): boosts on
     // the usual pool (personal, tier, Fortune, early start) are inactive too.
-    const openSets = SPECIAL_SETS.filter((s) => !lockedSets.includes(s.id) && !PAUSED_SETS.includes(s.id));
+    // A set with no line open yet (Set 1.2 before the tent) is not one they could have on.
+    const openSets = SPECIAL_SETS.filter((s) => !lockedSets.includes(s.id) && !PAUSED_SETS.includes(s.id) && s.openers.some((o) => isOpenAt(o, now)));
     const allOff = openSets.length > 0 && openSets.every((s) => settings.disabledSets.includes(s.id));
     // Inactive (owner, 2026-11-20): what the trainer turned off (its set, or
     // every set), listed at its own chance, "(inactive)". A boost with nothing

@@ -225,7 +225,26 @@ export interface SpecialSet {
      * the finds already made stay as they are. Remove the flag to resume.
      */
     paused?: boolean;
+    /** Its number on the Specials pages ("1", "1.2"); default its place in `SPECIAL_SETS`. */
+    number?: string;
+    /**
+     * A growing set (owner, 2026-11-22: Set 1.2) counts as a set only once it
+     * has this many open lines: until then no completion (notice, auto-off),
+     * no set points, and not in the set count. Its finds still score.
+     */
+    countsFrom?: number;
     openers: readonly Special[];
+}
+
+/** A set's number on the Specials pages. */
+export function setNumber(set: SpecialSet): string {
+    return set.number ?? String(SPECIAL_SETS.indexOf(set) + 1);
+}
+
+/** True when a set counts as a set at `now` (see `SpecialSet.countsFrom`). */
+export function countsAsSet(set: SpecialSet, now: Date = new Date()): boolean {
+    if (!set.countsFrom) return true;
+    return set.openers.filter((o) => !o.extra && isOpenAt(o, now)).length >= set.countsFrom;
 }
 
 /**
@@ -327,11 +346,9 @@ const REHEARSAL_FORCED: ForcedSuccess = {
 export const SPECIAL_SETS: readonly SpecialSet[] = [
     {
         id: 'set1',
-        name: 'Lobby Loungers',
+        number: '1.1',
+        name: 'Lobby Loungers 1',
         openers: [
-        { id: 'set1.matikane', name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
-        // Owner, 2026-11-15: with Machitan, she opens Fuku-chan's Fortune Tent (see fortune.ts). From TENT_OPENS only.
-        { id: 'set1.fukukitaru', name: 'Matikanefukukitaru', text: "Mumu...! {user}-san, Shiraoki-sama's oracle was right, you came! The run is done, and my crystal ball says the results are lucky. ...It also says something about a tent, and Machitan. I'm sure it's nothing! Namu, namu!", opensAt: TENT_OPENS },
         { id: 'set1.overslept', name: 'Overslept?!', text: '{user} zzzzzzzzz- OOOH AEUHHHH! Oh, right. Trainer, trainer, the timer!' },
         { id: 'set1.tachyon', name: 'Agnes Tachyon', text: '{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food! And then some guinea pigging activities too...' },
         { id: 'set1.bourbon', name: 'Mihono Bourbon', text: "{user} Master-san, I have been provided intel of your underling's completion. Please proceed at haste. I will provide chocolate afterwards." },
@@ -348,6 +365,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
     },
     {
         id: 'online-sensations',
+        number: '2',
         name: '#OnlineSensations',
         requires: 'set1.curren',
         // Owner, 2026-11-09: +1% #OnlineSensations once unlocked.
@@ -373,6 +391,7 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
     },
     {
         id: 'mejiro-estate',
+        number: '3',
         name: 'The Mejiro Estate',
         requires: 'set1.mejiro',
         // Paused 2026-11-10 for the redesign; resumed 2026-11-15 (owner), with the new lines,
@@ -396,6 +415,20 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: "guest.goldship", name: "Golshi's Crashdown", text: "Gorushi-chan, out of the hedge and into the ballroom! Target: McQueen! GORUSHI DROPKIIICK~!! ...She dodged?! Kkaa! {user}, you saw that, right? Missed her again. I always miss her... Not like THAT. Oi, I *said* don't look at me like that.\nAnyways. Here, hold this: a KFC bucket, family size. And yes, a parfait for McQueen... what? Don't ask where I got it. I'm so nice, you know?☆\nNow listen up: I may have failed this time, but next time, I'll come in through the chandelier with my water gun! ...What do you mean you don't want to get involved? You're on rope duty, end of story. Yes, you have to! Gorushi-sama has spoken~ じゃあね, gotta prepare my next escapade!", after: ['mejiro.mcqueen'], extra: true, guest: true },
             { id: "guest.symboli", name: "The Symboli-cs", text: "Rudolf: \"Good evening, {user}-kun. I suppose you're aware already, but we come at Ramonu's invitation in particular. After all, she once called our lunches *boring*, so tonight I intend to prove otherwise. Our two houses at one table... rather Symboli-c, wouldn't you say?\"\nSirius: \"...And that's why she calls them boring. Unbelievable. Evening, Trainer. Hmm... must say you look pretty good tonight, puppy~ Either way, I came to watch the Emperor squirm. Now be a good puppy and fetch me a drink while she does~\"\nRamonu: \"*Excuse me*, Sirius? Fawn over your own. Good evening, Symbolis; we have things to discuss. And Trainer... you had *better* not have enjoyed that.\"", after: ['mejiro.ramonu'], extra: true, guest: true, outcomes: SYMBOLI_OUTCOMES },
             { id: "guest.teio", name: "Teio's Tag-along", text: "Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~\nWell yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~\n...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~\nNow come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!", after: ['mejiro.mcqueen'], extra: true, guest: true, media: 'halloween-pose.mp4', credit: 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>', outcomes: TEIO_OUTCOMES },
+        ],
+    },
+    // Owner, 2026-11-22: Set 1.2, the Matikanes' set (and a home for new lobby lines):
+    // Machitan and Matikanefukukitaru, moved from Set 1 (now Set 1.1). Counts as a set from 12 lines.
+    {
+        id: 'set1-2',
+        number: '1.2',
+        name: 'Lobby Loungers 2',
+        countsFrom: 12,
+        openers: [
+        // Owner, 2026-11-22: Machitan moved here from Set 1 (id kept: finds are stored by it).
+        { id: 'set1.matikane', name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
+        // Owner, 2026-11-15: with Machitan, she opens Fuku-chan's Fortune Tent (see fortune.ts). From TENT_OPENS only.
+        { id: 'set1-2.fukukitaru', name: 'Matikanefukukitaru', text: "Mumu...! {user}-san, Shiraoki-sama's oracle was right, you came! The run is done, and my crystal ball says the results are lucky. ...It also says something about a tent, and Machitan. I'm sure it's nothing! Namu, namu!", opensAt: TENT_OPENS },
         ],
     },
 ];
@@ -734,8 +767,7 @@ export function boostPool(setId: string, tag: string): string[] {
  * removed.
  */
 export const SPECIAL_LOCKS: readonly { id: string; owner: string; ownerChance: number }[] = [
-    // Guaranteed (Fwoxie, 2026-11-08): Tylina's next ping is this line.
-    { id: 'set1.matikane', owner: '457773317739380738', ownerChance: 1 },
+    // Machitan's lock for Tylina (2026-11-08) is removed (owner, 2026-11-22): she found it, so it was over.
 ];
 
 /**

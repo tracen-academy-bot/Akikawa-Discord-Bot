@@ -4,6 +4,85 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-22 — Forced pings in one place; the tent waits for its intro; copy fixes
+
+- Owner: "the intro ping is guaranteed the same way your next forced lesson
+  is... put a `forced: yes` note", and set up future interactions the same
+  way. New `src/lib/timer/forced.ts`: `FORCED_SOURCES`, each `forced: true`
+  with a priority and a note; `nextForcedPing` returns the highest-priority
+  source that is due, the rest wait. Sources: 1 `guarantee` (lesson retry,
+  scheduled lesson, Helios's guest, one-time rig), 2 `tent-intro` (a scene).
+  The scheduler asks it once per ping instead of special-casing each.
+  Table and rules: docs/special-sets/forced-pings.md.
+- `hasTent` now needs the unlock recorded and the intro shown: the Fortune
+  button and draws wait for the intro.
+- Copy (owner: "fix everything"): Air Groove's last line split into two
+  speakers; Taiki's "dēsu" dropped; the intro no longer says the Matikanes
+  are roommates (unconfirmed): Fuku "...Not sisters, by the way!",
+  Machitan "Totally not sisters! I'm ordinary at everything, but...".
+
+---
+
+## 2026-11-22 — The tent's intro ping spends no boosts
+
+- Clash review (tent vs Ramonu, guests, the McQueen rig): a due guarantee
+  beats the intro (it waits; tested); a curse never blocks a guarantee
+  (guarantees skip the roll); a blessing cannot land on a held Ramonu. One
+  real clash: the intro ping rolls no special but still spent a run of
+  every running boost. Now it spends none (a scheduled lesson still counts
+  the run down).
+
+---
+
+## 2026-11-22 — Set 1.1 and Set 1.2; Machitan moves; her lock removed
+
+- Owner: Set 1 is now "Set 1.1: Lobby Loungers 1" (`number: '1.1'`, id
+  `set1` unchanged). Machitan moved to Set 1.2 with Fukukitaru, keeping her
+  id `set1.matikane` (finds are stored by id). Set 1.1 has 12 lines; Set 1.2
+  has 2 (Fukukitaru from TENT_OPENS), so its page shows from now.
+- Effect on points: nobody loses. Anyone who had every Set 1 line but
+  Machitan now has Set 1.1 complete (+100); its completion notice shows on
+  their next Set 1.1 find.
+- Owner: Machitan's `SPECIAL_LOCKS` entry for Tylina is removed (it ended
+  when she found it on 2026-11-08). The lock mechanism stays, unused; its
+  tests went with the entry.
+
+---
+
+## 2026-11-22 — Set 1.2: Lobby Loungers 2 (Fukukitaru's home)
+
+- Owner: rather than wake a finished Set 1, give new lobby lines their own
+  set. `set1.fukukitaru` became `set1-2.fukukitaru` (unfound by anyone, not
+  open yet) in "Set 1.2: Lobby Loungers 2". Also fixes a second bug: at
+  TENT_OPENS every Set 1 finisher would have lost the +100 set points
+  (a set counts as complete only with every open line found).
+- `SpecialSet.number` ("1", "1.2", "2", "3") names the pages; pages sort by
+  it; the tent is fixed as "Set 4". `SpecialSet.countsFrom` (12 for Set 1.2):
+  below it no completion notice or auto-off, no set points, not in the set
+  count; finds still score 15/3.
+- A set with no open line has no page (`pagesAt`, `pageOfSet` now take
+  `now`), so Set 1.2 appears at the opening and gives nothing away before.
+  The Boosts view's "all sets off" ignores such a set too.
+- Tests also run with the process clock moved past TENT_OPENS (a Node
+  preload shifting `Date`): both pass.
+
+---
+
+## 2026-11-22 — Finished sets wake for new lines (the tent's Fukukitaru)
+
+- Superseded for the tent by Set 1.2 (above); kept as a safety net for a
+  future line added to a finished set.
+
+- Found in the Set 4 review: Matikanefukukitaru is a new Set 1 line opening
+  at TENT_OPENS, and the tent needs her. Anyone who finished Set 1 had it
+  turned off by auto-off (`set1:all`), so she could never come up and the
+  tent could never unlock for them.
+- `wakeForNewLines` (rares.ts), run before each ping and the Boosts view:
+  a set auto-off turned off (not kept) that now has an open line the trainer
+  has not found is turned back on, resting (`<set>` kept, `<set>:all`
+  dropped). Found lines stay out; the new line is live; finding it completes
+  the set again, with its notice, and turns it off.
+
 ## 2026-11-21 — #club-bio: the poster closes the directory, and is redesigned
 
 Asked: the poster should be part of the #club-bio directory, at the bottom

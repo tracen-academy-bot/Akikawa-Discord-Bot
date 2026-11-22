@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelec
 import { getUserSettings } from './userSettings';
 import { FORTUNE_LINES, fortuneLineById, tentIsOpen } from './fortuneLines';
 import { prisma } from '../../db/prisma';
-import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, claimOpener, closedSpecials, redirectOpener, unlockedGuests, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
+import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, claimOpener, countsAsSet, setNumber, closedSpecials, redirectOpener, unlockedGuests, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
 /**
  * Rare timer-ping openers: which have come up, how often, and who found each
@@ -121,28 +121,33 @@ export const SPECIALS_FIRST_PAGE = 1;
  * Fortune Tent (its fortunes, drawn from the Boosts view; not a pool).
  */
 type SpecialsPage = { kind: 'reminders' } | { kind: 'set'; set: number } | { kind: 'extras'; set: number } | { kind: 'fortune' };
+// Pages follow the sets' numbers (Set 1, Set 1.2, Set 2, ...), not their place in SPECIAL_SETS.
 const SET_PAGES: readonly SpecialsPage[] = [
     { kind: 'reminders' },
-    ...SPECIAL_SETS.flatMap((s, i): SpecialsPage[] =>
-        RARE_OPENERS.some((o) => o.set === s.id && o.extra) ? [{ kind: 'set', set: i }, { kind: 'extras', set: i }] : [{ kind: 'set', set: i }],
-    ),
+    ...SPECIAL_SETS.map((s, i) => ({ s, i }))
+        .sort((a, b) => Number(setNumber(a.s)) - Number(setNumber(b.s)))
+        .flatMap(({ s, i }): SpecialsPage[] =>
+            RARE_OPENERS.some((o) => o.set === s.id && o.extra) ? [{ kind: 'set', set: i }, { kind: 'extras', set: i }] : [{ kind: 'set', set: i }],
+        ),
 ];
 
 /** The pages at `now`: the Fortune Tent's page only once it is open. */
 function pagesAt(now: Date): readonly SpecialsPage[] {
-    return tentIsOpen(now) ? [...SET_PAGES, { kind: 'fortune' }] : SET_PAGES;
+    // A set with no line open yet (Set 1.2 before the tent) has no page.
+    const shown = SET_PAGES.filter((p) => p.kind === 'reminders' || p.kind === 'fortune' || SPECIAL_SETS[p.set]!.openers.some((o) => isOpenAt(o, now)));
+    return tentIsOpen(now) ? [...shown, { kind: 'fortune' }] : shown;
 }
 
 /** The Fortune Tent's set number and name, after the special sets. */
-export const FORTUNE_SET_TITLE = `Set ${SPECIAL_SETS.length + 1}: Fuku-chan's Fortune Tent`;
+export const FORTUNE_SET_TITLE = "Set 4: Fuku-chan's Fortune Tent";
 
 /** A page's heading: "Set <n>: <name>", or "Set <n>.5: <name> Extras". */
 function pageTitle(pages: readonly SpecialsPage[], page: number): string {
     const pg = pages[page]!;
     if (pg.kind === 'reminders') return 'Set 0: Reminders';
     if (pg.kind === 'fortune') return FORTUNE_SET_TITLE;
-    const name = SPECIAL_SETS[pg.set]!.name;
-    return pg.kind === 'set' ? `Set ${pg.set + 1}: ${name}` : `Set ${pg.set + 1}.5: ${name} Extras`;
+    const set = SPECIAL_SETS[pg.set]!;
+    return pg.kind === 'set' ? `Set ${setNumber(set)}: ${set.name}` : `Set ${setNumber(set)}.5: ${set.name} Extras`;
 }
 
 /** The Back/Next row of a Specials page, with `middle` (the set's toggle) between them. */
@@ -372,9 +377,9 @@ export async function serverSpecialsView(guildId: string, page: number, now: Dat
 }
 
 /** The page of `setId` in the Specials list (Set 1 is page 1), or the first page. */
-export function pageOfSet(setId: string): number {
+export function pageOfSet(setId: string, now: Date = new Date()): number {
     const i = SPECIAL_SETS.findIndex((s) => s.id === setId);
-    const page = SET_PAGES.findIndex((p) => p.kind === 'set' && p.set === i);
+    const page = pagesAt(now).findIndex((p) => p.kind === 'set' && p.set === i);
     return page === -1 ? SPECIALS_FIRST_PAGE : page;
 }
 
@@ -484,6 +489,33 @@ export async function trainerPool(guildId: string, discordUserId: string, pool: 
         .filter((t) => !resting.has(t));
 }
 
+/**
+ * Wakes a trainer's sets that auto-off turned off (`<set>:all`, not kept)
+ * once they gain a line the trainer has not found (a `Special.opensAt`
+ * passing, e.g. Matikanefukukitaru in Set 1 at TENT_OPENS). The set is on
+ * again and resting: found lines stay out, the new line is live, and
+ * finding it completes the set again (and turns it off). Returns the sets
+ * woken. Called before each ping and the Boosts view.
+ */
+export async function wakeForNewLines(guildId: string, discordUserId: string, now: Date = new Date()): Promise<string[]> {
+    const row = await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId, discordUserId } } });
+    if (!row) return [];
+    const auto = row.autoOffSets ?? [];
+    const candidates = SPECIAL_SETS.filter((s) => auto.includes(`${s.id}:all`) && !auto.includes(`${s.id}:kept`) && row.disabledSets.includes(s.id));
+    if (candidates.length === 0) return [];
+    const found = await foundSpecialIds(guildId, discordUserId);
+    const woken = candidates.filter((s) => s.openers.some((o) => !o.extra && isOpenAt(o, now) && !found.has(o.id))).map((s) => s.id);
+    if (woken.length === 0) return [];
+    await prisma.timerUserSettings.update({
+        where: { guildId_discordUserId: { guildId, discordUserId } },
+        data: {
+            disabledSets: row.disabledSets.filter((id) => !woken.includes(id)),
+            autoOffSets: [...new Set([...auto.filter((k) => !woken.some((id) => k === `${id}:all`)), ...woken])],
+        },
+    });
+    return woken;
+}
+
 /** True when a set is resting for a trainer: auto-off with extras left, not turned back on. */
 export function isResting(setId: string, autoOffSets: readonly string[]): boolean {
     return autoOffSets.includes(setId) && !autoOffSets.includes(`${setId}:all`) && !autoOffSets.includes(`${setId}:kept`);
@@ -518,7 +550,8 @@ export async function completionNotice(guildId: string, discordUserId: string, o
     const special = specialByText(opener);
     if (!special) return null;
     const set = SPECIAL_SETS.find((s) => s.id === special.set);
-    if (!set) return null;
+    // A growing set (`SpecialSet.countsFrom`) has no completion yet.
+    if (!set || !countsAsSet(set)) return null;
     const found = await doneSpecialIds(guildId, discordUserId);
     // This ping's special is found now; a forced-success special only once earned (granted before this runs).
     if (!special.forcedSuccess || (await doneSpecialIds(guildId, discordUserId, new Set([special.id]))).has(special.id)) found.add(special.id);
@@ -919,7 +952,7 @@ export async function specialsBoard(guildId: string, limit = 15, now: Date = new
         // Extras score as finds but never count toward a set, or the found count.
         // A special not open yet (Special.opensAt) does not count toward its set until it opens.
         const fortuneSet = tentOpen && FORTUNE_LINES.every((l) => u.found.has(`${FORTUNE_READ_PREFIX}${l.id}`)) ? 1 : 0;
-        const setsComplete = SPECIAL_SETS.filter((s) => s.openers.some((o) => !o.extra) && s.openers.every((o) => o.extra || !isOpenAt(o, now) || u.found.has(o.id))).length + fortuneSet;
+        const setsComplete = SPECIAL_SETS.filter((s) => countsAsSet(s, now) && s.openers.some((o) => !o.extra) && s.openers.every((o) => o.extra || !isOpenAt(o, now) || u.found.has(o.id))).length + fortuneSet;
         const distinct = u.found.size;
         const points = distinct * SPECIAL_POINTS.found + (u.pings - distinct) * SPECIAL_POINTS.repeat + setsComplete * SPECIAL_POINTS.set;
         const found = [...u.found].filter((id) => !specialById(id)?.extra).length;
@@ -929,7 +962,7 @@ export async function specialsBoard(guildId: string, limit = 15, now: Date = new
     return {
         rows: rows.slice(0, limit),
         specialCount: RARE_OPENERS.filter((o) => !o.extra && isOpenAt(o, now)).length + (tentOpen ? FORTUNE_LINES.length : 0),
-        setCount: SPECIAL_SETS.length + (tentOpen ? 1 : 0),
+        setCount: SPECIAL_SETS.filter((s) => countsAsSet(s, now)).length + (tentOpen ? 1 : 0),
         totalPings: hits.length,
         trainers: rows.length,
     };

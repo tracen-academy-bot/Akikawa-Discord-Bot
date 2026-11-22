@@ -9,7 +9,7 @@ import { TENT_OPENS } from './openers';
 export { TENT_OPENS } from './openers';
 
 /** The two specials that open the tent. */
-export const TENT_PAIR = ['set1.matikane', 'set1.fukukitaru'] as const;
+export const TENT_PAIR = ['set1.matikane', 'set1-2.fukukitaru'] as const;
 
 /** Added to the ping that completes the pair (or a trainer's first ping after the tent opens, if they had both). */
 export const TENT_UNLOCK_LINE = "**Congrats!** Fuku-chan's Fortune Tent unlocked!";
@@ -17,8 +17,8 @@ export const TENT_UNLOCK_LINE = "**Congrats!** Fuku-chan's Fortune Tent unlocked
 /** The introduction: the trainer's next run's ping after the unlock, once ever. `{user}` is the trainer's mention. */
 export const TENT_INTRO = [
     'Machitan: "Babaan! {user}, welcome to the Matikane Fortune Tent! Every morning, Fuku-chan senpai reads my fortune before breakfast... and this morning it said a very special visitor was coming. Uhihi, and here you are!"',
-    'Fuku: "Mumu! Shiraoki-sama\'s oracles are never wrong! Machitan carries my charm, I carry the crystal ball, and together we are... the Matikanes! ...Not sisters, by the way. Just roommates."',
-    'Machitan: "Totally ordinary roommates! But I\'m ordinary at everything, and meeting you was the one lucky thing that\'s special. So I want to share the luck back. Ei, ei, mun!"',
+    'Fuku: "Mumu! Shiraoki-sama\'s oracles are never wrong! Machitan carries my charm, I carry the crystal ball, and together we are... the Matikanes! ...Not sisters, by the way!"',
+    'Machitan: "Totally not sisters! I\'m ordinary at everything, but meeting you was the one lucky thing that\'s special. So I want to share the luck back. Ei, ei, mun!"',
     'Fuku: "One omikuji a day, Trainer-san. Great blessing or great curse, Shiraoki-sama decides! Namu, namu!"',
     "-# Fuku-chan's Fortune Tent is open: draw one omikuji a day from **Boosts**. Blessings raise your special chance for the day; curses lower it.",
 ].join('\n');
@@ -110,7 +110,7 @@ export const FORTUNE_TIERS: readonly FortuneTier[] = [
                 text: [
                     'Taiki: "Howdy! Fuku and I baked fortune cookies, and this one is for {user}! Crack it open!"',
                     'Fuku: "Mumu! Great blessing! Taiki-san, your cookies have spiritual power!"',
-                    'Taiki: "Yippee-ki-yay! Fortune party dēsu!"',
+                    'Taiki: "Yippee-ki-yay! Fortune party!"',
                 ].join('\n'),
             },
         ],
@@ -227,7 +227,8 @@ export const FORTUNE_TIERS: readonly FortuneTier[] = [
                     "Groove: \"Mattaku. What is this racket outside the student council room? ...Fukukitaru. It is a cat. Not the end of the world.\"",
                     "Groove: \"...Still. Kisama, take this. A Shigaraki tanuki. Fukukitaru insisted it would bring luck, and I am in no mood to argue with a crystal ball. Just in case.\"",
                     "Fuku: \"Air Groove-san... you kept it all this time?!\"",
-                    "Machitan: \"Ei, ei, mun! ...It's still a great curse though, isn't it.\" / Groove: \"Yes. But perhaps a smaller one.\"",
+                    "Machitan: \"Ei, ei, mun! ...It's still a great curse though, isn't it.\"",
+                    "Groove: \"Yes. But perhaps a smaller one.\"",
                 ].join('\n'),
             },
         ],
