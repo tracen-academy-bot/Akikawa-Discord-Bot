@@ -4,7 +4,29 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-22 — Set 1.2: Lobby Loungers 2 (Fukukitaru's home)
+
+- Owner: rather than wake a finished Set 1, give new lobby lines their own
+  set. `set1.fukukitaru` became `set1-2.fukukitaru` (unfound by anyone, not
+  open yet) in "Set 1.2: Lobby Loungers 2". Also fixes a second bug: at
+  TENT_OPENS every Set 1 finisher would have lost the +100 set points
+  (a set counts as complete only with every open line found).
+- `SpecialSet.number` ("1", "1.2", "2", "3") names the pages; pages sort by
+  it; the tent is fixed as "Set 4". `SpecialSet.countsFrom` (12 for Set 1.2):
+  below it no completion notice or auto-off, no set points, not in the set
+  count; finds still score 15/3.
+- A set with no open line has no page (`pagesAt`, `pageOfSet` now take
+  `now`), so Set 1.2 appears at the opening and gives nothing away before.
+  The Boosts view's "all sets off" ignores such a set too.
+- Tests also run with the process clock moved past TENT_OPENS (a Node
+  preload shifting `Date`): both pass.
+
+---
+
 ## 2026-11-22 — Finished sets wake for new lines (the tent's Fukukitaru)
+
+- Superseded for the tent by Set 1.2 (above); kept as a safety net for a
+  future line added to a finished set.
 
 - Found in the Set 4 review: Matikanefukukitaru is a new Set 1 line opening
   at TENT_OPENS, and the tent needs her. Anyone who finished Set 1 had it

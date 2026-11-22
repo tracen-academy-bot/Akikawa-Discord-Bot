@@ -8,14 +8,16 @@ the owner.
 
 These override the draft below where they differ.
 
-1. **Fukukitaru** is a Lobby Loungers special, `set1.fukukitaru`
-   ("Matikanefukukitaru"), a normal find, listed right after
-   `set1.matikane` (ids unchanged).
+1. **Fukukitaru** is a Lobby Loungers 2 special, `set1-2.fukukitaru`
+   ("Matikanefukukitaru"), a normal find. Owner, 2026-11-22: moved from
+   Set 1 into a new Set 1.2 ("Lobby Loungers 2", page right after Set 1),
+   so finishing Set 1 stays finished (no lost set points, no auto-off
+   undone). Set 1.2 counts as a set only from 12 lines
+   (`SpecialSet.countsFrom`); its page appears once she opens.
 2. **Release gate:** nothing before `TENT_OPENS` = 2026-11-22T15:00Z
    (Monday 00:00 JST): no unlock, no button, no intro, and Fukukitaru's
-   line is in no pool (`Special.opensAt`). Until then she does not hold up
-   Set 1's completion either.
-3. **Unlock:** both `set1.matikane` and `set1.fukukitaru` found, from
+   line is in no pool (`Special.opensAt`).
+3. **Unlock:** both `set1.matikane` and `set1-2.fukukitaru` found, from
    `TENT_OPENS`. The ping that completes the pair adds
    `**Congrats!** Fuku-chan's Fortune Tent unlocked!`; trainers who already
    had both get it on their first ping after the opening.
@@ -285,10 +287,10 @@ Each result's box: a heading, the scene, then its effect line.
 
 ## Notes for the build
 
-- **Fukukitaru's line** is a Lobby Loungers special (`set1.fukukitaru`), a
+- **Fukukitaru's line** is a Lobby Loungers 2 special (`set1-2.fukukitaru`), a
   normal find with its 15 points. The tent itself is not a set: no page, no
   completion, no points for draws.
-- **Unlock check:** both `set1.matikane` and `set1.fukukitaru` found.
+- **Unlock check:** both `set1.matikane` and `set1-2.fukukitaru` found.
 - **Storage:** one row per trainer per day (guild, user, day, tier, line), so
   a redeploy cannot give a second draw, and the Boosts view can show today's
   result.

@@ -9,7 +9,7 @@ import { TENT_OPENS } from './openers';
 export { TENT_OPENS } from './openers';
 
 /** The two specials that open the tent. */
-export const TENT_PAIR = ['set1.matikane', 'set1.fukukitaru'] as const;
+export const TENT_PAIR = ['set1.matikane', 'set1-2.fukukitaru'] as const;
 
 /** Added to the ping that completes the pair (or a trainer's first ping after the tent opens, if they had both). */
 export const TENT_UNLOCK_LINE = "**Congrats!** Fuku-chan's Fortune Tent unlocked!";
