@@ -306,7 +306,9 @@ async function main() {
     const leneya = await extraChances(XG, '340238209147600897', base, ['online-sensations'], false, fullPool, OFF_SEASON);
     check('personal: two boosts are two lines, +1.5% each', leneya.map((e) => [e.chance, e.label?.split(':')[0]]), [[0.015, 'Faster Than Light'], [0.015, "Principal's Pirouette"]]);
     check('personal: paused with her Boosts off', await extraChances(XG, tylina.owner, { ...base, boosts: false }, [], false, fullPool, OFF_SEASON), []);
-    check('extras: none for a set turned off', (await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool, OFF_SEASON)).length, 0);
+    // A turned-off set's boosts are listed inactive (owner, 2026-11-20), with nothing to draw on.
+    const offExtras = await extraChances(XG, 'u1', { ...base, disabledSets: ['online-sensations'] }, [], false, fullPool, OFF_SEASON);
+    check('extras: a set turned off gives nothing (its boosts inactive, empty pools)', [offExtras.filter((e) => !e.inactive).length, offExtras.every((e) => e.inactive && e.pool.length === 0)], [0, true]);
     // The chances add: 4% boost + 1% early + 1% unlock bonus + the base 6% = 12%, the base intact.
     const extras = await extraChances(XG, 'u1', base, [], true, fullPool, OFF_SEASON);
     const counts = new Map<string, number>();
@@ -411,7 +413,7 @@ async function main() {
     check('season: not before or after the window', [(await extraChances(SN, 's1', plain, LOCKED, false, [], new Date(buff.from.getTime() - 1), [buff])).length, (await extraChances(SN, 's1', plain, LOCKED, false, [], buff.until, [buff])).length], [0, 0]);
     // (This sample week is in December, after the #OnlineSensations unlock bonus ended on Nov 22.)
     check('season: a prerequisite buff stops once its set is unlocked (and by December the unlock bonus is over)', (await extraChances(SN, 's1', plain, [], false, openers.rarePoolFor([]), inSeason, [buff])).map((e) => [e.chance, e.pool.length]), []);
-    check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
+    check('season: not with its set off, or Boosts off', [(await extraChances(SN, 's1', { ...plain, disabledSets: ['set1'] }, LOCKED, false, [], inSeason, [buff])).filter((e) => !e.inactive && e.pool.length > 0).length, (await extraChances(SN, 's1', { ...plain, boosts: false }, LOCKED, false, [], inSeason, [buff])).length], [0, 0]);
 
     // The Boosts view: base, each boost, and the next ping's total.
     const { boostsView, BOOSTS_TOGGLE_ID } = await import('../src/lib/timer/boosts');
@@ -428,9 +430,15 @@ async function main() {
     // Everything off (owner, 2026-11-19): the view says so, personal boosts stay listed at 0%, no early-start tip.
     {
         const ty = '457773317739380738';
-        for (const id of ['set1', 'online-sensations', 'mejiro-estate']) await us0.toggleSetting(SN, ty, `set:${id}`);
+        // Unlock #OnlineSensations and hold its Loves boost, then turn only that set off: the boost is inactive.
+        await rares.recordRareOpener(SN, ty, curren.text);
+        await rares.grantBoost(SN, ty, loves.text);
+        await us0.toggleSetting(SN, ty, 'set:online-sensations');
+        const oneOff = (await boostsView(SN, ty, OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
+        check('boosts view: a turned-off set\'s boost says inactive; her personal boosts stay live', [oneOff.includes('**+4%** #OnlineSensations collab lines, 50 runs left. (inactive)'), oneOff.includes('**+4%** Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!\n'), oneOff.includes('All sets have been disabled')], [true, true, false]);
+        for (const id of ['set1', 'mejiro-estate']) await us0.toggleSetting(SN, ty, `set:${id}`);
         const allOff = (await boostsView(SN, ty, OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
-        check('boosts view: everything off says so, lists idle boosts at 0%, total 0%', [allOff.startsWith('**Nothing left to find.**'), allOff.includes("**0%** Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist! (nothing to find right now)"), allOff.includes('Early Start: start your next run'), allOff.includes('**Your next ping: 0% chance of a special.**')], [true, true, false, true]);
+        check('boosts view: all sets off says so, lists her personal boosts as inactive, total 0%', [allOff.startsWith('**All sets have been disabled. Enable one to find specials!**'), allOff.includes('**+4%** Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist! (inactive)'), allOff.includes('Early Start: start your next run'), allOff.includes('**Your next ping: 0% chance of a special.**')], [true, true, false, true]);
     }
     const inWeek = new Date(week.from.getTime() + 60_000);
     const before = (await boostsView(SN, 'not-unlocked', inWeek)).embeds[0]!.toJSON().description ?? '';
@@ -602,7 +610,7 @@ async function main() {
     for (let k = 0; k < 10; k += 1) await ping(PING_OPENERS[0]!, 0.5);
     check('schedule: counts down to 1 and stays due (the set is paused, so it waits)', (await stateOf()).guaranteedInRuns, 1);
     // McQueen is found, so her three guests are unlocked: the guest slice (content) stays with Boosts off (owner, 2026-11-18).
-    check('boosts: outcome boosts apply, but give nothing with Boosts off (the guest slice stays) or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).length], [2, 1, 0]);
+    check('boosts: outcome boosts apply, but give nothing with Boosts off (the guest slice stays) or with the set off', [(await extraChances(OG, T, usable, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, boosts: false }, NOT_OS, false, [], OFF_SEASON)).length, (await extraChances(OG, T, { ...usable, disabledSets: ['mejiro-estate'] }, NOT_OS, false, [], OFF_SEASON)).filter((e) => !e.inactive && e.pool.length > 0).length], [2, 1, 0]);
     // The same storage on a set that is not paused (stored by hand: no Set 1 line has outcomes).
     const UG = `${OG}-live`;
     await prisma.timerSpecialBoost.createMany({ data: [

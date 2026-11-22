@@ -741,6 +741,12 @@ export interface ExtraChance {
     label?: string;
     /** Content, not a boost (the guest slice): Boosts off does not pause it. */
     content?: boolean;
+    /**
+     * Its set is turned off by the trainer (owner, 2026-11-20): listed in the
+     * Boosts view as "(inactive)" at its own chance, with an empty pool so it
+     * gives nothing.
+     */
+    inactive?: boolean;
 }
 
 /**

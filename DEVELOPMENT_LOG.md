@@ -24,6 +24,13 @@ Newest first. Each entry records what changed and, more importantly, why.
   find.**", shows 0%, and drops the Early Start tip. A boost with nothing to
   land on is listed as "**0%** … (nothing to find right now)" instead of
   hidden (e.g. Estate boosts while Ramonu is held).
+- Revised (owner, 2026-11-20): with every set they could have on turned
+  off, the view opens "**All sets have been disabled. Enable one to find
+  specials!**" and lists boosts on the usual pool (personal, tier, Fortune,
+  early start) as "(inactive)" at their own chance. A boost whose set is
+  turned off is listed the same way (`ExtraChance.inactive`, empty pool, so
+  it gives nothing; locked or paused sets still hide theirs). Order: live,
+  then "(nothing to find right now)" at 0%, then inactive.
 
 ## 2026-11-19 — Boosts keep their rate per line
 
