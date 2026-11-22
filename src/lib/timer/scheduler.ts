@@ -232,8 +232,9 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 const message = await channel.send({ ...payload(), allowedMentions: { users: [timer.discordUserId] } });
                 await scheduleNotificationDeletion(timer.channelId, message.id, pingMinutes(settings));
                 // Boosts tick down only while on (off pauses them). A boost
-                // this ping grants starts after it, with its full count.
-                if (settings.boosts) await spendBoosts(timer.guildId, timer.discordUserId);
+                // this ping grants starts after it, with its full count. The
+                // tent's intro ping rolls nothing, so it spends nothing either.
+                if (settings.boosts && !intro) await spendBoosts(timer.guildId, timer.discordUserId);
                 // A scheduled guarantee (Ramonu's lesson) counts down one run on every other ping.
                 await tickGuarantee(timer.guildId, timer.discordUserId, opener);
                 await tent?.record();

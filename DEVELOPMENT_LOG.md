@@ -4,6 +4,17 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-22 — The tent's intro ping spends no boosts
+
+- Clash review (tent vs Ramonu, guests, the McQueen rig): a due guarantee
+  beats the intro (it waits; tested); a curse never blocks a guarantee
+  (guarantees skip the roll); a blessing cannot land on a held Ramonu. One
+  real clash: the intro ping rolls no special but still spent a run of
+  every running boost. Now it spends none (a scheduled lesson still counts
+  the run down).
+
+---
+
 ## 2026-11-22 — Set 1.1 and Set 1.2; Machitan moves; her lock removed
 
 - Owner: Set 1 is now "Set 1.1: Lobby Loungers 1" (`number: '1.1'`, id
