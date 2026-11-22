@@ -169,12 +169,13 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
     // the usual pool (personal, tier, Fortune, early start) are inactive too.
     const openSets = SPECIAL_SETS.filter((s) => !lockedSets.includes(s.id) && !PAUSED_SETS.includes(s.id));
     const allOff = openSets.length > 0 && openSets.every((s) => settings.disabledSets.includes(s.id));
-    // Inactive (owner, 2026-11-20): anything that gives nothing right now, for
-    // whatever reason (its set off, every set off, or nothing left to land on,
-    // e.g. Ramonu held for a lesson). Listed at its own chance, "(inactive)".
-    const isInactive = (e: ExtraChance) => e.inactive === true || (allOff && e.pool === pool && !e.content) || e.pool.length === 0 || e.chance <= 0;
+    // Inactive (owner, 2026-11-20): what the trainer turned off (its set, or
+    // every set), listed at its own chance, "(inactive)". A boost with nothing
+    // to land on for other reasons (e.g. Ramonu held for a lesson) is a hidden
+    // thing: not shown.
+    const isInactive = (e: ExtraChance) => e.inactive === true || (allOff && e.pool === pool && !e.content);
     const inactive = all.filter(isInactive);
-    const extras = all.filter((e) => !isInactive(e));
+    const extras = all.filter((e) => !isInactive(e) && e.pool.length > 0 && e.chance > 0);
     // Nothing anywhere: no line on, no boost or slice with anything to find.
     const nothing = pool.length === 0 && extras.length === 0;
     // Fortune Tent: a curse lowers the base, Boosts on or off; the button once they have the tent.

@@ -864,10 +864,10 @@ async function main() {
         const { extraChances: ec } = await import('../src/lib/timer/boosts');
         const fw = (await ec(AG, AU, await usA.getUserSettings(AG, AU), [], false, [], new Date('2026-01-01T00:00:00Z'))).filter((e) => e.label?.startsWith('The Mejiro Estate: any Mejiro line'));
         check('per line: a resting Estate keeps a ninth of an Estate boost, on Ramonu', fw.map((e) => [Math.round(e.chance * 1e6) / 1e6, e.pool]), [[Math.round((0.05 / 9) * 1e6) / 1e6, [ramonu.text]]]);
-        // A lesson owed holds Ramonu: the boost has nothing to land on, so the view lists it at its own 5%, inactive.
+        // A lesson owed holds Ramonu: the boost has nothing to land on, a hidden thing (owner, 2026-11-20): not shown.
         await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: AG, discordUserId: AU } }, data: { guaranteedSpecialId: 'mejiro.rehearsal', guaranteedInRuns: 5 } });
         const heldView = (await (await import('../src/lib/timer/boosts')).boostsView(AG, AU, new Date('2026-01-01T00:00:00Z'))).embeds[0]!.toJSON().description ?? '';
-        check('inactive: Ramonu held for a lesson, the footwork boost is listed at 5%, inactive', heldView.includes('**+5%** The Mejiro Estate: any Mejiro line, 50 runs left. (inactive)'), true);
+        check('hidden: Ramonu held for a lesson, the footwork boost (nothing to land on) is not shown', heldView.includes('The Mejiro Estate: any Mejiro line'), false);
         await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: AG, discordUserId: AU } }, data: { guaranteedSpecialId: null, guaranteedInRuns: null } });
         await prisma.timerSpecialBoost.deleteMany({ where: { guildId: AG, discordUserId: AU } });
     }

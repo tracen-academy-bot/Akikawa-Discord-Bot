@@ -31,12 +31,10 @@ Newest first. Each entry records what changed and, more importantly, why.
   turned off is listed the same way (`ExtraChance.inactive`, empty pool, so
   it gives nothing; locked or paused sets still hide theirs). Live first,
   then inactive.
-- Simplified (owner, 2026-11-20): one label for anything that gives nothing
-  right now, whatever the reason (set off, every set off, or nothing left
-  to land on, e.g. Ramonu held for a lesson): its own chance, then
-  "(inactive)". No more "0% (nothing to find right now)". `perLine` keeps a
-  boost's chance when nothing is left (its pool is empty, so it gives
-  nothing anyway).
+- Simplified (owner, 2026-11-20: "keep it simple for user"): "(inactive)"
+  only for what the trainer turned off (a set, or every set). A boost with
+  nothing to land on for other reasons (Ramonu held for a lesson) is a
+  hidden thing and is not shown. No "0% (nothing to find right now)".
 
 ## 2026-11-19 — Boosts keep their rate per line
 
