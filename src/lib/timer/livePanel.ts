@@ -148,6 +148,16 @@ export const SCHEDULED_NOTICES: readonly { key: string; at: Date; text: string }
             '*"To offer a perfect and complete victory \u2013 that is the proof of my love."* Show up and perform with Ramonu, or be made to try again. After all, it\'s a special day at the Estate, and Ramonu accepts nothing less than perfection.',
         ].join('\n'),
     },
+    {
+        // Monday 2026-11-23 00:01 JST: the Fortune Tent opens (owner, 2026-11-22). Posted late if need be (24h window).
+        key: '2026-11-23-fortune-tent',
+        at: new Date('2026-11-22T15:01:00Z'),
+        text: [
+            "**Fuku-chan's Fortune Tent is open!** Find both Matikanes in **Set 1.2: Lobby Loungers 2** to unlock it, then draw one omikuji a day from **Boosts**. Blessings raise your special chance for the day; curses lower it. Shiraoki-sama decides!",
+            '',
+            "Weekly places now come with a boost until next week's results: 1\u20132 Abusers +5%, 3\u20135 Enjoyers +3%, 6\u201310 Regulars +1%.",
+        ].join('\n'),
+    },
 ];
 
 /** How long after its time a scheduled notice may still be set (the bot was down). */
