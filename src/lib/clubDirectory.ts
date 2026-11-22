@@ -27,8 +27,11 @@ import { guildClubs, nameWords, staffRolesOf, type LinkableClub, type NamedThing
  *
  * Threads are stored in the layout as `thread:<place>` with the thread's ID;
  * messages as `<place>|<key>`, where `place` is `main` or a group. Rules
- * threads are not in the layout, so a repost never deletes them. A thread archives itself after a week without new
- * messages; an edit reopens it first.
+ * threads are not in the layout, so a repost never deletes them. A thread
+ * archives itself after a week without new messages; an edit reopens it
+ * first. Every thread the directory makes is locked (only members with
+ * Manage Threads, and the bot, post there; rules threads are guarded too);
+ * a refresh locks any it finds unlocked.
  *
  * Clubs with no expected rank are left out. `/club directory` posts it; after that
  * any change to a club (`/club reports`, `/club profile`, `/club admin`, staff, create, delete)
@@ -82,7 +85,9 @@ export interface DirectoryTarget {
 /** A thread the directory made; a discord.js thread channel fits. */
 export interface DirectoryThread extends DirectoryTarget {
     archived?: boolean | null;
+    locked?: boolean | null;
     setArchived(archived: boolean): Promise<unknown>;
+    setLocked(locked: boolean): Promise<unknown>;
     delete(): Promise<unknown>;
 }
 
@@ -455,6 +460,7 @@ export async function publishDirectory(
                         if (!thread) throw new Error('thread gone');
                         // A quiet thread archives itself after a week; its messages cannot be edited until it is opened again.
                         if (thread.archived) await thread.setArchived(false);
+                        await lock(thread);
                         threads.set(threadId, thread);
                     }
                     target = thread;
@@ -500,6 +506,7 @@ export async function publishDirectory(
     for (const part of parts) {
         if ('name' in part) {
             const thread = await channel.threads.create({ name: part.name, autoArchiveDuration: THREAD_ARCHIVE_MINUTES });
+            await lock(thread);
             threads.set(part.place, thread);
             ids.set(part.key, thread.id);
             messageIds.push(thread.id);
@@ -532,7 +539,10 @@ async function rulesThreadPlan(guildId: string, channel: DirectoryChannel): Prom
     for (const club of clubs) {
         if (club.rules && isLink(club.rules)) continue;
         const thread = club.rulesThreadId ? await channel.threads.fetch(club.rulesThreadId).catch(() => null) : null;
-        if (thread) threads.set(club.id, thread.id);
+        if (thread) {
+            await lock(thread);
+            threads.set(club.id, thread.id);
+        }
         else missing.push(club);
     }
     return { threads, missing };
@@ -542,8 +552,19 @@ async function rulesThreadPlan(guildId: string, channel: DirectoryChannel): Prom
 async function openRulesThread(channel: DirectoryChannel, club: { id: string; name: string }): Promise<string> {
     const thread = await channel.threads.create({ name: `${club.name} Goals/Rules`.slice(0, 100), autoArchiveDuration: THREAD_ARCHIVE_MINUTES });
     await thread.send({ content: rulesThreadOpening(club.name), allowedMentions: NO_PINGS });
+    await lock(thread);
     await prisma.trackedCircle.update({ where: { id: club.id }, data: { rulesThreadId: thread.id } });
     return thread.id;
+}
+
+/**
+ * Locks a thread the directory made, if it is not already. A locked thread
+ * takes posts only from members with Manage Threads (and the bot); everyone
+ * can still read it. Rules threads are also guarded (`clubRulesThreads.ts`).
+ * Never fails the directory: without the permission the thread stays open.
+ */
+async function lock(thread: DirectoryThread): Promise<void> {
+    if (!thread.locked) await thread.setLocked(true).catch(() => undefined);
 }
 
 /** The first message in a club's Goals/Rules thread. */

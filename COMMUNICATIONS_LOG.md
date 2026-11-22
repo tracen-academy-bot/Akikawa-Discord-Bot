@@ -40,6 +40,8 @@ Decisions that changed project direction. Newest first.
   humans post there, just set restrictions". Discord cannot limit posting
   per thread, so the bot removes posts in a club's Goals/Rules thread from
   anyone but its staff and Club Managers, and DMs them why.
+- Then: lock the threads too, keeping the guard. Told: locking stops club
+  staff without Manage Threads from posting in their own rules thread.
 
 ---
 

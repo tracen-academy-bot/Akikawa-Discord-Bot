@@ -268,6 +268,13 @@ and its own Directory list. Spica's rules were their own thread too
   Manage Threads (to reopen archived threads) and Manage Messages (to
   remove posts in rules threads) in the directory channel. The guard needs
   the Guild Messages intent, which the bot's fuller intent modes have.
+- Then: "lock is fine... just lock and still have guard". Every thread the
+  directory makes (group and rules) is locked when made, and a refresh
+  locks any rules thread it finds unlocked (group threads, when it next
+  edits in them). Locked threads stay readable to all; only members with
+  Manage Threads (and the bot) post there, so club staff without it cannot
+  post in their rules thread. Threads the bot did not make (Spica's) are
+  not locked, only guarded.
 - Symbols from the screenshots in the migration: First and Rose 🤍, Cosmos
   ☆, Primrose, Alkes, Canopus, Altair, Ascella, Lily and Umbra ୨୧; Spica
   and Capella ★ (the default). Tempest was not in them.
