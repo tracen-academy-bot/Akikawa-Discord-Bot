@@ -275,6 +275,12 @@ and its own Directory list. Spica's rules were their own thread too
   Manage Threads (and the bot) post there, so club staff without it cannot
   post in their rules thread. Threads the bot did not make (Spica's) are
   not locked, only guarded.
+- The group boxes' titles link to their group's thread, as the old tier
+  boxes' titles did ("did you forget to make the top lines links").
+- Poster columns: the live poster put S, A+ and A (9 clubs) left and the
+  rest (5) right, since `splitColumns` kept each column's groups in one
+  run. Now each group goes to whichever column is shorter so far; on the
+  live clubs that is S, A, JP | A+, B+, Casual, level to the pixel.
 - Symbols from the screenshots in the migration: First and Rose 🤍, Cosmos
   ☆, Primrose, Alkes, Canopus, Altair, Ascella, Lily and Umbra ୨୧; Spica
   and Capella ★ (the default). Tempest was not in them.

@@ -392,12 +392,17 @@ async function directoryParts(guild: DirectoryGuild, rulesThreads: Map<string, s
         });
     }
     // In the channel itself, under the threads: what each group means, a box
-    // each, how to apply, and the poster.
+    // each, how to apply, and the poster. A box's title links to its group's
+    // thread, as the old tier boxes did; a group with no clubs has none.
     parts.push({
         key: 'groups',
         place: 'main',
-        build: () => ({
-            embeds: GROUP_ORDER.map((g) => new EmbedBuilder().setColor(GROUPS[g].color).setTitle(GROUPS[g].title).setDescription(GROUPS[g].blurb)),
+        build: (ids) => ({
+            embeds: GROUP_ORDER.map((g) => {
+                const box = new EmbedBuilder().setColor(GROUPS[g].color).setTitle(GROUPS[g].title).setDescription(GROUPS[g].blurb);
+                const thread = ids.get(`thread:${g}`);
+                return thread ? box.setURL(jumpLink(guild.id, thread)) : box;
+            }),
             files: [],
         }),
     });

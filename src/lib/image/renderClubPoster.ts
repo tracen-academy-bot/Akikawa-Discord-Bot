@@ -13,7 +13,7 @@ import { GROUPS, GROUP_ORDER, type RankGroup } from '../clubGroups';
  * colour, then one row per club.
  *
  * Landscape: the groups flow, in order, into two columns of rows under a
- * full-width banner (`splitColumns` balances their heights).
+ * full-width banner, each to the shorter column (`splitColumns`).
  *
  * Rows rather than cards, so the columns line up and clubs compare at a
  * glance: expected rank, quota (as set, and per day so a weekly and a
@@ -337,24 +337,26 @@ function sectionHeight(s: Section): number {
 }
 
 /**
- * Splits the sections, in order, into two columns: the left takes the first
- * few, the right the rest, at the split that makes the taller column
- * shortest.
+ * Splits the sections between two columns, in order, each into whichever
+ * column is shorter so far (the left on a tie). Rank order then reads
+ * left, right, then down, and the columns end close together. Keeping each
+ * column's sections in one run (S, A+, A | the rest) left the 2026-11-22
+ * poster at 9 clubs against 5.
  */
 export function splitColumns<T>(heights: number[], items: T[]): [T[], T[]] {
-    const total = heights.reduce((a, b) => a + b, 0);
-    let best = 0;
-    let bestTaller = Infinity;
+    const columns: [T[], T[]] = [[], []];
     let left = 0;
-    for (let k = 0; k <= items.length; k++) {
-        const taller = Math.max(left, total - left);
-        if (taller < bestTaller) {
-            bestTaller = taller;
-            best = k;
+    let right = 0;
+    items.forEach((item, i) => {
+        if (right < left) {
+            columns[1].push(item);
+            right += heights[i] ?? 0;
+        } else {
+            columns[0].push(item);
+            left += heights[i] ?? 0;
         }
-        left += heights[k] ?? 0;
-    }
-    return [items.slice(0, best), items.slice(best)];
+    });
+    return columns;
 }
 
 /** "21 Nov 2026" in UTC. */

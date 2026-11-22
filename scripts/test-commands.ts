@@ -1005,6 +1005,8 @@ async function main() {
         `${'-'.repeat(88)}\n__**Directory**__\n[Checkrose](https://discord.com/channels/${GUILD}/c-directory-t1/c-directory-m2)`);
     check('posted with its links: nothing needs editing after', dirA.rec.edits, []);
     check('a box per rank group', dirA.rec.sent[3]?.payload.embeds.map((e) => e.toJSON().title), ['S [Competitive]', 'A+ [Semi Competitive+]', 'A [Semi-Competitive]', 'B+ [Semi-Casual]', 'Casual']);
+    check("a box's title links to its group's thread; a group with no clubs has no link", dirA.rec.sent[3]?.payload.embeds.map((e) => (e.toJSON() as { url?: string }).url ?? null),
+        [null, null, `https://discord.com/channels/${GUILD}/c-directory-t1`, null, null]);
     const posterFile = dirA.rec.sent[5]?.payload.files[0] as { name?: string; attachment?: Buffer } | undefined;
     check('the poster is last, a JPEG', [posterFile?.name, posterFile?.attachment?.subarray(0, 3).toString('hex')], ['clubs.jpg', 'ffd8ff']);
     check('nothing in it pings', dirA.rec.sent.every((m) => JSON.stringify(m.payload.allowedMentions?.parse) === '[]'), true);

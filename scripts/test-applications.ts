@@ -319,6 +319,12 @@ async function main() {
         ({ id: name, name, group: 'A', rank, headcount: 20, quotaText: 'x', dailyRequirement, monthlyRank: null });
     check('poster: a tier orders by expected rank, then per day (none last), then name',
         posterOrder([pc('d', null, 9), pc('c', 'A', null), pc('b', 'A', 1), pc('a', 'A', 1), pc('e', 'A_PLUS', 1)]).map((c) => c.name), ['e', 'a', 'b', 'c', 'd']);
+    const { splitColumns } = await import('../src/lib/image/renderClubPoster');
+    // The live poster on 2026-11-22: S 2 clubs, A+ 3, A 4, B+ 2, Casual 2, JP 1 (band 62, row 84, gap 26).
+    const live = [['S', 2], ['A+', 3], ['A', 4], ['B+', 2], ['Casual', 2], ['JP', 1]] as const;
+    const split = splitColumns(live.map(([, n]) => 62 + n * 84 + 26), live.map(([g]) => g));
+    check('poster: each group goes to the shorter column, so they end level', split, [['S', 'A', 'JP'], ['A+', 'B+', 'Casual']]);
+    check('poster: one group stays left', splitColumns([100], ['S']), [['S'], []]);
     check('poster: short per-day figures', [shortFans(3_266_666), shortFans(533_333), shortFans(950)], ['3.3M', '533K', '950']);
     check('poster: renders a JPEG', poster.subarray(0, 3).toString('hex'), 'ffd8ff');
     check('poster: renders with no clubs', (await renderClubPoster([])).subarray(0, 3).toString('hex'), 'ffd8ff');
