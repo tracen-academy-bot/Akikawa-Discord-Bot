@@ -346,10 +346,9 @@ const REHEARSAL_FORCED: ForcedSuccess = {
 export const SPECIAL_SETS: readonly SpecialSet[] = [
     {
         id: 'set1',
-        number: '1',
-        name: 'Lobby Loungers',
+        number: '1.1',
+        name: 'Lobby Loungers 1',
         openers: [
-        { id: 'set1.matikane', name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
         { id: 'set1.overslept', name: 'Overslept?!', text: '{user} zzzzzzzzz- OOOH AEUHHHH! Oh, right. Trainer, trainer, the timer!' },
         { id: 'set1.tachyon', name: 'Agnes Tachyon', text: '{user} Hayaku, はやく! Tachyon is hungry, so get to finishing the training and cook her some food! And then some guinea pigging activities too...' },
         { id: 'set1.bourbon', name: 'Mihono Bourbon', text: "{user} Master-san, I have been provided intel of your underling's completion. Please proceed at haste. I will provide chocolate afterwards." },
@@ -418,14 +417,16 @@ export const SPECIAL_SETS: readonly SpecialSet[] = [
             { id: "guest.teio", name: "Teio's Tag-along", text: "Hey hey, {user}! Kaichou brought me as her plus-one, so Teio-sama is officially Symboli-house company tonight! Did you see McQueen's face when I walked in? Priceless~\nWell yeaaa, I'm still her rival, of course! Like, look at this pose I made to tease her! Like it?~\n...But hey, realsies. Don't tell her I said this, but she looks really happy tonight. Guess that's your fault, huh? Hehe~\nNow come on, Trainer. One Teio Step with me, then we're raiding the kitchen for はちみー. Muteki!", after: ['mejiro.mcqueen'], extra: true, guest: true, media: 'halloween-pose.mp4', credit: 'Video: <https://youtube.com/shorts/l-8i2u6T4CM>', outcomes: TEIO_OUTCOMES },
         ],
     },
-    // Owner, 2026-11-22: Set 1.2, a home for new lobby lines. Matikanefukukitaru moved here
-    // from Set 1 so finishing Set 1 stays finished. Counts as a set from 12 lines.
+    // Owner, 2026-11-22: Set 1.2, the Matikanes' set (and a home for new lobby lines):
+    // Machitan and Matikanefukukitaru, moved from Set 1 (now Set 1.1). Counts as a set from 12 lines.
     {
         id: 'set1-2',
         number: '1.2',
         name: 'Lobby Loungers 2',
         countsFrom: 12,
         openers: [
+        // Owner, 2026-11-22: Machitan moved here from Set 1 (id kept: finds are stored by it).
+        { id: 'set1.matikane', name: 'Matikanetannhauser', text: "Wasshoi~ *trips* Oooooow!... ooh- *tears up, sniffles*, I'm okay, {user}! You're here now! Please come take a look at your trainee!" },
         // Owner, 2026-11-15: with Machitan, she opens Fuku-chan's Fortune Tent (see fortune.ts). From TENT_OPENS only.
         { id: 'set1-2.fukukitaru', name: 'Matikanefukukitaru', text: "Mumu...! {user}-san, Shiraoki-sama's oracle was right, you came! The run is done, and my crystal ball says the results are lucky. ...It also says something about a tent, and Machitan. I'm sure it's nothing! Namu, namu!", opensAt: TENT_OPENS },
         ],
@@ -766,8 +767,7 @@ export function boostPool(setId: string, tag: string): string[] {
  * removed.
  */
 export const SPECIAL_LOCKS: readonly { id: string; owner: string; ownerChance: number }[] = [
-    // Guaranteed (Fwoxie, 2026-11-08): Tylina's next ping is this line.
-    { id: 'set1.matikane', owner: '457773317739380738', ownerChance: 1 },
+    // Machitan's lock for Tylina (2026-11-08) is removed (owner, 2026-11-22): she found it, so it was over.
 ];
 
 /**

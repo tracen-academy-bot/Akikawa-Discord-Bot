@@ -119,7 +119,8 @@ async function main() {
     // Rare lines are recorded and tallied.
     const rares = await import('../src/lib/timer/rares');
     const { RARE_OPENERS } = await import('../src/lib/timer/openers');
-    check('specials: Matikanetannhauser is No. 1', RARE_OPENERS[0]?.name, 'Matikanetannhauser');
+    // Set 1.1 opens with Overslept?! now; Machitan moved to Set 1.2 (owner, 2026-11-22), first there.
+    check('specials: Set 1.2 starts with Matikanetannhauser', (await import('../src/lib/timer/openers')).SPECIAL_SETS.find((x) => x.id === 'set1-2')!.openers[0]?.name, 'Matikanetannhauser');
     const RG = `test-rares-${Date.now()}`;
     check('rares: a rare line is rare, a common one is not', [rares.isRareOpener(RARE_PING_OPENERS[1]!), rares.isRareOpener(PING_OPENERS[0]!)], [true, false]);
     await rares.recordRareOpener(RG, 'u1', RARE_PING_OPENERS[1]!);
@@ -139,7 +140,7 @@ async function main() {
     const col = (n: number) => embed.fields?.[n]?.value.split('\n') ?? [];
     check('specials: one set per page, three columns', [embed.title, embed.description, embed.fields?.map((f) => f.name), col(0).length, col(2).length], [
         `Specials found: 2 of ${RARE_OPENERS.filter((o) => !o.extra && isOpenAt(o, PRE)).length}`,
-        `**Set 1: ${SETS[0]!.name}**: 2 of ${SETS[0]!.openers.filter((o) => isOpenAt(o, PRE)).length} found`,
+        `**Set 1.1: ${SETS[0]!.name}**: 2 of ${SETS[0]!.openers.filter((o) => isOpenAt(o, PRE)).length} found`,
         ['Special', 'Times', 'First found by'],
         SETS[0]!.openers.filter((o) => isOpenAt(o, PRE)).length,
         SETS[0]!.openers.filter((o) => isOpenAt(o, PRE)).length,
@@ -191,7 +192,8 @@ async function main() {
     const openers = await import('../src/lib/timer/openers');
     const allIds = openers.RARE_OPENERS.map((o) => o.id);
     check('ids: every special has a unique id', new Set(allIds).size, allIds.length);
-    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id.startsWith(o.guest ? 'guest.' : ({ 'online-sensations': 'os.', 'mejiro-estate': 'mejiro.' } as Record<string, string>)[o.set] ?? `${o.set}.`)), true);
+    // Machitan kept `set1.matikane` when she moved to Set 1.2 (finds are stored by id).
+    check('ids: each id starts with its set', openers.RARE_OPENERS.every((o) => o.id === 'set1.matikane' || o.id.startsWith(o.guest ? 'guest.' : ({ 'online-sensations': 'os.', 'mejiro-estate': 'mejiro.' } as Record<string, string>)[o.set] ?? `${o.set}.`)), true);
     check('ids: prerequisites and locks name real specials', [...openers.SPECIAL_SETS.flatMap((x) => (x.requires ? [x.requires] : [])), ...openers.SPECIAL_LOCKS.map((l) => l.id)].every((id) => openers.specialById(id) !== undefined), true);
     // A reworded special keeps its finds: they follow the id, not the text.
     const IG = `test-ids-${Date.now()}`;
@@ -213,34 +215,6 @@ async function main() {
     check('resumed: finding the Mejiro Family line announces the Estate', openers.setsUnlockedBy(openers.specialById('set1.mejiro')!.text, ['mejiro-estate']).map((x) => x.name), ['The Mejiro Estate']);
     check('paused: no boost draws on it', openers.boostPool('mejiro-estate', 'collab'), []);
     check('sets: with no special on, a rare roll gives a common line', PING_OPENERS.includes(openers.pickOpener(0.001, [])), true);
-
-    // The lock: Matikanetannhauser is locked to its owner, guaranteed on their next ping, until they have it.
-    const lock = openers.SPECIAL_LOCKS[0]!;
-    const lockedText = RARE_OPENERS.find((o) => o.id === lock.id)!.text;
-    const LG = `test-locks-${Date.now()}`;
-    const pool = openers.rarePoolFor([]);
-    /** Picks across the whole random range in `steps` even steps; counts per opener. */
-    const sweep = async (user: string, steps = 20000) => {
-        const counts = new Map<string, number>();
-        for (let k = 0; k < steps; k += 1) {
-            const o = await rares.chooseOpener(LG, user, k / steps, pool);
-            counts.set(o, (counts.get(o) ?? 0) + 1);
-        }
-        const special = [...counts].filter(([o]) => rares.isRareOpener(o));
-        return { locked: counts.get(lockedText) ?? 0, specials: special.reduce((n, [, c]) => n + c, 0), others: special.filter(([o]) => o !== lockedText).map(([, c]) => c) };
-    };
-    const owner = await sweep(lock.owner, 2000);
-    check('lock: guaranteed, the owner gets it on every roll', [lock.ownerChance >= 1, owner.locked], [true, 2000]);
-    const other = await sweep('someone-else');
-    check('lock: nobody else gets it', other.locked, 0);
-    check('lock: everyone else keeps the base chance, spread evenly over the rest', [other.specials, other.others.length, Math.max(...other.others) - Math.min(...other.others) <= 2], [stepsOf(20000), liveSpecials - 1, true]);
-    await rares.recordRareOpener(LG, 'someone-else', lockedText);
-    check('lock: still on while only someone else has it', (await sweep('someone-else', 2000)).locked, 0);
-    await rares.recordRareOpener(LG, lock.owner, lockedText);
-    const afterOther = await sweep('someone-else');
-    const afterOwner = await sweep(lock.owner);
-    check('lock: over once the owner has it, the base chance over all for everyone', [afterOther.specials, afterOther.locked > 0, afterOwner.specials, afterOwner.locked > 0 && afterOwner.locked < 400], [stepsOf(20000), true, stepsOf(20000), true]);
-    await prisma.rareOpenerHit.deleteMany({ where: { guildId: LG } });
 
     // #OnlineSensations: locked behind Curren Chan, a collab boost, and {set_name}.
     const XG = `test-boosts-${Date.now()}`;
@@ -322,16 +296,11 @@ async function main() {
     const specialCount = [...counts].filter(([o]) => rares.isRareOpener(o)).reduce((n, [, c]) => n + c, 0);
     const collabCount = [...counts].filter(([o]) => collabs.includes(o)).reduce((n, [, c]) => n + c, 0);
     const commonCounts = PING_OPENERS.map((o) => counts.get(o) ?? 0);
-    const guaranteed = openers.SPECIAL_LOCKS.find((l) => l.ownerChance >= 1);
-    if (guaranteed) {
-        const gText = RARE_OPENERS.find((o) => o.id === guaranteed.id)!.text;
-        check('lock: a guarantee beats the boosts too', await rares.chooseOpener(XG, guaranteed.owner, 0.001, fullPool, extras), gText);
-    }
     check('odds: special chance is 4% + 1% + 1% + 6% = 12%', Math.abs(specialCount - stepsOf(STEPS, 0.04 + 0.01 + 0.01 + P)) <= 1, true);
     // Collab lines: all of the 4% boost, plus their share of the 1% and 6%
-    // (spread over every special but the locked Matikanetannhauser).
+    // (spread over every special; no lock since 2026-11-22).
     const shareOf = (n: number, of: number) => Math.round((STEPS * n * collabs.length) / of);
-    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (stepsOf(STEPS, 0.04) + shareOf(0.01, fullPool.length - 1) + shareOf(P, fullPool.length - 1) + shareOf(0.01, openers.SPECIAL_SETS[1]!.openers.length))) <= 3, true);
+    check('odds: the collab lines get the whole boost', Math.abs(collabCount - (stepsOf(STEPS, 0.04) + shareOf(0.01, fullPool.length) + shareOf(P, fullPool.length) + shareOf(0.01, openers.SPECIAL_SETS[1]!.openers.length))) <= 3, true);
     // The sweep is discrete, so step boundaries can shift a count by one either way.
     const commonEach = (STEPS - stepsOf(STEPS, 0.04 + 0.01 + 0.01 + P)) / PING_OPENERS.length;
     check('odds: common lines stay even', commonCounts.every((c) => Math.abs(c - commonEach) <= 1), true);
@@ -438,7 +407,7 @@ async function main() {
         await us0.toggleSetting(SN, ty, 'set:online-sensations');
         const oneOff = (await boostsView(SN, ty, OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
         check('boosts view: a turned-off set\'s boost says inactive; her personal boosts stay live', [oneOff.includes('**+4%** #OnlineSensations collab lines, 50 runs left. (inactive)'), oneOff.includes('**+4%** Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist!\n'), oneOff.includes('All sets have been disabled')], [true, true, false]);
-        for (const id of ['set1', 'mejiro-estate']) await us0.toggleSetting(SN, ty, `set:${id}`);
+        for (const id of ['set1', 'set1-2', 'mejiro-estate']) await us0.toggleSetting(SN, ty, `set:${id}`);
         const allOff = (await boostsView(SN, ty, OFF_SEASON)).embeds[0]!.toJSON().description ?? '';
         check('boosts view: all sets off says so, lists her personal boosts as inactive, total 0%', [allOff.startsWith('**All sets have been disabled. Enable one to find specials!**'), allOff.includes('**+4%** Ei, Ei, Mun!: Machitan cheers on her Leading Mambologist! (inactive)'), allOff.includes('Early Start: start your next run'), allOff.includes('**Your next ping: 0% chance of a special.**')], [true, true, false, true]);
     }
@@ -460,8 +429,8 @@ async function main() {
     const seedHits = async (user: string, texts: string[], from: number) => {
         for (const [k, t] of texts.entries()) await prisma.rareOpenerHit.create({ data: { guildId: LB, discordUserId: user, opener: t, specialId: openers.specialIdOf(t)!, at: at(from + k) } });
     };
-    // 13 Set 1 lines and Fukukitaru (Set 1.2, owner 2026-11-22): 14 found, one set complete (Set 1.2 does not count yet).
-    await seedHits('lb-set', [...set1, openers.specialById('set1-2.fukukitaru')!.text], 0);
+    // Set 1.1's 12 lines and both Matikanes (Set 1.2, owner 2026-11-22): 14 found, one set complete (Set 1.2 does not count yet).
+    await seedHits('lb-set', [...set1, openers.specialById('set1.matikane')!.text, openers.specialById('set1-2.fukukitaru')!.text], 0);
     await seedHits('lb-wide', all.slice(1, 21), 100); // 20 found, no set complete
     await seedHits('lb-wide-more', [...all.slice(1, 21), all[1]!], 200); // 20 found, one repeat
     await seedHits('lb-wide-late', all.slice(1, 21), 300); // ties lb-wide, but later
@@ -621,7 +590,7 @@ async function main() {
         { guildId: UG, discordUserId: T, setId: 'set1', key: 'test:set', chance: 0.03, runsLeft: 1 },
     ] });
     const live1 = await extraChances(UG, T, usable, NOT_OS, false, [], OFF_SEASON);
-    check('boosts: on a live set, one special or the set\'s lines, at their own chance, labelled', live1.map((e) => [e.chance, e.pool.length, e.label]), [[0.02, 1, 'Curren Chan, 5 runs left.'], [0.03, set1Open, 'Lobby Loungers: any of its lines, 1 run left.']]);
+    check('boosts: on a live set, one special or the set\'s lines, at their own chance, labelled', live1.map((e) => [e.chance, e.pool.length, e.label]), [[0.02, 1, 'Curren Chan, 5 runs left.'], [0.03, set1Open, 'Lobby Loungers 1: any of its lines, 1 run left.']]);
     await rares.endBoostsHitBy(UG, T, openers.specialById('set1.curren')!.text);
     check('boosts: a one-time boost on a live set ends on its hit, the other stays', (await rares.activeBoosts(UG, T)).map((b) => b.key), ['test:set']);
     await prisma.timerSpecialBoost.deleteMany({ where: { guildId: UG } });
@@ -871,7 +840,7 @@ async function main() {
         check('set 1.2: Fukukitaru is in Lobby Loungers 2 (Set 1.2), not Set 1; the tent needs her', [openers.specialById('set1-2.fukukitaru')?.set, openers.SPECIAL_SETS[0]!.openers.some((o) => o.name === 'Matikanefukukitaru')], ['set1-2', false]);
         check('set 1.2: a finished Set 1 stays finished after the tent opens', await rares.wakeForNewLines(WG, 'w1', after), []);
         check('set 1.2: not a set yet (fewer than 12 lines): no completion, numbered 1.2', [openers.countsAsSet(openers.SPECIAL_SETS.find((x) => x.id === 'set1-2')!, after), await rares.completionNotice(WG, 'w1', openers.specialById('set1-2.fukukitaru')!.text), openers.setNumber(openers.SPECIAL_SETS.find((x) => x.id === 'set1-2')!)], [false, null, '1.2']);
-        check('set 1.2: its page sits right after Set 1 once open; no page before (Set 2 is page 2)', [rares.pageOfSet('set1-2', after), rares.pageOfSet('set1', after) + 1, rares.pageOfSet('online-sensations', new Date(openers.TENT_OPENS.getTime() - 60_000))], [rares.pageOfSet('set1', after) + 1, rares.pageOfSet('set1-2', after), 2]);
+        check('set 1.2: its page sits right after Set 1.1 (Machitan is open already, so Set 2 is page 3)', [rares.pageOfSet('set1-2', after), rares.pageOfSet('set1', after) + 1, rares.pageOfSet('online-sensations', new Date(openers.TENT_OPENS.getTime() - 60_000))], [rares.pageOfSet('set1', after) + 1, rares.pageOfSet('set1-2', after), 3]);
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: WG, specialId: set1Lines[1]!.id } });
         check('wake: a finished set with a line not found wakes', await rares.wakeForNewLines(WG, 'w1', after), ['set1']);
         const woke = await usA.getUserSettings(WG, 'w1');
@@ -929,7 +898,7 @@ async function main() {
     const set1Done = await rares.completionNotice(OGx, AU, set1Lines.at(-1)!.text);
     await rares.recordRareOpener(OGx, AU, set1Lines.at(-1)!.text);
     await set1Done!.record();
-    check('auto-off: a set without extras turns off when complete', [set1Done?.line === 'Congratulations on finishing Lobby Loungers! The set has been disabled, but you can re-enable it anytime.', (await usA.getUserSettings(OGx, AU)).disabledSets], [true, ['set1']]);
+    check('auto-off: a set without extras turns off when complete', [set1Done?.line === 'Congratulations on finishing Lobby Loungers 1! The set has been disabled, but you can re-enable it anytime.', (await usA.getUserSettings(OGx, AU)).disabledSets], [true, ['set1']]);
 
     // Counts and completion: guests never count, but score.
     const GB = `${GG}-board`;
@@ -939,14 +908,14 @@ async function main() {
     const gb = await rares.specialsBoard(GB, 15, POST);
     check('guests: not in the set\'s completion or found count, but 15 new and 3 repeat', gb.rows.map((r) => [r.discordUserId, r.setsComplete, r.found, r.points]), [['g-all', 1, 9, 14 * 15 + 3 + 100], ['g-eight', 0, 8, 13 * 15]]);
     check('guests: not in the board\'s special count', gb.specialCount, RARE_OPENERS.filter((o) => !o.extra && !o.guest).length + 13);
-    const gEight = json(rares.specialsView(await rares.rareTally(GB, 'g-eight'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }, PRE));
+    const gEight = json(rares.specialsView(await rares.rareTally(GB, 'g-eight'), rares.pageOfSet('mejiro-estate', PRE) + 1, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }, PRE));
     const gNames = gEight.embeds[0]!.fields?.[0]?.value.split('\n') ?? [];
     check('page: Set 3.5 lists the Rehearsal then the guests, counted on their own, never in the overall total', [gEight.embeds[0]!.title, gEight.embeds[0]!.description?.startsWith('**Set 3.5: The Mejiro Estate Extras**: 5 of 6 found'), gNames], [
         `Your specials: 8 of ${RARE_OPENERS.filter((o) => !o.extra && isOpenAt(o, PRE)).length}`,
         true,
         ['???', ...guests.map((g) => g.name)],
     ]);
-    const gNone = json(rares.specialsView(await rares.rareTally(GB, 'nobody'), 4, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }, PRE));
+    const gNone = json(rares.specialsView(await rares.rareTally(GB, 'nobody'), rares.pageOfSet('mejiro-estate', PRE) + 1, { lockedSets: [], disabledSets: [], boosts: [], boostsOn: true }, PRE));
     check('page: ??? until found, on Set 3.5', gNone.embeds[0]!.fields?.[0]?.value.split('\n') ?? [], ['???', '???', '???', '???', '???', '???']);
     const gOpts = gEight.components[1]?.components[0]?.options?.map((o) => [o.label, o.value]) ?? [];
     check('read menu: found guests can be read, from Set 3.5', [gOpts, (await rares.readSpecial(GB, 'g-eight', 'guest.teio'))?.text, await rares.readSpecial(GB, 'nobody', 'guest.teio')], [guests.map((g) => [g.name, g.id]), openers.fillOpener(openers.specialById('guest.teio')!.text, 'g-eight'), null]);
@@ -1026,7 +995,7 @@ async function main() {
     check('settings: a set flips back on', (await us.toggleSetting(SG, 'u1', 'set:set1')).disabledSets, []);
     const view = JSON.stringify(us.settingsView(on));
     check('settings: the screen shows each setting\'s state', [view.includes('DM Me Too: On'), view.includes('Early Riser: On'), view.includes('Boosts: On')], [true, true, true]);
-    check('settings: sets are not on this screen any more', [view.includes('Lobby Loungers:'), us.settingsView(on).components.length], [false, 1]);
+    check('settings: sets are not on this screen any more', [view.includes('Lobby Loungers 1:'), us.settingsView(on).components.length], [false, 1]);
     await prisma.timerUserSettings.deleteMany({ where: { guildId: SG } });
     const { BUTTON_SETTINGS } = await import('../src/lib/timer/panel');
     check('panel: has the Settings button', panelJson.includes(BUTTON_SETTINGS) || JSON.stringify(buildPanel([], { runsToday: 0, topToday: null } as never)).includes(BUTTON_SETTINGS), true);
@@ -1068,7 +1037,7 @@ async function main() {
         // Hidden everywhere players can see until she opens (owner): pages, "N of M", the board's count.
         await rares.recordRareOpener(FG, 'h1', fuku.text); // as if found early (cannot happen; proves the hiding)
         const hv = async (now: Date, mine: boolean) => {
-            // Set 1.2's page once open; before, that page number is Set 2's (Set 1.2 has no page yet).
+            // Set 1.2's page: Machitan before the opening, both Matikanes after.
             const pg = rares.pageOfSet('set1', now) + 1;
             const v = mine ? await rares.mySpecialsView(FG, 'h1', pg, now) : rares.specialsView(await rares.rareTally(FG), pg, undefined, now);
             const e = v.embeds[0]!.toJSON();
@@ -1076,9 +1045,8 @@ async function main() {
         };
         const nAll = RARE_OPENERS.filter((o) => !o.extra).length;
         check('hidden: her row and counts, before and after the opening (personal)', [await hv(BEFORE, true), await hv(OPEN, true)], [
-            // Locked for h1, so no rows (one empty field).
-            [`Your specials: 0 of ${nAll - 1}`, `**Set 2: #OnlineSensations**: 0 of ${openers.SPECIAL_SETS[1]!.openers.length}`, false, 1],
-            [`Your specials: 1 of ${nAll + 13}`, '**Set 1.2: Lobby Loungers 2**: 1 of 1', true, 1],
+            [`Your specials: 0 of ${nAll - 1}`, '**Set 1.2: Lobby Loungers 2**: 0 of 1', false, 1],
+            [`Your specials: 1 of ${nAll + 13}`, '**Set 1.2: Lobby Loungers 2**: 1 of 2', true, 2],
         ]);
         check('hidden: the same on the server list', [(await hv(BEFORE, false))[0], (await hv(BEFORE, false))[2], (await hv(OPEN, false))[0], (await hv(OPEN, false))[2]], [`Specials found: 0 of ${nAll - 1}`, false, `Specials found: 1 of ${nAll + 13}`, true]);
         const hb = async (now: Date) => { const b = await rares.specialsBoard(FG, 15, now); return [b.specialCount, b.rows.find((r) => r.discordUserId === 'h1')?.found ?? 0]; };
@@ -1169,7 +1137,7 @@ async function main() {
         type VJ = { embeds: { title?: string; description?: string; fields?: { name: string; value: string }[]; footer?: { text: string } }[]; components: { components: { custom_id: string; label?: string; options?: { label: string; value: string }[] }[] }[] };
         const vj = (v: { embeds: { toJSON(): unknown }[]; components: { toJSON(): unknown }[] }) => ({ embeds: v.embeds.map((e) => e.toJSON()), components: v.components.map((c) => c.toJSON()) }) as VJ;
         const lastBefore = vj(await rares.mySpecialsView(FG, 't1', 99, BEFORE));
-        check('set 4: no page before the opening (the last page is still Set 3.5)', [lastBefore.embeds[0]!.description?.startsWith('**Set 3.5'), lastBefore.embeds[0]!.footer?.text.endsWith('Page 5 of 5')], [true, true]);
+        check('set 4: no page before the opening (the last page is still Set 3.5, page 6 with Set 1.2)', [lastBefore.embeds[0]!.description?.startsWith('**Set 3.5'), lastBefore.embeds[0]!.footer?.text.endsWith('Page 6 of 6')], [true, true]);
         const s4 = vj(await rares.mySpecialsView(FG, 't1', 6, OPEN)); // after Set 1.2's page (owner, 2026-11-22)
         const s4e = s4.embeds[0]!;
         const s4col = (n: number) => s4e.fields?.[n]?.value.split('\n') ?? [];
@@ -1230,13 +1198,14 @@ async function main() {
         const openersV = await import('../src/lib/timer/openers');
         await rares.recordRareOpener(VG, 'v1', openersV.specialById('set1.mejiro')!.text);
         const fieldsOf = async (mine: boolean, page: number) => (mine ? await rares.mySpecialsView(VG, 'v1', page, PRE) : await rares.serverSpecialsView(VG, page, PRE)).embeds[0]!.toJSON().fields ?? [];
+        const P35 = rares.pageOfSet('mejiro-estate', PRE) + 1; // Set 3.5
         const victorLine = (f: { value: string }[]) => f.find((x) => x.value.startsWith('First Victor'))?.value ?? null;
-        check('victor: nothing before anyone has won', [victorLine(await fieldsOf(true, 4)), victorLine(await fieldsOf(false, 4))], [null, null]);
+        check('victor: nothing before anyone has won', [victorLine(await fieldsOf(true, P35)), victorLine(await fieldsOf(false, P35))], [null, null]);
         const at = new Date('2026-11-16T12:00:00Z');
         await prisma.timerSecondLove.create({ data: { guildId: VG, firstUserId: 'winner-1', firstAt: at } });
         const line = `First Victor (Ramonu's Second Love): <@winner-1> <t:${Math.floor(at.getTime() / 1000)}:R>`;
-        check('victor: under the Set 3.5 table, personal and server', [victorLine(await fieldsOf(true, 4)), victorLine(await fieldsOf(false, 4)), (await fieldsOf(false, 4)).at(-1)?.value], [line, line, line]);
-        check('victor: only on Set 3.5, not on Set 3 or the Boosts view', [victorLine(await fieldsOf(false, 3)), victorLine(await fieldsOf(false, 1)), JSON.stringify(await (await import('../src/lib/timer/boosts')).boostsView(VG, 'v1', PRE)).includes('First Victor')], [null, null, false]);
+        check('victor: under the Set 3.5 table, personal and server', [victorLine(await fieldsOf(true, P35)), victorLine(await fieldsOf(false, P35)), (await fieldsOf(false, P35)).at(-1)?.value], [line, line, line]);
+        check('victor: only on Set 3.5, not on Set 3 or the Boosts view', [victorLine(await fieldsOf(false, P35 - 1)), victorLine(await fieldsOf(false, 1)), JSON.stringify(await (await import('../src/lib/timer/boosts')).boostsView(VG, 'v1', PRE)).includes('First Victor')], [null, null, false]);
         await prisma.timerSecondLove.deleteMany({ where: { guildId: VG } });
         await prisma.rareOpenerHit.deleteMany({ where: { guildId: VG } });
     }

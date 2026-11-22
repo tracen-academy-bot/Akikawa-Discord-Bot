@@ -4,6 +4,21 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-22 — Set 1.1 and Set 1.2; Machitan moves; her lock removed
+
+- Owner: Set 1 is now "Set 1.1: Lobby Loungers 1" (`number: '1.1'`, id
+  `set1` unchanged). Machitan moved to Set 1.2 with Fukukitaru, keeping her
+  id `set1.matikane` (finds are stored by id). Set 1.1 has 12 lines; Set 1.2
+  has 2 (Fukukitaru from TENT_OPENS), so its page shows from now.
+- Effect on points: nobody loses. Anyone who had every Set 1 line but
+  Machitan now has Set 1.1 complete (+100); its completion notice shows on
+  their next Set 1.1 find.
+- Owner: Machitan's `SPECIAL_LOCKS` entry for Tylina is removed (it ended
+  when she found it on 2026-11-08). The lock mechanism stays, unused; its
+  tests went with the entry.
+
+---
+
 ## 2026-11-22 — Set 1.2: Lobby Loungers 2 (Fukukitaru's home)
 
 - Owner: rather than wake a finished Set 1, give new lobby lines their own

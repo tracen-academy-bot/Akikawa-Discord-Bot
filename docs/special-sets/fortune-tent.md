@@ -96,9 +96,9 @@ From `docs/uma-reference/briefs/1056.json` (Fukukitaru) and `1062.json`
 
 ## How a trainer gets it
 
-1. **Find Matikanetannhauser** (Lobby Loungers, already live as
+1. **Find Matikanetannhauser** (Lobby Loungers 1, already live as
    `set1.matikane`). No change.
-2. **Find Matikanefukukitaru**, a new Lobby Loungers special. It hints at the
+2. **Find Matikanefukukitaru**, a Lobby Loungers 2 special (Set 1.2). It hints at the
    tent without showing a lock:
 
    ```text
