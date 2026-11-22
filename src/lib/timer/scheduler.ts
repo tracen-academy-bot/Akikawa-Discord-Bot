@@ -13,9 +13,10 @@ import { prisma } from '../../db/prisma';
 import { refreshPanel } from './panel';
 import { awardMilestone, getTimerSettings, grantSecondLove, runWeeklyAwards, type WeeklyAward } from './rewards';
 import { weekResultsPost } from './boardImage';
-import { applyOutcome, chooseOpener, closedSpecialsFor, wakeForNewLines, completionNotice, endBoostsHitBy, tickGuarantee, grantBoost, guaranteedOpener, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
+import { applyOutcome, chooseOpener, wakeForNewLines, completionNotice, endBoostsHitBy, tickGuarantee, grantBoost, trainerPool, isRareOpener, lockedSetsFor, outcomeState, recentCommons, recordRareOpener, rememberCommon, spendBoosts } from './rares';
 import { extraChances, fortuneBaseAdjust } from './boosts';
-import { tentIntroDue, tentIntroShown, tentIntroText, tentUnlockNotice } from './fortune';
+import { tentUnlockNotice } from './fortune';
+import { nextForcedPing } from './forced';
 import { commonsFor, fillOpener, outcomeLines, pickOpener, rarePoolFor, rollOutcome, setsUnlockedBy, specialByText, specialCredit, specialMediaPath, type RolledOutcome } from './openers';
 import { pingBox } from './pingBox';
 import { getUserSettings, pingMinutes } from './userSettings';
@@ -189,14 +190,13 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 );
                 // Reminder lines don't repeat within 4 pings in a row (see COMMON_NO_REPEAT).
                 const commons = commonsFor(await recentCommons(timer.guildId, timer.discordUserId));
-                // A lost Remedial Rehearsal guarantees the next ping (while its set is unlocked
-                // and not paused, even if turned off, and the special is open for the trainer:
-                // a closed one waits, due).
+                // Forced pings (forced.ts): a guaranteed special (a lesson, a guest, a rig),
+                // then the tent's intro. The highest priority due fires; the rest wait.
                 const state = await outcomeState(timer.guildId, timer.discordUserId);
-                const closed = state.guaranteedSpecialId ? await closedSpecialsFor(timer.guildId, timer.discordUserId) : [];
-                const guaranteed = guaranteedOpener(state, lockedSets, closed);
-                // Fuku-chan's Fortune Tent: owed its introduction, this run's ping is it (a due guarantee wins; the intro waits).
-                const intro = await tentIntroDue(timer.guildId, timer.discordUserId, guaranteed !== undefined, now);
+                const forced = await nextForcedPing({ guildId: timer.guildId, discordUserId: timer.discordUserId, state, lockedSets, now });
+                const guaranteed = forced?.opener;
+                // A forced scene (no special): the tent's intro.
+                const intro = forced !== null && forced.opener === undefined;
                 // A Fortune Tent curse lowers the base for the day, Boosts on or off.
                 const baseAdjust = await fortuneBaseAdjust(timer.guildId, timer.discordUserId, now);
                 const opener = intro ? '' : await chooseOpener(timer.guildId, timer.discordUserId, Math.random(), pool, extras, commons, guaranteed, baseAdjust);
@@ -213,7 +213,7 @@ async function processExpiredTimers(client: Client): Promise<void> {
                         console.warn(`Ramonu's Second Love: the win notice failed for ${timer.guildId}:`, e instanceof Error ? e.message : e),
                     );
                 }
-                const text = intro ? tentIntroText(timer.discordUserId) : pingText(opener, timer.discordUserId, rolled, role);
+                const text = intro ? forced!.text! : pingText(opener, timer.discordUserId, rolled, role);
                 // The first time a trainer gets a set's prerequisite, the ping says the set opened.
                 const unlocked = setsUnlockedBy(opener, lockedSets).map((s) => s.name);
                 // Completing a set rests it (or turns it off), said on this ping; saved after the find.
@@ -238,8 +238,10 @@ async function processExpiredTimers(client: Client): Promise<void> {
                 // A scheduled guarantee (Ramonu's lesson) counts down one run on every other ping.
                 await tickGuarantee(timer.guildId, timer.discordUserId, opener);
                 await tent?.record();
-                if (intro) await tentIntroShown(timer.guildId, timer.discordUserId);
-                else if (!isRareOpener(opener)) await rememberCommon(timer.guildId, timer.discordUserId, opener);
+                await forced?.shown?.();
+                if (intro) {
+                    // A scene: no find, no common line to remember.
+                } else if (!isRareOpener(opener)) await rememberCommon(timer.guildId, timer.discordUserId, opener);
                 if (isRareOpener(opener)) {
                     await recordRareOpener(timer.guildId, timer.discordUserId, opener);
                     await completion?.record();

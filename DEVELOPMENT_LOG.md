@@ -4,6 +4,25 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-22 — Forced pings in one place; the tent waits for its intro; copy fixes
+
+- Owner: "the intro ping is guaranteed the same way your next forced lesson
+  is... put a `forced: yes` note", and set up future interactions the same
+  way. New `src/lib/timer/forced.ts`: `FORCED_SOURCES`, each `forced: true`
+  with a priority and a note; `nextForcedPing` returns the highest-priority
+  source that is due, the rest wait. Sources: 1 `guarantee` (lesson retry,
+  scheduled lesson, Helios's guest, one-time rig), 2 `tent-intro` (a scene).
+  The scheduler asks it once per ping instead of special-casing each.
+  Table and rules: docs/special-sets/forced-pings.md.
+- `hasTent` now needs the unlock recorded and the intro shown: the Fortune
+  button and draws wait for the intro.
+- Copy (owner: "fix everything"): Air Groove's last line split into two
+  speakers; Taiki's "dēsu" dropped; the intro no longer says the Matikanes
+  are roommates (unconfirmed): Fuku "...Not sisters, by the way!",
+  Machitan "Totally not sisters! I'm ordinary at everything, but...".
+
+---
+
 ## 2026-11-22 — The tent's intro ping spends no boosts
 
 - Clash review (tent vs Ramonu, guests, the McQueen rig): a due guarantee

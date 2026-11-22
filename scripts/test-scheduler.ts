@@ -1068,7 +1068,8 @@ async function main() {
         check('unlock: a Congrats line like a set unlock', pel({ milestone: null, newLongestStreak: false, currentStreakDays: 1, firstOfDay: false, totalRuns: 3 } as never, 0, null, [], [completing!.line]), ["**Congrats!** Fuku-chan's Fortune Tent unlocked!"]);
         await rares.recordRareOpener(FG, 't1', fuku.text);
         await completing!.record();
-        check('unlock: once only', [await fortune.tentUnlockNotice(FG, 't1', PING_OPENERS[0]!, OPEN), await fortune.hasTent(FG, 't1', OPEN), await fortune.hasTent(FG, 't1', BEFORE)], [null, true, false]);
+        // The tent itself (button, draws) waits for the intro (owner, 2026-11-22).
+        check('unlock: once only; no tent until the intro is shown', [await fortune.tentUnlockNotice(FG, 't1', PING_OPENERS[0]!, OPEN), await fortune.hasTent(FG, 't1', OPEN), await fortune.hasTent(FG, 't1', BEFORE)], [null, false, false]);
         // A trainer with both before the opening: the line on their first ping after it.
         await rares.recordRareOpener(FG, 't2', machi.text);
         await rares.recordRareOpener(FG, 't2', fuku.text);
@@ -1085,6 +1086,27 @@ async function main() {
         check('intro: four speakers, then the -# line, the mention once', [intro.length, intro.map((l) => l.split(':')[0]), intro[4]!.startsWith("-# Fuku-chan's Fortune Tent is open"), fortune.TENT_INTRO.split('{user}').length - 1, intro.join('\n').includes('<@t1>')], [5, ['Machitan', 'Fuku', 'Machitan', 'Fuku', "-# Fuku-chan's Fortune Tent is open"], true, 1, true]);
         check('intro: not a special (no find, not in Specials)', rares.isRareOpener(fortune.TENT_INTRO), false);
         await fortune.tentIntroShown(FG, 't1');
+        check('gate: the tent opens once the intro is shown', await fortune.hasTent(FG, 't1', OPEN), true);
+        // Forced pings (forced.ts, owner 2026-11-22): every source is forced; a guarantee beats the intro; the intro is a scene.
+        {
+            const forcedMod = await import('../src/lib/timer/forced');
+            check('forced: every source is marked forced, priorities unique, guarantee first', [forcedMod.FORCED_SOURCES.every((x) => x.forced === true), new Set(forcedMod.FORCED_SOURCES.map((x) => x.priority)).size === forcedMod.FORCED_SOURCES.length, [...forcedMod.FORCED_SOURCES].sort((a, b) => a.priority - b.priority).map((x) => x.id)], [true, true, ['guarantee', 'tent-intro']]);
+            const FU = 'forced-u';
+            await prisma.timerUserSettings.create({ data: { guildId: FG, discordUserId: FU, tentIntroOwed: true, tentUnlocked: true, guaranteedSpecialId: 'set1.matikane', guaranteedInRuns: 1 } });
+            const ctx = async () => ({ guildId: FG, discordUserId: FU, state: await rares.outcomeState(FG, FU), lockedSets: [] as string[], now: OPEN });
+            const both = await forcedMod.nextForcedPing(await ctx());
+            check('forced: both due, the guarantee fires (a special); the intro waits', [both?.source, both?.opener === machi.text, both?.text], ['guarantee', true, undefined]);
+            await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: FG, discordUserId: FU } }, data: { guaranteedSpecialId: null, guaranteedInRuns: null } });
+            const introOnly = await forcedMod.nextForcedPing(await ctx());
+            check('forced: then the intro, a scene (no special), with the mention', [introOnly?.source, introOnly?.opener, introOnly?.text?.includes(`<@${FU}>`)], ['tent-intro', undefined, true]);
+            await introOnly!.shown!();
+            check('forced: nothing once shown', await forcedMod.nextForcedPing(await ctx()), null);
+            await prisma.timerUserSettings.deleteMany({ where: { guildId: FG, discordUserId: FU } });
+        }
+        // t2 (had both before the opening): their unlock ping, then their intro.
+        await (await fortune.tentUnlockNotice(FG, 't2', PING_OPENERS[3]!, OPEN))!.record();
+        check('gate: t2 has no Fortune button until the intro', await fortune.hasTent(FG, 't2', OPEN), false);
+        await fortune.tentIntroShown(FG, 't2');
         check('intro: once only', [await fortune.tentIntroDue(FG, 't1', false, OPEN), (await prisma.timerUserSettings.findUnique({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 't1' } } }))?.tentUnlocked], [false, true]);
         await prisma.timerUserSettings.update({ where: { guildId_discordUserId: { guildId: FG, discordUserId: 't1' } }, data: { guaranteedSpecialId: null, guaranteedInRuns: null } });
 
@@ -1108,7 +1130,8 @@ async function main() {
             'Groove: "Mattaku. What is this racket outside the student council room? ...Fukukitaru. It is a cat. Not the end of the world."',
             'Groove: "...Still. Kisama, take this. A Shigaraki tanuki. Fukukitaru insisted it would bring luck, and I am in no mood to argue with a crystal ball. Just in case."',
             'Fuku: "Air Groove-san... you kept it all this time?!"',
-            'Machitan: "Ei, ei, mun! ...It\'s still a great curse though, isn\'t it." / Groove: "Yes. But perhaps a smaller one."',
+            'Machitan: "Ei, ei, mun! ...It\'s still a great curse though, isn\'t it."',
+            'Groove: "Yes. But perhaps a smaller one."',
         ].join('\n'));
         const great = fortune.fortuneTier('great')!;
         const oracle = fortune.fortuneTier('oracle')!;
