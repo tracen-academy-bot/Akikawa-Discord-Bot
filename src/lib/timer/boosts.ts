@@ -136,6 +136,8 @@ export async function extraChances(
 async function perLine(guildId: string, discordUserId: string, e: ExtraChance): Promise<ExtraChance> {
     if (e.pool.length === 0) return e;
     const left = await trainerPool(guildId, discordUserId, e.pool);
+    // Nothing left: it gives nothing either way; keep its own chance for the Boosts view ("inactive").
+    if (left.length === 0) return { ...e, pool: left };
     return left.length === e.pool.length ? { ...e, pool: left } : { ...e, pool: left, chance: (e.chance * left.length) / e.pool.length };
 }
 
@@ -167,11 +169,12 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
     // the usual pool (personal, tier, Fortune, early start) are inactive too.
     const openSets = SPECIAL_SETS.filter((s) => !lockedSets.includes(s.id) && !PAUSED_SETS.includes(s.id));
     const allOff = openSets.length > 0 && openSets.every((s) => settings.disabledSets.includes(s.id));
-    const isInactive = (e: ExtraChance) => e.inactive === true || (allOff && e.pool === pool && !e.content);
+    // Inactive (owner, 2026-11-20): anything that gives nothing right now, for
+    // whatever reason (its set off, every set off, or nothing left to land on,
+    // e.g. Ramonu held for a lesson). Listed at its own chance, "(inactive)".
+    const isInactive = (e: ExtraChance) => e.inactive === true || (allOff && e.pool === pool && !e.content) || e.pool.length === 0 || e.chance <= 0;
     const inactive = all.filter(isInactive);
-    // A boost with nothing to land on stays listed (owner, 2026-11-19: say so, don't hide it).
-    const extras = all.filter((e) => !isInactive(e) && e.pool.length > 0 && e.chance > 0);
-    const idle = all.filter((e) => !isInactive(e) && !(e.pool.length > 0 && e.chance > 0));
+    const extras = all.filter((e) => !isInactive(e));
     // Nothing anywhere: no line on, no boost or slice with anything to find.
     const nothing = pool.length === 0 && extras.length === 0;
     // Fortune Tent: a curse lowers the base, Boosts on or off; the button once they have the tent.
@@ -190,9 +193,8 @@ export async function boostsView(guildId: string, discordUserId: string, now: Da
           : [];
     lines.push(`**Base:** ${percent(RARE_OPENER_CHANCE)} on every ping${pool.length === 0 ? ' (nothing to find in your sets)' : ''}.`);
     if (curse) lines.push(`**-${percent(-curse.tier.delta)}** ${curse.tier.label}`);
-    if (extras.length === 0 && idle.length === 0 && inactive.length === 0) lines.push('No boosts right now.');
+    if (extras.length === 0 && inactive.length === 0) lines.push('No boosts right now.');
     for (const e of extras) lines.push(`**+${percent(e.chance)}** ${e.label ?? ''}${settings.boosts || e.content ? '' : ' (paused)'}`);
-    for (const e of idle) lines.push(`**0%** ${e.label ?? ''} (nothing to find right now)`);
     for (const e of inactive) lines.push(`**+${percent(e.chance)}** ${e.label ?? ''} (inactive)`);
     if (!timer?.earlyStart && !nothing) {
         lines.push(

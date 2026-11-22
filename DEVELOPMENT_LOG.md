@@ -29,8 +29,14 @@ Newest first. Each entry records what changed and, more importantly, why.
   specials!**" and lists boosts on the usual pool (personal, tier, Fortune,
   early start) as "(inactive)" at their own chance. A boost whose set is
   turned off is listed the same way (`ExtraChance.inactive`, empty pool, so
-  it gives nothing; locked or paused sets still hide theirs). Order: live,
-  then "(nothing to find right now)" at 0%, then inactive.
+  it gives nothing; locked or paused sets still hide theirs). Live first,
+  then inactive.
+- Simplified (owner, 2026-11-20): one label for anything that gives nothing
+  right now, whatever the reason (set off, every set off, or nothing left
+  to land on, e.g. Ramonu held for a lesson): its own chance, then
+  "(inactive)". No more "0% (nothing to find right now)". `perLine` keeps a
+  boost's chance when nothing is left (its pool is empty, so it gives
+  nothing anyway).
 
 ## 2026-11-19 — Boosts keep their rate per line
 
