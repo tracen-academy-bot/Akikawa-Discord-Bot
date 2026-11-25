@@ -159,15 +159,14 @@ export const SCHEDULED_NOTICES: readonly { key: string; at: Date; text: string }
         ].join('\n'),
     },
     {
-        // Owner, 2026-11-25: Ramonu's Second Love reopened (the first win was disqualified). The tent notice, plus a line.
+        // Owner, 2026-11-25: Ramonu's Second Love reopened (the first win was disqualified), treated as usual:
+        // the tent, then the original Second Love paragraph (from the 2026-11-16 notice).
         key: '2026-11-25-second-love-reopened',
         at: new Date('2026-11-25T16:00:00Z'),
         text: [
             "**Fuku-chan's Fortune Tent is open!** Find both Matikanes in **Set 1.2: Lobby Loungers 2** to unlock it, then draw one omikuji a day from **Boosts**. Blessings raise your special chance for the day; curses lower it. Shiraoki-sama decides!",
             '',
-            "Weekly places now come with a boost until next week's results: 1\u20132 Abusers +5%, 3\u20135 Enjoyers +3%, 6\u201310 Regulars +1%.",
-            '',
-            "**Ramonu's Second Love is up for grabs again.** She's still waiting at the Estate.",
+            '*"To offer a perfect and complete victory \u2013 that is the proof of my love."* Show up and perform with Ramonu, or be made to try again. After all, it\'s a special day at the Estate, and Ramonu accepts nothing less than perfection.',
         ].join('\n'),
     },
 ];
