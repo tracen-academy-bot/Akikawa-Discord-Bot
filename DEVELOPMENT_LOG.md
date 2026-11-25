@@ -4,6 +4,24 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-25 — Ramonu's Second Love reopened
+
+- Owner: 916564075301978112, the first Second Love, is disqualified (an
+  in-game cheater). Migration `20261125160000_second_love_reopened` deletes
+  their `TimerSecondLove` row, so: Ramonu's +2% (`endsOnSecondLove`) is
+  back; Set 3.5's First Victor line is gone; the next forced success is the
+  server's first again. Their role and `secondLove` flag are untouched.
+- The win notice is now added under the panel's current notice instead of
+  replacing it; its template lost the stale #OnlineSensations and Estate
+  lines.
+- Scheduled notice `2026-11-25-second-love-reopened` (16:00Z), "treat it as
+  usual" (owner): the tent paragraph, then the original Second Love
+  paragraph from the 2026-11-16 notice. No weekly-places line.
+- The disqualified trainer was kicked from the server (owner), so their role
+  and flag are left alone.
+
+---
+
 ## 2026-11-22 — The tent's intro on Set 4, not counted
 
 - Owner: "add as intro but don't count". Set 4's page opens with an
