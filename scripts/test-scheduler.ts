@@ -1178,6 +1178,8 @@ async function main() {
         check('set 4: the intro can be read once seen, not before', [readIntro?.name, readIntro?.text.includes('<@t1>, welcome to the Matikane Fortune Tent'), await rares.readSpecial(FG, 'nobody', 'fortune:intro')], ['Welcome to the Matikane Fortune Tent', true, null]);
         const unseen = vj(await rares.mySpecialsView(FG, 'nobody', 6, OPEN)).embeds[0]!;
         check('set 4: the intro row is ??? until seen', unseen.fields?.[0]?.value.split('\n')[0], '**Intro.** ???');
+        // Locked like a set (owner, 2026-11-25): which Matikanes are still needed; nothing once both are found.
+        check('set 4: locked line names the missing Matikanes; none with both', [unseen.description?.endsWith('Locked: find **Matikanetannhauser** and **Matikanefukukitaru** to open it.'), s4e.description?.includes('Locked:')], [true, false]);
         // Scoring: 15 a new fortune, 3 a repeat, 100 for all 13.
         const SB = `${FG}-score`;
         let k = 0;
