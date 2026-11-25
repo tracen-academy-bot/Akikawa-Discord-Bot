@@ -380,8 +380,11 @@ async function rewardChecks() {
     const rolesGuild = { roles: { cache: new Map([['1571417213028667393', {}]]) } };
     check('notice mentions: a role id becomes a role pill, any other id a member pill; existing pills untouched', live.resolveNoticeMentions(rolesGuild, 'Hi @1571417213028667393 and @123456789012345678, not <@&1571417213028667393> or <@123456789012345678> or email@1571417213028667393'), 'Hi <@&1571417213028667393> and <@123456789012345678>, not <@&1571417213028667393> or <@123456789012345678> or email@1571417213028667393');
     // A role's first win sets its notice under every panel of the server.
+    // Added under the panel's current notice (owner, 2026-11-25), not in place of it.
+    await live.setPanelNotice(client, guild, 'c-timer', "This week's notice.");
     const winSet = await live.postRoleWinNotice(client, guild, 'second-love', { roleId: 'r-love', winnerId: 'w1' });
-    check('role-win notice: set under the panel, with the role filled in', [winSet, (await prisma.timerPanel.findUnique({ where: { channelId: 'c-timer' } }))?.notice?.endsWith('on the same beat. <@&r-love>')], [1, true]);
+    const winNotice = (await prisma.timerPanel.findUnique({ where: { channelId: 'c-timer' } }))?.notice;
+    check('role-win notice: added under the current notice, with the role filled in', [winSet, winNotice?.startsWith("This week's notice.\n\nTo Ramonu,"), winNotice?.endsWith('on the same beat. <@&r-love>'), winNotice?.includes('#OnlineSensations is now up')], [1, true, true, false]);
     check('role-win notice: an unknown key sets nothing', await live.postRoleWinNotice(client, guild, 'nope', { roleId: null, winnerId: 'w1' }), 0);
     // Scheduled notices (owner, 2026-11-15): set by the bot at their time, once per panel.
     const sched = [{ key: 'test-notice', at: new Date('2030-01-06T15:01:00Z'), text: 'Scheduled hello.' }];

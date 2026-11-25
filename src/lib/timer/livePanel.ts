@@ -158,6 +158,18 @@ export const SCHEDULED_NOTICES: readonly { key: string; at: Date; text: string }
             "Weekly places now come with a boost until next week's results: 1\u20132 Abusers +5%, 3\u20135 Enjoyers +3%, 6\u201310 Regulars +1%.",
         ].join('\n'),
     },
+    {
+        // Owner, 2026-11-25: Ramonu's Second Love reopened (the first win was disqualified). The tent notice, plus a line.
+        key: '2026-11-25-second-love-reopened',
+        at: new Date('2026-11-25T16:00:00Z'),
+        text: [
+            "**Fuku-chan's Fortune Tent is open!** Find both Matikanes in **Set 1.2: Lobby Loungers 2** to unlock it, then draw one omikuji a day from **Boosts**. Blessings raise your special chance for the day; curses lower it. Shiraoki-sama decides!",
+            '',
+            "Weekly places now come with a boost until next week's results: 1\u20132 Abusers +5%, 3\u20135 Enjoyers +3%, 6\u201310 Regulars +1%.",
+            '',
+            "**Ramonu's Second Love is up for grabs again.** She's still waiting at the Estate.",
+        ].join('\n'),
+    },
 ];
 
 /** How long after its time a scheduled notice may still be set (the bot was down). */
@@ -239,12 +251,8 @@ export function resolveNoticeMentions(guild: { roles?: { cache?: { has(id: strin
  * mention, `{winner}` the winner's. One entry per special role.
  */
 export const ROLE_WIN_NOTICES: Record<string, string> = {
-    'second-love': [
-        '#OnlineSensations is now up! Join Curren Chan as she ~~kidnaps~~ recruits you as her #FavoriteManager and gets on #SpecialCollabs with other umas!',
-        'The Mejiros have formally extended an invitation to their esteemed Estate. Please arrive with haste.',
-        '',
-        "To Ramonu, she's always cared about the track. That's how she ended up recruiting you too. And yet, as her eyes waver for just a moment, trying to meet yours... you feel your heart swaying on the same beat. {role}",
-    ].join('\n'),
+    // Added under the panel's current notice (owner, 2026-11-25), not in place of it.
+    'second-love': "To Ramonu, she's always cared about the track. That's how she ended up recruiting you too. And yet, as her eyes waver for just a moment, trying to meet yours... you feel your heart swaying on the same beat. {role}",
 };
 
 /** Sets a role's win notice (`ROLE_WIN_NOTICES[key]`) under every panel of `guild`. Returns how many were set. */
@@ -254,7 +262,9 @@ export async function postRoleWinNotice(client: Client, guild: Guild, key: strin
     const text = template.replaceAll('{role}', fill.roleId ? `<@&${fill.roleId}>` : '').replaceAll('{winner}', `<@${fill.winnerId}>`).trim();
     let set = 0;
     for (const panel of await prisma.timerPanel.findMany({ where: { guildId: guild.id } })) {
-        const result = await setPanelNotice(client, guild, panel.channelId, text).catch((e) => {
+        // Added under what the panel already says (owner, 2026-11-25), so the week's notice stays.
+        const combined = panel.notice?.trim() ? `${panel.notice.trim()}\n\n${text}` : text;
+        const result = await setPanelNotice(client, guild, panel.channelId, combined).catch((e) => {
             console.error(`Timer role-win notice ${key} failed in ${panel.channelId}:`, e instanceof Error ? e.message : e);
             return 'failed' as const;
         });
