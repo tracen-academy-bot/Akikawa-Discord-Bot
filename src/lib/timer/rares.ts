@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js';
 import { getUserSettings } from './userSettings';
-import { FORTUNE_LINES, TENT_INTRO, fortuneLineById, tentIsOpen } from './fortuneLines';
+import { FORTUNE_LINES, TENT_INTRO, TENT_PAIR, fortuneLineById, tentIsOpen } from './fortuneLines';
 import { prisma } from '../../db/prisma';
 import { COMMON_NO_REPEAT, PING_OPENERS, RARE_OPENERS, claimOpener, countsAsSet, setNumber, closedSpecials, redirectOpener, unlockedGuests, RARE_PING_OPENERS, RARE_OPENER_CHANCE, effectiveChance, isOpenAt, PAUSED_SETS, SPECIAL_LOCKS, SPECIAL_SETS, boostOf, fillOpener, pickOpener, specialById, specialByText, specialIdOf, specialMediaPath, type OutcomeBoost, type RolledOutcome } from './openers';
 
@@ -208,6 +208,8 @@ export interface SpecialsViewMore {
     firstVictor?: { userId: string; at: Date } | null;
     /** The tent's intro was seen (personal: by them; server: by anyone). Shown on Set 4, never counted. */
     introSeen?: boolean;
+    /** Personal: the Matikanes they still need for the tent (`TENT_PAIR`); empty or none: they have both. */
+    tentMissing?: readonly string[];
 }
 
 /** The read menu's value for the tent's intro, and its row's name on Set 4 (owner, 2026-11-22: listed, not counted). */
@@ -277,7 +279,11 @@ export function specialsView(allTally: RareTally[], page: number, extras?: Perso
         const embed = new EmbedBuilder()
             .setColor(0xf2a87a)
             .setTitle(title)
-            .setDescription(`**${FORTUNE_SET_TITLE}**: ${drawnHere} of ${fortunes.length} drawn`)
+            // Locked like a set (owner, 2026-11-25): which Matikanes to find.
+            .setDescription(
+                `**${FORTUNE_SET_TITLE}**: ${drawnHere} of ${fortunes.length} drawn` +
+                    (more.tentMissing && more.tentMissing.length > 0 ? `\nLocked: find ${more.tentMissing.map((n) => `**${n}**`).join(' and ')} to open it.` : ''),
+            )
             .addFields(
                 // The intro heads the list, unnumbered and never counted (owner, 2026-11-22).
                 { name: 'Fortune', value: [`**Intro.** ${more.introSeen ? INTRO_NAME : '???'}`, ...fortunes.map((f, n) => `**${n + 1}.** ${f.count > 0 ? f.name : '???'}`)].join('\n').slice(0, 1024), inline: true },
@@ -381,7 +387,9 @@ export async function mySpecialsView(guildId: string, discordUserId: string, pag
         getUserSettings(guildId, discordUserId),
         fortuneTally(guildId, discordUserId),
     ]);
-    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts }, now, { fortunes, firstVictor: await firstVictor(guildId), introSeen: await introSeenBy(guildId, discordUserId) });
+    const found = await foundSpecialIds(guildId, discordUserId);
+    const tentMissing = TENT_PAIR.filter((id) => !found.has(id)).map((id) => specialById(id)?.name ?? id);
+    return specialsView(tally, page, { lockedSets, disabledSets: settings.disabledSets, autoOffSets: settings.autoOffSets ?? [], boosts, boostsOn: settings.boosts }, now, { fortunes, firstVictor: await firstVictor(guildId), introSeen: await introSeenBy(guildId, discordUserId), tentMissing });
 }
 
 /** The server's Specials page `page` (Club Managers), from the database. */

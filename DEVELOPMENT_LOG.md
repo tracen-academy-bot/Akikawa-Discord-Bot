@@ -4,6 +4,16 @@ Newest first. Each entry records what changed and, more importantly, why.
 
 ---
 
+## 2026-11-25 — Set 4 says which Matikanes to find
+
+- Owner: Set 4's page, for a trainer without the tent, adds "Locked: find
+  **Matikanetannhauser** and **Matikanefukukitaru** to open it." (only the
+  ones still missing), like Set 2's locked line. Nothing once both are found.
+- Note: #99 merged during a GitHub outage and Railway missed the deploy;
+  this merge is a fresh push to master.
+
+---
+
 ## 2026-11-25 — Ramonu's Second Love reopened
 
 - Owner: 916564075301978112, the first Second Love, is disqualified (an
